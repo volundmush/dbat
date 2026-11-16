@@ -45,15 +45,13 @@ struct script_data *dg_ensure_script(struct script_data **slot)
   return *slot;
 }
 
-/* where go keeps its script pointer: go is a mob, object or room according to type */
-struct script_data **script_slot(void *go, int type)
+/* where go keeps its script pointer */
+struct script_data **script_slot(owner_ptr go)
 {
-  switch (type) {
-    case MOB_TRIGGER: return char_script_slot((char_data *)go);
-    case OBJ_TRIGGER: return obj_script_slot((obj_data *)go);
-    case WLD_TRIGGER: return room_script_slot((room_data *)go);
-  }
-  return nullptr;
+  return std::visit(overloaded{[](char_data *ch) { return char_script_slot(ch); },
+                               [](obj_data *obj) { return obj_script_slot(obj); },
+                               [](room_data *room) { return room_script_slot(room); }},
+                    go);
 }
 
 /* release memory allocated for a variable list */
@@ -146,10 +144,10 @@ void free_extracted_triggers(GameWorld *g)
 }
 
 /* remove all triggers from a mob/obj/room */
-void extract_script(GameWorld *g, void *thing, int type)
+void extract_script(GameWorld *g, owner_ptr thing)
 {
-  struct script_data **slot = script_slot(thing, type);
-  struct script_data *sc    = slot ? *slot : nullptr; /* no slot for an unknown type */
+  struct script_data **slot = script_slot(thing);
+  struct script_data *sc    = *slot;
   struct trig_data *trig, *next_trig;
 
   if (!sc)
@@ -180,31 +178,28 @@ void extract_script_mem(struct script_memory *sc)
   }
 }
 
-void free_proto_script(void *thing, int type)
+/* Where thing keeps the list of its prototype's trigger vnums */
+static struct trig_proto_list *proto_script_of(owner_ptr thing)
 {
-  struct trig_proto_list *proto = nullptr, *fproto;
-  char_data *mob;
-  obj_data *obj;
-  room_data *room;
+  return std::visit(overloaded{[](char_data *mob) { return char_get_proto_script(mob); },
+                               [](obj_data *obj) { return obj_get_proto_script(obj); },
+                               [](room_data *room) { return room_get_proto_script(room); }},
+                    thing);
+}
 
-  switch (type) {
-    case MOB_TRIGGER:
-      mob               = (struct char_data *)thing;
-      proto             = char_get_proto_script(mob);
-      char_set_proto_script(mob, nullptr);
-      break;
-    case OBJ_TRIGGER:
-      obj               = (struct obj_data *)thing;
-      proto             = obj_get_proto_script(obj);
-      obj_set_proto_script(obj, nullptr);
-      break;
-    case WLD_TRIGGER:
-      room               = (struct room_data *)thing;
-      proto              = room_get_proto_script(room);
-      room_set_proto_script(room, nullptr);
-      break;
-  }
+static void set_proto_script(owner_ptr thing, struct trig_proto_list *list)
+{
+  std::visit(overloaded{[&](char_data *mob) { char_set_proto_script(mob, list); },
+                        [&](obj_data *obj) { obj_set_proto_script(obj, list); },
+                        [&](room_data *room) { room_set_proto_script(room, list); }},
+             thing);
+}
 
+void free_proto_script(owner_ptr thing)
+{
+  struct trig_proto_list *proto = proto_script_of(thing), *fproto;
+
+  set_proto_script(thing, nullptr);
   while (proto) {
     fproto = proto;
     proto  = proto->next;
@@ -212,35 +207,14 @@ void free_proto_script(void *thing, int type)
   }
 }
 
-void copy_proto_script(void *source, void *dest, int type)
+/* source and dest are of the same kind */
+void copy_proto_script(owner_ptr source, owner_ptr dest)
 {
-  struct trig_proto_list *tp_src = nullptr, *tp_dst = nullptr;
-
-  switch (type) {
-    case MOB_TRIGGER:
-      tp_src = char_get_proto_script((char_data *)source);
-      break;
-    case OBJ_TRIGGER:
-      tp_src = obj_get_proto_script((obj_data *)source);
-      break;
-    case WLD_TRIGGER:
-      tp_src = room_get_proto_script((room_data *)source);
-      break;
-  }
+  struct trig_proto_list *tp_src = proto_script_of(source), *tp_dst = nullptr;
 
   if (tp_src) {
     tp_dst = new trig_proto_list();
-    switch (type) {
-      case MOB_TRIGGER:
-        char_set_proto_script((char_data *)dest, tp_dst);
-        break;
-      case OBJ_TRIGGER:
-        obj_set_proto_script((obj_data *)dest, tp_dst);
-        break;
-      case WLD_TRIGGER:
-        room_set_proto_script((room_data *)dest, tp_dst);
-        break;
-    }
+    set_proto_script(dest, tp_dst);
 
     while (tp_src) {
       tp_dst->vnum = tp_src->vnum;

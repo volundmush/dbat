@@ -130,20 +130,12 @@ ACMD(do_oasis_trigedit)
 
 /* called when a mob or object is being saved to disk, so its script can */
 /* be saved */
-void script_save_to_disk(FILE *fp, void *item, int type)
+void script_save_to_disk(FILE *fp, owner_ptr item)
 {
-  struct trig_proto_list *t;
-
-  if (type == MOB_TRIGGER)
-    t = char_get_proto_script((struct char_data *)item);
-  else if (type == OBJ_TRIGGER)
-    t = obj_get_proto_script((struct obj_data *)item);
-  else if (type == WLD_TRIGGER)
-    t = room_get_proto_script((struct room_data *)item);
-  else {
-    mud_log("SYSERR: Invalid type passed to script_save_to_disk()");
-    return;
-  }
+  struct trig_proto_list *t = std::visit(overloaded{[](char_data *mob) { return char_get_proto_script(mob); },
+                                                    [](obj_data *obj) { return obj_get_proto_script(obj); },
+                                                    [](room_data *room) { return room_get_proto_script(room); }},
+                                         item);
 
   while (t) {
     file_print(fp, "T {:d}\n", t->vnum);

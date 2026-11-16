@@ -14,8 +14,8 @@ static bool is_num(char *arg);
 static std::string eval_op(const char *op, std::string lhs_text, std::string rhs_text);
 static char *matching_paren(char *p);
 constexpr int MAX_EVAL_DEPTH = 200;
-static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result, void *go, struct script_data *sc,
-                            trig_data *trig, int type);
+static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result, owner_ptr go, struct script_data *sc,
+                            trig_data *trig);
 
 /* returns 1 if string is all digits, else 0 */
 /* bugfixed - would have returned true on num="------" */
@@ -219,7 +219,7 @@ static char *next_token(char *p)
 }
 
 /* evaluates line */
-std::string eval_expr(GameWorld *g, const char *line, void *go, struct script_data *sc, trig_data *trig, int type)
+std::string eval_expr(GameWorld *g, const char *line, owner_ptr go, struct script_data *sc, trig_data *trig)
 {
   std::string result;
 
@@ -233,18 +233,18 @@ std::string eval_expr(GameWorld *g, const char *line, void *go, struct script_da
   }
   g->dg_eval_depth++;
 
-  if (eval_lhs_op_rhs(g, line, result, go, sc, trig, type))
+  if (eval_lhs_op_rhs(g, line, result, go, sc, trig))
     ;
 
   else if (*line == '(') {
     std::string expr = line;
     char *p          = matching_paren(expr.data());
     *p               = '\0';
-    result           = eval_expr(g, expr.c_str() + 1, go, sc, trig, type);
+    result           = eval_expr(g, expr.c_str() + 1, go, sc, trig);
   }
 
   else
-    result = var_subst(g, go, sc, trig, type, line);
+    result = var_subst(g, go, sc, trig, line);
 
   g->dg_eval_depth--;
   return result;
@@ -254,8 +254,8 @@ std::string eval_expr(GameWorld *g, const char *line, void *go, struct script_da
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result, void *go, struct script_data *sc,
-                            trig_data *trig, int type)
+static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result, owner_ptr go, struct script_data *sc,
+                            trig_data *trig)
 {
   char *p;
   int i;
@@ -290,8 +290,8 @@ static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result,
         *p = '\0';
         p += strlen(ops[i]);
 
-        std::string lhr = eval_expr(g, line.c_str(), go, sc, trig, type);
-        std::string rhr = eval_expr(g, p, go, sc, trig, type);
+        std::string lhr = eval_expr(g, line.c_str(), go, sc, trig);
+        std::string rhr = eval_expr(g, p, go, sc, trig);
         result          = eval_op(ops[i], lhr, rhr);
         return true;
       }
@@ -300,10 +300,10 @@ static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result,
 }
 
 /* returns 1 if cond is true, else 0 */
-bool process_if(GameWorld *g, const char *cond, void *go, struct script_data *sc,
-                trig_data *trig, int type)
+bool process_if(GameWorld *g, const char *cond, owner_ptr go, struct script_data *sc,
+                trig_data *trig)
 {
-  std::string result = eval_expr(g, cond, go, sc, trig, type);
+  std::string result = eval_expr(g, cond, go, sc, trig);
   const char *p      = result.c_str();
 
   while (isspace(*p))
@@ -355,8 +355,8 @@ struct cmdlist_element *find_end(GameWorld *g, trig_data *trig, struct cmdlist_e
  * returns line of elseif, else, or end if found, or last line of trigger.
  */
 struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
-                                      struct cmdlist_element *cl, void *go,
-                                      struct script_data *sc, int type)
+                                      struct cmdlist_element *cl, owner_ptr go,
+                                      struct script_data *sc)
 {
   struct cmdlist_element *c;
   const char *p;
@@ -371,7 +371,7 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
       c = find_end(g, trig, c);
 
     else if (!strncasecmp("elseif ", p, 7)) {
-      if (process_if(g, p + 7, go, sc, trig, type)) {
+      if (process_if(g, p + 7, go, sc, trig)) {
         trig->depth++;
         return c;
       }
@@ -405,9 +405,9 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
 */
 struct cmdlist_element *
 find_case(GameWorld *g, struct trig_data *trig, struct cmdlist_element *cl,
-          void *go, struct script_data *sc, int type, const char *cond)
+          owner_ptr go, struct script_data *sc, const char *cond)
 {
-  std::string result = eval_expr(g, cond, go, sc, trig, type);
+  std::string result = eval_expr(g, cond, go, sc, trig);
   struct cmdlist_element *c;
   const char *p;
 

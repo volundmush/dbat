@@ -303,7 +303,7 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
   /* Free old proto list  */
   if (char_get_proto_script(mob_proto_of(g, new_rnum)) &&
       char_get_proto_script(mob_proto_of(g, new_rnum)) != OLC_SCRIPT(d))
-    free_proto_script(mob_proto_of(g, new_rnum), MOB_TRIGGER);
+    free_proto_script(mob_proto_of(g, new_rnum));
 
   char_set_proto_script(mob_proto_of(g, new_rnum), OLC_SCRIPT(d));
 
@@ -314,11 +314,11 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
 
     /* remove any old scripts */
     if (char_get_script(mob))
-      extract_script(g, mob, MOB_TRIGGER);
+      extract_script(g, mob);
 
-    free_proto_script(mob, MOB_TRIGGER);
-    copy_proto_script(mob_proto_of(g, new_rnum), mob, MOB_TRIGGER);
-    assign_triggers(g, mob, MOB_TRIGGER);
+    free_proto_script(mob);
+    copy_proto_script(mob_proto_of(g, new_rnum), mob);
+    assign_triggers(g, mob);
   }
   /* end trigger update */
 }

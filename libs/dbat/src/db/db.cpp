@@ -493,9 +493,9 @@ void destroy_db(GameWorld *g)
 
     /* free any assigned scripts */
     if (room_get_script(g, cnt))
-      extract_script(g, room_of(g, cnt), WLD_TRIGGER);
+      extract_script(g, room_of(g, cnt));
     /* free script proto list */
-    free_proto_script(room_of(g, cnt), WLD_TRIGGER);
+    free_proto_script(room_of(g, cnt));
     /* its strings, exits and extra descriptions go with it */
   }
   g->rooms.clear();
@@ -503,7 +503,7 @@ void destroy_db(GameWorld *g)
   /* Objects */
   for (obj_vnum ovnum : g->obj_proto.vnums()) {
     /* free script proto list */
-    free_proto_script(obj_proto_of(g, ovnum), OBJ_TRIGGER);
+    free_proto_script(obj_proto_of(g, ovnum));
   }
   g->obj_proto.clear();
   g->obj_index.clear();
@@ -511,7 +511,7 @@ void destroy_db(GameWorld *g)
   /* Mobiles */
   for (mob_vnum mvnum : g->mob_proto.vnums()) {
     /* free script proto list */
-    free_proto_script(mob_proto_of(g, mvnum), MOB_TRIGGER);
+    free_proto_script(mob_proto_of(g, mvnum));
 
     while (!char_affects(mob_proto_of(g, mvnum)).empty())
       affect_remove(g, mob_proto_of(g, mvnum), &char_affects(mob_proto_of(g, mvnum)).front());
@@ -1382,7 +1382,7 @@ static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
         letter = fread_letter(fl);
         ungetc(letter, fl);
         while (letter == 'T') {
-          dg_read_trigger(g, fl, room_of(g, g->parse_room_index), WLD_TRIGGER);
+          dg_read_trigger(g, fl, room_of(g, g->parse_room_index));
           letter = fread_letter(fl);
           ungetc(letter, fl);
         }
@@ -2039,7 +2039,7 @@ static bool parse_mobile_from_file(GameWorld *g, FILE *mob_f, struct char_data *
   letter = fread_letter(mob_f);
   ungetc(letter, mob_f);
   while (letter == 'T') {
-    dg_read_trigger(g, mob_f, ch, MOB_TRIGGER);
+    dg_read_trigger(g, mob_f, ch);
     letter = fread_letter(mob_f);
     ungetc(letter, mob_f);
   }
@@ -3292,8 +3292,8 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
   char_set_id(mob, dg_new_mob_uid(g));
   char_register(g, mob);
 
-  copy_proto_script(mob_proto_of(g, i), mob, MOB_TRIGGER);
-  assign_triggers(g, mob, MOB_TRIGGER);
+  copy_proto_script(mob_proto_of(g, i), mob);
+  assign_triggers(g, mob);
   racial_body_parts(mob);
 
   if (char_get_mob_vnum(g, mob) >= 800 && char_get_mob_vnum(g, mob) <= 805) {
@@ -3465,7 +3465,7 @@ struct obj_data *create_obj(GameWorld *g)
   obj_set_generation(obj, game_now(g));
   obj_set_unique_id(obj, -1);
 
-  assign_triggers(g, obj, OBJ_TRIGGER);
+  assign_triggers(g, obj);
 
   return (obj);
 }
@@ -3494,8 +3494,8 @@ struct obj_data *read_object(GameWorld *g, obj_vnum nr)
   obj_set_generation(obj, game_now(g));
   obj_set_unique_id(obj, -1);
 
-  copy_proto_script(obj_proto_of(g, i), obj, OBJ_TRIGGER);
-  assign_triggers(g, obj, OBJ_TRIGGER);
+  copy_proto_script(obj_proto_of(g, i), obj);
+  assign_triggers(g, obj);
   if (obj_get_vnum(g, obj) == 65) {
     obj_set_healcharge(obj, 20);
   }
@@ -3994,16 +3994,16 @@ void free_char(GameWorld *g, struct char_data *ch)
   /* Containers (affects aside, which change what they affect), strings and player_specials go with ch. */
   if (!char_is_npc(ch) || char_get_nr(ch) == NOBODY) {
     /* a player, or a mob with no prototype: its trigger list is its own */
-    free_proto_script(ch, MOB_TRIGGER);
+    free_proto_script(ch);
   } else {
     /* free script proto list if it's not the prototype's (none, once OLC has deleted it) */
     struct char_data *proto = mob_proto_of(g, char_get_nr(ch));
     if (char_get_proto_script(ch) && char_get_proto_script(ch) != (proto ? char_get_proto_script(proto) : nullptr))
-      free_proto_script(ch, MOB_TRIGGER);
+      free_proto_script(ch);
   }
   /* free any assigned scripts */
   if (char_get_script(ch))
-    extract_script(g, ch, MOB_TRIGGER);
+    extract_script(g, ch);
 
   if (char_get_desc(ch))
     char_get_desc(ch)->character = nullptr;
@@ -4021,10 +4021,10 @@ void free_obj(GameWorld *g, struct obj_data *obj)
   remove_unique_id(g, obj);
   /* its strings and extra descriptions go with it; the trigger list may be the prototype's */
   if (obj_get_item_number(obj) == NOWHERE) {
-    free_proto_script(obj, OBJ_TRIGGER);
+    free_proto_script(obj);
   } else {
     if (obj_get_proto_script(obj) != obj_get_proto_script(obj_proto_of(g, obj_get_item_number(obj))))
-      free_proto_script(obj, OBJ_TRIGGER);
+      free_proto_script(obj);
   }
 
   /* Let's make sure that we free up this memory */
@@ -4034,7 +4034,7 @@ void free_obj(GameWorld *g, struct obj_data *obj)
 
   /* free any assigned scripts */
   if (obj_get_script(obj))
-    extract_script(g, obj, OBJ_TRIGGER);
+    extract_script(g, obj);
 
   obj_unregister(g, obj);
 

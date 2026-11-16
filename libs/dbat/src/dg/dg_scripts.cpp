@@ -32,15 +32,12 @@ constexpr int PULSES_PER_MUD_HOUR = SECS_PER_MUD_HOUR * PASSES_PER_SEC;
 
 
 /* Local functions not used elsewhere */
-static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char *cmd,
+static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
                          struct cmdlist_element *cl);
 static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
-static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                           int type, char *cmd);
-static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                           int type, char *cmd);
-static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                        int type, char *cmd);
+static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
+static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
+static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
 static int process_return(GameWorld *g, trig_data *trig, char *cmd);
 static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
 static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
@@ -145,52 +142,26 @@ static void free_wait_event_data(void *event_obj)
 static EVENTFUNC(trig_wait_event)
 {
   struct wait_event_data *wait_event_obj = (struct wait_event_data *)event_obj;
-  trig_data *trig;
-  void *go;
-  int type;
-
-  trig = wait_event_obj->trigger;
-  go   = wait_event_obj->go;
-  type = wait_event_obj->type;
+  long trigger_id                        = wait_event_obj->trigger_id;
+  script_owner owner                     = wait_event_obj->owner;
 
   delete wait_event_obj;
+  trig_data *trig = g->triggers.find(trigger_id);
+  if (!trig) /* extracting a trigger cancels its wait, so this can't be */
+    return 0;
   trig->wait_event = nullptr;
 
-#if 1 /* debugging */
-  {
-    int found = false;
-    if (type == MOB_TRIGGER) {
-      for (char_data *tch : each_char(g)) {
-        if (found)
-          break;
-        if (tch == (struct char_data *)go)
-          found = true;
-      }
-    } else if (type == OBJ_TRIGGER) {
-      for (obj_data *obj : each_obj(g)) {
-        if (found)
-          break;
-        if (obj == (struct obj_data *)go)
-          found = true;
-      }
-    } else {
-      g->rooms.visit([&](room_vnum, struct room_data *room) {
-        if (room == (struct room_data *)go)
-          found = true;
-      });
-    }
-    if (!found) {
-      mud_log("Trigger restarted on unknown entity. Vnum: {:d}", trig_get_vnum(g, trig));
-      mud_log("Type: {} trigger", type == MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj"
-                                                                                    : "Room");
-      mud_log("attached {:d} places", trig->index->number);
-      script_log(g, "Trigger restart attempt on unknown entity.");
-      return 0;
-    }
+  std::optional<owner_ptr> go = owner.resolve(g);
+  if (!go) {
+    mud_log("Trigger restarted on unknown entity. Vnum: {:d}", trig_get_vnum(g, trig));
+    mud_log("Type: {} trigger", owner.kind == owner_kind::mob ? "Mob" : owner.kind == owner_kind::obj ? "Obj"
+                                                                                                        : "Room");
+    mud_log("attached {:d} places", trig->index->number);
+    script_log(g, "Trigger restart attempt on unknown entity.");
+    return 0;
   }
-#endif
 
-  script_driver(g, &go, trig, type, TRIG_RESTART);
+  script_driver(g, *go, trig, TRIG_RESTART);
 
   /* Do not reenqueue*/
   return 0;
@@ -202,9 +173,10 @@ trig_vnum trig_get_vnum(GameWorld *g, const trig_data *t)
   return t->index->vnum;
 }
 
-static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
+static void dg_ctx_begin(GameWorld *g, owner_ptr go, trig_data *trig)
 {
   room_vnum room = NOWHERE;
+  int type       = owner_type(go);
 
   g->dg_ctx = {};
   g->dg_ctx.active     = true;
@@ -213,26 +185,26 @@ static void dg_ctx_begin(GameWorld *g, void *go, trig_data *trig, int type)
   g->dg_ctx.trig_name  = trig->name;
   g->dg_ctx.room_vnum = -1;
 
-  if (!go)
+  if (std::visit([](auto *thing) { return thing == nullptr; }, go))
     return;
 
   switch (type) {
     case MOB_TRIGGER:
-      g->dg_ctx.owner_name = writable_copy(char_get_name((char_data *)go));
-      g->dg_ctx.owner_vnum = (long long)char_get_mob_vnum(g, (char_data *)go);
-      g->dg_ctx.owner_uid  = char_get_id((char_data *)go);
-      room              = char_get_in_room((char_data *)go);
+      g->dg_ctx.owner_name = writable_copy(char_get_name(std::get<char_data *>(go)));
+      g->dg_ctx.owner_vnum = (long long)char_get_mob_vnum(g, std::get<char_data *>(go));
+      g->dg_ctx.owner_uid  = char_get_id(std::get<char_data *>(go));
+      room              = char_get_in_room(std::get<char_data *>(go));
       break;
     case OBJ_TRIGGER:
-      g->dg_ctx.owner_name = writable_copy(obj_get_short_description((obj_data *)go));
-      g->dg_ctx.owner_vnum = (long long)obj_get_vnum(g, (obj_data *)go);
-      g->dg_ctx.owner_uid  = obj_get_id((obj_data *)go);
-      room              = obj_room((obj_data *)go);
+      g->dg_ctx.owner_name = writable_copy(obj_get_short_description(std::get<obj_data *>(go)));
+      g->dg_ctx.owner_vnum = (long long)obj_get_vnum(g, std::get<obj_data *>(go));
+      g->dg_ctx.owner_uid  = obj_get_id(std::get<obj_data *>(go));
+      room              = obj_room(std::get<obj_data *>(go));
       break;
     case WLD_TRIGGER:
-      g->dg_ctx.owner_name = writable_copy(room_get_name((room_data *)go));
-      g->dg_ctx.owner_vnum = (long long)room_get_number((room_data *)go);
-      g->dg_ctx.owner_uid  = room_get_number((room_data *)go) + ROOM_ID_BASE;
+      g->dg_ctx.owner_name = writable_copy(room_get_name(std::get<room_data *>(go)));
+      g->dg_ctx.owner_vnum = (long long)room_get_number(std::get<room_data *>(go));
+      g->dg_ctx.owner_uid  = room_get_number(std::get<room_data *>(go)) + ROOM_ID_BASE;
       g->dg_ctx.room_vnum  = g->dg_ctx.owner_vnum;
       return;
   }
@@ -300,7 +272,7 @@ static long wait_mul(long a, long b)
   return product;
 }
 
-static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char *cmd,
+static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
                          struct cmdlist_element *cl)
 {
   char buf[MAX_INPUT_LENGTH], *arg;
@@ -354,10 +326,9 @@ static void process_wait(GameWorld *g, void *go, trig_data *trig, int type, char
   }
   when = std::clamp(when, -MAX_WAIT_PULSES, MAX_WAIT_PULSES);
 
-  wait_event_obj          = new wait_event_data();
-  wait_event_obj->trigger = trig;
-  wait_event_obj->go      = go;
-  wait_event_obj->type    = type;
+  wait_event_obj             = new wait_event_data();
+  wait_event_obj->trigger_id = trig->id;
+  wait_event_obj->owner      = script_owner::of(go);
 
   trig->wait_event = event_create(g, trig_wait_event, wait_event_obj, free_wait_event_data, when);
   trig->curr_state = cl->next;
@@ -382,8 +353,7 @@ static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, c
 }
 
 /* processes a script eval command */
-void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                  int type, char *cmd)
+void process_eval(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], *expr;
 
@@ -398,13 +368,12 @@ void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *tri
     return;
   }
 
-  std::string result = eval_expr(g, expr, go, sc, trig, type);
+  std::string result = eval_expr(g, expr, go, sc, trig);
   add_var(&trig->var_list, name, result.c_str(), sc ? sc->context : 0);
 }
 
 /* script attaching a trigger to something */
-static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                           int type, char *cmd)
+static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
   char *id_p;
@@ -431,7 +400,7 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
   }
 
   /* parse and locate the id specified */
-  std::string result = eval_expr(g, id_p, go, sc, trig, type);
+  std::string result = eval_expr(g, id_p, go, sc, trig);
   if (!(id = atoi(result.c_str()))) {
     script_log(g, "Trigger: {}, VNum {:d}. attach invalid id arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
@@ -480,8 +449,7 @@ static void process_attach(GameWorld *g, void *go, struct script_data *sc, trig_
 }
 
 /* script detaching a trigger from something */
-static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                           int type, char *cmd)
+static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
   char *id_p;
@@ -506,7 +474,7 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
   }
 
   /* parse and locate the id specified */
-  std::string result = eval_expr(g, id_p, go, sc, trig, type);
+  std::string result = eval_expr(g, id_p, go, sc, trig);
   if (!(id = atoi(result.c_str()))) {
     script_log(g, "Trigger: {}, VNum {:d}. detach invalid id arg: '{}'",
                trig->name, trig_get_vnum(g, trig), cmd);
@@ -527,12 +495,12 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
 
   if (c && char_get_script(c)) {
     if (!strcmp(trignum_s, "all")) {
-      extract_script(g, c, MOB_TRIGGER);
+      extract_script(g, c);
       return;
     }
     if (remove_trigger(g, char_get_script(c), trignum_s)) {
       if (!char_get_script(c)->trig_list) {
-        extract_script(g, c, MOB_TRIGGER);
+        extract_script(g, c);
       }
     }
     return;
@@ -540,12 +508,12 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
 
   if (o && obj_get_script(o)) {
     if (!strcmp(trignum_s, "all")) {
-      extract_script(g, o, OBJ_TRIGGER);
+      extract_script(g, o);
       return;
     }
     if (remove_trigger(g, obj_get_script(o), trignum_s)) {
       if (!obj_get_script(o)->trig_list) {
-        extract_script(g, o, OBJ_TRIGGER);
+        extract_script(g, o);
       }
     }
     return;
@@ -553,12 +521,12 @@ static void process_detach(GameWorld *g, void *go, struct script_data *sc, trig_
 
   if (r && room_get_script(r)) {
     if (!strcmp(trignum_s, "all")) {
-      extract_script(g, r, WLD_TRIGGER);
+      extract_script(g, r);
       return;
     }
     if (remove_trigger(g, room_get_script(r), trignum_s)) {
       if (!room_get_script(r)->trig_list) {
-        extract_script(g, r, WLD_TRIGGER);
+        extract_script(g, r);
       }
     }
     return;
@@ -575,9 +543,9 @@ struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj)
 }
 
 /* create a UID variable from the id number */
-static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                        int type, char *cmd)
+static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
 {
+  int type = owner_type(go);
   char junk[MAX_INPUT_LENGTH], varname[MAX_INPUT_LENGTH];
   char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
   std::string uid;
@@ -601,7 +569,7 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
 
   if (atoi(arg) != 0) { /* easy, if you pass an id number */
 
-    std::string result = eval_expr(g, arg, go, sc, trig, type);
+    std::string result = eval_expr(g, arg, go, sc, trig);
     uid                = str_format("{:c}{}", as_char(UID_CHAR), result);
   } else { /* a lot more work without it */
     if (!*name) {
@@ -614,13 +582,13 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
       struct char_data *c = nullptr;
       switch (type) {
         case WLD_TRIGGER:
-          c = get_char_in_room(g, (struct room_data *)go, name);
+          c = get_char_in_room(g, std::get<room_data *>(go), name);
           break;
         case OBJ_TRIGGER:
-          c = get_char_near_obj(g, (struct obj_data *)go, name);
+          c = get_char_near_obj(g, std::get<obj_data *>(go), name);
           break;
         case MOB_TRIGGER:
-          c = get_char_room_vis(g, (struct char_data *)go, name, nullptr);
+          c = get_char_room_vis(g, std::get<char_data *>(go), name, nullptr);
           break;
       }
       if (c)
@@ -629,16 +597,16 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
       struct obj_data *o = nullptr;
       switch (type) {
         case WLD_TRIGGER:
-          o = get_obj_in_room(g, (struct room_data *)go, name);
+          o = get_obj_in_room(g, std::get<room_data *>(go), name);
           break;
         case OBJ_TRIGGER:
-          o = get_obj_near_obj(g, (struct obj_data *)go, name);
+          o = get_obj_near_obj(g, std::get<obj_data *>(go), name);
           break;
         case MOB_TRIGGER:
-          if ((o = get_obj_in_list_vis(g, (struct char_data *)go, name, nullptr,
-                                       char_get_inventory((struct char_data *)go))) == nullptr)
-            o = get_obj_in_list_vis(g, (struct char_data *)go, name, nullptr,
-                                    room_get_contents(g, char_get_in_room((struct char_data *)go)));
+          if ((o = get_obj_in_list_vis(g, std::get<char_data *>(go), name, nullptr,
+                                       char_get_inventory(std::get<char_data *>(go)))) == nullptr)
+            o = get_obj_in_list_vis(g, std::get<char_data *>(go), name, nullptr,
+                                    room_get_contents(g, char_get_in_room(std::get<char_data *>(go))));
           break;
       }
       if (o)
@@ -647,13 +615,13 @@ static void makeuid_var(GameWorld *g, void *go, struct script_data *sc, trig_dat
       room_vnum r = NOWHERE;
       switch (type) {
         case WLD_TRIGGER:
-          r = room_get_number((struct room_data *)go);
+          r = room_get_number(std::get<room_data *>(go));
           break;
         case OBJ_TRIGGER:
-          r = obj_room((struct obj_data *)go);
+          r = obj_room(std::get<obj_data *>(go));
           break;
         case MOB_TRIGGER:
-          r = char_get_in_room((struct char_data *)go);
+          r = char_get_in_room(std::get<char_data *>(go));
           break;
       }
       if (room_of(g, r))
@@ -982,11 +950,10 @@ static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *tri
   add_var(&trig->var_list, varname, junk, sc->context);
 }
 
-/* the script attached to go, a mob, object or room according to type */
-static struct script_data *script_of(void *go, int type)
+/* the script attached to go */
+static struct script_data *script_of(owner_ptr go)
 {
-  struct script_data **slot = script_slot(go, type);
-  return slot ? *slot : nullptr;
+  return *script_slot(go);
 }
 
 /* What script_driver_body does after running one command line. */
@@ -1000,11 +967,11 @@ enum dg_line_result {
  * Runs one command line of a trigger, after variable substitution: a DG built-in
  * such as 'set' or 'wait', or else a mob, object or room command.
  */
-static enum dg_line_result dg_run_command(GameWorld *g, void *go_adress, void *go, struct script_data *sc, trig_data *trig,
-                                          int type, char *cmd, struct cmdlist_element *cl, int *ret_val)
+static enum dg_line_result dg_run_command(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd,
+                                          struct cmdlist_element *cl, int *ret_val, bool *owner_gone)
 {
   if (!strncasecmp(cmd, "eval ", 5))
-    process_eval(g, go, sc, trig, type, cmd);
+    process_eval(g, go, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "nop ", 4))
     ; /* nop: do nothing */
@@ -1016,16 +983,16 @@ static enum dg_line_result dg_run_command(GameWorld *g, void *go_adress, void *g
     dg_letter_value(g, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "makeuid ", 8))
-    makeuid_var(g, go, sc, trig, type, cmd);
+    makeuid_var(g, go, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "halt", 4))
     return DG_LINE_HALT;
 
   else if (!strncasecmp(cmd, "dg_cast ", 8))
-    do_dg_cast(g, go, sc, trig, type, cmd);
+    do_dg_cast(g, go, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "dg_affect ", 10))
-    do_dg_affect(g, go, sc, trig, type, cmd);
+    do_dg_affect(g, go, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "global ", 7))
     process_global(g, sc, trig, cmd, sc->context);
@@ -1049,34 +1016,26 @@ static enum dg_line_result dg_run_command(GameWorld *g, void *go_adress, void *g
     process_unset(g, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "wait ", 5)) {
-    process_wait(g, go, trig, type, cmd, cl);
+    process_wait(g, go, trig, cmd, cl);
     return DG_LINE_STOP;
   }
 
   else if (!strncasecmp(cmd, "attach ", 7))
-    process_attach(g, go, sc, trig, type, cmd);
+    process_attach(g, go, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "detach ", 7))
-    process_detach(g, go, sc, trig, type, cmd);
+    process_detach(g, go, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "version", 7))
     mudlog(g, LOG_NRM, ADMLVL_GOD, true, "{}", DG_SCRIPT_VERSION);
 
   else {
-    switch (type) {
-      case MOB_TRIGGER:
-        command_interpreter(g, (char_data *)go, cmd);
-        break;
-      case OBJ_TRIGGER:
-        obj_command_interpreter(g, (obj_data *)go, cmd);
-        break;
-      case WLD_TRIGGER:
-        wld_command_interpreter(g, (struct room_data *)go, cmd);
-        break;
-    }
+    std::visit(overloaded{[&](char_data *ch) { command_interpreter(g, ch, cmd); },
+                          [&](obj_data *obj) { obj_command_interpreter(g, obj, cmd); },
+                          [&](room_data *room) { wld_command_interpreter(g, room, cmd); }},
+               go);
     if (g->dg_owner_purged) {
-      if (type == OBJ_TRIGGER)
-        *(obj_data **)go_adress = nullptr;
+      *owner_gone = true;
       return DG_LINE_STOP;
     }
   }
@@ -1084,44 +1043,29 @@ static enum dg_line_result dg_run_command(GameWorld *g, void *go_adress, void *g
   return DG_LINE_NEXT;
 }
 
-/*  This is the core driver for scripts. */
-/*  Arguments:
-    void *go_adress
-      A pointer to a pointer to the entity running the script.
-      The reason for this approcah is that we want to be able to see
-      from the calling function, if the entity has been free'd.
-
-    trig_data *trig
-      A pointer to the current running trigger.
-
-    int type
-      MOB_TRIGGER, OBJ_TRIGGER or WLD_TRIGGER, respectively.
-
-    int mode
-      TRIG_NEW     just started from dg_triggers.c
-      TRIG_RESTART restarted after a 'wait'
-*/
-static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, int type, int mode);
+/*  This is the core driver for scripts: runs trig on go, from its first line (TRIG_NEW, as dg_triggers.cpp starts
+    it) or from where it waited (TRIG_RESTART). The result says whether go was purged meanwhile, as callers can't
+    otherwise tell. */
+static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int mode, bool *owner_gone);
 
 /* Runs a trigger with dg_ctx describing it, restoring the caller's context after. */
-int script_driver(GameWorld *g, void *go_adress, trig_data *trig, int type, int mode)
+run_result script_driver(GameWorld *g, owner_ptr go, trig_data *trig, int mode)
 {
   struct dg_run_ctx saved = g->dg_ctx;
-  void *go                = go_adress ? *(void **)go_adress : nullptr;
-  int ret;
+  run_result result;
 
   if (trig->extracted) /* an earlier trigger on the same thing removed this one */
-    return 0;
+    return result;
 
-  dg_ctx_begin(g, go, trig, type);
-  ret    = script_driver_body(g, go_adress, trig, type, mode);
-  g->dg_ctx = saved;
-  if (trig->owner_gone && type == OBJ_TRIGGER)
-    *(obj_data **)go_adress = nullptr; /* tell the caller, as dg_run_command() does */
-  return ret;
+  dg_ctx_begin(g, go, trig);
+  result.value = script_driver_body(g, go, trig, mode, &result.owner_gone);
+  g->dg_ctx    = saved;
+  if (trig->owner_gone)
+    result.owner_gone = true;
+  return result;
 }
 
-static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, int type, int mode)
+static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int mode, bool *owner_gone)
 {
   int ret_val      = 1;
   struct cmdlist_element *cl;
@@ -1129,28 +1073,28 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
   struct script_data *sc = nullptr;
   struct cmdlist_element *temp;
   unsigned long loops = 0;
-  void *go            = *(void **)go_adress;
+  int type            = owner_type(go);
 
-  sc = script_of(go, type);
+  sc = script_of(go);
 
   if (g->script_depth > MAX_SCRIPT_DEPTH) {
     script_log(g, "Trigger {:d} recursed beyond maximum allowed depth.", trig_get_vnum(g, trig));
     switch (type) {
       case MOB_TRIGGER:
         script_log(g, "It was attached to {} [{:d}]",
-                   char_get_name((char_data *)go), char_get_mob_vnum(g, (char_data *)go));
+                   char_get_name(std::get<char_data *>(go)), char_get_mob_vnum(g, std::get<char_data *>(go)));
         break;
       case OBJ_TRIGGER:
         script_log(g, "It was attached to {} [{:d}]",
-                   obj_get_short_description((obj_data *)go), obj_get_vnum(g, (obj_data *)go));
+                   obj_get_short_description(std::get<obj_data *>(go)), obj_get_vnum(g, std::get<obj_data *>(go)));
         break;
       case WLD_TRIGGER:
         script_log(g, "It was attached to {} [{:d}]",
-                   room_get_name((room_data *)go), room_get_number((room_data *)go));
+                   room_get_name(std::get<room_data *>(go)), room_get_number(std::get<room_data *>(go)));
         break;
     }
 
-    extract_script(g, go, type);
+    extract_script(g, go);
 
     /*
        extract_script() works on rooms, but on mobiles and objects,
@@ -1185,9 +1129,9 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
       continue;
 
     else if (!strncasecmp(p, "if ", 3)) {
-      if (process_if(g, p + 3, go, sc, trig, type))
+      if (process_if(g, p + 3, go, sc, trig))
         trig->depth++;
-      else cl = find_else_end(g, trig, cl, go, sc, type);
+      else cl = find_else_end(g, trig, cl, go, sc);
     }
 
     else if (!strncasecmp("elseif ", p, 7) ||
@@ -1212,14 +1156,14 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
                    trig_get_vnum(g, trig));
         break; /* end the run normally, so depth and the trigger's state are reset */
       }
-      if (process_if(g, p + 6, go, sc, trig, type)) {
+      if (process_if(g, p + 6, go, sc, trig)) {
         temp->original = cl;
       } else {
         cl    = temp;
         loops = 0;
       }
     } else if (!strncasecmp("switch ", p, 7)) {
-      cl = find_case(g, trig, cl, go, sc, type, p + 7);
+      cl = find_case(g, trig, cl, go, sc, p + 7);
     } else if (!strncasecmp("end", p, 3)) {
       /*
        * if not in an if-block, ignore the extra 'end' and warn about it.
@@ -1235,14 +1179,13 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
       if (cl->original) {
         const char *orig_cmd = cl->original->cmd.c_str();
         while (*orig_cmd && isspace(*orig_cmd)) orig_cmd++;
-        if (cl->original && process_if(g, orig_cmd + 6, go, sc, trig,
-                                       type)) {
+        if (cl->original && process_if(g, orig_cmd + 6, go, sc, trig)) {
           cl = cl->original;
           loops++;
           trig->loops++;
           if (loops == 40) {
             char wait_a_pulse[] = "wait 1";
-            process_wait(g, go, trig, type, wait_a_pulse, cl);
+            process_wait(g, go, trig, wait_a_pulse, cl);
             g->script_depth--;
             return ret_val;
           }
@@ -1263,9 +1206,9 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
 
     else {
 
-      std::string cmd = var_subst(g, go, sc, trig, type, p);
+      std::string cmd = var_subst(g, go, sc, trig, p);
 
-      enum dg_line_result res = dg_run_command(g, go_adress, go, sc, trig, type, cmd.data(), cl, &ret_val);
+      enum dg_line_result res = dg_run_command(g, go, sc, trig, cmd.data(), cl, &ret_val, owner_gone);
       if (res == DG_LINE_HALT)
         break;
       if (res == DG_LINE_STOP) {
@@ -1277,7 +1220,7 @@ static int script_driver_body(GameWorld *g, void *go_adress, trig_data *trig, in
 
   /* Once extracted, what the trigger belonged to may be gone, and free_trigger() has the rest. */
   if (!trig->extracted) {
-    sc = script_of(go, type); /* the script may have been detached */
+    sc = script_of(go); /* the script may have been detached */
     if (sc)
       free_varlist(trig->var_list);
     trig->var_list = nullptr;

@@ -224,11 +224,14 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
   return false;
 }
 
-static void find_replacement(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, std::string &str);
+/* type: whose command names %send% and the like give, which is go's own but for X.global() */
+static void find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, std::string &str);
 
 /* sets str to the value of field on character c (var.field where var names a character) */
-static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, std::string &str)
+static void char_field(GameWorld *g, char_data *c, owner_ptr go, struct trig_var_data *vd, trig_data *trig, char *field, char *subfield, std::string &str)
 {
+  int type = owner_type(go);
+
   int i, j;
 
   if (text_processed(field, subfield, vd, str)) return;
@@ -280,7 +283,7 @@ static void char_field(GameWorld *g, char_data *c, void *go, struct trig_var_dat
       break;
     case 'c':
       if (!strcasecmp(field, "canbeseen")) {
-        if ((type == MOB_TRIGGER) && !char_can_see(g, ((char_data *)go), c))
+        if ((type == MOB_TRIGGER) && !char_can_see(g, (std::get<char_data *>(go)), c))
           str = "0";
         else
           str = "1";
@@ -1195,7 +1198,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
 }
 
 /* sets str to be the value of var.field */
-static void find_replacement(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, std::string &str)
+static void find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, std::string &str)
 {
   struct trig_var_data *vd = nullptr;
   char_data *ch, *c          = nullptr, *rndm;
@@ -1242,17 +1245,8 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
       str = str_format("{}", vd->value);
     else {
       if (!strcasecmp(var, "self")) {
-        switch (type) {
-          case MOB_TRIGGER:
-            str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id((char_data *)go));
-            break;
-          case OBJ_TRIGGER:
-            str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id((obj_data *)go));
-            break;
-          case WLD_TRIGGER:
-            str = str_format("{:c}{:d}", as_char(UID_CHAR), room_get_number((room_data *)go) + ROOM_ID_BASE);
-            break;
-        }
+        /* the owner's own, even for X.global(self), which once read an object or room as a mob */
+        str = str_format("{:c}{:d}", as_char(UID_CHAR), owner_uid(go));
       } else if (!strcasecmp(var, "global")) {
         /* so "remote varname %global%" will work */
         str = str_format("{:d}", ROOM_ID_BASE);
@@ -1300,7 +1294,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
 
       switch (type) {
         case MOB_TRIGGER:
-          ch = (char_data *)go;
+          ch = std::get<char_data *>(go);
 
           if ((o = get_object_in_equip(g, ch, name)))
             ;
@@ -1318,7 +1312,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
 
           break;
         case OBJ_TRIGGER:
-          obj = (obj_data *)go;
+          obj = std::get<obj_data *>(go);
 
           if ((c = get_char_by_obj(g, obj, name)))
             ;
@@ -1328,7 +1322,7 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
 
           break;
         case WLD_TRIGGER:
-          room = (struct room_data *)go;
+          room = std::get<room_data *>(go);
 
           if ((c = get_char_by_room(g, room, name)))
             ;
@@ -1344,17 +1338,17 @@ static void find_replacement(GameWorld *g, void *go, struct script_data *sc, tri
       if (!strcasecmp(var, "self")) {
         switch (type) {
           case MOB_TRIGGER:
-            c = (char_data *)go;
+            c = std::get<char_data *>(go);
             r = nullptr;
             o = nullptr; /* NULL assignments added to avoid self to always be    */
             break;       /* the room.  - Welcor        */
           case OBJ_TRIGGER:
-            o = (obj_data *)go;
+            o = std::get<obj_data *>(go);
             c = nullptr;
             r = nullptr;
             break;
           case WLD_TRIGGER:
-            r = (struct room_data *)go;
+            r = std::get<room_data *>(go);
             c = nullptr;
             o = nullptr;
             break;
@@ -1456,7 +1450,7 @@ in the vault (vnum: 453) now and then. you can just use
           count = 0;
 
           if (type == MOB_TRIGGER) {
-            ch = (char_data *)go;
+            ch = std::get<char_data *>(go);
             for (char_data *tch : room_people(g, char_get_in_room(ch)))
               if ((tch != ch) && valid_dg_target(g, tch, DG_ALLOW_GODS) &&
                   char_can_see(g, ch, tch)) {
@@ -1467,7 +1461,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
 
           else if (type == OBJ_TRIGGER) {
-            for (char_data *other : room_people(g, obj_room((obj_data *)go)))
+            for (char_data *other : room_people(g, obj_room(std::get<obj_data *>(go))))
               if (valid_dg_target(g, other, DG_ALLOW_GODS)) {
                 if (!rand_number(g, 0, count))
                   rndm = other;
@@ -1476,7 +1470,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
 
           else if (type == WLD_TRIGGER) {
-            for (char_data *who : room_people(g, (struct room_data *)go))
+            for (char_data *who : room_people(g, std::get<room_data *>(go)))
               if (valid_dg_target(g, who, DG_ALLOW_GODS)) {
 
                 if (!rand_number(g, 0, count))
@@ -1496,13 +1490,13 @@ in the vault (vnum: 453) now and then. you can just use
 
           switch (type) {
             case WLD_TRIGGER:
-              in_room = room_get_number((struct room_data *)go);
+              in_room = room_get_number(std::get<room_data *>(go));
               break;
             case OBJ_TRIGGER:
-              in_room = obj_room((struct obj_data *)go);
+              in_room = obj_room(std::get<obj_data *>(go));
               break;
             case MOB_TRIGGER:
-              in_room = char_get_in_room((struct char_data *)go);
+              in_room = char_get_in_room(std::get<char_data *>(go));
               break;
           }
           if (!room_of(g, in_room)) {
@@ -1533,7 +1527,7 @@ in the vault (vnum: 453) now and then. you can just use
     }
 
     if (c)
-      char_field(g, c, go, vd, trig, type, field, subfield, str);
+      char_field(g, c, go, vd, trig, field, subfield, str);
     else if (o)
       obj_field(g, o, vd, trig, type, field, subfield, str);
     else if (r)
@@ -1557,7 +1551,7 @@ in the vault (vnum: 453) now and then. you can just use
  */
 
 /* Substitutes the variables into line, up to the length of a command line. The scan cuts up a copy of the line. */
-std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, const char *line)
+std::string var_subst(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, const char *line)
 {
   constexpr size_t max_len = MAX_INPUT_LENGTH - 1; /* what fits a command line */
   std::string out, repl_str, subfield;
@@ -1605,10 +1599,10 @@ std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data 
         dots   = 0;
         for (field = p; *p && ((*p != '%') || (paren_count > 0) || (dots)); p++) {
           if (dots > 0) {
-            find_replacement(g, go, sc, trig, type, var, field, subfield.data(), repl_str);
+            find_replacement(g, go, sc, trig, owner_type(go), var, field, subfield.data(), repl_str);
             if (!repl_str.empty()) {
               std::string tmp2 = "eval tmpvr " + repl_str; /* temp var */
-              process_eval(g, go, sc, trig, type, tmp2.data());
+              process_eval(g, go, sc, trig, tmp2.data());
               var   = tmpvr; /* not written over the name, which may be shorter and run into the next field */
               field = p;
               dots  = 0;
@@ -1633,9 +1627,9 @@ std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data 
       *(p++) = '\0';
 
       if (!subfield.empty())
-        subfield = var_subst(g, go, sc, trig, type, subfield.c_str());
+        subfield = var_subst(g, go, sc, trig, subfield.c_str());
 
-      find_replacement(g, go, sc, trig, type, var, field, subfield.data(), repl_str);
+      find_replacement(g, go, sc, trig, owner_type(go), var, field, subfield.data(), repl_str);
 
       out += repl_str;
     } /* else if *p .. */

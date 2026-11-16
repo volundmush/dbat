@@ -205,7 +205,7 @@ bool save_objects(GameWorld *g, struct zone_data *zone_num)
       /*
        * Do we have script(s) attached ?
        */
-      script_save_to_disk(fp, obj, OBJ_TRIGGER);
+      script_save_to_disk(fp, obj);
 
       file_print(fp, "Z\n{:d}\n", obj_get_size(obj));
       /*
@@ -330,7 +330,7 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
 
   /* No copy is left to share these, now that they have all been extracted and freed. */
   free_extracted_objects(g, rnum);
-  free_proto_script(obj, OBJ_TRIGGER);
+  free_proto_script(obj);
 
   /* Shops stop producing it. */
   for (struct shop_data *shop : g->shops.all()) {

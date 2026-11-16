@@ -203,7 +203,7 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
       index->number--;
     clearMemory(ch);
     if (char_get_script(ch))
-      extract_script(g, ch, MOB_TRIGGER);
+      extract_script(g, ch);
     if (char_get_memory(ch))
       extract_script_mem(char_get_memory(ch));
   } else {
@@ -325,11 +325,11 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
     (obj_index_of(g, obj_get_item_number(obj))->number)--;
 
   if (obj_get_script(obj))
-    extract_script(g, obj, OBJ_TRIGGER);
+    extract_script(g, obj);
 
   if (obj_get_vnum(g, obj) != 80 && obj_get_vnum(g, obj) != 81) {
     if (obj_get_item_number(obj) == NOTHING || obj_get_proto_script(obj) != obj_get_proto_script(obj_proto_of(g, obj_get_item_number(obj))))
-      free_proto_script(obj, OBJ_TRIGGER);
+      free_proto_script(obj);
   }
 
   /* Gone from the game now, but freed later, so that whoever still holds a pointer to it this pulse holds memory. */

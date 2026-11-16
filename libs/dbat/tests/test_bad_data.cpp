@@ -245,7 +245,7 @@ static void check_expression_values(void)
   GameWorld *g = th_boot();
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++) {
-    std::string result = eval_expr(g, cases[i].expression, nullptr, nullptr, nullptr, WLD_TRIGGER);
+    std::string result = eval_expr(g, cases[i].expression, owner_ptr{static_cast<room_data *>(nullptr)}, nullptr, nullptr);
 
     if (result != cases[i].value) {
       file_print(stdout, "FAIL: {} gave '{}', not '{}'\n", cases[i].expression, result, cases[i].value);
@@ -274,7 +274,7 @@ static void check_arithmetic_at_the_limits(void)
   GameWorld *g = th_boot();
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++) {
-    std::string result = eval_expr(g, cases[i].expression, nullptr, nullptr, nullptr, WLD_TRIGGER);
+    std::string result = eval_expr(g, cases[i].expression, owner_ptr{static_cast<room_data *>(nullptr)}, nullptr, nullptr);
 
     if (result != cases[i].value) {
       file_print(stdout, "FAIL: {} gave '{}', not '{}'\n", cases[i].expression, result, cases[i].value);
@@ -312,8 +312,8 @@ static void check_chained_field_on_a_short_variable(void)
   char_to_room(g, mob, 300);
   add_char_uid_var(&trig, "x", mob, 0);
   add_char_uid_var(&trig, "actor", mob, 0);
-  std::string want = var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "%actor.id.strlen%");
-  CHECK(var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "%x.id.strlen%") == want);
+  std::string want = var_subst(g, mob, nullptr, &trig, "%actor.id.strlen%");
+  CHECK(var_subst(g, mob, nullptr, &trig, "%x.id.strlen%") == want);
   free_varlist(trig.var_list);
   th_shutdown(g);
 }
@@ -327,9 +327,9 @@ static void check_variable_left_open_at_the_end(void)
 
   char_to_room(g, mob, 300);
   add_char_uid_var(&trig, "actor", mob, 0);
-  CHECK(var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "hello %actor.name") ==
+  CHECK(var_subst(g, mob, nullptr, &trig, "hello %actor.name") ==
         std::string("hello ") + char_get_name(mob));
-  CHECK(var_subst(g, mob, nullptr, &trig, MOB_TRIGGER, "%") == "");
+  CHECK(var_subst(g, mob, nullptr, &trig, "%") == "");
   free_varlist(trig.var_list);
   th_shutdown(g);
 }

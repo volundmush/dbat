@@ -236,8 +236,9 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg)
 }
 
 /* for mobs and rooms: */
-void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
+void dg_read_trigger(GameWorld *g, FILE *fp, owner_ptr proto)
 {
+  int type = owner_type(proto);
   char line[READ_SIZE];
   char junk[8];
   trig_vnum vnum;
@@ -262,12 +263,12 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
       case MOB_TRIGGER:
         mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #{:d} asked for but non-existant! (mob: {} - {:d})",
-               vnum, char_get_name((char_data *)proto), char_get_mob_vnum(g, (char_data *)proto));
+               vnum, char_get_name(std::get<char_data *>(proto)), char_get_mob_vnum(g, std::get<char_data *>(proto)));
         break;
       case WLD_TRIGGER:
         mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #{:d} asked for but non-existant! (room:{:d})",
-               vnum, room_get_number((room_data *)proto));
+               vnum, room_get_number(std::get<room_data *>(proto)));
         break;
       default:
         mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
@@ -282,7 +283,7 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
       new_trg       = new trig_proto_list();
       new_trg->vnum = vnum;
 
-      mob       = (char_data *)proto;
+      mob       = std::get<char_data *>(proto);
       trg_proto = char_get_proto_script(mob);
       if (!trg_proto) {
         char_set_proto_script(mob, trg_proto = new_trg);
@@ -295,7 +296,7 @@ void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type)
     case WLD_TRIGGER:
       new_trg       = new trig_proto_list();
       new_trg->vnum = vnum;
-      room          = (room_data *)proto;
+      room          = std::get<room_data *>(proto);
       trg_proto     = room_get_proto_script(room);
       if (!trg_proto) {
         room_set_proto_script(room, trg_proto = new_trg);
@@ -355,8 +356,9 @@ void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj)
   }
 }
 
-void assign_triggers(GameWorld *g, void *i, int type)
+void assign_triggers(GameWorld *g, owner_ptr i)
 {
+  int type = owner_type(i);
   struct char_data *mob  = nullptr;
   struct obj_data *obj   = nullptr;
   struct room_data *room = nullptr;
@@ -365,7 +367,7 @@ void assign_triggers(GameWorld *g, void *i, int type)
 
   switch (type) {
     case MOB_TRIGGER:
-      mob       = (char_data *)i;
+      mob       = std::get<char_data *>(i);
       trg_proto = char_get_proto_script(mob);
       while (trg_proto) {
         rnum = find_trigger(g, trg_proto->vnum);
@@ -380,7 +382,7 @@ void assign_triggers(GameWorld *g, void *i, int type)
       }
       break;
     case OBJ_TRIGGER:
-      obj       = (obj_data *)i;
+      obj       = std::get<obj_data *>(i);
       trg_proto = obj_get_proto_script(obj);
       while (trg_proto) {
         rnum = find_trigger(g, trg_proto->vnum);
@@ -394,7 +396,7 @@ void assign_triggers(GameWorld *g, void *i, int type)
       }
       break;
     case WLD_TRIGGER:
-      room      = (struct room_data *)i;
+      room      = std::get<room_data *>(i);
       trg_proto = room_get_proto_script(room);
       while (trg_proto) {
         rnum = find_trigger(g, trg_proto->vnum);

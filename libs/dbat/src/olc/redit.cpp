@@ -276,10 +276,10 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
   /* Free old proto list */
   if (room_get_proto_script(g, room_num) &&
       room_get_proto_script(g, room_num) != OLC_SCRIPT(d))
-    free_proto_script(room_of(g, room_num), WLD_TRIGGER);
+    free_proto_script(room_of(g, room_num));
 
   room_set_proto_script(g, room_num, OLC_SCRIPT(d));
-  assign_triggers(g, room_of(g, room_num), WLD_TRIGGER);
+  assign_triggers(g, room_of(g, room_num));
   /* end trigger update */
 }
 
@@ -299,8 +299,8 @@ void free_room(GameWorld *g, struct room_data *room)
   free_room_strings(room);
 
   if (room_get_script(room))
-    extract_script(g, room, WLD_TRIGGER);
-  free_proto_script(room, WLD_TRIGGER);
+    extract_script(g, room);
+  free_proto_script(room);
 
   /* Free the room. */
   delete room; /* XXX ? */

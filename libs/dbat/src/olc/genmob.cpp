@@ -191,18 +191,18 @@ bool free_mobile(GameWorld *g, struct char_data *mob)
   /* Non-prototyped mobile.  Also known as new mobiles.  */
   if ((i = char_get_nr(mob)) == NOBODY) {
     /* free script proto list */
-    free_proto_script(mob, MOB_TRIGGER);
+    free_proto_script(mob);
   } else { /* Prototyped mobile. */
     /* free script proto list if it's not the prototype */
     if (char_get_proto_script(mob) && char_get_proto_script(mob) != char_get_proto_script(mob_proto_of(g, i)))
-      free_proto_script(mob, MOB_TRIGGER);
+      free_proto_script(mob);
   }
   while (!char_affects(mob).empty())
     affect_remove(g, mob, &char_affects(mob).front());
 
   /* free any assigned scripts */
   if (char_get_script(mob))
-    extract_script(g, mob, MOB_TRIGGER);
+    extract_script(g, mob);
 
   delete mob;
   return true;
@@ -354,7 +354,7 @@ static bool write_mobile_record(GameWorld *g, mob_vnum mvnum, struct char_data *
   if (!write_mobile_espec(g, mvnum, mob, fd))
     mud_log("SYSERR: GenOLC: Error writing E-specs for mobile #{:d}.", mvnum);
 
-  script_save_to_disk(fd, mob, MOB_TRIGGER);
+  script_save_to_disk(fd, mob);
 
 #if CONFIG_GENOLC_MOBPROG
   if (write_mobile_mobprog(mvnum, mob, fd) < 0)

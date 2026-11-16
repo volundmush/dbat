@@ -40,7 +40,7 @@ room_vnum add_room(GameWorld *g, struct room_data *room)
   vnum = room_get_number(room);
   if ((slot = room_of(g, vnum))) {
     if (room_get_script(slot))
-      extract_script(g, slot, WLD_TRIGGER);
+      extract_script(g, slot);
     id_list people = room_get_people(slot), contents = room_get_contents(slot);
     copy_room(slot, room);
     slot->people   = people;
@@ -104,8 +104,8 @@ bool delete_room(GameWorld *g, room_vnum vnum)
 
   free_room_strings(room);
   if (room_get_script(room))
-    extract_script(g, room, WLD_TRIGGER);
-  free_proto_script(room, WLD_TRIGGER);
+    extract_script(g, room);
+  free_proto_script(room);
 
   /* Exits to this room go nowhere, or are removed if they had nothing to show. */
   for (struct room_data *other : g->rooms.all())
@@ -275,7 +275,7 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
                    xdesc.keyword, buf);
       }
       file_print(sf, "S\n");
-      script_save_to_disk(sf, room, WLD_TRIGGER);
+      script_save_to_disk(sf, room);
     }
   }
 

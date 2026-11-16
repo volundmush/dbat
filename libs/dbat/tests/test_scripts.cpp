@@ -566,6 +566,8 @@ namespace {
     std::string log = th_file_text("test.log");
     file_print(stdout, "== log:\n");
     for (const std::string &logged : lines_of(log.size() > (size_t)log_from ? log.substr(log_from) : std::string())) {
+      if (logged.find("(+0x") != std::string::npos || (logged.ends_with("]") && logged.find(" [0x") != std::string::npos))
+        continue; /* a backtrace's frames: addresses in this one build */
       size_t stamp = logged.find(" :: "); /* the log's own time is the real clock's */
       file_print(stdout, "{}\n", stamp == std::string::npos ? logged : logged.substr(stamp + 4));
     }

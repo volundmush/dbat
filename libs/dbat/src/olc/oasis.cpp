@@ -177,7 +177,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     switch (cleanup_type) {
       case CLEANUP_ALL:
         /* free(OLC_SCRIPT(d)) equivalent */
-        free_proto_script(OLC_ROOM(d), WLD_TRIGGER);
+        free_proto_script(OLC_ROOM(d));
         free_room(g, OLC_ROOM(d));
         break;
       case CLEANUP_STRUCTS:

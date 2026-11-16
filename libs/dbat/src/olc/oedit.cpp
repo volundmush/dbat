@@ -281,7 +281,7 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
   /* Free old proto list  */
   if (obj_get_proto_script(obj_proto_of(g, robj_num)) &&
       obj_get_proto_script(obj_proto_of(g, robj_num)) != OLC_SCRIPT(d))
-    free_proto_script(obj_proto_of(g, robj_num), OBJ_TRIGGER);
+    free_proto_script(obj_proto_of(g, robj_num));
   /* this will handle new instances of the object: */
   obj_set_proto_script(obj_proto_of(g, robj_num), OLC_SCRIPT(d));
 
@@ -291,11 +291,11 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
       continue;
     /* remove any old scripts */
     if (obj_get_script(obj))
-      extract_script(g, obj, OBJ_TRIGGER);
+      extract_script(g, obj);
 
-    free_proto_script(obj, OBJ_TRIGGER);
-    copy_proto_script(obj_proto_of(g, robj_num), obj, OBJ_TRIGGER);
-    assign_triggers(g, obj, OBJ_TRIGGER);
+    free_proto_script(obj);
+    copy_proto_script(obj_proto_of(g, robj_num), obj);
+    assign_triggers(g, obj);
   }
   /* end trigger update */
 }
@@ -956,7 +956,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 'N':
           /* If not saving, we must free the script_proto list. */
           obj_set_proto_script(OLC_OBJ(d), OLC_SCRIPT(d));
-          free_proto_script(OLC_OBJ(d), OBJ_TRIGGER);
+          free_proto_script(OLC_OBJ(d));
           cleanup_olc(g, d, CLEANUP_ALL);
           return;
         case 'a': /* abort quit */
@@ -1014,15 +1014,15 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             send_to_char(g, d->character, "\r\nCommitting iedit changes.\r\n");
             /* remove any old scripts */
             if (obj_get_script(obj)) {
-              extract_script(g, obj, OBJ_TRIGGER);
+              extract_script(g, obj);
               obj_set_script(obj, nullptr);
             }
             commit_iedit(g, obj, OLC_OBJ(d));
             if (obj_get_vnum(g, obj) != NOTHING) {
-              free_proto_script(obj, OBJ_TRIGGER);
+              free_proto_script(obj);
               robj = obj_get_vnum(g, obj);
-              copy_proto_script(obj_proto_of(g, robj), obj, OBJ_TRIGGER);
-              assign_triggers(g, obj, OBJ_TRIGGER);
+              copy_proto_script(obj_proto_of(g, robj), obj);
+              assign_triggers(g, obj);
             }
             obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
             mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,

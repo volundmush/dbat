@@ -843,4 +843,13 @@ attach 405 %self.id%
 detach all %self.id%
 %echo% [%findmob.300%] [%findobj.99999(1)%] [%findobj.300(300)%] [%findobj.300(%self.id%)%] [%findobj.300(streetlight)%]
 ~
+#460
+global self from an object~
+1 h 100
+~
+%load% mob 300
+makeuid m mob dummy
+attach 405 %m.id%
+%echo% self through a mob's globals: [%m.global(self)%] mine: [%self%]
+~
 $~

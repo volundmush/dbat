@@ -36,8 +36,7 @@
 /* LIMITATION: a target MUST exist for the spell unless the spell is   */
 /* set to TAR_IGNORE. Also, group spells are not permitted             */
 /* code borrowed from do_cast() */
-void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                int type, char *cmd)
+void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
 {
   struct char_data *caster      = nullptr;
   struct char_data *tch         = nullptr;
@@ -49,23 +48,13 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
   std::string orig_cmd;
 
   /* need to get the caster or the room of the temporary caster */
-  switch (type) {
-    case MOB_TRIGGER:
-      caster = (struct char_data *)go;
-      break;
-    case WLD_TRIGGER:
-      caster_room = (struct room_data *)go;
-      break;
-    case OBJ_TRIGGER:
-      caster_room = dg_room_of_obj(g, (struct obj_data *)go);
-      if (!caster_room) {
-        script_log(g, "dg_do_cast: unknown room for object-caster!");
-        return;
-      }
-      break;
-    default:
-      script_log(g, "dg_do_cast: unknown trigger type!");
-      return;
+  if (auto *mob = std::get_if<char_data *>(&go))
+    caster = *mob;
+  else if (auto *room = std::get_if<room_data *>(&go))
+    caster_room = *room;
+  else if (!(caster_room = dg_room_of_obj(g, std::get<obj_data *>(go)))) {
+    script_log(g, "dg_do_cast: unknown room for object-caster!");
+    return;
   }
 
   orig_cmd = cmd;
@@ -136,9 +125,9 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
       return;
     }
     /* set the caster's name to that of the object, or the gods.... */
-    if (type == OBJ_TRIGGER)
-      char_set_sdesc(caster, obj_get_short_description((struct obj_data *)go));
-    else if (type == WLD_TRIGGER)
+    if (auto *obj = std::get_if<obj_data *>(&go))
+      char_set_sdesc(caster, obj_get_short_description(*obj));
+    else if (std::holds_alternative<room_data *>(go))
       char_set_sdesc(caster, "The gods");
     caster_room->people.add(char_get_id(caster)); /* there, without char_to_room()'s side effects */
     char_set_in_room(caster, room_get_number(caster_room));
@@ -155,7 +144,7 @@ void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
 /* usage:  apply <target> <property> <value> <duration>               */
 constexpr int APPLY_TYPE  = 1;
 constexpr int AFFECT_TYPE = 2;
-void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int script_type, char *cmd)
+void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd)
 {
   struct char_data *ch = nullptr;
   int value = 0, duration = 0;

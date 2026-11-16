@@ -17,6 +17,7 @@
 #include "dbat/consts/pulse.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/triggers.hpp"
+#include "dbat/dg/owner.hpp"
 #include "dbat/index.hpp"
 #include "dbat/db.hpp"
 #include "dbat/genzon.hpp"
@@ -88,11 +89,10 @@ struct script_data {
   struct script_data *next{}; /* used for purged_scripts    */
 };
 
-/* The event data for the wait command */
+/* The event data for the wait command: the trigger and what it runs on, found again when the wait is over */
 struct wait_event_data {
-  struct trig_data *trigger{};
-  void *go{};
-  int type{};
+  long trigger_id{}; /* in g->triggers */
+  script_owner owner{};
 };
 
 /* typedefs that the dg functions rely on */
@@ -243,13 +243,17 @@ struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj);
 void obj_command_interpreter(GameWorld *g, obj_data *obj, char *argument);
 void wld_command_interpreter(GameWorld *g, room_data *room, char *argument);
 
-/* To maintain strict-aliasing we'll have to do this trick with a union */
-/* Thanks to Chris Gilbert for reminding me that there are other options. */
-int script_driver(GameWorld *g, void *go_adress, trig_data *trig, int type, int mode);
+/* What running a trigger came to: its return value, and whether what it ran on was purged */
+struct run_result {
+  int value{};
+  bool owner_gone{};
+};
+
+/* Runs trig on go, from the top (TRIG_NEW) or from where it waited (TRIG_RESTART). */
+run_result script_driver(GameWorld *g, owner_ptr go, trig_data *trig, int mode);
 struct index_data *find_trigger(GameWorld *g, trig_vnum vnum);
 obj_data *find_obj(GameWorld *g, long n);
-void process_eval(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                  int type, char *cmd);
+void process_eval(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
 void read_saved_vars(struct char_data *ch);
 void save_char_vars(GameWorld *g, struct char_data *ch);
 long dg_new_mob_uid(GameWorld *g);
@@ -261,15 +265,15 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr);
 int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data *d);
 trig_data *read_trigger(GameWorld *g, struct index_data *nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
-void dg_read_trigger(GameWorld *g, FILE *fp, void *proto, int type);
+void dg_read_trigger(GameWorld *g, FILE *fp, owner_ptr proto);
 void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj);
-void assign_triggers(GameWorld *g, void *i, int type);
+void assign_triggers(GameWorld *g, owner_ptr i);
 
 /* From dg_variables.c */
 void add_var(struct trig_var_data **var_list, const char *name, const char *value, long id);
 void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context);
 void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context);
-std::string var_subst(GameWorld *g, void *go, struct script_data *sc, trig_data *trig, int type, const char *line);
+std::string var_subst(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, const char *line);
 
 /* From dg_handler.c */
 void free_varlist(struct trig_var_data *vd);
@@ -277,11 +281,11 @@ struct script_data *dg_ensure_script(struct script_data **slot);
 bool remove_var(struct trig_var_data **var_list, const char *name);
 void free_trigger(GameWorld *g, trig_data *trig);
 void extract_trigger(GameWorld *g, struct trig_data *trig);
-void extract_script(GameWorld *g, void *thing, int type);
+void extract_script(GameWorld *g, owner_ptr thing);
 void free_extracted_triggers(GameWorld *g);
 void extract_script_mem(struct script_memory *sc);
-void free_proto_script(void *thing, int type);
-void copy_proto_script(void *source, void *dest, int type);
+void free_proto_script(owner_ptr thing);
+void copy_proto_script(owner_ptr source, owner_ptr dest); /* of the same kind */
 void delete_variables(const char *charname);
 
 /* from dg_comm.c */
@@ -289,10 +293,8 @@ void sub_write(GameWorld *g, char *arg, char_data *ch, int8_t find_invis, int ta
 void send_to_zone(GameWorld *g, const char *messg, struct zone_data *zone);
 
 /* from dg_misc.c */
-void do_dg_cast(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                int type, char *cmd);
-void do_dg_affect(GameWorld *g, void *go, struct script_data *sc, trig_data *trig,
-                  int type, char *cmd);
+void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
+void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
 bool valid_dg_target(GameWorld *g, char_data *ch, int bitvector);
 void script_damage(GameWorld *g, char_data *vict, int dam);
 extern const char *const dg_door_fields[];

@@ -418,12 +418,12 @@ ACMD(do_detach)
     if (!room_get_script(room))
       send_to_char(g, ch, "This room does not have any triggers.\r\n");
     else if (str_eq_nocase(arg2, "all")) {
-      extract_script(g, room, WLD_TRIGGER);
+      extract_script(g, room);
       send_to_char(g, ch, "All triggers removed from room.\r\n");
     } else if (remove_trigger(g, room_get_script(room), arg2.data())) {
       send_to_char(g, ch, "Trigger removed.\r\n");
       if (!room_get_script(room)->trig_list) {
-        extract_script(g, room, WLD_TRIGGER);
+        extract_script(g, room);
       }
     } else
       send_to_char(g, ch, "That trigger was not found.\r\n");
@@ -498,14 +498,14 @@ ACMD(do_detach)
         send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
       } else if (trigger && str_eq_nocase(*trigger, "all")) {
-        extract_script(g, victim, MOB_TRIGGER);
+        extract_script(g, victim);
         send_to_char(g, ch, "All triggers removed from {}.\r\n", char_get_sdesc(victim));
       }
 
       else if (trigger && remove_trigger(g, char_get_script(victim), trigger->data())) {
         send_to_char(g, ch, "Trigger removed.\r\n");
         if (!char_get_script(victim)->trig_list) {
-          extract_script(g, victim, MOB_TRIGGER);
+          extract_script(g, victim);
         }
       } else
         send_to_char(g, ch, "That trigger was not found.\r\n");
@@ -519,7 +519,7 @@ ACMD(do_detach)
         send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
       } else if (trigger && str_eq_nocase(*trigger, "all")) {
-        extract_script(g, object, OBJ_TRIGGER);
+        extract_script(g, object);
         send_to_char(g, ch, "All triggers removed from {}.\r\n",
                      obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object));
       }
@@ -527,7 +527,7 @@ ACMD(do_detach)
       else if (trigger && remove_trigger(g, obj_get_script(object), trigger->data())) {
         send_to_char(g, ch, "Trigger removed.\r\n");
         if (!obj_get_script(object)->trig_list) {
-          extract_script(g, object, OBJ_TRIGGER);
+          extract_script(g, object);
         }
       } else
         send_to_char(g, ch, "That trigger was not found.\r\n");
