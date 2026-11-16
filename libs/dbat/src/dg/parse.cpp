@@ -59,6 +59,9 @@ private:
                       p_.lines[open_.back().line].number);
   }
 
+  /* The expression after an if, elseif, while or switch: read as written, before any substitution */
+  static expression condition(const line &l) { return compile_expression(l.tail(), max_expression_depth); }
+
   bool innermost_is(keyword kw) const { return !open_.empty() && open_.back().kw == kw; }
 
   bool in_loop_or_switch() const
@@ -122,7 +125,7 @@ private:
         case keyword::blank: /* quirk: runs as an empty command, which stands a stunned mob up */
         case keyword::command:
           check_wait(l);
-          body.push_back({command_node{at_++}});
+          body.push_back({command_node{at_++, compile_template(l.body())}});
           break;
         case keyword::if_:
           body.push_back({parse_if()});
@@ -152,7 +155,7 @@ private:
         case keyword::case_:
         case keyword::default_:
           if (switch_of && innermost_is(keyword::switch_))
-            switch_of->labels.push_back({at_, l.kw == keyword::default_, body.size()});
+            switch_of->labels.push_back({at_, l.kw == keyword::default_, std::string(l.tail()), body.size()});
           else
             error(at_, str_format("'{}' outside a switch's own lines", keyword_name(l.kw)));
           at_++;
@@ -185,7 +188,8 @@ private:
 
     open_.push_back({keyword::if_, opened});
     for (bool tests = true;; tests = here().kw == keyword::elseif_) {
-      if_node::branch b{at_++, tests, {}};
+      if_node::branch b{at_, tests, tests ? condition(here()) : expression{}, {}};
+      at_++;
       b.body = parse_block(nullptr);
       n.branches.push_back(std::move(b));
       if (!closed(opened))
@@ -203,7 +207,8 @@ private:
   {
     while_node n;
 
-    n.line = at_;
+    n.line      = at_;
+    n.condition = condition(here());
     open_.push_back({keyword::while_, at_++});
     n.body = parse_block(nullptr);
     if (closed(n.line))
@@ -216,7 +221,8 @@ private:
   {
     switch_node n;
 
-    n.line = at_;
+    n.line    = at_;
+    n.subject = condition(here());
     open_.push_back({keyword::switch_, at_++});
     n.body = parse_block(&n);
     if (closed(n.line))

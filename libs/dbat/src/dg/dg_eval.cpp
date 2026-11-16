@@ -1,6 +1,5 @@
 /*
- * DG Scripts: evaluating script expressions and conditions.
- * Split out of dg_scripts.c.
+ * DG Scripts: working out expressions, compiled by dg/expr.cpp, and conditions.
  */
 #include <cstdlib>
 
@@ -9,17 +8,11 @@
 
 #include "dg_internal.hpp"
 
-/* Local functions not used elsewhere */
-static bool is_num(char *arg);
-static std::string eval_op(const char *op, std::string lhs_text, std::string rhs_text);
-static char *matching_paren(char *p);
-constexpr int MAX_EVAL_DEPTH = 200;
-static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result, owner_ptr go, struct script_data *sc,
-                            trig_data *trig);
+constexpr int MAX_EVAL_DEPTH = dg::max_expression_depth;
 
 /* returns 1 if string is all digits, else 0 */
 /* bugfixed - would have returned true on num="------" */
-static bool is_num(char *arg)
+static bool is_num(const char *arg)
 {
   if (*arg == '\0')
     return false;
@@ -65,7 +58,7 @@ static long long wrap_div(long long a, long long b)
 }
 
 /* evaluates 'lhs op rhs' */
-static std::string eval_op(const char *op, std::string lhs_text, std::string rhs_text)
+static std::string eval_op(std::string_view op, std::string lhs_text, std::string rhs_text)
 {
   char *lhs = lhs_text.data(), *rhs = rhs_text.data();
   std::string result; /* a number, or 0 or 1 */
@@ -84,78 +77,78 @@ static std::string eval_op(const char *op, std::string lhs_text, std::string rhs
     *--p = '\0';
 
   /* find the op, and figure out the value */
-  if (!strcmp("||", op)) {
+  if (op == "||") {
     if ((!*lhs || (*lhs == '0')) && (!*rhs || (*rhs == '0')))
       result = "0";
     else
       result = "1";
   }
 
-  else if (!strcmp("&&", op)) {
+  else if (op == "&&") {
     if (!*lhs || (*lhs == '0') || !*rhs || (*rhs == '0'))
       result = "0";
     else
       result = "1";
   }
 
-  else if (!strcmp("==", op)) {
+  else if (op == "==") {
     if (is_num(lhs) && is_num(rhs))
       result = str_format("{:d}", atoll(lhs) == atoll(rhs));
     else
       result = str_format("{:d}", !strcasecmp(lhs, rhs));
   }
 
-  else if (!strcmp("!=", op)) {
+  else if (op == "!=") {
     if (is_num(lhs) && is_num(rhs))
       result = str_format("{:d}", atoll(lhs) != atoll(rhs));
     else
       result = str_format("{:d}", strcasecmp(lhs, rhs));
   }
 
-  else if (!strcmp("<=", op)) {
+  else if (op == "<=") {
     if (is_num(lhs) && is_num(rhs))
       result = str_format("{:d}", atoll(lhs) <= atoll(rhs));
     else
       result = str_format("{:d}", strcasecmp(lhs, rhs) <= 0);
   }
 
-  else if (!strcmp(">=", op)) {
+  else if (op == ">=") {
     if (is_num(lhs) && is_num(rhs))
       result = str_format("{:d}", atoll(lhs) >= atoll(rhs));
     else
       result = str_format("{:d}", strcasecmp(lhs, rhs) >= 0);
   }
 
-  else if (!strcmp("<", op)) {
+  else if (op == "<") {
     if (is_num(lhs) && is_num(rhs))
       result = str_format("{:d}", atoll(lhs) < atoll(rhs));
     else
       result = str_format("{:d}", strcasecmp(lhs, rhs) < 0);
   }
 
-  else if (!strcmp(">", op)) {
+  else if (op == ">") {
     if (is_num(lhs) && is_num(rhs))
       result = str_format("{:d}", atoll(lhs) > atoll(rhs));
     else
       result = str_format("{:d}", strcasecmp(lhs, rhs) > 0);
   }
 
-  else if (!strcmp("/=", op))
+  else if (op == "/=")
     result = str_str(lhs, rhs) ? "1" : "0";
 
-  else if (!strcmp("*", op))
+  else if (op == "*")
     result = str_format("{:d}", wrap_mul(atoll(lhs), atoll(rhs)));
 
-  else if (!strcmp("/", op))
+  else if (op == "/")
     result = str_format("{:d}", wrap_div(atoll(lhs), atoll(rhs)));
 
-  else if (!strcmp("+", op))
+  else if (op == "+")
     result = str_format("{:d}", wrap_add(atoll(lhs), atoll(rhs)));
 
-  else if (!strcmp("-", op))
+  else if (op == "-")
     result = str_format("{:d}", wrap_sub(atoll(lhs), atoll(rhs)));
 
-  else if (!strcmp("!", op)) {
+  else if (op == "!") {
     if (is_num(rhs))
       result = str_format("{:d}", !atoll(rhs));
     else
@@ -167,64 +160,10 @@ static std::string eval_op(const char *op, std::string lhs_text, std::string rhs
   return result;
 }
 
-/*
- * p points to the first quote, returns the matching
- * end quote, or the last non-null char in p.
-*/
-char *matching_quote(char *p)
-{
-  for (p++; *p && (*p != '"'); p++) {
-    if (*p == '\\')
-      p++;
-  }
-
-  if (!*p)
-    p--;
-
-  return p;
-}
-
-/*
- * p points to the first paren.  returns a pointer to the
- * matching closing paren, or the last non-null char in p.
- */
-static char *matching_paren(char *p)
-{
-  int i;
-
-  for (p++, i = 1; *p && i; p++) {
-    if (*p == '(')
-      i++;
-    else if (*p == ')')
-      i--;
-    else if (*p == '"')
-      p = matching_quote(p);
-  }
-
-  return --p;
-}
-
-/* where the part of an expression starting at p ends */
-static char *next_token(char *p)
-{
-  if (*p == '(')
-    return matching_paren(p) + 1;
-  if (*p == '"')
-    return matching_quote(p) + 1;
-  if (isalnum(*p)) {
-    for (p++; *p && (isalnum(*p) || isspace(*p)); p++);
-    return p;
-  }
-  return p + 1;
-}
-
-/* evaluates line */
-std::string eval_expr(GameWorld *g, const char *line, owner_ptr go, struct script_data *sc, trig_data *trig)
+/* Works out e: an operator's two sides in order, then the operator */
+std::string evaluate(GameWorld *g, const dg::expression &e, owner_ptr go, struct script_data *sc, trig_data *trig)
 {
   std::string result;
-
-  while (*line && isspace(*line))
-    line++;
 
   /* each operator or bracket goes one deeper; real scripts reach about 40, and the stack is finite */
   if (g->dg_eval_depth >= MAX_EVAL_DEPTH) {
@@ -233,91 +172,40 @@ std::string eval_expr(GameWorld *g, const char *line, owner_ptr go, struct scrip
   }
   g->dg_eval_depth++;
 
-  if (eval_lhs_op_rhs(g, line, result, go, sc, trig))
-    ;
-
-  else if (*line == '(') {
-    std::string expr = line;
-    char *p          = matching_paren(expr.data());
-    *p               = '\0';
-    result           = eval_expr(g, expr.c_str() + 1, go, sc, trig);
+  switch (e.what) {
+    case dg::expression::kind::op: {
+      std::string lhs = evaluate(g, e.operands[0], go, sc, trig);
+      std::string rhs = evaluate(g, e.operands[1], go, sc, trig);
+      result          = eval_op(e.op, lhs, rhs);
+      break;
+    }
+    case dg::expression::kind::group:
+      result = evaluate(g, e.operands[0], go, sc, trig);
+      break;
+    case dg::expression::kind::text:
+      result = render(g, e.text, go, sc, trig);
+      break;
   }
-
-  else
-    result = var_subst(g, go, sc, trig, line);
 
   g->dg_eval_depth--;
   return result;
 }
 
-/*
- * evaluates expr if it is in the form lhs op rhs, and copies
- * answer in result.  returns 1 if expr is evaluated, else 0
- */
-static bool eval_lhs_op_rhs(GameWorld *g, const char *expr, std::string &result, owner_ptr go, struct script_data *sc,
-                            trig_data *trig)
+std::string eval_expr(GameWorld *g, std::string_view text, owner_ptr go, struct script_data *sc, trig_data *trig)
 {
-  char *p;
-  int i;
-
-  /*
-   * valid operands, in order of priority
-   * each must also be defined in eval_op()
-   */
-  static const char *ops[] = {
-      "||",
-      "&&",
-      "==",
-      "!=",
-      "<=",
-      ">=",
-      "<",
-      ">",
-      "/=",
-      "-",
-      "+",
-      "/",
-      "*",
-      "!",
-      "\n"};
-
-  std::string line = expr; /* cut in two at the operator */
-
-  /* the places in line where an op could possibly occur */
-  for (i = 0; *ops[i] != '\n'; i++)
-    for (p = line.data(); *p; p = next_token(p))
-      if (!strncasecmp(ops[i], p, strlen(ops[i]))) {
-        *p = '\0';
-        p += strlen(ops[i]);
-
-        std::string lhr = eval_expr(g, line.c_str(), go, sc, trig);
-        std::string rhr = eval_expr(g, p, go, sc, trig);
-        result          = eval_op(ops[i], lhr, rhr);
-        return true;
-      }
-
-  return false;
+  return evaluate(g, dg::compile_expression(text, MAX_EVAL_DEPTH), go, sc, trig);
 }
 
-/* returns 1 if cond is true, else 0 */
-bool process_if(GameWorld *g, const char *cond, owner_ptr go, struct script_data *sc,
-                trig_data *trig)
+/* Whether a condition's value counts as true: anything but nothing or a leading 0 */
+bool is_true(std::string_view value)
 {
-  std::string result = eval_expr(g, cond, go, sc, trig);
-  const char *p      = result.c_str();
-
-  while (isspace(*p))
-    p++;
-
-  if (!*p || *p == '0')
-    return false;
-  else
-    return true;
+  while (!value.empty() && isspace(static_cast<unsigned char>(value.front())))
+    value.remove_prefix(1);
+  return !value.empty() && value.front() != '0';
 }
 
 /* quirk: the value is compared as written, without substituting its variables */
-bool case_matches(const std::string &subject, const char *value)
+bool case_matches(const std::string &subject, std::string_view value)
 {
-  std::string match = eval_op("==", subject, value);
-  return !match.empty() && match[0] != '0';
+  return is_true(eval_op("==", subject, std::string(value)));
 }

@@ -80,7 +80,7 @@ private:
 
   const dg::line &line(size_t at) const { return prog_->lines[at]; }
   void at(size_t l) { dg_ctx_set_line(g_, line(l)); }
-  bool test(size_t l) { return process_if(g_, line(l).tail(), go_, sc_, trig_); }
+  bool test(const dg::expression &condition) { return is_true(evaluate(g_, condition, go_, sc_, trig_)); }
   void enter(dg::block_role role, const dg::block &body, size_t next, const dg::node &of)
   {
     trig_->run.frames.push_back({role, &body, next, &of});
@@ -107,7 +107,7 @@ private:
     const dg::while_node &w = std::get<dg::while_node>(f.of->what);
     size_t depth            = frames.size() - 1; /* f may move while the condition runs */
     at(w.done);
-    if (!test(w.line)) {
+    if (!test(w.condition)) {
       frames.pop_back();
       return {};
     }
@@ -128,7 +128,7 @@ private:
   std::optional<outcome> step(const dg::node &, const dg::command_node &c)
   {
     at(c.line);
-    std::string cmd = var_subst(g_, go_, sc_, trig_, line(c.line).body().data());
+    std::string cmd = render(g_, c.command, go_, sc_, trig_);
     command_call call{g_, go_, sc_, trig_, cmd.data(), c.line, ret_val_, owner_gone_};
 
     switch (run_command(call)) {
@@ -159,7 +159,7 @@ private:
   {
     for (const dg::if_node::branch &b : i.branches) {
       at(b.line);
-      if (!b.tests || test(b.line)) {
+      if (!b.tests || test(b.condition)) {
         enter(dg::block_role::branch, b.body, 0, n);
         break;
       }
@@ -170,7 +170,7 @@ private:
   std::optional<outcome> step(const dg::node &n, const dg::while_node &w)
   {
     at(w.line);
-    if (test(w.line))
+    if (test(w.condition))
       enter(dg::block_role::loop, w.body, 0, n);
     else
       passes_ = 0; /* quirk: only here, and not when a loop ends at its done */
@@ -180,9 +180,9 @@ private:
   std::optional<outcome> step(const dg::node &n, const dg::switch_node &s)
   {
     at(s.line);
-    std::string subject = eval_expr(g_, line(s.line).tail(), go_, sc_, trig_);
+    std::string subject = evaluate(g_, s.subject, go_, sc_, trig_);
     for (const dg::switch_node::label &l : s.labels)
-      if (l.is_default || case_matches(subject, line(l.line).tail())) {
+      if (l.is_default || case_matches(subject, l.value)) {
         enter(dg::block_role::cases, s.body, l.at, n);
         break;
       }

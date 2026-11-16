@@ -16,6 +16,8 @@
 #include <variant>
 #include <vector>
 
+#include "dbat/dg/expr.hpp"
+
 namespace dg {
 
 /* What a line is, read by the strict grammar: a keyword is the line's whole first word, in any case, ending at a
@@ -50,8 +52,8 @@ struct line {
   std::string_view body() const { return std::string_view(text).substr(indent); }
   /* For a keyword, what follows it, without the spaces either side */
   std::string_view argument() const;
-  /* For a keyword, what follows it, to the end of the line: a C string, as the expression code reads it */
-  const char *tail() const { return text.c_str() + arg; }
+  /* For a keyword, what follows it, to the end of the line, as the expression code reads it */
+  std::string_view tail() const { return std::string_view(text).substr(arg); }
 };
 
 /* The tree. Each node names its line by its index in program::lines. */
@@ -61,6 +63,7 @@ using block = std::vector<node>;
 /* A line that runs: a DG command or the owner's own, after substitution */
 struct command_node {
   size_t line{};
+  text_template command; /* the line without its indentation */
 };
 
 /* if, any elseifs and elses, end. A branch without a condition is an else; the first one ends the choosing, so
@@ -69,6 +72,7 @@ struct if_node {
   struct branch {
     size_t line{};
     bool tests{}; /* false for else */
+    expression condition;
     block body;
   };
   std::vector<branch> branches{};
@@ -77,6 +81,7 @@ struct if_node {
 
 struct while_node {
   size_t line{};
+  expression condition;
   block body;
   size_t done{}; /* the 'done' line, where the condition is tested again */
 };
@@ -87,9 +92,11 @@ struct switch_node {
   struct label {
     size_t line{};
     bool is_default{};
-    size_t at{}; /* the body's node after the label */
+    std::string value; /* a case's, as written: it is never substituted (quirk) */
+    size_t at{};       /* the body's node after the label */
   };
   size_t line{};
+  expression subject;
   block body;
   std::vector<label> labels{};
   size_t done{};

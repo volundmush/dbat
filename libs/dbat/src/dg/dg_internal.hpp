@@ -5,6 +5,7 @@
  * Not part of the public interface (that is dbat/dg_scripts.hpp).
  */
 #include "dbat/dg_scripts.hpp"
+#include "dbat/dg/expr.hpp"
 
 /* dg_handler.c */
 struct script_data **script_slot(owner_ptr go);
@@ -46,10 +47,18 @@ void dg_ctx_set_line(GameWorld *g, const dg::line &l);
 room_data *find_room(GameWorld *g, long n);
 
 /* dg_eval.c */
-std::string eval_expr(GameWorld *g, const char *line, owner_ptr go, struct script_data *sc, trig_data *trig);
-bool process_if(GameWorld *g, const char *cond, owner_ptr go, struct script_data *sc, trig_data *trig);
+/* What e works out to */
+std::string evaluate(GameWorld *g, const dg::expression &e, owner_ptr go, struct script_data *sc, trig_data *trig);
+/* What text, read as an expression when the script runs, works out to */
+std::string eval_expr(GameWorld *g, std::string_view text, owner_ptr go, struct script_data *sc, trig_data *trig);
+/* Whether a condition's value counts as true */
+bool is_true(std::string_view value);
 /* Whether a case label's value, as written, matches the switch's subject */
-bool case_matches(const std::string &subject, const char *value);
+bool case_matches(const std::string &subject, std::string_view value);
+
+/* dg_variables.c */
+/* t with its variables' values */
+std::string render(GameWorld *g, const dg::text_template &t, owner_ptr go, struct script_data *sc, trig_data *trig);
 
 /* dg_wizcmd.c */
 bool remove_trigger(GameWorld *g, struct script_data *sc, char *name);

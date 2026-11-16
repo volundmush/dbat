@@ -30,6 +30,8 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
+#include "dg_internal.hpp"
+
 /* Utility functions */
 
 /*
@@ -1501,106 +1503,49 @@ in the vault (vnum: 453) now and then. you can just use
   }
 }
 
-/*
- * Now automatically checks if the variable has more then one field
- * in it. And if the field returns a name or a script UID or the like
- * it can recurse.
- * If you supply a value like, %actor.int.str% it wont blow up on you
- * either.
- * - Jamie Nelson 31st Oct 2003 01:03
- *
- * Now also lets subfields have variables parsed inside of them
- * so that:
- * %echo% %actor.gold(%actor.gold%)%
- * will double the actors gold every time its called.  etc...
- * - Jamie Nelson 31st Oct 2003 01:24
- */
-
-/* Substitutes the variables into line, up to the length of a command line. The scan cuts up a copy of the line. */
-std::string var_subst(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, const char *line)
+/* The value of the variable r names, looking up a chain (%x.y.z%) a link at a time; see dbat/dg/expr.hpp */
+static std::string look_up(GameWorld *g, const dg::var_ref &r, owner_ptr go, struct script_data *sc, trig_data *trig)
 {
-  constexpr size_t max_len = MAX_INPUT_LENGTH - 1; /* what fits a command line */
-  std::string out, repl_str, subfield;
-  char *var = nullptr, *field = nullptr, *p = nullptr;
-  char tmpvr[]    = "tmpvr"; /* what a chained field (%x.y.z%) goes on looking at */
-  int paren_count = 0;
-  int dots        = 0;
+  std::string var = r.name, field = r.field, value;
 
-  /* skip out if no %'s */
-  if (!strchr(line, '%')) {
-    out = line;
-    if (out.size() > max_len)
-      out.resize(max_len);
-    return out;
+  for (const dg::var_ref::link &link : r.chain) {
+    std::string subfield = link.subfield_so_far;
+    find_replacement(g, go, sc, trig, owner_type(go), var.data(), field.data(), subfield.data(), value);
+    if (value.empty())
+      continue;
+    std::string eval = "eval tmpvr " + value; /* quirk: the value is worked out as an expression */
+    process_eval(g, go, sc, trig, eval.data());
+    var   = "tmpvr";
+    field = link.next_field;
   }
 
-  std::string tmp = line;
-  tmp.push_back('\0'); /* an unclosed %variable leaves the scan one past the end of the line */
-  p = tmp.data();
+  /* Now also lets subfields have variables parsed inside of them, so that %actor.gold(%actor.gold%)% will double
+     the actor's gold every time it's called. - Jamie Nelson 31st Oct 2003 */
+  std::string subfield = render(g, r.subfield, go, sc, trig);
+  find_replacement(g, go, sc, trig, owner_type(go), var.data(), field.data(), subfield.data(), value);
+  return value;
+}
 
-  while (*p && out.size() < max_len) {
+/* t with its variables' values, up to the length of a command line: once that is full, nothing more is looked up */
+std::string render(GameWorld *g, const dg::text_template &t, owner_ptr go, struct script_data *sc, trig_data *trig)
+{
+  constexpr size_t max_len = MAX_INPUT_LENGTH - 1;
+  std::string out;
 
-    /* copy until we find the first % */
-    while (*p && (*p != '%') && out.size() < max_len)
-      out += *(p++);
-
-    /* double % */
-    if (*p && (*(++p) == '%') && out.size() < max_len) {
-      out += *(p++);
-      continue;
-    }
-
-    /* so it wasn't double %'s */
-    else if (*p && out.size() < max_len) {
-
-      /* each variable starts with an empty subfield */
-      subfield.clear();
-
-      /* search until end of var or beginning of field */
-      for (var = p; *p && (*p != '%') && (*p != '.'); p++);
-
-      field = p;
-      if (*p == '.') {
-        *(p++) = '\0';
-        dots   = 0;
-        for (field = p; *p && ((*p != '%') || (paren_count > 0) || (dots)); p++) {
-          if (dots > 0) {
-            find_replacement(g, go, sc, trig, owner_type(go), var, field, subfield.data(), repl_str);
-            if (!repl_str.empty()) {
-              std::string tmp2 = "eval tmpvr " + repl_str; /* temp var */
-              process_eval(g, go, sc, trig, tmp2.data());
-              var   = tmpvr; /* not written over the name, which may be shorter and run into the next field */
-              field = p;
-              dots  = 0;
-              continue;
-            }
-            dots = 0;
-          } else if (*p == '(') {
-            *p = '\0';
-            paren_count++;
-          } else if (*p == ')') {
-            *p = '\0';
-            paren_count--;
-          } else if (paren_count > 0) {
-            subfield += *p;
-          } else if (*p == '.') {
-            *p = '\0';
-            dots++;
-          }
-        } /* for (field.. */
-      } /* if *p == '.' */
-
-      *(p++) = '\0';
-
-      if (!subfield.empty())
-        subfield = var_subst(g, go, sc, trig, subfield.c_str());
-
-      find_replacement(g, go, sc, trig, owner_type(go), var, field, subfield.data(), repl_str);
-
-      out += repl_str;
-    } /* else if *p .. */
-  } /* while *p .. */
+  for (const dg::template_piece &piece : t.pieces) {
+    if (out.size() >= max_len)
+      break;
+    if (const std::string *text = std::get_if<std::string>(&piece.what))
+      out.append(*text, 0, max_len - out.size());
+    else
+      out += look_up(g, std::get<dg::var_ref>(piece.what), go, sc, trig);
+  }
   if (out.size() > max_len)
     out.resize(max_len);
   return out;
+}
+
+std::string var_subst(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view text)
+{
+  return render(g, dg::compile_template(text), go, sc, trig);
 }

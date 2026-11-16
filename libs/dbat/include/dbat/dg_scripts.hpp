@@ -221,7 +221,6 @@ void script_log(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
 {
   script_log(g, str_format(fmt, std::forward<Args>(args)...));
 }
-char *matching_quote(char *p);
 struct room_data *dg_room_of_obj(GameWorld *g, struct obj_data *obj);
 void obj_command_interpreter(GameWorld *g, obj_data *obj, char *argument);
 void wld_command_interpreter(GameWorld *g, room_data *room, char *argument);
@@ -255,7 +254,8 @@ void assign_triggers(GameWorld *g, owner_ptr i);
 void add_var(dg::var_store &vars, std::string_view name, std::string_view value, long id);
 void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context);
 void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context);
-std::string var_subst(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, const char *line);
+/* text with its variables' values, compiled and substituted as a command line is */
+std::string var_subst(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view text);
 
 /* From dg_handler.c */
 struct script_data *dg_ensure_script(struct script_data **slot);

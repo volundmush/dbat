@@ -17,6 +17,7 @@
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
+#include "dbat/dg/expr.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/handler.hpp"
@@ -47,7 +48,7 @@ static char *one_phrase(char *arg, char *first_arg)
   else if (*arg == '"') {
     char *p, c;
 
-    p  = matching_quote(arg);
+    p  = arg + dg::matching_quote(arg, 0);
     c  = *p;
     *p = '\0';
     strcpy(first_arg, arg + 1);

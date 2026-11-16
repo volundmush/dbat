@@ -1652,6 +1652,117 @@ static void check_lexer_reads_keywords_strictly(void)
 }
 
 /* The parser builds the tree a script's blocks make, and refuses a script whose blocks don't fit, saying where */
+/* A template written out, to compare: text as it is, and each variable as {name|field|>next field:subfield so
+   far|(subfield)} */
+static std::string describe(const dg::text_template &t)
+{
+  std::string out;
+  for (const dg::template_piece &piece : t.pieces) {
+    if (const std::string *text = std::get_if<std::string>(&piece.what)) {
+      out += *text;
+      continue;
+    }
+    const dg::var_ref &r = std::get<dg::var_ref>(piece.what);
+    out += "{" + r.name;
+    if (!r.field.empty() || !r.chain.empty())
+      out += "|" + r.field;
+    for (const dg::var_ref::link &l : r.chain)
+      out += "|>" + l.next_field + (l.subfield_so_far.empty() ? "" : ":" + l.subfield_so_far);
+    if (!r.subfield.pieces.empty())
+      out += "|(" + describe(r.subfield) + ")";
+    out += "}";
+  }
+  return out;
+}
+
+/* An expression written out: (lhs op rhs), [bracketed], or its text */
+static std::string describe(const dg::expression &e)
+{
+  switch (e.what) {
+    case dg::expression::kind::op:
+      return "(" + describe(e.operands[0]) + e.op + describe(e.operands[1]) + ")";
+    case dg::expression::kind::group:
+      return "[" + describe(e.operands[0]) + "]";
+    case dg::expression::kind::text:
+      break;
+  }
+  return describe(e.text);
+}
+
+/* Templates and expressions compile to what the old engine's scan of the text found, quirks and all */
+static void check_scripts_compile_as_the_old_scan_read_them(void)
+{
+  static const struct {
+    const char *text, *want;
+  } templates[] = {
+      {"say %%hi%% %actor.name%!", "say %hi% {actor|name}!"},
+      {"%x.y.z%", "{x|y|>z}"},
+      {"%a.b(1).c(2)%", "{a|b|>c:1|(12)}"},         /* the subfields run together */
+      {"%a.b(x% and %c%", "{a|b|(x{ and }c)}"},       /* an unclosed bracket takes the rest of the line */
+      {"%a.%", "{a}"},
+      {"100%", "100"},                                /* a lone % at the end is dropped */
+      {"%x", "{x}"},                                  /* a variable left open runs to the end */
+      {"%a.b.%c%", "{a|b|>%c}"},                      /* the character after a '.' is never looked at */
+  };
+  for (const auto &t : templates)
+    CHECK(describe(dg::compile_template(t.text)) == t.want);
+
+  static const struct {
+    const char *text, *want;
+  } expressions[] = {
+      {"1 + 2 * 3", "(1 +(2 *3))"},
+      {"(a == b) && c", "([(a ==b)]&&c)"},
+      {"\"a-b\" - 1", "(\"a-b\" -1)"},
+      {"x y-1", "(x y-1)"},
+      {"-5 + 3", "(-(5 +3))"},
+      {"(1", "[]"},                  /* without a ')', the last character goes as though it were one */
+      {"(1) junk", "[1]"},           /* and after one, the rest is ignored */
+      {"!%x%", "(!{x})"},
+      {"\"ab\\", "\"ab\\"},          /* a quote ending in a backslash stops at the end of the text */
+  };
+  for (const auto &e : expressions)
+    CHECK(describe(dg::compile_expression(e.text, dg::max_expression_depth)) == e.want);
+
+  /* nested past the limit, what is left is never compiled */
+  std::string deep = std::string(300, '(') + "1" + std::string(300, ')');
+  const dg::expression *e = nullptr;
+  dg::expression top      = dg::compile_expression(deep, dg::max_expression_depth);
+  int depth               = 0;
+  for (e = &top; e->what == dg::expression::kind::group; e = &e->operands[0])
+    depth++;
+  CHECK(depth == dg::max_expression_depth && e->text.pieces.empty());
+}
+
+/* Once a line is as long as a command can be, nothing more is looked up in it */
+static void check_substituting_stops_at_the_longest_line(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *mob = read_mobile(g, 300);
+  trig_data with{}, full{};
+
+  char_to_room(g, mob, 300);
+  for (trig_data *t : {&with, &full}) {
+    add_char_uid_var(t, "actor", mob, 0);
+    add_var(t->var_list, "big", std::string(MAX_INPUT_LENGTH, 'x'), 0);
+  }
+  var_subst(g, mob, nullptr, &with, "%actor.name.car%");
+  CHECK(with.var_list.find("tmpvr")); /* the chain worked out the name into tmpvr */
+  CHECK(var_subst(g, mob, nullptr, &full, "%big%%actor.name.car%").size() == (size_t)MAX_INPUT_LENGTH - 1);
+  CHECK(!full.var_list.find("tmpvr"));
+  CHECK(var_subst(g, mob, nullptr, &full, "%big%%big%") == std::string(MAX_INPUT_LENGTH - 1, 'x'));
+  th_shutdown(g);
+}
+
+/* eval reads its expression after the line is substituted, so a variable can hold an operator */
+static void check_eval_reads_its_line_after_substitution(void)
+{
+  struct char_data *ch;
+  GameWorld *g = run_script("set op +\neval x 2 %op% 3\n%echo% x=%x%.", &ch);
+
+  CHECK(saw(ch, "X=5."));
+  th_shutdown(g);
+}
+
 static void check_parser_refuses_misplaced_keywords(void)
 {
   auto good = dg::lex("if 1\n  say a\nelseif 2\nelse\nend\nwhile 1\n  break\ndone\n"
@@ -2014,6 +2125,9 @@ static const struct {
     {"attached_trigger_shows_with_room_flags",      check_attached_trigger_shows_with_room_flags     },
     {"lexer_reads_keywords_strictly",               check_lexer_reads_keywords_strictly              },
     {"parser_refuses_misplaced_keywords",           check_parser_refuses_misplaced_keywords          },
+    {"scripts_compile_as_the_old_scan_read_them",   check_scripts_compile_as_the_old_scan_read_them  },
+    {"substituting_stops_at_the_longest_line",      check_substituting_stops_at_the_longest_line     },
+    {"eval_reads_its_line_after_substitution",      check_eval_reads_its_line_after_substitution     },
     {"variable_left_open_at_the_end",               check_variable_left_open_at_the_end              },
     {"wait_too_long_to_count",                      check_wait_too_long_to_count                     },
     {"wait_until_no_time",                          check_wait_until_no_time                         },
