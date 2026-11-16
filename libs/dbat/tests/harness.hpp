@@ -3,6 +3,7 @@
 /* Runs a whole game inside a test: no sockets, no real data/ files. */
 #include <ctime>
 #include <string>
+#include <string_view>
 
 #include "dbat/consts/types.hpp"
 
@@ -83,6 +84,11 @@ void th_type(GameWorld *g, struct char_data *ch, const char *line);
 void th_type_at(GameWorld *g, struct descriptor_data *d, const char *line);
 
 /* Everything sent to ch since the last call to th_take_output. */
+/* A script error's context ("[trig #...]") as " [trig ...]": each engine writes it its own way, so comparisons
+   between builds leave it out */
+std::string th_mask_script_context(std::string_view text);
+void th_mask_script_context(struct descriptor_data *d);
+/* What ch has been sent since it was last taken, its script errors' context masked */
 const char *th_output(struct char_data *ch);
 void th_take_output(GameWorld *g, struct char_data *ch);
 void th_take_output_at(GameWorld *g, struct descriptor_data *d);

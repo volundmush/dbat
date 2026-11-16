@@ -329,8 +329,46 @@ void th_type_at(GameWorld *g, struct descriptor_data *d, const char *line)
   game_process_commands(g);
 }
 
+std::string th_mask_script_context(std::string_view text)
+{
+  static constexpr std::string_view mark = " [trig #", masked = " [trig ...]";
+  std::string out;
+
+  for (size_t at = 0;;) {
+    size_t found = text.find(mark, at);
+    if (found == std::string_view::npos) {
+      out += text.substr(at);
+      return out;
+    }
+    size_t line_end = text.find('\n', found);
+    if (line_end == std::string_view::npos)
+      line_end = text.size();
+    if (line_end > found && text[line_end - 1] == '\r')
+      line_end--;
+    /* a builder's copy is wrapped in "[ ... ]", which stays */
+    size_t wrapper = text.substr(0, line_end).rfind(" ]");
+    size_t end     = wrapper != std::string_view::npos && wrapper > found ? wrapper : line_end;
+    out += text.substr(at, found - at);
+    out += masked;
+    at = end;
+  }
+}
+
+void th_mask_script_context(struct descriptor_data *d)
+{
+  if (!strstr(d->output, " [trig #"))
+    return;
+  size_t length       = strlen(d->output);
+  std::string masked = th_mask_script_context(std::string_view(d->output, length));
+  /* never longer than what it masks */
+  memcpy(d->output, masked.c_str(), masked.size() + 1);
+  d->bufspace += (int)(length - masked.size());
+  d->bufptr -= (int)(length - masked.size());
+}
+
 const char *th_output(struct char_data *ch)
 {
+  th_mask_script_context(char_get_desc(ch));
   return char_get_desc(ch)->output;
 }
 

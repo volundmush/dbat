@@ -73,7 +73,8 @@ def main():
     args = parser.parse_args()
 
     files = sorted(os.path.relpath(p, LIB) for p in glob.glob(os.path.join(LIB, 'src', '**', '*.cpp'), recursive=True))
-    with multiprocessing.get_context('fork').Pool(min(os.cpu_count() or 1, 24)) as pool:
+    # each worker holds a clang JSON dump of about a GB, parsed into about 6 GB, so only two at once
+    with multiprocessing.get_context("fork").Pool(min(os.cpu_count() or 1, 2)) as pool:
         rows = [row for result in pool.imap_unordered(scan, files, chunksize=2) for row in result]
 
     totals = collections.Counter(row[1] for row in rows)

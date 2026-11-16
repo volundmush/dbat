@@ -126,6 +126,7 @@ std::shared_ptr<const program> lex(std::string_view script, std::string_view if_
     classify(l);
     made->lines.push_back(std::move(l));
   }
+  parse(*made);
   return made;
 }
 

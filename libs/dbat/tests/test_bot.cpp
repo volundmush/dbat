@@ -258,10 +258,13 @@ static void take_all_output(GameWorld *g)
 {
   forget_closed_connections(g);
   for (int i = 0; i < num_connections; i++)
-    if (connections[i].peer >= 0)
+    if (connections[i].peer >= 0) {
+      th_mask_script_context(connections[i].d);
       send_real_output(g, &connections[i]);
+    }
 
   for (descriptor_data *d : each_desc(g)) {
+    th_mask_script_context(d);
     fingerprint_bytes(d->output, strlen(d->output));
     th_take_output_at(g, d);
   }

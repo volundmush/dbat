@@ -146,7 +146,6 @@ wait until 1430
 wait until 5
 %echo% after wait until 5
 wait
-wait until x
 wait 5 x
 wait -3
 wait 99999999999999999999 t
@@ -851,5 +850,97 @@ global self from an object~
 makeuid m mob dummy
 attach 405 %m.id%
 %echo% self through a mob's globals: [%m.global(self)%] mine: [%self%]
+~
+#461
+a wait whose time is a variable it can't read~
+0 g 100
+~
+set t abc
+wait %t%
+%echo% not after an unreadable wait
+~
+#462
+a written wait it can't read~
+0 g 100
+~
+%echo% never runs
+wait until x
+~
+#463
+an empty wait from a variable~
+0 g 100
+~
+wait %nothing%
+%echo% not after an empty wait
+~
+#464
+control flow corners~
+0 g 100
+~
+if 0
+  %echo% not here
+else
+  %echo% first else
+else
+  %echo% second else never runs
+elseif 1
+  %echo% nor this
+end
+    
+set i 0
+while 1
+  eval i %i% + 1
+  if %i% > 3
+    break
+  end
+done
+%echo% broke out at %i%
+switch b
+  default
+    %echo% default first
+  case b
+    %echo% case b after default
+    break
+done
+switch c
+  case a
+    %echo% not a
+  case c
+    %echo% c falls
+  default
+    %echo% through default
+  case d
+    %echo% and on into d
+done
+switch x
+  case x
+    switch y
+      case y
+        %echo% inner y
+        break
+    done
+    %echo% after the inner switch
+done
+set n 0
+while %n% < 30
+  eval n %n% + 1
+done
+set m 0
+while %m% < 30
+  eval m %m% + 1
+done
+%echo% two loops of 30: %n% %m%
+switch %n%
+  case 30
+    set k 0
+    while %k% < 3
+      eval k %k% + 1
+      wait 1
+      if %k% == 2
+        break
+      end
+    done
+    %echo% waited in a while in a case: %k%
+done
 ~
 $~

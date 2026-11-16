@@ -19,6 +19,7 @@
 #include "dbat/consts/triggers.hpp"
 #include "dbat/dg/owner.hpp"
 #include "dbat/dg/program.hpp"
+#include "dbat/dg/run.hpp"
 #include "dbat/dg/vars.hpp"
 #include "dbat/index.hpp"
 #include "dbat/db.hpp"
@@ -44,12 +45,10 @@ struct trig_data {
   std::string name{};                   /* name of trigger                 */
   bitvector_t trigger_type{};           /* type of trigger (for bitvector) */
   std::shared_ptr<const dg::program> program{}; /* its script, shared with its prototype */
-  size_t next_line{};                   /* where a run that waited carries on, in program->lines */
-  std::vector<int> while_of_done{};     /* for each 'done' line, the 'while' that last looped to it, or -1 */
+  dg::run_state run{};                  /* where a run is, while one is going or waiting */
+  bool refusal_logged{};                /* on the prototype: that it does not compile, when it first would have run */
   int narg{};                           /* numerical argument              */
   std::string arglist{};                /* argument list                   */
-  int depth{};                          /* depth into nest ifs/whiles/etc  */
-  int loops{};                          /* loop iteration counter          */
   struct event *wait_event{};           /* event to pause the trigger      */
   bool purged{};                        /* trigger is set to be purged     */
   dg::var_store var_list{};             /* its local variables             */
@@ -211,6 +210,8 @@ void do_sstat_object(GameWorld *g, char_data *ch, obj_data *j);
 void do_sstat_character(GameWorld *g, char_data *ch, char_data *k);
 void add_trigger(GameWorld *g, struct script_data *sc, trig_data *t, int loc);
 
+/* Logs why trig's script does not compile, and tells d too if it is not null */
+void report_compile_errors(GameWorld *g, const trig_data *trig, struct descriptor_data *d);
 /* script_log(): the text as it is */
 void script_log(GameWorld *g, std::string_view text);
 /* script_log(): the text formatted as std::format does */
@@ -244,7 +245,6 @@ void dg_log_uid_stats(GameWorld *g);
 
 /* from dg_db_scripts.c */
 void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr);
-int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data *d);
 trig_data *read_trigger(GameWorld *g, struct index_data *nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
 void dg_read_trigger(GameWorld *g, FILE *fp, owner_ptr proto);
@@ -301,11 +301,8 @@ static inline bool script_has_type(const struct script_data *sc, bitvector_t typ
   return sc && (sc->types & type);
 }
 
-/* true if trigger t is of the given type and not already running */
-static inline bool trigger_ready(const trig_data *t, bitvector_t type)
-{
-  return (t->trigger_type & type) && !t->depth;
-}
+/* true if trigger t is of the given type, not already running, and compiles (which it logs, once, if it doesn't) */
+bool trigger_ready(GameWorld *g, trig_data *t, bitvector_t type);
 
 /*
  * The trigger currently being run by script_driver(), so errors can say which
@@ -321,7 +318,11 @@ struct dg_run_ctx {
   long long owner_vnum{};
   long owner_uid{};
   long long room_vnum{};
+  long instance_id{};
+  int line_number{}; /* 0 before the first line */
   std::string line;
+  std::string actor;
+  long actor_uid{}; /* 0 if none */
 };
 
 

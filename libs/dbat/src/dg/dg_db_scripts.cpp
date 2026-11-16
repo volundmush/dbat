@@ -35,95 +35,6 @@
 /* local functions */
 static void trig_data_init(trig_data *this_data);
 
-/* the block a script line opens, for dg_lint_trigger() */
-struct dg_lint_block {
-  const char *kind{}; /* "if", "while" or "switch" */
-  int line{};
-};
-
-static void dg_lint_warn(GameWorld *g, const trig_data *trig, struct descriptor_data *d, int line, const char *msg)
-{
-  mud_log("SCRIPT WARN: trig #{:d} '{}' line {:d}: {}", trig_get_vnum(g, trig),
-          trig->name, line, msg);
-  if (d)
-    write_to_output(g, d, "Warning: line {:d}: {}\r\n", line, msg);
-}
-
-/*
- * Warns about control-flow mistakes in a trigger's script: a block that is never
- * closed, a closer with nothing to close, and 'else if', which runs as a plain 'else'.
- * Keywords are matched the way script_driver_body() matches them, so the warnings
- * describe what will actually run. Warnings go to the syslog, and also to d if it is
- * not NULL. Returns the number of warnings.
- */
-int dg_lint_trigger(GameWorld *g, const trig_data *trig, struct descriptor_data *d)
-{
-  struct dg_lint_block open[64];
-  int depth = 0, line = 0, warnings = 0;
-  std::string msg;
-
-  for (const dg::line &l : trig->program->lines) {
-    const char *p = l.body().data(); /* the rest of the line's own string, so it ends there */
-    line          = l.number;
-
-    if (*p == '*') /* comment */
-      continue;
-
-    if (!strncasecmp(p, "if ", 3) || !strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7)) {
-      if (depth == (int)(countof(open))) {
-        dg_lint_warn(g, trig, d, line, "blocks nested too deeply to check the rest of the script");
-        return warnings + 1;
-      }
-      if (!strncasecmp(p, "if ", 3))
-        open[depth].kind = "if";
-      else if (!strncasecmp(p, "while ", 6))
-        open[depth].kind = "while";
-      else
-        open[depth].kind = "switch";
-      open[depth++].line = line;
-    } else if (!strncasecmp("elseif ", p, 7) || !strncasecmp("else", p, 4)) {
-      const char *q = p + 4;
-      while (*q && isspace(*q))
-        q++;
-      if (q > p + 4 && !strncasecmp(q, "if", 2) && (!q[2] || q[2] == '(' || isspace(q[2]))) {
-        dg_lint_warn(g, trig, d, line, "'else if' runs as a plain 'else' and its condition is ignored; write 'elseif'");
-        warnings++;
-      }
-      if (!depth || strcmp(open[depth - 1].kind, "if")) {
-        dg_lint_warn(g, trig, d, line, "'else' without 'if'");
-        warnings++;
-      }
-    } else if (!strncasecmp("end", p, 3)) {
-      if (depth && !strcmp(open[depth - 1].kind, "if"))
-        depth--;
-      else {
-        dg_lint_warn(g, trig, d, line, "'end' without 'if'");
-        warnings++;
-      }
-    } else if (!strncasecmp("done", p, 4)) {
-      while (depth && !strcmp(open[depth - 1].kind, "if")) {
-        msg = str_format("'if' has no 'end' before the 'done' at line {:d}", line);
-        dg_lint_warn(g, trig, d, open[--depth].line, msg.c_str());
-        warnings++;
-      }
-      if (depth)
-        depth--;
-      else {
-        dg_lint_warn(g, trig, d, line, "'done' without 'while' or 'switch'");
-        warnings++;
-      }
-    }
-  }
-
-  while (depth) {
-    depth--;
-    msg = str_format("'{}' has no '{}'", open[depth].kind, strcmp(open[depth].kind, "if") ? "done" : "end");
-    dg_lint_warn(g, trig, d, open[depth].line, msg.c_str());
-    warnings++;
-  }
-  return warnings;
-}
-
 void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
 {
   int t[2], k, attach_type;
@@ -164,7 +75,7 @@ void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
   }
   g->trig_index.insert(nr, std::move(made));
 
-  dg_lint_trigger(g, trig, nullptr);
+  report_compile_errors(g, trig, nullptr);
 }
 
 /*
@@ -193,11 +104,10 @@ static void trig_data_init(trig_data *this_data)
   this_data->name.clear();
   this_data->trigger_type = 0;
   this_data->program.reset();
-  this_data->next_line    = 0;
-  this_data->while_of_done.clear();
+  this_data->run.stop();
+  this_data->refusal_logged = false;
   this_data->narg         = 0;
   this_data->arglist.clear();
-  this_data->depth        = 0;
   this_data->wait_event   = nullptr;
   this_data->purged       = false;
   this_data->var_list.clear();

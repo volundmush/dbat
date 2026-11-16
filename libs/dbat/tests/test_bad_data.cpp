@@ -1651,6 +1651,62 @@ static void check_lexer_reads_keywords_strictly(void)
   CHECK(dg::lex("\r\n\r\n", "* none")->lines[0].text == "* none");
 }
 
+/* The parser builds the tree a script's blocks make, and refuses a script whose blocks don't fit, saying where */
+static void check_parser_refuses_misplaced_keywords(void)
+{
+  auto good = dg::lex("if 1\n  say a\nelseif 2\nelse\nend\nwhile 1\n  break\ndone\n"
+                      "switch x\n  say before\n  case x\n  default\ndone\n* note\n   \n",
+                      "* none");
+  CHECK(good->runs() && good->body.size() == 4); /* if, while, switch, and the blank line, which runs */
+  const auto &i = std::get<dg::if_node>(good->body[0].what);
+  CHECK(i.branches.size() == 3 && i.branches[0].tests && !i.branches[2].tests && i.end == 4);
+  CHECK(i.branches[0].body.size() == 1 && i.branches[1].body.empty());
+  const auto &w = std::get<dg::while_node>(good->body[1].what);
+  CHECK(w.done == 7 && w.body.size() == 1 && std::holds_alternative<dg::break_node>(w.body[0].what));
+  const auto &sw = std::get<dg::switch_node>(good->body[2].what);
+  CHECK(sw.labels.size() == 2 && sw.labels[0].at == 1 && sw.labels[1].is_default && sw.labels[1].at == 1);
+
+  static const struct {
+    const char *script;
+    int line;
+    const char *message;
+  } bad[] = {
+      {"say a\nend", 2, "'end' closes nothing"},
+      {"if 1\n  done\nend", 2, "'done' closes nothing (the open block is the 'if' at line 1)"},
+      {"if 1\nsay a", 1, "'if' never closed"},
+      {"if 1\nelse return 0\nend", 2, "text after 'else': return 0"},
+      {"while\ndone", 1, "'while' with nothing to test"},
+      {"case 1", 1, "'case' outside a switch's own lines"},
+      {"switch 1\n  if 1\n    case 1\n  end\ndone", 3, "'case' outside a switch's own lines"},
+      {"if 1\n  break\nend", 2, "'break' outside a while or switch"},
+      {"say a\n\nelse", 3, "'else' with no 'if' open"},
+      {"wait until x", 1, "'wait' needs a time it can read, such as 'wait 5 s' or 'wait until 14:30'"},
+      {"wait   ", 1, "'wait' needs a time it can read, such as 'wait 5 s' or 'wait until 14:30'"},
+  };
+  for (const auto &want : bad) {
+    auto prog = dg::lex(want.script, "* none");
+    CHECK(!prog->runs() && prog->body.empty());
+    CHECK(prog->errors.size() == 1 && prog->lines[prog->errors[0].line].number == want.line &&
+          prog->errors[0].message == want.message);
+  }
+  CHECK(dg::lex("wait %t%", "* none")->runs()); /* known only when it runs */
+  CHECK(dg::lex("wait  5 s", "* none")->runs());
+
+  /* Where a waiting run carries on, as tstat shows it */
+  auto prog = dg::lex("say a\nwhile 1\n  wait 1\n  say b\ndone\nsay c", "* none");
+  const auto &loop = std::get<dg::while_node>(prog->body[1].what);
+  dg::run_state run;
+  run.prog   = prog;
+  run.frames = {{dg::block_role::script, &prog->body, 2, nullptr}, {dg::block_role::loop, &loop.body, 1, &prog->body[1]}};
+  CHECK(run.next_line() == &prog->lines[3]); /* say b */
+  run.frames.back().next = 2;
+  CHECK(run.next_line() == &prog->lines[4]); /* done, where the loop is tested again */
+  run.frames.pop_back();
+  CHECK(run.next_line() == &prog->lines[5]); /* say c */
+  run.frames.back().next = 3;
+  CHECK(run.next_line() == nullptr);
+}
+
 /* An object given a trigger in play, so with none from its prototype, shows to a builder with room flags on. */
 static void check_attached_trigger_shows_with_room_flags(void)
 {
@@ -1957,6 +2013,7 @@ static const struct {
     {"chained_field_on_a_short_variable",           check_chained_field_on_a_short_variable          },
     {"attached_trigger_shows_with_room_flags",      check_attached_trigger_shows_with_room_flags     },
     {"lexer_reads_keywords_strictly",               check_lexer_reads_keywords_strictly              },
+    {"parser_refuses_misplaced_keywords",           check_parser_refuses_misplaced_keywords          },
     {"variable_left_open_at_the_end",               check_variable_left_open_at_the_end              },
     {"wait_too_long_to_count",                      check_wait_too_long_to_count                     },
     {"wait_until_no_time",                          check_wait_until_no_time                         },

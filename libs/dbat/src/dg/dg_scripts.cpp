@@ -32,7 +32,7 @@ constexpr int PULSES_PER_MUD_HOUR = SECS_PER_MUD_HOUR * PASSES_PER_SEC;
 
 
 /* Local functions not used elsewhere */
-static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd, size_t at);
+static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd, size_t at);
 static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
 static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
 static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
@@ -172,91 +172,6 @@ trig_vnum trig_get_vnum(GameWorld *g, const trig_data *t)
   return t->index->vnum;
 }
 
-static void dg_ctx_begin(GameWorld *g, owner_ptr go, trig_data *trig)
-{
-  room_vnum room = NOWHERE;
-  int type       = owner_type(go);
-
-  g->dg_ctx = {};
-  g->dg_ctx.active     = true;
-  g->dg_ctx.owner_type = type;
-  g->dg_ctx.trig_vnum  = (long long)trig_get_vnum(g, trig);
-  g->dg_ctx.trig_name  = trig->name;
-  g->dg_ctx.room_vnum = -1;
-
-  if (std::visit([](auto *thing) { return thing == nullptr; }, go))
-    return;
-
-  switch (type) {
-    case MOB_TRIGGER:
-      g->dg_ctx.owner_name = writable_copy(char_get_name(std::get<char_data *>(go)));
-      g->dg_ctx.owner_vnum = (long long)char_get_mob_vnum(g, std::get<char_data *>(go));
-      g->dg_ctx.owner_uid  = char_get_id(std::get<char_data *>(go));
-      room              = char_get_in_room(std::get<char_data *>(go));
-      break;
-    case OBJ_TRIGGER:
-      g->dg_ctx.owner_name = writable_copy(obj_get_short_description(std::get<obj_data *>(go)));
-      g->dg_ctx.owner_vnum = (long long)obj_get_vnum(g, std::get<obj_data *>(go));
-      g->dg_ctx.owner_uid  = obj_get_id(std::get<obj_data *>(go));
-      room              = obj_room(std::get<obj_data *>(go));
-      break;
-    case WLD_TRIGGER:
-      g->dg_ctx.owner_name = writable_copy(room_get_name(std::get<room_data *>(go)));
-      g->dg_ctx.owner_vnum = (long long)room_get_number(std::get<room_data *>(go));
-      g->dg_ctx.owner_uid  = room_get_number(std::get<room_data *>(go)) + ROOM_ID_BASE;
-      g->dg_ctx.room_vnum  = g->dg_ctx.owner_vnum;
-      return;
-  }
-
-  if (room_of(g, room))
-    g->dg_ctx.room_vnum = (long long)room;
-}
-
-static void dg_ctx_set_line(GameWorld *g, std::string_view cmd)
-{
-  g->dg_ctx.line = cmd;
-}
-
-/* " [trig ... ]" describing the running trigger, or "" when none is. */
-std::string dg_context(GameWorld *g)
-{
-  static const char *owner_types[] = {"mob", "obj", "room"};
-
-  if (!g->dg_ctx.active)
-    return {};
-
-  return str_format(" [trig #{:d} '{}' on {} '{}' #{:d} uid {:d} in room {:d}; line: {}]",
-                    g->dg_ctx.trig_vnum, g->dg_ctx.trig_name,
-                    (g->dg_ctx.owner_type >= 0 && g->dg_ctx.owner_type <= 2) ? owner_types[g->dg_ctx.owner_type] : "?",
-                    g->dg_ctx.owner_name, g->dg_ctx.owner_vnum, g->dg_ctx.owner_uid, g->dg_ctx.room_vnum,
-                    !g->dg_ctx.line.empty() ? g->dg_ctx.line.c_str() : "(none)");
-}
-
-/*
- *  Logs any errors caused by scripts to the system log.
- *  Will eventually allow on-line view of script errors.
- */
-void script_log(GameWorld *g, std::string_view text)
-{
-  std::string ctx = dg_context(g);
-
-  mud_log("SCRIPT ERR: {}{}", text, ctx);
-
-  /* the rest is mostly a rip from basic_mud_log() */
-  for (descriptor_data *i : each_desc(g)) {
-    if (desc_get_connected(i) != CON_PLAYING || char_is_npc(i->character)) /* switch */
-      continue;
-    if (char_get_admlevel(i->character) < ADMLVL_BUILDER)
-      continue;
-    if (char_plr_flagged(i->character, PLR_WRITING))
-      continue;
-    if (LOG_NRM > (char_prf_flagged(g, i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, i->character, PRF_LOG2) ? 2 : 0))
-      continue;
-
-    send_to_char(g, i->character, "@g[ {}{} ]\r\n@n", text, ctx);
-  }
-}
-
 /* processes any 'wait' commands in a trigger */
 /* The longest a script can wait, in pulses: as good as forever, and far enough from overflowing once the pulse is added. */
 constexpr long MAX_WAIT_PULSES = LONG_MAX / 4;
@@ -271,12 +186,21 @@ static long wait_mul(long a, long b)
   return product;
 }
 
-/* at is the wait's line, in trig->program */
-static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd, size_t at)
+/* Waits when pulses from now, after which the run carries on where it is */
+void schedule_wait(GameWorld *g, owner_ptr go, trig_data *trig, long when)
 {
-  const std::string &written = trig->program->lines[at].text;
+  wait_event_data *wait_event_obj = new wait_event_data();
+  wait_event_obj->trigger_id      = trig->id;
+  wait_event_obj->owner           = script_owner::of(go);
+
+  trig->wait_event = event_create(g, trig_wait_event, wait_event_obj, free_wait_event_data, when);
+}
+
+/* The wait command; at is its line. False if it can't read the time, which ends the run. */
+static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd, size_t at)
+{
+  const std::string &written = trig->run.prog->lines[at].text;
   char buf[MAX_INPUT_LENGTH], *arg;
-  struct wait_event_data *wait_event_obj;
   long when, hr, min, ntime;
   char c;
 
@@ -286,19 +210,18 @@ static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
   if (!*arg) {
     script_log(g, "Trigger: {}, VNum {:d}. wait w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), written);
-    return;
+    return false;
+  }
+  if (!dg::readable_wait(arg)) {
+    script_log(g, "Trigger: {}, VNum {:d}. wait without a time it can read: '{}'",
+               trig->name, trig_get_vnum(g, trig), written);
+    return false;
   }
 
   if (!strncasecmp(arg, "until ", 6)) {
 
     /* valid forms of time are 14:30 and 1430 */
-    int fields = sscanf(arg, "until %ld:%ld", &hr, &min);
-    if (fields < 1) {
-      script_log(g, "Trigger: {}, VNum {:d}. wait until w/o a time: '{}'",
-                 trig->name, trig_get_vnum(g, trig), written);
-      return;
-    }
-    if (fields == 2)
+    if (sscanf(arg, "until %ld:%ld", &hr, &min) == 2)
       min = wait_mul(hr, 60) + min;
     else
       min = (hr % 100) + wait_mul(hr / 100, 60);
@@ -316,22 +239,14 @@ static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
       when = ntime - when;
   }
 
-  else {
-    if (sscanf(arg, "%ld %c", &when, &c) == 2) {
-      if (c == 't')
-        when = wait_mul(when, PULSES_PER_MUD_HOUR);
-      else if (c == 's')
-        when = wait_mul(when, PASSES_PER_SEC);
-    }
+  else if (sscanf(arg, "%ld %c", &when, &c) == 2) {
+    if (c == 't')
+      when = wait_mul(when, PULSES_PER_MUD_HOUR);
+    else if (c == 's')
+      when = wait_mul(when, PASSES_PER_SEC);
   }
-  when = std::clamp(when, -MAX_WAIT_PULSES, MAX_WAIT_PULSES);
-
-  wait_event_obj             = new wait_event_data();
-  wait_event_obj->trigger_id = trig->id;
-  wait_event_obj->owner      = script_owner::of(go);
-
-  trig->wait_event = event_create(g, trig_wait_event, wait_event_obj, free_wait_event_data, when);
-  trig->next_line  = at + 1;
+  schedule_wait(g, go, trig, std::clamp(when, -MAX_WAIT_PULSES, MAX_WAIT_PULSES));
+  return true;
 }
 
 /* processes a script set command */
@@ -929,279 +844,61 @@ static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *tri
   add_var(trig->var_list, varname, junk, sc->context);
 }
 
-/* the script attached to go */
-static struct script_data *script_of(owner_ptr go)
-{
-  return *script_slot(go);
-}
+/*
+ * The DG commands, which a command line runs after substitution, ahead of the owner's own. Each is found by the start
+ * of the line, in this order and without regard to case, so the command word can come from a variable.
+ */
+namespace {
 
-/* What script_driver_body does after running one command line. */
-enum dg_line_result {
-  DG_LINE_NEXT, /* go on to the next line */
-  DG_LINE_HALT, /* 'halt': end the run normally */
-  DG_LINE_STOP, /* return at once: a 'wait' was scheduled, or the owner was purged */
+struct dg_command {
+  std::string_view prefix;
+  command_result (*run)(command_call &c);
 };
 
-/*
- * Runs one command line of a trigger, after variable substitution: a DG built-in
- * such as 'set' or 'wait', or else a mob, object or room command.
- */
-static enum dg_line_result dg_run_command(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd,
-                                          size_t at, int *ret_val, bool *owner_gone)
+command_result carry_on() { return command_result::next; }
+
+constexpr dg_command dg_commands[] = {
+    {"eval ", [](command_call &c) { process_eval(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"nop ", [](command_call &) { return carry_on(); }},
+    {"extract ", [](command_call &c) { extract_value(c.g, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"dg_letter ", [](command_call &c) { dg_letter_value(c.g, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"makeuid ", [](command_call &c) { makeuid_var(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"halt", [](command_call &) { return command_result::halt; }},
+    {"dg_cast ", [](command_call &c) { do_dg_cast(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"dg_affect ", [](command_call &c) { do_dg_affect(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"global ", [](command_call &c) { process_global(c.g, c.sc, c.trig, c.cmd, c.sc->context); return carry_on(); }},
+    {"context ", [](command_call &c) { process_context(c.g, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"remote ", [](command_call &c) { process_remote(c.g, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"rdelete ", [](command_call &c) { process_rdelete(c.g, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"return ", [](command_call &c) { c.ret_val = process_return(c.g, c.trig, c.cmd); return carry_on(); }},
+    {"set ", [](command_call &c) { process_set(c.g, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"unset ", [](command_call &c) { process_unset(c.g, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"wait ",
+     [](command_call &c) {
+       return process_wait(c.g, c.go, c.trig, c.cmd, c.at) ? command_result::stop : command_result::halt;
+     }},
+    {"attach ", [](command_call &c) { process_attach(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"detach ", [](command_call &c) { process_detach(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
+    {"version", [](command_call &c) { mudlog(c.g, LOG_NRM, ADMLVL_GOD, true, "{}", DG_SCRIPT_VERSION); return carry_on(); }},
+};
+
+} // namespace
+
+command_result run_command(command_call &c)
 {
-  if (!strncasecmp(cmd, "eval ", 5))
-    process_eval(g, go, sc, trig, cmd);
+  for (const dg_command &command : dg_commands)
+    if (!strncasecmp(c.cmd, command.prefix.data(), command.prefix.size()))
+      return command.run(c);
 
-  else if (!strncasecmp(cmd, "nop ", 4))
-    ; /* nop: do nothing */
-
-  else if (!strncasecmp(cmd, "extract ", 8))
-    extract_value(g, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "dg_letter ", 10))
-    dg_letter_value(g, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "makeuid ", 8))
-    makeuid_var(g, go, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "halt", 4))
-    return DG_LINE_HALT;
-
-  else if (!strncasecmp(cmd, "dg_cast ", 8))
-    do_dg_cast(g, go, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "dg_affect ", 10))
-    do_dg_affect(g, go, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "global ", 7))
-    process_global(g, sc, trig, cmd, sc->context);
-
-  else if (!strncasecmp(cmd, "context ", 8))
-    process_context(g, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "remote ", 7))
-    process_remote(g, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "rdelete ", 8))
-    process_rdelete(g, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "return ", 7))
-    *ret_val = process_return(g, trig, cmd);
-
-  else if (!strncasecmp(cmd, "set ", 4))
-    process_set(g, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "unset ", 6))
-    process_unset(g, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "wait ", 5)) {
-    process_wait(g, go, trig, cmd, at);
-    return DG_LINE_STOP;
+  std::visit(overloaded{[&](char_data *ch) { command_interpreter(c.g, ch, c.cmd); },
+                        [&](obj_data *obj) { obj_command_interpreter(c.g, obj, c.cmd); },
+                        [&](room_data *room) { wld_command_interpreter(c.g, room, c.cmd); }},
+             c.go);
+  if (c.g->dg_owner_purged) {
+    c.owner_gone = true;
+    return command_result::stop;
   }
-
-  else if (!strncasecmp(cmd, "attach ", 7))
-    process_attach(g, go, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "detach ", 7))
-    process_detach(g, go, sc, trig, cmd);
-
-  else if (!strncasecmp(cmd, "version", 7))
-    mudlog(g, LOG_NRM, ADMLVL_GOD, true, "{}", DG_SCRIPT_VERSION);
-
-  else {
-    std::visit(overloaded{[&](char_data *ch) { command_interpreter(g, ch, cmd); },
-                          [&](obj_data *obj) { obj_command_interpreter(g, obj, cmd); },
-                          [&](room_data *room) { wld_command_interpreter(g, room, cmd); }},
-               go);
-    if (g->dg_owner_purged) {
-      *owner_gone = true;
-      return DG_LINE_STOP;
-    }
-  }
-
-  return DG_LINE_NEXT;
-}
-
-/*  This is the core driver for scripts: runs trig on go, from its first line (TRIG_NEW, as dg_triggers.cpp starts
-    it) or from where it waited (TRIG_RESTART). The result says whether go was purged meanwhile, as callers can't
-    otherwise tell. */
-static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int mode, bool *owner_gone);
-
-/* Runs a trigger with dg_ctx describing it, restoring the caller's context after. */
-run_result script_driver(GameWorld *g, owner_ptr go, trig_data *trig, int mode)
-{
-  struct dg_run_ctx saved = g->dg_ctx;
-  run_result result;
-
-  if (trig->extracted) /* an earlier trigger on the same thing removed this one */
-    return result;
-
-  dg_ctx_begin(g, go, trig);
-  result.value = script_driver_body(g, go, trig, mode, &result.owner_gone);
-  g->dg_ctx    = saved;
-  if (trig->owner_gone)
-    result.owner_gone = true;
-  return result;
-}
-
-static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int mode, bool *owner_gone)
-{
-  int ret_val      = 1;
-  struct script_data *sc = nullptr;
-  unsigned long loops = 0;
-  int type            = owner_type(go);
-
-  sc = script_of(go);
-
-  if (g->script_depth > MAX_SCRIPT_DEPTH) {
-    script_log(g, "Trigger {:d} recursed beyond maximum allowed depth.", trig_get_vnum(g, trig));
-    switch (type) {
-      case MOB_TRIGGER:
-        script_log(g, "It was attached to {} [{:d}]",
-                   char_get_name(std::get<char_data *>(go)), char_get_mob_vnum(g, std::get<char_data *>(go)));
-        break;
-      case OBJ_TRIGGER:
-        script_log(g, "It was attached to {} [{:d}]",
-                   obj_get_short_description(std::get<obj_data *>(go)), obj_get_vnum(g, std::get<obj_data *>(go)));
-        break;
-      case WLD_TRIGGER:
-        script_log(g, "It was attached to {} [{:d}]",
-                   room_get_name(std::get<room_data *>(go)), room_get_number(std::get<room_data *>(go)));
-        break;
-    }
-
-    extract_script(g, go);
-
-    /*
-       extract_script() works on rooms, but on mobiles and objects,
-       it will be called again if the
-       caller is load_mtrigger or load_otrigger
-       if it is one of these, we must make sure the script
-       is not just reloaded on the next mob
-
-       We make the calling code decide how to handle it, so it doesn't
-       get totally removed unless it's a load_xtrigger().
-     */
-
-    return SCRIPT_ERROR_CODE;
-  }
-
-  g->script_depth++;
-
-  if (mode == TRIG_NEW) {
-    trig->depth = 1;
-    trig->loops = 0;
-    sc->context = 0;
-  }
-
-  g->dg_owner_purged = 0;
-
-  /* held here, so that the lines outlast the run even if the trigger is edited meanwhile */
-  std::shared_ptr<const dg::program> prog = trig->program;
-  size_t lines                            = prog->lines.size();
-  if (trig->while_of_done.size() != lines)
-    trig->while_of_done.assign(lines, -1);
-
-  for (size_t cl = (mode == TRIG_NEW) ? 0 : trig->next_line; cl < lines && trig->depth && !trig->extracted; cl++) {
-    const char *p = prog->lines[cl].body().data(); /* the rest of the line's own string, so it ends there */
-    dg_ctx_set_line(g, p);
-
-    if (*p == '*') /* comment */
-      continue;
-
-    else if (!strncasecmp(p, "if ", 3)) {
-      if (process_if(g, p + 3, go, sc, trig))
-        trig->depth++;
-      else cl = find_else_end(g, trig, *prog, cl, go, sc);
-    }
-
-    else if (!strncasecmp("elseif ", p, 7) ||
-             !strncasecmp("else", p, 4)) {
-      /*
-       * if not in an if-block, ignore the extra 'else[if]' and warn about it
-       */
-      if (trig->depth == 1) {
-        script_log(g, "Trigger VNum {:d} has 'else' without 'if'.",
-                   trig_get_vnum(g, trig));
-        continue;
-      }
-      cl = find_end(g, trig, *prog, cl);
-      trig->depth--;
-    } else if (!strncasecmp("while ", p, 6)) {
-      size_t done = find_done(*prog, cl);
-      if (done == cl || strncasecmp("done", prog->lines[done].body().data(), 4)) {
-        script_log(g, "Trigger VNum {:d} has 'while' without 'done'.",
-                   trig_get_vnum(g, trig));
-        break; /* end the run normally, so depth and the trigger's state are reset */
-      }
-      if (process_if(g, p + 6, go, sc, trig)) {
-        trig->while_of_done[done] = (int)cl; /* quirk: never cleared, as the old driver marked the line itself */
-      } else {
-        cl    = done;
-        loops = 0;
-      }
-    } else if (!strncasecmp("switch ", p, 7)) {
-      cl = find_case(g, trig, *prog, cl, go, sc, p + 7);
-    } else if (!strncasecmp("end", p, 3)) {
-      /*
-       * if not in an if-block, ignore the extra 'end' and warn about it.
-       */
-      if (trig->depth == 1) {
-        script_log(g, "Trigger VNum {:d} has 'end' without 'if'.",
-                   trig_get_vnum(g, trig));
-        continue;
-      }
-      trig->depth--;
-    } else if (!strncasecmp("done", p, 4)) {
-      /* the end of a while loop that has run: test it again */
-      if (int loop = trig->while_of_done[cl]; loop >= 0) {
-        if (process_if(g, prog->lines[loop].body().data() + 6, go, sc, trig)) {
-          cl = (size_t)loop;
-          loops++;
-          trig->loops++;
-          if (loops == 40) {
-            char wait_a_pulse[] = "wait 1";
-            process_wait(g, go, trig, wait_a_pulse, cl);
-            g->script_depth--;
-            return ret_val;
-          }
-          if (trig->loops >= 5000) {
-            script_log(g, "Trigger VNum {:d} has looped 5,000 times!!!",
-                       trig_get_vnum(g, trig));
-            break;
-          }
-        } else {
-          /* if we're falling through a switch statement, this ends it. */
-        }
-      }
-    } else if (!strncasecmp("break", p, 5)) {
-      cl = find_done(*prog, cl);
-    } else if (!strncasecmp("case", p, 4)) {
-      /* Do nothing, this allows multiple cases to a single instance */
-    }
-
-    else {
-
-      std::string cmd = var_subst(g, go, sc, trig, p);
-
-      enum dg_line_result res = dg_run_command(g, go, sc, trig, cmd.data(), cl, &ret_val, owner_gone);
-      if (res == DG_LINE_HALT)
-        break;
-      if (res == DG_LINE_STOP) {
-        g->script_depth--;
-        return ret_val;
-      }
-    }
-  }
-
-  /* Once extracted, what the trigger belonged to may be gone, and free_trigger() has the rest. */
-  if (!trig->extracted) {
-    trig->var_list.clear();
-    trig->depth    = 0;
-  }
-
-  g->script_depth--;
-  return ret_val;
+  return command_result::next;
 }
 
 /* The trigger index entry for vnum, or null. */

@@ -569,7 +569,10 @@ namespace {
       if (logged.find("(+0x") != std::string::npos || (logged.ends_with("]") && logged.find(" [0x") != std::string::npos))
         continue; /* a backtrace's frames: addresses in this one build */
       size_t stamp = logged.find(" :: "); /* the log's own time is the real clock's */
-      file_print(stdout, "{}\n", stamp == std::string::npos ? logged : logged.substr(stamp + 4));
+      std::string text = stamp == std::string::npos ? logged : logged.substr(stamp + 4);
+      if (size_t where = text.find(" [trig #"); where != std::string::npos)
+        text = text.substr(0, where) + " [trig ...]"; /* where a script error was: each engine says it its own way */
+      file_print(stdout, "{}\n", text);
     }
   }
 

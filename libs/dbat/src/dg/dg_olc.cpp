@@ -409,13 +409,11 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
       live_trig->var_list.clear();
 
       live_trig->program      = proto->program;
-      live_trig->next_line    = 0;
-      live_trig->while_of_done.clear();
+      live_trig->run.stop();
       live_trig->trigger_type = proto->trigger_type;
       live_trig->attach_type  = proto->attach_type;
       live_trig->narg         = proto->narg;
       live_trig->data_type    = proto->data_type;
-      live_trig->depth        = 0;
     }
   });
 }
@@ -518,7 +516,7 @@ static void trigedit_save(GameWorld *g, struct descriptor_data *d)
   else
     trigedit_insert_new(g, d);
 
-  dg_lint_trigger(g, find_trigger(g, OLC_NUM(d))->proto, d);
+  report_compile_errors(g, find_trigger(g, OLC_NUM(d))->proto, d);
   trigedit_write_zone_file(g, d);
 }
 

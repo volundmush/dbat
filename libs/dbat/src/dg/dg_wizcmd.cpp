@@ -110,7 +110,7 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
     if (t->wait_event) {
       send_to_char(g, ch, "    Wait: {:d}, Current line: {}\r\n",
                    event_time(g, t->wait_event),
-                   t->next_line < t->program->lines.size() ? t->program->lines[t->next_line].text.c_str() : "End of Script");
+                   t->run.next_line() ? t->run.next_line()->text.c_str() : "End of Script");
       send_to_char(g, ch, "  Variables: {}\r\n", t->var_list.empty() ? "None" : "");
 
       for (const dg::variable &tv : t->var_list) {
