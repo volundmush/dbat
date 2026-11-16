@@ -95,6 +95,13 @@ target_compile_options(dbat_test_login PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_login PRIVATE dbat_test_harness)
 add_test(NAME login COMMAND dbat_test_login)
 
+add_executable(dbat_test_scripts tests/test_scripts.cpp)
+target_compile_options(dbat_test_scripts PRIVATE ${DBAT_CXX_FLAGS})
+target_link_libraries(dbat_test_scripts PRIVATE dbat_test_harness)
+target_compile_definitions(dbat_test_scripts PRIVATE DBAT_TEST_SCRIPTS="${CMAKE_CURRENT_SOURCE_DIR}/tests/scripts")
+add_test(NAME scripts COMMAND dbat_test_scripts)
+add_test(NAME scripts_synthetic COMMAND dbat_test_scripts --synthetic)
+
 add_executable(dbat_test_bot tests/test_bot.cpp)
 target_compile_options(dbat_test_bot PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_bot PRIVATE dbat_test_harness)

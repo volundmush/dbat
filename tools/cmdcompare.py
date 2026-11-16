@@ -9,6 +9,9 @@ it so that both sides run the same tests, and builds this tree, both with the de
   - dbat_test_techniques, if both sides have it, the same way;
   - dbat_test_login, if both sides have it: scripted journeys through the login and chargen menus over real
     connections (with --only, only if 'login' is one of the commands named);
+  - dbat_test_scripts, if both sides have it: every trigger run on its own through its dispatchers, on the
+    fixture world, on it with the triggers in tests/scripts, and on --script-world if given (with --only, only if
+    'scripts' is one of the commands named);
   - dbat_test_bot --seed N for each seed, comparing the fingerprints of all the output.
 and reports the first cases and seeds that differ. Exits 0 if nothing does.
 
@@ -19,15 +22,17 @@ options:
   -j N           processes (default: one per core)
   --only C,...   only these commands, in both transcripts, and no bots: for quick checks while working
   --keep         keep the work directory (transcripts, traces, the worktree)
+  --script-world DIR  also run dbat_test_scripts on this world (such as the real data)
 """
 import argparse, difflib, os, re, shutil, subprocess, sys, tempfile
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True,
                       cwd=os.path.dirname(os.path.abspath(__file__))).stdout.strip()
-TARGETS = ['dbat_test_commands', 'dbat_test_bot', 'dbat_test_techniques', 'dbat_test_login']
+TARGETS = ['dbat_test_commands', 'dbat_test_bot', 'dbat_test_techniques', 'dbat_test_login', 'dbat_test_scripts']
 # the tests a tree may not have yet, by their source
-OPTIONAL = {'dbat_test_techniques': 'test_techniques.cpp', 'dbat_test_login': 'test_login.cpp'}
+OPTIONAL = {'dbat_test_techniques': 'test_techniques.cpp', 'dbat_test_login': 'test_login.cpp',
+            'dbat_test_scripts': 'test_scripts.cpp'}
 
 
 def build(tree, jobs):
@@ -40,11 +45,11 @@ def build(tree, jobs):
     return os.path.join(tree, 'build/bin')
 
 
-def run_transcripts(binary, out_dir, shards, temp, only=None):
-    """only: the commands to run, each in its own process; otherwise all of them in shards"""
+def run_transcripts(binary, out_dir, shards, temp, only=None, extra=()):
+    """only: the commands to run, each in its own process; otherwise all of them in shards. extra: more options"""
     os.makedirs(out_dir, exist_ok=True)
     env = dict(os.environ, TMPDIR=temp)
-    runs = [['--shard', f'{k}/{shards}'] for k in range(shards)] if not only else [[c] for c in only]
+    runs = [[*extra, '--shard', f'{k}/{shards}'] for k in range(shards)] if not only else [[*extra, c] for c in only]
 
     def run(k):
         path = os.path.join(out_dir, f'{k}.txt')
@@ -125,6 +130,7 @@ def main():
     p.add_argument('-j', type=int, default=os.cpu_count())
     p.add_argument('--only')
     p.add_argument('--keep', action='store_true')
+    p.add_argument('--script-world')
     a = p.parse_args()
 
     work = tempfile.mkdtemp(prefix='cmdcompare.', dir=os.environ.get('TMPDIR'))
@@ -139,18 +145,26 @@ def main():
             base_bin, new_bin = ex.map(lambda t: build(t, max(1, a.j // 2)), [base_tree, ROOT])
 
         differing = 0
-        for test in ('dbat_test_commands', 'dbat_test_techniques', 'dbat_test_login'):
+        runs = [('dbat_test_commands', 'dbat_test_commands', ()), ('dbat_test_techniques', 'dbat_test_techniques', ()),
+                ('dbat_test_login', 'dbat_test_login', ()), ('dbat_test_scripts', 'dbat_test_scripts', ()),
+                ('dbat_test_scripts', 'dbat_test_scripts-synthetic', ('--synthetic',))]
+        if a.script_world:
+            runs.append(('dbat_test_scripts', 'dbat_test_scripts-world', ('--world', os.path.abspath(a.script_world))))
+        for test, name, extra in runs:
             if not (os.path.exists(os.path.join(base_bin, test)) and os.path.exists(os.path.join(new_bin, test))):
                 continue
             shards = a.j
             only = a.only.split(',') if a.only else None
-            if test == 'dbat_test_login' and only:  # its journeys aren't commands: all of them, or none
-                if 'login' not in only:
-                    continue
-                only = None
-            paths = [run_transcripts(os.path.join(b, test), os.path.join(work, f'{test}-{side}'), shards, work, only)
-                     for b, side in ((base_bin, 'base'), (new_bin, 'new'))]
-            differing += compare_transcripts(test, *paths, a.cases)
+            # the journeys and triggers aren't commands: all of them, or none
+            for whole, word in (('dbat_test_login', 'login'), ('dbat_test_scripts', 'scripts')):
+                if test == whole and only:
+                    if word not in only:
+                        break
+                    only = None
+            else:
+                paths = [run_transcripts(os.path.join(b, test), os.path.join(work, f'{name}-{side}'), shards, work, only, extra)
+                         for b, side in ((base_bin, 'base'), (new_bin, 'new'))]
+                differing += compare_transcripts(name, *paths, a.cases)
         if not a.only:
             differing += compare_bots(os.path.join(base_bin, 'dbat_test_bot'), os.path.join(new_bin, 'dbat_test_bot'),
                                   a.seeds, a.steps, a.j, work, a.cases)
