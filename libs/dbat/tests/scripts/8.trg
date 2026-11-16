@@ -366,4 +366,26 @@ set fake }999999
 set word hello
 %echo% [%word.name%] [%word.strlen%]
 ~
+#806
+field corners~
+0 g 100
+~
+mload obj 301
+wield sword
+%echo% eq [%self.eq(*)%] [%self.eq(wield)%] [%self.has_item(sword)%] [%self.has_item(301)%]
+%echo% clamp [%self.cha(1000)%] [%self.cha(-1000)%] [%self.prac(-5)%]
+%load% obj 3034
+set atm %self.inventory(3034)%
+%echo% room [%self.room.contents(3034)%] [%self.room.contents(99999)%]
+if !%atm%
+  set atm %self.room.contents(3034)%
+end
+%echo% atm [%atm.setextra(NO_INVIS)%] [%atm.extra(NO_INVIS)%] [%atm.setextra(NO_INVIS)%] [%atm.eek%] [%atm.e%]
+%echo% find [%findmob.300%] [%findmob.99999(1)%] [%findobj.99999(1)%]
+set gv yes
+remote gv %global%
+%echo% global [%global.gv%] [%global.nosuch%]
+set void 0
+%echo% void [%void.gv%] [%void.nosuch%] [%void.strlen%]
+~
 $~

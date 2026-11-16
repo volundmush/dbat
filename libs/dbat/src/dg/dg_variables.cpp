@@ -30,7 +30,7 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-#include "dg_internal.hpp"
+#include "fields.hpp"
 
 /* Utility functions */
 
@@ -67,14 +67,12 @@ void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o
   add_var(trig->var_list, name, buf.c_str(), context);
 }
 
-/* perhaps not the best place for this, but I didn't want a new file */
-static std::string skill_percent(GameWorld *g, struct char_data *ch, char *skill)
-{
-  int skillnum = find_skill_num(g, skill, SKTYPE_SKILL);
 
-  if (skillnum <= 0)
-    return "unknown skill";
-  return str_format("{:d}", char_get_skill(ch, skillnum));
+namespace dg {
+
+std::string uid_text(long id)
+{
+  return str_format("{:c}{:d}", as_char(UID_CHAR), id);
 }
 
 /*
@@ -86,1431 +84,365 @@ static std::string skill_percent(GameWorld *g, struct char_data *ch, char *skill
    Now also searches by vnum -- Welcor
    Now returns the number of matching objects -- Welcor 02/04
 */
-
-static int item_in_list(GameWorld *g, char *item, const id_list &list)
+int item_in_list(GameWorld *g, const char *item, const id_list &list)
 {
   int count = 0;
 
   if (!item || !*item)
     return 0;
 
-  if (*item == UID_CHAR) {
-    long id = atol(item + 1);
-
-    for (obj_data *i : obj_list(g, list)) {
-      if (id == obj_get_id(i))
+  for (obj_data *i : obj_list(g, list)) {
+    if (*item == UID_CHAR) {
+      if (atol(item + 1) == obj_get_id(i))
         count++;
-      if (obj_get_type_flag(i) == ITEM_CONTAINER)
-        count += item_in_list(g, item, obj_get_contains(i));
-    }
-  } else if (is_number(item)) { /* check for vnum */
-    obj_vnum ovnum = atoi(item);
-
-    for (obj_data *i : obj_list(g, list)) {
-      if (obj_get_vnum(g, i) == ovnum)
+    } else if (is_number(item)) { /* by vnum */
+      if (obj_get_vnum(g, i) == atoi(item))
         count++;
-      if (obj_get_type_flag(i) == ITEM_CONTAINER)
-        count += item_in_list(g, item, obj_get_contains(i));
-    }
-  } else {
-    for (obj_data *i : obj_list(g, list)) {
-      if (isname(item, obj_get_name(i)))
-        count++;
-      if (obj_get_type_flag(i) == ITEM_CONTAINER)
-        count += item_in_list(g, item, obj_get_contains(i));
-    }
+    } else if (isname(item, obj_get_name(i)))
+      count++;
+    if (obj_get_type_flag(i) == ITEM_CONTAINER)
+      count += item_in_list(g, item, obj_get_contains(i));
   }
   return count;
 }
 
-/*
-   BOOLEAN return, just check if a player or mob
-   has an item of any sort, searched for by name
-   or id.
-   searching equipment as well as inventory,
-   and containers.
-   Jamie Nelson (mordecai@timespace.co.nz)
-   MUD -- 4dimensions.org:6000
-*/
+} // namespace dg
 
-static bool char_has_item(GameWorld *g, char *item, struct char_data *ch)
-{
+namespace {
 
-  /* If this works, no more searching needed */
-  if (get_object_in_equip(g, ch, item) != nullptr)
-    return true;
+using dg::field_query;
 
-  if (item_in_list(g, item, char_get_inventory(ch)) == 0)
-    return false;
-  else
-    return true;
-}
-
-static bool text_processed(char *field, char *subfield, const dg::variable *vd,
-                           std::string &str)
-{
-
-  if (!vd) /* a field of self, which is no variable: its own fields, not these */
-    return false;
-
-  if (!strcasecmp(field, "strlen")) { /* strlen    */
-    std::string limit = str_format("{:d}", as_unsigned(strlen(vd->value.c_str())));
-    str               = str_format("{:d}", atoi(limit.c_str()));
-    return true;
-  } else if (!strcasecmp(field, "trim")) { /* trim      */
-    /* trim whitespace from ends */
-    const char *space = " \t\n\v\f\r"; /* what isspace() finds */
-    size_t start      = vd->value.find_first_not_of(space);
-    str               = start == std::string::npos ? "" : vd->value.substr(start, vd->value.find_last_not_of(space) + 1 - start);
-    return true;
-  } else if (!strcasecmp(field, "contains")) { /* contains  */
-    if (str_str(vd->value.c_str(), subfield))
-      str = "1";
-    else
-      str = "0";
-    return true;
-  } else if (!strcasecmp(field, "car")) { /* car       */
-    const char *car = vd->value.c_str();
-    str.clear();
-    while (*car && !isspace(*car))
-      str += *car++;
-    return true;
-
-  } else if (!strcasecmp(field, "cdr")) { /* cdr       */
-    const char *cdr = vd->value.c_str();
-    while (*cdr && !isspace(*cdr)) cdr++; /* skip 1st field */
-    while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
-
-    str = str_format("{}", cdr);
-    return true;
-  } else if (!strcasecmp(field, "charat")) { /* CharAt    */
-    size_t len = strlen(vd->value.c_str()), dgindex = atoi(subfield);
-    if (dgindex > len || dgindex < 1)
-      str = "";
-    else
-      str = str_format("{:c}", as_char(vd->value[dgindex - 1]));
-    return true;
-  }
-  if (!strcasecmp(field, "mudcommand")) {
-    /* find the mud command returned from this text */
-    /* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
-    /* depending on what patches you've got applied.                      */
-    /* on older source bases:    extern struct command_info *cmd_info; */
-    int length, cmd;
-    for (length = strlen(vd->value.c_str()), cmd = 0;
-         *cmd_info[cmd].command != '\n'; cmd++)
-      if (!strncmp(cmd_info[cmd].command, vd->value.c_str(), length))
-        break;
-
-    if (*cmd_info[cmd].command == '\n')
-      str = "";
-    else
-      str = str_format("{}", cmd_info[cmd].command);
-    return true;
-  }
-
-  return false;
-}
-
-/* type: whose command names %send% and the like give, which is go's own but for X.global() */
-static void find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, std::string &str);
-
-/* sets str to the value of field on character c (var.field where var names a character) */
-static void char_field(GameWorld *g, char_data *c, owner_ptr go, const dg::variable *vd, trig_data *trig, char *field, char *subfield, std::string &str)
-{
-  int type = owner_type(go);
-
-  int i, j;
-
-  if (text_processed(field, subfield, vd, str)) return;
-
-  else if (!strcasecmp(field, "global")) { /* get global of something else */
-    str = "";
-    if (char_is_npc(c) && char_get_script(c)) {
-      char no_field[] = "";
-      find_replacement(g, go, char_get_script(c), nullptr, MOB_TRIGGER,
-                       subfield, no_field, nullptr, str);
-    }
-    return;
-  }
-  /* set str to some 'non-text' first */
-  str = "\x1";
-
-  switch (tolower(*field)) {
-    case 'a':
-      if (!strcasecmp(field, "aaaaa")) {
-        str = "0";
-      } else if (!strcasecmp(field, "affect")) {
-        if (subfield && *subfield) {
-          int affect = get_flag_by_name(affected_bits, subfield);
-          if (affect != NOFLAG && char_aff_flagged(c, affect))
-            str = "1";
-          else
-            str = "0";
-        } else
-          str = "0";
-      } else if (!strcasecmp(field, "alias"))
-        str = str_format("{}", char_get_pc_name(c));
-
-      else if (!strcasecmp(field, "align")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_alignment(c, MAX(-1000, MIN(addition, 1000)));
-        }
-        str = str_format("{:d}", char_get_alignment(c));
-      }
-      break;
-    case 'b':
-      if (!strcasecmp(field, "bank")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_bank_gold(c, char_get_bank_gold(c) + (addition));
-        }
-        str = str_format("{:d}", char_get_gold(c));
-      }
-      break;
-    case 'c':
-      if (!strcasecmp(field, "canbeseen")) {
-        if ((type == MOB_TRIGGER) && !char_can_see(g, (std::get<char_data *>(go)), c))
-          str = "0";
-        else
-          str = "1";
-      } else if (!strcasecmp(field, "carry")) {
-        if (!char_is_npc(c) && char_get_carrying(g, c))
-          str = "1";
-        else
-          str = "0";
-      } else if (!strcasecmp(field, "clan")) {
-        str = "0";
-      } else if (!strcasecmp(field, "class")) {
-        if (!char_is_npc(c))
-          str = str_format("{}", char_sensei_name(c));
-        else
-          str = str_format("blank");
-      }
-
-      else if (!strcasecmp(field, "con")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          int max      = 100;
-          char_set_aff_abils_con(c, char_get_aff_abils_con(c) + (addition));
-          if (char_get_aff_abils_con(c) > max) char_set_aff_abils_con(c, max);
-          if (char_get_aff_abils_con(c) < 3) char_set_aff_abils_con(c, 3);
-        }
-        str = str_format("{:d}", char_get_aff_abils_con(c));
-      } else if (!strcasecmp(field, "cha")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          int max      = 100;
-          char_set_aff_abils_cha(c, char_get_aff_abils_cha(c) + (addition));
-          if (char_get_aff_abils_cha(c) > max) char_set_aff_abils_cha(c, max);
-          if (char_get_aff_abils_cha(c) < 3) char_set_aff_abils_cha(c, 3);
-        }
-        str = str_format("{:d}", char_get_aff_abils_cha(c));
-      }
-      break;
-    case 'd':
-      if (!strcasecmp(field, "dead")) {
-        if (char_aff_flagged(c, AFF_SPIRIT))
-          str = "1";
-        else
-          str = "0";
-      } else if (!strcasecmp(field, "death")) {
-        str = str_format("{:d}", (long long)char_get_deathtime(c));
-      } else if (!strcasecmp(field, "dex")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          int max      = 100;
-          char_set_aff_abils_dex(c, char_get_aff_abils_dex(c) + (addition));
-          if (char_get_aff_abils_dex(c) > max) char_set_aff_abils_dex(c, max);
-          if (char_get_aff_abils_dex(c) < 3) char_set_aff_abils_dex(c, 3);
-        }
-        str = str_format("{:d}", char_get_aff_abils_dex(c));
-      } else if (!strcasecmp(field, "drag")) {
-        if (!char_is_npc(c) && char_get_drag(g, c))
-          str = "1";
-        else
-          str = "0";
-      } else if (!strcasecmp(field, "drunk")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_conditions(g, c, DRUNK, MAX(-1, MIN(addition, 24)));
-        }
-        str = str_format("{:d}", char_get_conditions(g, c, DRUNK));
-      }
-      break;
-    case 'e':
-      if (!strcasecmp(field, "eq")) {
-        int pos;
-        if (!subfield || !*subfield)
-          str = "";
-        else if (*subfield == '*') {
-          for (i = 0, j = 0; i < NUM_WEARS; i++)
-            if (char_get_equipment(c, i)) {
-              j++;
-              break;
-            }
-          if (j > 0)
-            str = "1";
-          else
-            str = "";
-        } else if ((pos = find_eq_pos_script(subfield)) < 0 || !char_get_equipment(c, pos))
-          str = "";
-        else
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(char_get_equipment(c, pos)));
-      }
-      if (!strcasecmp(field, "exp")) {
-        if (subfield && *subfield) {
-          int64_t addition = MIN(atoll(subfield), 2100000000);
-
-          gain_exp(g, c, addition);
-        }
-        str = str_format("{:d}", char_get_exp(c));
-      }
-      break;
-    case 'f':
-      if (!strcasecmp(field, "fighting")) {
-        if (char_get_fighting(g, c))
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(char_get_fighting(g, c)));
-        else
-          str = "";
-      } else if (!strcasecmp(field, "flying")) {
-        if (char_aff_flagged(c, AFF_FLYING))
-          str = "1";
-        else
-          str = "0";
-      } else if (!strcasecmp(field, "follower")) {
-        if (!char_get_followers(c))
-          str = "";
-        else
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_followers(c).newest());
-      }
-      break;
-    case 'g':
-      if (!strcasecmp(field, "gold")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_gold(c, char_get_gold(c) + (addition));
-        }
-        str = str_format("{:d}", char_get_gold(c));
-      }
-      break;
-    case 'h':
-      if (!strcasecmp(field, "has_item")) {
-        if (!(subfield && *subfield))
-          str = "";
-        else
-          str = str_format("{:d}", char_has_item(g, subfield, c));
-      } else if (!strcasecmp(field, "hisher"))
-        str = str_format("{}", char_hshr(c));
-
-      else if (!strcasecmp(field, "heshe"))
-        str = str_format("{}", char_hssh(c));
-
-      else if (!strcasecmp(field, "himher"))
-        str = str_format("{}", char_hmhr(c));
-
-      else if (!strcasecmp(field, "hitp")) {
-        if (subfield && *subfield) {
-          int64_t addition = atoll(subfield);
-          if (addition > 0) {
-            incCurHealth(g, c, addition, true);
-          } else {
-            decCurHealth(g, c, addition, 0);
-          }
-
-          update_pos(g, c);
-        }
-        str = str_format("{:d}", getCurPL(g, c));
-      } else if (!strcasecmp(field, "hunger")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_conditions(g, c, HUNGER, MAX(-1, MIN(addition, 24)));
-        }
-        str = str_format("{:d}", char_get_conditions(g, c, HUNGER));
-      }
-      break;
-    case 'i':
-      if (!strcasecmp(field, "id"))
-        str = str_format("{:d}", char_get_id(c));
-
-      /* new check for pc/npc status */
-      else if (!strcasecmp(field, "is_pc")) {
-        if (char_is_npc(c))
-          str = "0";
-        else
-          str = "1";
-      }
-
-      else if (!strcasecmp(field, "inventory")) {
-        if (subfield && *subfield) {
-          for (obj_data *obj : char_inventory(g, c)) {
-            if (obj_get_vnum(g, obj) == atoi(subfield)) {
-              str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(obj)); /* arg given, found */
-              return;
-            }
-          }
-          str = "";      /* arg given, not found */
-        } else {         /* no arg given */
-          if (char_get_inventory(c)) {
-            str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_inventory(c).newest());
-          } else {
-            str = "";
-          }
-        }
-      }
-
-      else if (!strcasecmp(field, "is_killer")) {
-        if (subfield && *subfield) {
-          if (!strcasecmp("on", subfield))
-            char_plr_set(c, PLR_KILLER, true);
-          else if (!strcasecmp("off", subfield))
-            char_plr_set(c, PLR_KILLER, false);
-        }
-        if (char_plr_flagged(c, PLR_KILLER))
-          str = "1";
-        else
-          str = "0";
-      }
-
-      else if (!strcasecmp(field, "is_thief")) {
-        if (subfield && *subfield) {
-          if (!strcasecmp("on", subfield))
-            char_plr_set(c, PLR_THIEF, true);
-          else if (!strcasecmp("off", subfield))
-            char_plr_set(c, PLR_THIEF, false);
-        }
-        if (char_plr_flagged(c, PLR_THIEF))
-          str = "1";
-        else
-          str = "0";
-      }
-
-      else if (!strcasecmp(field, "int")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          int max      = 100;
-          char_set_aff_abils_intel(c, char_get_aff_abils_intel(c) + (addition));
-          if (char_get_aff_abils_intel(c) > max) char_set_aff_abils_intel(c, max);
-          if (char_get_aff_abils_intel(c) < 3) char_set_aff_abils_intel(c, 3);
-        }
-        str = str_format("{:d}", char_get_aff_abils_intel(c));
-      }
-      break;
-    case 'l':
-      if (!strcasecmp(field, "level"))
-        str = str_format("{:d}", char_get_level(c));
-      break;
-    case 'm':
-      if (!strcasecmp(field, "maxhitp")) {
-        if (subfield && *subfield) {
-          //GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
-        }
-        str = str_format("{:d}", getEffMaxPL(g, c));
-      }
-
-      else if (!strcasecmp(field, "mana")) {
-        if (subfield && *subfield) {
-          int64_t addition = atoll(subfield);
-          if (addition > 0) {
-            incCurKI(g, c, addition, true);
-          } else {
-            decCurKI(g, c, addition, 0);
-          }
-        }
-        str = str_format("{:d}", (getCurKI(g, c)));
-      } else if (!strcasecmp(field, "maxmana")) {
-        if (subfield && *subfield) {
-          //GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
-        }
-        str = str_format("{:d}", getMaxKI(g, c));
-      }
-
-      else if (!strcasecmp(field, "move")) {
-        if (subfield && *subfield) {
-          int64_t addition = atoll(subfield);
-          if (addition > 0) {
-            incCurST(g, c, addition, true);
-          } else {
-            decCurST(g, c, addition, 0);
-          }
-        }
-        str = str_format("{:d}", (getCurST(g, c)));
-      }
-
-      else if (!strcasecmp(field, "maxmove")) {
-        if (subfield && *subfield) {
-          //GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
-        }
-        str = str_format("{:d}", getMaxST(g, c));
-      }
-
-      else if (!strcasecmp(field, "master")) {
-        if (!char_get_master(g, c))
-          str = "";
-        else
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(char_get_master(g, c)));
-      }
-      break;
-    case 'n':
-      if (!strcasecmp(field, "name")) {
-        str = str_format("{}", char_get_name(c));
-      } else if (!strcasecmp(field, "next_in_room")) {
-        if (char_data *next = char_next_in_room(g, c))
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(next));
-        else
-          str = "";
-      }
-      break;
-    case 'p':
-      /* Thanks to Christian Ejlertsen for this idea
-         And to Ken Ray for speeding the implementation up :)*/
-      if (!strcasecmp(field, "pos")) {
-        if (subfield && *subfield) {
-          for (i = POS_SLEEPING; i <= POS_STANDING; i++) {
-            /* allows : Sleeping, Resting, Sitting, Fighting, Standing */
-            if (!strncasecmp(subfield, position_types[i], strlen(subfield))) {
-              char_set_position(c, i);
-              break;
-            }
-          }
-        }
-        str = str_format("{}", position_types[char_get_position(c)]);
-      } else if (!strcasecmp(field, "prac")) {
-        if (char_is_npc(c)) {
-          if (char_get_in_room(c) != NOWHERE) {
-            send_to_room(g, char_get_in_room(c), "Error!: Report this trigger error to the coding authorities!\r\n");
-          }
-        }
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_practice_points(g, c, MAX(0, char_get_practice_points(g, c) + addition));
-        }
-        str = str_format("{:d}", char_get_practice_points(g, c));
-      } else if (!strcasecmp(field, "plr")) {
-        if (subfield && *subfield) {
-          int plr = get_flag_by_name(player_bits, subfield);
-          if (plr != NOFLAG && char_plr_flagged(c, plr))
-            str = "1";
-          else
-            str = "0";
-        } else
-          str = "0";
-      } else if (!strcasecmp(field, "pref")) {
-        if (subfield && *subfield) {
-          int pref = get_flag_by_name(preference_bits, subfield);
-          if (pref != NOFLAG && char_prf_flagged(g, c, pref))
-            str = "1";
-          else
-            str = "0";
-        } else
-          str = "0";
-      }
-      break;
-    case 'r':
-      if (!strcasecmp(field, "room")) { /* in NOWHERE, return the void */
-                                        /* see note in dg_scripts.hpp */
-                                        str = str_format("{:c}{:d}", as_char(UID_CHAR),
-                                                         (char_get_in_room(c) != NOWHERE) ? char_get_in_room(c) + ROOM_ID_BASE : ROOM_ID_BASE);
-      } else if (!strcasecmp(field, "race")) {
-        str = str_format("{}", char_true_race_name(c));
-      } else if (!strcasecmp(field, "rpp")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_rp(c, char_get_rp(c) + (addition));
-        }
-
-        str = str_format("{:d}", char_get_rp(c));
-      }
-
-      break;
-    case 's':
-      if (!strcasecmp(field, "sex"))
-        str = str_format("{}", genders[(int)char_get_sex(c)]);
-
-      else if (!strcasecmp(field, "str")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          int max      = 100;
-          char_set_aff_abils_str(c, char_get_aff_abils_str(c) + (addition));
-          if (char_get_aff_abils_str(c) > max) char_set_aff_abils_str(c, max);
-          if (char_get_aff_abils_str(c) < 3) char_set_aff_abils_str(c, 3);
-        }
-        str = str_format("{:d}", char_get_aff_abils_str(c));
-      }
-
-      else if (!strcasecmp(field, "size")) {
-        if (subfield && *subfield) {
-          int ns;
-          if ((ns = search_block(subfield, size_names, false)) > -1) {
-            char_set_size(c, ns);
-          }
-        }
-        str = sprinttype(get_size(c), size_names);
-      }
-
-      else if (!strcasecmp(field, "skill"))
-        str = skill_percent(g, c, subfield);
-
-      else if (!strcasecmp(field, "skillset")) {
-        if (!char_is_npc(c) && subfield && *subfield) {
-          char skillname[MAX_INPUT_LENGTH], *amount;
-          amount = one_word(subfield, skillname);
-          skip_spaces(&amount);
-          if (amount && *amount && is_number(amount)) {
-            int skillnum = find_skill_num(g, skillname, SKTYPE_SKILL);
-            if (skillnum > 0) {
-              int new_value = MAX(0, MIN(100, atoi(amount)));
-              char_set_skills_base(c, skillnum, new_value);
-            }
-          }
-        }
-        str = ""; /* so the parser know we recognize 'skillset' as a field */
-      }
-
-      break;
-    case 't':
-      if (!strcasecmp(field, "thirst")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_conditions(g, c, THIRST, MAX(-1, MIN(addition, 24)));
-        }
-        str = str_format("{:d}", char_get_conditions(g, c, THIRST));
-      } else if (!strcasecmp(field, "tnl")) {
-        str = str_format("{:d}", (long long)level_exp(c, char_get_level(c) + 1));
-      }
-      break;
-    case 'v':
-      if (!strcasecmp(field, "vnum")) {
-        if (subfield && *subfield) {
-          str = str_format("{:d}", char_is_npc(c) ? (int)(char_get_mob_vnum(g, c) == atoi(subfield)) : -1);
-        } else {
-          if (char_is_npc(c))
-            str = str_format("{:d}", char_get_mob_vnum(g, c));
-          else
-            /*
-           * for compatibility with unsigned indexes
-           * - this is deprecated - use %actor.is_pc% to check
-           * instead of %actor.vnum% == -1  --Welcor 09/03
-           */
-            str = "-1";
-        }
-      }
-
-      else if (!strcasecmp(field, "varexists")) {
-        str = "0";
-        if (char_get_script(c) && char_get_script(c)->global_vars.find(subfield))
-          str = "1";
-      }
-
-      break;
-    case 'w':
-      if (!strcasecmp(field, "weight"))
-        str = str_format("{:d}", char_get_weight(c));
-      else if (!strcasecmp(field, "wis")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          int max      = 100;
-          char_set_aff_abils_wis(c, char_get_aff_abils_wis(c) + (addition));
-          if (char_get_aff_abils_wis(c) > max) char_set_aff_abils_wis(c, max);
-          if (char_get_aff_abils_wis(c) < 3) char_set_aff_abils_wis(c, 3);
-        }
-        str = str_format("{:d}", char_get_aff_abils_wis(c));
-      }
-      break;
-    case 'z':
-      if (!strcasecmp(field, "zenni")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          char_set_gold(c, char_get_gold(c) + (addition));
-        }
-        str = str_format("{:d}", char_get_gold(c));
-      }
-      break;
-  } /* switch *field */
-
-  if (str == "\x1") { /* no match found in switch */
-    if (char_get_script(c)) {
-      vd = char_get_script(c)->global_vars.find(field);
-      if (vd)
-        str = str_format("{}", vd->value);
-      else {
-        str = "";
-        script_log(g, "Trigger: {}, VNum {:d}. unknown char field: '{}'",
-                   trig->name, trig_get_vnum(g, trig), field);
-      }
-    } else {
-      str = "";
-      script_log(g, "Trigger: {}, VNum {:d}. unknown char field: '{}'",
-                 trig->name, trig_get_vnum(g, trig), field);
-    }
-  }
-}
-
-/* sets str to the value of field on object o */
-static void obj_field(GameWorld *g, obj_data *o, const dg::variable *vd, trig_data *trig, int type, char *field, char *subfield, std::string &str)
-{
-  if (text_processed(field, subfield, vd, str)) return;
-
-  str = "\x1";
-  switch (tolower(*field)) {
-    case 'a':
-      if (!strcasecmp(field, "affects")) {
-        if (subfield && *subfield) {
-          if (check_flags_by_name_ar(obj_get_bitvector(o), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
-            str = str_format("1");
-          else
-            str = str_format("0");
-        } else
-          str = str_format("0");
-      }
-      break;
-    case 'c':
-      if (!strcasecmp(field, "cost")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          obj_set_cost(o, MAX(0, addition + obj_get_cost(o)));
-        }
-        str = str_format("{:d}", obj_get_cost(o));
-      }
-
-      else if (!strcasecmp(field, "cost_per_day")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          obj_set_cost_per_day(o, MAX(0, addition + obj_get_cost_per_day(o)));
-        }
-        str = str_format("{:d}", obj_get_cost_per_day(o));
-      }
-
-      else if (!strcasecmp(field, "carried_by")) {
-        if (obj_get_carried_by(o))
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(obj_get_carried_by(o)));
-        else
-          str = "";
-      }
-
-      else if (!strcasecmp(field, "contents")) {
-        if (obj_get_contains(o))
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_contains(o).newest());
-        else
-          str = "";
-      }
-      /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-      else if (!strcasecmp(field, "count")) {
-        if (obj_get_type_flag(o) == ITEM_CONTAINER)
-          str = str_format("{:d}", item_in_list(g, subfield, obj_get_contains(o)));
-        else
-          str = "0";
-      }
-      break;
-    case 'e':
-      if (!strcasecmp(field, "extra")) {
-        if (subfield && *subfield) {
-          if (check_flags_by_name_ar(obj_get_extra_flags(o), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
-            str = str_format("1");
-          else
-            str = str_format("0");
-        } else
-          str = str_format("0");
-      } else {
-        str = sprintbitarray(obj_get_extra_flags(o), extra_bits, EF_ARRAY_MAX);
-      }
-      break;
-    case 'h':
-      /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-      if (!strcasecmp(field, "has_in")) {
-        if (obj_get_type_flag(o) == ITEM_CONTAINER)
-          str = str_format("{}", (item_in_list(g, subfield, obj_get_contains(o)) ? "1" : "0"));
-        else
-          str = "0";
-      }
-      if (!strcasecmp(field, "health")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          obj_set_value(o, VAL_ALL_HEALTH, MAX(1, addition + obj_get_value(o, VAL_ALL_HEALTH)));
-          if (obj_extra_flagged(o, ITEM_BROKEN) && obj_get_value(o, VAL_ALL_HEALTH) >= 100)
-            obj_extra_set(o, ITEM_BROKEN, false);
-        }
-        str = str_format("{:d}", obj_get_value(o, VAL_ALL_HEALTH));
-      }
-      break;
-    case 'i':
-      if (!strcasecmp(field, "id"))
-        str = str_format("{:d}", obj_get_id(o));
-
-      else if (!strcasecmp(field, "is_inroom")) {
-        if (obj_get_in_room(o) != NOWHERE)
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_in_room(o) + ROOM_ID_BASE);
-        else
-          str = "";
-      } else if (!strcasecmp(field, "is_pc")) {
-        str = "-1";
-      } else if (!strcasecmp(field, "itemflag")) {
-        if (subfield && *subfield) {
-          int item = get_flag_by_name(extra_bits, subfield);
-          if (item != NOFLAG && obj_extra_flagged(o, item))
-            str = "1";
-          else
-            str = "0";
-        } else
-          str = "0";
-      }
-      break;
-    case 'l':
-      if (!strcasecmp(field, "level"))
-        str = str_format("{:d}", obj_get_level(o));
-      break;
-
-    case 'n':
-      if (!strcasecmp(field, "name")) {
-        if (!subfield || !*subfield)
-          str = str_format("{}", obj_get_name(o));
-        else {
-          std::string blah = str_format("{} {}", obj_get_name(o), subfield);
-          obj_set_name(o, blah.c_str());
-        }
-      } else if (!strcasecmp(field, "next_in_list")) {
-        if (obj_data *next = obj_next_in_list(g, o))
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(next));
-        else
-          str = "";
-      }
-      break;
-    case 'r':
-      if (!strcasecmp(field, "room")) {
-        if (obj_room(o) != NOWHERE)
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_room(o) + ROOM_ID_BASE);
-        else
-          str = "";
-      }
-      break;
-    case 's':
-      if (!strcasecmp(field, "shortdesc")) {
-        if (!subfield || !*subfield)
-          str = str_format("{}", obj_get_short_description(o));
-        else {
-          std::string blah = str_format("{} @wnicknamed @D(@C{}@D)@n", obj_get_short_description(o), subfield);
-          obj_set_short_description(o, blah.c_str());
-        }
-      } else if (!strcasecmp(field, "setaffects")) {
-        if (subfield && *subfield) {
-          int ns;
-          if ((ns = check_flags_by_name_ar(obj_get_bitvector(o), NUM_AFF_FLAGS, subfield, affected_bits)) > 0) {
-            obj_aff_toggle(o, ns);
-            str = str_format("1");
-          }
-        }
-      } else if (!strcasecmp(field, "setextra")) {
-        if (subfield && *subfield) {
-          int ns;
-          if ((ns = check_flags_by_name_ar(obj_get_extra_flags(o), NUM_ITEM_FLAGS, subfield, extra_bits)) > 0) {
-            obj_extra_toggle(o, ns);
-            str = str_format("1");
-          }
-        }
-      }
-
-      else if (!strcasecmp(field, "size")) {
-        if (subfield && *subfield) {
-          int ns;
-          if ((ns = search_block(subfield, size_names, false)) > -1) {
-            obj_set_size(o, ns);
-          }
-        }
-        str = sprinttype(obj_get_size(o), size_names);
-      }
-      break;
-    case 't':
-      if (!strcasecmp(field, "type"))
-        str = sprinttype(obj_get_type_flag(o), item_types);
-
-      else if (!strcasecmp(field, "timer"))
-        str = str_format("{:d}", obj_get_timer(o));
-      break;
-    case 'v':
-      if (!strcasecmp(field, "vnum"))
-        if (subfield && *subfield) {
-          str = str_format("{:d}", (int)(obj_get_vnum(g, o) == atoi(subfield)));
-        } else {
-          str = str_format("{:d}", obj_get_vnum(g, o));
-        }
-      else if (!strcasecmp(field, "val0"))
-        str = str_format("{:d}", obj_get_value(o, 0));
-
-      else if (!strcasecmp(field, "val1"))
-        str = str_format("{:d}", obj_get_value(o, 1));
-
-      else if (!strcasecmp(field, "val2"))
-        str = str_format("{:d}", obj_get_value(o, 2));
-
-      else if (!strcasecmp(field, "val3"))
-        str = str_format("{:d}", obj_get_value(o, 3));
-
-      else if (!strcasecmp(field, "val4"))
-        str = str_format("{:d}", obj_get_value(o, 4));
-
-      else if (!strcasecmp(field, "val5"))
-        str = str_format("{:d}", obj_get_value(o, 5));
-
-      else if (!strcasecmp(field, "val6"))
-        str = str_format("{:d}", obj_get_value(o, 6));
-
-      else if (!strcasecmp(field, "val7"))
-        str = str_format("{:d}", obj_get_value(o, 7));
-      break;
-    case 'w':
-      if (!strcasecmp(field, "weight")) {
-        if (subfield && *subfield) {
-          int addition = atoi(subfield);
-          int64_t before = obj_get_weight(o);
-          if (addition < 0 || addition > 0) {
-            obj_set_weight(o, MAX(0, addition + obj_get_weight(o)));
-          } else {
-            obj_set_weight(o, 0);
-          }
-          obj_weight_changed(g, o, obj_get_weight(o) - before);
-        }
-        str = str_format("{:d}", obj_get_weight(o));
-      }
-
-      else if (!strcasecmp(field, "worn_by")) {
-        if (obj_get_worn_by(o))
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(obj_get_worn_by(o)));
-        else
-          str = "";
-      }
-      break;
-  } /* switch *field */
-
-  if (str == "\x1") {          /* no match in switch */
-    if (obj_get_script(o)) {   /* check for global var */
-      vd = obj_get_script(o)->global_vars.find(field);
-      if (vd)
-        str = str_format("{}", vd->value);
-      else {
-        str = "";
-        if (strcasecmp(trig->name.c_str(), "Rename Object")) {
-          script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown object field: '{}'",
-                     trig->name, trig_get_vnum(g, trig), type, field);
-        }
-      }
-    } else {
-      str = "";
-      if (strcasecmp(trig->name.c_str(), "Rename Object")) {
-        script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown object field: '{}'",
-                   trig->name, trig_get_vnum(g, trig), type, field);
-      }
-    }
-  }
-}
-
-/* sets str to %room.<exit>[(vnum|key|bits|room)]% for exit dir of room r */
-static void room_exit_field(GameWorld *g, struct room_data *r, int dir, char *subfield, std::string &str)
-{
-  if (room_get_dir_option(r, dir)) {
-    if (subfield && *subfield) {
-      if (!strcasecmp(subfield, "vnum"))
-        str = str_format("{:d}", room_get_dir_option(r, dir)->to_room);
-      else if (!strcasecmp(subfield, "key"))
-        str = str_format("{:d}", room_get_dir_option(r, dir)->key);
-      else if (!strcasecmp(subfield, "bits"))
-        str = sprintbit(room_get_dir_option(r, dir)->exit_info, exit_bits);
-      else if (!strcasecmp(subfield, "room")) {
-        if (room_get_dir_option(r, dir)->to_room != NOWHERE)
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), room_get_dir_option(r, dir)->to_room + ROOM_ID_BASE);
-        else
-          str = "";
-      }
-    } else /* no subfield - default to bits */
-      str = sprintbit(room_get_dir_option(r, dir)->exit_info, exit_bits);
-  } else
-    str = "";
-}
-
-/* the %room.<exit>% field names, and the direction each one reads */
-static const struct {
-  const char *name;
-  int dir;
-} room_exit_fields[] = {
-    {"north",     NORTH    },
-    {"east",      EAST     },
-    {"south",     SOUTH    },
-    {"west",      WEST     },
-    {"up",        UP       },
-    {"down",      DOWN     },
-    {"northwest", NORTHWEST},
-    {"northeast", NORTHEAST},
-    {"southwest", SOUTHWEST},
-    {"southeast", SOUTHEAST},
-    {"inside",    INDIR    },
-    {"outside",   OUTDIR   },
+/* The fields of any variable's text, as in %arg.car%, which work on the text and not on what it names */
+const struct {
+  std::string_view name;
+  std::string (*get)(const std::string &text, const std::string &arg);
+} text_fields[] = {
+    {"strlen", [](const std::string &text, const std::string &) { return str_format("{:d}", strlen(text.c_str())); }},
+    {"trim", [](const std::string &text, const std::string &) { /* without whitespace at either end */
+       const char *space = " \t\n\v\f\r";                   /* what isspace() finds */
+       size_t start      = text.find_first_not_of(space);
+       return start == std::string::npos ? std::string() : text.substr(start, text.find_last_not_of(space) + 1 - start);
+     }},
+    {"contains", [](const std::string &text, const std::string &arg) {
+       return std::string(str_str(text.c_str(), arg.c_str()) ? "1" : "0");
+     }},
+    {"car", [](const std::string &text, const std::string &) { /* the first word */
+       const char *car = text.c_str();
+       std::string word;
+       while (*car && !isspace(*car))
+         word += *car++;
+       return word;
+     }},
+    {"cdr", [](const std::string &text, const std::string &) { /* all but the first word */
+       const char *cdr = text.c_str();
+       while (*cdr && !isspace(*cdr))
+         cdr++;
+       while (*cdr && isspace(*cdr))
+         cdr++;
+       return std::string(cdr);
+     }},
+    {"charat", [](const std::string &text, const std::string &arg) { /* the character at a place, from 1 */
+       size_t len = strlen(text.c_str()), at = atoi(arg.c_str());
+       return at > len || at < 1 ? std::string() : std::string(1, text[at - 1]);
+     }},
+    {"mudcommand", [](const std::string &text, const std::string &) { /* the command the text is the start of */
+       size_t length = strlen(text.c_str());
+       for (int cmd = 0; *cmd_info[cmd].command != '\n'; cmd++)
+         if (!strncmp(cmd_info[cmd].command, text.c_str(), length))
+           return std::string(cmd_info[cmd].command);
+       return std::string();
+     }},
 };
 
-/* returns the direction named by an exit field, or -1 */
-static int room_exit_field_dir(const char *field)
+/* The names %send%, %echo% and the rest stand for: the command of that name for each kind of owner */
+const struct {
+  std::string_view name;
+  const char *per_kind[3]; /* for a mob, an object, a room */
+} command_names[] = {
+    {"door",       {"mdoor ", "odoor ", "wdoor "}                     },
+    {"force",      {"mforce ", "oforce ", "wforce "}                  },
+    {"load",       {"mload ", "oload ", "wload "}                     },
+    {"purge",      {"mpurge ", "opurge ", "wpurge "}                  },
+    {"teleport",   {"mteleport ", "oteleport ", "wteleport "}         },
+    {"damage",     {"mdamage ", "odamage ", "wdamage "}               },
+    {"send",       {"msend ", "osend ", "wsend "}                     },
+    {"echo",       {"mecho ", "oecho ", "wecho "}                     },
+    {"echoaround", {"mechoaround ", "oechoaround ", "wechoaround "}   },
+    {"zoneecho",   {"mzoneecho ", "ozoneecho ", "wzoneecho "}         },
+    {"asound",     {"masound ", "oasound ", "wasound "}               },
+    {"at",         {"mat ", "oat ", "wat "}                           },
+    {"transform",  {"mtransform ", "otransform ", "wecho "}           }, /* there is no wtransform */
+    {"recho",      {"mrecho ", "orecho ", "wrecho "}                  },
+};
+
+/* The variable var: the trigger's own, or else the script's global seen from its context */
+const dg::variable *find_variable(struct script_data *sc, trig_data *trig, const std::string &var)
 {
-  for (size_t k = 0; k < countof(room_exit_fields); k++)
-    if (!strcasecmp(field, room_exit_fields[k].name))
-      return room_exit_fields[k].dir;
-  return -1;
-}
-
-/* sets str to the value of field on room r */
-static void room_field(GameWorld *g, struct room_data *r, const dg::variable *vd, trig_data *trig, int type, char *field, char *subfield, std::string &str)
-{
-  int dir;
-
-  if (text_processed(field, subfield, vd, str)) return;
-
-  /* special handling of the void, as it stores all 'full global' variables */
-  if (room_get_number(r) == 0) {
-    if (!room_get_script(r)) {
-      str = "";
-      script_log(g, "Trigger: {}, Vnum {:d}, type {:d}. Trying to access Global var list of void. Apparently this has not been set up!",
-                 trig ? trig->name.c_str() : "none", trig ? trig_get_vnum(g, trig) : NOTHING, type);
-    } else {
-      vd = room_get_script(r)->global_vars.find(field);
-      if (vd)
-        str = str_format("{}", vd->value);
-      else
-        str = "";
-    }
-  }
-
-  else if (!strcasecmp(field, "name"))
-    str = str_format("{}", room_get_name(r));
-
-  else if (!strcasecmp(field, "sector"))
-    str = sprinttype(room_get_sector_type(r), sector_types);
-
-  else if (!strcasecmp(field, "gravity"))
-    str = str_format("{:d}", room_get_gravity(r));
-
-  else if (!strcasecmp(field, "vnum")) {
-    if (subfield && *subfield) {
-      str = str_format("{:d}", (int)(room_get_number(r) == atoi(subfield)));
-    } else {
-      str = str_format("{:d}", room_get_number(r));
-    }
-  } else if (!strcasecmp(field, "contents")) {
-    if (subfield && *subfield) {
-      for (obj_data *obj : obj_list(g, room_get_contents(r))) {
-        if (obj_get_vnum(g, obj) == atoi(subfield)) {
-          /* arg given, found */
-          str = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(obj));
-          return;
-        }
-      }
-      str = "";      /* arg given, not found */
-    } else {         /* no arg given */
-      if (room_get_contents(r)) {
-        str = str_format("{:c}{:d}", as_char(UID_CHAR), room_get_contents(r).newest());
-      } else {
-        str = "";
-      }
-    }
-  }
-
-  else if (!strcasecmp(field, "people")) {
-    if (room_get_people(r))
-      str = str_format("{:c}{:d}", as_char(UID_CHAR), room_get_people(r).newest());
-    else
-      str = "";
-  } else if (!strcasecmp(field, "id")) {
-    room_vnum rnum = room_get_number(r);
-    if (room_of(g, rnum))
-      str = str_format("{:d}", rnum + ROOM_ID_BASE);
-    else
-      str = "";
-  } else if (!strcasecmp(field, "weather")) {
-    const char *sky_look[] = {
-        "sunny",
-        "cloudy",
-        "rainy",
-        "lightning"};
-
-    if (!room_flagged(r, ROOM_INDOORS))
-      str = str_format("{}", sky_look[g->weather_info.sky]);
-    else
-      str = "";
-  } else if (!strcasecmp(field, "fishing")) {
-    room_vnum thisroom = room_get_number(r);
-    if (room_flagged(g, thisroom, ROOM_FISHING))
-      str = str_format("1");
-    else
-      str = str_format("0");
-  } else if (!strcasecmp(field, "zonenumber"))
-    str = str_format("{:d}", room_get_zone(r)->number);
-  else if (!strcasecmp(field, "zonename"))
-    str = str_format("{}", room_get_zone(r)->name);
-  else if (!strcasecmp(field, "roomflag")) {
-    if (subfield && *subfield) {
-      room_vnum thisroom = room_get_number(r);
-      if (check_flags_by_name_ar(room_get_room_flags(g, thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
-        str = str_format("1");
-      else
-        str = str_format("0");
-    } else
-      str = str_format("0");
-  } else if ((dir = room_exit_field_dir(field)) >= 0) {
-    room_exit_field(g, r, dir, subfield, str);
-  } else {
-    if (room_get_script(r)) { /* check for global var */
-      vd = room_get_script(r)->global_vars.find(field);
-      if (vd)
-        str = str_format("{}", vd->value);
-      else {
-        str = "";
-        script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown room field: '{}'",
-                   trig->name, trig_get_vnum(g, trig), type, field);
-      }
-    } else {
-      str = "";
-      script_log(g, "Trigger: {}, VNum {:d}, type: {:d}. unknown room field: '{}'",
-                 trig->name, trig_get_vnum(g, trig), type, field);
-    }
-  }
-}
-
-/* sets str to be the value of var.field */
-static void find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, std::string &str)
-{
-  const dg::variable *vd = nullptr;
-  char_data *ch, *c          = nullptr, *rndm;
-  obj_data *obj, *o          = nullptr;
-  struct room_data *room, *r = nullptr;
-  const char *name;
-  room_vnum num;
-  int count, i, doors;
-
-  const char *send_cmd[]       = {"msend ", "osend ", "wsend "};
-  const char *echo_cmd[]       = {"mecho ", "oecho ", "wecho "};
-  const char *echoaround_cmd[] = {"mechoaround ", "oechoaround ", "wechoaround "};
-  const char *door[]           = {"mdoor ", "odoor ", "wdoor "};
-  const char *force[]          = {"mforce ", "oforce ", "wforce "};
-  const char *load[]           = {"mload ", "oload ", "wload "};
-  const char *purge[]          = {"mpurge ", "opurge ", "wpurge "};
-  const char *teleport[]       = {"mteleport ", "oteleport ", "wteleport "};
-  /* the x kills a 'shadow' warning in gcc. */
-  const char *xdamage[]  = {"mdamage ", "odamage ", "wdamage "};
-  const char *zoneecho[] = {"mzoneecho ", "ozoneecho ", "wzoneecho "};
-  const char *asound[]   = {"masound ", "oasound ", "wasound "};
-  const char *at[]       = {"mat ", "oat ", "wat "};
-  /* there is no such thing as wtransform, thus the wecho below  */
-  const char *transform[] = {"mtransform ", "otransform ", "wecho "};
-  const char *recho[]     = {"mrecho ", "orecho ", "wrecho "};
-
-  str = "";
-
-  /* X.global() will have a NULL trig */
-  if (trig)
-    vd = trig->var_list.find(var);
-
-  /* some evil waitstates could crash the mud if sent here with sc==NULL*/
-  if (!vd && sc)
+  const dg::variable *vd = trig ? trig->var_list.find(var) : nullptr; /* X.global() has no trigger */
+  if (!vd && sc)                                                       /* some waits once came here with no script */
     vd = sc->global_vars.find_in(var, sc->context);
+  return vd;
+}
 
-  if (!*field) {
-    if (vd)
-      str = str_format("{}", vd->value);
-    else {
-      if (!strcasecmp(var, "self")) {
-        /* the owner's own, even for X.global(self), which once read an object or room as a mob */
-        str = str_format("{:c}{:d}", as_char(UID_CHAR), owner_uid(go));
-      } else if (!strcasecmp(var, "global")) {
-        /* so "remote varname %global%" will work */
-        str = str_format("{:d}", ROOM_ID_BASE);
-        return;
-      } else if (!strcasecmp(var, "ctime"))
-        str = str_format("{:d}", (long long)game_now(g));
-      else if (!strcasecmp(var, "door"))
-        str = str_format("{}", door[type]);
-      else if (!strcasecmp(var, "force"))
-        str = str_format("{}", force[type]);
-      else if (!strcasecmp(var, "load"))
-        str = str_format("{}", load[type]);
-      else if (!strcasecmp(var, "purge"))
-        str = str_format("{}", purge[type]);
-      else if (!strcasecmp(var, "teleport"))
-        str = str_format("{}", teleport[type]);
-      else if (!strcasecmp(var, "damage"))
-        str = str_format("{}", xdamage[type]);
-      else if (!strcasecmp(var, "send"))
-        str = str_format("{}", send_cmd[type]);
-      else if (!strcasecmp(var, "echo"))
-        str = str_format("{}", echo_cmd[type]);
-      else if (!strcasecmp(var, "echoaround"))
-        str = str_format("{}", echoaround_cmd[type]);
-      else if (!strcasecmp(var, "zoneecho"))
-        str = str_format("{}", zoneecho[type]);
-      else if (!strcasecmp(var, "asound"))
-        str = str_format("{}", asound[type]);
-      else if (!strcasecmp(var, "at"))
-        str = str_format("{}", at[type]);
-      else if (!strcasecmp(var, "transform"))
-        str = str_format("{}", transform[type]);
-      else if (!strcasecmp(var, "recho"))
-        str = str_format("{}", recho[type]);
-      else
-        str = "";
-    }
+std::string number(long long n) { return str_format("{:d}", n); }
 
-    return;
+/* The room the owner is in, or NOWHERE */
+room_vnum owner_room(const owner_ptr &go)
+{
+  return std::visit(overloaded{
+                        [](char_data *ch) { return char_get_in_room(ch); },
+                        [](obj_data *obj) { return obj_room(obj); },
+                        [](room_data *room) { return room_get_number(room); },
+                    },
+                    go);
+}
+
+/* %random.char%: someone in the owner's room, a mob choosing only among those it sees */
+std::string random_char(GameWorld *g, const owner_ptr &go)
+{
+  char_data *chosen = nullptr;
+  int count         = 0;
+  auto consider     = [&](char_data *who) {
+    if (!rand_number(g, 0, count))
+      chosen = who;
+    count++;
+  };
+
+  std::visit(overloaded{
+                 [&](char_data *ch) {
+                   for (char_data *tch : room_people(g, char_get_in_room(ch)))
+                     if (tch != ch && valid_dg_target(g, tch, DG_ALLOW_GODS) && char_can_see(g, ch, tch))
+                       consider(tch);
+                 },
+                 [&](obj_data *obj) {
+                   for (char_data *other : room_people(g, obj_room(obj)))
+                     if (valid_dg_target(g, other, DG_ALLOW_GODS))
+                       consider(other);
+                 },
+                 [&](room_data *room) {
+                   for (char_data *who : room_people(g, room))
+                     if (valid_dg_target(g, who, DG_ALLOW_GODS))
+                       consider(who);
+                 },
+             },
+             go);
+  return chosen ? dg::uid_text(char_get_id(chosen)) : "";
+}
+
+/* %random.dir%: an exit of the owner's room */
+std::string random_dir(GameWorld *g, const owner_ptr &go)
+{
+  room_data *room = room_of(g, owner_room(go));
+  if (!room)
+    return "";
+
+  int doors = 0;
+  for (int i = 0; i < NUM_OF_DIRS; i++)
+    if (room_get_dir_option(room, i))
+      doors++;
+  if (!doors)
+    return "";
+
+  for (;;) {
+    int dir = rand_number(g, 0, NUM_OF_DIRS - 1);
+    if (room_get_dir_option(room, dir))
+      return str_format("{}", dirs[dir]);
   }
+}
 
+/*
+ * The special variables that take a field, when no variable of the name hides them:
+ *
+ * %global.<name>%     - the game's global variable of that name
+ * %people.<room vnum>% - how many are in the room
+ * %time.<hour|day|month|year>% - the game's time
+ * %findmob.<room vnum X>(<mob vnum Y>)% - how many mobs in room X have vnum Y; players have the vnum -1, so
+ *                       %findmob.1204(-1)% counts the players in room 1204
+ * %findobj.<room vnum X>(<object vnum/id/name>)% - how many objects in room X have this name/id/vnum, so
+ *                       %findobj.453(1234)% counts the bags of gold (vnum 1234) in the vault (vnum 453)
+ * %random.<char|dir|number>% - someone in the owner's room, an exit of it, or a number from 1 up to that
+ *
+ * findmob and findobj are additions inspired by Jamie Nelson - mordecai@xtra.co.nz
+ */
+const struct {
+  std::string_view name;
+  std::string (*get)(const field_query &);
+} special_variables[] = {
+    {"global", [](const field_query &q) {
+       struct script_data *thescript = room_get_script(q.g, 0);
+       if (!thescript) {
+         script_log(q.g, "Attempt to find global var. Apparently the void has no script.");
+         return std::string();
+       }
+       const dg::variable *vd = thescript->global_vars.find(q.field);
+       return vd ? vd->value : "";
+     }},
+    {"people", [](const field_query &q) {
+       room_vnum num = atoi(q.field.c_str());
+       return number(num > 0 ? trgvar_in_room(q.g, num) : 0);
+     }},
+    {"time", [](const field_query &q) {
+       if (str_eq_nocase(q.field, "hour"))
+         return number(q.g->time_info.hours);
+       if (str_eq_nocase(q.field, "day"))
+         return number(q.g->time_info.day + 1);
+       if (str_eq_nocase(q.field, "month"))
+         return number(q.g->time_info.month + 1);
+       if (str_eq_nocase(q.field, "year"))
+         return number(q.g->time_info.year);
+       return std::string();
+     }},
+    {"findmob", [](const field_query &q) {
+       if (!q.has_arg()) {
+         script_log(q.g, "findmob.vnum(mvnum) - illegal syntax");
+         return std::string("0");
+       }
+       room_vnum rrnum = atoi(q.field.c_str());
+       if (!room_of(q.g, rrnum)) {
+         script_log(q.g, "findmob.vnum(ovnum): No room with vnum {:d}", rrnum);
+         return std::string("0");
+       }
+       mob_vnum mvnum = atoi(q.arg());
+       int count      = 0;
+       for (char_data *vict : room_people(q.g, rrnum))
+         if (char_get_mob_vnum(q.g, vict) == mvnum)
+           count++;
+       return number(count);
+     }},
+    {"findobj", [](const field_query &q) {
+       if (!q.has_arg()) {
+         script_log(q.g, "findobj.vnum(ovnum) - illegal syntax");
+         return std::string("0");
+       }
+       room_vnum rrnum = atoi(q.field.c_str());
+       if (!room_of(q.g, rrnum)) {
+         script_log(q.g, "findobj.vnum(ovnum): No room with vnum {:d}", rrnum);
+         return std::string("0");
+       }
+       /* item_in_list looks within containers as well. */
+       return number(dg::item_in_list(q.g, q.arg(), room_get_contents(q.g, rrnum)));
+     }},
+    {"random", [](const field_query &q) {
+       if (str_eq_nocase(q.field, "char"))
+         return random_char(q.g, q.go);
+       if (str_eq_nocase(q.field, "dir"))
+         return random_dir(q.g, q.go);
+       int num = atoi(q.field.c_str());
+       return number(num > 0 ? rand_number(q.g, 1, num) : 0);
+     }},
+};
+
+/* What a script owned by go finds by name: as a mob would, as an object would, or as a room would */
+using found = std::variant<std::monostate, char_data *, obj_data *, room_data *>;
+
+found find_by_name(GameWorld *g, const owner_ptr &go, const char *name)
+{
+  return std::visit(overloaded{
+                        [&](char_data *ch) -> found {
+                          if (obj_data *o = get_object_in_equip(g, ch, name))
+                            return o;
+                          if (obj_data *o = get_obj_in_list(g, name, char_get_inventory(ch)))
+                            return o;
+                          if (char_get_in_room(ch) != NOWHERE)
+                            if (char_data *c = get_char_in_room(g, room_of(g, char_get_in_room(ch)), name))
+                              return c;
+                          if (obj_data *o = get_obj_in_list(g, name, room_get_contents(g, char_get_in_room(ch))))
+                            return o;
+                          if (char_data *c = get_char(g, name))
+                            return c;
+                          if (obj_data *o = get_obj(g, name))
+                            return o;
+                          if (room_data *r = get_room(g, name))
+                            return r;
+                          return {};
+                        },
+                        [&](obj_data *obj) -> found {
+                          if (char_data *c = get_char_by_obj(g, obj, name))
+                            return c;
+                          if (obj_data *o = get_obj_by_obj(g, obj, name))
+                            return o;
+                          if (room_data *r = get_room(g, name))
+                            return r;
+                          return {};
+                        },
+                        [&](room_data *room) -> found {
+                          if (char_data *c = get_char_by_room(g, room, name))
+                            return c;
+                          if (obj_data *o = get_obj_by_room(g, room, name))
+                            return o;
+                          if (room_data *r = get_room(g, name))
+                            return r;
+                          return {};
+                        },
+                    },
+                    go);
+}
+
+/* The value of var.field(subfield); type is go's trigger type */
+std::string find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type,
+                             const std::string &var, const std::string &field, std::string &subfield)
+{
+  if (field.empty())
+    return dg::plain_variable(g, go, sc, trig, type, var);
+
+  field_query q{g, go, trig, type, field, subfield};
+  const dg::variable *vd = find_variable(sc, trig, var);
+  found what;
+
+  if (vd)
+    what = find_by_name(g, go, vd->value.c_str());
+  else if (str_eq_nocase(var, "self"))
+    std::visit([&](auto *self) { what = self; }, go);
   else {
-    if (vd) {
-      name = vd->value.data();
-
-      switch (type) {
-        case MOB_TRIGGER:
-          ch = std::get<char_data *>(go);
-
-          if ((o = get_object_in_equip(g, ch, name)))
-            ;
-          else if ((o = get_obj_in_list(g, name, char_get_inventory(ch))))
-            ;
-          else if (char_get_in_room(ch) != NOWHERE && (c = get_char_in_room(g, room_of(g, char_get_in_room(ch)), name)))
-            ;
-          else if ((o = get_obj_in_list(g, name, room_get_contents(g, char_get_in_room(ch)))))
-            ;
-          else if ((c = get_char(g, name)))
-            ;
-          else if ((o = get_obj(g, name)))
-            ;
-          else if ((r = get_room(g, name))) {}
-
-          break;
-        case OBJ_TRIGGER:
-          obj = std::get<obj_data *>(go);
-
-          if ((c = get_char_by_obj(g, obj, name)))
-            ;
-          else if ((o = get_obj_by_obj(g, obj, name)))
-            ;
-          else if ((r = get_room(g, name))) {}
-
-          break;
-        case WLD_TRIGGER:
-          room = std::get<room_data *>(go);
-
-          if ((c = get_char_by_room(g, room, name)))
-            ;
-          else if ((o = get_obj_by_room(g, room, name)))
-            ;
-          else if ((r = get_room(g, name))) {}
-
-          break;
-      }
-    }
-
-    else {
-      if (!strcasecmp(var, "self")) {
-        switch (type) {
-          case MOB_TRIGGER:
-            c = std::get<char_data *>(go);
-            r = nullptr;
-            o = nullptr; /* NULL assignments added to avoid self to always be    */
-            break;       /* the room.  - Welcor        */
-          case OBJ_TRIGGER:
-            o = std::get<obj_data *>(go);
-            c = nullptr;
-            r = nullptr;
-            break;
-          case WLD_TRIGGER:
-            r = std::get<room_data *>(go);
-            c = nullptr;
-            o = nullptr;
-            break;
-        }
-      }
-
-      else if (!strcasecmp(var, "global")) {
-        struct script_data *thescript = room_get_script(g, 0);
-        str                           = "";
-        if (!thescript) {
-          script_log(g, "Attempt to find global var. Apparently the void has no script.");
-          return;
-        }
-        vd = thescript->global_vars.find(field);
-
-        if (vd)
-          str = str_format("{}", vd->value);
-
-        return;
-      } else if (!strcasecmp(var, "people")) {
-        str = str_format("{:d}", ((num = atoi(field)) > 0) ? trgvar_in_room(g, num) : 0);
-        return;
-      } else if (!strcasecmp(var, "time")) {
-        if (!strcasecmp(field, "hour"))
-          str = str_format("{:d}", g->time_info.hours);
-        else if (!strcasecmp(field, "day"))
-          str = str_format("{:d}", g->time_info.day + 1);
-        else if (!strcasecmp(field, "month"))
-          str = str_format("{:d}", g->time_info.month + 1);
-        else if (!strcasecmp(field, "year"))
-          str = str_format("{:d}", g->time_info.year);
-        else str = "";
-        return;
-      }
-      /*
-
-      %findobj.<room vnum X>(<object vnum/id/name>)%
-        - count number of objects in room X with this name/id/vnum
-      %findmob.<room vnum X>(<mob vnum Y>)%
-        - count number of mobs in room X with vnum Y
-
-for example you want to check how many PC's are in room with vnum 1204.
-as PC's have the vnum -1...
-you would type:
-in any script:
-%echo% players in room 1204: %findmob.1204(-1)%
-
-Or say you had a bank, and you want a script to check the number of
-bags
-of gold (vnum: 1234)
-in the vault (vnum: 453) now and then. you can just use
-%findobj.453(1234)% and it will return the number of bags of gold.
-
-**/
-
-      /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-      else if (!strcasecmp(var, "findmob")) {
-        if (!field || !*field || !subfield || !*subfield) {
-          script_log(g, "findmob.vnum(mvnum) - illegal syntax");
-          str = "0";
-        } else {
-          room_vnum rrnum = atoi(field);
-          mob_vnum mvnum  = atoi(subfield);
-
-          if (!room_of(g, rrnum)) {
-            script_log(g, "findmob.vnum(ovnum): No room with vnum {:d}", atoi(field));
-            str = "0";
-          } else {
-            i = 0;
-            for (char_data *vict : room_people(g, rrnum))
-              if (char_get_mob_vnum(g, vict) == mvnum)
-                i++;
-
-            str = str_format("{:d}", i);
-          }
-        }
-      }
-      /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-      else if (!strcasecmp(var, "findobj")) {
-        if (!field || !*field || !subfield || !*subfield) {
-          script_log(g, "findobj.vnum(ovnum) - illegal syntax");
-          str = "0";
-        } else {
-          room_vnum rrnum = atoi(field);
-
-          if (!room_of(g, rrnum)) {
-            script_log(g, "findobj.vnum(ovnum): No room with vnum {:d}", atoi(field));
-            str = "0";
-          } else {
-            /* item_in_list looks within containers as well. */
-            str = str_format("{:d}", item_in_list(g, subfield, room_get_contents(g, rrnum)));
-          }
-        }
-      } else if (!strcasecmp(var, "random")) {
-        if (!strcasecmp(field, "char")) {
-          rndm  = nullptr;
-          count = 0;
-
-          if (type == MOB_TRIGGER) {
-            ch = std::get<char_data *>(go);
-            for (char_data *tch : room_people(g, char_get_in_room(ch)))
-              if ((tch != ch) && valid_dg_target(g, tch, DG_ALLOW_GODS) &&
-                  char_can_see(g, ch, tch)) {
-                if (!rand_number(g, 0, count))
-                  rndm = tch;
-                count++;
-              }
-          }
-
-          else if (type == OBJ_TRIGGER) {
-            for (char_data *other : room_people(g, obj_room(std::get<obj_data *>(go))))
-              if (valid_dg_target(g, other, DG_ALLOW_GODS)) {
-                if (!rand_number(g, 0, count))
-                  rndm = other;
-                count++;
-              }
-          }
-
-          else if (type == WLD_TRIGGER) {
-            for (char_data *who : room_people(g, std::get<room_data *>(go)))
-              if (valid_dg_target(g, who, DG_ALLOW_GODS)) {
-
-                if (!rand_number(g, 0, count))
-                  rndm = who;
-                count++;
-              }
-          }
-
-          if (rndm)
-            str = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(rndm));
-          else
-            str = "";
-        }
-
-        else if (!strcasecmp(field, "dir")) {
-          room_vnum in_room = NOWHERE;
-
-          switch (type) {
-            case WLD_TRIGGER:
-              in_room = room_get_number(std::get<room_data *>(go));
-              break;
-            case OBJ_TRIGGER:
-              in_room = obj_room(std::get<obj_data *>(go));
-              break;
-            case MOB_TRIGGER:
-              in_room = char_get_in_room(std::get<char_data *>(go));
-              break;
-          }
-          if (!room_of(g, in_room)) {
-            str = "";
-          } else {
-            doors = 0;
-            room  = room_of(g, in_room);
-            for (i = 0; i < NUM_OF_DIRS; i++)
-              if (room_get_dir_option(room, i))
-                doors++;
-
-            if (!doors) {
-              str = "";
-            } else {
-              for (;;) {
-                doors = rand_number(g, 0, NUM_OF_DIRS - 1);
-                if (room_get_dir_option(room, doors))
-                  break;
-              }
-              str = str_format("{}", dirs[doors]);
-            }
-          }
-        } else
-          str = str_format("{:d}", ((num = atoi(field)) > 0) ? rand_number(g, 1, num) : 0);
-
-        return;
-      }
-    }
-
-    if (c)
-      char_field(g, c, go, vd, trig, field, subfield, str);
-    else if (o)
-      obj_field(g, o, vd, trig, type, field, subfield, str);
-    else if (r)
-      room_field(g, r, vd, trig, type, field, subfield, str);
+    for (const auto &special : special_variables)
+      if (str_eq_nocase(var, special.name))
+        return special.get(q);
   }
+
+  if (std::holds_alternative<std::monostate>(what))
+    return ""; /* quirk: even the fields of the text, as strlen, need the text to name something */
+
+  if (vd)
+    for (const auto &f : text_fields)
+      if (str_eq_nocase(field, f.name))
+        return f.get(vd->value, subfield);
+
+  return std::visit(overloaded{
+                        [](std::monostate) { return std::string(); },
+                        [&](char_data *c) { return dg::char_field(q, c); },
+                        [&](obj_data *o) { return dg::obj_field(q, o); },
+                        [&](room_data *r) { return dg::room_field(q, r); },
+                    },
+                    what);
+}
+
+} // namespace
+
+std::string dg::plain_variable(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type, const std::string &var)
+{
+  if (const dg::variable *vd = find_variable(sc, trig, var))
+    return vd->value;
+
+  if (str_eq_nocase(var, "self")) /* the owner's own, even for X.global(self) */
+    return uid_text(owner_uid(go));
+  if (str_eq_nocase(var, "global")) /* so "remote varname %global%" will work */
+    return number(ROOM_ID_BASE);
+  if (str_eq_nocase(var, "ctime"))
+    return number((long long)game_now(g));
+  for (const auto &command : command_names)
+    if (str_eq_nocase(var, command.name))
+      return command.per_kind[type];
+  return "";
 }
 
 /* The value of the variable r names, looking up a chain (%x.y.z%) a link at a time; see dbat/dg/expr.hpp */
 static std::string look_up(GameWorld *g, const dg::var_ref &r, owner_ptr go, struct script_data *sc, trig_data *trig)
 {
-  std::string var = r.name, field = r.field, value;
+  std::string var = r.name, field = r.field;
 
   for (const dg::var_ref::link &link : r.chain) {
     std::string subfield = link.subfield_so_far;
-    find_replacement(g, go, sc, trig, owner_type(go), var.data(), field.data(), subfield.data(), value);
+    std::string value    = find_replacement(g, go, sc, trig, owner_type(go), var, field, subfield);
     if (value.empty())
       continue;
     std::string eval = "eval tmpvr " + value; /* quirk: the value is worked out as an expression */
@@ -1522,8 +454,7 @@ static std::string look_up(GameWorld *g, const dg::var_ref &r, owner_ptr go, str
   /* Now also lets subfields have variables parsed inside of them, so that %actor.gold(%actor.gold%)% will double
      the actor's gold every time it's called. - Jamie Nelson 31st Oct 2003 */
   std::string subfield = render(g, r.subfield, go, sc, trig);
-  find_replacement(g, go, sc, trig, owner_type(go), var.data(), field.data(), subfield.data(), value);
-  return value;
+  return find_replacement(g, go, sc, trig, owner_type(go), var, field, subfield);
 }
 
 /* t with its variables' values, up to the length of a command line: once that is full, nothing more is looked up */
