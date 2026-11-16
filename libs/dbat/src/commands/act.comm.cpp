@@ -227,8 +227,8 @@ ACMD(do_say)
   }
 
   /* trigger check */
-  speech_mtrigger(g, ch, text.data());
-  speech_wtrigger(g, ch, text.data());
+  speech_mtrigger(g, ch, text);
+  speech_wtrigger(g, ch, text);
   if (!g->SHENRON || char_get_in_room(ch) != g->DRAGONR)
     mob_talk(g, ch, text.c_str());
 }

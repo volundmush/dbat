@@ -119,9 +119,9 @@ ACMD(do_mrecho);
 
 /* function prototypes from dg_triggers.c */
 
-void act_mtrigger(GameWorld *g, const char_data *ch, char *str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg);
-void speech_mtrigger(GameWorld *g, char_data *actor, char *str);
-void speech_wtrigger(GameWorld *g, char_data *actor, char *str);
+void act_mtrigger(GameWorld *g, const char_data *ch, std::string_view str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg);
+void speech_mtrigger(GameWorld *g, char_data *actor, std::string_view str);
+void speech_wtrigger(GameWorld *g, char_data *actor, std::string_view str);
 void greet_memory_mtrigger(GameWorld *g, char_data *ch);
 bool greet_mtrigger(GameWorld *g, char_data *actor, int dir);
 int entry_mtrigger(GameWorld *g, char_data *ch);
@@ -140,9 +140,9 @@ void bribe_mtrigger(GameWorld *g, char_data *ch, char_data *actor,
 int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int where);
 int remove_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
 
-bool command_mtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument);
-bool command_otrigger(GameWorld *g, char_data *actor, char *cmd, char *argument);
-int command_wtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument);
+bool command_mtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument);
+bool command_otrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument);
+int command_wtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument);
 
 int death_mtrigger(GameWorld *g, char_data *ch, char_data *actor);
 void fight_mtrigger(GameWorld *g, char_data *ch);

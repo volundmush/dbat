@@ -295,4 +295,53 @@ dispatch 2 t 0~
 ~
 %echo% room time
 ~
+#950
+speech phrases~
+0 d 1
+"hello there" aaab "unclosed~
+%echo% 950 heard [%speech%] from [%actor.name%]
+~
+#951
+speech whole text~
+0 d 0
+aaab~
+%echo% 951 heard [%speech%]
+~
+#952
+speech list ended by an empty phrase~
+0 d 1
+"" never~
+%echo% 952 heard [%speech%]
+~
+#953
+act words~
+0 e 1
+smiles says~
+%echo% 953 saw [%arg%] actor [%actor.name%] victim [%victim.name%]
+~
+#954
+speech and act corners~
+0 g 100
+~
+attach 950 %self.id%
+%force% %actor% say hello there friend
+%force% %actor% say nothing to see
+%force% %actor% say unclose
+%force% %actor% say unclosed
+%force% %actor% say aaab!
+detach 950 %self.id%
+attach 951 %self.id%
+%force% %actor% say aaaab
+%force% %actor% say xaaab.
+%force% %actor% say AAAB
+%force% %actor% say aaabc
+detach 951 %self.id%
+attach 952 %self.id%
+%force% %actor% say never
+detach 952 %self.id%
+attach 953 %self.id%
+%force% %actor% emote smiles broadly
+%force% %actor% emote   smiles, says nothing
+%force% %actor% say anything
+~
 $~

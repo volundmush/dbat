@@ -756,10 +756,9 @@ void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view ar
   /* otherwise, find the command */
   {
     int cont;                                                                                 /* continue the command checks */
-    std::string trigger_line(line);                                                           /* the triggers want a C string */
-    cont = command_wtrigger(g, ch, arg, trigger_line.data());                                 /* any world triggers ? */
-    if (!cont && !char_is_dead(ch)) cont = command_mtrigger(g, ch, arg, trigger_line.data()); /* any mobile triggers ? */
-    if (!cont && !char_is_dead(ch)) cont = command_otrigger(g, ch, arg, trigger_line.data()); /* any object triggers ? */
+    cont = command_wtrigger(g, ch, arg, line);                                 /* any world triggers ? */
+    if (!cont && !char_is_dead(ch)) cont = command_mtrigger(g, ch, arg, line); /* any mobile triggers ? */
+    if (!cont && !char_is_dead(ch)) cont = command_otrigger(g, ch, arg, line); /* any object triggers ? */
     if (cont || char_is_dead(ch)) return; /* yes, command trigger took over, or forced them away */
   }
   for (length = strlen(arg), cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++) {

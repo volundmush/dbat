@@ -30,239 +30,289 @@
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/args.hpp"
+
+#include "dg_internal.hpp"
 
 /*
- *  General functions used by several triggers
+ * Every dispatcher below fires its owner's triggers of one type through fire(): it says which of them fire (the
+ * test), what variables each gets before it runs, and whether to go on to the next after one has run. What differs
+ * between them is only that, and what they make of the result.
  */
+namespace {
 
-/*
- * Copy first phrase into first_arg, returns rest of string
- */
-static char *one_phrase(char *arg, char *first_arg)
+/* What fire() does after a trigger has run */
+enum class then { stop, go_on };
+
+/* Most dispatchers run only the first trigger that fires */
+const auto stop_at_first = [](const run_result &) { return then::stop; };
+const auto no_vars       = [](trig_data *) {};
+
+/* Whether t can run now: it compiled and isn't running already */
+bool ready(GameWorld *g, trig_data *t)
 {
-  skip_spaces(&arg);
-
-  if (!*arg)
-    *first_arg = '\0';
-
-  else if (*arg == '"') {
-    char *p, c;
-
-    p  = arg + dg::matching_quote(arg, 0);
-    c  = *p;
-    *p = '\0';
-    strcpy(first_arg, arg + 1);
-    if (c == '\0')
-      return p;
-    else
-      return p + 1;
-  }
-
-  else {
-    char *s, *p;
-
-    s = first_arg;
-    p = arg;
-
-    while (*p && !isspace(*p) && *p != '"')
-      *s++ = *p++;
-
-    *s = '\0';
-    return p;
-  }
-
-  return arg;
+  return trigger_ready(g, t, t->trigger_type);
 }
 
-static bool is_substring(const char *sub, const char *string)
+/* Whether t's chance comes up: the percentage in its number */
+bool chance(GameWorld *g, trig_data *t)
 {
-  const char *s;
+  return rand_number(g, 1, 100) <= t->narg;
+}
 
-  if ((s = str_str(string, sub))) {
-    int len    = strlen(string);
-    int sublen = strlen(sub);
+/* The usual test: ready, then its chance comes up */
+auto ready_and_chance(GameWorld *g)
+{
+  return [g](trig_data *t) { return ready(g, t) && chance(g, t); };
+}
 
-    /* check front */
-    if ((s == string || isspace(*(s - 1)) || ispunct(*(s - 1))) &&
+auto ready_only(GameWorld *g)
+{
+  return [g](trig_data *t) { return ready(g, t); };
+}
 
-        /* check end */
-        ((s + sublen == string + len) || isspace(s[sublen]) ||
-         ispunct(s[sublen])))
-      return true;
+/*
+ * Fires owner's triggers of type, in order: each that test(t) says fires (test is asked only of triggers of the type,
+ * and calls ready() itself, so that what it checks comes in the order the dispatcher always had) gets its variables
+ * from vars(t) and runs. after(result) says whether to stop there. Returns the last run's result, or nothing if none
+ * ran.
+ */
+template <class Test, class Vars, class After>
+std::optional<run_result> fire(GameWorld *g, owner_ptr owner, bitvector_t type, Test &&test, Vars &&vars, After &&after)
+{
+  struct script_data *sc = *script_slot(owner);
+  if (!script_has_type(sc, type))
+    return std::nullopt;
+
+  std::optional<run_result> last;
+  /* a trigger removed by an earlier one stays in memory until the pulse ends, and runs no more */
+  for (trig_data *t = sc->trig_list; t; t = t->next) {
+    if (!(t->trigger_type & type) || !test(t))
+      continue;
+    vars(t);
+    last = script_driver(g, owner, t, TRIG_NEW);
+    if (after(*last) == then::stop)
+      break;
   }
+  return last;
+}
 
+/* Sets %direction%: dir's name, or the one it comes from, or "none" */
+void set_direction(trig_data *t, int dir, bool coming_from)
+{
+  if (dir >= 0 && dir < NUM_OF_DIRS)
+    add_var(t->var_list, "direction", dirs[coming_from ? rev_dir[dir] : dir], 0);
+  else
+    add_var(t->var_list, "direction", "none", 0);
+}
+
+/* Sets %spell% and %spellname% */
+void set_spell(GameWorld *g, trig_data *t, int spellnum)
+{
+  add_var(t->var_list, "spell", str_format("{:d}", spellnum), 0);
+  add_var(t->var_list, "spellname", skill_name(g, spellnum), 0);
+}
+
+/* Whether t has the text it needs; if not, that's logged as a 'what' trigger with none */
+bool has_text(GameWorld *g, trig_data *t, std::string_view what)
+{
+  if (!t->arglist.empty())
+    return true;
+  mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: {} Trigger #{:d} has no text argument!", what, trig_get_vnum(g, t));
   return false;
 }
 
-/*
- * return 1 if str contains a word or phrase from wordlist.
- * phrases are in double quotes (").
- * if wrdlist is NULL, then return 1, if str is NULL, return 0.
- */
-static bool word_check(const char *str, const char *wordlist)
+/* Whether a command trigger's text starts cmd, ignoring case, or is '*' for any command */
+bool command_matches(const trig_data *t, std::string_view cmd)
 {
-  char *words, *phrase, *s;
-  size_t len;
-  bool found = false;
-
-  if (*wordlist == '*') return true;
-
-  /*
-   * one_phrase() writes into its input, so work on a copy; argument lists have no
-   * length limit, so size the copy and the phrase buffer to fit
-   */
-  len = strlen(wordlist) + 1;
-  words  = str_alloc(2 * len);
-  phrase = words + len;
-  memcpy(words, wordlist, len);
-
-  for (s = one_phrase(words, phrase); *phrase; s = one_phrase(s, phrase))
-    if (is_substring(phrase, str)) {
-      found = true;
-      break;
-    }
-
-  free(words);
-  return found;
+  const std::string &word = t->arglist;
+  return word[0] == '*' || (cmd.size() >= word.size() && str_eq_nocase(cmd.substr(0, word.size()), word));
 }
+
+/* Sets a command trigger's %actor%, %arg% and %cmd% */
+void set_command_vars(trig_data *t, char_data *actor, std::string_view cmd, std::string_view argument)
+{
+  add_char_uid_var(t, "actor", actor, 0);
+  add_var(t->var_list, "arg", skip_spaces(argument), 0);
+  add_var(t->var_list, "cmd", skip_spaces(cmd), 0);
+}
+
+/*
+ * Where sub is first found in text, ignoring case, or npos.
+ * quirk: after a partial match it carries on from where that failed, not from the next character, as str_str()
+ * always has, so "aaab" isn't found in "aaaab".
+ */
+size_t find_nocase(std::string_view text, std::string_view sub)
+{
+  if (sub.empty())
+    return std::string_view::npos;
+  size_t at = 0;
+  while (at < text.size()) {
+    size_t t = 0;
+    while (at < text.size() && tolower(text[at]) != tolower(sub[t]))
+      at++;
+    size_t start = at;
+    while (t < sub.size() && at < text.size() && tolower(text[at]) == tolower(sub[t])) {
+      t++;
+      at++;
+    }
+    if (t == sub.size())
+      return start;
+  }
+  return std::string_view::npos;
+}
+
+/* Whether sub is in text as a whole word or words, between spaces, punctuation or the ends (the first time only) */
+bool is_substring(std::string_view sub, std::string_view text)
+{
+  size_t s = find_nocase(text, sub);
+  if (s == std::string_view::npos)
+    return false;
+  size_t end     = s + sub.size();
+  auto separates = [](char c) { return isspace(c) || ispunct(c); };
+  return (s == 0 || separates(text[s - 1])) && (end == text.size() || separates(text[end]));
+}
+
+/* The next word of text, or "phrase" in double quotes, taking it off text; "" when there is none */
+std::string_view take_phrase(std::string_view &text)
+{
+  text = skip_spaces(text);
+  if (text.empty())
+    return {};
+
+  if (text[0] == '"') {
+    size_t close = dg::matching_quote(text, 0); /* quirk: with no closing quote, the last character is left off */
+    std::string_view phrase = close ? text.substr(1, close - 1) : std::string_view();
+    text.remove_prefix(close + 1);
+    return phrase;
+  }
+
+  size_t end = 0;
+  while (end < text.size() && !isspace(text[end]) && text[end] != '"')
+    end++;
+  std::string_view word = text.substr(0, end);
+  text.remove_prefix(end);
+  return word;
+}
+
+/* Whether text has one of the words or "phrases" in wordlist, or wordlist is "*" */
+bool word_check(std::string_view text, std::string_view wordlist)
+{
+  if (wordlist.starts_with('*'))
+    return true;
+  /* quirk: an empty "" ends the list */
+  for (std::string_view phrase = take_phrase(wordlist); !phrase.empty(); phrase = take_phrase(wordlist))
+    if (is_substring(phrase, text))
+      return true;
+  return false;
+}
+
+/* Whether a speech or act trigger's text is in what was said: any of its words if its number is set, else all of it */
+bool speech_matches(const trig_data *t, std::string_view said)
+{
+  return t->narg ? word_check(said, t->arglist) : is_substring(t->arglist, said);
+}
+
+/* A mob too charmed, asleep or busy to notice actor, or actor itself */
+bool inattentive(GameWorld *g, char_data *ch, const char_data *actor)
+{
+  return !char_is_awake(ch) || char_get_fighting(g, ch) || ch == actor || char_aff_flagged(ch, AFF_CHARM);
+}
+
+} // namespace
 
 /*
  *  mob triggers
  */
 
+/* called only while someone without nohassle is in the zone */
 void random_mtrigger(GameWorld *g, char_data *ch)
 {
-  trig_data *t;
-
-  /*
-   * This trigger is only called if a char is in the zone without nohassle.
-   */
-
-  if (!script_has_type(char_get_script(ch), MTRIG_RANDOM) || char_aff_flagged(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_RANDOM) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      script_driver(g, ch, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, ch, MTRIG_RANDOM, ready_and_chance(g), no_vars, stop_at_first);
 }
 
 void bribe_mtrigger(GameWorld *g, char_data *ch, char_data *actor, int amount)
 {
-  trig_data *t;
-  std::string buf;
-
-  if (!script_has_type(char_get_script(ch), MTRIG_BRIBE) || char_aff_flagged(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_BRIBE) && (amount >= t->narg)) {
-      buf = str_format("{:d}", amount);
-      add_var(t->var_list, "amount", buf.c_str(), 0);
-      add_char_uid_var(t, "actor", actor, 0);
-      script_driver(g, ch, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, ch, MTRIG_BRIBE, [&](trig_data *t) { return ready(g, t) && amount >= t->narg; },
+       [&](trig_data *t) {
+         add_var(t->var_list, "amount", str_format("{:d}", amount), 0);
+         add_char_uid_var(t, "actor", actor, 0);
+       },
+       stop_at_first);
 }
 
 void greet_memory_mtrigger(GameWorld *g, char_data *actor)
 {
-  trig_data *t;
-  struct script_memory *mem;
-
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return;
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
-    if (!char_get_memory(ch) || !char_is_awake(ch) || char_get_fighting(g, ch) || (ch == actor) ||
-        char_aff_flagged(ch, AFF_CHARM))
+    if (!char_get_memory(ch) || inattentive(g, ch, actor))
       continue;
     /* find memory line with command only */
-    for (mem = char_get_memory(ch); mem; mem = mem->next)
-      if (char_get_id(actor) == mem->id)
-        break;
+    struct script_memory *mem = char_get_memory(ch);
+    while (mem && mem->id != char_get_id(actor))
+      mem = mem->next;
     if (!mem)
       continue;
 
     long id = mem->id;
-    char *cmd       = !mem->cmd.empty() ? strdup(mem->cmd.c_str()) : nullptr;
-    char_data *self = ch;
-
-    if (cmd) {
-      command_interpreter(g, ch, cmd); /* no script */
-      free(cmd);
-    } else if (char_get_script(ch)) {
-      /* if a command was not performed execute the memory script */
-      for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-        if (IS_SET(t->trigger_type, MTRIG_MEMORY) &&
-            char_can_see(g, ch, actor) &&
-            trigger_ready(g, t, t->trigger_type) &&
-            rand_number(g, 1, 100) <= t->narg) {
-          add_char_uid_var(t, "actor", actor, 0);
-          script_driver(g, self, t, TRIG_NEW);
-          break;
-        }
-      }
-      if (!self) /* the script purged the mob */
-        return;
-    }
+    if (!mem->cmd.empty()) {
+      std::string cmd = mem->cmd; /* a copy: the command can forget the memory */
+      command_interpreter(g, ch, cmd);    /* no script */
+    } else /* if a command was not performed execute the memory script */
+      fire(g, ch, MTRIG_MEMORY, [&](trig_data *t) { return char_can_see(g, ch, actor) && ready(g, t) && chance(g, t); },
+           [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first);
 
     /* delete the memory, if what just ran didn't: it can use mforget */
-    struct script_memory *prev = nullptr;
-
-    for (mem = char_get_memory(ch); mem && mem->id != id; mem = mem->next)
-      prev = mem;
-    if (mem) {
-      if (prev)
-        prev->next = mem->next;
-      else
-        char_set_memory(ch, mem->next);
-      delete mem;
+    struct script_memory **link = char_memory_slot(ch);
+    while (*link && (*link)->id != id)
+      link = &(*link)->next;
+    if (struct script_memory *gone = *link) {
+      *link = gone->next;
+      delete gone;
     }
   }
 }
 
 bool greet_mtrigger(GameWorld *g, char_data *actor, int dir)
 {
-  trig_data *t;
-  int intermediate, final = true;
+  bool final = true;
 
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return true;
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
-    if (!script_has_type(char_get_script(ch), MTRIG_GREET | MTRIG_GREET_ALL) ||
-        !char_is_awake(ch) || char_get_fighting(g, ch) || (ch == actor) ||
-        char_aff_flagged(ch, AFF_CHARM))
+    if (!script_has_type(char_get_script(ch), MTRIG_GREET | MTRIG_GREET_ALL) || inattentive(g, ch, actor))
       continue;
     if (!script_has_type(char_get_script(ch), MTRIG_GREET_ALL) && char_is_npc(actor))
       continue;
 
-    for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-      if (((IS_SET(t->trigger_type, MTRIG_GREET) && char_can_see(g, ch, actor)) ||
-           IS_SET(t->trigger_type, MTRIG_GREET_ALL)) &&
-          trigger_ready(g, t, t->trigger_type) && (rand_number(g, 1, 100) <= t->narg)) {
-        if (dir >= 0 && dir < NUM_OF_DIRS)
-          add_var(t->var_list, "direction", (const char *)dirs[rev_dir[dir]], 0);
-        else
-          add_var(t->var_list, "direction", "none", 0);
-        add_char_uid_var(t, "actor", actor, 0);
-        intermediate = script_driver(g, ch, t, TRIG_NEW).value;
-        if (!intermediate) final = false;
-        continue;
-      }
-    }
+    /* every greeting runs, and any one of them can stop the actor */
+    fire(g, ch, MTRIG_GREET | MTRIG_GREET_ALL,
+         [&](trig_data *t) {
+           return ((IS_SET(t->trigger_type, MTRIG_GREET) && char_can_see(g, ch, actor)) || IS_SET(t->trigger_type, MTRIG_GREET_ALL)) &&
+                  ready(g, t) && chance(g, t);
+         },
+         [&](trig_data *t) {
+           set_direction(t, dir, true);
+           add_char_uid_var(t, "actor", actor, 0);
+         },
+         [&](const run_result &r) {
+           if (!r.value)
+             final = false;
+           return then::go_on;
+         });
   }
   return final;
 }
 
 void entry_memory_mtrigger(GameWorld *g, char_data *ch)
 {
-  trig_data *t;
   struct script_memory *mem, *next_mem;
 
   if (!char_get_memory(ch) || char_aff_flagged(ch, AFF_CHARM))
@@ -271,492 +321,282 @@ void entry_memory_mtrigger(GameWorld *g, char_data *ch)
   for (char_data *actor : room_people(g, char_get_in_room(ch))) {
     if (!char_get_memory(ch))
       break;
-    if (actor != ch && char_get_memory(ch)) {
-      for (mem = char_get_memory(ch); mem; mem = next_mem) {
-        next_mem = mem->next;
-        if (char_get_id(actor) != mem->id)
-          continue;
+    if (actor == ch)
+      continue;
+    for (mem = char_get_memory(ch); mem; mem = next_mem) {
+      next_mem = mem->next;
+      if (char_get_id(actor) != mem->id)
+        continue;
 
-        /* unlink it first: the command or trigger below may change ch->memory (mforget) or purge ch */
-        struct script_memory **link = char_memory_slot(ch);
-        while (*link != mem) link = &(*link)->next;
-        *link = mem->next;
+      /* unlink it first: the command or trigger below may change ch->memory (mforget) or purge ch */
+      struct script_memory **link = char_memory_slot(ch);
+      while (*link != mem)
+        link = &(*link)->next;
+      *link = mem->next;
 
-        if (!mem->cmd.empty()) command_interpreter(g, ch, mem->cmd);
-        else {
-          for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-            if (trigger_ready(g, t, MTRIG_MEMORY) && (rand_number(g, 1, 100) <=
-                                                   t->narg)) {
-              add_char_uid_var(t, "actor", actor, 0);
-              script_driver(g, ch, t, TRIG_NEW);
-              break;
-            }
-          }
-        }
-        delete mem;
-        if (!ch || !char_get_memory(ch))
-          return;
+      if (!mem->cmd.empty())
+        command_interpreter(g, ch, mem->cmd);
+      else
+        fire(g, ch, MTRIG_MEMORY, ready_and_chance(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first);
+      delete mem;
+      if (!char_get_memory(ch))
+        return;
 
-        /* carry on only if the next memory survived */
-        struct script_memory *p = char_get_memory(ch);
-        while (p && p != next_mem) p = p->next;
-        next_mem = p;
-      } /* for (mem =..... */
+      /* carry on only if the next memory survived */
+      struct script_memory *p = char_get_memory(ch);
+      while (p && p != next_mem)
+        p = p->next;
+      next_mem = p;
     }
   }
 }
 
 int entry_mtrigger(GameWorld *g, char_data *ch)
 {
-  trig_data *t;
-
-  if (!script_has_type(char_get_script(ch), MTRIG_ENTRY) || char_aff_flagged(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return 1;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_ENTRY) && (rand_number(g, 1, 100) <= t->narg)) {
-      return script_driver(g, ch, t, TRIG_NEW).value;
-      break;
-    }
-  }
-
-  return 1;
+  auto r = fire(g, ch, MTRIG_ENTRY, ready_and_chance(g), no_vars, stop_at_first);
+  return r ? r->value : 1;
 }
 
-bool command_mtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
+bool command_mtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument)
 {
-  trig_data *t;
-
   /* prevent people we like from becoming trapped :P */
   if (!valid_dg_target(g, actor, 0))
     return false;
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
-
-    if (script_has_type(char_get_script(ch), MTRIG_COMMAND) && !char_aff_flagged(ch, AFF_CHARM) &&
-        (actor != ch)) {
-      for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-        if (!trigger_ready(g, t, MTRIG_COMMAND))
-          continue;
-
-        if (t->arglist.empty()) {
-          mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Command Trigger #{:d} has no text argument!",
-                 trig_get_vnum(g, t));
-          continue;
-        }
-
-        if (t->arglist[0] == '*' ||
-            !strncasecmp(t->arglist.c_str(), cmd, t->arglist.size())) {
-          add_char_uid_var(t, "actor", actor, 0);
-          skip_spaces(&argument);
-          add_var(t->var_list, "arg", argument, 0);
-          skip_spaces(&cmd);
-          add_var(t->var_list, "cmd", cmd, 0);
-
-          if (script_driver(g, ch, t, TRIG_NEW).value)
-            return true;
-        }
-      }
-    }
+    if (char_aff_flagged(ch, AFF_CHARM) || actor == ch)
+      continue;
+    /* each that matches runs, until one takes the command */
+    auto r = fire(g, ch, MTRIG_COMMAND,
+                  [&](trig_data *t) { return ready(g, t) && has_text(g, t, "Command") && command_matches(t, cmd); },
+                  [&](trig_data *t) { set_command_vars(t, actor, cmd, argument); },
+                  [](const run_result &ran) { return ran.value ? then::stop : then::go_on; });
+    if (r && r->value)
+      return true;
   }
-
   return false;
 }
 
-void speech_mtrigger(GameWorld *g, char_data *actor, char *str)
+void speech_mtrigger(GameWorld *g, char_data *actor, std::string_view str)
 {
-  trig_data *t;
-
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
-
-    if (script_has_type(char_get_script(ch), MTRIG_SPEECH) && char_is_awake(ch) &&
-        !char_aff_flagged(ch, AFF_CHARM) && (actor != ch))
-      for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-        if (!trigger_ready(g, t, MTRIG_SPEECH))
-          continue;
-
-        if (t->arglist.empty()) {
-          mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Speech Trigger #{:d} has no text argument!",
-                 trig_get_vnum(g, t));
-          continue;
-        }
-
-        if (((t->narg && word_check(str, t->arglist.c_str())) ||
-             (!t->narg && is_substring(t->arglist.c_str(), str)))) {
-          add_char_uid_var(t, "actor", actor, 0);
-          add_var(t->var_list, "speech", str, 0);
-          script_driver(g, ch, t, TRIG_NEW);
-          break;
-        }
-      }
+    if (!char_is_awake(ch) || char_aff_flagged(ch, AFF_CHARM) || actor == ch)
+      continue;
+    fire(g, ch, MTRIG_SPEECH, [&](trig_data *t) { return ready(g, t) && has_text(g, t, "Speech") && speech_matches(t, str); },
+         [&](trig_data *t) {
+           add_char_uid_var(t, "actor", actor, 0);
+           add_var(t->var_list, "speech", str, 0);
+         },
+         stop_at_first);
   }
 }
 
-void act_mtrigger(GameWorld *g, const char_data *ch, char *str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg)
+/* str is what ch saw, ending in "\r\n"; arg is unused */
+void act_mtrigger(GameWorld *g, const char_data *ch, std::string_view str, char_data *actor, const char_data *victim, obj_data *object,
+                  const obj_data *target, const char * /* arg */)
 {
-  trig_data *t;
+  if (char_aff_flagged(ch, AFF_CHARM) || actor == ch)
+    return;
 
-  if (script_has_type(char_get_script(ch), MTRIG_ACT) && !char_aff_flagged(ch, AFF_CHARM) &&
-      (actor != ch))
-    for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-      if (!trigger_ready(g, t, MTRIG_ACT))
-        continue;
-
-      if (t->arglist.empty()) {
-        mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Act Trigger #{:d} has no text argument!",
-               trig_get_vnum(g, t));
-        continue;
-      }
-
-      if (((t->narg && word_check(str, t->arglist.c_str())) ||
-           (!t->narg && is_substring(t->arglist.c_str(), str)))) {
-        if (actor)
-          add_char_uid_var(t, "actor", actor, 0);
-        if (victim)
-          add_char_uid_var(t, "victim", victim, 0);
-        if (object)
-          add_obj_uid_var(t, "object", object, 0);
-        if (target)
-          add_obj_uid_var(t, "target", target, 0);
-        if (str) {
-          /* we're guaranteed to have a string ending with \r\n\0 */
-          char *nstr = strdup(str), *fstr = nstr, *p = strchr(nstr, '\r');
-          skip_spaces(&nstr);
-          *p = '\0';
-          add_var(t->var_list, "arg", nstr, 0);
-          free(fstr);
-        }
-        script_driver(g, const_cast<char_data *>(ch), t, TRIG_NEW);
-        break;
-      }
-    }
+  fire(g, const_cast<char_data *>(ch), MTRIG_ACT, [&](trig_data *t) { return ready(g, t) && has_text(g, t, "Act") && speech_matches(t, str); },
+       [&](trig_data *t) {
+         if (actor)
+           add_char_uid_var(t, "actor", actor, 0);
+         if (victim)
+           add_char_uid_var(t, "victim", victim, 0);
+         if (object)
+           add_obj_uid_var(t, "object", object, 0);
+         if (target)
+           add_obj_uid_var(t, "target", target, 0);
+         /* %arg% is the line without its leading spaces, up to the "\r\n" */
+         size_t cut             = str.find('\r');
+         std::string_view arg   = skip_spaces(str);
+         size_t start           = str.size() - arg.size();
+         if (cut != std::string_view::npos && cut >= start) /* quirk: a line starting "\r\n" keeps all the rest */
+           arg = arg.substr(0, cut - start);
+         add_var(t->var_list, "arg", arg, 0);
+       },
+       stop_at_first);
 }
 
 void fight_mtrigger(GameWorld *g, char_data *ch)
 {
-  struct char_data *actor;
-  trig_data *t;
-
-  if (!script_has_type(char_get_script(ch), MTRIG_FIGHT) || !char_get_fighting(g, ch) ||
-      char_aff_flagged(ch, AFF_CHARM))
+  if (!char_get_fighting(g, ch) || char_aff_flagged(ch, AFF_CHARM))
     return;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_FIGHT) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      actor = char_get_fighting(g, ch);
-      if (actor)
-        add_char_uid_var(t, "actor", actor, 0);
-      else
-        add_var(t->var_list, "actor", "nobody", 0);
-
-      script_driver(g, ch, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, ch, MTRIG_FIGHT, ready_and_chance(g),
+       [&](trig_data *t) {
+         if (char_data *actor = char_get_fighting(g, ch))
+           add_char_uid_var(t, "actor", actor, 0);
+         else
+           add_var(t->var_list, "actor", "nobody", 0);
+       },
+       stop_at_first);
 }
 
+/* fires when the mob's health is down to the percentage in the trigger's number */
 void hitprcnt_mtrigger(GameWorld *g, char_data *ch)
 {
-  struct char_data *actor;
-  trig_data *t;
-
-  if (!script_has_type(char_get_script(ch), MTRIG_HITPRCNT) || !char_get_fighting(g, ch) ||
-      char_aff_flagged(ch, AFF_CHARM))
+  if (!char_get_fighting(g, ch) || char_aff_flagged(ch, AFF_CHARM))
     return;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_HITPRCNT) && getEffMaxPL(g, ch) &&
-        (getCurPL(g, ch) <= (getEffMaxPL(g, ch) / 100) * t->narg)) {
-
-      actor = char_get_fighting(g, ch);
-      add_char_uid_var(t, "actor", actor, 0);
-      script_driver(g, ch, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, ch, MTRIG_HITPRCNT,
+       [&](trig_data *t) { return ready(g, t) && getEffMaxPL(g, ch) && getCurPL(g, ch) <= (getEffMaxPL(g, ch) / 100) * t->narg; },
+       [&](trig_data *t) { add_char_uid_var(t, "actor", char_get_fighting(g, ch), 0); }, stop_at_first);
 }
 
 int receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor, obj_data *obj)
 {
-  trig_data *t;
-  int ret_val;
   long id = obj_get_id(obj);
 
-  if (!script_has_type(char_get_script(ch), MTRIG_RECEIVE) || char_aff_flagged(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return 1;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_RECEIVE) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-
-      add_char_uid_var(t, "actor", actor, 0);
-      add_obj_uid_var(t, "object", obj, 0);
-      ret_val = script_driver(g, ch, t, TRIG_NEW).value;
-      /* by id, because plenty of scripts purge what they're given */
-      if (char_is_dead(actor) || char_is_dead(ch) || !(obj = find_obj(g, id)) || obj_get_carried_by(obj) != actor)
-        return 0;
-      else
-        return ret_val;
-    }
-  }
-
-  return 1;
+  auto r = fire(g, ch, MTRIG_RECEIVE, ready_and_chance(g),
+                [&](trig_data *t) {
+                  add_char_uid_var(t, "actor", actor, 0);
+                  add_obj_uid_var(t, "object", obj, 0);
+                },
+                stop_at_first);
+  if (!r)
+    return 1;
+  /* by id, because plenty of scripts purge what they're given */
+  if (char_is_dead(actor) || char_is_dead(ch) || !(obj = find_obj(g, id)) || obj_get_carried_by(obj) != actor)
+    return 0;
+  return r->value;
 }
 
 int death_mtrigger(GameWorld *g, char_data *ch, char_data *actor)
 {
-  trig_data *t;
-
-  if (!script_has_type(char_get_script(ch), MTRIG_DEATH) || char_aff_flagged(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return 1;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_DEATH) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      if (actor)
-        add_char_uid_var(t, "actor", actor, 0);
-      return script_driver(g, ch, t, TRIG_NEW).value;
-    }
-  }
-
-  return 1;
+  auto r = fire(g, ch, MTRIG_DEATH, ready_and_chance(g),
+                [&](trig_data *t) {
+                  if (actor)
+                    add_char_uid_var(t, "actor", actor, 0);
+                },
+                stop_at_first);
+  return r ? r->value : 1;
 }
 
 void load_mtrigger(GameWorld *g, char_data *ch)
 {
-  trig_data *t;
-  int result = 0;
-
-  if (!script_has_type(char_get_script(ch), MTRIG_LOAD))
-    return;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_LOAD) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      result = script_driver(g, ch, t, TRIG_NEW).value;
-      break;
-    }
-  }
-  if (result == SCRIPT_ERROR_CODE) {
-    /* we have recursed beyond reasonable depth */
-    /* make sure this mob is the last one in the load chain */
-    if (char_get_nr(ch) != NOBODY) {
-      char_proto_script(mob_proto_of(g, char_get_nr(ch))).clear();
-    }
-  }
+  auto r = fire(g, ch, MTRIG_LOAD, ready_and_chance(g), no_vars, stop_at_first);
+  /* recursed beyond reasonable depth: make sure this mob is the last one in the load chain */
+  if (r && r->value == SCRIPT_ERROR_CODE && char_get_nr(ch) != NOBODY)
+    char_proto_script(mob_proto_of(g, char_get_nr(ch))).clear();
 }
 
 int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum)
 {
-  trig_data *t;
-  std::string buf;
-
-  if (ch == nullptr)
+  if (ch == nullptr || char_aff_flagged(ch, AFF_CHARM))
     return 1;
-
-  if (!script_has_type(char_get_script(ch), MTRIG_CAST) || char_aff_flagged(ch, AFF_CHARM))
-    return 1;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_CAST) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      buf = str_format("{:d}", spellnum);
-      add_var(t->var_list, "spell", buf.c_str(), 0);
-      add_var(t->var_list, "spellname", skill_name(g, spellnum), 0);
-      return script_driver(g, ch, t, TRIG_NEW).value;
-    }
-  }
-
-  return 1;
+  auto r = fire(g, ch, MTRIG_CAST, ready_and_chance(g),
+                [&](trig_data *t) {
+                  add_char_uid_var(t, "actor", actor, 0);
+                  set_spell(g, t, spellnum);
+                },
+                stop_at_first);
+  return r ? r->value : 1;
 }
 
 int leave_mtrigger(GameWorld *g, char_data *actor, int dir)
 {
-  trig_data *t;
-
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return 1;
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
-    if (!script_has_type(char_get_script(ch), MTRIG_LEAVE) ||
-        !char_is_awake(ch) || char_get_fighting(g, ch) || (ch == actor) ||
-        char_aff_flagged(ch, AFF_CHARM))
+    if (inattentive(g, ch, actor))
       continue;
-
-    for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-      if ((IS_SET(t->trigger_type, MTRIG_LEAVE)) &&
-          trigger_ready(g, t, t->trigger_type) && (rand_number(g, 1, 100) <= t->narg)) {
-        if (dir >= 0 && dir < NUM_OF_DIRS)
-          add_var(t->var_list, "direction", (const char *)dirs[dir], 0);
-        else
-          add_var(t->var_list, "direction", "none", 0);
-        add_char_uid_var(t, "actor", actor, 0);
-        return script_driver(g, ch, t, TRIG_NEW).value;
-      }
-    }
+    auto r = fire(g, ch, MTRIG_LEAVE, ready_and_chance(g),
+                  [&](trig_data *t) {
+                    set_direction(t, dir, false);
+                    add_char_uid_var(t, "actor", actor, 0);
+                  },
+                  stop_at_first);
+    if (r)
+      return r->value;
   }
   return 1;
 }
 
 int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 {
-  trig_data *t;
-
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
-    if (!script_has_type(char_get_script(ch), MTRIG_DOOR) ||
-        !char_is_awake(ch) || char_get_fighting(g, ch) || (ch == actor) ||
-        char_aff_flagged(ch, AFF_CHARM))
+    if (inattentive(g, ch, actor))
       continue;
-
-    for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-      if (IS_SET(t->trigger_type, MTRIG_DOOR) && char_can_see(g, ch, actor) &&
-          trigger_ready(g, t, t->trigger_type) && (rand_number(g, 1, 100) <= t->narg)) {
-        add_var(t->var_list, "cmd", (const char *)cmd_door[subcmd], 0);
-        if (dir >= 0 && dir < NUM_OF_DIRS)
-          add_var(t->var_list, "direction", (const char *)dirs[dir], 0);
-        else
-          add_var(t->var_list, "direction", "none", 0);
-        add_char_uid_var(t, "actor", actor, 0);
-        return script_driver(g, ch, t, TRIG_NEW).value;
-      }
-    }
+    auto r = fire(g, ch, MTRIG_DOOR, [&](trig_data *t) { return char_can_see(g, ch, actor) && ready(g, t) && chance(g, t); },
+                  [&](trig_data *t) {
+                    add_var(t->var_list, "cmd", cmd_door[subcmd], 0);
+                    set_direction(t, dir, false);
+                    add_char_uid_var(t, "actor", actor, 0);
+                  },
+                  stop_at_first);
+    if (r)
+      return r->value;
   }
   return 1;
 }
 
+/* A time trigger fires when the hour is the one in its number, and gets %time% */
+static auto at_its_hour(GameWorld *g)
+{
+  return [g](trig_data *t) { return ready(g, t) && g->time_info.hours == t->narg; };
+}
+
+static auto set_time(GameWorld *g)
+{
+  return [g](trig_data *t) { add_var(t->var_list, "time", str_format("{:d}", g->time_info.hours), 0); };
+}
+
 void time_mtrigger(GameWorld *g, char_data *ch)
 {
-  trig_data *t;
-  std::string buf;
-
-  /*
-   * This trigger is called if the hour is the same as specified in Narg.
-   */
-
-  if (!script_has_type(char_get_script(ch), MTRIG_TIME) || char_aff_flagged(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return;
-
-  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, MTRIG_TIME) &&
-        (g->time_info.hours == t->narg)) {
-      buf = str_format("{:d}", g->time_info.hours);
-      add_var(t->var_list, "time", buf.c_str(), 0);
-      script_driver(g, ch, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, ch, MTRIG_TIME, at_its_hour(g), set_time(g), stop_at_first);
 }
 
 /*
  *  object triggers
  */
 
-/* Runs t on *obj from the top, and empties *obj if the script purged it: what the caller checks before going on */
-static int run_obj_trigger(GameWorld *g, obj_data **obj, trig_data *t)
-{
-  run_result result = script_driver(g, *obj, t, TRIG_NEW);
-  if (result.owner_gone)
-    *obj = nullptr;
-  return result.value;
-}
-
 void random_otrigger(GameWorld *g, obj_data *obj)
 {
-  trig_data *t;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_RANDOM))
-    return;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_RANDOM) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      run_obj_trigger(g, &obj, t);
-      break;
-    }
-  }
+  fire(g, obj, OTRIG_RANDOM, ready_and_chance(g), no_vars, stop_at_first);
 }
 
+/* every timer trigger runs */
 void timer_otrigger(GameWorld *g, struct obj_data *obj)
 {
-  trig_data *t;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_TIMER))
-    return;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_TIMER)) {
-      run_obj_trigger(g, &obj, t);
-    }
-  }
-
-  return;
+  fire(g, obj, OTRIG_TIMER, ready_only(g), no_vars, [](const run_result &) { return then::go_on; });
 }
 
 int get_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
-  trig_data *t;
-  int ret_val;
-  if (!script_has_type(obj_get_script(obj), OTRIG_GET))
+  auto r = fire(g, obj, OTRIG_GET, ready_and_chance(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first);
+  if (!r)
     return 1;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_GET) && (rand_number(g, 1, 100) <= t->narg)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      ret_val = run_obj_trigger(g, &obj, t);
-      /* don't allow a get to take place, if
-       * a) the actor is killed (the mud would choke on obj_to_char).
-       * b) the object is purged.
-       */
-      if (char_is_dead(actor) || !obj)
-        return 0;
-      else
-        return ret_val;
-    }
-  }
-
-  return 1;
+  /* no get if the actor was killed (the mud would choke on obj_to_char) or the object purged */
+  if (char_is_dead(actor) || r->owner_gone)
+    return 0;
+  return r->value;
 }
 
-/* checks for command trigger on specific object. assumes obj has cmd trig */
-static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, char *cmd,
-                      char *argument, int type)
+/* Runs obj's command triggers for where the actor has it (type), until one takes the command or purges obj */
+static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, std::string_view cmd, std::string_view argument, int type)
 {
-  trig_data *t;
-
-  if (obj && script_has_type(obj_get_script(obj), OTRIG_COMMAND))
-    for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-      if (!trigger_ready(g, t, OTRIG_COMMAND))
-        continue;
-
-      if (IS_SET(t->narg, type) &&
-          t->arglist.empty()) {
-        mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: O-Command Trigger #{:d} has no text argument!",
-               trig_get_vnum(g, t));
-        continue;
-      }
-
-      if (IS_SET(t->narg, type) &&
-          (t->arglist[0] == '*' ||
-           !strncasecmp(t->arglist.c_str(), cmd, t->arglist.size()))) {
-
-        add_char_uid_var(t, "actor", actor, 0);
-        skip_spaces(&argument);
-        add_var(t->var_list, "arg", argument, 0);
-        skip_spaces(&cmd);
-        add_var(t->var_list, "cmd", cmd, 0);
-
-        if (run_obj_trigger(g, &obj, t) || !obj)
-          return true;
-      }
-    }
-
-  return false;
+  if (!obj)
+    return false;
+  auto r = fire(g, obj, OTRIG_COMMAND,
+                [&](trig_data *t) {
+                  return ready(g, t) && IS_SET(t->narg, type) && has_text(g, t, "O-Command") && command_matches(t, cmd);
+                },
+                [&](trig_data *t) { set_command_vars(t, actor, cmd, argument); },
+                [](const run_result &ran) { return ran.value || ran.owner_gone ? then::stop : then::go_on; });
+  return r && (r->value || r->owner_gone);
 }
 
 /* Runs the command triggers on a list of objects, returning true if one of them took the command. */
-static bool cmd_otrig_list(GameWorld *g, const id_list &list, char_data *actor, char *cmd, char *argument, int type)
+static bool cmd_otrig_list(GameWorld *g, const id_list &list, char_data *actor, std::string_view cmd, std::string_view argument, int type)
 {
   /* a script can purge any object at all: the loop passes over whatever goes */
   for (obj_data *o : obj_list(g, list)) {
@@ -770,17 +610,14 @@ static bool cmd_otrig_list(GameWorld *g, const id_list &list, char_data *actor, 
   return false;
 }
 
-bool command_otrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
+bool command_otrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument)
 {
-  obj_data *obj;
-  int i;
-
   /* prevent people we like from becoming trapped :P */
   if (!valid_dg_target(g, actor, 0))
     return false;
 
-  for (i = 0; i < NUM_WEARS; i++)
-    if ((obj = char_get_equipment(actor, i))) {
+  for (int i = 0; i < NUM_WEARS; i++)
+    if (obj_data *obj = char_get_equipment(actor, i)) {
       bool forged = obj_extra_flagged(obj, ITEM_FORGED);
 
       if ((cmd_otrig(g, obj, actor, cmd, argument, OCMD_EQUIP) && !forged) || char_is_dead(actor))
@@ -791,251 +628,118 @@ bool command_otrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
          cmd_otrig_list(g, room_get_contents(g, char_get_in_room(actor)), actor, cmd, argument, OCMD_ROOM);
 }
 
-int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int where)
+/* The result of the first trigger, of wear, remove or consume, that runs; 0 if it purged the object */
+static int run_unless_purged(const std::optional<run_result> &r)
 {
-  trig_data *t;
-  int ret_val;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_WEAR))
+  if (!r)
     return 1;
+  return r->owner_gone ? 0 : r->value;
+}
 
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_WEAR)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      ret_val = run_obj_trigger(g, &obj, t);
-      /* don't allow a wear to take place, if
-       * the object is purged.
-       */
-      if (!obj)
-        return 0;
-      else
-        return ret_val;
-    }
-  }
-
-  return 1;
+int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int /* where */)
+{
+  return run_unless_purged(fire(g, obj, OTRIG_WEAR, ready_only(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first));
 }
 
 int remove_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
-  trig_data *t;
-  int ret_val;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_REMOVE))
-    return 1;
-
   if (!valid_dg_target(g, actor, 0))
     return 1;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_REMOVE)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      ret_val = run_obj_trigger(g, &obj, t);
-      /* don't allow a remove to take place, if
-       * the object is purged.
-       */
-      if (!obj)
-        return 0;
-      else
-        return ret_val;
-    }
-  }
-
-  return 1;
+  return run_unless_purged(fire(g, obj, OTRIG_REMOVE, ready_only(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first));
 }
 
 int drop_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
-  trig_data *t;
-  int ret_val;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_DROP))
-    return 1;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_DROP) && (rand_number(g, 1, 100) <= t->narg)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      ret_val = run_obj_trigger(g, &obj, t);
-      /* don't allow a drop to take place, if
-       * the object is purged (nothing to drop).
-       */
-      if (!obj)
-        return 0;
-      else
-        return ret_val;
-    }
-  }
-
-  return 1;
+  /* a purged object leaves nothing to drop */
+  return run_unless_purged(fire(g, obj, OTRIG_DROP, ready_and_chance(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first));
 }
 
 int give_otrigger(GameWorld *g, obj_data *obj, char_data *actor, char_data *victim)
 {
-  trig_data *t;
-  int ret_val;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_GIVE))
+  auto r = fire(g, obj, OTRIG_GIVE, ready_and_chance(g),
+                [&](trig_data *t) {
+                  add_char_uid_var(t, "actor", actor, 0);
+                  add_char_uid_var(t, "victim", victim, 0);
+                },
+                stop_at_first);
+  if (!r)
     return 1;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_GIVE) && (rand_number(g, 1, 100) <= t->narg)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      add_char_uid_var(t, "victim", victim, 0);
-      ret_val = run_obj_trigger(g, &obj, t);
-      /* don't allow a give to take place, if
-       * a) the object is purged.
-       * b) the object is not carried by the giver.
-       */
-      if (!obj || obj_get_carried_by(obj) != actor)
-        return 0;
-      else
-        return ret_val;
-    }
-  }
-
-  return 1;
+  /* no give if the object was purged, or the giver no longer has it */
+  if (r->owner_gone || obj_get_carried_by(obj) != actor)
+    return 0;
+  return r->value;
 }
 
 bool load_otrigger(GameWorld *g, obj_data *obj)
 {
-  trig_data *t;
-  int result = 0;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_LOAD))
+  auto r = fire(g, obj, OTRIG_LOAD, ready_and_chance(g), no_vars, stop_at_first);
+  if (!r)
     return true;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_LOAD) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      result = run_obj_trigger(g, &obj, t);
-      break;
-    }
-  }
-  if (!obj)
+  if (r->owner_gone)
     return false;
-  if (result == SCRIPT_ERROR_CODE) {
-    /* we have recursed beyond reasonable depth */
-    /* make sure this mob is the last one in the load chain */
-    if (obj_get_item_number(obj) != NOTHING) {
-      obj_proto_script(obj_proto_of(g, obj_get_item_number(obj))).clear();
-    }
-  }
+  /* recursed beyond reasonable depth: make sure this object is the last one in the load chain */
+  if (r->value == SCRIPT_ERROR_CODE && obj_get_item_number(obj) != NOTHING)
+    obj_proto_script(obj_proto_of(g, obj_get_item_number(obj))).clear();
   return true;
 }
 
 int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
 {
-  trig_data *t;
-  std::string buf;
-  int ret_val;
-
   if (obj == nullptr)
     return 1;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_CAST))
+  auto r = fire(g, obj, OTRIG_CAST, ready_and_chance(g),
+                [&](trig_data *t) {
+                  add_char_uid_var(t, "actor", actor, 0);
+                  set_spell(g, t, spellnum);
+                },
+                stop_at_first);
+  if (!r)
     return 1;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_CAST) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      buf = str_format("{:d}", spellnum);
-      add_var(t->var_list, "spell", buf.c_str(), 0);
-      add_var(t->var_list, "spellname", skill_name(g, spellnum), 0);
-      ret_val = run_obj_trigger(g, &obj, t);
-      /* the spell has nothing left to work on, or nobody left to cast it */
-      if (!obj || char_is_dead(actor))
-        return 0;
-      return ret_val;
-    }
-  }
-
-  return 1;
+  /* the spell has nothing left to work on, or nobody left to cast it */
+  if (r->owner_gone || char_is_dead(actor))
+    return 0;
+  return r->value;
 }
 
+/* every leave trigger on every object in the room runs, and any one of them can stop the actor */
 bool leave_otrigger(GameWorld *g, room_data *room, char_data *actor, int dir)
 {
-  trig_data *t;
-  int temp, final = 1;
+  bool final = true;
 
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return true;
 
-  for (obj_data *obj : room_contents(g, room)) {
-    if (!script_has_type(obj_get_script(obj), OTRIG_LEAVE))
-      continue;
-
-    for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-      if (trigger_ready(g, t, OTRIG_LEAVE) &&
-          (rand_number(g, 1, 100) <= t->narg)) {
-        if (dir >= 0 && dir < NUM_OF_DIRS)
-          add_var(t->var_list, "direction", (const char *)dirs[dir], 0);
-        else
-          add_var(t->var_list, "direction", "none", 0);
-        add_char_uid_var(t, "actor", actor, 0);
-        temp = run_obj_trigger(g, &obj, t);
-        if (temp == 0)
-          final = 0;
-      }
-    }
-  }
-
+  for (obj_data *obj : room_contents(g, room))
+    fire(g, obj, OTRIG_LEAVE, ready_and_chance(g),
+         [&](trig_data *t) {
+           set_direction(t, dir, false);
+           add_char_uid_var(t, "actor", actor, 0);
+         },
+         [&](const run_result &r) {
+           if (r.value == 0)
+             final = false;
+           return then::go_on;
+         });
   return final;
 }
 
 int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int cmd)
 {
-  trig_data *t;
-  int ret_val;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_CONSUME))
-    return 1;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_CONSUME)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      switch (cmd) {
-        case OCMD_EAT:
-          add_var(t->var_list, "command", "eat", 0);
-          break;
-        case OCMD_DRINK:
-          add_var(t->var_list, "command", "drink", 0);
-          break;
-        case OCMD_QUAFF:
-          add_var(t->var_list, "command", "quaff", 0);
-          break;
-      }
-      ret_val = run_obj_trigger(g, &obj, t);
-      /* don't allow a wear to take place, if
-       * the object is purged.
-       */
-      if (!obj)
-        return 0;
-      else
-        return ret_val;
-    }
-  }
-
-  return 1;
+  return run_unless_purged(fire(g, obj, OTRIG_CONSUME, ready_only(g),
+                                [&](trig_data *t) {
+                                  add_char_uid_var(t, "actor", actor, 0);
+                                  switch (cmd) {
+                                    case OCMD_EAT: add_var(t->var_list, "command", "eat", 0); break;
+                                    case OCMD_DRINK: add_var(t->var_list, "command", "drink", 0); break;
+                                    case OCMD_QUAFF: add_var(t->var_list, "command", "quaff", 0); break;
+                                  }
+                                },
+                                stop_at_first));
 }
 
 void time_otrigger(GameWorld *g, obj_data *obj)
 {
-  trig_data *t;
-  std::string buf;
-
-  if (!script_has_type(obj_get_script(obj), OTRIG_TIME))
-    return;
-
-  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, OTRIG_TIME) &&
-        (g->time_info.hours == t->narg)) {
-      buf = str_format("{:d}", g->time_info.hours);
-      add_var(t->var_list, "time", buf.c_str(), 0);
-      run_obj_trigger(g, &obj, t);
-      break;
-    }
-  }
+  fire(g, obj, OTRIG_TIME, at_its_hour(g), set_time(g), stop_at_first);
 }
 
 /*
@@ -1044,246 +748,121 @@ void time_otrigger(GameWorld *g, obj_data *obj)
 
 void reset_wtrigger(GameWorld *g, struct room_data *room)
 {
-  trig_data *t;
-
-  if (!script_has_type(room_get_script(room), WTRIG_RESET))
-    return;
-
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, WTRIG_RESET) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      script_driver(g, room, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, room, WTRIG_RESET, ready_and_chance(g), no_vars, stop_at_first);
 }
 
 void random_wtrigger(GameWorld *g, struct room_data *room)
 {
-  trig_data *t;
-
-  if (!script_has_type(room_get_script(room), WTRIG_RANDOM))
-    return;
-
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, WTRIG_RANDOM) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      script_driver(g, room, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, room, WTRIG_RANDOM, ready_and_chance(g), no_vars, stop_at_first);
 }
 
 int enter_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int dir)
 {
-  trig_data *t;
-
-  if (!script_has_type(room_get_script(room), WTRIG_ENTER))
-    return 1;
-
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, WTRIG_ENTER) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      if (dir >= 0 && dir < NUM_OF_DIRS)
-        add_var(t->var_list, "direction", (const char *)dirs[rev_dir[dir]], 0);
-      else
-        add_var(t->var_list, "direction", "none", 0);
-      add_char_uid_var(t, "actor", actor, 0);
-      return script_driver(g, room, t, TRIG_NEW).value;
-    }
-  }
-
-  return 1;
+  auto r = fire(g, room, WTRIG_ENTER, ready_and_chance(g),
+                [&](trig_data *t) {
+                  set_direction(t, dir, true);
+                  add_char_uid_var(t, "actor", actor, 0);
+                },
+                stop_at_first);
+  return r ? r->value : 1;
 }
 
-int command_wtrigger(GameWorld *g, char_data *actor, char *cmd, char *argument)
+/* The room the actor is in, if it has triggers of type and there is an actor */
+static room_data *actor_room_with(GameWorld *g, char_data *actor, bitvector_t type)
 {
-  struct room_data *room;
-  trig_data *t;
+  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), type))
+    return nullptr;
+  return room_of(g, char_get_in_room(actor));
+}
 
-  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_COMMAND))
-    return 0;
-
+int command_wtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument)
+{
+  room_data *room = actor_room_with(g, actor, WTRIG_COMMAND);
   /* prevent people we like from becoming trapped :P */
-  if (!valid_dg_target(g, actor, 0))
+  if (!room || !valid_dg_target(g, actor, 0))
     return 0;
-
-  room = room_of(g, char_get_in_room(actor));
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (!trigger_ready(g, t, WTRIG_COMMAND))
-      continue;
-
-    if (t->arglist.empty()) {
-      mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Command Trigger #{:d} has no text argument!",
-             trig_get_vnum(g, t));
-      continue;
-    }
-
-    if (t->arglist[0] == '*' ||
-        !strncasecmp(t->arglist.c_str(), cmd, t->arglist.size())) {
-      add_char_uid_var(t, "actor", actor, 0);
-      skip_spaces(&argument);
-      add_var(t->var_list, "arg", argument, 0);
-      skip_spaces(&cmd);
-      add_var(t->var_list, "cmd", cmd, 0);
-
-      return script_driver(g, room, t, TRIG_NEW).value;
-    }
-  }
-
-  return 0;
+  auto r = fire(g, room, WTRIG_COMMAND, [&](trig_data *t) { return ready(g, t) && has_text(g, t, "W-Command") && command_matches(t, cmd); },
+                [&](trig_data *t) { set_command_vars(t, actor, cmd, argument); }, stop_at_first);
+  return r ? r->value : 0;
 }
 
-void speech_wtrigger(GameWorld *g, char_data *actor, char *str)
+void speech_wtrigger(GameWorld *g, char_data *actor, std::string_view str)
 {
-  struct room_data *room;
-  trig_data *t;
-
-  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_SPEECH))
+  room_data *room = actor_room_with(g, actor, WTRIG_SPEECH);
+  if (!room)
     return;
-
-  room = room_of(g, char_get_in_room(actor));
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (!trigger_ready(g, t, WTRIG_SPEECH))
-      continue;
-
-    if (t->arglist.empty()) {
-      mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: W-Speech Trigger #{:d} has no text argument!",
-             trig_get_vnum(g, t));
-      continue;
-    }
-
-    if (t->arglist[0] == '*' ||
-        (t->narg && word_check(str, t->arglist.c_str())) ||
-        (!t->narg && is_substring(t->arglist.c_str(), str))) {
-      add_char_uid_var(t, "actor", actor, 0);
-      add_var(t->var_list, "speech", str, 0);
-      script_driver(g, room, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, room, WTRIG_SPEECH,
+       [&](trig_data *t) { return ready(g, t) && has_text(g, t, "W-Speech") && (t->arglist[0] == '*' || speech_matches(t, str)); },
+       [&](trig_data *t) {
+         add_char_uid_var(t, "actor", actor, 0);
+         add_var(t->var_list, "speech", str, 0);
+       },
+       stop_at_first);
 }
 
 int drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
-  struct room_data *room;
-  trig_data *t;
-  int ret_val;
-
-  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_DROP))
+  room_data *room = actor_room_with(g, actor, WTRIG_DROP);
+  if (!room)
     return 1;
-
-  room = room_of(g, char_get_in_room(actor));
-  for (t = room_get_script(room)->trig_list; t; t = t->next)
-    if (trigger_ready(g, t, WTRIG_DROP) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      add_char_uid_var(t, "actor", actor, 0);
-      add_obj_uid_var(t, "object", obj, 0);
-      ret_val = script_driver(g, room, t, TRIG_NEW).value;
-      if (obj_get_carried_by(obj) != actor)
-        return 0;
-      else
-        return ret_val;
-      break;
-    }
-
-  return 1;
+  auto r = fire(g, room, WTRIG_DROP, ready_and_chance(g),
+                [&](trig_data *t) {
+                  add_char_uid_var(t, "actor", actor, 0);
+                  add_obj_uid_var(t, "object", obj, 0);
+                },
+                stop_at_first);
+  if (!r)
+    return 1;
+  return obj_get_carried_by(obj) != actor ? 0 : r->value;
 }
 
 int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj, int spellnum)
 {
-  room_data *room;
-  trig_data *t;
-  std::string buf;
-
-  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_CAST))
+  room_data *room = actor_room_with(g, actor, WTRIG_CAST);
+  if (!room)
     return 1;
-
-  room = room_of(g, char_get_in_room(actor));
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, WTRIG_CAST) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-
-      add_char_uid_var(t, "actor", actor, 0);
-      if (vict)
-        add_char_uid_var(t, "victim", vict, 0);
-      if (obj)
-        add_obj_uid_var(t, "object", obj, 0);
-      buf = str_format("{:d}", spellnum);
-      add_var(t->var_list, "spell", buf.c_str(), 0);
-      add_var(t->var_list, "spellname", skill_name(g, spellnum), 0);
-      return script_driver(g, room, t, TRIG_NEW).value;
-    }
-  }
-
-  return 1;
+  auto r = fire(g, room, WTRIG_CAST, ready_and_chance(g),
+                [&](trig_data *t) {
+                  add_char_uid_var(t, "actor", actor, 0);
+                  if (vict)
+                    add_char_uid_var(t, "victim", vict, 0);
+                  if (obj)
+                    add_obj_uid_var(t, "object", obj, 0);
+                  set_spell(g, t, spellnum);
+                },
+                stop_at_first);
+  return r ? r->value : 1;
 }
 
 int leave_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int dir)
 {
-  trig_data *t;
-
   if (!valid_dg_target(g, actor, DG_ALLOW_GODS))
     return 1;
-
-  if (!script_has_type(room_get_script(room), WTRIG_LEAVE))
-    return 1;
-
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, WTRIG_LEAVE) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      if (dir >= 0 && dir < NUM_OF_DIRS)
-        add_var(t->var_list, "direction", (const char *)dirs[dir], 0);
-      else
-        add_var(t->var_list, "direction", "none", 0);
-      add_char_uid_var(t, "actor", actor, 0);
-      return script_driver(g, room, t, TRIG_NEW).value;
-    }
-  }
-
-  return 1;
+  auto r = fire(g, room, WTRIG_LEAVE, ready_and_chance(g),
+                [&](trig_data *t) {
+                  set_direction(t, dir, false);
+                  add_char_uid_var(t, "actor", actor, 0);
+                },
+                stop_at_first);
+  return r ? r->value : 1;
 }
 
 int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 {
-  room_data *room;
-  trig_data *t;
-
-  if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), WTRIG_DOOR))
+  room_data *room = actor_room_with(g, actor, WTRIG_DOOR);
+  if (!room)
     return 1;
-
-  room = room_of(g, char_get_in_room(actor));
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, WTRIG_DOOR) &&
-        (rand_number(g, 1, 100) <= t->narg)) {
-      add_var(t->var_list, "cmd", (const char *)cmd_door[subcmd], 0);
-      if (dir >= 0 && dir < NUM_OF_DIRS)
-        add_var(t->var_list, "direction", (const char *)dirs[dir], 0);
-      else
-        add_var(t->var_list, "direction", "none", 0);
-      add_char_uid_var(t, "actor", actor, 0);
-      return script_driver(g, room, t, TRIG_NEW).value;
-    }
-  }
-
-  return 1;
+  auto r = fire(g, room, WTRIG_DOOR, ready_and_chance(g),
+                [&](trig_data *t) {
+                  add_var(t->var_list, "cmd", cmd_door[subcmd], 0);
+                  set_direction(t, dir, false);
+                  add_char_uid_var(t, "actor", actor, 0);
+                },
+                stop_at_first);
+  return r ? r->value : 1;
 }
 
 void time_wtrigger(GameWorld *g, struct room_data *room)
 {
-  trig_data *t;
-  std::string buf;
-
-  if (!script_has_type(room_get_script(room), WTRIG_TIME))
-    return;
-
-  for (t = room_get_script(room)->trig_list; t; t = t->next) {
-    if (trigger_ready(g, t, WTRIG_TIME) &&
-        (g->time_info.hours == t->narg)) {
-      buf = str_format("{:d}", g->time_info.hours);
-      add_var(t->var_list, "time", buf.c_str(), 0);
-      script_driver(g, room, t, TRIG_NEW);
-      break;
-    }
-  }
+  fire(g, room, WTRIG_TIME, at_its_hour(g), set_time(g), stop_at_first);
 }
