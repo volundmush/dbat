@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <array>
 #include <string>
 #include "dbat/registry.hpp"
@@ -53,7 +54,7 @@ struct obj_data {
   time_t generation{}; /* creation time for dupe check     */
   int64_t unique_id{}; /* random bits for dupe check       */
 
-  struct trig_proto_list *proto_script{}; /* list of default triggers  */
+  std::vector<trig_vnum> proto_script{}; /* the triggers it starts with */
   struct script_data *script{};           /* script info for the object       */
 
 

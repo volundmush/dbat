@@ -330,7 +330,7 @@ obj_vnum delete_object(GameWorld *g, obj_vnum rnum)
 
   /* No copy is left to share these, now that they have all been extracted and freed. */
   free_extracted_objects(g, rnum);
-  free_proto_script(obj);
+  obj_proto_script(obj).clear();
 
   /* Shops stop producing it. */
   for (struct shop_data *shop : g->shops.all()) {

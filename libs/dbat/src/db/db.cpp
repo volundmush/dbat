@@ -494,25 +494,16 @@ void destroy_db(GameWorld *g)
     /* free any assigned scripts */
     if (room_get_script(g, cnt))
       extract_script(g, room_of(g, cnt));
-    /* free script proto list */
-    free_proto_script(room_of(g, cnt));
-    /* its strings, exits and extra descriptions go with it */
+    /* its strings, exits, extra descriptions and trigger list go with it */
   }
   g->rooms.clear();
 
   /* Objects */
-  for (obj_vnum ovnum : g->obj_proto.vnums()) {
-    /* free script proto list */
-    free_proto_script(obj_proto_of(g, ovnum));
-  }
   g->obj_proto.clear();
   g->obj_index.clear();
 
   /* Mobiles */
   for (mob_vnum mvnum : g->mob_proto.vnums()) {
-    /* free script proto list */
-    free_proto_script(mob_proto_of(g, mvnum));
-
     while (!char_affects(mob_proto_of(g, mvnum)).empty())
       affect_remove(g, mob_proto_of(g, mvnum), &char_affects(mob_proto_of(g, mvnum)).front());
   }
@@ -548,20 +539,8 @@ void destroy_db(GameWorld *g)
 
   /* Triggers */
   for (struct index_data *entry : g->trig_index.all()) {
-    if (entry->proto) {
-      /* make sure to nuke the command list (memory leak) */
-      /* free_trigger() doesn't free the command list */
-      if (entry->proto->cmdlist) {
-        struct cmdlist_element *i, *j;
-        i = entry->proto->cmdlist;
-        while (i) {
-          j = i->next;
-          delete i;
-          i = j;
-        }
-      }
+    if (entry->proto)
       free_trigger(g, entry->proto);
-    }
   }
   g->trig_index.clear();
 
@@ -2651,7 +2630,7 @@ int vnum_mobile(GameWorld *g, std::string_view searchname, struct char_data *ch)
     if (isname(searchname, char_get_alias(mob_proto_of(g, nr))))
       send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
                    ++found, mob_index_of(g, nr)->vnum, char_get_sdesc(mob_proto_of(g, nr)),
-                   char_get_proto_script(mob_proto_of(g, nr)) ? "[TRIG]" : "");
+                   !char_get_proto_script(mob_proto_of(g, nr)).empty() ? "[TRIG]" : "");
 
   return (found);
 }
@@ -2664,7 +2643,7 @@ int vnum_object(GameWorld *g, std::string_view searchname, struct char_data *ch)
     if (isname(searchname, obj_get_name(obj_proto_of(g, nr))))
       send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
                    ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
-                   obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
+                   !obj_get_proto_script(obj_proto_of(g, nr)).empty() ? "[TRIG]" : "");
 
   return (found);
 }
@@ -2677,7 +2656,7 @@ int vnum_material(GameWorld *g, std::string_view searchname, struct char_data *c
     if (isname(searchname, material_names[obj_get_value(obj_proto_of(g, nr), VAL_ALL_MATERIAL)])) {
       send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
                    ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
-                   obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
+                   !obj_get_proto_script(obj_proto_of(g, nr)).empty() ? "[TRIG]" : "");
     }
 
   return (found);
@@ -2692,7 +2671,7 @@ int vnum_weapontype(GameWorld *g, std::string_view searchname, struct char_data 
       if (isname(searchname, weapon_type[obj_get_value(obj_proto_of(g, nr), VAL_WEAPON_SKILL)])) {
         send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
                      ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
-                     obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
+                     !obj_get_proto_script(obj_proto_of(g, nr)).empty() ? "[TRIG]" : "");
       }
     }
 
@@ -2708,7 +2687,7 @@ int vnum_armortype(GameWorld *g, std::string_view searchname, struct char_data *
       if (isname(searchname, armor_type[obj_get_value(obj_proto_of(g, nr), VAL_ARMOR_SKILL)])) {
         send_to_char(g, ch, "{:>3d}. [{:>5d}] {:<40} {}\r\n",
                      ++found, obj_index_of(g, nr)->vnum, obj_get_short_description(obj_proto_of(g, nr)),
-                     obj_get_proto_script(obj_proto_of(g, nr)) ? "[TRIG]" : "");
+                     !obj_get_proto_script(obj_proto_of(g, nr)).empty() ? "[TRIG]" : "");
       }
     }
 
@@ -3831,14 +3810,14 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             if (!char_get_script(tmob)) {
               ZONE_ERROR(g, "Attempt to give variable to scriptless mobile");
             } else
-              add_var(&(char_get_script(tmob)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
+              add_var(char_get_script(tmob)->global_vars, ZCMD2.sarg1, ZCMD2.sarg2,
                       ZCMD2.arg3);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER && tobj) {
             if (!obj_get_script(tobj)) {
               ZONE_ERROR(g, "Attempt to give variable to scriptless object");
             } else
-              add_var(&(obj_get_script(tobj)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
+              add_var(obj_get_script(tobj)->global_vars, ZCMD2.sarg1, ZCMD2.sarg2,
                       ZCMD2.arg3);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
@@ -3848,7 +3827,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
               if (!(room_get_script(g, ZCMD2.arg3))) {
                 ZONE_ERROR(g, "Attempt to give variable to scriptless object");
               } else
-                add_var(&(room_get_script(g, ZCMD2.arg3)->global_vars),
+                add_var(room_get_script(g, ZCMD2.arg3)->global_vars,
                         ZCMD2.sarg1, ZCMD2.sarg2, ZCMD2.arg2);
               last_cmd = 1;
             }
@@ -3991,16 +3970,8 @@ void free_char(GameWorld *g, struct char_data *ch)
   while (!char_affects(ch).empty())
     affect_remove(g, ch, &char_affects(ch).front());
 
-  /* Containers (affects aside, which change what they affect), strings and player_specials go with ch. */
-  if (!char_is_npc(ch) || char_get_nr(ch) == NOBODY) {
-    /* a player, or a mob with no prototype: its trigger list is its own */
-    free_proto_script(ch);
-  } else {
-    /* free script proto list if it's not the prototype's (none, once OLC has deleted it) */
-    struct char_data *proto = mob_proto_of(g, char_get_nr(ch));
-    if (char_get_proto_script(ch) && char_get_proto_script(ch) != (proto ? char_get_proto_script(proto) : nullptr))
-      free_proto_script(ch);
-  }
+  /* Containers (affects aside, which change what they affect), strings, the trigger list and player_specials go
+     with ch. */
   /* free any assigned scripts */
   if (char_get_script(ch))
     extract_script(g, ch);
@@ -4019,13 +3990,7 @@ void free_char(GameWorld *g, struct char_data *ch)
 void free_obj(GameWorld *g, struct obj_data *obj)
 {
   remove_unique_id(g, obj);
-  /* its strings and extra descriptions go with it; the trigger list may be the prototype's */
-  if (obj_get_item_number(obj) == NOWHERE) {
-    free_proto_script(obj);
-  } else {
-    if (obj_get_proto_script(obj) != obj_get_proto_script(obj_proto_of(g, obj_get_item_number(obj))))
-      free_proto_script(obj);
-  }
+  /* its strings, extra descriptions and trigger list go with it */
 
   /* Let's make sure that we free up this memory */
   if (obj_get_auctname(obj)) {

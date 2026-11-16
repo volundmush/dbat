@@ -1,5 +1,6 @@
 # 2.9.4 (latest)
 - ???
+- Looking at an object given a trigger in play (by a script's `attach`, say), with room flags showing, no longer crashes the game when the object's prototype has no triggers of its own. [Volund]
 - A script on an object or a room asking a mob's globals for `self` (`%mob.global(self)%`) gets its own id, rather than reading the object or room as though it were a mob. [Volund]
 - Creating a character makes its rolls and gains at the end, once the traits are chosen, rather than as each question is answered: the size, the base stats and abilities, the answers' gains, the age, the alignment chosen and its penalty, forgotten skills and the genomes' bonuses. A character comes out as before, but a bad answer to the first question no longer rolls the stats again, and a mutant's second mutation is rolled before the rest. [Volund]
 - Logging in to a character whose player file is marked deleted starts a new one, as it's meant to, rather than reading the freed old character and then leaving the new one out of the player index and not properly in the game. [Volund]

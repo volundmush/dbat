@@ -105,7 +105,7 @@ bool delete_room(GameWorld *g, room_vnum vnum)
   free_room_strings(room);
   if (room_get_script(room))
     extract_script(g, room);
-  free_proto_script(room);
+  room_proto_script(room).clear();
 
   /* Exits to this room go nowhere, or are removed if they had nothing to show. */
   for (struct room_data *other : g->rooms.all())

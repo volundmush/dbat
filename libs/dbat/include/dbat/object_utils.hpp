@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <string>
 #include <cstdint>
 #include <ctime>
@@ -143,8 +144,9 @@ void obj_set_in_obj(struct obj_data *obj, struct obj_data *v);
 const char *obj_get_name(const struct obj_data *obj);
 void obj_set_name(struct obj_data *obj, const char *v);
 void obj_set_name(struct obj_data *obj, const std::string &v);
-struct trig_proto_list *obj_get_proto_script(const struct obj_data *obj);
-void obj_set_proto_script(struct obj_data *obj, struct trig_proto_list *v);
+const std::vector<trig_vnum> &obj_get_proto_script(const struct obj_data *obj);
+std::vector<trig_vnum> &obj_proto_script(struct obj_data *obj);
+void obj_set_proto_script(struct obj_data *obj, std::vector<trig_vnum> v);
 struct obj_spellbook_spell *obj_get_sbinfo(const struct obj_data *obj);
 struct script_data *obj_get_script(const struct obj_data *obj);
 void obj_set_script(struct obj_data *obj, struct script_data *v);

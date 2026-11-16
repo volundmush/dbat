@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <string>
 #include "dbat/extradesc.hpp"
 #include "dbat/registry.hpp"
@@ -75,10 +76,11 @@ void room_set_number(struct room_data *room, room_vnum v);
 void room_set_number(GameWorld *g, room_vnum room, room_vnum v);
 const id_list &room_get_people(const struct room_data *room);
 const id_list &room_get_people(GameWorld *g, room_vnum room);
-struct trig_proto_list *room_get_proto_script(const struct room_data *room);
-void room_set_proto_script(struct room_data *room, struct trig_proto_list *v);
-struct trig_proto_list *room_get_proto_script(GameWorld *g, room_vnum room);
-void room_set_proto_script(GameWorld *g, room_vnum room, struct trig_proto_list *v);
+const std::vector<trig_vnum> &room_get_proto_script(const struct room_data *room);
+std::vector<trig_vnum> &room_proto_script(struct room_data *room);
+void room_set_proto_script(struct room_data *room, std::vector<trig_vnum> v);
+const std::vector<trig_vnum> &room_get_proto_script(GameWorld *g, room_vnum room);
+void room_set_proto_script(GameWorld *g, room_vnum room, std::vector<trig_vnum> v);
 bitvector_t *room_get_room_flags(struct room_data *room);
 struct script_data *room_get_script(const struct room_data *room);
 void room_set_script(struct room_data *room, struct script_data *v);

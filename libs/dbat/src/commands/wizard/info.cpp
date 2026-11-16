@@ -817,18 +817,16 @@ ACMD(do_varstat)
     return;
   }
   /* Display their global variables */
-  if (char_get_script(vict) && char_get_script(vict)->global_vars) {
-    struct trig_var_data *tv;
-
+  if (char_get_script(vict) && !char_get_script(vict)->global_vars.empty()) {
     send_to_char(g, ch, "{}'s Global Variables:\r\n", char_get_name(vict));
 
     /* currently, variable context for players is always 0, so it is */
     /* not displayed here. in the future, this might change */
-    for (tv = char_get_script(vict)->global_vars; tv; tv = tv->next) {
-      if (tv->value[0] == UID_CHAR) {
-        send_to_char(g, ch, "    {:>10}:  [UID]: {}\r\n", tv->name, find_uid_name(g, tv->value));
+    for (const dg::variable &tv : char_get_script(vict)->global_vars) {
+      if (tv.value[0] == UID_CHAR) {
+        send_to_char(g, ch, "    {:>10}:  [UID]: {}\r\n", tv.name, find_uid_name(g, tv.value));
       } else
-        send_to_char(g, ch, "    {:>10}:  {}\r\n", tv->name, tv->value);
+        send_to_char(g, ch, "    {:>10}:  {}\r\n", tv.name, tv.value);
     }
   }
 }
@@ -1950,7 +1948,6 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
   room_vnum lastroom_r     = 0;
   mob_vnum lastmob_r       = 0;
   obj_vnum lastobj_r       = 0;
-  struct trig_proto_list *tpl;
 
   if (trnum == nullptr) {
     send_to_char(g, ch, "That trigger does not exist.\r\n");
@@ -2016,11 +2013,8 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
   } /*for zone...*/
 
   for (mob_vnum i : g->mob_proto.vnums()) {
-    if (!char_get_proto_script(mob_proto_of(g, i)))
-      continue;
-
-    for (tpl = char_get_proto_script(mob_proto_of(g, i)); tpl; tpl = tpl->next)
-      if (tpl->vnum == tvnum) {
+    for (trig_vnum vnum : char_get_proto_script(mob_proto_of(g, i)))
+      if (vnum == tvnum) {
         send_to_char(g, ch, "mob [{:>5d}] {}\r\n",
                      mob_index_of(g, i)->vnum,
                      char_get_sdesc(mob_proto_of(g, i)));
@@ -2029,11 +2023,8 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
   }
 
   for (obj_vnum j : g->obj_proto.vnums()) {
-    if (!obj_get_proto_script(obj_proto_of(g, j)))
-      continue;
-
-    for (tpl = obj_get_proto_script(obj_proto_of(g, j)); tpl; tpl = tpl->next)
-      if (tpl->vnum == tvnum) {
+    for (trig_vnum vnum : obj_get_proto_script(obj_proto_of(g, j)))
+      if (vnum == tvnum) {
         send_to_char(g, ch, "obj [{:>5d}] {}\r\n",
                      obj_index_of(g, j)->vnum,
                      obj_get_short_description(obj_proto_of(g, j)));
@@ -2042,11 +2033,8 @@ static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum)
   }
 
   for (room_vnum k : g->rooms.vnums()) {
-    if (!room_get_proto_script(g, k))
-      continue;
-
-    for (tpl = room_get_proto_script(g, k); tpl; tpl = tpl->next)
-      if (tpl->vnum == tvnum) {
+    for (trig_vnum vnum : room_get_proto_script(g, k))
+      if (vnum == tvnum) {
         send_to_char(g, ch, "room[{:>5d}] {}\r\n",
                      k,
                      room_get_name(g, k));

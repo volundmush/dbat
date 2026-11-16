@@ -183,20 +183,9 @@ static bool update_mobile_strings(struct char_data *t, struct char_data *f)
  * and their mob_proto!  */
 bool free_mobile(GameWorld *g, struct char_data *mob)
 {
-  mob_vnum i;
-
   if (mob == nullptr)
     return false;
 
-  /* Non-prototyped mobile.  Also known as new mobiles.  */
-  if ((i = char_get_nr(mob)) == NOBODY) {
-    /* free script proto list */
-    free_proto_script(mob);
-  } else { /* Prototyped mobile. */
-    /* free script proto list if it's not the prototype */
-    if (char_get_proto_script(mob) && char_get_proto_script(mob) != char_get_proto_script(mob_proto_of(g, i)))
-      free_proto_script(mob);
-  }
   while (!char_affects(mob).empty())
     affect_remove(g, mob, &char_affects(mob).front());
 

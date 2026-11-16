@@ -108,7 +108,7 @@ static void check_song_of_shielding_costs_ki(void)
   /* the fixture has no instrument, and adding one would shift what bots pick from it: make one here */
   struct obj_data *proto = g->obj_proto.emplace(8802);
   copy_object(g, proto, obj_proto_of(g, 350));
-  obj_set_proto_script(proto, nullptr); /* copy_object() shares the original's trigger list */
+  obj_set_proto_script(proto, {}); /* without the original's triggers */
   obj_set_item_number(proto, 8802);
   g->obj_index.emplace(8802)->vnum = 8802;
   instrument                       = read_object(g, 8802);

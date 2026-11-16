@@ -22,7 +22,6 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc);
 
 static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
 {
-  struct cmdlist_element *cmd_list;
   std::string sb;
   std::string buf;
 
@@ -51,12 +50,8 @@ static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
 
   sb += "Commands:\r\n";
 
-  cmd_list = trig->cmdlist;
-  while (cmd_list) {
-    if (!cmd_list->cmd.empty())
-      sb += str_format("{}\r\n", cmd_list->cmd);
-    cmd_list = cmd_list->next;
-  }
+  for (const dg::line &l : trig->program->lines)
+    sb += str_format("{}\r\n", l.text);
 
   send_to_char(g, ch, sb);
 }
@@ -78,20 +73,19 @@ std::string find_uid_name(GameWorld *g, std::string_view uid)
 /* general function to display stats on script sc */
 static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
 {
-  struct trig_var_data *tv;
   trig_data *t;
   std::string namebuf;
   std::string buf1;
 
-  send_to_char(g, ch, "Global Variables: {}\r\n", sc->global_vars ? "" : "None");
+  send_to_char(g, ch, "Global Variables: {}\r\n", sc->global_vars.empty() ? "None" : "");
   send_to_char(g, ch, "Global context: {:d}\r\n", sc->context);
 
-  for (tv = sc->global_vars; tv; tv = tv->next) {
-    namebuf = str_format("{}:{:d}", tv->name, tv->context);
-    if (tv->value[0] == UID_CHAR) {
-      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf.c_str() : tv->name.c_str(), find_uid_name(g, tv->value));
+  for (const dg::variable &tv : sc->global_vars) {
+    namebuf = str_format("{}:{:d}", tv.name, tv.context);
+    if (tv.value[0] == UID_CHAR) {
+      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv.context ? namebuf : tv.name, find_uid_name(g, tv.value));
     } else
-      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->context ? namebuf.c_str() : tv->name.c_str(), tv->value);
+      send_to_char(g, ch, "    {:>15}:  {}\r\n", tv.context ? namebuf : tv.name, tv.value);
   }
 
   for (t = sc->trig_list; t; t = t->next) {
@@ -116,14 +110,14 @@ static void script_stat(GameWorld *g, char_data *ch, struct script_data *sc)
     if (t->wait_event) {
       send_to_char(g, ch, "    Wait: {:d}, Current line: {}\r\n",
                    event_time(g, t->wait_event),
-                   t->curr_state ? t->curr_state->cmd.c_str() : "End of Script");
-      send_to_char(g, ch, "  Variables: {}\r\n", t->var_list ? "" : "None");
+                   t->next_line < t->program->lines.size() ? t->program->lines[t->next_line].text.c_str() : "End of Script");
+      send_to_char(g, ch, "  Variables: {}\r\n", t->var_list.empty() ? "None" : "");
 
-      for (tv = t->var_list; tv; tv = tv->next) {
-        if (tv->value[0] == UID_CHAR) {
-          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name, find_uid_name(g, tv->value));
+      for (const dg::variable &tv : t->var_list) {
+        if (tv.value[0] == UID_CHAR) {
+          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv.name, find_uid_name(g, tv.value));
         } else
-          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv->name, tv->value);
+          send_to_char(g, ch, "    {:>15}:  {}\r\n", tv.name, tv.value);
       }
     }
   }
@@ -579,19 +573,18 @@ ACMD(do_vdelete)
     return;
   }
 
-  if (sc_remote->global_vars == nullptr) {
+  if (sc_remote->global_vars.empty()) {
     send_to_char(g, ch, "That id represents no global variables.(2)\r\n");
     return;
   }
 
   if (var[0] == '*' || is_abbrev(var, "all")) {
-    free_varlist(sc_remote->global_vars);
-    sc_remote->global_vars = nullptr;
+    sc_remote->global_vars.clear();
     send_to_char(g, ch, "All variables deleted from that id.\r\n");
     return;
   }
 
-  if (!remove_var(&sc_remote->global_vars, var.c_str())) {
+  if (!sc_remote->global_vars.erase(var)) {
     send_to_char(g, ch, "That variable cannot be located.\r\n");
     return;
   }

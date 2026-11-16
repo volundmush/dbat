@@ -402,27 +402,33 @@ const id_list &room_get_people(GameWorld *g, room_vnum room)
   return none;
 }
 
-struct trig_proto_list *room_get_proto_script(const struct room_data *room)
+const std::vector<trig_vnum> &room_get_proto_script(const struct room_data *room)
 {
   return room->proto_script;
 }
 
-void room_set_proto_script(struct room_data *room, struct trig_proto_list *v)
+std::vector<trig_vnum> &room_proto_script(struct room_data *room)
 {
-  room->proto_script = v;
+  return room->proto_script;
 }
 
-struct trig_proto_list *room_get_proto_script(GameWorld *g, room_vnum room)
+void room_set_proto_script(struct room_data *room, std::vector<trig_vnum> v)
 {
+  room->proto_script = std::move(v);
+}
+
+const std::vector<trig_vnum> &room_get_proto_script(GameWorld *g, room_vnum room)
+{
+  static const std::vector<trig_vnum> none;
   if (struct room_data *r = room_of(g, room))
     return r->proto_script;
-  return {};
+  return none;
 }
 
-void room_set_proto_script(GameWorld *g, room_vnum room, struct trig_proto_list *v)
+void room_set_proto_script(GameWorld *g, room_vnum room, std::vector<trig_vnum> v)
 {
   if (struct room_data *r = room_of(g, room))
-    r->proto_script = v;
+    r->proto_script = std::move(v);
 }
 
 bitvector_t *room_get_room_flags(struct room_data *room)

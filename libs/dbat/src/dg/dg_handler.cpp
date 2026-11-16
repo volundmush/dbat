@@ -31,12 +31,6 @@
 
 #include "dg_internal.hpp"
 
-/* frees memory associated with var */
-static void free_var_el(struct trig_var_data *var)
-{
-  delete var;
-}
-
 /* returns *slot, first creating an empty script there if there is none */
 struct script_data *dg_ensure_script(struct script_data **slot)
 {
@@ -54,44 +48,6 @@ struct script_data **script_slot(owner_ptr go)
                     go);
 }
 
-/* release memory allocated for a variable list */
-void free_varlist(struct trig_var_data *vd)
-{
-  struct trig_var_data *i, *j;
-
-  for (i = vd; i;) {
-    j = i;
-    i = i->next;
-    free_var_el(j);
-  }
-}
-
-/*
- * remove var name from var_list
- * returns 1 if found, else 0
- */
-bool remove_var(struct trig_var_data **var_list, const char *name)
-{
-  struct trig_var_data *i, *j;
-
-  for (j = nullptr, i = *var_list; i && strcasecmp(name, i->name.c_str());
-       j = i, i = i->next);
-
-  if (i) {
-    if (j) {
-      j->next = i->next;
-      free_var_el(i);
-    } else {
-      *var_list = i->next;
-      free_var_el(i);
-    }
-
-    return true;
-  }
-
-  return false;
-}
-
 /*
  * Return memory used by a trigger
  * The command list is free'd when changed and when
@@ -101,10 +57,6 @@ void free_trigger(GameWorld *g, struct trig_data *trig)
 {
   trig->name.clear();
   trig->arglist.clear();
-  if (trig->var_list) {
-    free_varlist(trig->var_list);
-    trig->var_list = nullptr;
-  }
   if (trig->wait_event)
     event_cancel(g, trig->wait_event);
 
@@ -161,9 +113,6 @@ void extract_script(GameWorld *g, owner_ptr thing)
   }
   sc->trig_list = nullptr;
 
-  /* Thanks to James Long for tracking down this memory leak */
-  free_varlist(sc->global_vars);
-
   delete sc;
 }
 
@@ -178,52 +127,19 @@ void extract_script_mem(struct script_memory *sc)
   }
 }
 
-/* Where thing keeps the list of its prototype's trigger vnums */
-static struct trig_proto_list *proto_script_of(owner_ptr thing)
+/* Where thing keeps the vnums of the triggers it starts with */
+std::vector<trig_vnum> &proto_script_of(owner_ptr thing)
 {
-  return std::visit(overloaded{[](char_data *mob) { return char_get_proto_script(mob); },
-                               [](obj_data *obj) { return obj_get_proto_script(obj); },
-                               [](room_data *room) { return room_get_proto_script(room); }},
+  return std::visit(overloaded{[](char_data *mob) -> std::vector<trig_vnum> & { return char_proto_script(mob); },
+                               [](obj_data *obj) -> std::vector<trig_vnum> & { return obj_proto_script(obj); },
+                               [](room_data *room) -> std::vector<trig_vnum> & { return room_proto_script(room); }},
                     thing);
-}
-
-static void set_proto_script(owner_ptr thing, struct trig_proto_list *list)
-{
-  std::visit(overloaded{[&](char_data *mob) { char_set_proto_script(mob, list); },
-                        [&](obj_data *obj) { obj_set_proto_script(obj, list); },
-                        [&](room_data *room) { room_set_proto_script(room, list); }},
-             thing);
-}
-
-void free_proto_script(owner_ptr thing)
-{
-  struct trig_proto_list *proto = proto_script_of(thing), *fproto;
-
-  set_proto_script(thing, nullptr);
-  while (proto) {
-    fproto = proto;
-    proto  = proto->next;
-    delete fproto;
-  }
 }
 
 /* source and dest are of the same kind */
 void copy_proto_script(owner_ptr source, owner_ptr dest)
 {
-  struct trig_proto_list *tp_src = proto_script_of(source), *tp_dst = nullptr;
-
-  if (tp_src) {
-    tp_dst = new trig_proto_list();
-    set_proto_script(dest, tp_dst);
-
-    while (tp_src) {
-      tp_dst->vnum = tp_src->vnum;
-      tp_src       = tp_src->next;
-      if (tp_src)
-        tp_dst->next = new trig_proto_list();
-      tp_dst = tp_dst->next;
-    }
-  }
+  proto_script_of(dest) = proto_script_of(source);
 }
 
 void delete_variables(const char *charname)

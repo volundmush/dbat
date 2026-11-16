@@ -132,15 +132,8 @@ ACMD(do_oasis_trigedit)
 /* be saved */
 void script_save_to_disk(FILE *fp, owner_ptr item)
 {
-  struct trig_proto_list *t = std::visit(overloaded{[](char_data *mob) { return char_get_proto_script(mob); },
-                                                    [](obj_data *obj) { return obj_get_proto_script(obj); },
-                                                    [](room_data *room) { return room_get_proto_script(room); }},
-                                         item);
-
-  while (t) {
-    file_print(fp, "T {:d}\n", t->vnum);
-    t = t->next;
-  }
+  for (trig_vnum vnum : proto_script_of(item))
+    file_print(fp, "T {:d}\n", vnum);
 }
 
 static void trigedit_setup_new(struct descriptor_data *d)
@@ -171,7 +164,6 @@ static void trigedit_setup_new(struct descriptor_data *d)
 static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct index_data *rtrg_num)
 {
   struct trig_data *trig;
-  struct cmdlist_element *c;
   /*
    * Allocate a scratch trigger structure
    */
@@ -179,14 +171,8 @@ static void trigedit_setup_existing(GameWorld *g, struct descriptor_data *d, str
 
   trig_data_copy(trig, rtrg_num->proto);
 
-  /* convert cmdlist to a string */
-  OLC_STORAGE(d).clear();
-  for (c = trig->cmdlist; c; c = c->next) {
-    OLC_STORAGE(d) += c->cmd;
-    OLC_STORAGE(d) += "\r\n";
-  }
-  /* now trig->cmdlist is something to pass to the text editor */
-  /* it will be converted back to a real cmdlist_element list later */
+  /* the script goes to the text editor, and is read again when the trigger is saved */
+  OLC_STORAGE(d) = trig->program->script();
 
   OLC_TRIG(d) = trig;
   OLC_VAL(d)  = 0; /* Has changed flag. (It hasn't so far, we just made it.) */
@@ -391,24 +377,10 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
   trigedit_disp_menu(g, d);
 }
 
-/* Builds trig->cmdlist from the editor text s, one element per line. */
-/* Makes the trigger's command list from the script, a line to a command. */
-static void trigedit_compile_script(trig_data *trig, std::string script)
+/* Reads the trigger's script from the editor's text. */
+static void trigedit_compile_script(trig_data *trig, std::string_view script)
 {
-  struct cmdlist_element *cmd;
-  char *s;
-
-  trig->cmdlist = new cmdlist_element();
-  /* strtok returns NULL if the script is "\r\n" */
-  char *t            = strtok(script.data(), "\n\r");
-  trig->cmdlist->cmd = t ? t : "* No script";
-  cmd                = trig->cmdlist;
-
-  while ((s = strtok(nullptr, "\n\r"))) {
-    cmd->next = new cmdlist_element();
-    cmd       = cmd->next;
-    cmd->cmd  = s;
-  }
+  trig->program = dg::lex(script, "* No script");
 }
 
 /* Replaces the trigger prototype with the edited trigger, and updates every live copy of it. */
@@ -416,12 +388,6 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
 {
   trig_data *trig  = OLC_TRIG(d);
   trig_data *proto = rnum->proto;
-  struct cmdlist_element *cmd, *next_cmd;
-
-  for (cmd = proto->cmdlist; cmd; cmd = next_cmd) {
-    next_cmd = cmd->next;
-    delete cmd;
-  }
 
   /* Recompile the command list from the new script */
   trigedit_compile_script(trig, OLC_STORAGE(d));
@@ -440,13 +406,11 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
         event_cancel(g, live_trig->wait_event);
         live_trig->wait_event = nullptr;
       }
-      if (live_trig->var_list) {
-        free_varlist(live_trig->var_list);
-        live_trig->var_list = nullptr;
-      }
+      live_trig->var_list.clear();
 
-      live_trig->cmdlist      = proto->cmdlist;
-      live_trig->curr_state   = live_trig->cmdlist;
+      live_trig->program      = proto->program;
+      live_trig->next_line    = 0;
+      live_trig->while_of_done.clear();
       live_trig->trigger_type = proto->trigger_type;
       live_trig->attach_type  = proto->attach_type;
       live_trig->narg         = proto->narg;
@@ -477,7 +441,6 @@ bool save_triggers(GameWorld *g, struct zone_data *in_zone)
   IDXTYPE i;
   struct index_data *rnum;
   trig_data *trig;
-  struct cmdlist_element *cmd;
   FILE *trig_file;
   zone_vnum zone;
   room_vnum top;
@@ -513,10 +476,11 @@ bool save_triggers(GameWorld *g, struct zone_data *in_zone)
                  trig->arglist, as_char(STRING_TERMINATOR));
 
       /* The script, one line per command. Written directly: scripts can exceed any fixed buffer. */
-      if (!trig->cmdlist)
+      if (!trig->program)
         fputs("* Empty script", trig_file);
-      for (cmd = trig->cmdlist; cmd; cmd = cmd->next)
-        file_print(trig_file, "{}\n", cmd->cmd);
+      else
+        for (const dg::line &l : trig->program->lines)
+          file_print(trig_file, "{}\n", l.text);
 
       file_print(trig_file, "{:c}\n", as_char(STRING_TERMINATOR));
     }
@@ -560,32 +524,16 @@ static void trigedit_save(GameWorld *g, struct descriptor_data *d)
 
 void dg_olc_script_copy(struct descriptor_data *d)
 {
-  struct trig_proto_list *origscript, *editscript;
-
   if (OLC_ITEM_TYPE(d) == MOB_TRIGGER)
-    origscript = char_get_proto_script(OLC_MOB(d));
+    OLC_SCRIPT(d) = char_get_proto_script(OLC_MOB(d));
   else if (OLC_ITEM_TYPE(d) == OBJ_TRIGGER)
-    origscript = obj_get_proto_script(OLC_OBJ(d));
-  else origscript = room_get_proto_script(OLC_ROOM(d));
-
-  if (origscript) {
-    editscript    = new trig_proto_list();
-    OLC_SCRIPT(d) = editscript;
-
-    while (origscript) {
-      editscript->vnum = origscript->vnum;
-      origscript       = origscript->next;
-      if (origscript)
-        editscript->next = new trig_proto_list();
-      editscript = editscript->next;
-    }
-  } else
-    OLC_SCRIPT(d) = nullptr;
+    OLC_SCRIPT(d) = obj_get_proto_script(OLC_OBJ(d));
+  else
+    OLC_SCRIPT(d) = room_get_proto_script(OLC_ROOM(d));
 }
 
 void dg_script_menu(GameWorld *g, struct descriptor_data *d)
 {
-  struct trig_proto_list *editscript;
   int i = 0;
 
   /* make sure our input parser gets used */
@@ -595,17 +543,12 @@ void dg_script_menu(GameWorld *g, struct descriptor_data *d)
   clear_screen(g, d);
   write_to_output(g, d, "     Script Editor\r\n\r\n     Trigger List:\r\n");
 
-  editscript = OLC_SCRIPT(d);
-
-  while (editscript) {
-    write_to_output(g, d, "     {:>2d}) [@c{:d}@n] @c{}@n", ++i, editscript->vnum,
-                    find_trigger(g, editscript->vnum)->proto->name);
-    if (find_trigger(g, editscript->vnum)->proto->attach_type != OLC_ITEM_TYPE(d))
+  for (trig_vnum vnum : OLC_SCRIPT(d)) {
+    write_to_output(g, d, "     {:>2d}) [@c{:d}@n] @c{}@n", ++i, vnum, find_trigger(g, vnum)->proto->name);
+    if (find_trigger(g, vnum)->proto->attach_type != OLC_ITEM_TYPE(d))
       write_to_output(g, d, "   @g** Mis-matched Trigger Type **@n\r\n");
     else
       write_to_output(g, d, "\r\n");
-
-    editscript = editscript->next;
   }
   if (i == 0)
     write_to_output(g, d, "     <none>\r\n");
@@ -615,7 +558,7 @@ void dg_script_menu(GameWorld *g, struct descriptor_data *d)
 
 bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  struct trig_proto_list *trig, *currtrig;
+  std::vector<trig_vnum> &list = OLC_SCRIPT(d);
   int count, pos;
   trig_vnum vnum;
 
@@ -645,9 +588,9 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
              After updating to OasisOLC 2.0.3 I discovered some malfunctions
              in this code, so I restructured it a bit. Now things work like this:
              OLC_SCRIPT(d) is assigned a copy of the edited things' proto_script.
-             OLC_OBJ(d), etc.. are initalized with proto_script = NULL;
-             On save, the saved copy is updated with OLC_SCRIPT(d) as new proto_script (freeing the old one).
-             On quit/nosave, OLC_SCRIPT is free()'d, and the prototype not touched.
+             OLC_OBJ(d), etc.. are initalized with an empty proto_script;
+             On save, the saved copy is updated with OLC_SCRIPT(d) as new proto_script.
+             On quit/nosave, OLC_SCRIPT is dropped, and the prototype not touched.
 
            */
           return false;
@@ -683,48 +626,18 @@ bool dg_script_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         return true;
       }
 
-      /* add the new info in position */
-      currtrig = OLC_SCRIPT(d);
-      trig       = new trig_proto_list();
-      trig->vnum = vnum;
-
-      if (pos == 1 || !currtrig) {
-        trig->next    = OLC_SCRIPT(d);
-        OLC_SCRIPT(d) = trig;
-      } else {
-        while (currtrig->next && --pos) {
-          currtrig = currtrig->next;
-        }
-        trig->next     = currtrig->next;
-        currtrig->next = trig;
-      }
-      OLC_VAL(d)
-      ++;
+      /* quirk: position 1 is the first, but any other n goes after the nth, or at the end */
+      list.insert(list.begin() + (pos == 1 ? 0 : std::min((size_t)pos, list.size())), vnum);
+      OLC_VAL(d)++;
       break;
 
     case SCRIPT_DEL_TRIGGER:
       pos = atoi(arg);
       if (pos <= 0) break;
 
-      if (pos == 1 && OLC_SCRIPT(d)) {
-        OLC_VAL(d)
-        ++;
-        currtrig      = OLC_SCRIPT(d);
-        OLC_SCRIPT(d) = currtrig->next;
-        delete currtrig;
-        break;
-      }
-
-      pos--;
-      currtrig = OLC_SCRIPT(d);
-      while (--pos && currtrig) currtrig = currtrig->next;
-      /* now curtrig points one before the target */
-      if (currtrig && currtrig->next) {
-        OLC_VAL(d)
-        ++;
-        trig           = currtrig->next;
-        currtrig->next = trig->next;
-        delete trig;
+      if ((size_t)pos <= list.size()) {
+        OLC_VAL(d)++;
+        list.erase(list.begin() + (pos - 1));
       }
       break;
   }

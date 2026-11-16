@@ -32,8 +32,7 @@ constexpr int PULSES_PER_MUD_HOUR = SECS_PER_MUD_HOUR * PASSES_PER_SEC;
 
 
 /* Local functions not used elsewhere */
-static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
-                         struct cmdlist_element *cl);
+static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd, size_t at);
 static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd);
 static void process_attach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
 static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd);
@@ -213,9 +212,9 @@ static void dg_ctx_begin(GameWorld *g, owner_ptr go, trig_data *trig)
     g->dg_ctx.room_vnum = (long long)room;
 }
 
-static void dg_ctx_set_line(GameWorld *g, const char *cmd)
+static void dg_ctx_set_line(GameWorld *g, std::string_view cmd)
 {
-  g->dg_ctx.line = writable_copy(cmd);
+  g->dg_ctx.line = cmd;
 }
 
 /* " [trig ... ]" describing the running trigger, or "" when none is. */
@@ -272,9 +271,10 @@ static long wait_mul(long a, long b)
   return product;
 }
 
-static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
-                         struct cmdlist_element *cl)
+/* at is the wait's line, in trig->program */
+static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd, size_t at)
 {
+  const std::string &written = trig->program->lines[at].text;
   char buf[MAX_INPUT_LENGTH], *arg;
   struct wait_event_data *wait_event_obj;
   long when, hr, min, ntime;
@@ -285,7 +285,7 @@ static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
 
   if (!*arg) {
     script_log(g, "Trigger: {}, VNum {:d}. wait w/o an arg: '{}'",
-               trig->name, trig_get_vnum(g, trig), cl->cmd);
+               trig->name, trig_get_vnum(g, trig), written);
     return;
   }
 
@@ -295,7 +295,7 @@ static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
     int fields = sscanf(arg, "until %ld:%ld", &hr, &min);
     if (fields < 1) {
       script_log(g, "Trigger: {}, VNum {:d}. wait until w/o a time: '{}'",
-                 trig->name, trig_get_vnum(g, trig), cl->cmd);
+                 trig->name, trig_get_vnum(g, trig), written);
       return;
     }
     if (fields == 2)
@@ -331,7 +331,7 @@ static void process_wait(GameWorld *g, owner_ptr go, trig_data *trig, char *cmd,
   wait_event_obj->owner      = script_owner::of(go);
 
   trig->wait_event = event_create(g, trig_wait_event, wait_event_obj, free_wait_event_data, when);
-  trig->curr_state = cl->next;
+  trig->next_line  = at + 1;
 }
 
 /* processes a script set command */
@@ -349,7 +349,7 @@ static void process_set(GameWorld *g, struct script_data *sc, trig_data *trig, c
     return;
   }
 
-  add_var(&trig->var_list, name, value, sc ? sc->context : 0);
+  add_var(trig->var_list, name, value, sc ? sc->context : 0);
 }
 
 /* processes a script eval command */
@@ -369,7 +369,7 @@ void process_eval(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
   }
 
   std::string result = eval_expr(g, expr, go, sc, trig);
-  add_var(&trig->var_list, name, result.c_str(), sc ? sc->context : 0);
+  add_var(trig->var_list, name, result.c_str(), sc ? sc->context : 0);
 }
 
 /* script attaching a trigger to something */
@@ -634,7 +634,7 @@ static void makeuid_var(GameWorld *g, owner_ptr go, struct script_data *sc, trig
     }
   }
   if (!uid.empty())
-    add_var(&trig->var_list, varname, uid.c_str(), sc ? sc->context : 0);
+    add_var(trig->var_list, varname, uid.c_str(), sc ? sc->context : 0);
 }
 
 /*
@@ -675,8 +675,8 @@ static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig,
     return;
   }
 
-  if (!remove_var(&(sc->global_vars), var))
-    remove_var(&trig->var_list, var);
+  if (!sc->global_vars.erase(var))
+    trig->var_list.erase(var);
 }
 
 /*
@@ -685,7 +685,7 @@ static void process_unset(GameWorld *g, struct script_data *sc, trig_data *trig,
  */
 static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
 {
-  struct trig_var_data *vd;
+  const dg::variable *vd;
   struct script_data *sc_remote = nullptr;
   char *line, *var, *uid_p;
   char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
@@ -708,15 +708,9 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
   }
 
   /* find the locally owned variable */
-  for (vd = trig->var_list; vd; vd = vd->next)
-    if (!strcasecmp(vd->name.c_str(), buf))
-      break;
-
+  vd = trig->var_list.find(buf);
   if (!vd)
-    for (vd = sc->global_vars; vd; vd = vd->next)
-      if (!strcasecmp(vd->name.c_str(), var) &&
-          (vd->context == 0 || vd->context == sc->context))
-        break;
+    vd = sc->global_vars.find_in(var, sc->context);
 
   if (!vd) {
     script_log(g, "Trigger: {}, VNum {:d}. local var '{}' not found in remote call",
@@ -750,7 +744,7 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
 
   if (sc_remote == nullptr) return; /* no script to assign */
 
-  add_var(&(sc_remote->global_vars), vd->name.c_str(), vd->value.c_str(), context);
+  add_var(sc_remote->global_vars, vd->name, vd->value, context); /* which may be sc's own */
 }
 
 /*
@@ -759,7 +753,6 @@ static void process_remote(GameWorld *g, struct script_data *sc, trig_data *trig
  */
 static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd)
 {
-  struct trig_var_data *vd, *vd_prev = nullptr;
   struct script_data *sc_remote = nullptr;
   char *line, *var, *uid_p;
   char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
@@ -801,22 +794,11 @@ static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *tri
     return;
   }
 
-  if (sc_remote == nullptr) return;              /* no script to delete a trigger from */
-  if (sc_remote->global_vars == nullptr) return; /* no script globals */
+  if (sc_remote == nullptr) return; /* no script to delete a trigger from */
 
-  /* find the global */
-  for (vd = sc_remote->global_vars; vd; vd_prev = vd, vd = vd->next)
-    if (!strcasecmp(vd->name.c_str(), var) &&
-        (vd->context == 0 || vd->context == sc->context))
-      break;
-
-  if (!vd) return; /* the variable doesn't exist, or is the wrong context */
-
-  /* ok, delete the variable */
-  if (vd_prev) vd_prev->next = vd->next;
-  else sc_remote->global_vars = vd->next;
-
-  delete vd;
+  /* the global, unless it doesn't exist or is of the wrong context */
+  if (const dg::variable *vd = sc_remote->global_vars.find_in(var, sc->context))
+    sc_remote->global_vars.erase(vd);
 }
 
 /*
@@ -824,7 +806,7 @@ static void process_rdelete(GameWorld *g, struct script_data *sc, trig_data *tri
  */
 static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig, char *cmd, long id)
 {
-  struct trig_var_data *vd;
+  const dg::variable *vd;
   char arg[MAX_INPUT_LENGTH], *var;
 
   var = any_one_arg(cmd, arg);
@@ -837,18 +819,15 @@ static void process_global(GameWorld *g, struct script_data *sc, trig_data *trig
     return;
   }
 
-  for (vd = trig->var_list; vd; vd = vd->next)
-    if (!strcasecmp(vd->name.c_str(), var))
-      break;
-
+  vd = trig->var_list.find(var);
   if (!vd) {
     script_log(g, "Trigger: {}, VNum {:d}. local var '{}' not found in global call",
                trig->name, trig_get_vnum(g, trig), var);
     return;
   }
 
-  add_var(&(sc->global_vars), vd->name.c_str(), vd->value.c_str(), id);
-  remove_var(&trig->var_list, vd->name.c_str());
+  add_var(sc->global_vars, vd->name, vd->value, id);
+  trig->var_list.erase(vd);
 }
 
 /* set the current context for a script */
@@ -897,7 +876,7 @@ static void extract_value(GameWorld *g, struct script_data *sc, trig_data *trig,
     num--;
   }
 
-  add_var(&trig->var_list, to, buf, sc ? sc->context : 0);
+  add_var(trig->var_list, to, buf, sc ? sc->context : 0);
 }
 
 /*
@@ -947,7 +926,7 @@ static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *tri
 
   *junk       = string[num - 1];
   *(junk + 1) = '\0';
-  add_var(&trig->var_list, varname, junk, sc->context);
+  add_var(trig->var_list, varname, junk, sc->context);
 }
 
 /* the script attached to go */
@@ -968,7 +947,7 @@ enum dg_line_result {
  * such as 'set' or 'wait', or else a mob, object or room command.
  */
 static enum dg_line_result dg_run_command(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, char *cmd,
-                                          struct cmdlist_element *cl, int *ret_val, bool *owner_gone)
+                                          size_t at, int *ret_val, bool *owner_gone)
 {
   if (!strncasecmp(cmd, "eval ", 5))
     process_eval(g, go, sc, trig, cmd);
@@ -1016,7 +995,7 @@ static enum dg_line_result dg_run_command(GameWorld *g, owner_ptr go, struct scr
     process_unset(g, sc, trig, cmd);
 
   else if (!strncasecmp(cmd, "wait ", 5)) {
-    process_wait(g, go, trig, cmd, cl);
+    process_wait(g, go, trig, cmd, at);
     return DG_LINE_STOP;
   }
 
@@ -1068,10 +1047,7 @@ run_result script_driver(GameWorld *g, owner_ptr go, trig_data *trig, int mode)
 static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int mode, bool *owner_gone)
 {
   int ret_val      = 1;
-  struct cmdlist_element *cl;
-  const char *p;
   struct script_data *sc = nullptr;
-  struct cmdlist_element *temp;
   unsigned long loops = 0;
   int type            = owner_type(go);
 
@@ -1120,9 +1096,14 @@ static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int m
 
   g->dg_owner_purged = 0;
 
-  for (cl                    = (mode == TRIG_NEW) ? trig->cmdlist : trig->curr_state;
-       cl && trig->depth && !trig->extracted; cl = cl->next) {
-    for (p = cl->cmd.c_str(); *p && isspace(*p); p++);
+  /* held here, so that the lines outlast the run even if the trigger is edited meanwhile */
+  std::shared_ptr<const dg::program> prog = trig->program;
+  size_t lines                            = prog->lines.size();
+  if (trig->while_of_done.size() != lines)
+    trig->while_of_done.assign(lines, -1);
+
+  for (size_t cl = (mode == TRIG_NEW) ? 0 : trig->next_line; cl < lines && trig->depth && !trig->extracted; cl++) {
+    const char *p = prog->lines[cl].body().data(); /* the rest of the line's own string, so it ends there */
     dg_ctx_set_line(g, p);
 
     if (*p == '*') /* comment */
@@ -1131,7 +1112,7 @@ static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int m
     else if (!strncasecmp(p, "if ", 3)) {
       if (process_if(g, p + 3, go, sc, trig))
         trig->depth++;
-      else cl = find_else_end(g, trig, cl, go, sc);
+      else cl = find_else_end(g, trig, *prog, cl, go, sc);
     }
 
     else if (!strncasecmp("elseif ", p, 7) ||
@@ -1144,26 +1125,23 @@ static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int m
                    trig_get_vnum(g, trig));
         continue;
       }
-      cl = find_end(g, trig, cl);
+      cl = find_end(g, trig, *prog, cl);
       trig->depth--;
     } else if (!strncasecmp("while ", p, 6)) {
-      temp = find_done(cl);
-      const char *end = temp->cmd.c_str();
-      while (*end && isspace(*end))
-        end++;
-      if (temp == cl || strncasecmp("done", end, 4)) {
+      size_t done = find_done(*prog, cl);
+      if (done == cl || strncasecmp("done", prog->lines[done].body().data(), 4)) {
         script_log(g, "Trigger VNum {:d} has 'while' without 'done'.",
                    trig_get_vnum(g, trig));
         break; /* end the run normally, so depth and the trigger's state are reset */
       }
       if (process_if(g, p + 6, go, sc, trig)) {
-        temp->original = cl;
+        trig->while_of_done[done] = (int)cl; /* quirk: never cleared, as the old driver marked the line itself */
       } else {
-        cl    = temp;
+        cl    = done;
         loops = 0;
       }
     } else if (!strncasecmp("switch ", p, 7)) {
-      cl = find_case(g, trig, cl, go, sc, p + 7);
+      cl = find_case(g, trig, *prog, cl, go, sc, p + 7);
     } else if (!strncasecmp("end", p, 3)) {
       /*
        * if not in an if-block, ignore the extra 'end' and warn about it.
@@ -1175,12 +1153,10 @@ static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int m
       }
       trig->depth--;
     } else if (!strncasecmp("done", p, 4)) {
-      /* if in a while loop, cl->original is non-NULL */
-      if (cl->original) {
-        const char *orig_cmd = cl->original->cmd.c_str();
-        while (*orig_cmd && isspace(*orig_cmd)) orig_cmd++;
-        if (cl->original && process_if(g, orig_cmd + 6, go, sc, trig)) {
-          cl = cl->original;
+      /* the end of a while loop that has run: test it again */
+      if (int loop = trig->while_of_done[cl]; loop >= 0) {
+        if (process_if(g, prog->lines[loop].body().data() + 6, go, sc, trig)) {
+          cl = (size_t)loop;
           loops++;
           trig->loops++;
           if (loops == 40) {
@@ -1199,7 +1175,7 @@ static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int m
         }
       }
     } else if (!strncasecmp("break", p, 5)) {
-      cl = find_done(cl);
+      cl = find_done(*prog, cl);
     } else if (!strncasecmp("case", p, 4)) {
       /* Do nothing, this allows multiple cases to a single instance */
     }
@@ -1220,10 +1196,7 @@ static int script_driver_body(GameWorld *g, owner_ptr go, trig_data *trig, int m
 
   /* Once extracted, what the trigger belonged to may be gone, and free_trigger() has the rest. */
   if (!trig->extracted) {
-    sc = script_of(go); /* the script may have been detached */
-    if (sc)
-      free_varlist(trig->var_list);
-    trig->var_list = nullptr;
+    trig->var_list.clear();
     trig->depth    = 0;
   }
 
@@ -1277,7 +1250,7 @@ void read_saved_vars(struct char_data *ch)
       skip_spaces(&temp); /* temp now points to the rest of the line */
 
       context = atol(context_str);
-      add_var(&(char_get_script(ch)->global_vars), varname, temp, context);
+      add_var(char_get_script(ch)->global_vars, varname, temp, context);
       free(p); /* plug memory hole */
     }
   } while (!feof(file));
@@ -1292,7 +1265,6 @@ void save_char_vars(GameWorld *g, struct char_data *ch)
   struct atomic_file af;
   FILE *file;
   char fn[127];
-  struct trig_var_data *vars;
 
   /* immediate return if no script (and therefore no variables) structure */
   /* has been created. this will happen when the player is logging in */
@@ -1304,11 +1276,11 @@ void save_char_vars(GameWorld *g, struct char_data *ch)
   get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, char_get_name(ch));
 
   /* make sure this char has global variables to save */
-  if (char_get_script(ch)->global_vars == nullptr) {
+  const dg::var_store &vars = char_get_script(ch)->global_vars;
+  if (vars.empty()) {
     unlink(fn);
     return;
   }
-  vars = char_get_script(ch)->global_vars;
 
   file = atomic_open(&af, fn, true);
   if (!file) {
@@ -1319,11 +1291,9 @@ void save_char_vars(GameWorld *g, struct char_data *ch)
   }
   /* note that currently, context will always be zero. this may change */
   /* in the future */
-  while (vars) {
-    if (vars->name[0] != '-') /* don't save if it begins with - */
-      file_print(file, "{} {:d} {}\n", vars->name, vars->context, vars->value);
-    vars = vars->next;
-  }
+  for (const dg::variable &v : vars)
+    if (v.name[0] != '-') /* don't save if it begins with - */
+      file_print(file, "{} {:d} {}\n", v.name, v.context, v.value);
 
   atomic_commit(&af);
 }

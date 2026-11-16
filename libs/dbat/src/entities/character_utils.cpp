@@ -7592,14 +7592,19 @@ void char_set_poisonby(struct char_data *ch, struct char_data *v)
   ch->poisonby_uid = v ? char_get_id(v) : 0;
 }
 
-struct trig_proto_list *char_get_proto_script(const struct char_data *ch)
+const std::vector<trig_vnum> &char_get_proto_script(const struct char_data *ch)
 {
   return ch->proto_script;
 }
 
-void char_set_proto_script(struct char_data *ch, struct trig_proto_list *v)
+std::vector<trig_vnum> &char_proto_script(struct char_data *ch)
 {
-  ch->proto_script = v;
+  return ch->proto_script;
+}
+
+void char_set_proto_script(struct char_data *ch, std::vector<trig_vnum> v)
+{
+  ch->proto_script = std::move(v);
 }
 
 void char_set_race(struct char_data *ch, int v)

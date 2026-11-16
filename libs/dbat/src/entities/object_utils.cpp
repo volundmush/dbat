@@ -980,14 +980,19 @@ void obj_set_name(struct obj_data *obj, const std::string &v)
   obj->name = v;
 }
 
-struct trig_proto_list *obj_get_proto_script(const struct obj_data *obj)
+const std::vector<trig_vnum> &obj_get_proto_script(const struct obj_data *obj)
 {
   return obj->proto_script;
 }
 
-void obj_set_proto_script(struct obj_data *obj, struct trig_proto_list *v)
+std::vector<trig_vnum> &obj_proto_script(struct obj_data *obj)
 {
-  obj->proto_script = v;
+  return obj->proto_script;
+}
+
+void obj_set_proto_script(struct obj_data *obj, std::vector<trig_vnum> v)
+{
+  obj->proto_script = std::move(v);
 }
 
 struct obj_spellbook_spell *obj_get_sbinfo(const struct obj_data *obj)

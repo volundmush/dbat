@@ -236,7 +236,7 @@ static void oedit_setup_new(struct descriptor_data *d)
   obj_set_value(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
   obj_set_size(OLC_OBJ(d), SIZE_MEDIUM);
 
-  OLC_SCRIPT(d) = nullptr;
+  OLC_SCRIPT(d).clear();
 }
 
 /*------------------------------------------------------------------------*/
@@ -263,7 +263,7 @@ static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_vn
    * It will be assigned to the updated obj later, after editing.
    */
   obj_set_script(obj, nullptr);
-  obj_set_proto_script(OLC_OBJ(d), nullptr);
+  obj_set_proto_script(OLC_OBJ(d), {});
 }
 
 /*------------------------------------------------------------------------*/
@@ -278,10 +278,6 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
   }
 
   /* Update triggers : */
-  /* Free old proto list  */
-  if (obj_get_proto_script(obj_proto_of(g, robj_num)) &&
-      obj_get_proto_script(obj_proto_of(g, robj_num)) != OLC_SCRIPT(d))
-    free_proto_script(obj_proto_of(g, robj_num));
   /* this will handle new instances of the object: */
   obj_set_proto_script(obj_proto_of(g, robj_num), OLC_SCRIPT(d));
 
@@ -293,7 +289,6 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
     if (obj_get_script(obj))
       extract_script(g, obj);
 
-    free_proto_script(obj);
     copy_proto_script(obj_proto_of(g, robj_num), obj);
     assign_triggers(g, obj);
   }
@@ -912,7 +907,7 @@ static void oedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   obj_get_value(obj, 11), obj_get_value(obj, 12), obj_get_value(obj, 13),
                   obj_get_value(obj, 14), obj_get_value(obj, 15), obj_get_extra_flags(obj) ? "Set." : "Not Set.",
                   obj_get_level(obj), material_names[obj_get_value(obj, 7)],
-                  ebitbuf, OLC_SCRIPT(d) ? "Set." : "Not Set.",
+                  ebitbuf, !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.",
                   size_names[obj_get_size(obj)]);
   OLC_MODE(d) = OEDIT_MAIN_MENU;
 }
@@ -954,9 +949,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           return;
         case 'n':
         case 'N':
-          /* If not saving, we must free the script_proto list. */
-          obj_set_proto_script(OLC_OBJ(d), OLC_SCRIPT(d));
-          free_proto_script(OLC_OBJ(d));
+          /* If not saving, the edited script list goes with the OLC data. */
           cleanup_olc(g, d, CLEANUP_ALL);
           return;
         case 'a': /* abort quit */
@@ -1019,7 +1012,6 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
             }
             commit_iedit(g, obj, OLC_OBJ(d));
             if (obj_get_vnum(g, obj) != NOTHING) {
-              free_proto_script(obj);
               robj = obj_get_vnum(g, obj);
               copy_proto_script(obj_proto_of(g, robj), obj);
               assign_triggers(g, obj);

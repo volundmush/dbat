@@ -287,15 +287,14 @@ static void check_arithmetic_at_the_limits(void)
 /* A script variable can't grow past what a script line holds. */
 static void check_script_variable_has_a_limit(void)
 {
-  GameWorld *g               = th_boot(); /* for the log */
-  struct trig_var_data *vars = nullptr;
+  GameWorld *g = th_boot(); /* for the log */
+  dg::var_store vars;
   std::string long_value(MAX_INPUT_LENGTH + 4000, 'x');
 
-  add_var(&vars, "big", long_value.c_str(), 0);
-  CHECK(vars && vars->value.size() == (size_t)MAX_INPUT_LENGTH - 1);
-  add_var(&vars, "big", "small", 0); /* and setting it again replaces it */
-  CHECK(vars && vars->value == "small" && !vars->next);
-  delete vars;
+  add_var(vars, "big", long_value, 0);
+  CHECK(vars.find("big") && vars.find("big")->value.size() == (size_t)MAX_INPUT_LENGTH - 1);
+  add_var(vars, "big", "small", 0); /* and setting it again replaces it */
+  CHECK(vars.find("BIG") && vars.find("big")->value == "small" && std::next(vars.begin()) == vars.end());
   th_shutdown(g);
 }
 
@@ -314,7 +313,6 @@ static void check_chained_field_on_a_short_variable(void)
   add_char_uid_var(&trig, "actor", mob, 0);
   std::string want = var_subst(g, mob, nullptr, &trig, "%actor.id.strlen%");
   CHECK(var_subst(g, mob, nullptr, &trig, "%x.id.strlen%") == want);
-  free_varlist(trig.var_list);
   th_shutdown(g);
 }
 
@@ -330,7 +328,6 @@ static void check_variable_left_open_at_the_end(void)
   CHECK(var_subst(g, mob, nullptr, &trig, "hello %actor.name") ==
         std::string("hello ") + char_get_name(mob));
   CHECK(var_subst(g, mob, nullptr, &trig, "%") == "");
-  free_varlist(trig.var_list);
   th_shutdown(g);
 }
 
@@ -1613,6 +1610,65 @@ static void check_board_post_saves_and_aborts(void)
   th_shutdown(g);
 }
 
+/* The lexer reads keywords as whole words, ending at a space or '(', and numbers lines as written. */
+static void check_lexer_reads_keywords_strictly(void)
+{
+  static const struct {
+    const char *text;
+    dg::keyword kw;
+    const char *argument;
+  } lines[] = {
+      {"if %x% == 1", dg::keyword::if_, "%x% == 1"},
+      {"  IF(%x%)", dg::keyword::if_, "(%x%)"},
+      {"elseif %y%", dg::keyword::elseif_, "%y%"},
+      {"else", dg::keyword::else_, ""},
+      {"else return 0", dg::keyword::else_, "return 0"},
+      {"elsewhere", dg::keyword::command, ""},
+      {"end  ", dg::keyword::end_, ""},
+      {"ending", dg::keyword::command, ""},
+      {"while %i% < 3", dg::keyword::while_, "%i% < 3"},
+      {"done", dg::keyword::done_, ""},
+      {"switch %arg%", dg::keyword::switch_, "%arg%"},
+      {"case 1", dg::keyword::case_, "1"},
+      {"default", dg::keyword::default_, ""},
+      {"break", dg::keyword::break_, ""},
+      {"* if this", dg::keyword::comment, ""},
+      {"   ", dg::keyword::blank, ""},
+      {"if%x%", dg::keyword::command, ""},
+      {"%echo% if", dg::keyword::command, ""},
+  };
+  for (const auto &want : lines) {
+    auto prog = dg::lex(want.text, "* none");
+    CHECK(prog->lines.size() == 1 && prog->lines[0].kw == want.kw);
+    if (want.kw != dg::keyword::command && want.kw != dg::keyword::comment)
+      CHECK(prog->lines[0].argument() == want.argument);
+  }
+
+  auto prog = dg::lex("say one\r\n\r\n  say three\n\nsay five", "* none");
+  CHECK(prog->lines.size() == 3);
+  CHECK(prog->lines[1].number == 3 && prog->lines[1].body() == "say three" && prog->lines[2].number == 5);
+  CHECK(prog->script() == "say one\r\n  say three\r\nsay five\r\n");
+  CHECK(dg::lex("\r\n\r\n", "* none")->lines[0].text == "* none");
+}
+
+/* An object given a trigger in play, so with none from its prototype, shows to a builder with room flags on. */
+static void check_attached_trigger_shows_with_room_flags(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *ch  = th_player(g, "Builder", ADMLVL_IMPL);
+  struct obj_data *obj  = read_object(g, 350);
+
+  obj_set_proto_script(obj, {}); /* as if its prototype had none */
+  obj_to_room(g, obj, char_get_in_room(ch));
+  add_trigger(g, dg_ensure_script(obj_script_slot(obj)), read_trigger(g, find_trigger(g, 312)), -1);
+  char_prf_set(g, ch, PRF_ROOMFLAGS, true);
+  th_take_output(g, ch);
+  th_type(g, ch, "look"); /* this read the prototype's first trigger, which there isn't */
+  CHECK(strstr(th_output(ch), "350") != nullptr);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 static void check_trigger_argument_can_be_cleared(void)
 {
   GameWorld *g         = th_boot();
@@ -1899,6 +1955,8 @@ static const struct {
     {"arithmetic_at_the_limits",                    check_arithmetic_at_the_limits                   },
     {"script_variable_has_a_limit",                 check_script_variable_has_a_limit                },
     {"chained_field_on_a_short_variable",           check_chained_field_on_a_short_variable          },
+    {"attached_trigger_shows_with_room_flags",      check_attached_trigger_shows_with_room_flags     },
+    {"lexer_reads_keywords_strictly",               check_lexer_reads_keywords_strictly              },
     {"variable_left_open_at_the_end",               check_variable_left_open_at_the_end              },
     {"wait_too_long_to_count",                      check_wait_too_long_to_count                     },
     {"wait_until_no_time",                          check_wait_until_no_time                         },

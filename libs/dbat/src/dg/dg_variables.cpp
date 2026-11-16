@@ -37,46 +37,32 @@
  * that used to be here.   -- Welcor
  */
 /* adds a variable with given name and value to trigger */
-void add_var(struct trig_var_data **var_list, const char *name, const char *value, long id)
+void add_var(dg::var_store &vars, std::string_view name, std::string_view value, long id)
 {
-  struct trig_var_data *vd;
-
-  if (strchr(name, '.')) {
+  if (name.find('.') != std::string_view::npos) {
     mud_log("add_var() : Attempt to add illegal var: {}", name);
     return;
   }
 
-  for (vd = *var_list; vd && strcasecmp(vd->name.c_str(), name); vd = vd->next);
-
-  /* copied before replacing the old value, which value may be */
-  std::string copy(value, strnlen(value, MAX_DG_VAR_LENGTH + 1));
-  if (copy.size() > MAX_DG_VAR_LENGTH) {
+  if (value.size() > MAX_DG_VAR_LENGTH) {
     mud_log("SYSERR: Script variable {} is longer than {:d} characters; cutting it there.", name, as_unsigned(MAX_DG_VAR_LENGTH));
-    copy.resize(MAX_DG_VAR_LENGTH);
+    value = value.substr(0, MAX_DG_VAR_LENGTH);
   }
-
-  if (!vd || (vd->context && vd->context != id)) {
-    vd          = new trig_var_data();
-    vd->name    = name;
-    vd->next    = *var_list;
-    vd->context = id;
-    *var_list   = vd;
-  }
-  vd->value = std::move(copy);
+  vars.set(name, value, id);
 }
 
 /* sets trigger variable name to character c's UID, so the script can use %name% to refer to it */
 void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context)
 {
   std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(c));
-  add_var(&trig->var_list, name, buf.c_str(), context);
+  add_var(trig->var_list, name, buf.c_str(), context);
 }
 
 /* sets trigger variable name to object o's UID, so the script can use %name% to refer to it */
 void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context)
 {
   std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(o));
-  add_var(&trig->var_list, name, buf.c_str(), context);
+  add_var(trig->var_list, name, buf.c_str(), context);
 }
 
 /* perhaps not the best place for this, but I didn't want a new file */
@@ -158,7 +144,7 @@ static bool char_has_item(GameWorld *g, char *item, struct char_data *ch)
     return true;
 }
 
-static bool text_processed(char *field, char *subfield, struct trig_var_data *vd,
+static bool text_processed(char *field, char *subfield, const dg::variable *vd,
                            std::string &str)
 {
 
@@ -228,7 +214,7 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
 static void find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, std::string &str);
 
 /* sets str to the value of field on character c (var.field where var names a character) */
-static void char_field(GameWorld *g, char_data *c, owner_ptr go, struct trig_var_data *vd, trig_data *trig, char *field, char *subfield, std::string &str)
+static void char_field(GameWorld *g, char_data *c, owner_ptr go, const dg::variable *vd, trig_data *trig, char *field, char *subfield, std::string &str)
 {
   int type = owner_type(go);
 
@@ -710,14 +696,9 @@ static void char_field(GameWorld *g, char_data *c, owner_ptr go, struct trig_var
       }
 
       else if (!strcasecmp(field, "varexists")) {
-        struct trig_var_data *remote_vd;
         str = "0";
-        if (char_get_script(c) && char_get_script(c)->global_vars) {
-          for (remote_vd = char_get_script(c)->global_vars; remote_vd; remote_vd = remote_vd->next) {
-            if (!strcasecmp(remote_vd->name.c_str(), subfield)) break;
-          }
-          if (remote_vd) str = "1";
-        }
+        if (char_get_script(c) && char_get_script(c)->global_vars.find(subfield))
+          str = "1";
       }
 
       break;
@@ -748,9 +729,7 @@ static void char_field(GameWorld *g, char_data *c, owner_ptr go, struct trig_var
 
   if (str == "\x1") { /* no match found in switch */
     if (char_get_script(c)) {
-      for (vd = (char_get_script(c))->global_vars; vd; vd = vd->next)
-        if (!strcasecmp(vd->name.c_str(), field))
-          break;
+      vd = char_get_script(c)->global_vars.find(field);
       if (vd)
         str = str_format("{}", vd->value);
       else {
@@ -767,7 +746,7 @@ static void char_field(GameWorld *g, char_data *c, owner_ptr go, struct trig_var
 }
 
 /* sets str to the value of field on object o */
-static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, std::string &str)
+static void obj_field(GameWorld *g, obj_data *o, const dg::variable *vd, trig_data *trig, int type, char *field, char *subfield, std::string &str)
 {
   if (text_processed(field, subfield, vd, str)) return;
 
@@ -1003,9 +982,7 @@ static void obj_field(GameWorld *g, obj_data *o, struct trig_var_data *vd, trig_
 
   if (str == "\x1") {          /* no match in switch */
     if (obj_get_script(o)) {   /* check for global var */
-      for (vd = (obj_get_script(o))->global_vars; vd; vd = vd->next)
-        if (!strcasecmp(vd->name.c_str(), field))
-          break;
+      vd = obj_get_script(o)->global_vars.find(field);
       if (vd)
         str = str_format("{}", vd->value);
       else {
@@ -1077,7 +1054,7 @@ static int room_exit_field_dir(const char *field)
 }
 
 /* sets str to the value of field on room r */
-static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *vd, trig_data *trig, int type, char *field, char *subfield, std::string &str)
+static void room_field(GameWorld *g, struct room_data *r, const dg::variable *vd, trig_data *trig, int type, char *field, char *subfield, std::string &str)
 {
   int dir;
 
@@ -1090,9 +1067,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
       script_log(g, "Trigger: {}, Vnum {:d}, type {:d}. Trying to access Global var list of void. Apparently this has not been set up!",
                  trig ? trig->name.c_str() : "none", trig ? trig_get_vnum(g, trig) : NOTHING, type);
     } else {
-      for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
-        if (!strcasecmp(vd->name.c_str(), field))
-          break;
+      vd = room_get_script(r)->global_vars.find(field);
       if (vd)
         str = str_format("{}", vd->value);
       else
@@ -1179,9 +1154,7 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
     room_exit_field(g, r, dir, subfield, str);
   } else {
     if (room_get_script(r)) { /* check for global var */
-      for (vd = (room_get_script(r))->global_vars; vd; vd = vd->next)
-        if (!strcasecmp(vd->name.c_str(), field))
-          break;
+      vd = room_get_script(r)->global_vars.find(field);
       if (vd)
         str = str_format("{}", vd->value);
       else {
@@ -1200,11 +1173,11 @@ static void room_field(GameWorld *g, struct room_data *r, struct trig_var_data *
 /* sets str to be the value of var.field */
 static void find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, std::string &str)
 {
-  struct trig_var_data *vd = nullptr;
+  const dg::variable *vd = nullptr;
   char_data *ch, *c          = nullptr, *rndm;
   obj_data *obj, *o          = nullptr;
   struct room_data *room, *r = nullptr;
-  char *name;
+  const char *name;
   room_vnum num;
   int count, i, doors;
 
@@ -1229,16 +1202,11 @@ static void find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc,
 
   /* X.global() will have a NULL trig */
   if (trig)
-    for (vd = trig->var_list; vd; vd = vd->next)
-      if (!strcasecmp(vd->name.c_str(), var))
-        break;
+    vd = trig->var_list.find(var);
 
   /* some evil waitstates could crash the mud if sent here with sc==NULL*/
   if (!vd && sc)
-    for (vd = sc->global_vars; vd; vd = vd->next)
-      if (!strcasecmp(vd->name.c_str(), var) &&
-          (vd->context == 0 || vd->context == sc->context))
-        break;
+    vd = sc->global_vars.find_in(var, sc->context);
 
   if (!*field) {
     if (vd)
@@ -1362,9 +1330,7 @@ static void find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc,
           script_log(g, "Attempt to find global var. Apparently the void has no script.");
           return;
         }
-        for (vd = thescript->global_vars; vd; vd = vd->next)
-          if (!strcasecmp(vd->name.c_str(), field))
-            break;
+        vd = thescript->global_vars.find(field);
 
         if (vd)
           str = str_format("{}", vd->value);

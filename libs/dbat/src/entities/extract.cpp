@@ -327,11 +327,6 @@ void extract_obj(GameWorld *g, struct obj_data *obj)
   if (obj_get_script(obj))
     extract_script(g, obj);
 
-  if (obj_get_vnum(g, obj) != 80 && obj_get_vnum(g, obj) != 81) {
-    if (obj_get_item_number(obj) == NOTHING || obj_get_proto_script(obj) != obj_get_proto_script(obj_proto_of(g, obj_get_item_number(obj))))
-      free_proto_script(obj);
-  }
-
   /* Gone from the game now, but freed later, so that whoever still holds a pointer to it this pulse holds memory. */
   obj_retire(g, obj);
   g->extracted_objects.push_back(obj);

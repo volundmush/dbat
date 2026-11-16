@@ -220,7 +220,7 @@ static void medit_setup_new(GameWorld *g, struct descriptor_data *d)
   char_set_ldesc(mob, "An unfinished mob stands here.\r\n");
   char_set_ddesc(mob, "It looks unfinished.\r\n");
   char_set_race(mob, RACE_HUMAN);
-  OLC_SCRIPT(d) = nullptr;
+  OLC_SCRIPT(d).clear();
 
   OLC_MOB(d) = mob;
   /* Has changed flag. (It hasn't so far, we just made it.) */
@@ -249,7 +249,7 @@ static void medit_setup_existing(GameWorld *g, struct descriptor_data *d, mob_vn
    * It will be assigned to the updated mob later, after editing.
    */
   char_set_script(mob, nullptr);
-  char_set_proto_script(OLC_MOB(d), nullptr);
+  char_set_proto_script(OLC_MOB(d), {});
 }
 
 /*-------------------------------------------------------------------*/
@@ -300,11 +300,6 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
   }
 
   /* Update triggers */
-  /* Free old proto list  */
-  if (char_get_proto_script(mob_proto_of(g, new_rnum)) &&
-      char_get_proto_script(mob_proto_of(g, new_rnum)) != OLC_SCRIPT(d))
-    free_proto_script(mob_proto_of(g, new_rnum));
-
   char_set_proto_script(mob_proto_of(g, new_rnum), OLC_SCRIPT(d));
 
   /* this takes care of the mobs currently in-game */
@@ -316,7 +311,6 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
     if (char_get_script(mob))
       extract_script(g, mob);
 
-    free_proto_script(mob);
     copy_proto_script(mob_proto_of(g, new_rnum), mob);
     assign_triggers(g, mob);
   }
@@ -488,7 +482,7 @@ static void medit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   npc_personality[char_get_personality(mob)],
                   flags, flag2, char_sensei_name(mob),
                   char_true_race_name(mob),
-                  OLC_SCRIPT(d) ? "Set." : "Not Set.", size_names[get_size(mob)]);
+                  !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[get_size(mob)]);
 
   OLC_MODE(d) = MEDIT_MAIN_MENU;
 }
@@ -538,10 +532,7 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           return;
         case 'n':
         case 'N':
-          /* If not saving, we must free the script_proto list. We do so by
-       * assigning it to the edited mob and letting free_mobile in
-       * cleanup_olc handle it. */
-          char_set_proto_script(OLC_MOB(d), OLC_SCRIPT(d));
+          /* If not saving, the edited script list goes with the OLC data. */
           cleanup_olc(g, d, CLEANUP_ALL);
           return;
         default:

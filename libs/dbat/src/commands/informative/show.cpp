@@ -202,13 +202,13 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
         if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS)) {
           if (obj_get_posted_to(g, obj) == nullptr) {
             send_to_char(g, ch, "@D[@G{:d}@D]@w ", obj_get_vnum(g, obj));
-            if (obj_get_script(obj))
-              send_to_char(g, ch, "@D[@wT{:d}@D]@w ", obj_get_proto_script(obj)->vnum);
+            if (obj_get_script(obj) && !obj_get_proto_script(obj).empty())
+              send_to_char(g, ch, "@D[@wT{:d}@D]@w ", obj_get_proto_script(obj).front());
           } else {
             if (obj_get_posttype(obj) <= 0) {
               send_to_char(g, ch, "@D[@G{:d}@D]@w ", obj_get_vnum(g, obj));
-              if (obj_get_script(obj))
-                send_to_char(g, ch, "@D[@wT{:d}@D]@w ", obj_get_proto_script(obj)->vnum);
+              if (obj_get_script(obj) && !obj_get_proto_script(obj).empty())
+                send_to_char(g, ch, "@D[@wT{:d}@D]@w ", obj_get_proto_script(obj).front());
             }
           }
         }
@@ -257,8 +257,8 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
     case SHOW_OBJ_SHORT:
       if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS)) {
         send_to_char(g, ch, "[{:d}] ", obj_get_vnum(g, obj));
-        if (obj_get_script(obj))
-          send_to_char(g, ch, "[T{:d}] ", obj_get_proto_script(obj)->vnum);
+        if (obj_get_script(obj) && !obj_get_proto_script(obj).empty())
+          send_to_char(g, ch, "[T{:d}] ", obj_get_proto_script(obj).front());
       }
 
       if (char_prf_flagged(g, ch, PRF_IHEALTH)) {

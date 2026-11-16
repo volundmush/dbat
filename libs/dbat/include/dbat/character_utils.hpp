@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <deque>
 #include <string>
 #include <string_view>
@@ -852,8 +853,9 @@ struct player_special_data *char_make_player_specials(struct char_data *ch);
 void char_drop_player_specials(struct char_data *ch);
 struct char_data *char_get_poisonby(GameWorld *g, const struct char_data *ch);
 void char_set_poisonby(struct char_data *ch, struct char_data *v);
-struct trig_proto_list *char_get_proto_script(const struct char_data *ch);
-void char_set_proto_script(struct char_data *ch, struct trig_proto_list *v);
+const std::vector<trig_vnum> &char_get_proto_script(const struct char_data *ch);
+std::vector<trig_vnum> &char_proto_script(struct char_data *ch);
+void char_set_proto_script(struct char_data *ch, std::vector<trig_vnum> v);
 void char_set_race(struct char_data *ch, int v);
 int8_t char_get_real_abils_cha(const struct char_data *ch);
 void char_set_real_abils_cha(struct char_data *ch, int8_t v);

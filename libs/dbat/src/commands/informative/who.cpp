@@ -368,8 +368,8 @@ static void print_object_location(GameWorld *g, int num, struct obj_data *obj, s
   else
     send_to_char(g, ch, "{:>33}", " - ");
 
-  if (obj_get_script(obj))
-    send_to_char(g, ch, "[T{:d}]", obj_get_proto_script(obj)->vnum);
+  if (obj_get_script(obj) && !obj_get_proto_script(obj).empty())
+    send_to_char(g, ch, "[T{:d}]", obj_get_proto_script(obj).front());
 
   if (obj_get_in_room(obj) != NOWHERE)
     send_to_char(g, ch, "[{:>5d}] {}\r\n", obj_get_in_room(obj), room_get_name(g, obj_get_in_room(obj)));

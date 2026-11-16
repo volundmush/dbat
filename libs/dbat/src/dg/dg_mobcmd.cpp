@@ -418,7 +418,7 @@ ACMD(do_mload)
     char_to_room(g, mob, rnum);
     if (char_get_script(ch)) { /* It _should_ have, but it might be detached. */
       std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(mob));
-      add_var(&(char_get_script(ch)->global_vars), "lastloaded", buf.c_str(), 0);
+      add_var(char_get_script(ch)->global_vars, "lastloaded", buf.c_str(), 0);
     }
     load_mtrigger(g, mob);
   }
@@ -430,7 +430,7 @@ ACMD(do_mload)
     }
     if (char_get_script(ch)) { /* It _should_ have, but it might be detached. */
       std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(object));
-      add_var(&(char_get_script(ch)->global_vars), "lastloaded", buf.c_str(), 0);
+      add_var(char_get_script(ch)->global_vars, "lastloaded", buf.c_str(), 0);
     }
     randomize_eq(g, object);
     /* special handling to make objects able to load on a person/in a container/worn etc. */

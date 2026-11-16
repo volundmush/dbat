@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <string>
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
@@ -36,7 +37,7 @@ struct room_data {
   owned<room_direction_data> dir_option[NUM_OF_DIRS];    /* Directions: the room owns its exits */
   bitvector_t room_flags[RF_ARRAY_MAX]{};                /* DEATH,DARK ... etc */
 
-  struct trig_proto_list *proto_script{}; /* list of default triggers  */
+  std::vector<trig_vnum> proto_script{}; /* the triggers it starts with */
   struct script_data *script{};           /* script info for the object         */
 
   int8_t light{}; /* Number of lightsources in room     */

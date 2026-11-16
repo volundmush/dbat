@@ -18,16 +18,12 @@
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/triggers.hpp"
 #include "dbat/dg/owner.hpp"
+#include "dbat/dg/program.hpp"
+#include "dbat/dg/vars.hpp"
 #include "dbat/index.hpp"
 #include "dbat/db.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/oasis.hpp"
-
-/* linked list for mob/object prototype trigger lists */
-struct trig_proto_list {
-  trig_vnum vnum{};               /* vnum of the trigger   */
-  struct trig_proto_list *next{}; /* next trigger          */
-};
 
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 
@@ -40,21 +36,6 @@ constexpr int PULSE_DG_SCRIPT = 13 * PASSES_PER_SEC;
 /* The longest a script variable's value can be: what a substituted script line can hold. */
 constexpr size_t MAX_DG_VAR_LENGTH = MAX_INPUT_LENGTH - 1;
 
-/* one line of the trigger */
-struct cmdlist_element {
-  std::string cmd{}; /* one line of a trigger */
-  struct cmdlist_element *original{};
-  struct cmdlist_element *next{};
-};
-
-struct trig_var_data {
-  std::string name{};  /* name of variable  */
-  std::string value{}; /* value of variable */
-  long context{}; /* 0: global context */
-
-  struct trig_var_data *next{};
-};
-
 /* structure for triggers */
 struct trig_data {
   struct index_data *index{};           /* its prototype's entry */
@@ -62,15 +43,16 @@ struct trig_data {
   uint8_t data_type{};                  /* type of game_data for trig      */
   std::string name{};                   /* name of trigger                 */
   bitvector_t trigger_type{};           /* type of trigger (for bitvector) */
-  struct cmdlist_element *cmdlist{};    /* top of command list             */
-  struct cmdlist_element *curr_state{}; /* ptr to current line of trigger  */
+  std::shared_ptr<const dg::program> program{}; /* its script, shared with its prototype */
+  size_t next_line{};                   /* where a run that waited carries on, in program->lines */
+  std::vector<int> while_of_done{};     /* for each 'done' line, the 'while' that last looped to it, or -1 */
   int narg{};                           /* numerical argument              */
   std::string arglist{};                /* argument list                   */
   int depth{};                          /* depth into nest ifs/whiles/etc  */
   int loops{};                          /* loop iteration counter          */
   struct event *wait_event{};           /* event to pause the trigger      */
   bool purged{};                        /* trigger is set to be purged     */
-  struct trig_var_data *var_list{};     /* list of local vars for trigger  */
+  dg::var_store var_list{};             /* its local variables             */
 
   struct trig_data *next{};
   long id{};                         /* in g->triggers, while attached to something; 0 if not */
@@ -82,7 +64,7 @@ struct trig_data {
 struct script_data {
   bitvector_t types{};                 /* bitvector of trigger types */
   struct trig_data *trig_list{};       /* list of triggers           */
-  struct trig_var_data *global_vars{}; /* list of global variables   */
+  dg::var_store global_vars{};         /* its global variables       */
   bool purged{};                       /* script is set to be purged */
   long context{};                      /* current context for statics */
 
@@ -270,21 +252,20 @@ void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj);
 void assign_triggers(GameWorld *g, owner_ptr i);
 
 /* From dg_variables.c */
-void add_var(struct trig_var_data **var_list, const char *name, const char *value, long id);
+void add_var(dg::var_store &vars, std::string_view name, std::string_view value, long id);
 void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context);
 void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context);
 std::string var_subst(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, const char *line);
 
 /* From dg_handler.c */
-void free_varlist(struct trig_var_data *vd);
 struct script_data *dg_ensure_script(struct script_data **slot);
-bool remove_var(struct trig_var_data **var_list, const char *name);
 void free_trigger(GameWorld *g, trig_data *trig);
 void extract_trigger(GameWorld *g, struct trig_data *trig);
 void extract_script(GameWorld *g, owner_ptr thing);
 void free_extracted_triggers(GameWorld *g);
 void extract_script_mem(struct script_memory *sc);
-void free_proto_script(owner_ptr thing);
+/* Where thing keeps the vnums of the triggers it starts with */
+std::vector<trig_vnum> &proto_script_of(owner_ptr thing);
 void copy_proto_script(owner_ptr source, owner_ptr dest); /* of the same kind */
 void delete_variables(const char *charname);
 

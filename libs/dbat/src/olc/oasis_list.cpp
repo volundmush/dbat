@@ -171,7 +171,7 @@ static void list_rooms(GameWorld *g, struct char_data *ch, struct zone_data *rnu
 
       send_to_char(g, ch, "{:>4d}) [@g{:<5d}@n] @[1]{}@n {}",
                    counter, i,
-                   printf_width(room_get_name(g, i), count_color_chars(room_get_name(g, i)) + 44, true), room_get_proto_script(g, i) ? "[TRIG] " : "");
+                   printf_width(room_get_name(g, i), count_color_chars(room_get_name(g, i)) + 44, true), !room_get_proto_script(g, i).empty() ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
         if (room_get_dir_option(g, i, j) == nullptr)
@@ -220,7 +220,7 @@ static void list_mobiles(GameWorld *g, struct char_data *ch, struct zone_data *r
 
       send_to_char(g, ch, "@g{:>4d}@n) [@g{:<5d}@n] @[3]{} @C{:<9} @c{:<9} @y[{:>4d}]@n {}\r\n",
                    counter, mob_index_of(g, i)->vnum, printf_width(char_get_sdesc(mob_proto_of(g, i)), count_color_chars(char_get_sdesc(mob_proto_of(g, i))) + 30, true), char_true_race_name((mob_proto_of(g, i))), char_sensei_name((mob_proto_of(g, i))),
-                   char_get_class_level(mob_proto_of(g, i)) + char_get_level_adj(mob_proto_of(g, i)) + char_get_race_level(mob_proto_of(g, i)), char_get_proto_script(mob_proto_of(g, i)) ? " [TRIG]" : "");
+                   char_get_class_level(mob_proto_of(g, i)) + char_get_level_adj(mob_proto_of(g, i)) + char_get_race_level(mob_proto_of(g, i)), !char_get_proto_script(mob_proto_of(g, i)).empty() ? " [TRIG]" : "");
     }
   }
 
@@ -258,7 +258,7 @@ static void list_objects(GameWorld *g, struct char_data *ch, struct zone_data *r
       send_to_char(g, ch, "@g{:>4d}@n) [@g{:<5d}@n] @[2]{} @y[{}]@n{}\r\n",
                    counter, obj_index_of(g, i)->vnum,
                    printf_width(obj_get_short_description(obj_proto_of(g, i)), count_color_chars(obj_get_short_description(obj_proto_of(g, i))) + 44, true), item_types[obj_get_type_flag(obj_proto_of(g, i))],
-                   obj_get_proto_script(obj_proto_of(g, i)) ? " [TRIG]" : "");
+                   !obj_get_proto_script(obj_proto_of(g, i)).empty() ? " [TRIG]" : "");
     }
   }
 

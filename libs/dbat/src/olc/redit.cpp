@@ -203,7 +203,7 @@ static void redit_setup_new(struct descriptor_data *d)
   room_set_description(OLC_ROOM(d), "You are in an unfinished room.\r\n");
   room_set_number(OLC_ROOM(d), NOWHERE);
   OLC_ITEM_TYPE(d)         = WLD_TRIGGER;
-  OLC_SCRIPT(d)            = nullptr;
+  OLC_SCRIPT(d).clear();
 
   OLC_VAL(d) = 0;
 }
@@ -252,7 +252,7 @@ static void redit_setup_existing(GameWorld *g, struct descriptor_data *d, room_v
   OLC_ITEM_TYPE(d) = WLD_TRIGGER;
 
   dg_olc_script_copy(d);
-  room_set_proto_script(room, nullptr);
+  room_set_proto_script(room, {});
   room_set_script(room, nullptr);
 }
 
@@ -273,11 +273,6 @@ void redit_save_internally(GameWorld *g, struct descriptor_data *d)
   }
 
   /* Update triggers */
-  /* Free old proto list */
-  if (room_get_proto_script(g, room_num) &&
-      room_get_proto_script(g, room_num) != OLC_SCRIPT(d))
-    free_proto_script(room_of(g, room_num));
-
   room_set_proto_script(g, room_num, OLC_SCRIPT(d));
   assign_triggers(g, room_of(g, room_num));
   /* end trigger update */
@@ -300,7 +295,6 @@ void free_room(GameWorld *g, struct room_data *room)
 
   if (room_get_script(room))
     extract_script(g, room);
-  free_proto_script(room);
 
   /* Free the room. */
   delete room; /* XXX ? */
@@ -437,7 +431,7 @@ static void redit_disp_menu(GameWorld *g, struct descriptor_data *d)
                     room_get_dir_option(room, INDIR) && room_get_dir_option(room, INDIR)->to_room != NOWHERE ? room_get_dir_option(room, INDIR)->to_room : -1,
                     room_get_dir_option(room, DOWN) && room_get_dir_option(room, DOWN)->to_room != NOWHERE ? room_get_dir_option(room, DOWN)->to_room : -1,
                     room_get_dir_option(room, OUTDIR) && room_get_dir_option(room, OUTDIR)->to_room != NOWHERE ? room_get_dir_option(room, OUTDIR)->to_room : -1,
-                    OLC_SCRIPT(d) ? "Set." : "Not Set.");
+                    !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.");
   } else {
     write_to_output(g, d,
                     "-- Room number : [@c{:d}@n]    Room zone: [@c{:d}@n]\r\n@g1@n) Location Designation (Room Name)        : @y{}\r\n@g2@n) Remodeling Routine (Room Description)   :\r\n@y{}@gH@n) Extra descriptions menu\r\n@gQ@n) Quit\r\nEnter choice : ",
@@ -481,10 +475,7 @@ void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           break;
         case 'n':
         case 'N':
-          /* If not saving, we must free the script_proto list. We do so by
-       * assigning it to the edited room and letting free_room in
-       * cleanup_olc handle it. */
-          room_set_proto_script(OLC_ROOM(d), OLC_SCRIPT(d));
+          /* If not saving, the edited script list goes with the OLC data. */
           cleanup_olc(g, d, CLEANUP_ALL);
           if (char_get_admlevel(d->character) < 1) {
             write_to_output(g, d, "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");

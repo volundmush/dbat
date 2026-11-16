@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <deque>
 #include <list>
 #include <map>
@@ -194,7 +195,7 @@ struct char_data {
   std::string loguser;            /* What user was I last saved as?      */
 
   // dgscripts data
-  struct trig_proto_list *proto_script{};
+  std::vector<trig_vnum> proto_script{}; /* the triggers it starts with */
   struct script_data *script{};   /* script info for the object		*/
   struct script_memory *memory{}; /* for mob memory triggers		*/
 

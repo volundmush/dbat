@@ -315,60 +315,59 @@ bool process_if(GameWorld *g, const char *cond, owner_ptr go, struct script_data
     return true;
 }
 
+/* The line at, without its indentation, as a C string: the scanners below read it as the old driver did */
+static const char *line_at(const dg::program &prog, size_t at)
+{
+  return prog.lines[at].body().data(); /* the rest of the line's own string, so it ends there */
+}
+
 /*
  * scans for end of if-block.
  * returns the line containg 'end', or the last
  * line of the trigger if not found.
  */
-struct cmdlist_element *find_end(GameWorld *g, trig_data *trig, struct cmdlist_element *cl)
+size_t find_end(GameWorld *g, trig_data *trig, const dg::program &prog, size_t cl)
 {
-  struct cmdlist_element *c;
-  const char *p;
+  size_t last = prog.lines.size() - 1;
 
-  if (!(cl->next)) { /* rryan: if this is the last line, theres no end. */
+  if (cl == last) { /* rryan: if this is the last line, theres no end. */
     script_log(g, "Trigger VNum {:d} has 'if' without 'end'. (error 1)", trig_get_vnum(g, trig));
     return cl;
   }
 
-  for (c = cl->next; c; c = c->next) {
-    for (p = c->cmd.c_str(); *p && isspace(*p); p++);
+  for (size_t c = cl + 1;; c++) {
+    const char *p = line_at(prog, c);
 
     if (!strncasecmp("if ", p, 3))
-      c = find_end(g, trig, c);
+      c = find_end(g, trig, prog, c);
     else if (!strncasecmp("end", p, 3))
       return c;
 
     /* thanks to Russell Ryan for this fix */
-    if (!c->next) { /* rryan: this is the last line, we didn't find an end. */
+    if (c == last) { /* rryan: this is the last line, we didn't find an end. */
       script_log(g, "Trigger VNum {:d} has 'if' without 'end'. (error 2)", trig_get_vnum(g, trig));
       return c;
     }
   }
-
-  /* rryan: we didn't find an end. */
-  script_log(g, "Trigger VNum {:d} has 'if' without 'end'. (error 3)", trig_get_vnum(g, trig));
-  return c;
 }
 
 /*
  * searches for valid elseif, else, or end to continue execution at.
  * returns line of elseif, else, or end if found, or last line of trigger.
  */
-struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
-                                      struct cmdlist_element *cl, owner_ptr go,
-                                      struct script_data *sc)
+size_t find_else_end(GameWorld *g, trig_data *trig, const dg::program &prog, size_t cl, owner_ptr go,
+                     struct script_data *sc)
 {
-  struct cmdlist_element *c;
-  const char *p;
+  size_t last = prog.lines.size() - 1, c;
 
-  if (!(cl->next))
+  if (cl == last)
     return cl;
 
-  for (c = cl->next; c->next; c = c->next) {
-    for (p = c->cmd.c_str(); *p && isspace(*p); p++); /* skip spaces */
+  for (c = cl + 1; c < last; c++) {
+    const char *p = line_at(prog, c);
 
     if (!strncasecmp("if ", p, 3))
-      c = find_end(g, trig, c);
+      c = find_end(g, trig, prog, c);
 
     else if (!strncasecmp("elseif ", p, 7)) {
       if (process_if(g, p + 7, go, sc, trig)) {
@@ -386,15 +385,14 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
       return c;
 
     /* thanks to Russell Ryan for this fix */
-    if (!c->next) { /* rryan: this is the last line, return. */
+    if (c == last) { /* rryan: this is the last line, return. */
       script_log(g, "Trigger VNum {:d} has 'if' without 'end'. (error 4)", trig_get_vnum(g, trig));
       return c;
     }
   }
 
   /* rryan: if we got here, it's the last line, if its not an end, script_log it. */
-  for (p = c->cmd.c_str(); *p && isspace(*p); p++); /* skip spaces */
-  if (strncasecmp("end", p, 3))
+  if (strncasecmp("end", line_at(prog, c), 3))
     script_log(g, "Trigger VNum {:d} has 'if' without 'end'. (error 5)", trig_get_vnum(g, trig));
   return c;
 }
@@ -403,23 +401,21 @@ struct cmdlist_element *find_else_end(GameWorld *g, trig_data *trig,
 * returns the line containg the correct case instance, or the last
 * line of the trigger if not found.
 */
-struct cmdlist_element *
-find_case(GameWorld *g, struct trig_data *trig, struct cmdlist_element *cl,
-          owner_ptr go, struct script_data *sc, const char *cond)
+size_t find_case(GameWorld *g, struct trig_data *trig, const dg::program &prog, size_t cl, owner_ptr go,
+                 struct script_data *sc, const char *cond)
 {
   std::string result = eval_expr(g, cond, go, sc, trig);
-  struct cmdlist_element *c;
-  const char *p;
+  size_t last        = prog.lines.size() - 1, c;
 
-  if (!(cl->next))
+  if (cl == last)
     return cl;
 
-  for (c = cl->next; c->next; c = c->next) {
-    for (p = c->cmd.c_str(); *p && isspace(*p); p++);
+  for (c = cl + 1; c < last; c++) {
+    const char *p = line_at(prog, c);
 
     if (!strncasecmp("while ", p, 6) || !strncasecmp("switch", p, 6)) {
-      c = find_done(c);
-      if (!c->next) /* it never ended, and neither does this */
+      c = find_done(prog, c);
+      if (c == last) /* it never ended, and neither does this */
         return c;
     } else if (!strncasecmp("case ", p, 5)) {
       std::string match = eval_op("==", result, p + 5);
@@ -437,22 +433,20 @@ find_case(GameWorld *g, struct trig_data *trig, struct cmdlist_element *cl,
 * scans for end of while/switch-blocks.
 * returns the line containg 'end', or the last
 * line of the trigger if not found.
-* Malformed scripts may cause NULL to be returned.
 */
-struct cmdlist_element *find_done(struct cmdlist_element *cl)
+size_t find_done(const dg::program &prog, size_t cl)
 {
-  struct cmdlist_element *c;
-  const char *p;
+  size_t last = prog.lines.size() - 1, c;
 
-  if (!cl || !(cl->next))
+  if (cl == last)
     return cl;
 
-  for (c = cl->next; c && c->next; c = c->next) {
-    for (p = c->cmd.c_str(); *p && isspace(*p); p++);
+  for (c = cl + 1; c < last; c++) {
+    const char *p = line_at(prog, c);
 
     if (!strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7)) {
-      c = find_done(c);
-      if (!c->next) /* it never ended, and neither does this */
+      c = find_done(prog, c);
+      if (c == last) /* it never ended, and neither does this */
         return c;
     } else if (!strncasecmp("done", p, 3))
       return c;
