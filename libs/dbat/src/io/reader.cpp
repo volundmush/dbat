@@ -113,6 +113,59 @@ int scan_ints(std::string_view text, std::span<int> out)
   return read;
 }
 
+bool fields::start()
+{
+  if (failed_)
+    return false;
+  while (at_ < text_.size() && is_space(text_[at_]))
+    at_++;
+  if (at_ >= text_.size())
+    failed_ = true;
+  return !failed_;
+}
+
+bool fields::number(int &n)
+{
+  if (!start())
+    return false;
+  size_t digits = at_ + (text_[at_] == '+' || text_[at_] == '-');
+  if (digits >= text_.size() || !is_digit(text_[digits])) {
+    failed_ = true;
+    return false;
+  }
+  n = static_cast<int>(read_long(text_, at_)); /* quirk: past an int, cut to one */
+  count_++;
+  return true;
+}
+
+bool fields::word(std::string &w, size_t width)
+{
+  if (!start())
+    return false;
+  size_t from = at_;
+  while (at_ < text_.size() && at_ - from < width && !is_space(text_[at_]))
+    at_++;
+  w.assign(text_.substr(from, at_ - from));
+  count_++;
+  return true;
+}
+
+bool fields::until(std::string &w, std::string_view stops, size_t width)
+{
+  if (!start())
+    return false;
+  size_t from = at_;
+  while (at_ < text_.size() && at_ - from < width && stops.find(text_[at_]) == std::string_view::npos)
+    at_++;
+  if (at_ == from) {
+    failed_ = true;
+    return false;
+  }
+  w.assign(text_.substr(from, at_ - from));
+  count_++;
+  return true;
+}
+
 bitvector_t ascii_flags(std::string_view word, int first_letter_bit, const char *who)
 {
   bitvector_t flags = 0;

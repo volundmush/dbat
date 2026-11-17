@@ -19,6 +19,8 @@
 #include "dbat/iterate.hpp"
 #include "dbat/db.hpp"
 #include "dbat/io/reader.hpp"
+#include "dbat/world_files.hpp"
+#include "legacy_loaders.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/help.hpp"
@@ -71,7 +73,6 @@
 #include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
-static void load_help(GameWorld *g, FILE *fl, const char *name);
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -88,16 +89,12 @@ static void dragon_level(GameWorld *g, struct char_data *ch);
 static int check_object_spell_number(GameWorld *g, struct obj_data *obj, int val);
 static int check_object_level(GameWorld *g, struct obj_data *obj, int val);
 static void setup_dir(GameWorld *g, FILE *fl, room_vnum room, int dir);
-static void discrete_load(GameWorld *g, FILE *fl, int mode, const char *filename);
 static int check_object(GameWorld *g, struct obj_data *);
 static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr);
 static void parse_mobile(GameWorld *g, FILE *mob_f, mob_vnum nr);
 static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr);
-static void load_zones(GameWorld *g, FILE *fl, const char *zonename);
 static int file_to_string(const char *name, std::string &text);
 static int file_to_string_alloc(const char *name, std::string *text);
-static int count_alias_records(FILE *fl);
-static int count_hash_records(FILE *fl);
 static bitvector_t asciiflag_conv_aff(char *flag);
 static bool parse_simple_mob(GameWorld *g, FILE *mob_f, struct char_data *ch, mob_vnum nr);
 static void interpret_espec(GameWorld *g, const char *keyword, const char *value, struct char_data *ch, mob_vnum nr);
@@ -115,7 +112,6 @@ static void mob_autobalance(struct char_data *ch);
 
 /* external functions */
 
-static bool help_keyword_order(const help_index_element &a, const help_index_element &b);
 void memorize_add(struct char_data *ch, int spellnum, int timer);
 
 /* external vars */
@@ -414,19 +410,22 @@ ACMD(do_reboot)
   send_to_char(g, ch, CONFIG_OK);
 }
 
-void boot_world(GameWorld *g)
+io::loaded<void> boot_world(GameWorld *g)
 {
   mud_log("Loading level tables.");
   load_levels(g);
 
   mud_log("Loading zone table.");
-  index_boot(g, DB_BOOT_ZON);
+  if (io::loaded<void> booted = boot_index(g, DB_BOOT_ZON); !booted)
+    return booted;
 
   mud_log("Loading triggers and generating index.");
-  index_boot(g, DB_BOOT_TRG);
+  if (io::loaded<void> booted = boot_index(g, DB_BOOT_TRG); !booted)
+    return booted;
 
   mud_log("Loading rooms.");
-  index_boot(g, DB_BOOT_WLD);
+  if (io::loaded<void> booted = boot_index(g, DB_BOOT_WLD); !booted)
+    return booted;
 
   mud_log("Renumbering rooms.");
   renum_world(g);
@@ -435,10 +434,12 @@ void boot_world(GameWorld *g)
   check_start_rooms(g);
 
   mud_log("Loading mobs and generating index.");
-  index_boot(g, DB_BOOT_MOB);
+  if (io::loaded<void> booted = boot_index(g, DB_BOOT_MOB); !booted)
+    return booted;
 
   mud_log("Loading objs and generating index.");
-  index_boot(g, DB_BOOT_OBJ);
+  if (io::loaded<void> booted = boot_index(g, DB_BOOT_OBJ); !booted)
+    return booted;
 
   mud_log("Renumbering zone table.");
   renum_zone_table(g);
@@ -453,15 +454,18 @@ void boot_world(GameWorld *g)
 
   if (!g->no_specials) {
     mud_log("Loading shops.");
-    index_boot(g, DB_BOOT_SHP);
+    if (io::loaded<void> booted = boot_index(g, DB_BOOT_SHP); !booted)
+      return booted;
 
     mud_log("Loading guild masters.");
-    index_boot(g, DB_BOOT_GLD);
+    if (io::loaded<void> booted = boot_index(g, DB_BOOT_GLD); !booted)
+      return booted;
   }
   if (g->SELFISHMETER >= 10) {
     mud_log("Loading Shadow Dragons.");
     load_shadow_dragons(g);
   }
+  return {};
 }
 
 
@@ -608,7 +612,10 @@ void boot_db(GameWorld *g)
   mud_log("Loading feats.");
   assign_feats(g);
 
-  boot_world(g);
+  if (io::loaded<void> booted = boot_world(g); !booted) {
+    mud_log("SYSERR: {}", booted.error().text());
+    exit(1);
+  }
 
   mud_log("Loading help entries.");
   index_boot(g, DB_BOOT_HLP);
@@ -881,7 +888,7 @@ void save_mud_time(GameWorld *g, struct time_info_data *when)
   exit(1); /* Some day we hope to handle these things better... */
 }
 
-static int count_alias_records(FILE *fl)
+int count_alias_records(FILE *fl)
 {
   char key[READ_SIZE], next_key[READ_SIZE];
   char line[READ_SIZE], *scan;
@@ -916,180 +923,7 @@ static int count_alias_records(FILE *fl)
   return (total_keywords);
 }
 
-/* function to count how many hash-mark delimited records exist in a file */
-static int count_hash_records(FILE *fl)
-{
-  char buf[128];
-  int count = 0;
-
-  while (fgets(buf, 128, fl))
-    if (*buf == '#')
-      count++;
-
-  return (count);
-}
-
-/* The next name in an index file. A file that ends without its "$" ends here anyway. */
-static void read_index_entry(FILE *index, char *entry)
-{
-  if (fscanf(index, "%64935s\n", entry) != 1) { /* MAX_STRING_LENGTH */
-    mud_log("SYSERR: index file ends without a '$'");
-    strcpy(entry, "$");
-  }
-}
-
-void index_boot(GameWorld *g, int mode)
-{
-  const char *index_filename, *prefix = nullptr; /* NULL or egcs 1.1 complains */
-  FILE *db_index, *db_file;
-  int rec_count = 0, size[2];
-  std::string buf2;
-  char buf1[MAX_STRING_LENGTH];
-
-  switch (mode) {
-    case DB_BOOT_WLD:
-      prefix = WLD_PREFIX;
-      break;
-    case DB_BOOT_MOB:
-      prefix = MOB_PREFIX;
-      break;
-    case DB_BOOT_OBJ:
-      prefix = OBJ_PREFIX;
-      break;
-    case DB_BOOT_ZON:
-      prefix = ZON_PREFIX;
-      break;
-    case DB_BOOT_SHP:
-      prefix = SHP_PREFIX;
-      break;
-    case DB_BOOT_HLP:
-      prefix = HLP_PREFIX;
-      break;
-    case DB_BOOT_TRG:
-      prefix = TRG_PREFIX;
-      break;
-    case DB_BOOT_GLD:
-      prefix = GLD_PREFIX;
-      break;
-    default:
-      mud_log("SYSERR: Unknown subcommand {:d} to index_boot!", mode);
-      exit(1);
-  }
-
-  if (g->mini_mud)
-    index_filename = MINDEX_FILE;
-  else
-    index_filename = INDEX_FILE;
-
-  buf2 = str_format("{}{}", prefix, index_filename);
-  if (!(db_index = fopen(buf2.c_str(), "r"))) {
-    mud_log("SYSERR: opening index file '{}': {}", buf2, strerror(errno));
-    exit(1);
-  }
-
-  /* first, count the number of records in the file so we can malloc */
-  read_index_entry(db_index, buf1);
-  while (*buf1 != '$') {
-    buf2 = str_format("{}{}", prefix, buf1);
-    if (!(db_file = fopen(buf2.c_str(), "r"))) {
-      mud_log("SYSERR: File '{}' listed in '{}{}': {}", buf2, prefix,
-              index_filename, strerror(errno));
-      read_index_entry(db_index, buf1);
-      continue;
-    }
-    if (mode == DB_BOOT_ZON)
-      rec_count++;
-    else if (mode == DB_BOOT_HLP)
-      rec_count += count_alias_records(db_file);
-    else
-      rec_count += count_hash_records(db_file);
-
-    fclose(db_file);
-    read_index_entry(db_index, buf1);
-  }
-
-  /* Exit if 0 records, unless this is shops */
-  if (!rec_count) {
-    if (mode == DB_BOOT_SHP || mode == DB_BOOT_GLD)
-      return;
-    mud_log("SYSERR: boot error - 0 records counted in {}/{}.", prefix,
-            index_filename);
-    exit(1);
-  }
-
-  /*
-   * NOTE: "bytes" does _not_ include strings or other later malloc'd things.
-   */
-  switch (mode) {
-    case DB_BOOT_TRG:
-      break;
-    case DB_BOOT_WLD:
-      size[0] = sizeof(struct room_data) * rec_count;
-      mud_log("   {:d} rooms, {:d} bytes.", rec_count, size[0]);
-      break;
-    case DB_BOOT_MOB:
-      size[0] = sizeof(struct index_data) * rec_count;
-      size[1] = sizeof(struct char_data) * rec_count;
-      mud_log("   {:d} mobs, {:d} bytes in index, {:d} bytes in prototypes.", rec_count, size[0], size[1]);
-      break;
-    case DB_BOOT_OBJ:
-      size[0] = sizeof(struct index_data) * rec_count;
-      size[1] = sizeof(struct obj_data) * rec_count;
-      mud_log("   {:d} objs, {:d} bytes in index, {:d} bytes in prototypes.", rec_count, size[0], size[1]);
-      break;
-    case DB_BOOT_ZON:
-      size[0] = sizeof(struct zone_data) * rec_count;
-      mud_log("   {:d} zones, {:d} bytes.", rec_count, size[0]);
-      break;
-    case DB_BOOT_HLP:
-      g->help_table.reserve(rec_count);
-      size[0] = sizeof(struct help_index_element) * rec_count;
-      mud_log("   {:d} entries, {:d} bytes.", rec_count, size[0]);
-      break;
-  }
-
-  rewind(db_index);
-  read_index_entry(db_index, buf1);
-  while (*buf1 != '$') {
-    buf2 = str_format("{}{}", prefix, buf1);
-    if (!(db_file = fopen(buf2.c_str(), "r"))) {
-      mud_log("SYSERR: {}: {}", buf2, strerror(errno));
-      exit(1);
-    }
-    switch (mode) {
-      case DB_BOOT_WLD:
-      case DB_BOOT_OBJ:
-      case DB_BOOT_MOB:
-      case DB_BOOT_TRG:
-        discrete_load(g, db_file, mode, buf2.c_str());
-        break;
-      case DB_BOOT_ZON:
-        load_zones(g, db_file, buf2.c_str());
-        break;
-      case DB_BOOT_HLP:
-        load_help(g, db_file, buf2.c_str());
-        break;
-      case DB_BOOT_SHP:
-        boot_the_shops(g, db_file, buf2.c_str(), rec_count);
-        break;
-      case DB_BOOT_GLD:
-        boot_the_guilds(g, db_file, buf2.c_str(), rec_count);
-        break;
-    }
-
-    fclose(db_file);
-    read_index_entry(db_index, buf1);
-  }
-  fclose(db_index);
-
-  /* Sort the help index. */
-  if (mode == DB_BOOT_HLP) {
-    /* stable, as glibc's qsort() was: an entry's keywords stay in the order the file gave them */
-    std::stable_sort(g->help_table.begin(), g->help_table.end(), help_keyword_order);
-  }
-}
-
-static void discrete_load(GameWorld *g, FILE *fl, int mode, const char *filename)
+void discrete_load(GameWorld *g, FILE *fl, int mode, const char *filename)
 {
   IDXTYPE nr = -1, last;
   char line[READ_SIZE];
@@ -1131,9 +965,6 @@ static void discrete_load(GameWorld *g, FILE *fl, int mode, const char *filename
             break;
           case DB_BOOT_MOB:
             parse_mobile(g, fl, nr);
-            break;
-          case DB_BOOT_TRG:
-            parse_trigger(g, fl, nr);
             break;
           case DB_BOOT_OBJ:
             strlcpy(line, parse_object(g, fl, nr), sizeof(line));
@@ -2312,182 +2143,6 @@ static char *parse_object(GameWorld *g, FILE *obj_f, IDXTYPE nr)
   return line;
 }
 
-#define Z (*zone)
-
-/* load the zone table and command tables */
-static void load_zones(GameWorld *g, FILE *fl, const char *zonename)
-{
-  std::unique_ptr<zone_data> made = std::make_unique<zone_data>();
-  struct zone_data *zone          = made.get(); /* Z and ZCMD2 refer to it */
-  int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
-  char *ptr, buf[READ_SIZE];
-  std::string zname;
-  std::string buf2;
-  int zone_fix = false;
-  char t1[80], t2[80], line[MAX_STRING_LENGTH];
-
-  zname = zonename;
-
-  /* Skip first 3 lines lest we mistake the zone name for a command. */
-  for (tmp = 0; tmp < 3; tmp++)
-    get_line(fl, buf);
-
-  /*  More accurate count. Previous was always 4 or 5 too high. -gg 2001/1/17
-   *  Note that if a new zone command is added to reset_zone(), this string
-   *  will need to be updated to suit. - ae.
-   */
-  while (get_line(fl, buf))
-    if ((strchr("MOPGERDTV", buf[0]) && buf[1] == ' ') || (buf[0] == 'S' && buf[1] == '\0'))
-      num_of_cmds++;
-
-  rewind(fl);
-
-  if (num_of_cmds == 0) {
-    mud_log("SYSERR: {} is empty!", zname);
-    exit(1);
-  } else
-    Z.cmd.assign(num_of_cmds, reset_com{});
-
-  line_num += get_line(fl, buf);
-
-  if (*buf == '@') {
-    if (sscanf(buf, "@Version: %d", &version) != 1) {
-      mud_log("SYSERR: Format error in {} (version)", zname);
-      mud_log("SYSERR: ...Line: {}", line);
-      exit(1);
-    }
-    line_num += get_line(fl, buf);
-  }
-
-  if (sscanf(buf, "#%d", &Z.number) != 1) {
-    mud_log("SYSERR: Format error in {}, line {:d}", zname, line_num);
-    exit(1);
-  }
-  buf2 = str_format("beginning of zone #{:d}", Z.number);
-
-  line_num += get_line(fl, buf);
-  if ((ptr = strchr(buf, '~')) != nullptr) /* take off the '~' if it's there */
-    *ptr = '\0';
-  Z.builders = buf;
-
-  line_num += get_line(fl, buf);
-  if ((ptr = strchr(buf, '~')) != nullptr) /* take off the '~' if it's there */
-    *ptr = '\0';
-  Z.name = buf;
-
-  line_num += get_line(fl, buf);
-  if (version >= 2) {
-
-    char zbuf1[MAX_STRING_LENGTH];
-    char zbuf2[MAX_STRING_LENGTH];
-    char zbuf3[MAX_STRING_LENGTH];
-    char zbuf4[MAX_STRING_LENGTH];
-
-    if (sscanf(buf, " %d %d %d %d %s %s %s %s %d %d", &Z.bot, &Z.top, &Z.lifespan,
-               &Z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &Z.min_level, &Z.max_level) != 10) {
-      mud_log("SYSERR: Format error in 10-constant line of {}", zname);
-      exit(1);
-    }
-
-    Z.zone_flags[0] = asciiflag_conv(zbuf1);
-    Z.zone_flags[1] = asciiflag_conv(zbuf2);
-    Z.zone_flags[2] = asciiflag_conv(zbuf3);
-    Z.zone_flags[3] = asciiflag_conv(zbuf4);
-
-  } else if (sscanf(buf, " %d %d %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
-    /*
-     * This may be due to the fact that the zone has no builder.  So, we just attempt
-     * to fix this by copying the previous 2 last reads into this variable and the
-     * last one.
-     */
-    mud_log("SYSERR: Format error in numeric constant line of {}, attempting to fix.", zname);
-    if (sscanf(Z.name.c_str(), " %d %d %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
-      mud_log("SYSERR: Could not fix previous error, aborting game.");
-      exit(1);
-    } else {
-      Z.name     = Z.builders;
-      Z.builders = "None.";
-      zone_fix   = true;
-    }
-  }
-  if (Z.bot > Z.top) {
-    mud_log("SYSERR: Zone {:d} bottom ({:d}) > top ({:d}).", Z.number, Z.bot, Z.top);
-    exit(1);
-  }
-
-  cmd_no = 0;
-
-  for (;;) {
-    /* skip reading one line if we fixed above (line is correct already) */
-    if (zone_fix != true) {
-      if ((tmp = get_line(fl, buf)) == 0) {
-        mud_log("SYSERR: Format error in {} - premature end of file", zname);
-        exit(1);
-      }
-    } else
-      zone_fix = false;
-
-    line_num += tmp;
-    ptr = buf;
-    skip_spaces(&ptr);
-
-    if (*ptr != '*' && cmd_no >= num_of_cmds) { /* counted by a stricter rule than this reads them by */
-      mud_log("SYSERR: Zone command count mismatch for {}. Estimated: {:d}, Actual: more", zname, num_of_cmds);
-      exit(1);
-    }
-    if ((ZCMD2.command = *ptr) == '*')
-      continue;
-
-    ptr++;
-
-    if (ZCMD2.command == 'S' || ZCMD2.command == '$') {
-      ZCMD2.command = 'S';
-      break;
-    }
-    error = 0;
-    if (strchr("MOEPDTVG", ZCMD2.command) == nullptr) { /* a 4-arg command */
-      if (sscanf(ptr, " %d %d %d %d ", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3) != 4)
-        error = 1;
-    } else if (ZCMD2.command == 'V') { /* a string-arg command */
-      if (sscanf(ptr, " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3, &ZCMD2.arg4, &ZCMD2.arg5, t1, t2) != 8)
-        error = 1;
-      else {
-        ZCMD2.sarg1 = strdup(t1);
-        ZCMD2.sarg2 = strdup(t2);
-      }
-    } else {
-      if ((arg_num = sscanf(ptr, " %d %d %d %d %d %d ", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3, &ZCMD2.arg4, &ZCMD2.arg5)) != 6) {
-        if (arg_num != 5) {
-          error = 1;
-        } else {
-          ZCMD2.arg5 = 0;
-        }
-      }
-    }
-
-    ZCMD2.if_flag = tmp;
-
-    if (error) {
-      mud_log("SYSERR: Format error in {}, line {:d}: '{}'", zname, line_num, buf);
-      exit(1);
-    }
-    ZCMD2.line = line_num;
-    cmd_no++;
-  }
-
-  if (num_of_cmds != cmd_no + 1) {
-    mud_log("SYSERR: Zone command count mismatch for {}. Estimated: {:d}, Actual: {:d}", zname, num_of_cmds, cmd_no + 1);
-    exit(1);
-  }
-
-  if (g->zones.find(Z.number)) {
-    mud_log("SYSERR: zone #{:d} is defined twice.", Z.number);
-    exit(1);
-  }
-  g->zones.insert(Z.number, std::move(made));
-}
-
-#undef Z
 
 static void get_one_line(FILE *fl, char *buf)
 {
@@ -2504,7 +2159,7 @@ void free_help_table(GameWorld *g)
   g->help_table.clear();
 }
 
-static void load_help(GameWorld *g, FILE *fl, const char *name)
+void load_help(GameWorld *g, FILE *fl, const char *name)
 {
   char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
   size_t entrylen;
@@ -2567,7 +2222,7 @@ static void load_help(GameWorld *g, FILE *fl, const char *name)
   }
 }
 
-static bool help_keyword_order(const help_index_element &a, const help_index_element &b)
+bool help_keyword_order(const help_index_element &a, const help_index_element &b)
 {
   return strcasecmp(a.keywords.c_str(), b.keywords.c_str()) < 0;
 }

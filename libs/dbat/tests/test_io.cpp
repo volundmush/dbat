@@ -292,6 +292,75 @@ static void check_numbers_read_as_sscanf_reads_them()
   }
 }
 
+/* io::fields against sscanf() with the formats the loaders read by: a trigger's type line, a zone's 'V' command
+   and a zone's header */
+static void compare_fields(const std::string &text)
+{
+  int a = 0, b = 0, c = 0, d = 0, e = 0, f6 = 0, g = 0, h = 0;
+  char w1[1024], w2[1024], w3[1024], w4[1024];
+
+  int want = sscanf(text.c_str(), "%d %255s %d", &a, w1, &b);
+  io::fields f(text);
+  int x = 0, y = 0;
+  std::string s1, s2, s3, s4;
+  f.number(x) && f.word(s1, 255) && f.number(y);
+  if (f.count() != std::max(want, 0) || (want >= 1 && x != a) || (want >= 2 && s1 != w1) || (want >= 3 && y != b)) {
+    file_print(stdout, "fields (trigger) differ for '{}'\n", text);
+    CHECK(false);
+  }
+
+  int n[6];
+  want = sscanf(text.c_str(), " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &a, &b, &c, &d, &e, &f6, w1, w2);
+  io::fields v(text);
+  for (int &i : n)
+    v.number(i);
+  v.word(s1, 79) && v.until(s2, "\f\n\r\t\v", 79);
+  int got[6] = {a, b, c, d, e, f6};
+  bool same  = v.count() == std::max(want, 0);
+  for (int i = 0; i < std::min(want, 6); i++)
+    same = same && n[i] == got[i];
+  if (!same || (want >= 7 && s1 != w1) || (want >= 8 && s2 != w2)) {
+    file_print(stdout, "fields (V command) differ for '{}'\n", text);
+    CHECK(false);
+  }
+
+  want = sscanf(text.c_str(), " %d %d %d %d %s %s %s %s %d %d", &a, &b, &c, &d, w1, w2, w3, w4, &g, &h);
+  io::fields z(text);
+  int m[6];
+  z.number(m[0]) && z.number(m[1]) && z.number(m[2]) && z.number(m[3]) && z.word(s1) && z.word(s2) && z.word(s3) &&
+      z.word(s4) && z.number(m[4]) && z.number(m[5]);
+  int zgot[10]    = {a, b, c, d, 0, 0, 0, 0, g, h};
+  const char *ws[] = {w1, w2, w3, w4};
+  std::string *ss[] = {&s1, &s2, &s3, &s4};
+  same              = z.count() == std::max(want, 0);
+  for (int i = 0; i < want; i++)
+    if (i < 4)
+      same = same && m[i] == zgot[i];
+    else if (i < 8)
+      same = same && *ss[i - 4] == ws[i - 4];
+    else
+      same = same && m[i - 4] == zgot[i];
+  if (!same) {
+    file_print(stdout, "fields (zone header) differ for '{}'\n", text);
+    CHECK(false);
+  }
+}
+
+static void check_fields_read_as_sscanf_reads_them()
+{
+  for (const char *text : {"", " ", "2 g 100", "2", "2 g", "x g 1", "1 2 3 4 5 6 name value with spaces",
+                           "1 2 3 4 5 6 name", "1 2 3 4 5 6", "300 399 5 2 a b c d 0 100", "300 399 5"})
+    compare_fields(text);
+  std::mt19937 rng(98765);
+  static const char alphabet[] = "0123456789 -+abZ~\t\v";
+  for (int i = 0; i < 20000; i++) {
+    std::string s;
+    for (size_t n = rng() % 200; n; n--)
+      s += alphabet[rng() % (sizeof(alphabet) - 1)];
+    compare_fields(s);
+  }
+}
+
 static void check_flags_read_as_asciiflag_conv_reads_them()
 {
   for (const char *word : {"0", "abc", "aD", "zF", "12", "-1", "4294967296", "99999999999999999999", "a1", "1-2", "",
@@ -356,6 +425,7 @@ int main()
   check_reading_random_files();
   check_line_numbers();
   check_numbers_read_as_sscanf_reads_them();
+  check_fields_read_as_sscanf_reads_them();
   check_flags_read_as_asciiflag_conv_reads_them();
   check_player_files();
   check_replacing_files();

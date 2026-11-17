@@ -2204,7 +2204,8 @@ static void zone_command_with_a_space_before_it(void)
  * it was read but not counted, and written past the end. */
 static void check_zone_command_with_a_space_before_it(void)
 {
-  CHECK(boot_is_refused(zone_command_with_a_space_before_it, "SYSERR: Zone command count mismatch"));
+  CHECK(boot_is_refused(zone_command_with_a_space_before_it,
+                        "SYSERR: world/zon/3.zon:72: zone #3: more commands than the 66 counted"));
 }
 
 /* Damaged files of each kind the boot reads, each with what the game says when it refuses to start. These fix
@@ -2222,10 +2223,14 @@ static const struct damaged_file {
     {"world/mob/3.mob", "#301\nkeeper", "#300\nkeeper", "SYSERR: mobile #300 is defined twice."},
     {"world/mob/3.mob", "d 0 0 0 0 0 0 0 0 E\n", "d 0 E\n",
      "SYSERR: Format error after string section of mob #300"},
-    {"world/zon/3.zon", "300 399 5 2 0 0 0 0 0 0\n", "300 399 5\n", "SYSERR: Format error in 10-constant line of world/zon/3.zon"},
-    {"world/zon/3.zon", "@Version: 2\n", "@Version: x\n", "SYSERR: Format error in world/zon/3.zon (version)"},
-    {"world/obj/index", "3.obj\n", "3.obj\nmissing.obj\n", "SYSERR: world/obj/missing.obj: No such file or directory"},
+    {"world/zon/3.zon", "300 399 5 2 0 0 0 0 0 0\n", "300 399 5\n", "SYSERR: world/zon/3.zon:5: zone #3: expected 10 numbers and flags"},
+    {"world/zon/3.zon", "@Version: 2\n", "@Version: x\n", "SYSERR: world/zon/3.zon:1: expected \"@Version: <number>\", got '@Version: x'"},
+    {"world/obj/index", "3.obj\n", "3.obj\nmissing.obj\n", "SYSERR: world/obj/missing.obj: can't be opened, and world/obj/index lists it"},
     {"world/wld/3.wld", "#301\n", "#300\n", "SYSERR: room #300 is defined twice."},
+    {"world/zon/3.zon", "\nS\n$\n", "\n", "SYSERR: world/zon/3.zon:71: zone #3: the file ends before the 'S' that ends its commands"},
+    {"world/trg/3.trg", "2 g 100\n", "2\n", "SYSERR: world/trg/3.trg:3: trigger #300: expected its attach type and flags, got '2'"},
+    {"world/trg/3.trg", "#301\n", "301\n", "SYSERR: world/trg/3.trg:7: expected a #<vnum>, or the '$' that ends the file, after trg #300; got '301'"},
+    {"world/trg/3.trg", "#301\n", "#x\n", "SYSERR: world/trg/3.trg:7: expected a number after the '#', after trg #300"},
     /* quirk: a string missing its ~ takes in the next one, and the error is found on a later line */
     {"world/obj/3.obj", "A wooden chest sits here.~\n", "A wooden chest sits here.\n",
      "SYSERR: Format error in first numeric line (expecting 13 args, got 0), object #300"},

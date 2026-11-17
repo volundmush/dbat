@@ -244,7 +244,6 @@ long dg_new_obj_uid(GameWorld *g);
 void dg_log_uid_stats(GameWorld *g);
 
 /* from dg_db_scripts.c */
-void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr);
 trig_data *read_trigger(GameWorld *g, struct index_data *nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
 void dg_read_trigger(GameWorld *g, FILE *fp, owner_ptr proto);

@@ -424,64 +424,6 @@ static void trigedit_insert_new(GameWorld *g, struct descriptor_data *d)
   trig_data_copy(index->proto, trig);
 }
 
-/* Writes every trigger of the zone to <zone>.trg. Returns false, having logged why, if it couldn't. */
-bool save_triggers(GameWorld *g, struct zone_data *in_zone)
-{
-  IDXTYPE i;
-  struct index_data *rnum;
-  trig_data *trig;
-  FILE *trig_file;
-  zone_vnum zone;
-  room_vnum top;
-  char bitBuf[MAX_INPUT_LENGTH];
-  struct atomic_file af;
-  std::string fname;
-
-  zone = in_zone->number;
-  top  = in_zone->top;
-
-  fname = str_format("{}{:d}.trg", TRG_PREFIX, zone);
-  if (!(trig_file = atomic_open(&af, fname.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't open trig file \"{}\"", fname);
-    return false;
-  }
-
-  for (i = in_zone->bot; i <= top; i++) {
-    if ((rnum = find_trigger(g, i)) != nullptr) {
-      trig = rnum->proto;
-
-      if (file_print(trig_file, "#{:d}\n", i) < 0) {
-        mudlog(g, LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Can't write trig file!");
-        atomic_abort(&af);
-        return false;
-      }
-      sprintascii(bitBuf, trig->trigger_type);
-      file_print(trig_file, "{}{:c}\n"
-                            "{:d} {} {:d}\n"
-                            "{}{:c}\n",
-                 !trig->name.empty() ? trig->name.c_str() : "unknown trigger", as_char(STRING_TERMINATOR),
-                 trig->attach_type,
-                 *bitBuf ? bitBuf : "0", trig->narg,
-                 trig->arglist, as_char(STRING_TERMINATOR));
-
-      /* The script, one line per command. Written directly: scripts can exceed any fixed buffer. */
-      if (!trig->program)
-        fputs("* Empty script", trig_file);
-      else
-        for (const dg::line &l : trig->program->lines)
-          file_print(trig_file, "{}\n", l.text);
-
-      file_print(trig_file, "{:c}\n", as_char(STRING_TERMINATOR));
-    }
-  }
-
-  file_print(trig_file, "${:c}\n", as_char(STRING_TERMINATOR));
-  if (!atomic_commit(&af))
-    return false;
-  create_world_index(g, zone, "trg");
-  return true;
-}
-
 /*
  * Writes the editor's zone's triggers to disk.
  * note: we write this to disk NOW instead of letting the builder

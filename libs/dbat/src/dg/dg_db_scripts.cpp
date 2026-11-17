@@ -35,49 +35,6 @@
 /* local functions */
 static void trig_data_init(trig_data *this_data);
 
-void parse_trigger(GameWorld *g, FILE *trig_f, trig_vnum nr)
-{
-  int t[2], k, attach_type;
-  char line[256], *cmds, flags[256];
-  std::string errors;
-  struct index_data *t_index;
-  struct trig_data *trig;
-
-  trig                             = new trig_data();
-  std::unique_ptr<index_data> made = std::make_unique<index_data>();
-  t_index                          = made.get();
-
-  t_index->vnum  = nr;
-  t_index->proto = trig;
-
-  errors = str_format("trig vnum {:d}", nr);
-
-  trig->index = t_index;
-  trig->name  = take_string(fread_string(trig_f, errors.c_str()));
-
-  get_line(trig_f, line);
-  k                  = sscanf(line, "%d %255s %d", &attach_type, flags, t);
-  trig->attach_type  = (int8_t)attach_type;
-  trig->trigger_type = (long)asciiflag_conv(flags);
-  trig->narg         = (k == 3) ? t[0] : 0;
-
-  trig->arglist = take_string(fread_string(trig_f, errors.c_str()));
-
-  /* an empty script gets a placeholder */
-  cmds          = fread_string(trig_f, errors.c_str());
-  trig->program = dg::lex(cmds ? cmds : "", "* Empty script");
-  free(cmds);
-
-  if (g->trig_index.find(nr)) {
-    mud_log("SYSERR: trigger #{:d} is defined twice; ignoring the second one.", nr);
-    free_trigger(g, trig);
-    return;
-  }
-  g->trig_index.insert(nr, std::move(made));
-
-  report_compile_errors(g, trig, nullptr);
-}
-
 /*
  * create a new trigger from a prototype, given its entry in the trigger index (or null).
  */

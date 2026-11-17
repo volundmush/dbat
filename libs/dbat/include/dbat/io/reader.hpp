@@ -50,6 +50,34 @@ long c_atol(std::string_view text);
    first of them logged, naming what is read as who. */
 bitvector_t ascii_flags(std::string_view word, int first_letter_bit, const char *who);
 
+/* Reads a line's fields one at a time, as sscanf() reads its conversions: each passes over the spaces before it,
+   and once one fails the rest fail too. count() is how many were read, as sscanf() returns it (but 0, not EOF, when
+   the line runs out first).
+
+     io::fields f(line);
+     f.number(bot) && f.number(top) && f.word(flags);
+     if (f.count() != 3) ...  */
+class fields {
+public:
+  explicit fields(std::string_view text) : text_(text) {}
+  /* %d: a number, held to a long's range and then cut to an int (quirk, as scan_ints()) */
+  bool number(int &n);
+  /* %s, or %<width>s: a word of up to width characters */
+  bool word(std::string &w, size_t width = std::string_view::npos);
+  /* " %<width>[^stops]": after the spaces, up to width characters none of which is one of stops */
+  bool until(std::string &w, std::string_view stops, size_t width);
+  int count() const { return count_; }
+  /* what is left of the text after the last field read */
+  std::string_view rest() const { return text_.substr(at_); }
+
+private:
+  bool start(); /* passes over spaces; false if a field failed before, or the text has run out */
+  std::string_view text_;
+  size_t at_{};
+  int count_{};
+  bool failed_{};
+};
+
 /* The entries an index file names, up to its "$": the files of one kind to load, in order */
 loaded<std::vector<std::string>> read_index(const std::filesystem::path &path);
 
@@ -62,6 +90,8 @@ public:
   text_reader(std::string name, std::string text);
 
   const std::string &name() const { return name_; }
+  /* the whole file */
+  std::string_view text() const { return text_; }
   /* The line the last one read was on, from 1; 0 before any */
   int line_number() const { return line_; }
   /* How far into the file the reading is, in bytes */

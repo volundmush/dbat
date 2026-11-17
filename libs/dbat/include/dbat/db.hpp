@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/io/load_error.hpp"
 
 /* arbitrary constants used by index_boot() (must be unique) */
 constexpr int DB_BOOT_WLD = 0;
@@ -106,7 +107,8 @@ constexpr int PINDEX_NOWIZLIST  = (1 << 3); /* Player shouldn't be on wizlist*/
 
 void auc_load(struct obj_data *obj);
 /* public procedures in db.c */
-void boot_world(GameWorld *g);
+/* Loads the world: zones, triggers, rooms, mobs, objects, shops and guilds; or why a file of it can't be */
+io::loaded<void> boot_world(GameWorld *g);
 bool is_empty(GameWorld *g, struct zone_data *zone_nr);
 void index_boot(GameWorld *g, int mode);
 void boot_db(GameWorld *g);
