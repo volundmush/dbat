@@ -97,8 +97,6 @@ io::loaded<void> through_file(GameWorld *g, io::text_reader &in)
   return {};
 }
 
-void legacy_mobs(GameWorld *g, std::FILE *fl, const char *name) { discrete_load(g, fl, DB_BOOT_MOB, name); }
-void legacy_objects(GameWorld *g, std::FILE *fl, const char *name) { discrete_load(g, fl, DB_BOOT_OBJ, name); }
 void legacy_shops(GameWorld *g, std::FILE *fl, const char *name) { boot_the_shops(g, fl, name, 0); }
 void legacy_guilds(GameWorld *g, std::FILE *fl, const char *name) { boot_the_guilds(g, fl, name, 0); }
 
@@ -116,8 +114,8 @@ constexpr world_kind kinds[] = {
     {DB_BOOT_ZON, ZON_PREFIX, count_one,           report_zones,   false, read_zone_file,               nullptr  },
     {DB_BOOT_TRG, TRG_PREFIX, count_hash_records,  nullptr,        false, read_trigger_file,            nullptr  },
     {DB_BOOT_WLD, WLD_PREFIX, count_hash_records,  report_rooms,   false, read_room_file,               nullptr  },
-    {DB_BOOT_MOB, MOB_PREFIX, count_hash_records,  report_mobs,    false, through_file<legacy_mobs>,    nullptr  },
-    {DB_BOOT_OBJ, OBJ_PREFIX, count_hash_records,  report_objects, false, through_file<legacy_objects>, nullptr  },
+    {DB_BOOT_MOB, MOB_PREFIX, count_hash_records,  report_mobs,    false, read_mob_file,                nullptr  },
+    {DB_BOOT_OBJ, OBJ_PREFIX, count_hash_records,  report_objects, false, read_object_file,             nullptr  },
     {DB_BOOT_SHP, SHP_PREFIX, count_hash_records,  nullptr,        true,  through_file<legacy_shops>,   nullptr  },
     {DB_BOOT_GLD, GLD_PREFIX, count_hash_records,  nullptr,        true,  through_file<legacy_guilds>,  nullptr  },
     {DB_BOOT_HLP, HLP_PREFIX, count_help_keywords, report_help,    false, through_file<load_help>,      sort_help},

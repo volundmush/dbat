@@ -93,7 +93,7 @@ struct GameWorld {
   char *last_act_message{};
 
   /* Run modes */
-  int mini_mud{}, no_mail{}, no_rent_check{}, no_specials{}, scheck{}, converting{};
+  int mini_mud{}, no_mail{}, no_rent_check{}, no_specials{}, scheck{};
 
   /* Time, weather and randomness */
   struct time_info_data time_info{};
@@ -171,9 +171,7 @@ struct GameWorld {
   obj_vnum lRnum{};
   int extractions_pending{};
 
-  /* Progress of the world file parsers and the zone clock */
-  mob_vnum parse_mob_index{};
-  obj_vnum parse_obj_index{};
+  /* The zone clock */
   int zone_update_timer{};
 };
 

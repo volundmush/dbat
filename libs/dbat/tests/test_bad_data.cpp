@@ -2215,14 +2215,18 @@ static const struct damaged_file {
   const char *reason;
 } damaged_files[] = {
     {"world/obj/3.obj", "15 0 0 0 0 a 0 0 0 0 0 0 0\n", "15 0 0 0 0\n",
-     "SYSERR: Format error in first numeric line (expecting 13 args, got 5), object #300"},
-    {"world/obj/3.obj", "#301\nsword blade~", "#300\nsword blade~", "SYSERR: object #300 is defined twice."},
-    {"world/obj/3.obj", "3 50 0 0\nZ\n4\n#302", "3 50 0 0\nA\nx\n#302", "SYSERR: Format error in 'A' field, object #301"},
-    {"world/obj/3.obj", "3 50 0 0\nZ\n4\n#302", "3 50 0 0\nQ\n#302", "SYSERR: Format error in (Q): object #301"},
-    {"world/mob/3.mob", "d 0 0 0 0 0 0 0 0 E\n", "d 0 0 0 0 0 0 0 0 X\n", "SYSERR: Unsupported mob type 'X' in mob #300"},
-    {"world/mob/3.mob", "#301\nkeeper", "#300\nkeeper", "SYSERR: mobile #300 is defined twice."},
+     "SYSERR: world/obj/3.obj:6: object #300: expected its type, 4 extra flags, 4 wear flags and 4 affect flags, got '15 0 0 0 0'"},
+    {"world/obj/3.obj", "#301\nsword blade~", "#300\nsword blade~", "SYSERR: world/obj/3.obj:11: object #300 is defined twice"},
+    {"world/obj/3.obj", "3 50 0 0\nZ\n4\n#302", "3 50 0 0\nA\nx\n#302", "SYSERR: world/obj/3.obj:20: object #301: after its 'A', expected its location, modifier and specific, got 'x'"},
+    {"world/obj/3.obj", "3 50 0 0\nZ\n4\n#302", "3 50 0 0\nQ\n#302", "SYSERR: world/obj/3.obj:19: object #301: expected E, A, S, T or Z, or the next '#<vnum>' or the '$', got 'Q'"},
+    {"world/mob/3.mob", "d 0 0 0 0 0 0 0 0 E\n", "d 0 0 0 0 0 0 0 0 X\n", "SYSERR: world/mob/3.mob:8: mob #300: there is no mob type 'X', only S and E"},
+    {"world/mob/3.mob", "#301\nkeeper", "#300\nkeeper", "SYSERR: world/mob/3.mob:19: mob #300 is defined twice"},
     {"world/mob/3.mob", "d 0 0 0 0 0 0 0 0 E\n", "d 0 E\n",
-     "SYSERR: Format error after string section of mob #300"},
+     "SYSERR: world/mob/3.mob:8: mob #300: expected 4 act flags, 4 affect flags, its alignment and S or E, got 'd 0 E'"},
+    {"world/mob/3.mob", "1 0 10 0d0+0 0d0+0\n0 0 0 0\n8 8 0\nStr", "1 0 10 0x0+0 0d0+0\n0 0 0 0\n8 8 0\nStr",
+     "SYSERR: world/mob/3.mob:9: mob #300: expected its level, hit roll, armor, points and damage, as '# # # #d#+# #d#+#'"},
+    {"world/mob/3.mob", "Cha: 10\nE\n#301", "Cha: 10\n#301", "SYSERR: world/mob/3.mob:18: mob #300: its especs have no 'E' to end them"},
+    {"world/obj/3.obj", "4\n#301", "x\n#301", "SYSERR: world/obj/3.obj:10: object #300: after its 'Z', expected its size, got 'x'"},
     {"world/zon/3.zon", "300 399 5 2 0 0 0 0 0 0\n", "300 399 5\n", "SYSERR: world/zon/3.zon:5: zone #3: expected 10 numbers and flags"},
     {"world/zon/3.zon", "@Version: 2\n", "@Version: x\n", "SYSERR: world/zon/3.zon:1: expected \"@Version: <number>\", got '@Version: x'"},
     {"world/obj/index", "3.obj\n", "3.obj\nmissing.obj\n", "SYSERR: world/obj/missing.obj: can't be opened, and world/obj/index lists it"},
@@ -2236,9 +2240,11 @@ static const struct damaged_file {
     {"world/wld/3.wld", "0 0 301 0 0 0 0 0 0 0 0\n", "0 0 301 20 20 0 0\n", "SYSERR: world/wld/3.wld:9: room #300, exit D0: expected 11 numbers"},
     {"world/wld/3.wld", "0 0 303 0 0 0 0 0 0 0 0\nS\n", "0 0 303 0 0 0 0 0 0 0 0\nQ\n", "SYSERR: world/wld/3.wld:18: room #300: expected D (an exit), E (an extra description) or S (the end), got 'Q'"},
     {"world/wld/3.wld", "#300\n", "#-5\n", "SYSERR: world/wld/3.wld:1: room #-5 is outside of any zone"},
+    {"world/obj/3.obj", "15 0 0 0 0 a 0 0 0 0 0 0 0\n", "15 0 a 0\n",
+     "SYSERR: world/obj/3.obj:6: object #300: expected its type, 4 extra flags, 4 wear flags and 4 affect flags, got '15 0 a 0'"},
     /* quirk: a string missing its ~ takes in the next one, and the error is found on a later line */
     {"world/obj/3.obj", "A wooden chest sits here.~\n", "A wooden chest sits here.\n",
-     "SYSERR: Format error in first numeric line (expecting 13 args, got 0), object #300"},
+     "SYSERR: world/obj/3.obj:13: object #300: expected its type, 4 extra flags, 4 wear flags and 4 affect flags, got 'a plain sword~'"},
 };
 static const damaged_file *damaging;
 

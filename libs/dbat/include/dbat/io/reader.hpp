@@ -66,6 +66,9 @@ public:
   bool word(std::string &w, size_t width = std::string_view::npos);
   /* " %<width>[^stops]": after the spaces, up to width characters none of which is one of stops */
   bool until(std::string &w, std::string_view stops, size_t width);
+  /* a character in the format, as the 'd' of "%dd%d": the next one must be c, with no spaces passed over; it isn't
+     counted */
+  bool literal(char c);
   int count() const { return count_; }
   /* what is left of the text after the last field read */
   std::string_view rest() const { return text_.substr(at_); }
@@ -107,6 +110,20 @@ public:
   /* The next character that isn't a space, without reading it, as fread_letter() then ungetc() find it; it passes
      over the spaces. EOF at the end. */
   int peek_letter();
+
+  /* Where the reading is, to come back to with go_back(): a record with no end marker reads the line after it, and
+     then leaves it for whatever reads next */
+  struct place {
+    size_t pos;
+    int line, newlines;
+  };
+  place here() const { return {pos_, line_, newlines_}; }
+  void go_back(place p)
+  {
+    pos_      = p.pos;
+    line_     = p.line;
+    newlines_ = p.newlines;
+  }
 
   /* An error at the line read last */
   load_error fail(std::string message) const { return {name_, line_, std::move(message)}; }

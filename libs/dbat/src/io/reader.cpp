@@ -166,6 +166,16 @@ bool fields::until(std::string &w, std::string_view stops, size_t width)
   return true;
 }
 
+bool fields::literal(char c)
+{
+  if (failed_ || at_ >= text_.size() || text_[at_] != c) {
+    failed_ = true;
+    return false;
+  }
+  at_++;
+  return true;
+}
+
 bitvector_t ascii_flags(std::string_view word, int first_letter_bit, const char *who)
 {
   bitvector_t flags = 0;

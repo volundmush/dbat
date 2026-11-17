@@ -278,19 +278,6 @@ const room_vnum donation_room_3 = NOWHERE; /* unused - room for expansion */
 /* GAME OPERATION OPTIONS */
 
 /*
- * Please read 128bit.readme before setting this to true. Set this
- * flag if you want the conversion to take place.
- */
-const int bitwarning = false;
-
-/*
- * If you want to look at normal worldfiles but DO NOT want to save
- * to 128bit format, turn this to false. However, do not save through
- * olc, or your worldfiles will be 128bit anyway.
- */
-const int bitsavetodisk = true;
-
-/*
  * This is the default port on which the game should run if no port is
  * given on the command-line.  NOTE WELL: If you're using the
  * 'autorun' script, the port number there will override this setting.

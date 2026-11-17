@@ -344,15 +344,31 @@ static void compare_fields(const std::string &text)
     file_print(stdout, "fields (zone header) differ for '{}'\n", text);
     CHECK(false);
   }
+  /* a mob's points: the 'd' and '+' are matched as they stand, with no spaces passed over before them */
+  int mob[9], want_mob[9];
+  want = sscanf(text.c_str(), " %d %d %d %dd%d+%d %dd%d+%d ", want_mob, want_mob + 1, want_mob + 2, want_mob + 3,
+                want_mob + 4, want_mob + 5, want_mob + 6, want_mob + 7, want_mob + 8);
+  io::fields p(text);
+  p.number(mob[0]) && p.number(mob[1]) && p.number(mob[2]) && p.number(mob[3]) && p.literal('d') &&
+      p.number(mob[4]) && p.literal('+') && p.number(mob[5]) && p.number(mob[6]) && p.literal('d') &&
+      p.number(mob[7]) && p.literal('+') && p.number(mob[8]);
+  same = p.count() == std::max(want, 0);
+  for (int i = 0; i < want; i++)
+    same = same && mob[i] == want_mob[i];
+  if (!same) {
+    file_print(stdout, "fields (mob points) differ for '{}'\n", text);
+    CHECK(false);
+  }
 }
 
 static void check_fields_read_as_sscanf_reads_them()
 {
   for (const char *text : {"", " ", "2 g 100", "2", "2 g", "x g 1", "1 2 3 4 5 6 name value with spaces",
-                           "1 2 3 4 5 6 name", "1 2 3 4 5 6", "300 399 5 2 a b c d 0 100", "300 399 5"})
+                           "1 2 3 4 5 6 name", "1 2 3 4 5 6", "300 399 5 2 a b c d 0 100", "300 399 5",
+                           "1 0 10 0d0+0 0d0+0", "1 0 10 5d6+-7 1 d2+3", "1 0 10 5 d6+7 1d2+3", "1 2 3 4d+5"})
     compare_fields(text);
   std::mt19937 rng(98765);
-  static const char alphabet[] = "0123456789 -+abZ~\t\v";
+  static const char alphabet[] = "0123456789 -+abdZ~\t\v";
   for (int i = 0; i < 20000; i++) {
     std::string s;
     for (size_t n = rng() % 200; n; n--)

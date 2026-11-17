@@ -93,14 +93,6 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg)
 }
 
 /* for mobs and rooms: */
-void dg_read_trigger(GameWorld *g, FILE *fp, owner_ptr proto)
-{
-  char line[READ_SIZE];
-
-  get_line(fp, line);
-  dg_attach_proto_trigger(g, line, proto);
-}
-
 void dg_attach_proto_trigger(GameWorld *g, std::string_view line, owner_ptr proto)
 {
   int type = owner_type(proto);
@@ -112,8 +104,11 @@ void dg_attach_proto_trigger(GameWorld *g, std::string_view line, owner_ptr prot
   io::fields f(line);
   f.word(junk, 7) && f.number(vnum);
   if (f.count() != 2) {
-    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
-           "SYSERR: Error assigning trigger! - Line was\n  {}", line);
+    if (type == OBJ_TRIGGER)
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
+             "SYSERR: dg_obj_trigger() : Error assigning trigger! - Line was:\n  {}", line);
+    else
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: Error assigning trigger! - Line was\n  {}", line);
     return;
   }
 
@@ -130,6 +125,11 @@ void dg_attach_proto_trigger(GameWorld *g, std::string_view line, owner_ptr prot
                "SYSERR: dg_read_trigger: Trigger vnum #{:d} asked for but non-existant! (room:{:d})",
                vnum, room_get_number(std::get<room_data *>(proto)));
         break;
+      case OBJ_TRIGGER:
+        mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
+               "SYSERR: Trigger vnum #{:d} asked for but non-existant! (Object: {} - {:d})", vnum,
+               obj_get_short_description(std::get<obj_data *>(proto)), obj_get_vnum(g, std::get<obj_data *>(proto)));
+        break;
       default:
         mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #{:d} asked for but non-existant! (?)", vnum);
@@ -141,6 +141,9 @@ void dg_attach_proto_trigger(GameWorld *g, std::string_view line, owner_ptr prot
   switch (type) {
     case MOB_TRIGGER:
       char_proto_script(std::get<char_data *>(proto)).push_back(vnum);
+      break;
+    case OBJ_TRIGGER:
+      obj_proto_script(std::get<obj_data *>(proto)).push_back(vnum);
       break;
     case WLD_TRIGGER:
       room = std::get<room_data *>(proto);
@@ -158,32 +161,6 @@ void dg_attach_proto_trigger(GameWorld *g, std::string_view line, owner_ptr prot
       mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
              "SYSERR: Trigger vnum #{:d} assigned to non-mob/obj/room", vnum);
   }
-}
-
-void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj)
-{
-  char junk[8];
-  trig_vnum vnum;
-  struct index_data *rnum;
-  int count;
-
-  count = sscanf(line, "%7s %d", junk, &vnum);
-
-  if (count != 2) {
-    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
-           "SYSERR: dg_obj_trigger() : Error assigning trigger! - Line was:\n  {}", line);
-    return;
-  }
-
-  rnum = find_trigger(g, vnum);
-  if (rnum == nullptr) {
-    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
-           "SYSERR: Trigger vnum #{:d} asked for but non-existant! (Object: {} - {:d})",
-           vnum, obj_get_short_description(obj), obj_get_vnum(g, obj));
-    return;
-  }
-
-  obj_proto_script(obj).push_back(vnum);
 }
 
 void assign_triggers(GameWorld *g, owner_ptr i)

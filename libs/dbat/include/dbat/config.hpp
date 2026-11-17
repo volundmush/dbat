@@ -256,8 +256,6 @@ extern const room_vnum mortal_start_room, immort_start_room, frozen_start_room;
 
 extern const room_vnum donation_room_1, donation_room_2, donation_room_3;
 
-extern const int bitwarning, bitsavetodisk;
-
 extern const uint16_t DFLT_PORT;
 
 extern const char *const DFLT_IP, *const DFLT_DIR, *const LOGNAME, *const MENU, *const WELC_MESSG, *const START_MESSG;

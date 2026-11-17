@@ -41,7 +41,6 @@ constexpr int SCRIPT_DEL_TRIGGER = 2;
 #define OLC_ITEM_TYPE(d)        (OLC(d)->item_type)   /* mob/obj/room     */
 
 /* prototype exported functions from dg_olc.c */
-void script_save_to_disk(FILE *fp, owner_ptr item); /* a prototype's trigger list, as T lines */
 bool save_triggers(GameWorld *g, struct zone_data *zone);
 void dg_olc_script_copy(struct descriptor_data *d);
 void dg_script_menu(GameWorld *g, struct descriptor_data *d);

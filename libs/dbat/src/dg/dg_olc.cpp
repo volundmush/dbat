@@ -127,14 +127,6 @@ ACMD(do_oasis_trigedit)
          char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
 }
 
-/* called when a mob or object is being saved to disk, so its script can */
-/* be saved */
-void script_save_to_disk(FILE *fp, owner_ptr item)
-{
-  for (trig_vnum vnum : proto_script_of(item))
-    file_print(fp, "T {:d}\n", vnum);
-}
-
 static void trigedit_setup_new(struct descriptor_data *d)
 {
   struct trig_data *trig;
