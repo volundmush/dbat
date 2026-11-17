@@ -42,6 +42,10 @@ bool read_raw_line(std::FILE *fl, std::string &raw);
    gives it, then cut to an int (quirk). */
 int scan_ints(std::string_view text, std::span<int> out);
 
+/* A number from text as sscanf(text, "%f") reads one into x: 1 if it read one, 0 if the text doesn't start with one,
+   -1 (leaving x as it was) if there is only space */
+int scan_float(std::string_view text, float &x);
+
 /* text as atol() reads it: spaces, a sign and digits, or 0; past a long's range, the largest long of that sign */
 long c_atol(std::string_view text);
 

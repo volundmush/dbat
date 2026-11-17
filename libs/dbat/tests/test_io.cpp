@@ -377,6 +377,30 @@ static void check_fields_read_as_sscanf_reads_them()
   }
 }
 
+/* scan_float() reads what sscanf("%f") reads */
+static void check_floats_read_as_sscanf_reads_them()
+{
+  std::mt19937 rng(4242);
+  static const char alphabet[] = "0123456789 -+.eExinfa\t";
+  std::vector<std::string> texts = {"", " ", "1.00", "0.75", " -2.5", "1e3", "1e", "1e+", ".", "-.5", "inf", "nan",
+                                    "0x1p3", "x", "3.25 junk"};
+  for (int i = 0; i < 20000; i++) {
+    std::string s;
+    for (size_t n = rng() % 12; n; n--)
+      s += alphabet[rng() % (sizeof(alphabet) - 1)];
+    texts.push_back(s);
+  }
+  for (const std::string &text : texts) {
+    float want = 7.0f, got = 7.0f;
+    int want_n = sscanf(text.c_str(), "%f", &want);
+    int got_n  = io::scan_float(text, got);
+    if (want_n != got_n || (want_n == 1 && memcmp(&want, &got, sizeof(float)) != 0 && !(want != want && got != got))) {
+      file_print(stdout, "scan_float differs for '{}': {:d} {} against {:d} {}\n", text, want_n, want, got_n, got);
+      CHECK(false);
+    }
+  }
+}
+
 static void check_flags_read_as_asciiflag_conv_reads_them()
 {
   for (const char *word : {"0", "abc", "aD", "zF", "12", "-1", "4294967296", "99999999999999999999", "a1", "1-2", "",
@@ -442,6 +466,7 @@ int main()
   check_line_numbers();
   check_numbers_read_as_sscanf_reads_them();
   check_fields_read_as_sscanf_reads_them();
+  check_floats_read_as_sscanf_reads_them();
   check_flags_read_as_asciiflag_conv_reads_them();
   check_player_files();
   check_replacing_files();

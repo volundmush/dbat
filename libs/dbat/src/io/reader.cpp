@@ -3,6 +3,7 @@
  */
 #include <cctype>
 #include <climits>
+#include <cstdlib>
 #include <fstream>
 #include <sstream>
 
@@ -111,6 +112,39 @@ int scan_ints(std::string_view text, std::span<int> out)
     read++;
   }
   return read;
+}
+
+int scan_float(std::string_view text, float &x)
+{
+  size_t at = 0;
+  while (at < text.size() && is_space(text[at]))
+    at++;
+  if (at >= text.size())
+    return -1;
+  std::string rest(text.substr(at)); /* strtof() reads %f's numbers, "inf" and "nan" with them, and needs an end */
+  char *end = nullptr;
+  float read = std::strtof(rest.c_str(), &end);
+  if (end == rest.c_str())
+    return 0;
+  /* sscanf() takes in what could still become a number, then has read nothing if it doesn't: an exponent's 'e' (or a
+     hex number's 'p') and sign with no digits after them, or a "0x" with no hex digits */
+  std::string_view parsed(rest.c_str(), static_cast<size_t>(end - rest.c_str()));
+  if (parsed.find_first_of("iInN") == std::string_view::npos) { /* not inf or nan */
+    bool hex = parsed.find_first_of("xX") != std::string_view::npos;
+    std::string_view digits = parsed.substr(parsed[0] == '+' || parsed[0] == '-');
+    if (!hex && digits == "0" && (*end == 'x' || *end == 'X'))
+      return 0;
+    const char *exponent = hex ? "pP" : "eE";
+    if (parsed.find_first_of(exponent) == std::string_view::npos && (*end == exponent[0] || *end == exponent[1])) {
+      const char *after = end + 1;
+      if (*after == '+' || *after == '-')
+        after++;
+      if (!isdigit(static_cast<unsigned char>(*after)))
+        return 0;
+    }
+  }
+  x = read;
+  return 1;
 }
 
 bool fields::start()

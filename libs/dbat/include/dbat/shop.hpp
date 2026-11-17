@@ -55,8 +55,6 @@ struct shop_data {
 };
 
 
-constexpr int MAX_TRADE = 5;      /* List maximums for compatibility	*/
-constexpr int MAX_PROD  = 5;      /*	with shops before v3.0		*/
 #define VERSION3_TAG "v3.0"       /* The file has v3.0 shops in it!	*/
 constexpr int MAX_SHOP_OBJ = 100; /* "Soft" maximum for list maximums	*/
 
@@ -193,7 +191,6 @@ extern const char *const shop_bits[];
 
 // functions
 bool shop_producing(GameWorld *g, struct obj_data *item, struct shop_data *shop);
-void boot_the_shops(GameWorld *g, FILE *shop_f, const char *filename, int rec_count);
 void assign_the_shopkeepers(GameWorld *g);
 bool ok_shop_room(GameWorld *g, struct shop_data *shop, room_vnum room);
 void destroy_shops(GameWorld *g);

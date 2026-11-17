@@ -2050,6 +2050,29 @@ static void empty_record_before_the_shops(void)
   fclose(fl);
 }
 
+static void replace_in_file(const char *path, const char *from, const char *to);
+
+static void shop_with_negative_flags(void)
+{
+  replace_in_file("world/shp/3.shp", "\n0\n0\n301\n", "\n0\n-1\n301\n");
+}
+
+/* quirk: the flags were read as a long into 4 bytes, spilling into the keeper read after them; a negative one leaves
+   the keeper a vnum no mob has */
+static void check_shop_flags_spill_into_the_keeper(void)
+{
+  GameWorld *g = th_boot();
+  CHECK(shop_get_keeper(*g->shops.all().begin()) == 301);
+  th_shutdown(g);
+
+  th_before_boot(shop_with_negative_flags);
+  g = th_boot();
+  shop_data *shop = *g->shops.all().begin();
+  CHECK(shop_get_keeper(shop) == NOBODY);
+  CHECK(shop_get_bitvector(shop) == 0xFFFFFFFFu);
+  th_shutdown(g);
+}
+
 static void check_empty_record_in_a_shop_file(void)
 {
   th_before_boot(empty_record_before_the_shops);
@@ -2240,6 +2263,12 @@ static const struct damaged_file {
     {"world/wld/3.wld", "0 0 301 0 0 0 0 0 0 0 0\n", "0 0 301 20 20 0 0\n", "SYSERR: world/wld/3.wld:9: room #300, exit D0: expected 11 numbers"},
     {"world/wld/3.wld", "0 0 303 0 0 0 0 0 0 0 0\nS\n", "0 0 303 0 0 0 0 0 0 0 0\nQ\n", "SYSERR: world/wld/3.wld:18: room #300: expected D (an exit), E (an extra description) or S (the end), got 'Q'"},
     {"world/wld/3.wld", "#300\n", "#-5\n", "SYSERR: world/wld/3.wld:1: room #-5 is outside of any zone"},
+    {"world/shp/3.shp", "-1\n1.00\n", "-1\nx\n", "SYSERR: world/shp/3.shp:5: shop #300: expected its buy profit, got 'x'"},
+    {"world/shp/3.shp", "\n301\n0 0 16384", "\nx\n0 0 16384", "SYSERR: world/shp/3.shp:18: shop #300: expected its keeper's vnum, got 'x'"},
+    {"world/shp/3.shp", "CircleMUD v3.0 Shop File~", "CircleMUD Shop File~",
+     "SYSERR: world/shp/3.shp:2: shop #300 comes before the \"v3.0\" header; shops older than v3.0 aren't read any more"},
+    {"world/gld/3.gld", "-1\n1.00\n", "-1\nx\n", "SYSERR: world/gld/3.gld:10: guild #300: expected its charge, got 'x'"},
+    {"world/gld/3.gld", "427 1\n", "427 3\n", "SYSERR: world/gld/3.gld:8: guild #300: 3 after skill 427 is neither 1 (a skill) nor 2 (a feat)"},
     {"world/obj/3.obj", "15 0 0 0 0 a 0 0 0 0 0 0 0\n", "15 0 a 0\n",
      "SYSERR: world/obj/3.obj:6: object #300: expected its type, 4 extra flags, 4 wear flags and 4 affect flags, got '15 0 a 0'"},
     /* quirk: a string missing its ~ takes in the next one, and the error is found on a later line */
@@ -2348,6 +2377,7 @@ static const struct {
     {"start_room_missing_from_the_world",           check_start_room_missing_from_the_world          },
     {"shop_with_impossible_item_types",             check_shop_with_impossible_item_types            },
     {"empty_record_in_a_shop_file",                 check_empty_record_in_a_shop_file                },
+    {"shop_flags_spill_into_the_keeper",            check_shop_flags_spill_into_the_keeper           },
     {"shadow_dragon_missing_from_the_world",        check_shadow_dragon_missing_from_the_world       },
     {"homing_ball_that_someone_is_carrying",        check_homing_ball_that_someone_is_carrying       },
     {"long_name_in_auction_file",                   check_long_name_in_auction_file                  },

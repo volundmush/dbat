@@ -97,8 +97,6 @@ io::loaded<void> through_file(GameWorld *g, io::text_reader &in)
   return {};
 }
 
-void legacy_shops(GameWorld *g, std::FILE *fl, const char *name) { boot_the_shops(g, fl, name, 0); }
-void legacy_guilds(GameWorld *g, std::FILE *fl, const char *name) { boot_the_guilds(g, fl, name, 0); }
 
 struct world_kind {
   int mode;
@@ -116,8 +114,8 @@ constexpr world_kind kinds[] = {
     {DB_BOOT_WLD, WLD_PREFIX, count_hash_records,  report_rooms,   false, read_room_file,               nullptr  },
     {DB_BOOT_MOB, MOB_PREFIX, count_hash_records,  report_mobs,    false, read_mob_file,                nullptr  },
     {DB_BOOT_OBJ, OBJ_PREFIX, count_hash_records,  report_objects, false, read_object_file,             nullptr  },
-    {DB_BOOT_SHP, SHP_PREFIX, count_hash_records,  nullptr,        true,  through_file<legacy_shops>,   nullptr  },
-    {DB_BOOT_GLD, GLD_PREFIX, count_hash_records,  nullptr,        true,  through_file<legacy_guilds>,  nullptr  },
+    {DB_BOOT_SHP, SHP_PREFIX, count_hash_records,  nullptr,        true,  read_shop_file,               nullptr  },
+    {DB_BOOT_GLD, GLD_PREFIX, count_hash_records,  nullptr,        true,  read_guild_file,              nullptr  },
     {DB_BOOT_HLP, HLP_PREFIX, count_help_keywords, report_help,    false, through_file<load_help>,      sort_help},
 };
 

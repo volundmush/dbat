@@ -24,6 +24,12 @@ io::loaded<void> read_mob_file(GameWorld *g, io::text_reader &in);
 /* One object file; its objects are added to g->obj_index and g->obj_proto */
 io::loaded<void> read_object_file(GameWorld *g, io::text_reader &in);
 
+/* One shop file; its shops are added to g->shops */
+io::loaded<void> read_shop_file(GameWorld *g, io::text_reader &in);
+
+/* One guild file; its guilds are added to g->guilds */
+io::loaded<void> read_guild_file(GameWorld *g, io::text_reader &in);
+
 /* One trigger file; its triggers are added to g->trig_index */
 io::loaded<void> read_trigger_file(GameWorld *g, io::text_reader &in);
 
