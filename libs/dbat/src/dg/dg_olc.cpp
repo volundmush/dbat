@@ -23,7 +23,6 @@
 #include "dbat/genolc.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/oasis.hpp"
-#include "dbat/dg_event.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/modify.hpp"
 #include "dbat/genzon.hpp"
@@ -395,21 +394,13 @@ static void trigedit_replace_existing(GameWorld *g, struct descriptor_data *d, s
   /* make the prorotype look like what we have */
   trig_data_copy(proto, trig);
 
-  /* go through the mud and replace existing triggers         */
+  /* Every live copy takes the new script for its next run. One that is running or waiting finishes on the script it
+     started, which its run holds (see dg::run_state), with its variables; tstat shows which those are. */
   g->triggers.visit([&](long, struct trig_data *live_trig) {
     if (live_trig->index == rnum) {
-      live_trig->arglist = proto->arglist;
-      live_trig->name    = proto->name;
-
-      /* anything could have happened so we don't want to keep these */
-      if (live_trig->wait_event) {
-        event_cancel(g, live_trig->wait_event);
-        live_trig->wait_event = nullptr;
-      }
-      live_trig->var_list.clear();
-
+      live_trig->arglist      = proto->arglist;
+      live_trig->name         = proto->name;
       live_trig->program      = proto->program;
-      live_trig->run.stop();
       live_trig->trigger_type = proto->trigger_type;
       live_trig->attach_type  = proto->attach_type;
       live_trig->narg         = proto->narg;

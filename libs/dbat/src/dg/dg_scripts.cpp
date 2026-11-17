@@ -389,8 +389,7 @@ static void process_detach(GameWorld *g, owner_ptr go, struct script_data *sc, t
       extract_script(g, thing);
       return;
     }
-    std::string name = trignum_s; /* remove_trigger() cuts it up */
-    if (remove_trigger(g, script, name.data()) && !script->trig_list)
+    if (remove_trigger(g, script, trignum_s) && !script->trig_list)
       extract_script(g, thing);
   };
 

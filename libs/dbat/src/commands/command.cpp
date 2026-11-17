@@ -595,6 +595,7 @@ const struct command_info cmd_info[] = {
     {"attach",        "attach",       POS_DEAD,     do_attach,          0,  ADMLVL_BUILDER, 0                  },
     {"detach",        "detach",       POS_DEAD,     do_detach,          0,  ADMLVL_BUILDER, 0                  },
     {"detect",        "detec",        POS_STANDING, do_radar,           0,  ADMLVL_NONE,    0                  },
+    {"tcheck",        "tcheck",       POS_DEAD,     do_tcheck,          0,  ADMLVL_BUILDER, 0                  },
     {"tlist",         "tlist",        POS_DEAD,     do_oasis,           0,  ADMLVL_IMMORT,  SCMD_OASIS_TLIST   },
     {"tstat",         "tstat",        POS_DEAD,     do_tstat,           0,  ADMLVL_IMMORT,  0                  },
     {"masound",       "masound",      POS_DEAD,     do_masound,         -1, ADMLVL_NONE,    0                  },

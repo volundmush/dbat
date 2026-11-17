@@ -61,5 +61,5 @@ bool case_matches(const std::string &subject, std::string_view value);
 std::string render(GameWorld *g, const dg::text_template &t, owner_ptr go, struct script_data *sc, trig_data *trig);
 
 /* dg_wizcmd.c */
-bool remove_trigger(GameWorld *g, struct script_data *sc, char *name);
+bool remove_trigger(GameWorld *g, struct script_data *sc, std::string_view name);
 

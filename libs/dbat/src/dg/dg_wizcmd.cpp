@@ -53,8 +53,104 @@ static void do_stat_trigger(GameWorld *g, struct char_data *ch, trig_data *trig)
   for (const dg::line &l : trig->program->lines)
     sb += str_format("{}\r\n", l.text);
 
+  if (!trig->program->runs()) {
+    sb += "@RIt does not run: its script has errors.@n\r\n";
+    for (const dg::diagnostic &e : trig->program->errors)
+      sb += str_format("  line {:d}: {}\r\n", trig->program->lines[e.line].number, e.message);
+  }
+
   send_to_char(g, ch, sb);
 }
+
+namespace {
+
+/* What a script is on, for builders, as the error context names it */
+std::string owner_text(GameWorld *g, owner_ptr go)
+{
+  return std::visit(overloaded{[&](char_data *mob) {
+                                 return str_format("mob '{}' #{:d} uid {:d} in room {:d}", char_get_name(mob),
+                                                   char_get_mob_vnum(g, mob), char_get_id(mob), char_get_in_room(mob));
+                               },
+                               [&](obj_data *obj) {
+                                 return str_format("obj '{}' #{:d} uid {:d} in room {:d}",
+                                                   obj_get_short_description(obj), obj_get_vnum(g, obj),
+                                                   obj_get_id(obj), obj_room(obj));
+                               },
+                               [&](room_data *room) {
+                                 return str_format("room '{}' #{:d}", room_get_name(room), room_get_number(room));
+                               }},
+                    go);
+}
+
+/* Calls fn(owner, script) for each thing in the game with a script */
+template <class Fn>
+void each_script(GameWorld *g, Fn &&fn)
+{
+  for (char_data *mob : each_char(g))
+    if (char_get_script(mob))
+      fn(owner_ptr{mob}, char_get_script(mob));
+  for (obj_data *obj : each_obj(g))
+    if (obj_get_script(obj))
+      fn(owner_ptr{obj}, obj_get_script(obj));
+  g->rooms.visit([&](room_vnum, room_data *room) {
+    if (room_get_script(room))
+      fn(owner_ptr{room}, room_get_script(room));
+  });
+}
+
+/* Where an instance's run is: idle, or what it is doing, the line it carries on at and the blocks it is inside */
+std::string run_text(GameWorld *g, const trig_data *t)
+{
+  const dg::run_state &run = t->run;
+  if (!run.running())
+    return "idle\r\n";
+
+  std::string out = "running";
+  if (t->wait_event) {
+    long left = event_time(g, t->wait_event);
+    out       = str_format("waiting, {:d} pulse{} left", left, left == 1 ? "" : "s");
+  }
+  if (run.prog != t->program)
+    out += ", on the script as it was before it was last saved";
+  if (const dg::line *at = run.next_line())
+    out += str_format("\r\n      at line {:d}: {}", at->number, at->body());
+  else
+    out += "\r\n      at the end of the script";
+
+  std::string inside;
+  for (const dg::frame &f : run.frames)
+    if (const dg::line *opened = run.opened_at(f))
+      inside += str_format("{}{} at line {:d}", inside.empty() ? "" : ", in ", dg::keyword_name(opened->kw),
+                           opened->number);
+  if (!inside.empty())
+    out += "\r\n      inside " + inside;
+  return out + "\r\n";
+}
+
+/* The live instances of the trigger with index rnum, up to a screenful */
+std::string instances_text(GameWorld *g, const index_data *rnum)
+{
+  constexpr int most_shown = 50;
+  int found                = 0;
+  std::string out;
+
+  each_script(g, [&](owner_ptr go, script_data *sc) {
+    for (const trig_data *t = sc->trig_list; t; t = t->next) {
+      if (t->index != rnum)
+        continue;
+      if (++found <= most_shown)
+        out += str_format("  #{:d} on {}: {}", t->id, owner_text(g, go), run_text(g, t));
+    }
+  });
+
+  if (!found)
+    return "Live instances: none\r\n";
+  if (found > most_shown)
+    out += str_format("  ... and {:d} more\r\n", found - most_shown);
+  return str_format("Live instances: {:d}\r\n", found) + out;
+}
+
+} // namespace
 
 /* find the name of what the uid points to */
 std::string find_uid_name(GameWorld *g, std::string_view uid)
@@ -184,16 +280,48 @@ void add_trigger(GameWorld *g, struct script_data *sc, trig_data *t, int loc)
   g->triggers.add(t->id, t);
 }
 
+namespace {
+
+/* Attaches a new instance of trigger tn to go's script, at place loc as add_trigger() takes it; null, having told ch,
+   if there's no such trigger */
+trig_data *attach_new(GameWorld *g, char_data *ch, owner_ptr go, trig_vnum tn, int loc)
+{
+  struct index_data *rn = find_trigger(g, tn);
+  trig_data *trig;
+  if (!rn || !(trig = read_trigger(g, rn))) {
+    send_to_char(g, ch, "That trigger does not exist.\r\n");
+    return nullptr;
+  }
+  add_trigger(g, dg_ensure_script(script_slot(go)), trig, loc);
+  return trig;
+}
+
+/* Removes the trigger named (as remove_trigger() takes it), or "all" of them, from go's script, telling ch; what is
+   go as "All triggers removed from ..." names it. No trigger named finds none. */
+void detach_from(GameWorld *g, char_data *ch, owner_ptr go, const std::string *trigger, std::string_view what)
+{
+  script_data *sc = *script_slot(go);
+  if (trigger && str_eq_nocase(*trigger, "all")) {
+    extract_script(g, go);
+    send_to_char(g, ch, "All triggers removed from {}.\r\n", what);
+  } else if (trigger && remove_trigger(g, sc, *trigger)) {
+    send_to_char(g, ch, "Trigger removed.\r\n");
+    if (!sc->trig_list)
+      extract_script(g, go);
+  } else
+    send_to_char(g, ch, "That trigger was not found.\r\n");
+}
+
+} // namespace
+
 ACMD(do_attach)
 {
   char_data *victim;
   obj_data *object;
-  room_data *room;
   trig_data *trig;
   std::string arg, trig_name, targ_name, loc_name;
   int loc;
   trig_vnum tn;
-  struct index_data *rn;
   IDXTYPE num_arg;
   room_vnum rnum;
 
@@ -231,14 +359,8 @@ ACMD(do_attach)
       send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
-    /* have a valid mob, now get trigger */
-    rn = find_trigger(g, tn);
-    if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
-      send_to_char(g, ch, "That trigger does not exist.\r\n");
+    if (!(trig = attach_new(g, ch, victim, tn, loc)))
       return;
-    }
-
-    add_trigger(g, dg_ensure_script(char_script_slot(victim)), trig, loc);
 
     send_to_char(g, ch, "Trigger {:d} ({}) attached to {} [{:d}].\r\n",
                  tn, trig->name, char_get_sdesc(victim), char_get_mob_vnum(g, victim));
@@ -264,14 +386,8 @@ ACMD(do_attach)
       send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
-    /* have a valid obj, now get trigger */
-    rn = find_trigger(g, tn);
-    if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
-      send_to_char(g, ch, "That trigger does not exist.\r\n");
+    if (!(trig = attach_new(g, ch, object, tn, loc)))
       return;
-    }
-
-    add_trigger(g, dg_ensure_script(obj_script_slot(object)), trig, loc);
 
     send_to_char(g, ch, "Trigger {:d} ({}) attached to {} [{:d}].\r\n",
                  tn, trig->name,
@@ -296,16 +412,8 @@ ACMD(do_attach)
       send_to_char(g, ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
-    /* have a valid room, now get trigger */
-    rn = find_trigger(g, tn);
-    if ((rn == nullptr) || !(trig = read_trigger(g, rn))) {
-      send_to_char(g, ch, "That trigger does not exist.\r\n");
+    if (!(trig = attach_new(g, ch, room_of(g, rnum), tn, loc)))
       return;
-    }
-
-    room = room_of(g, rnum);
-
-    add_trigger(g, dg_ensure_script(room_script_slot(room)), trig, loc);
 
     send_to_char(g, ch, "Trigger {:d} ({}) attached to room {:d}.\r\n",
                  tn, trig->name, rnum);
@@ -323,62 +431,49 @@ ACMD(do_attach)
  *  you might need to check to see if all the triggers were removed after
  *  this function returns, in order to remove the script.
  */
-bool remove_trigger(GameWorld *g, struct script_data *sc, char *name)
+bool remove_trigger(GameWorld *g, struct script_data *sc, std::string_view name)
 {
-  trig_data *i, *j;
-  mob_vnum num = 0;
-  int string   = false, n;
-  char *cname;
-
   if (!sc)
     return false;
 
-  if ((cname = strstr(name, ".")) || (!isdigit(*name))) {
-    string = true;
-    if (cname) {
-      *cname = '\0';
-      num    = atoi(name);
-      name   = ++cname;
+  /* "N.name" is the Nth trigger by that name, and a plain name the first; a number is the trigger in that place or
+     with that vnum, whichever comes first (it was the place only, once) */
+  bool by_name   = false;
+  mob_vnum num   = 0;
+  size_t dot     = name.find('.');
+  std::string word(name);
+  if (dot != std::string_view::npos || name.empty() || !isdigit(static_cast<unsigned char>(name[0]))) {
+    by_name = true;
+    if (dot != std::string_view::npos) {
+      num  = atoi(std::string(name.substr(0, dot)).c_str());
+      word = name.substr(dot + 1);
     }
   } else
-    num = atoi(name);
+    num = atoi(word.c_str());
 
+  trig_data *i, *j;
+  int n;
   for (n = 0, j = nullptr, i = sc->trig_list; i; j = i, i = i->next) {
-    if (string) {
-      if (isname(name, i->name.c_str()))
-        if (++n >= num)
-          break;
-    }
-
-    /* this isn't clean... */
-    /* a numeric value will match if it's position OR vnum */
-    /* is found. originally the number was position-only */
-    else if (++n >= num)
-      break;
-    else if (i->index->vnum == num)
+    if (by_name) {
+      if (isname(word.c_str(), i->name.c_str()) && ++n >= num)
+        break;
+    } else if (++n >= num || i->index->vnum == num)
       break;
   }
-
-  if (i) {
-    if (j) {
-      j->next = i->next;
-      extract_trigger(g, i);
-    }
-
-    /* this was the first trigger */
-    else {
-      sc->trig_list = i->next;
-      extract_trigger(g, i);
-    }
-
-    /* update the script type bitvector */
-    sc->types = 0;
-    for (i = sc->trig_list; i; i = i->next)
-      sc->types |= i->trigger_type;
-
-    return true;
-  } else
+  if (!i)
     return false;
+
+  if (j)
+    j->next = i->next;
+  else
+    sc->trig_list = i->next;
+  extract_trigger(g, i);
+
+  /* update the script type bitvector */
+  sc->types = 0;
+  for (i = sc->trig_list; i; i = i->next)
+    sc->types |= i->trigger_type;
+  return true;
 }
 
 ACMD(do_detach)
@@ -411,16 +506,8 @@ ACMD(do_detach)
     }
     if (!room_get_script(room))
       send_to_char(g, ch, "This room does not have any triggers.\r\n");
-    else if (str_eq_nocase(arg2, "all")) {
-      extract_script(g, room);
-      send_to_char(g, ch, "All triggers removed from room.\r\n");
-    } else if (remove_trigger(g, room_get_script(room), arg2.data())) {
-      send_to_char(g, ch, "Trigger removed.\r\n");
-      if (!room_get_script(room)->trig_list) {
-        extract_script(g, room);
-      }
-    } else
-      send_to_char(g, ch, "That trigger was not found.\r\n");
+    else
+      detach_from(g, ch, room, &arg2, "room");
   }
 
   else {
@@ -491,18 +578,8 @@ ACMD(do_detach)
       else if (!can_edit_zone(g, ch, find_zone_by_thing(g, char_get_mob_vnum(g, victim)))) {
         send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
-      } else if (trigger && str_eq_nocase(*trigger, "all")) {
-        extract_script(g, victim);
-        send_to_char(g, ch, "All triggers removed from {}.\r\n", char_get_sdesc(victim));
-      }
-
-      else if (trigger && remove_trigger(g, char_get_script(victim), trigger->data())) {
-        send_to_char(g, ch, "Trigger removed.\r\n");
-        if (!char_get_script(victim)->trig_list) {
-          extract_script(g, victim);
-        }
       } else
-        send_to_char(g, ch, "That trigger was not found.\r\n");
+        detach_from(g, ch, victim, trigger, char_get_sdesc(victim));
     }
 
     else if (object) {
@@ -512,19 +589,9 @@ ACMD(do_detach)
       else if (!can_edit_zone(g, ch, find_zone_by_thing(g, obj_get_vnum(g, object)))) {
         send_to_char(g, ch, "You can only detach triggers in your own zone\r\n");
         return;
-      } else if (trigger && str_eq_nocase(*trigger, "all")) {
-        extract_script(g, object);
-        send_to_char(g, ch, "All triggers removed from {}.\r\n",
-                     obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object));
-      }
-
-      else if (trigger && remove_trigger(g, obj_get_script(object), trigger->data())) {
-        send_to_char(g, ch, "Trigger removed.\r\n");
-        if (!obj_get_script(object)->trig_list) {
-          extract_script(g, object);
-        }
       } else
-        send_to_char(g, ch, "That trigger was not found.\r\n");
+        detach_from(g, ch, object, trigger,
+                    obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object));
     }
   }
 }
@@ -606,6 +673,52 @@ ACMD(do_tstat)
     }
 
     do_stat_trigger(g, ch, rnum->proto);
+    send_to_char(g, ch, instances_text(g, rnum));
   } else
     send_to_char(g, ch, "Usage: tstat <vnum>\r\n");
+}
+
+/* tcheck: the triggers whose scripts do not compile, and so never run; or with a vnum, all of one's errors */
+ACMD(do_tcheck)
+{
+  std::string_view rest = argument;
+  std::string arg       = take_word(rest);
+
+  if (!arg.empty()) {
+    const index_data *rnum = find_trigger(g, parse_int(arg));
+    if (!rnum) {
+      send_to_char(g, ch, "That vnum does not exist.\r\n");
+      return;
+    }
+    const dg::program &prog = *rnum->proto->program;
+    if (prog.runs()) {
+      send_to_char(g, ch, "Trigger #{:d} compiles.\r\n", rnum->vnum);
+      return;
+    }
+    std::string out = str_format("Trigger #{:d} '{}' does not run:\r\n", rnum->vnum, rnum->proto->name);
+    for (const dg::diagnostic &e : prog.errors)
+      out += str_format("  line {:d}: {}\r\n", prog.lines[e.line].number, e.message);
+    send_to_char(g, ch, out);
+    return;
+  }
+
+  std::string out;
+  int broken = 0;
+  g->trig_index.visit([&](trig_vnum vnum, const index_data *rnum) {
+    const dg::program &prog = *rnum->proto->program;
+    if (prog.runs())
+      return;
+    broken++;
+    const dg::diagnostic &first = prog.errors.front();
+    out += str_format("  #{:<6d} {:<30} line {:d}: {}{}\r\n", vnum, rnum->proto->name, prog.lines[first.line].number,
+                      first.message,
+                      prog.errors.size() > 1 ? str_format(" (and {:d} more)", prog.errors.size() - 1) : "");
+  });
+
+  if (!broken) {
+    send_to_char(g, ch, "Every trigger compiles.\r\n");
+    return;
+  }
+  send_to_char(g, ch, "{:d} of {:d} triggers do not compile, and never run:\r\n{}Use tcheck <vnum> for all of one's errors.\r\n",
+               broken, g->trig_index.size(), out);
 }

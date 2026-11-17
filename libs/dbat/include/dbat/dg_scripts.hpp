@@ -94,6 +94,7 @@ ACMD(do_attach);
 ACMD(do_detach);
 ACMD(do_vdelete);
 ACMD(do_tstat);
+ACMD(do_tcheck);
 
 ACMD(do_masound);
 ACMD(do_mkill);

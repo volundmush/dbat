@@ -287,3 +287,14 @@ const dg::line *dg::run_state::next_line() const
   }
   return nullptr;
 }
+
+const dg::line *dg::run_state::opened_at(const frame &f) const
+{
+  if (!f.of)
+    return nullptr;
+  if (const auto *i = std::get_if<dg::if_node>(&f.of->what))
+    for (const dg::if_node::branch &b : i->branches)
+      if (&b.body == f.body)
+        return &prog->lines[b.line];
+  return &prog->lines[first_line(*f.of)];
+}

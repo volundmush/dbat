@@ -1872,6 +1872,84 @@ static void check_trigger_argument_can_be_cleared(void)
   th_shutdown(g);
 }
 
+/* Saving a trigger in trigedit gives its live copies the new script for their next runs, while a run that waits
+ * finishes on the script it started; tstat shows the copies and where each run is, and tcheck the triggers that don't
+ * compile. Saving used to cancel the waiting run, with its variables. */
+static void check_trigger_hot_reload(void)
+{
+  GameWorld *g          = th_boot();
+  struct char_data *ch  = th_player(g, "Builder", ADMLVL_IMPL);
+  struct char_data *mob = read_mobile(g, 300);
+  char_to_room(g, mob, char_get_in_room(ch));
+
+  find_trigger(g, 312)->proto->program =
+      dg::lex("set word old\nwhile 1\n  wait 1\n  %echo% the %word% script\n  break\ndone", "* none");
+  trig_data *trig = read_trigger(g, find_trigger(g, 312));
+  add_trigger(g, dg_ensure_script(char_script_slot(mob)), trig, -1);
+  script_driver(g, mob, trig, TRIG_NEW);
+  CHECK(trig->wait_event != nullptr);
+
+  th_take_output(g, ch);
+  th_type(g, ch, "tstat 312");
+  CHECK(strstr(th_output(ch), "Live instances: 2") != nullptr); /* and the one critter2 has from its prototype */
+  CHECK(strstr(th_output(ch), str_format("#{:d} on mob 'a training dummy' #300", trig->id).c_str()) != nullptr);
+  CHECK(strstr(th_output(ch), ": waiting, 1 pulse left") != nullptr);
+  CHECK(strstr(th_output(ch), "at line 4: %echo% the %word% script") != nullptr);
+  CHECK(strstr(th_output(ch), "inside while at line 2") != nullptr);
+
+  th_type(g, ch, "trigedit 312");
+  th_type(g, ch, "6");
+  th_type(g, ch, "/c");
+  th_type(g, ch, "%echo% the new script");
+  th_type(g, ch, "/s");
+  th_type(g, ch, "q");
+  th_type(g, ch, "y");
+  CHECK(trig->wait_event != nullptr && trig->run.prog != trig->program);
+  CHECK(trig->program == find_trigger(g, 312)->proto->program);
+  th_take_output(g, ch);
+  th_type(g, ch, "tstat 312");
+  CHECK(strstr(th_output(ch), "on the script as it was before it was last saved") != nullptr);
+
+  th_take_output(g, ch);
+  th_pulses(g, 5 * PASSES_PER_SEC);
+  CHECK(strstr(th_output(ch), "The old script") != nullptr);
+  CHECK(!trig->run.running() && !trig->run.prog);
+  th_take_output(g, ch);
+  script_driver(g, mob, trig, TRIG_NEW);
+  CHECK(strstr(th_output(ch), "The new script") != nullptr);
+
+  th_take_output(g, ch);
+  th_type(g, ch, "tcheck");
+  CHECK(strstr(th_output(ch), "Every trigger compiles.") != nullptr);
+  th_type(g, ch, "trigedit 312");
+  th_type(g, ch, "6");
+  th_type(g, ch, "/c");
+  th_type(g, ch, "if 1");
+  th_type(g, ch, "/s");
+  th_type(g, ch, "q");
+  th_take_output(g, ch);
+  th_type(g, ch, "y");
+  CHECK(strstr(th_output(ch), "Error: line 1: 'if' never closed") != nullptr);
+  th_take_output(g, ch);
+  th_type(g, ch, "tcheck");
+  CHECK(strstr(th_output(ch), "1 of ") != nullptr);
+  CHECK(strstr(th_output(ch), "line 1: 'if' never closed") != nullptr);
+  th_take_output(g, ch);
+  th_type(g, ch, "tcheck 312");
+  CHECK(strstr(th_output(ch), "does not run:\r\n  line 1: 'if' never closed") != nullptr);
+  th_take_output(g, ch);
+  th_type(g, ch, "tstat 312");
+  CHECK(strstr(th_output(ch), "It does not run: its script has errors.") != nullptr);
+  CHECK(strstr(th_output(ch), str_format("#{:d} on mob 'a training dummy'", trig->id).c_str()) != nullptr);
+  CHECK(strstr(th_output(ch), ": idle") != nullptr);
+
+  th_take_output(g, ch);
+  th_type(g, ch, "detach dummy 312");
+  CHECK(strstr(th_output(ch), "Trigger removed.") != nullptr);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
 static void check_mob_given_armor_with_no_wear_slot(void)
 {
   GameWorld *g = th_boot();
@@ -2196,6 +2274,7 @@ static const struct {
     {"letter_reaches_its_reader",                   check_letter_reaches_its_reader                  },
     {"board_post_saves_and_aborts",                 check_board_post_saves_and_aborts                },
     {"trigger_argument_can_be_cleared",             check_trigger_argument_can_be_cleared            },
+    {"trigger_hot_reload",                          check_trigger_hot_reload                         },
     {"new_prototypes_leave_other_editors_alone",    check_new_prototypes_leave_other_editors_alone   },
     {"worn_container_that_cannot_go_back_on",       check_worn_container_that_cannot_go_back_on      },
     {"long_words_in_ban_file",                      check_long_words_in_ban_file                     },

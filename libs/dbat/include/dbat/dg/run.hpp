@@ -39,6 +39,8 @@ struct run_state {
   }
   /* The line the run carries on at, or null at the end of the script */
   const line *next_line() const;
+  /* The line that opened f's block: its if, elseif, else, while or switch, or null for the script's own body */
+  const line *opened_at(const frame &f) const;
 };
 
 } // namespace dg
