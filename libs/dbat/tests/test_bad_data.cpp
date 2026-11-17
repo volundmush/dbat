@@ -2192,7 +2192,7 @@ static void exit_in_a_direction_that_does_not_exist(void)
 /* There are only NUM_OF_DIRS exits: the direction was written past the end of them. */
 static void check_exit_in_a_direction_that_does_not_exist(void)
 {
-  CHECK(boot_is_refused(exit_in_a_direction_that_does_not_exist, "SYSERR: Format error in room #300: there is no direction D300"));
+  CHECK(boot_is_refused(exit_in_a_direction_that_does_not_exist, "SYSERR: world/wld/3.wld:6: room #300: there is no direction D300"));
 }
 
 static void zone_command_with_a_space_before_it(void)
@@ -2226,11 +2226,16 @@ static const struct damaged_file {
     {"world/zon/3.zon", "300 399 5 2 0 0 0 0 0 0\n", "300 399 5\n", "SYSERR: world/zon/3.zon:5: zone #3: expected 10 numbers and flags"},
     {"world/zon/3.zon", "@Version: 2\n", "@Version: x\n", "SYSERR: world/zon/3.zon:1: expected \"@Version: <number>\", got '@Version: x'"},
     {"world/obj/index", "3.obj\n", "3.obj\nmissing.obj\n", "SYSERR: world/obj/missing.obj: can't be opened, and world/obj/index lists it"},
-    {"world/wld/3.wld", "#301\n", "#300\n", "SYSERR: room #300 is defined twice."},
+    {"world/wld/3.wld", "#301\n", "#300\n", "SYSERR: world/wld/3.wld:19: room #300 is defined twice"},
     {"world/zon/3.zon", "\nS\n$\n", "\n", "SYSERR: world/zon/3.zon:71: zone #3: the file ends before the 'S' that ends its commands"},
     {"world/trg/3.trg", "2 g 100\n", "2\n", "SYSERR: world/trg/3.trg:3: trigger #300: expected its attach type and flags, got '2'"},
     {"world/trg/3.trg", "#301\n", "301\n", "SYSERR: world/trg/3.trg:7: expected a #<vnum>, or the '$' that ends the file, after trg #300; got '301'"},
     {"world/trg/3.trg", "#301\n", "#x\n", "SYSERR: world/trg/3.trg:7: expected a number after the '#', after trg #300"},
+    /* the old 128-bit conversion and the exits without DCs are gone: those lines are now refused */
+    {"world/wld/3.wld", "3 0 0 0 0 0\n", "3 0 0\n", "SYSERR: world/wld/3.wld:5: room #300: expected its zone, 4 flags and its sector, got '3 0 0'"},
+    {"world/wld/3.wld", "0 0 301 0 0 0 0 0 0 0 0\n", "0 0 301 20 20 0 0\n", "SYSERR: world/wld/3.wld:9: room #300, exit D0: expected 11 numbers"},
+    {"world/wld/3.wld", "0 0 303 0 0 0 0 0 0 0 0\nS\n", "0 0 303 0 0 0 0 0 0 0 0\nQ\n", "SYSERR: world/wld/3.wld:18: room #300: expected D (an exit), E (an extra description) or S (the end), got 'Q'"},
+    {"world/wld/3.wld", "#300\n", "#-5\n", "SYSERR: world/wld/3.wld:1: room #-5 is outside of any zone"},
     /* quirk: a string missing its ~ takes in the next one, and the error is found on a later line */
     {"world/obj/3.obj", "A wooden chest sits here.~\n", "A wooden chest sits here.\n",
      "SYSERR: Format error in first numeric line (expecting 13 args, got 0), object #300"},

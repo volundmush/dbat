@@ -15,6 +15,9 @@ io::loaded<void> boot_index(GameWorld *g, int mode);
 /* One zone file; the zone is added to g->zones */
 io::loaded<void> read_zone_file(GameWorld *g, io::text_reader &in);
 
+/* One room file; its rooms are added to g->rooms */
+io::loaded<void> read_room_file(GameWorld *g, io::text_reader &in);
+
 /* One trigger file; its triggers are added to g->trig_index */
 io::loaded<void> read_trigger_file(GameWorld *g, io::text_reader &in);
 

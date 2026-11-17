@@ -24,6 +24,7 @@
 #include "dbat/dg_event.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/fileop.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/room_utils.hpp"
@@ -94,18 +95,23 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg)
 /* for mobs and rooms: */
 void dg_read_trigger(GameWorld *g, FILE *fp, owner_ptr proto)
 {
-  int type = owner_type(proto);
   char line[READ_SIZE];
-  char junk[8];
-  trig_vnum vnum;
-  struct index_data *rnum;
-  int count;
-  room_data *room;
 
   get_line(fp, line);
-  count = sscanf(line, "%7s %d", junk, &vnum);
+  dg_attach_proto_trigger(g, line, proto);
+}
 
-  if (count != 2) {
+void dg_attach_proto_trigger(GameWorld *g, std::string_view line, owner_ptr proto)
+{
+  int type = owner_type(proto);
+  std::string junk;
+  trig_vnum vnum = 0;
+  struct index_data *rnum;
+  room_data *room;
+
+  io::fields f(line);
+  f.word(junk, 7) && f.number(vnum);
+  if (f.count() != 2) {
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: Error assigning trigger! - Line was\n  {}", line);
     return;

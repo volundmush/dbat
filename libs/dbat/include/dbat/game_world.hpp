@@ -172,8 +172,6 @@ struct GameWorld {
   int extractions_pending{};
 
   /* Progress of the world file parsers and the zone clock */
-  room_vnum parse_room_index{};
-  struct zone_data *parse_room_zone{};
   mob_vnum parse_mob_index{};
   obj_vnum parse_obj_index{};
   int zone_update_timer{};

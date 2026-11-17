@@ -247,6 +247,8 @@ void dg_log_uid_stats(GameWorld *g);
 trig_data *read_trigger(GameWorld *g, struct index_data *nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
 void dg_read_trigger(GameWorld *g, FILE *fp, owner_ptr proto);
+/* A prototype's "T <vnum>" line, as dg_read_trigger() reads it from a file: the trigger goes on its script list */
+void dg_attach_proto_trigger(GameWorld *g, std::string_view line, owner_ptr proto);
 void dg_obj_trigger(GameWorld *g, char *line, struct obj_data *obj);
 void assign_triggers(GameWorld *g, owner_ptr i);
 
