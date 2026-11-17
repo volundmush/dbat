@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # build-tree.sh <tree-dir> <out-dir> [extra cflags...]
-# Compiles the server in <tree-dir> (a checkout containing libs/ and apps/) plus tools/roundtrip.cpp into
+# Compiles the server in <tree-dir> (a checkout containing libs/ and apps/) plus tools/roundtrip.cpp (and
+# tools/statedump.cpp, where the tree has one) into
 # <out-dir>/dbat, with objects in <out-dir>/obj. Used by verify.sh, objdiff.sh and deadcode.sh.
 set -euo pipefail
 tree=$(cd "$1" && pwd) out=$2; shift 2
@@ -14,6 +15,7 @@ cflags=(-std=$std -g -w -DPATH_MAX=4096 -fmacro-prefix-map="$tree/=" -fmacro-pre
 # The helper calls server functions, so it must match the tree being built.
 roundtrip="$tree/tools/roundtrip.$ext"
 [ -f "$roundtrip" ] || roundtrip="$here/roundtrip.cpp"
+statedump="$tree/tools/statedump.$ext"
 # At most JOBS compilers at once (default 4): one per file at once ran the machine out of memory
 jobs=${JOBS:-4} running=0 fail=0
 while IFS= read -r f; do
@@ -21,7 +23,7 @@ while IFS= read -r f; do
   $cc "${cflags[@]}" -c "$f" -o "$obj" &
   running=$((running + 1))
   if [ $running -ge "$jobs" ]; then wait -n || fail=1; running=$((running - 1)); fi
-done < <(find "$tree/libs/dbat/src" -name "*.$ext"; echo "$tree/apps/server/src/main.$ext"; echo "$roundtrip")
+done < <(find "$tree/libs/dbat/src" -name "*.$ext"; echo "$tree/apps/server/src/main.$ext"; echo "$roundtrip"; [ -f "$statedump" ] && echo "$statedump")
 while [ $running -gt 0 ]; do wait -n || fail=1; running=$((running - 1)); done
 [ $fail -eq 0 ] || { echo "build-tree: compile failed in $tree" >&2; exit 1; }
 $cc -o "$out/dbat" "$out"/obj/*.o -lm -lcrypt ${LDFLAGS_EXTRA:-}

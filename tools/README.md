@@ -4,7 +4,7 @@ Developer checks for refactoring the server. None of this is part of the server 
 
 | script | what it checks |
 |---|---|
-| `verify.sh [ref]` | Behaviour against a git ref (default `HEAD`). Both builds must give the same `dbat -c` result and log, the same boot log, and byte-identical saved data after loading and re-saving every player and every zone's mobs. The RNG is seeded with a fixed value, because mob stats are rolled at boot. Each build runs on its own copy of `data/`. |
+| `verify.sh [--data DIR] [ref]` | Behaviour against a git ref (default `HEAD`), on `data/` or on DIR. Both builds must give the same `dbat -c` result and log, the same boot log, the same `statedump.txt` (what the boot loaded, from `statedump.cpp`), and byte-identical saved data after `roundtrip.cpp` loads and re-saves every player (with script variables, aliases and rent file), every account, every zone's world files, and the etc files the game writes (config, time, auction, assemblies, the player index, boards and houses). The RNG is seeded with a fixed value, because mob stats are rolled at boot, and the clock is pinned, because saves stamp the time. Each build runs on its own copy of the data. `VERIFY_SHARED_ROUNDTRIP=1` builds the ref with this tree's `roundtrip.cpp`; `VERIFY_KEEP=1` keeps the work directory. |
 | `objdiff.sh [ref]` | Generated code against a git ref. Each function's normalised disassembly is compared, matched by name across files, so moving functions between files doesn't count as a change. Use it to show a refactor changed no code. Making a function or variable `static` counts as no change, but the optimisations that `static` enables (a never-written variable folded to a constant, for example) still show up; inspect those with `OBJDIFF_SHOW=fn1,fn2`, which prints the normalised diff. For deliberate renames, set `OBJDIFF_RENAME="old=new,..."`. |
 | `deadcode.sh` | Lists functions that `main()` can never reach, via the linker's `--gc-sections` report. Code disabled by a constant condition (`if (false && ...)`) is invisible to it, so the compiler is the final check when you delete something. |
 | `check-headers.sh` | Every header under `libs/dbat/include` compiles on its own. |
@@ -18,6 +18,7 @@ Developer checks for refactoring the server. None of this is part of the server 
 
 - **Shared pieces:**
   - `build-tree.sh` is the shared builder.
+  - `statedump.cpp` holds `state_dump()`, which `verify.sh` calls from gdb before `roundtrip_dump()`. A ref without one is built with this tree's copy.
   - `roundtrip.cpp` holds `roundtrip_dump()`, which `verify.sh` calls from gdb. For each tree, `verify.sh` checks whether it passes `g` to this and to `circle_srandom()`, so a ref from before `GameWorld` still works. It calls server functions, so each tree is built with its own copy when it has one.
 - **Where they work:** the scripts build in `$TMPDIR` and need `gcc`, `gdb`, `objdump` and `python3`.
 - **Typical loop:** make a change, run `tools/objdiff.sh` if it should be code-neutral, and run `tools/verify.sh` before committing.

@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
-# verify.sh [git-ref]   (default: HEAD)
+# verify.sh [--data DIR] [git-ref]   (default: data/ and HEAD)
 # Behavioural regression check of the working tree against <git-ref>:
 #   1. `dbat -c` syntax-check boot: exit status and log must match.
 #   2. Full boot under gdb with the RNG pinned (mob stats are rolled from the seed), then
 #      roundtrip_dump(): every player is saved, and every zone's mobs, objects, rooms, shops, guilds, triggers
-#      and zone file; the data/ trees must match. VERIFY_SHARED_ROUNDTRIP=1 builds the ref with this roundtrip.cpp.
+#      and zone file, and the rest the game saves (see roundtrip.cpp); the data/ trees must match. Before that,
+#      state_dump() writes what the boot loaded to statedump.txt (see statedump.cpp), which must match too.
+#      VERIFY_SHARED_ROUNDTRIP=1 builds the ref with this roundtrip.cpp. A ref without a statedump.cpp is built with
+#      this one.
 # Each build runs on its own copy of data/; the real data/ is never written.
 set -euo pipefail
+datadir=
+if [ "${1:-}" = --data ]; then datadir=$(cd "$2" && pwd); shift 2; fi
 ref=${1:-HEAD}
 root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 here="$root/tools"
@@ -17,6 +22,8 @@ git -C "$root" archive "$ref" libs apps tools | tar -x -C "$work/ref-src"
 # VERIFY_SHARED_ROUNDTRIP=1: build the ref with this tree's roundtrip.cpp, so that both save the same files. Only
 # while the save functions it calls are the same on both sides.
 [ "${VERIFY_SHARED_ROUNDTRIP:-0}" = 1 ] && cp "$here/roundtrip.cpp" "$work/ref-src/tools/roundtrip.cpp"
+[ -f "$work/ref-src/tools/statedump.cpp" ] || cp "$here/statedump.cpp" "$work/ref-src/tools/statedump.cpp"
+datadir=${datadir:-$root/data}
 # One build at a time (each runs JOBS compilers, see build-tree.sh), to keep within memory
 "$here/build-tree.sh" "$work/ref-src" "$work/ref" -O2
 "$here/build-tree.sh" "$root" "$work/new" -O2
@@ -30,6 +37,7 @@ break boot_db
 run -d data @PORT@ > boot.log 2>&1
 call (void)@SRANDOM@
 finish
+call (long)state_dump(g)
 call (long)@ROUNDTRIP@
 kill
 quit
@@ -46,7 +54,8 @@ for side in ref new; do
   (
     set +e
     mkdir -p "$work/$side/check" "$work/$side/run"
-    cp -a "$root/data" "$work/$side/check/" && cp -a "$root/data" "$work/$side/run/"
+    mkdir -p "$work/$side/check/data" "$work/$side/run/data"
+    cp -a "$datadir/." "$work/$side/check/data/" && cp -a "$datadir/." "$work/$side/run/data/"
     cd "$work/$side/check" && timeout 600 "$work/$side/dbat" -c -d data 9999 > check.log 2>&1; echo $? > check.rc
     cd "$work/$side/run" && timeout 1200 gdb -q -batch -x "$work/$side/rt.gdb" "$work/$side/dbat" > gdb.out 2>&1
   ) &
@@ -60,6 +69,9 @@ for side in ref new; do echo "  $side: -c exit $(cat "$work/$side/check/check.rc
 diff <(norm "$work/ref/check/check.log") <(norm "$work/new/check/check.log") > "$work/check.diff" || { echo "FAIL: -c logs differ ($work/check.diff)"; status=1; }
 diff <(norm "$work/ref/run/boot.log") <(norm "$work/new/run/boot.log") > "$work/boot.diff" || { echo "FAIL: boot logs differ ($work/boot.diff)"; status=1; }
 # *.bak: atomic saves of player data keep the replaced version beside the file (dbat/atomicfile.hpp)
-diff -r -x '*.bak' "$work/ref/run/data" "$work/new/run/data" > "$work/data.diff" || { echo "FAIL: saved data differs ($work/data.diff)"; status=1; }
-[ $status -eq 0 ] && { echo "verify: OK"; rm -rf "$work"; } || echo "verify: differences kept in $work"
+diff "$work/ref/run/data/statedump.txt" "$work/new/run/data/statedump.txt" > "$work/state.diff" || { echo "FAIL: loaded state differs ($work/state.diff)"; status=1; }
+diff -r -x '*.bak' -x statedump.txt "$work/ref/run/data" "$work/new/run/data" > "$work/data.diff" || { echo "FAIL: saved data differs ($work/data.diff)"; status=1; }
+[ $status -eq 0 ] && echo "verify: OK" || echo "verify: differences kept in $work"
+# VERIFY_KEEP=1 keeps the work directory even when nothing differs
+[ $status -eq 0 ] && [ "${VERIFY_KEEP:-0}" != 1 ] && rm -rf "$work"
 exit $status

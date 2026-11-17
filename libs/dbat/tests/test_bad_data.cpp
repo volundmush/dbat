@@ -2180,6 +2180,7 @@ static bool boot_is_refused(void (*prepare)(void), const char *reason)
   if (said.find("runtime error") != std::string::npos || said.find("ERROR: AddressSanitizer") != std::string::npos ||
       said.find("Assertion") != std::string::npos)
     file_print(stdout, "{}", said);
+  if (getenv("SHOW_REFUSAL")) file_print(stdout, "[status {:d}] {}\n", WIFEXITED(status) ? WEXITSTATUS(status) : -1, said.substr(said.size() > 1500 ? said.size() - 1500 : 0));
   return WIFEXITED(status) && WEXITSTATUS(status) == 1 && said.find(reason) != std::string::npos;
 }
 
@@ -2204,6 +2205,47 @@ static void zone_command_with_a_space_before_it(void)
 static void check_zone_command_with_a_space_before_it(void)
 {
   CHECK(boot_is_refused(zone_command_with_a_space_before_it, "SYSERR: Zone command count mismatch"));
+}
+
+/* Damaged files of each kind the boot reads, each with what the game says when it refuses to start. These fix
+ * today's messages, so that a change to them shows; the loaders are being rewritten (see the file I/O plan). */
+static const struct damaged_file {
+  const char *path, *from, *to;
+  const char *reason;
+} damaged_files[] = {
+    {"world/obj/3.obj", "15 0 0 0 0 a 0 0 0 0 0 0 0\n", "15 0 0 0 0\n",
+     "SYSERR: Format error in first numeric line (expecting 13 args, got 5), object #300"},
+    {"world/obj/3.obj", "#301\nsword blade~", "#300\nsword blade~", "SYSERR: object #300 is defined twice."},
+    {"world/obj/3.obj", "3 50 0 0\nZ\n4\n#302", "3 50 0 0\nA\nx\n#302", "SYSERR: Format error in 'A' field, object #301"},
+    {"world/obj/3.obj", "3 50 0 0\nZ\n4\n#302", "3 50 0 0\nQ\n#302", "SYSERR: Format error in (Q): object #301"},
+    {"world/mob/3.mob", "d 0 0 0 0 0 0 0 0 E\n", "d 0 0 0 0 0 0 0 0 X\n", "SYSERR: Unsupported mob type 'X' in mob #300"},
+    {"world/mob/3.mob", "#301\nkeeper", "#300\nkeeper", "SYSERR: mobile #300 is defined twice."},
+    {"world/mob/3.mob", "d 0 0 0 0 0 0 0 0 E\n", "d 0 E\n",
+     "SYSERR: Format error after string section of mob #300"},
+    {"world/zon/3.zon", "300 399 5 2 0 0 0 0 0 0\n", "300 399 5\n", "SYSERR: Format error in 10-constant line of world/zon/3.zon"},
+    {"world/zon/3.zon", "@Version: 2\n", "@Version: x\n", "SYSERR: Format error in world/zon/3.zon (version)"},
+    {"world/obj/index", "3.obj\n", "3.obj\nmissing.obj\n", "SYSERR: world/obj/missing.obj: No such file or directory"},
+    {"world/wld/3.wld", "#301\n", "#300\n", "SYSERR: room #300 is defined twice."},
+    /* quirk: a string missing its ~ takes in the next one, and the error is found on a later line */
+    {"world/obj/3.obj", "A wooden chest sits here.~\n", "A wooden chest sits here.\n",
+     "SYSERR: Format error in first numeric line (expecting 13 args, got 0), object #300"},
+};
+static const damaged_file *damaging;
+
+static void damage_a_file(void)
+{
+  replace_in_file(damaging->path, damaging->from, damaging->to);
+}
+
+static void check_damaged_files_refuse_the_boot(void)
+{
+  for (const damaged_file &d : damaged_files) {
+    damaging = &d;
+    if (!boot_is_refused(damage_a_file, d.reason)) {
+      file_print(stdout, "not refused as expected: {} ('{}'), for '{}'\n", d.path, d.to, d.reason);
+      CHECK(false);
+    }
+  }
 }
 
 static const struct {
@@ -2295,6 +2337,7 @@ static const struct {
     {"long_name_in_auction_file",                   check_long_name_in_auction_file                  },
     {"exit_in_a_direction_that_does_not_exist",     check_exit_in_a_direction_that_does_not_exist    },
     {"zone_command_with_a_space_before_it",         check_zone_command_with_a_space_before_it        },
+    {"damaged_files_refuse_the_boot",               check_damaged_files_refuse_the_boot              },
 };
 
 int main(int argc, char **argv)
