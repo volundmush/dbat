@@ -18,6 +18,7 @@
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/db.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/help.hpp"
@@ -1158,60 +1159,13 @@ static char fread_letter(FILE *fp)
 
 bitvector_t asciiflag_conv(char *flag)
 {
-  bitvector_t flags = 0;
-  int is_num = true, warned = false;
-  char *p;
-
-  for (p = flag; *p; p++) {
-    unsigned char c = (unsigned char)*p;
-
-    if (islower(c))
-      flags |= 1U << (c - 'a');
-    else if (c >= 'A' && c <= 'F')
-      flags |= 1U << (26 + (c - 'A'));
-    else if (isupper(c) && !warned) {
-      /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
-      mud_log("SYSERR: asciiflag_conv: ignoring out-of-range flag letter '{:c}' in \"{}\".", as_char(c), flag);
-      warned = true;
-    }
-
-    if (!(isdigit(c) || (c == '-')))
-      is_num = false;
-  }
-
-  if (is_num)
-    flags = atol(flag);
-
-  return (flags);
+  return io::ascii_flags(flag, 0, "asciiflag_conv");
 }
 
+/* the old affect flags, whose letters start at bit 1 */
 static bitvector_t asciiflag_conv_aff(char *flag)
 {
-  bitvector_t flags = 0;
-  int is_num = true, warned = false;
-  char *p;
-
-  for (p = flag; *p; p++) {
-    unsigned char c = (unsigned char)*p;
-
-    if (islower(c))
-      flags |= 1U << (1 + (c - 'a'));
-    else if (c >= 'A' && c <= 'F')
-      flags |= 1U << (26 + (c - 'A'));
-    else if (isupper(c) && !warned) {
-      /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
-      mud_log("SYSERR: asciiflag_conv_aff: ignoring out-of-range flag letter '{:c}' in \"{}\".", as_char(c), flag);
-      warned = true;
-    }
-
-    if (!(isdigit(c) || (c == '-')))
-      is_num = false;
-  }
-
-  if (is_num)
-    flags = atol(flag);
-
-  return (flags);
+  return io::ascii_flags(flag, 1, "asciiflag_conv_aff");
 }
 /* load the rooms */
 static void parse_room(GameWorld *g, FILE *fl, room_vnum virtual_nr)
@@ -3928,39 +3882,22 @@ bool is_empty(GameWorld *g, struct zone_data *zone_nr)
 ************************************************************************/
 
 /* read and allocate space for a '~'-terminated string from a given file */
+/* Reads a string ending in '~' by io::add_string_line()'s rules; null for an empty one */
 char *fread_string(FILE *fl, const char *error)
 {
-  char *line = nullptr, *text = nullptr;
-  size_t cap = 0, len = 0, n;
-  FILE *out = open_memstream(&text, &len);
-  bool done = false;
+  std::string raw, text;
 
-  while (!done) {
-    if (getline(&line, &cap, fl) < 0) {
+  do {
+    if (!io::read_raw_line(fl, raw)) {
       mud_log("SYSERR: fread_string: format error at string (pos {:d}): {} at or near {}",
               ftell(fl), feof(fl) ? "EOF" : ferror(fl) ? "read error"
                                                        : "unknown error",
               error);
       exit(1);
     }
-    /* A line ending in '~' ends the string; any other line gets an "\r\n". Only trailing ~'s count -- Welcor */
-    n = strcspn(line, "\r\n");
-    if (n > 0 && line[n - 1] == '~') {
-      fwrite(line, 1, n - 1, out);
-      done = true;
-    } else {
-      fwrite(line, 1, n, out);
-      fputs("\r\n", out);
-    }
-  }
-  free(line);
-  fclose(out);
+  } while (!io::add_string_line(text, raw));
 
-  if (!len) {
-    free(text);
-    return nullptr;
-  }
-  return text;
+  return text.empty() ? nullptr : strdup(text.c_str());
 }
 
 /* release memory allocated for a char struct */

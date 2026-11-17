@@ -83,7 +83,7 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
 
   if (file_print(fp, "{:d} {:d} {:d} {:d} {:d} {:d}\r\n", rentcode, (long long)game_now(g), cost,
                  char_get_gold(ch), char_get_bank_gold(ch), 0) < 0) {
-    Crash_log_file_error("fprintf", af.tmp, __FILE__, __LINE__);
+    Crash_log_file_error("fprintf", af.tmp.c_str(), __FILE__, __LINE__);
     atomic_abort(&af);
     return false;
   }
@@ -98,7 +98,7 @@ static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentco
       }
       if (ferror(fp)) {
         Crash_restore_weight(g, char_get_equipment(ch, j));
-        Crash_log_file_error("write", af.tmp, __FILE__, __LINE__);
+        Crash_log_file_error("write", af.tmp.c_str(), __FILE__, __LINE__);
         atomic_abort(&af);
         return false;
       }

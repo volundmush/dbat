@@ -54,6 +54,11 @@ target_compile_options(dbat_test_game_world PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_game_world PRIVATE dbat::dbat)
 add_test(NAME game_world COMMAND dbat_test_game_world)
 
+add_executable(dbat_test_io tests/test_io.cpp)
+target_compile_options(dbat_test_io PRIVATE ${DBAT_CXX_FLAGS})
+target_link_libraries(dbat_test_io PRIVATE dbat::dbat)
+add_test(NAME io COMMAND dbat_test_io)
+
 add_library(dbat_test_harness STATIC tests/harness.cpp)
 target_compile_options(dbat_test_harness PRIVATE ${DBAT_CXX_FLAGS})
 target_compile_definitions(dbat_test_harness PRIVATE DBAT_TEST_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/world")

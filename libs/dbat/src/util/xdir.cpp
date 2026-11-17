@@ -1,59 +1,41 @@
-#include <cstdlib>
-#include <cerrno>
-
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
+/*
+ * Directory listings, on io::list_directory(): see dbat/xdir.hpp.
+ */
+#include <algorithm>
 
 #include "dbat/xdir.hpp"
-#include "dbat/stringutils.hpp"
+#include "dbat/io/paths.hpp"
 
 int xdir_scan(const char *dir_name, struct xap_dir *xapdirp)
 {
-  xapdirp->total   = scandir(dir_name, &(xapdirp->namelist), nullptr, alphasort);
+  std::optional<std::vector<std::string>> names = io::list_directory(dir_name);
+
   xapdirp->current = 0;
-
-  return (xapdirp->total);
+  xapdirp->names.clear();
+  if (!names) {
+    xapdirp->total = -1;
+    return -1;
+  }
+  /* as scandir() listed it, with "." and "..", which sort first */
+  xapdirp->names = {".", ".."};
+  xapdirp->names.insert(xapdirp->names.end(), names->begin(), names->end());
+  std::ranges::sort(xapdirp->names);
+  xapdirp->total = static_cast<int>(xapdirp->names.size());
+  return xapdirp->total;
 }
 
-char *xdir_get_name(struct xap_dir *xd, int i)
+const char *xdir_get_name(struct xap_dir *xd, int i)
 {
-  return xd->namelist[i]->d_name;
+  return xd->names[static_cast<size_t>(i)].c_str();
 }
 
-/* Frees the name list from a successful xdir_scan(). Safe after a failed scan. */
 void xdir_cleanup(struct xap_dir *xd)
 {
-  if (xd->total < 0)
-    return; /* scandir() failed; namelist was never allocated */
-  for (int i = 0; i < xd->total; i++)
-    free(xd->namelist[i]); /* scandir() allocated these with malloc */
-  free(xd->namelist);
-  xd->namelist = nullptr;
-  xd->total    = 0;
+  xd->names.clear();
+  xd->total = 0;
 }
 
-/* Like `mkdir -p`: creates each missing directory along path. Returns 1 if path ends up a directory, else 0. */
 bool insure_directory(const char *path)
 {
-  char *dir = strdup(path);
-  struct stat st;
-
-  for (char *p = dir;; p++) {
-    if ((*p != '/' && *p != '\0') || (p == dir && *p == '/'))
-      continue;
-    char saved = *p;
-    *p         = '\0';
-    if (mkdir(dir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) < 0 && errno != EEXIST) {
-      free(dir);
-      return false;
-    }
-    if (saved == '\0')
-      break;
-    *p = saved;
-  }
-
-  int ok = !stat(dir, &st) && S_ISDIR(st.st_mode);
-  free(dir);
-  return ok;
+  return io::ensure_directory(path);
 }

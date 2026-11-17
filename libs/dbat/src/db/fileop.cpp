@@ -1,9 +1,14 @@
 #include <cerrno>
 #include <cstdlib>
 
-#include <linux/limits.h>
+#include <algorithm>
+#include <cstring>
+#include <optional>
+#include <string>
 
 #include "dbat/fileop.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -20,149 +25,48 @@
  * with '*' are considered to be comments.
  *
  * Returns the number of lines advanced in the file. Buffer given must
- * be at least READ_SIZE (256) characters large.  */
+ * be at least READ_SIZE (256) characters large. The rules are io::is_skipped_line() and io::line_text(). */
 int get_line(FILE *fl, char *buf)
 {
-  char *line = nullptr;
-  size_t cap = 0;
-  int lines  = 0;
+  std::string raw;
+  int lines = 0;
 
   do {
-    if (getline(&line, &cap, fl) < 0) {
-      free(line);
-      return (0);
-    }
+    if (!io::read_raw_line(fl, raw))
+      return 0;
     lines++;
-  } while (*line == '*' || *line == '\n' || *line == '\r');
+  } while (io::is_skipped_line(raw));
 
-  /* Last line of file doesn't always have a \n, but it should. A longer line is cut short. */
-  line[strcspn(line, "\r\n")] = '\0';
-  strlcpy(buf, line, READ_SIZE);
-  free(line);
-  return (lines);
+  std::string_view text = io::line_text(raw);
+  memcpy(buf, text.data(), text.size());
+  buf[text.size()] = '\0';
+  return lines;
 }
 
+/* The file of kind mode for the player or account orig_name, as io::player_file() gives it, cut to fbufsize. */
 bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name)
 {
-  const char *prefix, *middle, *suffix;
-  char name[PATH_MAX], *ptr;
-
   if (orig_name == nullptr || *orig_name == '\0' || filename == nullptr) {
     mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), {} or {}.",
             as_pointer(orig_name), as_pointer(filename));
     return false;
   }
 
-  switch (mode) {
-    case CRASH_FILE:
-      prefix = LIB_PLROBJS;
-      suffix = SUF_OBJS;
-      break;
-    case ALIAS_FILE:
-      prefix = LIB_PLRALIAS;
-      suffix = SUF_ALIAS;
-      break;
-    case ETEXT_FILE:
-      prefix = LIB_PLRTEXT;
-      suffix = SUF_TEXT;
-      break;
-    case SCRIPT_VARS_FILE:
-      prefix = LIB_PLRVARS;
-      suffix = SUF_MEM;
-      break;
-    case NEW_OBJ_FILES:
-      prefix = LIB_PLROBJS;
-      suffix = SUF_OBJS;
-      break;
-    case PLR_FILE:
-      prefix = LIB_PLRFILES;
-      suffix = SUF_PLR;
-      break;
-    case PET_FILE:
-      prefix = LIB_PLRFILES;
-      suffix = SUF_PET;
-      break;
-    case USER_FILE:
-      prefix = LIB_USER;
-      suffix = SUF_USER;
-      break;
-    case INTRO_FILE:
-      prefix = LIB_INTRO;
-      suffix = SUF_INTRO;
-      break;
-    case SENSE_FILE:
-      prefix = LIB_SENSE;
-      suffix = SUF_SENSE;
-      break;
-    case CUSTOME_FILE:
-      prefix = LIB_USER;
-      suffix = SUF_CUSTOM;
-      break;
-    default:
-      return false;
+  std::optional<std::string> path = io::player_file(mode, orig_name);
+  if (!path)
+    return false;
+  if (fbufsize) { /* quirk: a name too long for the buffer is cut short, as snprintf() cut it */
+    size_t n = std::min(path->size(), fbufsize - 1);
+    memcpy(filename, path->data(), n);
+    filename[n] = '\0';
   }
-
-  strlcpy(name, orig_name, sizeof(name));
-  for (ptr = name; *ptr; ptr++)
-    *ptr = tolower(*ptr);
-
-  switch (tolower(*name)) {
-    case 'a':
-    case 'b':
-    case 'c':
-    case 'd':
-    case 'e':
-      middle = "A-E";
-      break;
-    case 'f':
-    case 'g':
-    case 'h':
-    case 'i':
-    case 'j':
-      middle = "F-J";
-      break;
-    case 'k':
-    case 'l':
-    case 'm':
-    case 'n':
-    case 'o':
-      middle = "K-O";
-      break;
-    case 'p':
-    case 'q':
-    case 'r':
-    case 's':
-    case 't':
-      middle = "P-T";
-      break;
-    case 'u':
-    case 'v':
-    case 'w':
-    case 'x':
-    case 'y':
-    case 'z':
-      middle = "U-Z";
-      break;
-    default:
-      middle = "ZZZ";
-      break;
-  }
-
-  snprintf(filename, fbufsize, "%s%s" SLASH "%s.%s", prefix, middle, name, suffix);
   return true;
 }
 
 /* the "touch" command, essentially. */
 int touch(const char *path)
 {
-  FILE *fl;
-
-  if (!(fl = fopen(path, "a"))) {
-    mud_log("SYSERR: {}: {}", path, strerror(errno));
-    return (-1);
-  }
-  fclose(fl);
-  return (0);
+  return io::touch(path) ? 0 : -1;
 }
 
 void topLoad(GameWorld *g)
