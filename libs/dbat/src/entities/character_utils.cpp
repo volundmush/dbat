@@ -36,7 +36,8 @@
 #include "dbat/consts/races.hpp"
 #include "dbat/consts/shadowdragons.hpp"
 #include "dbat/local_limits.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/io/writer.hpp"
 #include "dbat/game_world.hpp"
 
 static void char_adm_set(struct char_data *ch, int flag, bool on);
@@ -2104,30 +2105,19 @@ const char *disp_align(struct char_data *ch)
 /* This creates a player's sense memory file for the first time. */
 void senseCreate(struct char_data *ch)
 {
-  struct atomic_file af;
-  char fname[40];
-  FILE *fl;
-  /* Write Sense File */
-  if (!get_filename(fname, sizeof(fname), SENSE_FILE, char_get_name(ch)))
+  std::optional<std::string> path = player_path(SENSE_FILE, char_get_name(ch));
+  if (!path)
     return;
-
-  if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log("ERROR: could not save sense memory of, {}, to filename, {}.", char_get_name(ch), fname);
-    return;
-  }
-
-  file_print(fl, "0\n");
-
-  atomic_commit(&af);
-  return;
+  io::text_writer out(*path, true);
+  out.write("0\n");
+  if (!out.commit())
+    mud_log("ERROR: could not save sense memory of, {}, to filename, {}.", char_get_name(ch), *path);
 }
 
 int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  char fname[40], line[256];
   int known       = false;
   mob_vnum idnums = -1337;
-  FILE *fl;
 
   /* Read Sense File */
   if (vict == nullptr) {
@@ -2135,20 +2125,21 @@ int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict
     return 0;
   }
 
-  if (!get_filename(fname, sizeof(fname), SENSE_FILE, char_get_name(ch))) {
+  std::optional<std::string> path = player_path(SENSE_FILE, char_get_name(ch));
+  if (!path) {
     senseCreate(ch);
-  }
-  if (!(fl = fopen(fname, "r"))) {
     return 2;
   }
-  if (vict == ch) {
-    fclose(fl);
+  io::loaded<io::text_reader> file = io::text_reader::open(*path);
+  if (!file)
+    return 2;
+  if (vict == ch)
     return 0;
-  }
 
-  while (!feof(fl)) {
-    get_line(fl, line);
-    sscanf(line, "%d\n", &idnums);
+  io::line_cursor lines(*file);
+  while (!lines.eof()) {
+    lines.next();
+    sscanf(lines.line().c_str(), "%d\n", &idnums);
     if (char_is_npc(vict)) {
       if (idnums == char_get_mob_vnum(g, vict)) {
         known = true;
@@ -2159,7 +2150,6 @@ int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict
       }
     }
   }
-  fclose(fl);
 
   if (known == true)
     return 1;
@@ -2170,61 +2160,51 @@ int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict
 /* This writes a player's sense memory to file. */
 void sense_memory_write(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  struct atomic_file af;
-  FILE *file;
-  char fname[40], line[256];
-  int idnums[500] = {0};
-  FILE *fl;
-  int count = 0, x = 0, id_sample;
+  int id_sample = 0;
 
   /* Read Sense File */
-  if (!get_filename(fname, sizeof(fname), SENSE_FILE, char_get_name(ch))) {
+  std::optional<std::string> path = player_path(SENSE_FILE, char_get_name(ch));
+  if (!path) {
     senseCreate(ch);
-  }
-  if (!(file = fopen(fname, "r"))) {
     return;
   }
-  while (!feof(file) || count < 498) {
-    get_line(file, line);
-    sscanf(line, "%d\n", &id_sample);
-    idnums[count] = id_sample;
-    count++;
+  io::loaded<io::text_reader> file = io::text_reader::open(*path);
+  if (!file)
+    return;
+  /* At least 498 ids are read, the last one standing in for those past the end (quirk); a file of more lines
+     than that is read whole, where the old fixed list ran past its end */
+  std::vector<int> idnums;
+  io::line_cursor lines(*file);
+  while (!lines.eof() || idnums.size() < 498) {
+    lines.next();
+    sscanf(lines.line().c_str(), "%d\n", &id_sample);
+    idnums.push_back(id_sample);
   }
-  fclose(file);
 
   /* Write Sense File */
-
-  if (!get_filename(fname, sizeof(fname), SENSE_FILE, char_get_name(ch)))
-    return;
-
-  if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log("ERROR: could not save sense memory file, {}, to filename, {}.", char_get_name(ch), fname);
-    return;
-  }
-
-  while (x < count) {
+  io::text_writer out(*path, true);
+  for (size_t x = 0; x < idnums.size(); x++) {
     if (x == 0 || idnums[x - 1] != idnums[x]) {
       if (!char_is_npc(vict)) {
         if (idnums[x] != char_get_id(vict)) {
-          file_print(fl, "{:d}\n", idnums[x]);
+          out.print("{:d}\n", idnums[x]);
         }
       } else {
         if (idnums[x] != char_get_mob_vnum(g, vict)) {
-          file_print(fl, "{:d}\n", idnums[x]);
+          out.print("{:d}\n", idnums[x]);
         }
       }
     }
-    x++;
   }
 
   if (!char_is_npc(vict)) {
-    file_print(fl, "{:d}\n", char_get_id(vict));
+    out.print("{:d}\n", char_get_id(vict));
   } else {
-    file_print(fl, "{:d}\n", char_get_mob_vnum(g, vict));
+    out.print("{:d}\n", char_get_mob_vnum(g, vict));
   }
 
-  atomic_commit(&af);
-  return;
+  if (!out.commit())
+    mud_log("ERROR: could not save sense memory file, {}, to filename, {}.", char_get_name(ch), *path);
 }
 
 /* Will they manage to pursue a fleeing enemy? */
@@ -3764,10 +3744,9 @@ int roll_stats(GameWorld *g, struct char_data *ch, int type, int bonus)
 /* For Getting An Intro Name */
 const char *get_i_name(struct char_data *ch, struct char_data *vict)
 {
-  char fname[40], filler[50], scrap[100], line[256];
+  char filler[50] = "", scrap[100] = "";
   static char name[50];
   int known = false;
-  FILE *fl;
 
   /* Read Introduction File */
   if (vict == nullptr) {
@@ -3782,22 +3761,22 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict)
     return ("");
   }
 
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch))) {
+  std::optional<std::string> path = player_path(INTRO_FILE, char_get_name(ch));
+  if (!path)
     return (juggleRaceName(vict, true));
-  }
-  if (!(fl = fopen(fname, "r"))) {
+  io::loaded<io::text_reader> file = io::text_reader::open(*path);
+  if (!file)
     return (juggleRaceName(vict, true));
-  }
 
-  while (!feof(fl)) {
-    get_line(fl, line);
-    sscanf(line, "%49s %99s\n", filler, scrap);
+  io::line_cursor lines(*file);
+  while (!lines.eof()) {
+    lines.next();
+    sscanf(lines.line().c_str(), "%49s %99s\n", filler, scrap);
     if (!strcasecmp(char_get_name(vict), filler)) {
       snprintf(name, sizeof(name), "%s", scrap);
       known = true;
     }
   }
-  fclose(fl);
 
   if (known == true)
     return (name);

@@ -14,7 +14,6 @@
 #include <ranges>
 #include <vector>
 
-#include <unistd.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"
@@ -61,7 +60,6 @@
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/spell_parser.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/world_audit.hpp"
 #include "dbat/game_world.hpp"
 
@@ -607,8 +605,8 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
     char buf1[64], cmbuf2[64];
     time_t created = char_get_time_created(k), logon = char_get_time_logon(k);
 
-    strlcpy(buf1, asctime(localtime(&created)), sizeof(buf1));
-    strlcpy(cmbuf2, asctime(localtime(&logon)), sizeof(cmbuf2));
+    copy_cstr(buf1, asctime(localtime(&created)), sizeof(buf1));
+    copy_cstr(cmbuf2, asctime(localtime(&logon)), sizeof(cmbuf2));
     buf1[10] = cmbuf2[10] = '\0';
 
     send_to_char(g, ch, "Created: [{}], Last Logon: [{}], Played [{:d}h {:d}m], Age [{:d}]\r\n",

@@ -31,6 +31,10 @@ bool replace_with(std::FILE *fl, const std::string &tmp, const std::string &path
 /* Replaces path with text, as above */
 bool replace_file(const std::string &path, std::string_view text, bool backup);
 
+/* Adds text to the end of the file at path, making the file if there isn't one; false, with errno saying why, if it
+   couldn't be opened or written */
+bool append_file(const std::string &path, std::string_view text);
+
 /* A file built up in memory and then written all at once */
 class text_writer {
 public:

@@ -262,14 +262,14 @@ bool context_help(GameWorld *g, struct descriptor_data *d, char *arg)
 
   if (context != NOTHING && context < NUM_CONTEXTS && *g->context_help_list[context]) {
     if (*g->context_help_list[context] == FIND_HELP_CHAR) {
-      strlcpy(actbuf, g->context_help_list[context] + 1, sizeof(actbuf));
+      copy_cstr(actbuf, g->context_help_list[context] + 1, sizeof(actbuf));
       do_help(g, d->character, actbuf, 0, 0);
     } else {
       write_to_output(g, d, "\r\n{}\r\n>  ", g->context_help_list[context]);
     }
     return true;
   }
-  strlcpy(actbuf, tmp, sizeof(actbuf));
+  copy_cstr(actbuf, tmp, sizeof(actbuf));
   do_help(g, d->character, actbuf, 0, 0);
   return true;
 }

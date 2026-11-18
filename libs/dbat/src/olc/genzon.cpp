@@ -10,7 +10,8 @@
 #include "dbat/fileop.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/dg_scripts.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/io/writer.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
@@ -29,10 +30,7 @@ struct zone_data *find_zone_by_thing(GameWorld *g, room_vnum vznum)
 
 struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
 {
-  struct atomic_file af;
-  FILE *fp;
   struct zone_data *zone;
-  std::string buf;
 
   if (vzone_num < 0) {
     *error = "You can't make negative zones.\r\n";
@@ -65,116 +63,30 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
     }
 
   /*
-   * Create the zone file.
+   * The zone's world files, empty but for the zone and its first room.
    */
-  buf = str_format("{}{:d}.zon", ZON_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
-    *error = "Could not write zone file.\r\n";
-    return nullptr;
-  }
-  file_print(fp, "#{:d}\nNew Zone~\n{:d} 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
-  if (!atomic_commit(&af)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
-    *error = "Could not write zone file.\r\n";
-    return nullptr;
-  }
-
-  /*
-   * Create the room file.
-   */
-  buf = str_format("{}{:d}.wld", WLD_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
-    *error = "Could not write world file.\r\n";
-    return nullptr;
-  }
-  file_print(fp, "#{:d}\nThe Beginning~\nNot much here.\n~\n{:d} 0 0\nS\n$\n", bottom, vzone_num);
-  if (!atomic_commit(&af)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
-    *error = "Could not write world file.\r\n";
-    return nullptr;
-  }
-
-  /*
-   * Create the mobile file.
-   */
-  buf = str_format("{}{:d}.mob", MOB_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
-    *error = "Could not write mobile file.\r\n";
-    return nullptr;
-  }
-  file_print(fp, "$\n");
-  if (!atomic_commit(&af)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
-    *error = "Could not write mobile file.\r\n";
-    return nullptr;
-  }
-
-  /*  
-   * Create the object file.
-   */
-  buf = str_format("{}{:d}.obj", OBJ_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
-    *error = "Could not write object file.\r\n";
-    return nullptr;
-  }
-  file_print(fp, "$\n");
-  if (!atomic_commit(&af)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
-    *error = "Could not write object file.\r\n";
-    return nullptr;
-  }
-
-  /*
-   * Create the shop file.
-   */
-  buf = str_format("{}{:d}.shp", SHP_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
-    *error = "Could not write shop file.\r\n";
-    return nullptr;
-  }
-  file_print(fp, "$~\n");
-  if (!atomic_commit(&af)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
-    *error = "Could not write shop file.\r\n";
-    return nullptr;
-  }
-
-  /*
-   * Create the trigger file.
-   */
-  buf = str_format("{}{:d}.trg", TRG_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
-    *error = "Could not write trigger file.\r\n";
-    return nullptr;
-  }
-  file_print(fp, "$~\n");
-  if (!atomic_commit(&af)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
-    *error = "Could not write trigger file.\r\n";
-    return nullptr;
-  }
-
-  /*
-   * Create Gld file .
-   */
-  buf = str_format("{}/{:d}.gld", GLD_PREFIX, vzone_num);
-  if (!(fp = atomic_open(&af, buf.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
-    *error = "Could not write guild file.\r\n";
-    return nullptr;
-  }
-  file_print(fp, "$~\n");
-  if (!atomic_commit(&af)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
-    *error = "Could not write guild file.\r\n";
-    return nullptr;
-  }
+  struct new_file {
+    std::string path, text;
+    const char *log, *error;
+  };
+  const new_file files[] = {
+    {str_format("{}{:d}.zon", ZON_PREFIX, vzone_num), str_format("#{:d}\nNew Zone~\n{:d} 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99),
+     "SYSERR: OLC: Can't write new zone file.", "Could not write zone file.\r\n"},
+    {str_format("{}{:d}.wld", WLD_PREFIX, vzone_num), str_format("#{:d}\nThe Beginning~\nNot much here.\n~\n{:d} 0 0\nS\n$\n", bottom, vzone_num),
+     "SYSERR: OLC: Can't write new world file.", "Could not write world file.\r\n"},
+    {str_format("{}{:d}.mob", MOB_PREFIX, vzone_num), "$\n", "SYSERR: OLC: Can't write new mob file.", "Could not write mobile file.\r\n"},
+    {str_format("{}{:d}.obj", OBJ_PREFIX, vzone_num), "$\n", "SYSERR: OLC: Can't write new obj file.", "Could not write object file.\r\n"},
+    {str_format("{}{:d}.shp", SHP_PREFIX, vzone_num), "$~\n", "SYSERR: OLC: Can't write new shop file.", "Could not write shop file.\r\n"},
+    {str_format("{}{:d}.trg", TRG_PREFIX, vzone_num), "$~\n", "SYSERR: OLC: Can't write new trigger file", "Could not write trigger file.\r\n"},
+    /* quirk: a '/' more than the others */
+    {str_format("{}/{:d}.gld", GLD_PREFIX, vzone_num), "$~\n", "SYSERR: OLC: Can't write new guild file", "Could not write guild file.\r\n"},
+  };
+  for (const new_file &file : files)
+    if (!io::replace_file(file.path, file.text, false)) {
+      mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "{}", file.log);
+      *error = file.error;
+      return nullptr;
+    }
 
   /*
    * Update index files.
@@ -220,13 +132,10 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
 
 void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
 {
-  struct atomic_file index_af;
-  FILE *newfile, *oldfile;
   std::string old_name;
   const char *prefix;
   zone_vnum num;
   int found = false;
-  char buf[MAX_STRING_LENGTH];
   char buf1[MAX_STRING_LENGTH];
 
   switch (*type) {
@@ -260,43 +169,40 @@ void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
 
   old_name = str_format("{}/index", prefix);
 
-  if (!(oldfile = fopen(old_name.c_str(), "r"))) {
+  io::loaded<io::text_reader> oldfile = io::text_reader::open(old_name);
+  if (!oldfile) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open {}.", old_name);
     return;
   }
-  if (!(newfile = atomic_open(&index_af, old_name.c_str(), false))) {
-    mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open {}.", index_af.tmp);
-    fclose(oldfile);
-    return;
-  }
+  io::text_writer newfile(old_name);
 
   /*
    * Index contents must be in order: search through the old file for the
    * right place, insert the new file, then copy the rest over. 
    */
   snprintf(buf1, sizeof(buf1), "%d.%s", znum, type);
-  while (get_line(oldfile, buf)) {
-    if (*buf == '$') {
+  while (std::optional<std::string_view> line = oldfile->line()) {
+    std::string buf(*line);
+    if (buf[0] == '$') {
       /*
        * The following used to add a blank line, thanks to Brian Taylor for the fix... (Mythran)
        */
-      file_print(newfile, "{}", (!found ? strncat(buf1, "\n$\n", sizeof(buf1) - 1) : "$\n"));
+      newfile.print("{}", (!found ? strncat(buf1, "\n$\n", sizeof(buf1) - 1) : "$\n"));
       break;
     }
     if (!found) {
-      sscanf(buf, "%d", &num);
+      sscanf(buf.c_str(), "%d", &num);
       if (num == znum) {
         found = true;
       } else if (num > znum) {
         found = true;
-        file_print(newfile, "{}\n", buf1);
+        newfile.print("{}\n", buf1);
       }
     }
-    file_print(newfile, "{}\n", buf);
+    newfile.print("{}\n", buf);
   }
 
-  fclose(oldfile);
-  atomic_commit(&index_af); /* out with the old, in with the new */
+  newfile.commit(); /* out with the old, in with the new */
 }
 
 /*-------------------------------------------------------------------*/

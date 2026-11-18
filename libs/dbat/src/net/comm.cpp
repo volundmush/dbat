@@ -58,6 +58,7 @@
 #include "dbat/object_systems.hpp"
 #include "dbat/extract.hpp"
 #include "dbat/fileop.hpp"
+#include "dbat/io/paths.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/genolc.hpp"
@@ -247,7 +248,7 @@ static void copyover_recover(GameWorld *g)
 void init_game(GameWorld *g, uint16_t cmport)
 {
   /* We don't want to restart if we crash before we get up. */
-  touch(KILLSCRIPT_FILE);
+  io::touch(KILLSCRIPT_FILE);
 
   circle_srandom(g, game_now(g));
 

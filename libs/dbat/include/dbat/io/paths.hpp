@@ -2,6 +2,7 @@
 /*
  * Where the game's files are, and the few things done to directories, on std::filesystem.
  */
+#include <expected>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -28,4 +29,6 @@ bool touch(const std::filesystem::path &path);
    like */
 std::string why_unreadable(const std::filesystem::path &path);
 
+/* How many bytes the file at path holds, or why that can't be told, as strerror() words it */
+std::expected<long long, std::string> file_size(const std::filesystem::path &path);
 } // namespace io

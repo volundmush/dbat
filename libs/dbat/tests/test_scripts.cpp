@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <vector>
 
+#include "dbat/io/reader.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/consts/triggers.hpp"
 #include "dbat/db.hpp"
@@ -116,7 +117,7 @@ namespace {
         char flags[128] = "";
         if (sscanf(lines[j].c_str(), "%d %127s %d", &t.attach, flags, &t.narg) < 2)
           continue;
-        t.types = asciiflag_conv(flags);
+        t.types = io::ascii_flags(flags, 0, "asciiflag_conv");
         std::string args;
         for (j++; j < lines.size(); j++) { /* the argument list */
           size_t tilde = lines[j].find('~');
@@ -247,10 +248,9 @@ namespace {
 
   void remove_player_files(const char *name)
   {
-    char path[256];
     for (int mode : {PLR_FILE, SCRIPT_VARS_FILE, NEW_OBJ_FILES, ALIAS_FILE})
-      if (get_filename(path, sizeof(path), mode, name))
-        unlink(path);
+      if (std::optional<std::string> path = player_path(mode, name))
+        unlink(path->c_str());
   }
 
   /* --synthetic: Actor comes into the game with saved script variables, which it reads */
@@ -259,12 +259,12 @@ namespace {
   struct char_data *player_in(GameWorld *g, const char *name, int admlevel, room_vnum room)
   {
     remove_player_files(name);
-    char path[256];
-    if (saved_variables && !strcmp(name, "Actor") && get_filename(path, sizeof(path), SCRIPT_VARS_FILE, name)) {
-      std::string dir = path;
+    std::optional<std::string> path = player_path(SCRIPT_VARS_FILE, name);
+    if (saved_variables && !strcmp(name, "Actor") && path) {
+      std::string dir = *path;
       if (system(str_format("mkdir -p '{}'", dir.substr(0, dir.rfind('/'))).c_str()) != 0)
         th_exit(2);
-      if (FILE *fl = fopen(path, "w")) {
+      if (FILE *fl = fopen(path->c_str(), "w")) {
         fputs("savedvar 0 a saved value\nincontext 5 in context five\n\nbare\n", fl);
         fclose(fl);
       }
@@ -542,10 +542,9 @@ namespace {
 
     struct char_data *people[] = {s.actor, s.witness};
     th_write_case_record(g, people, 2, false);
-    char path[256];
     save_char_vars(g, s.actor);
-    if (get_filename(path, sizeof(path), SCRIPT_VARS_FILE, "Actor"))
-      file_print(stdout, "== Actor's variables:\n{}", th_file_text(path));
+    if (std::optional<std::string> path = player_path(SCRIPT_VARS_FILE, "Actor"))
+      file_print(stdout, "== Actor's variables:\n{}", th_file_text(path->c_str()));
     file_print(stdout, "== owner: {}\n", owner_here(g, s) ? "here" : "gone");
     std::string line;
     for (char_data *who : room_people(g, s.room))

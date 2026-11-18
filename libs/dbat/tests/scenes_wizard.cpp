@@ -32,9 +32,10 @@ namespace {
   /* ... with a lockout file of these names, or of count made up ones, or none */
   void lockout_file(std::initializer_list<const char *> names, int count = 0)
   {
-    char fname[40];
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout"))
+    std::optional<std::string> path = player_path(INTRO_FILE, "lockout");
+    if (!path)
       return;
+    const char *fname = path->c_str();
     remove(fname);
     if (names.size() == 0 && count < 0)
       return;

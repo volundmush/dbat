@@ -26,7 +26,6 @@
 #include "dbat/act.wizard.hpp"
 #include "dbat/modify.hpp"
 #include "dbat/genzon.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"

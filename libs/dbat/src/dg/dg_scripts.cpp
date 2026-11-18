@@ -12,7 +12,6 @@
 #include <climits>
 #include <cstdlib>
 
-#include <unistd.h>
 
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
@@ -21,7 +20,6 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/fileop.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"

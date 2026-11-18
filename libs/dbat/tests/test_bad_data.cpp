@@ -46,6 +46,9 @@
 #include "dbat/mail.hpp"
 #include "dbat/house.hpp"
 #include "dbat/object_records.hpp"
+#include "dbat/fileop.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/stringutils.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/utils.hpp"
@@ -650,7 +653,7 @@ static void check_house_records_past_their_limits(void)
   text += "#350\n3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\nXAP\n~\n~\n.~\n~\n2 0 0 0 0 0 0 0\n$~\n";
 
   io::text_reader in("house/test.house", text);
-  record_lines lines(in);
+  io::line_cursor lines(in);
   lines.next();
   bag_rows rows(g, nullptr, room);
   int count = 0;
@@ -674,6 +677,48 @@ static void check_rent_file_cut_short_in_a_string(void)
   save_path("plrobjs", "new", "tester", path, sizeof(path));
   write_file(path, "1\n#350\n0\nXAP\nkeywords~\na short descr");
   CHECK(Crash_load(g, ch) == 0); /* the file is refused, and the game goes on */
+  th_shutdown(g);
+}
+
+/* A sense memory of more than 500 ids: the old writer read them into a list of 500, and ran past its end */
+static void check_long_sense_memory(void)
+{
+  GameWorld *g                    = th_boot();
+  struct char_data *ch            = th_player(g, "Tester", ADMLVL_NONE);
+  struct char_data *vict          = th_player(g, "Victim", ADMLVL_NONE);
+  std::optional<std::string> path = player_path(SENSE_FILE, "Tester");
+  std::string ids;
+
+  for (int i = 1; i <= 600; i++)
+    ids += str_format("{:d}\n", 100000 + i);
+  io::ensure_directory(std::filesystem::path(*path).parent_path());
+  write_file(path->c_str(), ids.c_str());
+  sense_memory_write(g, ch, vict);
+  CHECK(read_whole(path->c_str()) == ids + str_format("{:d}\n", char_get_id(vict)));
+  CHECK(read_sense_memory(g, ch, vict) == 1);
+  th_shutdown(g);
+}
+
+/* An account listed twice at the bottom of the toplist's last section, moving up: the old list of places was read
+   one past its end */
+static void check_toplist_name_listed_twice_at_the_bottom(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  const char *user     = char_get_user(ch);
+  const char *rpp[5]   = {"Aaa", user, "Ccc", "Bbb", user}; /* the last section, places 20 to 24 */
+
+  CHECK(user != nullptr && char_get_desc(ch) != nullptr);
+  for (int x = 0; x < 25; x++) {
+    free(g->topname[x]);
+    g->topname[x]  = strdup(x < 20 ? "Nobody" : rpp[x - 20]);
+    g->toppoint[x] = x < 20 ? 2000000000000LL : 100 - x;
+  }
+  g->TOPLOADED = true;
+  char_set_trp(ch, 150);
+  topWrite(g, ch);
+  CHECK(str_eq_nocase(g->topname[20], user) && g->toppoint[20] == 150);
+  CHECK(!strcmp(g->topname[21], "Aaa") && !strcmp(g->topname[24], "") && g->toppoint[24] == 0);
   th_shutdown(g);
 }
 
@@ -2676,6 +2721,8 @@ static const struct {
     {"hcontrol_that_cant_be_read_refuses_the_boot", check_hcontrol_that_cant_be_read_refuses_the_boot},
     {"house_records_past_their_limits",             check_house_records_past_their_limits            },
     {"rent_file_cut_short_in_a_string",             check_rent_file_cut_short_in_a_string            },
+    {"long_sense_memory",                           check_long_sense_memory                          },
+    {"toplist_name_listed_twice_at_the_bottom",     check_toplist_name_listed_twice_at_the_bottom    },
     {"damaged_files_refuse_the_boot",               check_damaged_files_refuse_the_boot              },
 };
 

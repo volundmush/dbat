@@ -17,31 +17,12 @@ struct GameWorld;
 struct char_data;
 struct obj_data;
 
-/* A file's lines as get_line() read them for the rent and house readers: at the end of the file the line is left as
-   it was, and eof() says the end has been met, as feof() did */
-class record_lines {
-public:
-  explicit record_lines(io::text_reader &in) : in_(in) {}
-  /* The next line; false, leaving line() as it was, at the end of the file */
-  bool next();
-  const std::string &line() const { return line_; }
-  bool eof() const { return eof_; }
-  /* A '~' string, as fread_string() read one */
-  io::loaded<std::string> string(std::string_view what);
-  io::load_error fail(std::string message) const { return in_.fail(std::move(message)); }
-
-private:
-  io::text_reader &in_;
-  std::string line_{};
-  bool eof_{};
-};
-
 /* The readers' differences, kept as they were */
 enum class record_kind { rent, house };
 
 /* Reads object records from the line in.line() on, to the end of the file, calling loaded(obj, where it was) for
    each object made; an error if a record is broken partway through */
-io::loaded<void> read_object_records(GameWorld *g, record_lines &in, record_kind kind,
+io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_kind kind,
                                      const std::function<void(obj_data *, int)> &loaded);
 
 /* Writes obj's record, where it is being kept at locate: a wear position + 1, 0 for carried or in the room, or -n

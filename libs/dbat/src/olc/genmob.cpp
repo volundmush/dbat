@@ -17,7 +17,6 @@
 #include "dbat/dg_olc.hpp"
 #include "dbat/class.hpp"
 #include "dbat/affect.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 

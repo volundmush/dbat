@@ -10,7 +10,6 @@
 #include <climits>
 #include <cstdlib>
 
-#include <unistd.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"
@@ -57,7 +56,7 @@
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/spell_parser.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/game_world.hpp"
 
 namespace {
@@ -65,29 +64,31 @@ namespace {
 
   /* The entry numbered lookup in the news file, as shown: its heading, then its text with repeated lines left out.
    * Returns whether it was found. */
-  bool read_news_entry(FILE *fl, int lookup, std::string &buf)
+  bool read_news_entry(io::text_reader &file, int lookup, std::string &buf)
   {
-    char line[256], title[256] = "";
+    char title[256] = "";
+    io::line_cursor lines(file);
+    const std::string &line = lines.line();
     std::string lastline;
     int nr;
     bool found = false, done = false, first = true;
 
-    while (!feof(fl) && !done) {
-      get_line(fl, line);
-      if (*line != '#' || sscanf(line, "#%d", &nr) != 1 || nr != lookup)
+    while (!lines.eof() && !done) {
+      lines.next();
+      if (line[0] != '#' || sscanf(line.c_str(), "#%d", &nr) != 1 || nr != lookup)
         continue;
-      sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
+      sscanf(line.c_str(), "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
       buf   = str_format("@w--------------------------------------------------------------\n@cNum@W: @D(@G{:>3d}@D)                @cTitle@W: @g{:<50}@n\n", nr, title);
       found = true;
-      while (!feof(fl) && !done) {
-        get_line(fl, line);
-        if (*line == '#') {
+      while (!lines.eof() && !done) {
+        lines.next();
+        if (line[0] == '#') {
           done = true;
         } else if (first) {
           first = false;
           buf += str_format("{}\n@w--------------------------------------------------------------\n", line);
           lastline = line;
-        } else if (strcasecmp(line, lastline.c_str())) {
+        } else if (strcasecmp(line.c_str(), lastline.c_str())) {
           buf += str_format("{}\n", line);
           lastline = line;
         }
@@ -97,19 +98,21 @@ namespace {
   }
 
   /* The headings of the news file's entries; returns how many there are */
-  int list_news(FILE *fl, std::string &buf)
+  int list_news(io::text_reader &file, std::string &buf)
   {
-    char line[256], title[256] = "";
+    char title[256] = "";
+    io::line_cursor lines(file);
+    const std::string &line = lines.line();
     int nr, entries = 0;
 
-    while (!feof(fl)) {
-      get_line(fl, line);
-      if (*line != '#')
+    while (!lines.eof()) {
+      lines.next();
+      if (line[0] != '#')
         continue;
       entries++;
-      if (sscanf(line, "#%d", &nr) != 1)
+      if (sscanf(line.c_str(), "#%d", &nr) != 1)
         continue;
-      sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
+      sscanf(line.c_str(), "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
       if (buf.empty())
         buf = "@wNews Entries (Newest at the bottom, to read an entry use 'news (number)')\n";
       buf += str_format("@D[@cNum@W: @D(@G{:>3d}@D) @cTitle@W: @g{:<50}@D]@n\n", nr, title);
@@ -118,17 +121,18 @@ namespace {
   }
 
   /* The number the next news entry takes, or 0 if the file's numbering is broken */
-  int next_news_number(FILE *fl)
+  int next_news_number(io::text_reader &file)
   {
-    char line[256];
+    io::line_cursor lines(file);
+    const std::string &line = lines.line();
     int nr, entries = 0, lastentry = 0;
 
-    while (!feof(fl)) {
-      get_line(fl, line);
-      if (*line != '#')
+    while (!lines.eof()) {
+      lines.next();
+      if (line[0] != '#')
         continue;
       entries++;
-      if (sscanf(line, "#%d", &nr) == 1)
+      if (sscanf(line.c_str(), "#%d", &nr) == 1)
         lastentry = nr;
     }
     if (lastentry)
@@ -199,7 +203,7 @@ ACMD(do_news)
   }
 
   int lookup = parse_int(arg);
-  FILE *fl   = fopen(NEWS_FILE, "r");
+  io::loaded<io::text_reader> fl = io::text_reader::open(NEWS_FILE);
   if (!fl) {
     mud_log("SYSERR: opening news file for reading");
     return;
@@ -207,8 +211,7 @@ ACMD(do_news)
 
   std::string buf;
   if (lookup > 0) {
-    bool found = read_news_entry(fl, lookup, buf);
-    fclose(fl);
+    bool found = read_news_entry(*fl, lookup, buf);
     if (!found) {
       send_to_char(g, ch, "That news entry does not exist.\r\n");
       return;
@@ -219,12 +222,10 @@ ACMD(do_news)
     return;
   }
   if (!str_eq_nocase(arg, "list")) {
-    fclose(fl);
     send_to_char(g, ch, NEWS_SYNTAX);
     return;
   }
-  int entries = list_news(fl, buf);
-  fclose(fl);
+  int entries = list_news(*fl, buf);
   if (entries <= 0) {
     send_to_char(g, ch, "The news file is empty right now.\r\n");
     return;
@@ -253,13 +254,12 @@ ACMD(do_newsedit)
     return;
   }
 
-  FILE *fl = fopen(NEWS_FILE, "r");
+  io::loaded<io::text_reader> fl = io::text_reader::open(NEWS_FILE);
   if (!fl) {
     mud_log("SYSERR: Couldn't open news file for reading");
     return;
   }
-  int lookup = next_news_number(fl);
-  fclose(fl);
+  int lookup = next_news_number(*fl);
   if (!lookup) {
     send_to_imm(g, "ERROR: News file entries are disorganized. Report to Iovan for analysis.\r\n");
     return;

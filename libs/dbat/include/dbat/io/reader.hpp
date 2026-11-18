@@ -155,4 +155,24 @@ private:
   int newlines_{}; /* the line ends before pos_ */
 };
 
+/* A file's lines as the old get_line() loops read them, feof() and all. At the end of the file next() fails and
+   leaves line() as it was (quirk: a loop that tests eof() before reading goes round once more on the last line), and
+   eof() is true once the end has been met: after the last line if it has no line end, else on the read after it. */
+class line_cursor {
+public:
+  explicit line_cursor(text_reader &in) : in_(in) {}
+  /* The next line by get_line()'s rules; false, leaving line() as it was, at the end of the file */
+  bool next();
+  const std::string &line() const { return line_; }
+  bool eof() const { return eof_; }
+  /* A '~' string, as fread_string() read one */
+  loaded<std::string> string(std::string_view what);
+  load_error fail(std::string message) const { return in_.fail(std::move(message)); }
+
+private:
+  text_reader &in_;
+  std::string line_{};
+  bool eof_{};
+};
+
 } // namespace io

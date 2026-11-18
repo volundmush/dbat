@@ -156,7 +156,7 @@ long get_ptable_by_name(GameWorld *g, const char *name)
   int i;
 
   for (i = 0; i <= g->top_of_p_table; i++)
-    if (!strcasecmp(g->player_table[i].name, name))
+    if (str_eq_nocase(g->player_table[i].name, name))
       return (i);
 
   return (-1);
@@ -167,7 +167,7 @@ long get_id_by_name(GameWorld *g, const char *name)
   int i;
 
   for (i = 0; i <= g->top_of_p_table; i++)
-    if (!strcasecmp(g->player_table[i].name, name))
+    if (str_eq_nocase(g->player_table[i].name, name))
       return (g->player_table[i].id);
 
   return (-1);

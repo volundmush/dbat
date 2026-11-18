@@ -245,7 +245,7 @@ bool Crash_delete_crashfile(struct char_data *ch)
   std::optional<io::text_reader> file = open_rent_file(char_get_name(ch), "checking for crash file", 3);
   if (!file)
     return false;
-  record_lines in(*file);
+  io::line_cursor in(*file);
   in.next();
   if (read_rent_header(in.line(), 0).rentcode == RENT_CRASH)
     Crash_delete_file(char_get_name(ch));
@@ -257,7 +257,7 @@ static bool Crash_clean_file(GameWorld *g, char *name)
   std::optional<io::text_reader> file = open_rent_file(name, "OPENING OBJECT FILE", 4);
   if (!file)
     return false;
-  record_lines in(*file);
+  io::line_cursor in(*file);
   in.next();
   rent_header h = read_rent_header(in.line(), 0);
 
@@ -296,7 +296,7 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
   }
   send_to_char(g, ch, "{}\r\n", path);
 
-  record_lines in(*file);
+  io::line_cursor in(*file);
   in.next();
   switch (read_rent_header(in.line(), -1).rentcode) {
     case RENT_RENTED:
@@ -544,7 +544,7 @@ int Crash_load(GameWorld *g, struct char_data *ch)
 
 static bool Crash_load_file(GameWorld *g, struct char_data *ch, io::text_reader &file)
 {
-  record_lines in(file);
+  io::line_cursor in(file);
   in.next();
   int orig_rent_code = read_rent_header(in.line(), 0).rentcode;
 

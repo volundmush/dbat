@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <array>
 
-#include <sys/stat.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"

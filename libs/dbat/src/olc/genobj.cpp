@@ -15,7 +15,6 @@
 #include "dbat/utils.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/dg_olc.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/game_world.hpp"
 

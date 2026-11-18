@@ -19,6 +19,8 @@ struct gauntlet_mob {
 /* Reset functions */
 bool pre_reset(GameWorld *g, zone_vnum znum);
 void post_reset(zone_vnum znum);
+/* Logs a bad command in zone's reset table, cmd_no its index */
+void log_zone_error(GameWorld *g, struct zone_data *zone, int cmd_no, const char *message);
 
 /* Zone pre-reset functions */
 

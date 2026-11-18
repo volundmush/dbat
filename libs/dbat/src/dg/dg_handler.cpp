@@ -13,9 +13,8 @@
 *  $Revision: 1.0.14 $                                                    *
 ***************************************************************************/
 #include <cstdlib>
-#include <cerrno>
+#include <filesystem>
 
-#include <linux/limits.h>
 
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -144,11 +143,12 @@ void copy_proto_script(owner_ptr source, owner_ptr dest)
 
 void delete_variables(const char *charname)
 {
-  char filename[PATH_MAX];
-
-  if (!get_filename(filename, sizeof(filename), SCRIPT_VARS_FILE, charname))
+  std::optional<std::string> path = player_path(SCRIPT_VARS_FILE, charname);
+  if (!path)
     return;
 
-  if (remove(filename) < 0 && errno != ENOENT)
-    mud_log("SYSERR: deleting variable file {}: {}", filename, strerror(errno));
+  std::error_code ec;
+  std::filesystem::remove(*path, ec);
+  if (ec)
+    mud_log("SYSERR: deleting variable file {}: {}", *path, ec.message());
 }

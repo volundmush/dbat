@@ -33,6 +33,8 @@
 - A player file that ends partway through its description is refused, with the file and line in the log, rather than shutting the game down when the player logs in. [Volund]
 - When aedit can't write the socials file, the socials stay listed as unsaved, rather than the game shutting down. [Volund]
 - A help file line that starts with a NUL byte is read as an empty line, rather than writing before the reader's buffer. [Volund]
+- Sensing someone new when your sense memory already holds more than 500 people no longer writes past the end of the list it was read into, which could crash the game. [Volund]
+- Moving up the RPP top list when your account is listed twice in its bottom places no longer reads past the end of the list of places, which could crash the game; the last place is left empty. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]

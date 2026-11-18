@@ -21,7 +21,8 @@
 #include "dbat/consts/maximums.hpp"
 #include "dbat/players.hpp"
 #include "dbat/utils.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/io/writer.hpp"
 #include "dbat/db.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/interpreter.hpp"
@@ -143,7 +144,7 @@ ACMD(do_shutdown)
   mud_log("(GC) {} by {}.", mode->logged, char_get_name(ch));
   send_to_all(g, mode->announced);
   if (mode->touched)
-    touch(mode->touched);
+    io::touch(mode->touched);
   g->circle_shutdown = 1;
   if (mode->reboot)
     g->circle_reboot = mode->reboot;
@@ -233,11 +234,7 @@ static struct char_data *copyover_player(const struct descriptor_data *d)
 /* Who to bring back, and how. Returns false, having changed nothing, if it can't all be written down. */
 static bool write_copyover_file(GameWorld *g)
 {
-  struct atomic_file af;
-  FILE *fp = atomic_open(&af, COPYOVER_FILE, false);
-
-  if (!fp)
-    return false;
+  io::text_writer out(COPYOVER_FILE);
 
   for (descriptor_data *d : each_desc(g)) {
     struct char_data *player = copyover_player(d);
@@ -249,13 +246,13 @@ static bool write_copyover_file(GameWorld *g)
       room = char_get_in_room(player);
     else if (char_get_was_in_room(player) > 1)
       room = char_get_was_in_room(player);
-    file_print(fp, "{:d} {} {} {:d} {}\n", d->descriptor, char_get_name(player), *d->host ? d->host : "unknown", room,
+    out.print("{:d} {} {} {:d} {}\n", d->descriptor, char_get_name(player), *d->host ? d->host : "unknown", room,
                !d->acct.user.empty() ? d->acct.user.c_str() : "Empty");
   }
 
   /* After the end marker, so that an older server ignores it. What else outlives the process goes here. */
-  file_print(fp, "-1 restrict {:d}\n", g->circle_restrict);
-  return atomic_commit(&af);
+  out.print("-1 restrict {:d}\n", g->circle_restrict);
+  return out.commit();
 }
 
 /* Saves everyone in the game who has no connection to bring back: link-dead players. */

@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <span>
 
-#include <sys/stat.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"

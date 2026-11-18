@@ -2,7 +2,6 @@
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
 #include <algorithm>
 
-#include <sys/stat.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"

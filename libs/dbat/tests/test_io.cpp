@@ -177,18 +177,20 @@ static void check_lines(const std::string &text)
   }
   fclose(fl);
 
-  /* and so does the wrapper on FILE */
-  fl  = file_of(text);
+  /* and so does line_cursor, feof() and all: the line is left as it was at the end, and eof() is what feof() was */
   FILE *old = file_of(text);
-  char a[READ_SIZE], b[READ_SIZE];
+  io::text_reader again("test", text);
+  io::line_cursor cursor(again);
+  char b[READ_SIZE] = "";
   for (;;) {
-    int x = get_line(fl, a), y = old_get_line(old, b);
-    CHECK(x == y);
+    int y  = old_get_line(old, b);
+    bool x = cursor.next();
+    CHECK(x == (y > 0));
+    CHECK(cursor.line() == b);
+    CHECK(cursor.eof() == (feof(old) != 0));
     if (!x || !y)
       break;
-    CHECK(!strcmp(a, b));
   }
-  fclose(fl);
   fclose(old);
 }
 
@@ -418,8 +420,6 @@ static void check_player_files()
   CHECK(io::player_file(ALIAS_FILE, "1abc") == "plralias/ZZZ/1abc.alias");
   CHECK(!io::player_file(PLR_FILE, ""));
   CHECK(!io::player_file(7, "Bob")); /* no such kind */
-  char cut[16];
-  CHECK(get_filename(cut, sizeof(cut), PLR_FILE, "Kelvarin") && !strcmp(cut, "plrfiles/K-O/ke")); /* quirk: cut */
 }
 
 static void check_replacing_files()

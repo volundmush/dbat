@@ -80,7 +80,7 @@ int find_skill_num(GameWorld *g, char *name, int sktype)
     }
 
     ok = true;
-    strlcpy(tempbuf, g->spell_info[skindex].name, sizeof(tempbuf)); /* strlcpy: OK */
+    copy_cstr(tempbuf, g->spell_info[skindex].name, sizeof(tempbuf));
     temp  = any_one_arg(tempbuf, first);
     temp2 = any_one_arg(name, first2);
     while (*first && *first2 && ok) {

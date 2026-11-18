@@ -371,4 +371,29 @@ int text_reader::peek_letter()
   return pos_ < text_.size() ? static_cast<unsigned char>(text_[pos_]) : EOF;
 }
 
+bool line_cursor::next()
+{
+  for (;;) {
+    std::optional<std::string_view> raw = in_.raw_line();
+    if (!raw) {
+      eof_ = true;
+      return false;
+    }
+    if (!raw->ends_with('\n'))
+      eof_ = true;
+    if (!is_skipped_line(*raw)) {
+      line_ = line_text(*raw);
+      return true;
+    }
+  }
+}
+
+loaded<std::string> line_cursor::string(std::string_view what)
+{
+  loaded<std::string> text = in_.tilde_string(what);
+  if (in_.at_end() && !in_.text().ends_with('\n'))
+    eof_ = true;
+  return text;
+}
+
 } // namespace io

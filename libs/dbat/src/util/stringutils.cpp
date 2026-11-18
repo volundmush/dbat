@@ -446,6 +446,15 @@ std::string &CAP(std::string &txt)
   return txt;
 }
 
+void copy_cstr(char *dst, std::string_view src, size_t size)
+{
+  if (size == 0)
+    return;
+  size_t n = std::min(src.size(), size - 1);
+  memcpy(dst, src.data(), n);
+  dst[n] = '\0';
+}
+
 bool str_eq_nocase(std::string_view a, std::string_view b)
 {
   if (a.size() != b.size())

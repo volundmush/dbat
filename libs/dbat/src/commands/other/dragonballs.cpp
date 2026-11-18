@@ -5,7 +5,6 @@
 #include <functional>
 #include <string_view>
 
-#include <sys/stat.h>
 
 #include "dbat/iterate.hpp"
 #include "dbat/act.other.hpp"

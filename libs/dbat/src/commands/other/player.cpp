@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <iterator>
 
-#include <sys/stat.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"
@@ -56,6 +55,9 @@
 #include "dbat/mail.hpp"
 #include "dbat/local_limits.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/io/writer.hpp"
 
 #include "other_internal.hpp"
 
@@ -503,24 +505,22 @@ ACMD(do_gen_write)
   }
   send_to_imm(g, "[A new {} has been filed by: {}]\r\n", CMD_NAME, char_get_name(ch));
 
-  struct stat fbuf;
-  if (stat(filename, &fbuf) < 0) {
-    perror("SYSERR: Can't stat() file");
+  std::expected<long long, std::string> size = io::file_size(filename);
+  if (!size) {
+    std::fprintf(stderr, "SYSERR: Can't stat() file: %s\n", size.error().c_str());
     return;
   }
-  if (fbuf.st_size >= CONFIG_MAX_FILESIZE) {
+  if (*size >= CONFIG_MAX_FILESIZE) {
     send_to_char(g, ch, "Sorry, the file is full right now.. try again later.\r\n");
     return;
   }
-  FILE *fl = fopen(filename, "a");
-  if (!fl) {
+  std::string entry = str_format("@D[@WUser: @c{:<10}@D] [@WChar: @C{:<10}@D] [@WRoom: @G{:<4d}@D] [@WDate: @Y{:>6.6}@D]@b \n-----------@w\n{}\n@D-------------------------------@n\n",
+                                 char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), text);
+  if (!io::append_file(filename, entry)) {
     perror("SYSERR: do_gen_write");
     send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
     return;
   }
-  file_print(fl, "@D[@WUser: @c{:<10}@D] [@WChar: @C{:<10}@D] [@WRoom: @G{:<4d}@D] [@WDate: @Y{:>6.6}@D]@b \n-----------@w\n{}\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), text);
-  file_print(fl, "@D-------------------------------@n\n");
-  fclose(fl);
   send_to_char(g, ch, "Okay.  Thanks!\r\n");
 }
 
@@ -746,29 +746,31 @@ ACMD(do_file)
   }
   int req_lines = value.empty() ? 15 : parse_int(value); /* default is the last 15 lines */
 
-  FILE *req_file = fopen(f->file, "r");
+  io::loaded<io::text_reader> req_file = io::text_reader::open(f->file);
   if (!req_file) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: Error opening file {} using 'file' command.", f->file);
     return;
   }
-  char line[READ_SIZE];
+  /* Counted as the get_line() loop counted them: a line with no line end at the end of the file isn't (quirk) */
+  io::text_reader::place start = req_file->here();
+  io::line_cursor lines(*req_file);
   int num_lines = 0;
-  get_line(req_file, line);
-  while (!feof(req_file)) {
+  lines.next();
+  while (!lines.eof()) {
     num_lines++;
-    get_line(req_file, line);
+    lines.next();
   }
-  rewind(req_file);
+  req_file->go_back(start);
   req_lines = std::min({req_lines, num_lines, 5000});
 
   std::string buf;
   int cur_line = 0;
-  get_line(req_file, line);
-  while (!feof(req_file)) {
+  io::line_cursor again(*req_file);
+  again.next();
+  while (!again.eof()) {
     if (++cur_line > num_lines - req_lines)
-      buf += str_format("{}\r\n", line);
-    get_line(req_file, line);
+      buf += str_format("{}\r\n", again.line());
+    again.next();
   }
-  fclose(req_file);
   send_to_char(g, ch, buf);
 }

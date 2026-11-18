@@ -53,86 +53,44 @@
 #include "dbat/objsave.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/io/writer.hpp"
 
 #include "other_internal.hpp"
 
 // definitions
 void log_imm_action(GameWorld *g, std::string_view text)
 {
-
-  FILE *fl;
-  const char *filename;
-  struct stat fbuf;
-
-  filename = REQUEST_FILE;
-
-  if (stat(filename, &fbuf) < 0) {
-    perror("SYSERR: Can't stat() file");
-    /*  SYSERR_DESC:
-       *  This is from do_gen_write() and indicates that it cannot call the
-       *  stat() system call on the file required.  The error string at the
-       *  end of the line should explain what the problem is.
-       */
+  std::expected<long long, std::string> size = io::file_size(REQUEST_FILE);
+  if (!size) {
+    std::fprintf(stderr, "SYSERR: Can't stat() file: %s\n", size.error().c_str());
     return;
   }
-  if (fbuf.st_size >= CONFIG_MAX_FILESIZE * 4) {
+  if (*size >= CONFIG_MAX_FILESIZE * 4)
     return;
-  }
-  if (!(fl = fopen(filename, "a"))) {
-    perror("SYSERR: log_imm_action");
-    /*  SYSERR_DESC:
-        *  This is from do_gen_write(), and will be output if the file in
-        *  question cannot be opened for appending to.  The error string
-        *  at the end of the line should explain what the problem is.
-        */
 
-    return;
-  }
   time_t ct    = game_now(g);
   char *time_s = asctime(localtime(&ct));
 
   time_s[strlen(time_s) - 1] = '\0';
-
-  file_print(fl, "{:<15.15} :: ", time_s + 4);
-  fwrite(text.data(), 1, text.size(), fl);
-  file_print(fl, "\n");
-
-  fclose(fl);
+  if (!io::append_file(REQUEST_FILE, str_format("{:<15.15} :: {}\n", time_s + 4, text)))
+    perror("SYSERR: log_imm_action");
 }
 
 void log_custom(GameWorld *g, struct descriptor_data *d, struct obj_data *obj)
 {
-  FILE *fl;
-  const char *filename;
-  struct stat fbuf;
-
-  filename = CUSTOM_FILE;
-
-  if (stat(filename, &fbuf) < 0) {
-    perror("SYSERR: Can't stat() file");
-    /*  SYSERR_DESC:
-       *  This is from do_gen_write() and indicates that it cannot call the
-       *  stat() system call on the file required.  The error string at the
-       *  end of the line should explain what the problem is.
-       */
+  std::expected<long long, std::string> size = io::file_size(CUSTOM_FILE);
+  if (!size) {
+    std::fprintf(stderr, "SYSERR: Can't stat() file: %s\n", size.error().c_str());
     return;
   }
-  if (fbuf.st_size >= CONFIG_MAX_FILESIZE * 4) {
+  if (*size >= CONFIG_MAX_FILESIZE * 4)
     return;
-  }
-  if (!(fl = fopen(filename, "a"))) {
+
+  if (!io::append_file(CUSTOM_FILE, str_format("@D[@cUser@W: @R{:<20} @cName@W: @C{:<20} @cCustom@W: @Y{}@D]\n",
+                                               char_get_user(d->character), char_get_name(d->character),
+                                               obj_get_short_description(obj))))
     perror("SYSERR: log_custom");
-    /*  SYSERR_DESC:
-        *  This is from do_gen_write(), and will be output if the file in
-        *  question cannot be opened for appending to.  The error string
-        *  at the end of the line should explain what the problem is.
-        */
-
-    return;
-  }
-
-  file_print(fl, "@D[@cUser@W: @R{:<20} @cName@W: @C{:<20} @cCustom@W: @Y{}@D]\n", char_get_user(d->character), char_get_name(d->character), obj_get_short_description(obj));
-  fclose(fl);
 }
 
 namespace {

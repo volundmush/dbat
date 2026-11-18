@@ -4,7 +4,6 @@
 #include <climits>
 #include <cstdlib>
 
-#include <sys/stat.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"

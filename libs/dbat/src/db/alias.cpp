@@ -12,7 +12,6 @@
 #include <cerrno>
 #include <cstdlib>
 
-#include <linux/limits.h>
 
 #include "dbat/args.hpp"
 #include "dbat/alias.hpp"
@@ -102,7 +101,7 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
   int num_of_tokens = 0, num;
 
   /* First, parse the original string */
-  strlcpy(buf2, orig, sizeof(buf2));
+  copy_cstr(buf2, orig, sizeof(buf2));
   temp = strtok(buf2, " ");
   while (temp != nullptr && num_of_tokens < NUM_TOKENS) {
     tokens[num_of_tokens++] = temp;
@@ -182,7 +181,7 @@ bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t m
     return false;
 
   if (a->type == ALIAS_SIMPLE) {
-    strlcpy(orig, a->replacement.c_str(), maxlen);
+    copy_cstr(orig, a->replacement.c_str(), maxlen);
     return false;
   }
   perform_complex_alias(&d->input, ptr, a);

@@ -439,8 +439,6 @@ static std::string saved_text(const std::string &text, bool full)
 
 void th_write_case_record(GameWorld *g, struct char_data *const *chars, size_t num_chars, bool full)
 {
-  char path[256];
-
   file_print(stdout, "rng {:d}\n", g->rng_seed);
   for (size_t i = 0; i < num_chars; i++) {
     struct char_data *ch = chars[i];
@@ -448,10 +446,10 @@ void th_write_case_record(GameWorld *g, struct char_data *const *chars, size_t n
     file_print(stdout, "== {} sees:\n{}\n", char_get_name(ch), th_output(ch));
     Crash_crashsave(g, ch);
     save_char(g, ch);
-    if (get_filename(path, sizeof(path), PLR_FILE, char_get_name(ch)))
-      file_print(stdout, "== {} saved: {}", char_get_name(ch), saved_text(th_file_text(path), full));
-    if (get_filename(path, sizeof(path), NEW_OBJ_FILES, char_get_name(ch)))
-      file_print(stdout, "== {} carries: {}", char_get_name(ch), saved_text(th_file_text(path), full));
+    if (std::optional<std::string> path = player_path(PLR_FILE, char_get_name(ch)))
+      file_print(stdout, "== {} saved: {}", char_get_name(ch), saved_text(th_file_text(path->c_str()), full));
+    if (std::optional<std::string> path = player_path(NEW_OBJ_FILES, char_get_name(ch)))
+      file_print(stdout, "== {} carries: {}", char_get_name(ch), saved_text(th_file_text(path->c_str()), full));
   }
   for (room_vnum v = 300; v < 400; v++) {
     if (!room_of(g, v))

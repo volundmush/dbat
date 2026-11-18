@@ -28,6 +28,9 @@ bool is_abbrev(const char *arg1, const char *arg2);
 bool is_abbrev(std::string_view arg1, std::string_view arg2);
 /* Whether a and b are the same ignoring case, as strcasecmp() finds them */
 bool str_eq_nocase(std::string_view a, std::string_view b);
+/* Copies src into dst, a buffer of size bytes, cut short to fit and always ended by a '\0', as strlcpy() did;
+   nothing is written if size is 0 */
+void copy_cstr(char *dst, std::string_view src, size_t size);
 /* The number s starts with, read as atoi() reads it: leading whitespace and a sign allowed, the rest ignored */
 int parse_int(std::string_view s);
 void half_chop(char *string, char *arg1, char *arg2);

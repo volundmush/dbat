@@ -1,47 +1,17 @@
-#include <cerrno>
+#include <array>
+#include <cstdint>
 #include <cstdlib>
-
-#include <algorithm>
 #include <cstring>
 #include <optional>
 #include <string>
 
 #include "dbat/fileop.hpp"
 #include "dbat/io/paths.hpp"
-#include "dbat/io/reader.hpp"
-#include "dbat/utils.hpp"
 #include "dbat/stringutils.hpp"
-#include "dbat/consts/maximums.hpp"
 #include "dbat/log.hpp"
-#include "dbat/db.hpp"
 #include "dbat/comm.hpp"
-#include "dbat/config.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
-
-/* get_line reads the next non-blank line off of the input stream.
- * The newline character is removed from the input.  Lines which begin
- * with '*' are considered to be comments.
- *
- * Returns the number of lines advanced in the file. Buffer given must
- * be at least READ_SIZE (256) characters large. The rules are io::is_skipped_line() and io::line_text(). */
-int get_line(FILE *fl, char *buf)
-{
-  std::string raw;
-  int lines = 0;
-
-  do {
-    if (!io::read_raw_line(fl, raw))
-      return 0;
-    lines++;
-  } while (io::is_skipped_line(raw));
-
-  std::string_view text = io::line_text(raw);
-  memcpy(buf, text.data(), text.size());
-  buf[text.size()] = '\0';
-  return lines;
-}
 
 std::optional<std::string> player_path(int mode, const char *name)
 {
@@ -54,309 +24,88 @@ std::optional<std::string> player_path(int mode, const char *name)
   return io::player_file(mode, name);
 }
 
-/* The file of kind mode for the player or account orig_name, as io::player_file() gives it, cut to fbufsize. */
-bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name)
-{
-  if (filename == nullptr) {
-    mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), {} or {}.", as_pointer(orig_name),
-            as_pointer(filename));
-    return false;
-  }
-  std::optional<std::string> path = player_path(mode, orig_name);
-  if (!path)
-    return false;
-  if (fbufsize) { /* quirk: a name too long for the buffer is cut short, as snprintf() cut it */
-    size_t n = std::min(path->size(), fbufsize - 1);
-    memcpy(filename, path->data(), n);
-    filename[n] = '\0';
-  }
-  return true;
-}
+namespace {
+  /* The toplist's sections, five places each, in the order g->topname and g->toppoint hold them */
+  struct toplist_section {
+    const char *label;
+    int64_t (*value)(GameWorld *g, char_data *ch);
+    bool by_account; /* listed by the account's name, not the character's */
+  };
+  const toplist_section toplist_sections[] = {
+    {"powerlevel", [](GameWorld *g, char_data *ch) -> int64_t { return getEffMaxPL(g, ch); }, false},
+    {"ki", [](GameWorld *g, char_data *ch) -> int64_t { return getMaxKI(g, ch); }, false},
+    {"stamina", [](GameWorld *g, char_data *ch) -> int64_t { return getMaxST(g, ch); }, false},
+    {"zenni", [](GameWorld *, char_data *ch) -> int64_t { return char_get_bank_gold(ch) + char_get_gold(ch); }, false},
+    {"RPP", [](GameWorld *, char_data *ch) -> int64_t { return char_get_trp(ch); }, true},
+  };
+  constexpr int TOPLIST_PLACES = 5 * static_cast<int>(std::size(toplist_sections));
 
-/* the "touch" command, essentially. */
-int touch(const char *path)
-{
-  return io::touch(path) ? 0 : -1;
-}
+  void set_place(GameWorld *g, int x, int64_t points, const char *name)
+  {
+    free(g->topname[x]);
+    g->toppoint[x] = points;
+    g->topname[x]  = strdup(name);
+  }
+} // namespace
 
-/* Write the toplist to file */
+/* Puts ch on the toplist where they now belong, moving those below down a place, and saves it if anything changed */
 void topWrite(GameWorld *g, struct char_data *ch)
 {
   if (char_get_admlevel(ch) > 0 || char_is_npc(ch))
     return;
-
-  if (g->TOPLOADED == false) {
+  if (g->TOPLOADED == false)
     return;
-  }
-
-  char *positions[25];
-  int64_t points[25] = {0};
-  int x = 0, writeEm = false, placed = false, start = 0, finish = 25, location = -1;
-  int progress = false;
-
-  if (!ch) {
+  if (!char_get_desc(ch) || !char_get_user(ch))
     return;
-  }
 
-  if (!char_get_desc(ch) || !char_get_user(ch)) {
-    return;
-  }
-
-  for (x = start; x < finish; x++) { /* Save the places as they are right now */
-    positions[x] = strdup(g->topname[x]);
+  /* The places as they are right now, and an empty one past the end: someone listed twice in the last section can
+     read one place past it as they move up (quirk), which was memory past the list's end */
+  std::array<std::string, TOPLIST_PLACES + 1> positions;
+  std::array<int64_t, TOPLIST_PLACES + 1> points{};
+  for (int x = 0; x < TOPLIST_PLACES; x++) {
+    positions[x] = g->topname[x];
     points[x]    = g->toppoint[x];
   }
 
-  /* Powerlevel Section */
-  /* Set the start and finish for this section */
-  start  = 0;
-  finish = 5;
+  bool writeEm = false;
+  for (size_t section = 0; section < std::size(toplist_sections); section++) {
+    const toplist_section &listed = toplist_sections[section];
+    const char *name              = listed.by_account ? char_get_user(ch) : char_get_name(ch);
+    int start = static_cast<int>(section) * 5, finish = start + 5, location = -1;
+    bool placed = false, progress = false;
 
-  for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == false) {                             /* They Haven't Placed */
-      if (strcasecmp(g->topname[x], char_get_name(ch))) { /* Name doesn't match */
-        if (getEffMaxPL(g, ch) > g->toppoint[x]) {
-          free(g->topname[x]);
-          g->toppoint[x] = getEffMaxPL(g, ch);
-          g->topname[x]  = strdup(char_get_name(ch));
-          placed      = true;
-          writeEm     = true;
-          location    = x;
+    for (int x = start; x < finish; x++) {
+      if (!placed) {
+        if (!str_eq_nocase(g->topname[x], name)) { /* Name doesn't match */
+          if (listed.value(g, ch) > g->toppoint[x]) {
+            set_place(g, x, listed.value(g, ch), name);
+            placed   = true;
+            writeEm  = true;
+            location = x;
+          }
+        } else { /* This is their spot already */
+          placed   = true;
+          location = finish;
         }
-      } else { /* This is their spot already */
-        placed   = true;
-        location = finish;
-      }
-    } else { /* They have placed */
-      if (x < finish && location < finish) {
-        if (strcasecmp(positions[location], char_get_name(ch))) { /* This isn't their old spot */
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
+      } else if (location < finish) { /* They have placed: the rest move down */
+        if (!str_eq_nocase(positions[location], name)) { /* This isn't their old spot */
+          set_place(g, x, points[location], positions[location].c_str());
           location += 1;
         } else { /* This IS their old spot */
           progress = true;
           location += 1;
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
+          set_place(g, x, points[location], positions[location].c_str());
           location += 1;
         }
       }
     }
-  } /* End Save New Spots*/
 
-  if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas moved up in rank in the powerlevel section.@D]\r\n", char_get_name(ch));
-  } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas placed in the powerlevel section.@D]\r\n", char_get_name(ch));
+    if (progress)
+      send_to_all(g, "@D[@GToplist@W: @C{} @Whas moved up in rank in the {} section.@D]\r\n", name, listed.label);
+    else if (placed && location != finish)
+      send_to_all(g, "@D[@GToplist@W: @C{} @Whas placed in the {} section.@D]\r\n", name, listed.label);
   }
 
-  location = -1;
-  placed   = false;
-  progress = false;
-  /* Ki Section         */
-  /* Set the start and finish for this section */
-  start  = 5;
-  finish = 10;
-
-  for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == false) {                             /* They Haven't Placed */
-      if (strcasecmp(g->topname[x], char_get_name(ch))) { /* Name doesn't match */
-        if (getMaxKI(g, ch) > g->toppoint[x]) {
-          free(g->topname[x]);
-          g->toppoint[x] = getMaxKI(g, ch);
-          g->topname[x]  = strdup(char_get_name(ch));
-          placed      = true;
-          writeEm     = true;
-          location    = x;
-        }
-      } else { /* This is their spot already */
-        placed   = true;
-        location = finish;
-      }
-    } else { /* They have placed */
-      if (x < finish && location < finish) {
-        if (strcasecmp(positions[location], char_get_name(ch))) { /* This isn't their old spot */
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
-          location += 1;
-        } else { /* This IS their old spot */
-          progress = true;
-          location += 1;
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
-          location += 1;
-        }
-      }
-    }
-  } /* End Save New Spots*/
-
-  if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas moved up in rank in the ki section.@D]\r\n", char_get_name(ch));
-  } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas placed in the ki section.@D]\r\n", char_get_name(ch));
-  }
-
-  location = -1;
-  placed   = false;
-  progress = false;
-
-  /* Stamina Section    */
-  /* Set the start and finish for this section */
-  start  = 10;
-  finish = 15;
-
-  for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == false) {                             /* They Haven't Placed */
-      if (strcasecmp(g->topname[x], char_get_name(ch))) { /* Name doesn't match */
-        if (getMaxST(g, ch) > g->toppoint[x]) {
-          free(g->topname[x]);
-          g->toppoint[x] = getMaxST(g, ch);
-          g->topname[x]  = strdup(char_get_name(ch));
-          placed      = true;
-          writeEm     = true;
-          location    = x;
-        }
-      } else { /* This is their spot already */
-        placed   = true;
-        location = finish;
-      }
-    } else { /* They have placed */
-      if (x < finish && location < finish) {
-        if (strcasecmp(positions[location], char_get_name(ch))) { /* This isn't their old spot */
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
-          location += 1;
-        } else { /* This IS their old spot */
-          progress = true;
-          location += 1;
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
-          location += 1;
-        }
-      }
-    }
-  } /* End Save New Spots*/
-
-  if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas moved up in rank in the stamina section.@D]\r\n", char_get_name(ch));
-  } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas placed in the stamina section.@D]\r\n", char_get_name(ch));
-  }
-
-  location = -1;
-  placed   = false;
-  progress = false;
-
-  /* Zenni Section      */
-  /* Set the start and finish for this section */
-  start  = 15;
-  finish = 20;
-
-  for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == false) {                             /* They Haven't Placed */
-      if (strcasecmp(g->topname[x], char_get_name(ch))) { /* Name doesn't match */
-        if (char_get_bank_gold(ch) + char_get_gold(ch) > g->toppoint[x]) {
-          free(g->topname[x]);
-          g->toppoint[x] = char_get_bank_gold(ch) + char_get_gold(ch);
-          g->topname[x]  = strdup(char_get_name(ch));
-          placed      = true;
-          writeEm     = true;
-          location    = x;
-        }
-      } else { /* This is their spot already */
-        placed   = true;
-        location = finish;
-      }
-    } else { /* They have placed */
-      if (x < finish && location < finish) {
-        if (strcasecmp(positions[location], char_get_name(ch))) { /* This isn't their old spot */
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
-          location += 1;
-        } else { /* This IS their old spot */
-          progress = true;
-          location += 1;
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
-          location += 1;
-        }
-      }
-    }
-  } /* End Save New Spots*/
-
-  if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas moved up in rank in the zenni section.@D]\r\n", char_get_name(ch));
-  } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas placed in the zenni section.@D]\r\n", char_get_name(ch));
-  }
-
-  location = -1;
-  placed   = false;
-  progress = false;
-
-  /* RPP Section        */
-  /* Set the start and finish for this section */
-  start  = 20;
-  finish = 25;
-
-  for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == false) {                             /* They Haven't Placed */
-      if (strcasecmp(g->topname[x], char_get_user(ch))) { /* Name doesn't match */
-        if (char_get_trp(ch) > g->toppoint[x]) {
-          free(g->topname[x]);
-          g->toppoint[x] = char_get_trp(ch);
-          g->topname[x]  = strdup(char_get_user(ch));
-          placed      = true;
-          writeEm     = true;
-          location    = x;
-        }
-      } else { /* This is their spot already */
-        placed   = true;
-        location = finish;
-      }
-    } else { /* They have placed */
-      if (x < finish && location < finish) {
-        if (strcasecmp(positions[location], char_get_user(ch))) { /* This isn't their old spot */
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
-          location += 1;
-        } else { /* This IS their old spot */
-          progress = true;
-          location += 1;
-          free(g->topname[x]);
-          g->toppoint[x] = points[location];
-          g->topname[x]  = strdup(positions[location]);
-          location += 1;
-        }
-      }
-    }
-  } /* End Save New Spots*/
-
-  if (progress == true) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas moved up in rank in the RPP section.@D]\r\n", char_get_user(ch));
-  } else if (placed == true && location != finish) {
-    send_to_all(g, "@D[@GToplist@W: @C{} @Whas placed in the RPP section.@D]\r\n", char_get_user(ch));
-  }
-
-  location = -1;
-  placed   = false;
-  progress = false;
-
-  for (x = 0; x < 25; x++) {
-    free(positions[x]);
-  }
-
-  if (writeEm == true) {
+  if (writeEm)
     save_toplist(g);
-  }
-  return;
 }

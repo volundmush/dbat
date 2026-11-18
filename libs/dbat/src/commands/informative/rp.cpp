@@ -44,7 +44,8 @@
 #include "dbat/mail.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/disabled.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/io/writer.hpp"
 #include "dbat/game_world.hpp"
 
 #include "informative_internal.hpp"
@@ -462,29 +463,19 @@ ACMD(do_showoff)
 /* Used for checking if you know the character in question. */
 void introCreate(struct char_data *ch)
 {
-  struct atomic_file af;
-  char fname[40];
-  FILE *fl;
-  /* Write Introduction File */
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch)))
+  std::optional<std::string> path = player_path(INTRO_FILE, char_get_name(ch));
+  if (!path)
     return;
-
-  if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log("ERROR: could not save user, {}, to filename, {}.", char_get_name(ch), fname);
-    return;
-  }
-
-  file_print(fl, "Gibbles Gibbles\n");
-
-  atomic_commit(&af);
-  return;
+  io::text_writer out(*path, true);
+  out.write("Gibbles Gibbles\n");
+  if (!out.commit())
+    mud_log("ERROR: could not save user, {}, to filename, {}.", char_get_name(ch), *path);
 }
 
 int readIntro(struct char_data *ch, struct char_data *vict)
 {
-  char fname[40], filler[50], line[256];
+  char filler[50];
   int known = false;
-  FILE *fl;
 
   /* Read Introduction File */
   if (vict == nullptr) {
@@ -495,23 +486,22 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     return 1;
   }
 
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch))) {
+  std::optional<std::string> path = player_path(INTRO_FILE, char_get_name(ch));
+  if (!path) {
     introCreate(ch);
-  }
-  if (!(fl = fopen(fname, "r"))) {
     return 2;
   }
-  if (vict == ch) {
-    fclose(fl);
+  io::loaded<io::text_reader> file = io::text_reader::open(*path);
+  if (!file)
+    return 2;
+  if (vict == ch)
     return 0;
-  }
 
-  while (get_line(fl, line)) {
-    if (sscanf(line, "%49s", filler) == 1 && !strcasecmp(char_get_name(vict), filler)) {
+  while (std::optional<std::string_view> line = file->line()) {
+    if (sscanf(std::string(*line).c_str(), "%49s", filler) == 1 && !strcasecmp(char_get_name(vict), filler)) {
       known = true;
     }
   }
-  fclose(fl);
 
   if (known == true)
     return 1;
@@ -521,65 +511,42 @@ int readIntro(struct char_data *ch, struct char_data *vict)
 
 static void introWrite(struct char_data *ch, struct char_data *vict, std::string name)
 {
-  struct atomic_file af;
-  FILE *file;
-  char fname[40], filler[50], scrap[100], line[256];
-  char *names[500] = {nullptr}, *alias[500] = {nullptr};
-  FILE *fl;
-  int count = 0, x = 0;
+  char filler[50], scrap[100];
+  std::vector<std::pair<std::string, std::string>> known; /* each name, and what ch calls them */
 
   /* Read Introduction File */
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch))) {
+  std::optional<std::string> path = player_path(INTRO_FILE, char_get_name(ch));
+  if (!path) {
     introCreate(ch);
-  }
-  if (!(file = fopen(fname, "r"))) {
     return;
   }
+  io::loaded<io::text_reader> file = io::text_reader::open(*path);
+  if (!file)
+    return;
   /* one slot is kept free for the new introduction written below */
-  while (count < 499 && get_line(file, line)) {
+  while (known.size() < 499) {
+    std::optional<std::string_view> line = file->line();
+    if (!line)
+      break;
     *filler = *scrap = '\0';
-    if (sscanf(line, "%49s %99s", filler, scrap) < 1)
+    if (sscanf(std::string(*line).c_str(), "%49s %99s", filler, scrap) < 1)
       continue;
-    names[count] = strdup(filler);
-    alias[count] = strdup(scrap);
-    count++;
+    known.emplace_back(filler, scrap);
   }
-  fclose(file);
 
   /* Write Introduction File */
-
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch)))
-    return;
-
-  if (!(fl = atomic_open(&af, fname, true))) {
-    mud_log("ERROR: could not save intro file, {}, to filename, {}.", char_get_name(ch), fname);
-    return;
-  }
-
-  while (x < count) {
-    if (x == 0 || strcasecmp(names[x - 1], names[x])) {
-      if (strcasecmp(names[x], char_get_name(vict))) {
-        file_print(fl, "{} {}\n", names[x], alias[x]);
+  io::text_writer out(*path, true);
+  for (size_t x = 0; x < known.size(); x++) {
+    if (x == 0 || strcasecmp(known[x - 1].first.c_str(), known[x].first.c_str())) {
+      if (strcasecmp(known[x].first.c_str(), char_get_name(vict))) {
+        out.print("{} {}\n", known[x].first, known[x].second);
       }
     }
-    x++;
   }
+  out.print("{} {}\n", char_get_name(vict), CAP(name));
 
-  x = 0;
-  while (x < count) {
-    if (names[x] != nullptr) {
-      free(names[x]);
-    }
-    if (alias[x] != nullptr) {
-      free(alias[x]);
-    }
-    x++;
-  }
-
-  file_print(fl, "{} {}\n", char_get_name(vict), CAP(name));
-
-  atomic_commit(&af);
-  return;
+  if (!out.commit())
+    mud_log("ERROR: could not save intro file, {}, to filename, {}.", char_get_name(ch), *path);
 }
 
 constexpr act_msgs DUBBED = {"You decide to call $M, $N.", "$n seems to decide something about you.", "$n seems to decide something about $N.", true};

@@ -507,7 +507,7 @@ static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, ch
   char tmpname[MAX_INPUT_LENGTH];
   char *tmp;
 
-  strlcpy(tmpname, name, sizeof(tmpname));
+  copy_cstr(tmpname, name, sizeof(tmpname));
   tmp = tmpname;
   if (!(number = get_number(&tmp)))
     return (nullptr);

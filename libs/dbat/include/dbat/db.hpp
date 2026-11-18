@@ -106,7 +106,7 @@ constexpr int PINDEX_NOWIZLIST  = (1 << 3); /* Player shouldn't be on wizlist*/
 
 
 void auc_load(struct obj_data *obj);
-/* public procedures in db.c */
+/* public procedures in db.cpp, reset.cpp and the entity files */
 /* Loads the world: zones, triggers, rooms, mobs, objects, shops and guilds; or why a file of it can't be */
 io::loaded<void> boot_world(GameWorld *g);
 bool is_empty(GameWorld *g, struct zone_data *zone_nr);
@@ -115,7 +115,6 @@ void boot_db(GameWorld *g);
 void destroy_db(GameWorld *g);
 int create_entry(GameWorld *g, const char *name);
 void zone_update(GameWorld *g);
-char *fread_string(FILE *fl, const char *error);
 long get_id_by_name(GameWorld *g, const char *name);
 char *get_name_by_id(GameWorld *g, long id);
 void save_mud_time(GameWorld *g, struct time_info_data *when);
@@ -136,6 +135,8 @@ void init_char(GameWorld *g, struct char_data *ch);
 struct char_data *read_mobile(GameWorld *g, mob_vnum nr);
 int vnum_mobile(GameWorld *g, std::string_view searchname, struct char_data *ch);
 void clear_char(struct char_data *ch);
+/* An enhanced (E) mob's abilities, rolled at random by its level and race as it loads */
+void mob_stats(GameWorld *g, struct char_data *mob);
 void reset_char(GameWorld *g, struct char_data *ch);
 void free_char(GameWorld *g, struct char_data *ch);
 void save_player_index(GameWorld *g);
@@ -148,6 +149,9 @@ void free_obj(GameWorld *g, struct obj_data *obj);
 void obj_retire(GameWorld *g, struct obj_data *obj);
 struct obj_data *read_object(GameWorld *g, obj_vnum nr);
 int vnum_object(GameWorld *g, std::string_view searchname, struct char_data *ch);
+/* Makes the empty unique-id table at boot, and frees it and its entries at shutdown */
+void init_obj_unique_hash(GameWorld *g);
+void free_obj_unique_hash(GameWorld *g);
 void add_unique_id(GameWorld *g, struct obj_data *obj);
 void check_unique_id(GameWorld *g, struct obj_data *obj);
 /* the unique objects with vnums low to high, as "show uniques" lists them */
@@ -156,10 +160,6 @@ int vnum_material(GameWorld *g, std::string_view searchname, struct char_data *c
 int vnum_weapontype(GameWorld *g, std::string_view searchname, struct char_data *ch);
 int vnum_armortype(GameWorld *g, std::string_view searchname, struct char_data *ch);
 
-/* global buffering system */
-
-
-bitvector_t asciiflag_conv(char *flag);
 void reset_zone(GameWorld *g, struct zone_data *zone);
 
 /* For disabled commands code by Erwin S. Andreasen, */

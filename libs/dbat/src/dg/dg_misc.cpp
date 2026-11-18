@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <optional>
 
+#include "dbat/io/reader.hpp"
 #include "dbat/args.hpp"
 
 #include "dbat/consts/maximums.hpp"
@@ -359,7 +360,7 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, std::string_
       break;
     case 2: { /* flags       */
       std::string flags(value);
-      newexit->exit_info = (int16_t)asciiflag_conv(flags.data());
+      newexit->exit_info = (int16_t)io::ascii_flags(flags.data(), 0, "asciiflag_conv");
       break;
     }
     case 3: /* key         */

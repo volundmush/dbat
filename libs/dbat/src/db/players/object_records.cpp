@@ -28,32 +28,7 @@
 #include "dbat/object_utils.hpp"
 #include "dbat/relocate.hpp"
 
-bool record_lines::next()
-{
-  for (;;) {
-    std::optional<std::string_view> raw = in_.raw_line();
-    if (!raw) {
-      eof_ = true;
-      return false;
-    }
-    if (!raw->ends_with('\n'))
-      eof_ = true;
-    if (!io::is_skipped_line(*raw)) {
-      line_ = io::line_text(*raw);
-      return true;
-    }
-  }
-}
-
-io::loaded<std::string> record_lines::string(std::string_view what)
-{
-  io::loaded<std::string> text = in_.tilde_string(what);
-  if (in_.at_end() && !in_.text().ends_with('\n'))
-    eof_ = true;
-  return text;
-}
-
-io::loaded<void> read_object_records(GameWorld *g, record_lines &in, record_kind kind,
+io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_kind kind,
                                      const std::function<void(obj_data *, int)> &loaded)
 {
   const char *file_kind = kind == record_kind::rent ? "rent" : "house";

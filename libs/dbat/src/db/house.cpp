@@ -509,7 +509,7 @@ static bool House_load(GameWorld *g, room_vnum rvnum)
     return false;
   }
 
-  record_lines in(*file);
+  io::line_cursor in(*file);
   in.next();
   bag_rows rows(g, nullptr, rvnum);
   io::loaded<void> read = read_object_records(g, in, record_kind::house, [&](obj_data *temp, int locate) {

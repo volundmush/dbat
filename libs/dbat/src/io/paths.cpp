@@ -109,4 +109,13 @@ std::string why_unreadable(const std::filesystem::path &path)
   return std::make_error_code(std::errc::permission_denied).message();
 }
 
+std::expected<long long, std::string> file_size(const std::filesystem::path &path)
+{
+  std::error_code ec;
+  std::uintmax_t size = std::filesystem::file_size(path, ec);
+  if (ec)
+    return std::unexpected(ec.message());
+  return static_cast<long long>(size);
+}
+
 } // namespace io

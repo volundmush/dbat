@@ -92,7 +92,7 @@ ACMD(do_ban)
 
     for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
       if (ban_node->date) {
-        strlcpy(timestr, asctime(localtime(&(ban_node->date))), 10);
+        copy_cstr(timestr, asctime(localtime(&(ban_node->date))), 10);
         timestr[10] = '\0';
       } else
         strcpy(timestr, "Unknown"); /* strcpy: OK (strlen("Unknown") < 16) */
@@ -114,17 +114,17 @@ ACMD(do_ban)
     return;
   }
   for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
-    if (!strcasecmp(ban_node->site, site.c_str())) {
+    if (str_eq_nocase(ban_node->site, site.c_str())) {
       send_to_char(g, ch, "That site has already been banned -- unban it to change the ban type.\r\n");
       return;
     }
   }
 
   ban_node = new ban_list_element();
-  strlcpy(ban_node->site, site.c_str(), sizeof(ban_node->site));
+  copy_cstr(ban_node->site, site.c_str(), sizeof(ban_node->site));
   for (nextchar = ban_node->site; *nextchar; nextchar++)
     *nextchar = tolower(*nextchar);
-  strlcpy(ban_node->name, char_get_name(ch), sizeof(ban_node->name));
+  copy_cstr(ban_node->name, char_get_name(ch), sizeof(ban_node->name));
   ban_node->date = game_now(g);
 
   for (i = BAN_NEW; i <= BAN_ALL; i++)
@@ -155,7 +155,7 @@ ACMD(do_unban)
   }
   ban_node = g->ban_list;
   while (ban_node && !found) {
-    if (!strcasecmp(ban_node->site, site.c_str()))
+    if (str_eq_nocase(ban_node->site, site.c_str()))
       found = 1;
     else
       ban_node = ban_node->next;
@@ -199,7 +199,7 @@ bool Valid_Name(GameWorld *g, char *newname)
    * THIS SHOULD FIX THE 'invalid name' if disconnected from OLC-bug - WELCOR 9/00
    */
   for (descriptor_data *dt : each_desc(g))
-    if (dt->character && char_get_name(dt->character) && !strcasecmp(char_get_name(dt->character), newname))
+    if (dt->character && char_get_name(dt->character) && str_eq_nocase(char_get_name(dt->character), newname))
       if (char_get_idnum(dt->character) == -1)
         return (desc_is_playing(dt));
 
@@ -218,7 +218,7 @@ bool Valid_Name(GameWorld *g, char *newname)
     return true;
 
   /* change to lowercase */
-  strlcpy(tempname, newname, sizeof(tempname));
+  copy_cstr(tempname, newname, sizeof(tempname));
   for (i = 0; tempname[i]; i++)
     tempname[i] = tolower(tempname[i]);
 

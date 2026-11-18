@@ -6,6 +6,8 @@
 #include <iterator>
 #include <ranges>
 
+#include "dbat/io/reader.hpp"
+#include "dbat/fileop.hpp"
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -483,22 +485,25 @@ ACMD(do_toplist)
   if (char_is_npc(ch))
     return;
 
-  char fname[40], filler[50], line[256];
-  FILE *file;
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist") || !(file = fopen(fname, "r"))) {
+  char filler[50];
+  std::optional<std::string> path = player_path(INTRO_FILE, "toplist");
+  io::loaded<io::text_reader> file = io::text_reader::open(path.value_or(""));
+  if (!file) {
     send_to_char(g, ch, "The toplist file does not exist.");
     return;
   }
 
   /* 25 places, a line each; any the file is short of are empty */
   std::array<std::string, 25> titles;
-  for (std::size_t count = 0; count < titles.size() && get_line(file, line); count++) {
+  for (std::size_t count = 0; count < titles.size(); count++) {
+    std::optional<std::string_view> line = file->line();
+    if (!line)
+      break;
     int64_t stats;
     *filler = '\0';
-    sscanf(line, "%49s %" SCNd64 "\n", filler, &stats);
+    sscanf(std::string(*line).c_str(), "%49s %" SCNd64 "\n", filler, &stats);
     titles[count] = filler;
   }
-  fclose(file);
 
   send_to_char(g, ch, "@D-=[@BDBAT Top Lists for @REra@C {:d}@D]=-@n\r\n", CURRENT_ERA);
   for (std::size_t x = 0; x < std::size(TOPLIST_SECTIONS) * 5; x++) {

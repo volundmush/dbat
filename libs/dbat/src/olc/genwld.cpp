@@ -16,7 +16,6 @@
 #include "dbat/genolc.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/dg_olc.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"

@@ -35,7 +35,6 @@
 #include "dbat/races.hpp"
 #include "dbat/utils.hpp"
 
-#include "../legacy_loaders.hpp"
 #include "load_rules.hpp"
 
 namespace {

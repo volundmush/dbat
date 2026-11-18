@@ -98,4 +98,13 @@ bool replace_file(const std::string &path, std::string_view text, bool backup)
   return replace_with(fl, tmp, path, backup);
 }
 
+bool append_file(const std::string &path, std::string_view text)
+{
+  std::FILE *fl = std::fopen(path.c_str(), "ab");
+  if (!fl)
+    return false;
+  bool written = std::fwrite(text.data(), 1, text.size(), fl) == text.size();
+  return std::fclose(fl) == 0 && written;
+}
+
 } // namespace io

@@ -10,7 +10,6 @@
 #include <climits>
 #include <cstdlib>
 
-#include <unistd.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"
@@ -57,7 +56,6 @@
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/spell_parser.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
 namespace {

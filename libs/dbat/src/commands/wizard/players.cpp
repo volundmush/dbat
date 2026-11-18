@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <iterator>
 
-#include <unistd.h>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"
@@ -59,7 +58,8 @@
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/spell_parser.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/io/writer.hpp"
 #include "dbat/game_world.hpp"
 
 namespace {
@@ -68,18 +68,20 @@ namespace {
     if (char_is_npc(ch))
       return;
 
-    char fname[40], filler[50] = "", line[256] = "";
-    FILE *file;
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout") || !(file = fopen(fname, "r"))) {
+    char filler[50] = "";
+    std::optional<std::string> path = player_path(INTRO_FILE, "lockout");
+    io::loaded<io::text_reader> file = io::text_reader::open(path.value_or(""));
+    if (!file) {
       send_to_char(g, ch, "The lockout file does not exist.");
       return;
     }
+    io::line_cursor lines(*file);
     /* Two names to a line, each once */
     std::string buf = "@b------------------[ @RLOCKOUT @b]------------------@n\n";
     bool first = true, odd = false;
-    while (!feof(file)) {
-      get_line(file, line);
-      sscanf(line, "%49s\n", filler);
+    while (!lines.eof()) {
+      lines.next();
+      sscanf(lines.line().c_str(), "%49s\n", filler);
       if (first || !strstr(buf.c_str(), filler)) {
         if (odd && !first)
           buf += str_format("{:<23}\n", filler);
@@ -94,55 +96,51 @@ namespace {
       buf += "\n";
     buf += "@b------------------[ @RLOCKOUT @b]------------------@n\n";
     send_to_char(g, ch, buf);
-    fclose(file);
   }
 
   /* Locks name out, or lets them back in if they were */
   void lockWrite(GameWorld *g, struct char_data *ch, const char *name)
   {
-    char fname[40], filler[50] = "", line[256] = "";
+    char filler[50] = "";
     std::string capped = name;
     CAP(capped);
 
-    FILE *file;
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout") || !(file = fopen(fname, "r"))) {
+    std::optional<std::string> path = player_path(INTRO_FILE, "lockout");
+    io::loaded<io::text_reader> file = io::text_reader::open(path.value_or(""));
+    if (!file) {
       send_to_char(g, ch, "The lockout file does not exist.");
       return;
     }
+    io::line_cursor lines(*file);
     /* At least 498 entries are read, the last name standing in for those past the end, as it always has */
     std::vector<std::string> names;
-    while (!feof(file) || names.size() < 498) {
-      get_line(file, line);
-      sscanf(line, "%49s\n", filler);
+    while (!lines.eof() || names.size() < 498) {
+      lines.next();
+      sscanf(lines.line().c_str(), "%49s\n", filler);
       names.emplace_back(filler);
       *filler = '\0';
     }
-    fclose(file);
 
-    struct atomic_file af;
-    FILE *fl;
-    if (!(fl = atomic_open(&af, fname, false))) {
-      mud_log("ERROR: could not save Lockout File, {}.", fname);
-      return;
-    }
+    io::text_writer out(*path);
     bool found = false;
     for (size_t x = 0; x < names.size(); x++) {
       if (x > 0 && !strcasecmp(names[x - 1].c_str(), names[x].c_str()))
         continue;
       if (strcasecmp(names[x].c_str(), capped.c_str()))
-        file_print(fl, "{}\n", CAP(names[x]));
+        out.print("{}\n", CAP(names[x]));
       else
         found = true;
     }
     if (!found) {
-      file_print(fl, "{}\n", capped);
+      out.print("{}\n", capped);
       send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, was locked out of the MUD by @c{}@W.@n\r\n", capped, char_get_name(ch));
     } else {
       send_to_all(g, "@rLOCKOUT@D: @WThe character, @C{}@W, has had lockout removed by @c{}@W.@n\r\n", capped, char_get_name(ch));
     }
     mud_log("LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
     log_imm_action(g, "LOCKOUT: {} sentenced by {}.", capped, char_get_name(ch));
-    atomic_commit(&af);
+    if (!out.commit())
+      mud_log("ERROR: could not save Lockout File, {}.", *path);
   }
 
   void perform_immort_invis(GameWorld *g, struct char_data *ch, int level)

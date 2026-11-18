@@ -18,13 +18,12 @@
 #include "dbat/improved-edit.hpp"
 #include "dbat/tedit.hpp"
 #include "dbat/config.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/writer.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
 void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator)
 {
-  FILE *fl;
   const char *storage = NEWS_FILE;
 
   if (!storage)
@@ -34,20 +33,22 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
     case STRINGADD_SAVE:
       if (d->draft.empty())
         mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '{}'.", storage);
-      else if (!(fl = fopen(storage, "a"))) {
-        mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '{}'.", storage);
-        write_to_output(g, d, "The news file couldn't be opened; your entry was not saved.\r\n");
-      } else {
+      else {
         char *tmstr;
         time_t mytime                = game_now(g);
         tmstr                        = asctime(localtime(&mytime));
         *(tmstr + strlen(tmstr) - 1) = '\0';
 
-        file_print(fl, "#{:d} {}\n@cUpdated By@D: @C{:<13} @cDate@D: @Y{}@n\n", g->TOP_OF_NEWS, d->newsbuf, char_get_name(d->character), tmstr);
+        std::string draft = d->draft;
+        strip_cr(draft);
+        std::string entry = str_format("#{:d} {}\n@cUpdated By@D: @C{:<13} @cDate@D: @Y{}@n\n{}\n", g->TOP_OF_NEWS, d->newsbuf,
+                                       char_get_name(d->character), tmstr, draft);
+        if (!io::append_file(storage, entry)) {
+          mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '{}'.", storage);
+          write_to_output(g, d, "The news file couldn't be opened; your entry was not saved.\r\n");
+          break;
+        }
         d->newsbuf.clear();
-        strip_cr(d->draft);
-        file_print(fl, "{}\n", d->draft);
-        fclose(fl);
 
         g->NEWSUPDATE = game_now(g);
         save_mud_time(g, &g->time_info);
@@ -79,8 +80,6 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
 
 void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator)
 {
-  struct atomic_file af;
-  FILE *fl;
   const char *storage = !OLC_STORAGE(d).empty() ? OLC_STORAGE(d).c_str() : nullptr;
   std::string *text   = d->str; /* the file's text, as now edited */
 
@@ -89,9 +88,8 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
 
   switch (terminator) {
     case STRINGADD_SAVE:
-      if (!(fl = atomic_open(&af, storage, false)))
-        mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '{}'.", storage);
-      else {
+      {
+        io::text_writer fl(storage);
         if (!text->empty() && !(strcmp(storage, "text/news"))) {
           char *tmstr;
           time_t mytime                = game_now(g);
@@ -99,12 +97,12 @@ void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminato
           *(tmstr + strlen(tmstr) - 1) = '\0';
 
           strip_cr(*text);
-          file_print(fl, "\n-----------------------------------------------\n@Y{} @cUpdated By@D: @C{}@n\r\n-----------------------------------------------\n{}\n", tmstr, char_get_name(d->character), text->c_str());
+          fl.print("\n-----------------------------------------------\n@Y{} @cUpdated By@D: @C{}@n\r\n-----------------------------------------------\n{}\n", tmstr, char_get_name(d->character), text->c_str());
         } else if (!text->empty()) {
           strip_cr(*text);
-          fputs(text->c_str(), fl);
+          fl.write(text->c_str());
         }
-        if (!atomic_commit(&af)) {
+        if (!fl.commit()) {
           write_to_output(g, d, "Could not write the file; nothing was changed.\r\n");
           break;
         }

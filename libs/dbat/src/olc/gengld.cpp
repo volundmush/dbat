@@ -10,7 +10,6 @@
 #include "dbat/genolc.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/utils.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
 

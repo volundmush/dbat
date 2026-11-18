@@ -1,7 +1,6 @@
 #pragma once
 #include <optional>
 #include <string>
-#include <cstdio>
 
 #include "dbat/consts/types.hpp"
 
@@ -19,12 +18,9 @@ constexpr int SENSE_FILE       = 10;
 constexpr int CUSTOME_FILE     = 11;
 constexpr int MAX_FILES        = 12;
 
-int get_line(FILE *fl, char *buf);
-bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name);
 /* The file of kind mode for the player or account name, as io::player_file() gives it; nothing, and logged, for no
    name */
 std::optional<std::string> player_path(int mode, const char *name);
-int touch(const char *path);
 void topLoad(GameWorld *g);
 void topWrite(GameWorld *g, struct char_data *ch);
 /* Writes the toplist as it stands */
