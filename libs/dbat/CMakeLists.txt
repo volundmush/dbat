@@ -100,6 +100,11 @@ target_compile_options(dbat_test_login PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_login PRIVATE dbat_test_harness)
 add_test(NAME login COMMAND dbat_test_login)
 
+add_executable(dbat_test_olc tests/test_olc.cpp)
+target_compile_options(dbat_test_olc PRIVATE ${DBAT_CXX_FLAGS})
+target_link_libraries(dbat_test_olc PRIVATE dbat_test_harness)
+add_test(NAME olc COMMAND dbat_test_olc)
+
 add_executable(dbat_test_scripts tests/test_scripts.cpp)
 target_compile_options(dbat_test_scripts PRIVATE ${DBAT_CXX_FLAGS})
 target_link_libraries(dbat_test_scripts PRIVATE dbat_test_harness)
@@ -116,7 +121,7 @@ add_test(NAME corpus COMMAND dbat_test_bot --corpus ${CMAKE_CURRENT_SOURCE_DIR}/
 # Coverage-guided fuzzing, for the fuzz preset: see tools/fuzz.sh.
 if(DBAT_FUZZ)
   target_compile_definitions(dbat_test_harness PRIVATE DBAT_FUZZ)
-  foreach(target load boot script bot)
+  foreach(target load boot script bot olc)
     add_executable(dbat_fuzz_${target} tests/fuzz/fuzz_${target}.cpp tests/fuzz/fuzz.cpp)
     target_include_directories(dbat_fuzz_${target} PRIVATE tests tests/fuzz)
     target_compile_options(dbat_fuzz_${target} PRIVATE -g)

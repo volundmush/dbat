@@ -9,6 +9,8 @@ it so that both sides run the same tests, and builds this tree, both with the de
   - dbat_test_techniques, if both sides have it, the same way;
   - dbat_test_login, if both sides have it: scripted journeys through the login and chargen menus over real
     connections (with --only, only if 'login' is one of the commands named);
+  - dbat_test_olc, if both sides have it: scripted journeys through every OLC editor, recording what the builder
+    and a watcher saw and every file each journey changed (with --only, only if 'olc' is one of the commands named);
   - dbat_test_scripts, if both sides have it: every trigger run on its own through its dispatchers, on the
     fixture world, on it with the triggers in tests/scripts, and on --script-world if given (with --only, only if
     'scripts' is one of the commands named);
@@ -29,9 +31,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 ROOT = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True,
                       cwd=os.path.dirname(os.path.abspath(__file__))).stdout.strip()
-TARGETS = ['dbat_test_commands', 'dbat_test_bot', 'dbat_test_techniques', 'dbat_test_login', 'dbat_test_scripts']
+TARGETS = ['dbat_test_commands', 'dbat_test_bot', 'dbat_test_techniques', 'dbat_test_login', 'dbat_test_olc', 'dbat_test_scripts']
 # the tests a tree may not have yet, by their source
-OPTIONAL = {'dbat_test_techniques': 'test_techniques.cpp', 'dbat_test_login': 'test_login.cpp',
+OPTIONAL = {'dbat_test_techniques': 'test_techniques.cpp', 'dbat_test_login': 'test_login.cpp', 'dbat_test_olc': 'test_olc.cpp',
             'dbat_test_scripts': 'test_scripts.cpp'}
 
 
@@ -146,7 +148,8 @@ def main():
 
         differing = 0
         runs = [('dbat_test_commands', 'dbat_test_commands', ()), ('dbat_test_techniques', 'dbat_test_techniques', ()),
-                ('dbat_test_login', 'dbat_test_login', ()), ('dbat_test_scripts', 'dbat_test_scripts', ()),
+                ('dbat_test_login', 'dbat_test_login', ()), ('dbat_test_olc', 'dbat_test_olc', ()),
+                ('dbat_test_scripts', 'dbat_test_scripts', ()),
                 ('dbat_test_scripts', 'dbat_test_scripts-synthetic', ('--synthetic',))]
         if a.script_world:
             runs.append(('dbat_test_scripts', 'dbat_test_scripts-world', ('--world', os.path.abspath(a.script_world))))
@@ -156,7 +159,7 @@ def main():
             shards = a.j
             only = a.only.split(',') if a.only else None
             # the journeys and triggers aren't commands: all of them, or none
-            for whole, word in (('dbat_test_login', 'login'), ('dbat_test_scripts', 'scripts')):
+            for whole, word in (('dbat_test_login', 'login'), ('dbat_test_olc', 'olc'), ('dbat_test_scripts', 'scripts')):
                 if test == whole and only:
                     if word not in only:
                         break

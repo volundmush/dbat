@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """fuzz.py TARGET [options]
-Runs one of the coverage-guided fuzz targets (load, boot, script, bot) on many cores, carrying on past
+Runs one of the coverage-guided fuzz targets (load, boot, script, bot, olc) on many cores, carrying on past
 what it finds, and sorts what it found by where it happened. Build the fuzz preset first:
   cmake --preset fuzz && cmake --build --preset fuzz
 Everything goes under --out, including a corpus that later runs carry on from. See tools/README.md."""
@@ -52,6 +52,18 @@ def seeds_script(corpus):
             write_seed(corpus, f"script{number}", bytes([number % 3]) + parts[2])
 
 
+# how many editors fuzz_olc.cpp opens, by its first byte
+OLC_OPENERS = 25
+
+
+def seeds_olc(corpus):
+    """Each editor, given a walk through the first of its menus"""
+    walk = b"?\n1\nnew name\n2\n3\n5\n0\n7\n0\n8\n10\na\n0\ns\nn\n1, 300\nx\nq\ny\n"
+    for number in range(OLC_OPENERS):
+        write_seed(corpus, f"editor{number}", bytes([number]) + walk)
+        write_seed(corpus, f"quit{number}", bytes([number]) + b"q\nn\n")
+
+
 def seeds_bot(corpus, binary):
     for path in glob.glob(os.path.join(TESTS, "corpus", "*.txt")):
         shutil.copy(path, os.path.join(corpus, os.path.basename(path)))
@@ -80,6 +92,12 @@ def make_dictionary(path, target):
                   "%teleport%", "%load%", "wait 1", "if ", "elseif ", "else", "end", "while ", "done", "switch ", "case ",
                   "break", "return 0", "halt", "eval ", "set ", "global ", "remote ", "rdelete ", "context ", "unset ",
                   "extract ", "dg_letter ", "makeuid ", "nop "}
+    elif target == "olc":
+        for name in glob.glob(os.path.join(source, "olc", "*.cpp")) + [os.path.join(source, "dg/dg_olc.cpp")]:
+            with open(name, errors="replace") as f:
+                words |= set(re.findall(r"case '(\w)':", f.read()))
+        words |= {"/s", "/a", "/c", "/l", "/n", "/d ", "/i ", "/e ", "/r ", "/ra ", "/f", "/h", "@", "1, 300", "300", "301",
+                  "-1", "99999"}
     elif target == "load":
         with open(os.path.join(source, "db/players.cpp"), errors="replace") as f:
             words |= {t + ": " for t in re.findall(r'strcmp\(tag, "([^"]{4})"\)', f.read())}
@@ -141,7 +159,7 @@ def summarize(out, binary, artifacts, jobs):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("target", choices=["load", "boot", "script", "bot"])
+    parser.add_argument("target", choices=["load", "boot", "script", "bot", "olc"])
     parser.add_argument("--binary-dir", default=os.path.join(ROOT, "build-fuzz/bin"))
     parser.add_argument("--out", default=None)
     parser.add_argument("-j", "--jobs", type=int, default=8)
@@ -157,10 +175,10 @@ def main():
         if args.target == "bot":
             seeds_bot(corpus, binary)
         else:
-            {"load": seeds_load, "boot": seeds_boot, "script": seeds_script}[args.target](corpus)
+            {"load": seeds_load, "boot": seeds_boot, "script": seeds_script, "olc": seeds_olc}[args.target](corpus)
     dictionary = os.path.join(out, "dictionary")
     make_dictionary(dictionary, args.target)
-    limits = {"load": 65536, "boot": 65536, "script": 4096, "bot": 8192}
+    limits = {"load": 65536, "boot": 65536, "script": 4096, "bot": 8192, "olc": 4096}
     command = [binary, corpus, f"-fork={args.jobs}", f"-max_total_time={args.time}", "-ignore_crashes=1", "-ignore_timeouts=1",
                "-ignore_ooms=1", f"-artifact_prefix={artifacts}/", f"-max_len={args.max_len or limits[args.target]}", "-timeout=30",
                "-rss_limit_mb=4096", "-close_fd_mask=1", "-print_final_stats=1", "-detect_leaks=0"]

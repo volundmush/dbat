@@ -23,6 +23,8 @@
 #include <vector>
 
 #include "dbat/comm.hpp"
+#include "dbat/config.hpp"
+#include "dbat/oasis.hpp"
 #include "dbat/consts/constates.hpp"
 #include "dbat/descriptor_utils.hpp"
 #include "dbat/iterate.hpp"
@@ -107,7 +109,40 @@ namespace {
     account_file(40, 3, "Gonechar");
   }
 
+  /* Base stats set by points (creation methods 2 and 3), with rerolling or not */
+  void points_method_2(GameWorld *g)
+  {
+    CONFIG_CREATION_METHOD        = CEDIT_CREATION_METHOD_2;
+    CONFIG_REROLL_PLAYER_CREATION = 1;
+  }
+  void points_method_2_no_reroll(GameWorld *g)
+  {
+    CONFIG_CREATION_METHOD        = CEDIT_CREATION_METHOD_2;
+    CONFIG_REROLL_PLAYER_CREATION = 0;
+  }
+  void points_method_3(GameWorld *g) { CONFIG_CREATION_METHOD = CEDIT_CREATION_METHOD_3; }
+  void reroll_method_1(GameWorld *g)
+  {
+    CONFIG_CREATION_METHOD        = CEDIT_CREATION_METHOD_1;
+    CONFIG_REROLL_PLAYER_CREATION = 1;
+  }
+
+  /* The stats editor's answers: every stat, out of range both ways, then quitting */
+  const answers STATS = {{CON_QSTATS, "?"}, {CON_QSTATS, "s"}, {CON_QSTATS, "20"}, {CON_QSTATS, "d"}, {CON_QSTATS, "200"}, {CON_QSTATS, "n"},
+                         {CON_QSTATS, "1"}, {CON_QSTATS, "i"}, {CON_QSTATS, "abc"}, {CON_QSTATS, "w"}, {CON_QSTATS, "10"}, {CON_QSTATS, "c"},
+                         {CON_QSTATS, "10"}, {CON_QSTATS, "S"}, {CON_QSTATS, "15"}, {CON_QSTATS, "q"}};
+
+  answers with_stats(answers first)
+  {
+    first.insert(first.end(), STATS.begin(), STATS.end());
+    return first;
+  }
+
   const journey JOURNEYS[] = {
+      made("chargen, stats by points, rerolling first", with_stats({{CON_QROLLSTATS, "n"}, {CON_QROLLSTATS, "y"}}), {}, points_method_2),
+      made("chargen, stats by points, no rerolling", with_stats({{CON_QROLLSTATS, ""}}), {}, points_method_2_no_reroll),
+      made("chargen, stats from a pool", with_stats({{CON_QROLLSTATS, ""}}), {}, points_method_3),
+      made("chargen, stats rerolled", {{CON_QROLLSTATS, "n"}, {CON_QROLLSTATS, "maybe"}, {CON_QROLLSTATS, "Y"}}, {}, reroll_method_1),
       /* the menus once made, and coming back */
       made("menu, a bad choice, then a description", {{CON_MENU, "9"}, {CON_MENU, "2"}, {CON_EXDESC, "A tall fellow."}, {CON_EXDESC, "/s"}}),
       made("menu, deleting the character, not", {{CON_MENU, "4"}, {CON_DELCNF2, "no"}}),
