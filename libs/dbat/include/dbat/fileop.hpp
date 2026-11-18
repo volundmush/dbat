@@ -22,4 +22,6 @@ bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_na
 int touch(const char *path);
 void topLoad(GameWorld *g);
 void topWrite(GameWorld *g, struct char_data *ch);
+/* Writes the toplist as it stands */
+void save_toplist(GameWorld *g);
 

@@ -5,6 +5,10 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
+#include <cctype>
+#include <optional>
+#include <string>
+
 #include "dbat/arrays.hpp"
 #include "dbat/assemblies.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -21,105 +25,87 @@
 #include "dbat/extract.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/search.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/args.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/io/writer.hpp"
 #include "dbat/game_world.hpp"
 
 static long assemblyGetAssemblyIndex(GameWorld *g, obj_vnum lVnum);
 
 /* Local global variables. */
 
+/* The assemblies file, etc/assemblies:
+ *
+ *   Vnum      #<the assembled object's vnum> <its type, as AssemblyTypes[] names it>
+ *   Component #<a part's vnum> <whether it is used up> <whether it may be in the room>
+ *   ...
+ *
+ * with a blank line between assemblies. */
 void assemblyBootAssemblies(GameWorld *g)
 {
-  char szLine[MAX_STRING_LENGTH] = {'\0'};
-  char szTag[MAX_STRING_LENGTH]  = {'\0'};
-  char szType[MAX_STRING_LENGTH] = {'\0'};
-  int iExtract                   = 0;
-  int iInRoom                    = 0;
-  int iType                      = 0;
-  long lLineCount                = 0;
-  obj_vnum lPartVnum             = NOTHING;
-  obj_vnum lVnum                 = NOTHING;
-  FILE *pFile                    = nullptr;
-
-  if ((pFile = fopen(ASSEMBLIES_FILE, "rt")) == nullptr) {
-    mud_log("SYSERR: assemblyBootAssemblies(): Couldn't open file '{}' for reading.",
-            ASSEMBLIES_FILE);
+  io::loaded<io::text_reader> file = io::text_reader::open(ASSEMBLIES_FILE);
+  if (!file) {
+    mud_log("SYSERR: assemblyBootAssemblies(): Couldn't open file '{}' for reading.", ASSEMBLIES_FILE);
     return;
   }
 
-  while (!feof(pFile)) {
-    lLineCount += get_line(pFile, szLine);
-    half_chop(szLine, szTag, szLine);
-
-    if (*szTag == '\0')
+  obj_vnum lVnum = NOTHING;
+  while (std::optional<std::string_view> line = file->line()) {
+    std::string_view rest = *line;
+    std::string tag       = take_word(rest);
+    rest                  = skip_spaces(rest);
+    int lineno            = file->line_number();
+    if (tag.empty())
       continue;
 
-    if (strcasecmp(szTag, "Component") == 0) {
-      if (sscanf(szLine, "#%d %d %d", &lPartVnum, &iExtract, &iInRoom) != 3) {
+    if (str_eq_nocase(tag, "Component")) {
+      int part = 0, extract = 0, in_room = 0;
+      io::fields f(rest.substr(rest.starts_with('#') ? 1 : rest.size()));
+      if (!(f.number(part) && f.number(extract) && f.number(in_room))) {
         mud_log("SYSERR: bootAssemblies(): Invalid format in file {}, line {:d}: szTag={}, szLine={}.",
-                ASSEMBLIES_FILE, lLineCount, szTag, szLine);
-      } else if (!assemblyAddComponent(g, lVnum, lPartVnum, iExtract, iInRoom)) {
-        mud_log("SYSERR: bootAssemblies(): Could not add component #{:d} to assembly #{:d}.",
-                lPartVnum, lVnum);
+                ASSEMBLIES_FILE, lineno, tag, rest);
+      } else if (!assemblyAddComponent(g, lVnum, part, extract, in_room)) {
+        mud_log("SYSERR: bootAssemblies(): Could not add component #{:d} to assembly #{:d}.", part, lVnum);
       }
-    } else if (strcasecmp(szTag, "Vnum") == 0) {
-      if (sscanf(szLine, "#%d %s", &lVnum, szType) != 2) {
-        mud_log("SYSERR: bootAssemblies(): Invalid format in file {}, line {:d}.",
-                ASSEMBLIES_FILE, lLineCount);
+    } else if (str_eq_nocase(tag, "Vnum")) {
+      std::string type;
+      auto lower_case = [](std::string w) { /* as search_block() left it, lowered in place */
+        for (char &c : w)
+          c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        return w;
+      };
+      io::fields f(rest.substr(rest.starts_with('#') ? 1 : rest.size()));
+      int iType = -1;
+      if (!(f.number(lVnum) && f.word(type))) {
+        mud_log("SYSERR: bootAssemblies(): Invalid format in file {}, line {:d}.", ASSEMBLIES_FILE, lineno);
         lVnum = NOTHING;
-      } else if ((iType = search_block(szType, AssemblyTypes, true)) < 0) {
-        mud_log("SYSERR: bootAssemblies(): Invalid type '{}' for assembly vnum #{:d} at line {:d}.",
-                szType, lVnum, lLineCount);
+      } else if ((iType = search_block(type, AssemblyTypes, true)) < 0) {
+        mud_log("SYSERR: bootAssemblies(): Invalid type '{}' for assembly vnum #{:d} at line {:d}.", lower_case(type),
+                lVnum, lineno);
         lVnum = NOTHING;
       } else if (!assemblyCreate(g, lVnum, iType)) {
-        mud_log("SYSERR: bootAssemblies(): Could not create assembly for vnum #{:d}, type {}.",
-                lVnum, szType);
+        mud_log("SYSERR: bootAssemblies(): Could not create assembly for vnum #{:d}, type {}.", lVnum, lower_case(type));
         lVnum = NOTHING;
       }
     } else {
-      mud_log("SYSERR: Invalid tag '{}' in file {}, line #{:d}.", szTag,
-              ASSEMBLIES_FILE, lLineCount);
+      mud_log("SYSERR: Invalid tag '{}' in file {}, line #{:d}.", tag, ASSEMBLIES_FILE, lineno);
     }
-
-    *szLine = '\0';
-    *szTag  = '\0';
   }
-
-  fclose(pFile);
 }
 
 void assemblySaveAssemblies(GameWorld *g)
 {
-  struct atomic_file af;
-  std::string szType;
-  long i                         = 0;
-  long j                         = 0;
-  ASSEMBLY *pAssembly            = nullptr;
-  FILE *pFile                    = nullptr;
-
-  if ((pFile = atomic_open(&af, ASSEMBLIES_FILE, false)) == nullptr) {
-    mud_log("SYSERR: assemblySaveAssemblies(): Couldn't open file '{}' for writing.",
-            ASSEMBLIES_FILE);
-    return;
-  }
-
-  for (i = 0; i < g->g_lNumAssemblies; i++) {
-    pAssembly = (g->g_pAssemblyTable + i);
-    szType    = sprinttype(pAssembly->uchAssemblyType, AssemblyTypes);
-    file_print(pFile, "Vnum                #{:d} {}\n", pAssembly->lVnum, szType);
-
-    for (j = 0; j < pAssembly->lNumComponents; j++) {
-      file_print(pFile, "Component           #{:d} {:d} {:d}\n",
-                 pAssembly->pComponents[j].lVnum,
-                 (pAssembly->pComponents[j].bExtract ? 1 : 0),
-                 (pAssembly->pComponents[j].bInRoom ? 1 : 0));
-    }
-
+  io::text_writer out(ASSEMBLIES_FILE);
+  for (long i = 0; i < g->g_lNumAssemblies; i++) {
+    ASSEMBLY *pAssembly = g->g_pAssemblyTable + i;
+    out.print("Vnum                #{:d} {}\n", pAssembly->lVnum, sprinttype(pAssembly->uchAssemblyType, AssemblyTypes));
+    for (long j = 0; j < pAssembly->lNumComponents; j++)
+      out.print("Component           #{:d} {:d} {:d}\n", pAssembly->pComponents[j].lVnum,
+                (pAssembly->pComponents[j].bExtract ? 1 : 0), (pAssembly->pComponents[j].bInRoom ? 1 : 0));
     if (i < g->g_lNumAssemblies - 1)
-      file_print(pFile, "\n");
+      out.write("\n");
   }
-
-  atomic_commit(&af);
+  out.commit();
 }
 
 void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)

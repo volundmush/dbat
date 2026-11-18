@@ -7,6 +7,8 @@
 
 #include "dbat/descriptor_utils.hpp"
 #include "dbat/context_help.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/act.informative.hpp"
 #include "dbat/oasis.hpp"
 #include "dbat/dg_olc.hpp"
@@ -272,28 +274,34 @@ bool context_help(GameWorld *g, struct descriptor_data *d, char *arg)
   return true;
 }
 
+/* The context help file, text/contexthelp: "#<context>" and its text up to a '~', for each context that has one */
 void boot_context_help(GameWorld *g)
 {
-  int i, num;
-  FILE *fl;
-  char line[READ_SIZE];
-
-  fl = fopen(CONTEXT_HELP_FILE, "r");
-
   /* init to 'no help' string */
-  for (i = 0; i < NUM_CONTEXTS; i++)
+  for (int i = 0; i < NUM_CONTEXTS; i++)
     g->context_help_list[i] = const_cast<char *>(NO_HELP); /* never freed: see below */
 
-  if (!fl) {
-    mud_log("No context help found : {}", strerror(errno));
+  io::loaded<io::text_reader> file = io::text_reader::open(CONTEXT_HELP_FILE);
+  if (!file) {
+    mud_log("No context help found : {}", io::why_unreadable(CONTEXT_HELP_FILE));
     return;
   }
-  while (get_line(fl, line)) {
-    if (sscanf(line, "#%d *", &num) == 1 && num >= 0 && num < NUM_CONTEXTS) /* got a number, now get the text */
-      g->context_help_list[num] = fread_string(fl, "Context sensitive help");
+  while (std::optional<std::string_view> line = file->line()) {
+    int num = 0;
+    if (!line->starts_with('#') || !io::fields(line->substr(1)).number(num) || num < 0 || num >= NUM_CONTEXTS)
+      continue;
+    io::loaded<std::string> text = file->tilde_string("Context sensitive help");
+    if (!text) {
+      mud_log("SYSERR: {}", text.error().text());
+      exit(1);
+    }
+    /* an empty one is no help, as it was (it was a null, which showing it would crash on) */
+    if (text->empty())
+      continue;
+    if (g->context_help_list[num] != NO_HELP)
+      free(g->context_help_list[num]);
+    g->context_help_list[num] = strdup(text->c_str());
   }
-
-  fclose(fl);
 }
 
 void free_context_help(GameWorld *g)

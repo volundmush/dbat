@@ -96,4 +96,17 @@ bool touch(const std::filesystem::path &path)
   return true;
 }
 
+std::string why_unreadable(const std::filesystem::path &path)
+{
+  std::error_code ec;
+  std::filesystem::file_status st = std::filesystem::status(path, ec);
+  if (ec)
+    return ec.message();
+  if (!std::filesystem::exists(st))
+    return std::make_error_code(std::errc::no_such_file_or_directory).message();
+  if (std::filesystem::is_directory(st))
+    return std::make_error_code(std::errc::is_a_directory).message();
+  return std::make_error_code(std::errc::permission_denied).message();
+}
+
 } // namespace io

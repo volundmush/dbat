@@ -23,14 +23,11 @@
 #include "dbat/stringutils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/game_world.hpp"
 
 /* local globals */
 
 /* local functions */
-static void _write_one_node(FILE *fp, struct ban_list_element *node);
-static void write_ban_list(GameWorld *g);
 
 static const char *const ban_types[] = {
     "no",
@@ -38,40 +35,6 @@ static const char *const ban_types[] = {
     "select",
     "all",
     "ERROR"};
-
-void load_banned(GameWorld *g)
-{
-  FILE *fl;
-  int i, date;
-  char site_name[BANNED_SITE_LENGTH + 1], ban_type[100];
-  char name[MAX_NAME_LENGTH + 1];
-  struct ban_list_element *next_node;
-
-  g->ban_list = nullptr;
-
-  if (!(fl = fopen(BAN_FILE, "r"))) {
-    if (errno != ENOENT) {
-      mud_log("SYSERR: Unable to open banfile '{}': {}", BAN_FILE, strerror(errno));
-    } else
-      mud_log("   Ban file '{}' doesn't exist.", BAN_FILE);
-    return;
-  }
-  while (fscanf(fl, " %99s %50s %d %20s ", ban_type, site_name, &date, name) == 4) {
-    next_node = new ban_list_element();
-    strlcpy(next_node->site, site_name, sizeof(next_node->site));
-    strlcpy(next_node->name, name, sizeof(next_node->name));
-    next_node->date = date;
-
-    for (i = BAN_NOT; i <= BAN_ALL; i++)
-      if (!strcmp(ban_type, ban_types[i]))
-        next_node->type = i;
-
-    next_node->next = g->ban_list;
-    g->ban_list        = next_node;
-  }
-
-  fclose(fl);
-}
 
 void free_ban_list(GameWorld *g)
 {
@@ -100,29 +63,6 @@ int isbanned(GameWorld *g, char *hostname)
       i = MAX(i, banned_node->type);
 
   return (i);
-}
-
-static void _write_one_node(FILE *fp, struct ban_list_element *node)
-{
-  if (node) {
-    _write_one_node(fp, node->next);
-    file_print(fp, "{} {} {:d} {}\n", ban_types[node->type],
-               node->site, (long)node->date, node->name);
-  }
-}
-
-static void write_ban_list(GameWorld *g)
-{
-  struct atomic_file af;
-  FILE *fl;
-
-  if (!(fl = atomic_open(&af, BAN_FILE, false))) {
-    perror("SYSERR: Unable to open '" BAN_FILE "' for writing");
-    return;
-  }
-  _write_one_node(fl, g->ban_list); /* recursively write from end to start */
-  atomic_commit(&af);
-  return;
 }
 
 #define BAN_LIST_FORMAT "{:<40.40}  {:<8.8}  {:<10.10}  {:<16.16}\r\n"
@@ -197,7 +137,7 @@ ACMD(do_ban)
   mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "{} has banned {} for {} players.",
          char_get_name(ch), site, ban_types[ban_node->type]);
   send_to_char(g, ch, "Site banned.\r\n");
-  write_ban_list(g);
+  save_ban_list(g);
 }
 #undef BAN_LIST_FORMAT
 
@@ -231,7 +171,7 @@ ACMD(do_unban)
          char_get_name(ch), ban_types[ban_node->type], ban_node->site);
 
   delete ban_node;
-  write_ban_list(g);
+  save_ban_list(g);
 }
 
 /**************************************************************************
@@ -301,24 +241,3 @@ void Free_Invalid_List(GameWorld *g)
   g->num_invalid = 0;
 }
 
-void Read_Invalid_List(GameWorld *g)
-{
-  FILE *fp;
-  char temp[256];
-
-  if (!(fp = fopen(XNAME_FILE, "r"))) {
-    perror("SYSERR: Unable to open '" XNAME_FILE "' for reading");
-    return;
-  }
-
-  g->num_invalid = 0;
-  while (get_line(fp, temp) && g->num_invalid < MAX_INVALID_NAMES)
-    g->invalid_list[g->num_invalid++] = strdup(temp);
-
-  if (g->num_invalid >= MAX_INVALID_NAMES) {
-    mud_log("SYSERR: Too many invalid names; change MAX_INVALID_NAMES in ban.c");
-    exit(1);
-  }
-
-  fclose(fp);
-}

@@ -29,7 +29,6 @@
 #include "dbat/game_world.hpp"
 
 /* local functions */
-static char *fread_action(FILE *fl, int nr);
 static int find_action(GameWorld *g, int cmd);
 static int social_sort_order(const void *a, const void *b);
 
@@ -141,125 +140,6 @@ ACMD(do_insult)
   act(g, "$n insults $N.", true, ch, nullptr, victim, TO_NOTVICT);
 }
 
-void boot_social_messages(GameWorld *g)
-{
-  FILE *fl;
-  int nr = 0, hide, min_char_pos, min_pos, min_lvl, curr_soc = -1;
-  char next_soc[MAX_STRING_LENGTH], sorted[MAX_INPUT_LENGTH];
-
-  if (CONFIG_NEW_SOCIALS == true) {
-    /* open social file */
-    if (!(fl = fopen(SOCMESS_FILE_NEW, "r"))) {
-      mud_log("SYSERR: can't open socials file '{}': {}", SOCMESS_FILE_NEW, strerror(errno));
-      /*  SYSERR_DESC:
-       *  This error, from boot_social_messages(), occurs when the server
-       *  fails to open the file containing the social messages.  The error
-       *  at the end will indicate the reason why.
-       */
-      exit(1);
-    }
-    /* count socials */
-    *next_soc = '\0';
-    while (!feof(fl)) {
-      fgets(next_soc, MAX_STRING_LENGTH, fl);
-      if (*next_soc == '~') g->top_of_socialt++;
-    }
-  } else { /* old style */
-
-    /* open social file */
-    if (!(fl = fopen(SOCMESS_FILE, "r"))) {
-      mud_log("SYSERR: can't open socials file '{}': {}", SOCMESS_FILE, strerror(errno));
-      exit(1);
-    }
-    /* count socials */
-    while (!feof(fl)) {
-      fgets(next_soc, MAX_STRING_LENGTH, fl);
-      if (*next_soc == '\n' || *next_soc == '\r') g->top_of_socialt++; /* all socials are followed by a blank line */
-    }
-  }
-
-  mud_log("Social table contains {:d} socials.", g->top_of_socialt);
-  if (g->top_of_socialt < 0) { /* a game with no socials can still run */
-    fclose(fl);
-    return;
-  }
-  rewind(fl);
-
-  g->soc_mess_list = new social_messg[g->top_of_socialt + 1]();
-
-  /* now read 'em */
-  for (;;) {
-    fscanf(fl, " %64935s ", next_soc); /* MAX_STRING_LENGTH */
-    if (*next_soc == '$') break;
-    if (curr_soc >= g->top_of_socialt) {
-      mud_log("SYSERR: more socials than were counted in the social file, near '{}'", next_soc);
-      exit(1);
-    }
-
-    if (CONFIG_NEW_SOCIALS == true) {
-      if (fscanf(fl, " %16383s %d %d %d %d \n", /* MAX_INPUT_LENGTH */
-                 sorted, &hide, &min_char_pos, &min_pos, &min_lvl) != 5) {
-        mud_log("SYSERR: format error in social file near social '{}'", next_soc);
-        /*  SYSERR_DESC:
-       *  From boot_social_messages(), this error is output when the
-       *  server is expecting to find the remainder of the first line of the
-       *  social ('hide' and 'minimum position').  These must follow the
-       *  name of the social with a single space such as: 'accuse 0 5\n'.
-       *  This error often occurs when one of the numbers is missing or the
-       *  social name has a space in it (i.e., 'bend over').
-       */
-        exit(1);
-      }
-      curr_soc++;
-      g->soc_mess_list[curr_soc].command             = strdup(next_soc + 1);
-      g->soc_mess_list[curr_soc].sort_as             = strdup(sorted);
-      g->soc_mess_list[curr_soc].hide                = hide;
-      g->soc_mess_list[curr_soc].min_char_position   = min_char_pos;
-      g->soc_mess_list[curr_soc].min_victim_position = min_pos;
-      g->soc_mess_list[curr_soc].min_level_char      = min_lvl;
-    } else { /* old style */
-      if (fscanf(fl, " %d %d \n", &hide, &min_pos) != 2) {
-        mud_log("SYSERR: format error in social file near social '{}'", next_soc);
-        exit(1);
-      }
-      curr_soc++;
-      g->soc_mess_list[curr_soc].command             = strdup(next_soc);
-      g->soc_mess_list[curr_soc].sort_as             = strdup(next_soc);
-      g->soc_mess_list[curr_soc].hide                = hide;
-      g->soc_mess_list[curr_soc].min_char_position   = POS_RESTING;
-      g->soc_mess_list[curr_soc].min_victim_position = min_pos;
-      g->soc_mess_list[curr_soc].min_level_char      = 0;
-    }
-
-    g->soc_mess_list[curr_soc].char_no_arg   = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].others_no_arg = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].char_found    = fread_action(fl, nr);
-
-    /* if no char_found, the rest is to be ignored */
-    if (CONFIG_NEW_SOCIALS == false && !g->soc_mess_list[curr_soc].char_found)
-      continue;
-
-    g->soc_mess_list[curr_soc].others_found = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].vict_found   = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].not_found    = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].char_auto    = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].others_auto  = fread_action(fl, nr);
-
-    if (CONFIG_NEW_SOCIALS == false)
-      continue;
-
-    g->soc_mess_list[curr_soc].char_body_found   = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].others_body_found = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].vict_body_found   = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].char_obj_found    = fread_action(fl, nr);
-    g->soc_mess_list[curr_soc].others_obj_found  = fread_action(fl, nr);
-  }
-
-  /* close file & set top */
-  fclose(fl);
-  g->top_of_socialt = curr_soc;
-}
-
 void create_command_list(GameWorld *g)
 {
   int i, j, k;
@@ -322,27 +202,6 @@ void free_command_list(GameWorld *g)
   free(const_cast<char *>(g->complete_cmd_info[k].sort_as));
   delete[] g->complete_cmd_info;
   g->complete_cmd_info = nullptr;
-}
-
-static char *fread_action(FILE *fl, int nr)
-{
-  char buf[MAX_STRING_LENGTH];
-
-  fgets(buf, MAX_STRING_LENGTH, fl);
-  if (feof(fl)) {
-    mud_log("SYSERR: fread_action: unexpected EOF near action #{:d}", nr);
-    /*  SYSERR_DESC:
-     *  fread_action() will fail if it discovers an end of file marker
-     *  before it is able to read in the expected string.  This can be
-     *  caused by a truncated socials file.
-     */
-    exit(1);
-  }
-  if (*buf == '#')
-    return (nullptr);
-
-  buf[strlen(buf) - 1] = '\0';
-  return (strdup(buf));
 }
 
 void free_social_messages(GameWorld *g)

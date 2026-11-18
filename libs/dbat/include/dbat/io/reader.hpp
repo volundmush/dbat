@@ -18,6 +18,7 @@
 #include <string_view>
 #include <vector>
 
+#include "dbat/consts/maximums.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/io/load_error.hpp"
 
@@ -28,6 +29,14 @@ bool is_skipped_line(std::string_view raw);
 
 /* What get_line() keeps of a raw line: up to its line end, or a '\0' (quirk), cut to READ_SIZE - 1 bytes */
 std::string_view line_text(std::string_view raw);
+
+/* The next piece of text as fgets(buf, buffer) reads one, taken off the front of text: up to and including a '\n',
+   but at most buffer - 1 bytes, so that a longer line comes in several pieces */
+std::string_view fgets_piece(std::string_view &text, size_t buffer = READ_SIZE);
+
+/* What the old fgets() readers kept of a piece: up to a '\0', with its last character taken off (quirk: whether or not
+   it is the '\n'). An empty one stays empty. */
+std::string_view chopped_piece(std::string_view piece);
 
 /* Adds one raw line to a string being read as fread_string() reads one; true if the line ends it, with a '~' just
    before its line end (only a trailing '~' counts), otherwise the line is added with "\r\n" after it */
@@ -66,6 +75,8 @@ public:
   explicit fields(std::string_view text) : text_(text) {}
   /* %d: a number, held to a long's range and then cut to an int (quirk, as scan_ints()) */
   bool number(int &n);
+  /* %lld: a number, held to a long long's range */
+  bool number(long long &n);
   /* %s, or %<width>s: a word of up to width characters */
   bool word(std::string &w, size_t width = std::string_view::npos);
   /* " %<width>[^stops]": after the spaces, up to width characters none of which is one of stops */

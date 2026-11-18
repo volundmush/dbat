@@ -4,6 +4,7 @@
 #include <cctype>
 #include <climits>
 #include <cstdlib>
+#include <limits>
 #include <fstream>
 #include <sstream>
 
@@ -24,8 +25,10 @@ bool is_space(char c)
 bool is_digit(char c) { return c >= '0' && c <= '9'; }
 
 /* The digits at the start of text, after a sign, as strtol() reads them: the value, held to a long's range */
-long read_long(std::string_view text, size_t &at)
+/* A number as strtol() (or strtoll()) reads one into a T: past T's range, the largest T of that sign */
+template <class T> T read_signed(std::string_view text, size_t &at)
 {
+  constexpr T low = std::numeric_limits<T>::min(), high = std::numeric_limits<T>::max();
   bool negative = false;
   if (at < text.size() && (text[at] == '+' || text[at] == '-'))
     negative = text[at++] == '-';
@@ -38,9 +41,13 @@ long read_long(std::string_view text, size_t &at)
       magnitude = magnitude * 10 + static_cast<unsigned>(text[at] - '0');
   }
   if (negative)
-    return over || magnitude > static_cast<unsigned long long>(LONG_MAX) + 1 ? LONG_MIN
-                                                                            : static_cast<long>(0 - magnitude);
-  return over || magnitude > static_cast<unsigned long long>(LONG_MAX) ? LONG_MAX : static_cast<long>(magnitude);
+    return over || magnitude > static_cast<unsigned long long>(high) + 1 ? low : static_cast<T>(0 - magnitude);
+  return over || magnitude > static_cast<unsigned long long>(high) ? high : static_cast<T>(magnitude);
+}
+
+long read_long(std::string_view text, size_t &at)
+{
+  return read_signed<long>(text, at);
 }
 
 } // namespace
@@ -56,6 +63,23 @@ std::string_view line_text(std::string_view raw)
   if (end == std::string_view::npos)
     end = raw.size();
   return raw.substr(0, std::min<size_t>(end, READ_SIZE - 1));
+}
+
+std::string_view fgets_piece(std::string_view &text, size_t buffer)
+{
+  size_t end = text.find('\n');
+  end        = end == std::string_view::npos ? text.size() : end + 1;
+  std::string_view piece = text.substr(0, std::min(end, buffer - 1));
+  text.remove_prefix(piece.size());
+  return piece;
+}
+
+std::string_view chopped_piece(std::string_view piece)
+{
+  piece = piece.substr(0, piece.find('\0'));
+  if (!piece.empty())
+    piece.remove_suffix(1);
+  return piece;
 }
 
 bool add_string_line(std::string &s, std::string_view raw)
@@ -168,6 +192,20 @@ bool fields::number(int &n)
     return false;
   }
   n = static_cast<int>(read_long(text_, at_)); /* quirk: past an int, cut to one */
+  count_++;
+  return true;
+}
+
+bool fields::number(long long &n)
+{
+  if (!start())
+    return false;
+  size_t digits = at_ + (text_[at_] == '+' || text_[at_] == '-');
+  if (digits >= text_.size() || !is_digit(text_[digits])) {
+    failed_ = true;
+    return false;
+  }
+  n = read_signed<long long>(text_, at_);
   count_++;
   return true;
 }

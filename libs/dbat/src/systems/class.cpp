@@ -61,36 +61,6 @@ static const char *sensei_abbr(int s);
  * guild, then you don't have to change that file, only here.
  */
 
-/* 
- * These tables hold the various level configuration setting;
- * experience points, base hit values, character saving throws.
- * They are read from a configuration file (normally etc/levels)
- * as part of the boot process.  The function load_levels() at
- * the end of this file reads in the actual values.
- */
-
-static const char *const config_sect[NUM_CONFIG_SECTIONS + 1] = {
-    "version",
-    "experience",
-    "vernum",
-    "fortitude",
-    "reflex",
-    "will",
-    "basehit",
-    "\n"};
-
-/* The keywords above, in order. */
-enum {
-  CONFIG_LEVEL_VERSION,
-  CONFIG_LEVEL_EXPERIENCE,
-  CONFIG_LEVEL_VERNUM,
-  CONFIG_LEVEL_FORTITUDE,
-  CONFIG_LEVEL_REFLEX,
-  CONFIG_LEVEL_WILL,
-  CONFIG_LEVEL_BASEHIT,
-};
-
-
 enum { SAVE_MANUAL,
        SAVE_LOW,
        SAVE_HIGH };
@@ -1518,100 +1488,6 @@ std::string class_desc_str(struct char_data *ch, int howlong, int wantthe)
   rank = char_get_class_ranks(ch, char_get_class(ch));
   str += str_format("{}{:d}{}", char_sensei_name_lower(ch), rank, char_get_level(ch) == rank ? "" : "+");
   return str;
-}
-
-int load_levels(GameWorld *g)
-{
-  FILE *fp;
-  char line[READ_SIZE], sect_name[READ_SIZE] = {'\0'}, *ptr;
-  int linenum = 0, tp, cls, sect_type = -1;
-
-  if (!(fp = fopen(LEVEL_CONFIG, "r"))) {
-    mud_log("SYSERR: Could not open level configuration file, error: {}!",
-            strerror(errno));
-    return -1;
-  }
-
-  for (cls = 0; cls < NUM_CLASSES; cls++) {
-    for (tp = 0; tp <= SAVING_WILL; tp++) {
-      g->save_classes[tp][cls] = 0;
-    }
-    g->basehit_classes[cls] = 0;
-  }
-
-  for (;;) {
-    linenum++;
-    if (!fgets(line, READ_SIZE, fp)) { /* eof check */
-      mud_log("SYSERR: Unexpected EOF in file {}.", LEVEL_CONFIG);
-      return -1;
-    } else if (*line == '$') { /* end of file */
-      break;
-    } else if (*line == '*') { /* comment line */
-      continue;
-    } else if (*line == '#') { /* start of a section */
-      if ((tp = sscanf(line, "#%s", sect_name)) != 1) {
-        mud_log("SYSERR: Format error in file {}, line number {:d} - text: {}.",
-                LEVEL_CONFIG, linenum, line);
-        return -1;
-      }
-      if ((sect_type = search_block(sect_name, config_sect, false)) == -1) {
-        mud_log("SYSERR: Invalid section in file {}, line number {:d}: {}.",
-                LEVEL_CONFIG, linenum, sect_name);
-        return -1;
-      }
-    } else {
-      if (sect_type == CONFIG_LEVEL_VERSION) {
-        if (!strncmp(line, "Suntzu", 6)) {
-          mud_log("SYSERR: Suntzu {} config files are not compatible with rasputin", LEVEL_CONFIG);
-          return -1;
-        }
-        strcpy(g->level_version, line); /* OK - both are READ_SIZE */
-      } else if (sect_type == CONFIG_LEVEL_VERNUM) {
-        g->level_vernum = atoi(line);
-      } else if (sect_type == CONFIG_LEVEL_EXPERIENCE) {
-        tp             = atoi(line);
-        g->exp_multiplier = tp;
-      } else if ((sect_type >= CONFIG_LEVEL_FORTITUDE && sect_type <= CONFIG_LEVEL_WILL) ||
-                 sect_type == CONFIG_LEVEL_BASEHIT) {
-        for (ptr = line; ptr && *ptr && !isdigit(*ptr); ptr++);
-        if (!ptr || !*ptr || !isdigit(*ptr)) {
-          mud_log("SYSERR: Cannot find class number in file {}, line number {:d}, section {}.",
-                  LEVEL_CONFIG, linenum, sect_name);
-          return -1;
-        }
-        cls = atoi(ptr);
-        for (; ptr && *ptr && isdigit(*ptr); ptr++);
-        for (; ptr && *ptr && !isdigit(*ptr); ptr++);
-        if (ptr && *ptr && !isdigit(*ptr)) {
-          mud_log("SYSERR: Non-numeric entry in file {}, line number {:d}, section {}.",
-                  LEVEL_CONFIG, linenum, sect_name);
-          return -1;
-        }
-        if (ptr && *ptr) /* There's a value */
-          tp = atoi(ptr);
-        else {
-          mud_log("SYSERR: Need 1 value in {}, line number {:d}, section {}.",
-                  LEVEL_CONFIG, linenum, sect_name);
-          return -1;
-        }
-        if (cls < 0 || cls >= NUM_CLASSES) {
-          mud_log("SYSERR: Invalid class number {:d} in file {}, line number {:d}.",
-                  cls, LEVEL_CONFIG, linenum);
-          return -1;
-        }
-        if (sect_type == CONFIG_LEVEL_BASEHIT) {
-          g->basehit_classes[cls] = tp;
-        } else {
-          g->save_classes[SAVING_FORTITUDE + sect_type - CONFIG_LEVEL_FORTITUDE][cls] = tp;
-        }
-      } else {
-        mud_log("Unsupported level config option");
-      }
-    }
-  }
-  fclose(fp);
-
-  return 0;
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */

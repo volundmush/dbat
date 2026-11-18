@@ -1084,6 +1084,45 @@ static void check_help_keyword_with_an_unfinished_quote(void)
   th_shutdown(g);
 }
 
+/* A line that starts with a '\0': the old reader took the last character off a line of no length, writing before
+   its buffer. */
+static void help_line_starting_with_a_nul(void)
+{
+  static const char text[] = "nul\nbefore\n\0after\nend\n#0\n$\n";
+  FILE *fl                 = fopen("text/help/help.hlp", "w");
+
+  if (!fl)
+    abort();
+  fwrite(text, 1, sizeof(text) - 1, fl);
+  fclose(fl);
+}
+
+static void check_help_line_starting_with_a_nul(void)
+{
+  th_before_boot(help_line_starting_with_a_nul);
+  GameWorld *g = th_boot();
+
+  CHECK(g->help_table.size() == 1);
+  CHECK(g->help_table[0].entry == "nul\r\nbefore\r\n\r\nend\r\n"); /* the line is empty from its '\0' */
+  th_shutdown(g);
+}
+
+/* An entry with no text was a null in the context help, which showing it would crash on. */
+static void empty_context_help(void)
+{
+  write_file(CONTEXT_HELP_FILE, "#0\n~\n#1\nSome help.~\n");
+}
+
+static void check_empty_context_help(void)
+{
+  th_before_boot(empty_context_help);
+  GameWorld *g = th_boot();
+
+  CHECK(g->context_help_list[0] && !strcmp(g->context_help_list[0], "No help available (yet)!\r\n"));
+  CHECK(g->context_help_list[1] && !strcmp(g->context_help_list[1], "Some help."));
+  th_shutdown(g);
+}
+
 static void check_long_word_in_index(void)
 {
   th_before_boot(long_word_in_index);
@@ -2383,6 +2422,8 @@ static const struct {
     {"long_name_in_auction_file",                   check_long_name_in_auction_file                  },
     {"exit_in_a_direction_that_does_not_exist",     check_exit_in_a_direction_that_does_not_exist    },
     {"zone_command_with_a_space_before_it",         check_zone_command_with_a_space_before_it        },
+    {"help_line_starting_with_a_nul",               check_help_line_starting_with_a_nul              },
+    {"empty_context_help",                          check_empty_context_help                         },
     {"damaged_files_refuse_the_boot",               check_damaged_files_refuse_the_boot              },
 };
 

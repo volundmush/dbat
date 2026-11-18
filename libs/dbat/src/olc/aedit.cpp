@@ -23,12 +23,12 @@
 #include "dbat/comm.hpp"
 #include "dbat/oasis.hpp"
 #include "dbat/genolc.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/text_files.hpp"
 #include "dbat/game_world.hpp"
 
 static void aedit_disp_menu(GameWorld *g, struct descriptor_data *d);
 static int aedit_find_command(GameWorld *g, const char *txt);
-static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *d);
+static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *);
 
 /*------------------------------------------------------------------------*\
   Utils and exported functions.
@@ -194,46 +194,9 @@ static void aedit_save_internally(GameWorld *g, struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *d)
+static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *)
 {
-  struct atomic_file af;
-  FILE *fp;
-  int i;
-  if (!(fp = atomic_open(&af, SOCMESS_FILE_NEW, false))) {
-    std::string error = str_format("Can't open socials file '{}'", SOCMESS_FILE);
-    perror(error.c_str());
-    exit(1);
-  }
-
-  for (i = 0; i <= g->top_of_socialt; i++) {
-    file_print(fp, "~{} {} {:d} {:d} {:d} {:d}\n",
-               g->soc_mess_list[i].command,
-               g->soc_mess_list[i].sort_as,
-               g->soc_mess_list[i].hide,
-               g->soc_mess_list[i].min_char_position,
-               g->soc_mess_list[i].min_victim_position,
-               g->soc_mess_list[i].min_level_char);
-    file_print(fp, "{}\n{}\n{}\n{}\n",
-               ((g->soc_mess_list[i].char_no_arg) ? g->soc_mess_list[i].char_no_arg : "#"),
-               ((g->soc_mess_list[i].others_no_arg) ? g->soc_mess_list[i].others_no_arg : "#"),
-               ((g->soc_mess_list[i].char_found) ? g->soc_mess_list[i].char_found : "#"),
-               ((g->soc_mess_list[i].others_found) ? g->soc_mess_list[i].others_found : "#"));
-    file_print(fp, "{}\n{}\n{}\n{}\n",
-               ((g->soc_mess_list[i].vict_found) ? g->soc_mess_list[i].vict_found : "#"),
-               ((g->soc_mess_list[i].not_found) ? g->soc_mess_list[i].not_found : "#"),
-               ((g->soc_mess_list[i].char_auto) ? g->soc_mess_list[i].char_auto : "#"),
-               ((g->soc_mess_list[i].others_auto) ? g->soc_mess_list[i].others_auto : "#"));
-    file_print(fp, "{}\n{}\n{}\n",
-               ((g->soc_mess_list[i].char_body_found) ? g->soc_mess_list[i].char_body_found : "#"),
-               ((g->soc_mess_list[i].others_body_found) ? g->soc_mess_list[i].others_body_found : "#"),
-               ((g->soc_mess_list[i].vict_body_found) ? g->soc_mess_list[i].vict_body_found : "#"));
-    file_print(fp, "{}\n{}\n\n",
-               ((g->soc_mess_list[i].char_obj_found) ? g->soc_mess_list[i].char_obj_found : "#"),
-               ((g->soc_mess_list[i].others_obj_found) ? g->soc_mess_list[i].others_obj_found : "#"));
-  }
-
-  file_print(fp, "$\n");
-  if (atomic_commit(&af)) /* otherwise still listed as unsaved */
+  if (save_socials(g)) /* otherwise still listed as unsaved */
     remove_from_save_list(g, AEDIT_PERMISSION, SL_ACT);
 }
 

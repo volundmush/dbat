@@ -24,6 +24,9 @@
 - A mob made to restring something at the restring shop is ignored, rather than crashing the game. [Volund]
 - Locking someone out while the lockout list holds 500 or more names no longer crashes the game. [Volund]
 - Checking a zone with `zcheck` no longer crashes the game when one of its rooms has no description, or one of its mobs has no keywords, short or long description. [Volund]
+- Asking for help at an OLC prompt whose context help entry has no text, such as the script editor's "delete a trigger" prompt, says there is no help for it, rather than crashing the game. [Volund]
+- When aedit can't write the socials file, the socials stay listed as unsaved, rather than the game shutting down. [Volund]
+- A help file line that starts with a NUL byte is read as an empty line, rather than writing before the reader's buffer. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]

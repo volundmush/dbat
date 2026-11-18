@@ -28,7 +28,7 @@
 #include "dbat/broadcast.hpp"
 #include "dbat/act.informative.hpp"
 #include "dbat/act.social.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/text_files.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
@@ -142,32 +142,9 @@ static void hedit_save_internally(GameWorld *g, struct descriptor_data *d)
   hedit_save_to_disk(g, d);
 }
 
-static void hedit_save_to_disk(GameWorld *g, struct descriptor_data *d)
+static void hedit_save_to_disk(GameWorld *g, struct descriptor_data *)
 {
-  struct atomic_file af;
-  FILE *fp;
-  std::string buf1;
-  std::string index_name;
-  int i;
-
-  index_name = str_format("{}{}", HLP_PREFIX, HELP_FILE);
-  if (!(fp = atomic_open(&af, index_name.c_str(), false))) {
-    mud_log("SYSERR: Could not write help index file");
-    return;
-  }
-
-  for (i = 0; i < (int)g->help_table.size(); i++) {
-    if (g->help_table[i].duplicate)
-      continue;
-    buf1 = !g->help_table[i].entry.empty() ? g->help_table[i].entry.c_str() : "Empty\r\n";
-    strip_cr(buf1);
-
-    /* Forget making a buffer, lets just write the thing now. */
-    file_print(fp, "{}#{:d}\n", buf1, g->help_table[i].min_level);
-  }
-  /* Write final line and close. */
-  file_print(fp, "$~\n");
-  if (!atomic_commit(&af))
+  if (!save_help(g))
     return; /* still listed as unsaved */
 
   remove_from_save_list(g, HEDIT_PERMISSION, SL_HLP);

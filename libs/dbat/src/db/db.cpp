@@ -24,6 +24,7 @@
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/help.hpp"
+#include "dbat/text_files.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
@@ -85,9 +86,6 @@
 
 /* local functions */
 static void dragon_level(GameWorld *g, struct char_data *ch);
-static int file_to_string(const char *name, std::string &text);
-static int file_to_string_alloc(const char *name, std::string *text);
-static void get_one_line(FILE *fl, char *buf);
 static void check_start_rooms(GameWorld *g);
 static void renum_world(GameWorld *g);
 static void renum_zone_table(GameWorld *g);
@@ -227,117 +225,6 @@ void mob_stats(GameWorld *g, struct char_data *mob)
 /*************************************************************************
 *  routines for booting the system                                       *
 *************************************************************************/
-
-/* this is necessary for the autowiz system */
-void reboot_wizlists(GameWorld *g)
-{
-  file_to_string_alloc(WIZLIST_FILE, &g->wizlist);
-  file_to_string_alloc(IMMLIST_FILE, &g->immlist);
-}
-
-/*
- * Too bad it doesn't check the return values to let the user
- * know about -1 values.  This will result in an 'Okay.' to a
- * 'reload' command even when the string was not replaced.
- * To fix later, if desired. -gg 6/24/99
- */
-ACMD(do_reboot)
-{
-  std::string arg;
-
-  std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
-  if (str_eq_nocase(arg, "all") || arg[0] == '*') {
-    if (load_levels(g) < 0)
-      send_to_char(g, ch, "Cannot read level configurations\r\n");
-    if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
-      prune_crlf(g->GREETINGS);
-    if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
-      prune_crlf(g->GREETANSI);
-    if (file_to_string_alloc(WIZLIST_FILE, &g->wizlist) < 0)
-      send_to_char(g, ch, "Cannot read wizlist\r\n");
-    if (file_to_string_alloc(IMMLIST_FILE, &g->immlist) < 0)
-      send_to_char(g, ch, "Cannot read immlist\r\n");
-    if (file_to_string_alloc(NEWS_FILE, &g->news) < 0)
-      send_to_char(g, ch, "Cannot read news\r\n");
-    if (file_to_string_alloc(CREDITS_FILE, &g->credits) < 0)
-      send_to_char(g, ch, "Cannot read credits\r\n");
-    if (file_to_string_alloc(MOTD_FILE, &g->motd) < 0)
-      send_to_char(g, ch, "Cannot read motd\r\n");
-    if (file_to_string_alloc(IMOTD_FILE, &g->imotd) < 0)
-      send_to_char(g, ch, "Cannot read imotd\r\n");
-    if (file_to_string_alloc(HELP_PAGE_FILE, &g->help) < 0)
-      send_to_char(g, ch, "Cannot read help front page\r\n");
-    if (file_to_string_alloc(INFO_FILE, &g->info) < 0)
-      send_to_char(g, ch, "Cannot read info file\r\n");
-    if (file_to_string_alloc(POLICIES_FILE, &g->policies) < 0)
-      send_to_char(g, ch, "Cannot read policies\r\n");
-    if (file_to_string_alloc(HANDBOOK_FILE, &g->handbook) < 0)
-      send_to_char(g, ch, "Cannot read handbook\r\n");
-    if (file_to_string_alloc(BACKGROUND_FILE, &g->background) < 0)
-      send_to_char(g, ch, "Cannot read background\r\n");
-    free_help_table(g);
-    index_boot(g, DB_BOOT_HLP);
-  } else if (str_eq_nocase(arg, "levels")) {
-    if (load_levels(g) < 0)
-      send_to_char(g, ch, "Cannot read level configurations\r\n");
-  } else if (str_eq_nocase(arg, "wizlist")) {
-    if (file_to_string_alloc(WIZLIST_FILE, &g->wizlist) < 0)
-      send_to_char(g, ch, "Cannot read wizlist\r\n");
-  } else if (str_eq_nocase(arg, "immlist")) {
-    if (file_to_string_alloc(IMMLIST_FILE, &g->immlist) < 0)
-      send_to_char(g, ch, "Cannot read immlist\r\n");
-  } else if (str_eq_nocase(arg, "news")) {
-    if (file_to_string_alloc(NEWS_FILE, &g->news) < 0)
-      send_to_char(g, ch, "Cannot read news\r\n");
-  } else if (str_eq_nocase(arg, "credits")) {
-    if (file_to_string_alloc(CREDITS_FILE, &g->credits) < 0)
-      send_to_char(g, ch, "Cannot read credits\r\n");
-  } else if (str_eq_nocase(arg, "motd")) {
-    if (file_to_string_alloc(MOTD_FILE, &g->motd) < 0)
-      send_to_char(g, ch, "Cannot read motd\r\n");
-  } else if (str_eq_nocase(arg, "imotd")) {
-    if (file_to_string_alloc(IMOTD_FILE, &g->imotd) < 0)
-      send_to_char(g, ch, "Cannot read imotd\r\n");
-  } else if (str_eq_nocase(arg, "help")) {
-    if (file_to_string_alloc(HELP_PAGE_FILE, &g->help) < 0)
-      send_to_char(g, ch, "Cannot read help front page\r\n");
-  } else if (str_eq_nocase(arg, "info")) {
-    if (file_to_string_alloc(INFO_FILE, &g->info) < 0)
-      send_to_char(g, ch, "Cannot read info\r\n");
-  } else if (str_eq_nocase(arg, "policy")) {
-    if (file_to_string_alloc(POLICIES_FILE, &g->policies) < 0)
-      send_to_char(g, ch, "Cannot read policy\r\n");
-  } else if (str_eq_nocase(arg, "handbook")) {
-    if (file_to_string_alloc(HANDBOOK_FILE, &g->handbook) < 0)
-      send_to_char(g, ch, "Cannot read handbook\r\n");
-  } else if (str_eq_nocase(arg, "background")) {
-    if (file_to_string_alloc(BACKGROUND_FILE, &g->background) < 0)
-      send_to_char(g, ch, "Cannot read background\r\n");
-  } else if (str_eq_nocase(arg, "greetings")) {
-    if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
-      prune_crlf(g->GREETINGS);
-    else
-      send_to_char(g, ch, "Cannot read greetings.\r\n");
-  } else if (str_eq_nocase(arg, "greetansi")) {
-    if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
-      prune_crlf(g->GREETANSI);
-    else
-      send_to_char(g, ch, "Cannot read greetings.\r\n");
-  } else if (str_eq_nocase(arg, "xhelp")) {
-    free_help_table(g);
-    index_boot(g, DB_BOOT_HLP);
-  } else if (str_eq_nocase(arg, "ihelp")) {
-    if (file_to_string_alloc(IHELP_PAGE_FILE, &g->ihelp) < 0)
-      send_to_char(g, ch, "Cannot read help front page\r\n");
-  } else {
-    send_to_char(g, ch, "Unknown reload option.\r\n");
-    return;
-  }
-
-  send_to_char(g, ch, CONFIG_OK);
-}
 
 io::loaded<void> boot_world(GameWorld *g)
 {
@@ -513,22 +400,7 @@ void boot_db(GameWorld *g)
   reset_time(g);
 
   mud_log("Reading news, credits, help, ihelp, bground, info & motds.");
-  file_to_string_alloc(NEWS_FILE, &g->news);
-  file_to_string_alloc(CREDITS_FILE, &g->credits);
-  file_to_string_alloc(MOTD_FILE, &g->motd);
-  file_to_string_alloc(IMOTD_FILE, &g->imotd);
-  file_to_string_alloc(HELP_PAGE_FILE, &g->help);
-  file_to_string_alloc(INFO_FILE, &g->info);
-  file_to_string_alloc(WIZLIST_FILE, &g->wizlist);
-  file_to_string_alloc(IMMLIST_FILE, &g->immlist);
-  file_to_string_alloc(POLICIES_FILE, &g->policies);
-  file_to_string_alloc(HANDBOOK_FILE, &g->handbook);
-  file_to_string_alloc(BACKGROUND_FILE, &g->background);
-  file_to_string_alloc(IHELP_PAGE_FILE, &g->ihelp);
-  if (file_to_string_alloc(GREETINGS_FILE, &g->GREETINGS) == 0)
-    prune_crlf(g->GREETINGS);
-  if (file_to_string_alloc(GREETANSI_FILE, &g->GREETANSI) == 0)
-    prune_crlf(g->GREETANSI);
+  load_text_pages(g);
 
   mud_log("Loading spell definitions.");
   mag_assign_spells(g);
@@ -567,7 +439,10 @@ void boot_db(GameWorld *g)
   }
 
   mud_log("Loading social messages.");
-  boot_social_messages(g);
+  if (io::loaded<void> socials = read_socials(g); !socials) {
+    mud_log("SYSERR: {}", socials.error().text());
+    exit(1);
+  }
 
   mud_log("Building command list.");
   create_command_list(g); /* aedit patch -- M. Scott */
@@ -603,7 +478,10 @@ void boot_db(GameWorld *g)
 
   mud_log("Reading banned site and invalid-name list.");
   load_banned(g);
-  Read_Invalid_List(g);
+  if (io::loaded<void> names = Read_Invalid_List(g); !names) {
+    mud_log("SYSERR: {}", names.error().text());
+    exit(1);
+  }
 
   if (!g->no_rent_check) {
     mud_log("Deleting timed-out crash and rent files:");
@@ -630,99 +508,11 @@ void boot_db(GameWorld *g)
   mud_log("Boot db -- DONE.");
 }
 
-/* save the auction file */
-void auc_save(GameWorld *g)
-{
-  FILE *fl;
-
-  if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
-    mud_log("SYSERR: Can't write to '{}' auction file.", AUCTION_FILE);
-  else {
-
-    for (obj_data *obj : room_contents(g, 80)) {
-      if (obj) {
-        file_print(fl, "{:d} {} {:d} {:d} {:d} {:d} {:d}\n", obj_get_unique_id(obj), obj_get_auctname(obj), obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj), obj_get_aucTime(obj));
-      }
-    }
-    file_print(fl, "~END~\n");
-    fclose(fl);
-  }
-}
-
-/* load from auction file */
-void auc_load(struct obj_data *obj)
-{
-  char line[500], filler[50];
-  int64_t oID;
-  time_t timer;
-  int aID, bID, cost, startc;
-  FILE *fl;
-
-  if ((fl = fopen(AUCTION_FILE, "r")) == nullptr)
-    mud_log("SYSERR: Can't read from '{}' auction file.", AUCTION_FILE);
-  else {
-    while (!feof(fl)) {
-      get_line(fl, line);
-      sscanf(line, "%" SCNd64 " %49s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
-      if (obj_get_unique_id(obj) == oID) {
-        obj_set_auctname(obj, strdup(filler));
-        obj_set_aucter(obj, aID);
-        obj_set_curBidder(obj, bID);
-        obj_set_startbid(obj, startc);
-        obj_set_bid(obj, cost);
-        obj_set_aucTime(obj, timer);
-      }
-    }
-    fclose(fl);
-  }
-}
-
-/* reset the time in the game from file */
-/* Reads a time_t written as a decimal number on its own line; t is unchanged if there is none. */
-static void fscanf_time(FILE *fl, time_t *t)
-{
-  long long v;
-
-  if (fscanf(fl, "%lld\n", &v) == 1)
-    *t = v;
-}
-
 static void reset_time(GameWorld *g)
 {
   time_t beginning_of_time = 0;
-  FILE *bgtime;
 
-  if ((bgtime = fopen(TIME_FILE, "r")) == nullptr)
-    mud_log("SYSERR: Can't read from '{}' time file.", TIME_FILE);
-  else {
-    fscanf_time(bgtime, &beginning_of_time);
-    fscanf_time(bgtime, &g->NEWSUPDATE);
-    fscanf_time(bgtime, &g->BOARDNEWMORT);
-    fscanf_time(bgtime, &g->BOARDNEWDUO);
-    fscanf_time(bgtime, &g->BOARDNEWCOD);
-    fscanf_time(bgtime, &g->BOARDNEWBUI);
-    fscanf_time(bgtime, &g->BOARDNEWIMM);
-    fscanf_time(bgtime, &g->INTERESTTIME);
-    fscanf_time(bgtime, &g->LASTINTEREST);
-    fscanf(bgtime, "%d\n", &g->HIGHPCOUNT);
-    fscanf_time(bgtime, &g->PCOUNTDATE);
-    fscanf(bgtime, "%d\n", &g->WISHTIME);
-    fscanf(bgtime, "%d\n", &g->PCOUNT);
-    fscanf_time(bgtime, &g->LASTPAYOUT);
-    fscanf(bgtime, "%d\n", &g->LASTPAYTYPE);
-    fscanf(bgtime, "%d\n", &g->LASTNEWS);
-    fscanf(bgtime, "%d\n", &g->dballtime);
-    fscanf(bgtime, "%d\n", &g->SELFISHMETER);
-    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON1);
-    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON2);
-    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON3);
-    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON4);
-    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON5);
-    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON6);
-    fscanf(bgtime, "%d\n", &g->SHADOW_DRAGON7);
-    fscanf(bgtime, "%d\n", &g->ERAPLAYERS);
-    fclose(bgtime);
-  }
+  read_time_file(g, beginning_of_time);
 
   if (g->dballtime == 0)
     g->dballtime = 604800;
@@ -762,89 +552,6 @@ static void reset_time(GameWorld *g)
     g->weather_info.sky = SKY_CLOUDY;
   else
     g->weather_info.sky = SKY_CLOUDLESS;
-}
-
-/* Write the time in 'when' to the MUD-time file. */
-void save_mud_time(GameWorld *g, struct time_info_data *when)
-{
-  struct atomic_file af;
-  FILE *bgtime;
-
-  if ((bgtime = atomic_open(&af, TIME_FILE, false)) == nullptr)
-    mud_log("SYSERR: Can't write to '{}' time file.", TIME_FILE);
-  else {
-    file_print(bgtime, "{:d}\n", (long long)mud_time_to_secs(g, when));
-    file_print(bgtime, "{:d}\n", (long long)g->NEWSUPDATE);
-    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWMORT);
-    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWDUO);
-    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWCOD);
-    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWBUI);
-    file_print(bgtime, "{:d}\n", (long long)g->BOARDNEWIMM);
-    file_print(bgtime, "{:d}\n", (long long)g->INTERESTTIME);
-    file_print(bgtime, "{:d}\n", (long long)g->LASTINTEREST);
-    file_print(bgtime, "{:d}\n", g->HIGHPCOUNT);
-    file_print(bgtime, "{:d}\n", (long long)g->PCOUNTDATE);
-    file_print(bgtime, "{:d}\n", g->WISHTIME);
-    file_print(bgtime, "{:d}\n", g->PCOUNT);
-    file_print(bgtime, "{:d}\n", (long long)g->LASTPAYOUT);
-    file_print(bgtime, "{:d}\n", g->LASTPAYTYPE);
-    file_print(bgtime, "{:d}\n", g->LASTNEWS);
-    file_print(bgtime, "{:d}\n", g->dballtime);
-    file_print(bgtime, "{:d}\n", g->SELFISHMETER);
-    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON1);
-    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON2);
-    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON3);
-    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON4);
-    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON5);
-    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON6);
-    file_print(bgtime, "{:d}\n", g->SHADOW_DRAGON7);
-    file_print(bgtime, "{:d}\n", g->ERAPLAYERS);
-    atomic_commit(&af);
-  }
-}
-
-/*
- * Thanks to Andrey (andrey@alex-ua.com) for this bit of code.
- */
-[[noreturn]] static void help_file_eof(void)
-{
-  mud_log("SYSERR: Unexpected end of help file.");
-  exit(1); /* Some day we hope to handle these things better... */
-}
-
-int count_alias_records(FILE *fl)
-{
-  char key[READ_SIZE], next_key[READ_SIZE];
-  char line[READ_SIZE], *scan;
-  int total_keywords = 0;
-
-  /* get the first keyword line */
-  get_one_line(fl, key);
-
-  while (*key != '$') {
-    /* skip the text */
-    do {
-      get_one_line(fl, line);
-      if (feof(fl))
-        help_file_eof();
-    } while (*line != '#');
-
-    /* now count keywords */
-    scan = key;
-    do {
-      scan = one_word(scan, next_key);
-      if (*next_key)
-        ++total_keywords;
-    } while (*next_key);
-
-    /* get next keyword line (or $) */
-    get_one_line(fl, key);
-
-    if (feof(fl))
-      help_file_eof();
-  }
-
-  return (total_keywords);
 }
 
 bitvector_t asciiflag_conv(char *flag)
@@ -950,89 +657,6 @@ static void renum_zone_table(GameWorld *g)
         ZCMD2.command = '*';
       }
     }
-}
-
-static void get_one_line(FILE *fl, char *buf)
-{
-  if (fgets(buf, READ_SIZE, fl) == nullptr) {
-    mud_log("SYSERR: error reading help file: not terminated with $?");
-    exit(1);
-  }
-
-  buf[strlen(buf) - 1] = '\0'; /* take off the trailing \n */
-}
-
-void free_help_table(GameWorld *g)
-{
-  g->help_table.clear();
-}
-
-void load_help(GameWorld *g, FILE *fl, const char *name)
-{
-  char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
-  size_t entrylen;
-  char line[READ_SIZE + 1];
-  std::string hname;
-  char *scan;
-  struct help_index_element el;
-
-  hname = name;
-
-  get_one_line(fl, key);
-  while (*key != '$') {
-    strcat(key, "\r\n"); /* strcat: OK (READ_SIZE - "\n"  "\r\n" == READ_SIZE  1) */
-    entrylen = strlcpy(entry, key, sizeof(entry));
-
-    /* Read in the corresponding help entry. */
-    get_one_line(fl, line);
-    while (*line != '#' && entrylen < sizeof(entry) - 1) {
-      entrylen += strlcpy(entry + entrylen, line, sizeof(entry) - entrylen);
-
-      if (entrylen + 2 < sizeof(entry) - 1) {
-        strcpy(entry + entrylen, "\r\n"); /* strcpy: OK (size checked above) */
-        entrylen += 2;
-      }
-      get_one_line(fl, line);
-    }
-
-    if (entrylen >= sizeof(entry) - 1) {
-      int keysize;
-      const char *truncmsg = "\r\n*TRUNCATED*\r\n";
-
-      strcpy(entry + sizeof(entry) - strlen(truncmsg) - 1, truncmsg); /* strcpy: OK (assuming sane 'entry' size) */
-
-      keysize = strlen(key) - 2;
-      mud_log("SYSERR: Help entry exceeded buffer space: {}", printf_precision(key, keysize));
-
-      /* If we ran out of buffer space, eat the rest of the entry. */
-      while (*line != '#')
-        get_one_line(fl, line);
-    }
-
-    if (*line == '#') {
-      if (sscanf(line, "#%d", &el.min_level) != 1) {
-        mud_log("SYSERR: Help entry does not have a min level. {}", key);
-        el.min_level = 0;
-      }
-    }
-
-    el.duplicate = 0;
-    el.entry     = entry;
-    scan         = one_word(key, next_key);
-
-    while (*next_key) {
-      el.keywords = next_key;
-      g->help_table.push_back(el);
-      el.duplicate++;
-      scan = one_word(scan, next_key);
-    }
-    get_one_line(fl, key);
-  }
-}
-
-bool help_keyword_order(const help_index_element &a, const help_index_element &b)
-{
-  return strcasecmp(a.keywords.c_str(), b.keywords.c_str()) < 0;
 }
 
 /*************************************************************************
@@ -2406,55 +2030,6 @@ void free_obj(GameWorld *g, struct obj_data *obj)
   delete obj;
 }
 
-/* Read a text file into a freshly allocated string at *buf, replacing (and freeing) what was there. On failure
- * *buf is left untouched. */
-/* Reads a text file into text, leaving it as it was if the file can't be read. */
-static int file_to_string_alloc(const char *name, std::string *text)
-{
-  std::string temp;
-
-  if (file_to_string(name, temp) < 0)
-    return (-1);
-
-  *text = std::move(temp);
-  return (0);
-}
-
-/* read contents of a text file, and place in buf */
-static int file_to_string(const char *name, std::string &text)
-{
-  FILE *fl;
-  char tmp[READ_SIZE + 3];
-  int len;
-
-  text.clear();
-
-  if (!(fl = fopen(name, "r"))) {
-    mud_log("SYSERR: reading {}: {}", name, strerror(errno));
-    return (-1);
-  }
-
-  for (;;) {
-    if (!fgets(tmp, READ_SIZE, fl)) /* EOF check */
-      break;
-    if ((len = strlen(tmp)) > 0)
-      tmp[len - 1] = '\0'; /* take off the trailing \n */
-    strcat(tmp, "\r\n");   /* strcat: OK (tmp:READ_SIZE+3) */
-
-    if (text.size() + strlen(tmp) + 1 > MAX_STRING_LENGTH) {
-      mud_log("SYSERR: {}: string too big ({:d} max)", name, MAX_STRING_LENGTH);
-      text.clear();
-      fclose(fl);
-      return (-1);
-    }
-    text += tmp;
-  }
-
-  fclose(fl);
-
-  return (0);
-}
-
 /* clear some of the the working variables of a char */
 void reset_char(GameWorld *g, struct char_data *ch)
 {
@@ -2814,31 +2389,40 @@ static void load_default_config(GameWorld *g)
   CONFIG_CREATION_METHOD = method;
 }
 
+/* "tag = value": the tag is what is before the '=', its spaces taken out (quirk: "a b" is "ab"); the value is
+   after it and the spaces and '='s that follow */
+static std::pair<std::string, std::string_view> split_option(std::string_view line)
+{
+  size_t equals = std::min(line.find('='), line.size());
+  std::string tag;
+  for (char c : line.substr(0, equals))
+    if (c != ' ')
+      tag += c;
+  std::string_view value = line.substr(equals);
+  while (value.starts_with('=') || value.starts_with(' '))
+    value.remove_prefix(1);
+  return {std::move(tag), value};
+}
+
 void load_config(GameWorld *g)
 {
-  FILE *fl;
-  char line[MAX_STRING_LENGTH];
-  char tag[MAX_INPUT_LENGTH];
-  std::string buf;
-
   load_default_config(g);
 
-  buf = str_format("{}/{}", DFLT_DIR, CONFIG_CONFFILE);
-  if (!(fl = fopen(CONFIG_CONFFILE.c_str(), "r")) && !(fl = fopen(buf.c_str(), "r"))) {
-    buf = str_format("Game Config File: {}", CONFIG_CONFFILE);
-    perror(buf.c_str());
+  io::loaded<io::text_reader> file = io::text_reader::open(CONFIG_CONFFILE);
+  if (!file)
+    file = io::text_reader::open(str_format("{}/{}", DFLT_DIR, CONFIG_CONFFILE));
+  if (!file) {
+    mud_log("SYSERR: Game Config File: {}: can't be opened", CONFIG_CONFFILE);
     return;
   }
 
-  /****************************************************************************/
-  /** Load the game configuration file.                                      **/
-  /****************************************************************************/
-  while (get_line(fl, line)) {
-    split_argument(line, tag);
-    config_load_option(g, tag, line, fl);
+  while (std::optional<std::string_view> line = file->line()) {
+    auto [tag, value] = split_option(*line);
+    if (io::loaded<void> read = config_load_option(g, tag, value, *file); !read) {
+      mud_log("SYSERR: {}", read.error().text());
+      exit(1);
+    }
   }
   if (CONFIG_DFLT_DIR.empty()) /* an empty DFLT_DIR line */
     CONFIG_DFLT_DIR = DFLT_DIR;
-
-  fclose(fl);
 }

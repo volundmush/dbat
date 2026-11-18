@@ -1,6 +1,8 @@
 #include <cstdlib>
-
-#include <unistd.h>
+#include <cstring>
+#include <filesystem>
+#include <optional>
+#include <string>
 
 #include "dbat/args.hpp"
 #include "dbat/disabled.hpp"
@@ -9,7 +11,10 @@
 #include "dbat/fileop.hpp"
 #include "dbat/db.hpp"
 #include "dbat/interpreter.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/io/writer.hpp"
+#include "dbat/log.hpp"
+#include "dbat/stringutils.hpp"
 #include "dbat/game_world.hpp"
 
 
@@ -119,64 +124,57 @@ bool check_disabled(GameWorld *g, const struct command_info *command)
   return false;
 }
 
-/* Load disabled commands */
+/* Load disabled commands: "<command> <subcmd> <level> <who>" a line, up to "END" */
 void load_disabled(GameWorld *g)
 {
-  FILE *fp;
-  DISABLED_DATA *p;
-  int i;
-  char line[READ_SIZE], name[MAX_INPUT_LENGTH], temp[MAX_INPUT_LENGTH];
-
   if (g->disabled_first)
     free_disabled(g);
 
-  if ((fp = fopen(DISABLED_FILE, "r")) == nullptr)
+  io::loaded<io::text_reader> file = io::text_reader::open(DISABLED_FILE);
+  if (!file)
     return; /* No disabled file.. no disabled commands. */
 
-  while (get_line(fp, line)) {
-    if (!strcasecmp(line, END_MARKER))
-      break; /* break loop if we encounter the END_MARKER */
-    p = new disabled_data();
-    sscanf(line, "%s %d %hd %s", name, &(p->subcmd), &(p->level), temp);
-    /* Find the command in the table */
-    for (i = 0; *cmd_info[i].command != '\n'; i++)
-      if (!strcasecmp(cmd_info[i].command, name))
-        break;
+  /* quirk: a line short of its name or who disabled it keeps the one before's, as sscanf() left them */
+  std::string name, by;
+  while (std::optional<std::string_view> line = file->line()) {
+    if (str_eq_nocase(*line, END_MARKER))
+      break;
+    auto *p = new disabled_data();
+    io::fields f(*line);
+    int level = 0;
+    if (f.word(name) && f.number(p->subcmd) && f.number(level))
+      p->level = static_cast<int16_t>(level);
+    f.word(by);
+    int i = 0;
+    while (*cmd_info[i].command != '\n' && !str_eq_nocase(cmd_info[i].command, name))
+      i++;
     if (*cmd_info[i].command == '\n') { /* command does not exist? */
       mud_log("WARNING: load_disabled(): Skipping unknown disabled command - '{}'!", name);
       delete p;
     } else { /* add new disabled command */
-      p->disabled_by = strdup(temp);
-      p->command     = &cmd_info[i];
-      p->next        = g->disabled_first;
+      p->disabled_by    = strdup(by.c_str());
+      p->command        = &cmd_info[i];
+      p->next           = g->disabled_first;
       g->disabled_first = p;
     }
   }
-  fclose(fp);
 }
 
 /* Save disabled commands */
 static void save_disabled(GameWorld *g)
 {
-  struct atomic_file af;
-  FILE *fp;
-  DISABLED_DATA *p;
-
   if (!g->disabled_first) {
     /* delete file if no commands are disabled */
-    unlink(DISABLED_FILE);
+    std::error_code ec;
+    std::filesystem::remove(DISABLED_FILE, ec);
     return;
   }
 
-  if ((fp = atomic_open(&af, DISABLED_FILE, false)) == nullptr) {
-    mud_log("SYSERR: Could not open " DISABLED_FILE " for writing");
-    return;
-  }
-
-  for (p = g->disabled_first; p; p = p->next)
-    file_print(fp, "{} {:d} {:d} {}\n", p->command->command, p->subcmd, p->level, p->disabled_by);
-  file_print(fp, "{}\n", END_MARKER);
-  atomic_commit(&af);
+  io::text_writer out(DISABLED_FILE);
+  for (DISABLED_DATA *p = g->disabled_first; p; p = p->next)
+    out.print("{} {:d} {:d} {}\n", p->command->command, p->subcmd, p->level, p->disabled_by);
+  out.print("{}\n", END_MARKER);
+  out.commit();
 }
 
 /* free all disabled commands from memory */

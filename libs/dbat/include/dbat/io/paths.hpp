@@ -24,4 +24,8 @@ std::optional<std::vector<std::string>> list_directory(const std::filesystem::pa
 /* Makes path exist, as `touch` does, without changing what it holds; false, and logged, if it couldn't */
 bool touch(const std::filesystem::path &path);
 
+/* Why the file at path can't be opened for reading, as strerror() words it: "No such file or directory" and the
+   like */
+std::string why_unreadable(const std::filesystem::path &path);
+
 } // namespace io

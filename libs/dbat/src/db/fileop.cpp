@@ -69,39 +69,9 @@ int touch(const char *path)
   return io::touch(path) ? 0 : -1;
 }
 
-void topLoad(GameWorld *g)
-{
-  FILE *file;
-  char fname[40], line[256], filler[50];
-  int x = 0;
-
-  /* Read Toplist File */
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist")) {
-    mud_log("ERROR: Toplist file does not exist.");
-    return;
-  }
-  if (!(file = fopen(fname, "r"))) {
-    mud_log("ERROR: Toplist file does not exist.");
-    return;
-  }
-
-  g->TOPLOADED = true;
-
-  /* 25 places, a line each; any the file is short of are empty */
-  for (; x < 25 && get_line(file, line); x++) {
-    *filler = '\0';
-    sscanf(line, "%49s %" SCNd64 "\n", filler, &g->toppoint[x]);
-    g->topname[x] = strdup(filler);
-  }
-  for (; x < 25; x++)
-    g->topname[x] = strdup("");
-  fclose(file);
-}
-
 /* Write the toplist to file */
 void topWrite(GameWorld *g, struct char_data *ch)
 {
-  struct atomic_file af;
   if (char_get_admlevel(ch) > 0 || char_is_npc(ch))
     return;
 
@@ -109,8 +79,6 @@ void topWrite(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  char fname[40];
-  FILE *fl;
   char *positions[25];
   int64_t points[25] = {0};
   int x = 0, writeEm = false, placed = false, start = 0, finish = 25, location = -1;
@@ -378,20 +346,7 @@ void topWrite(GameWorld *g, struct char_data *ch)
   }
 
   if (writeEm == true) {
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist"))
-      return;
-
-    if (!(fl = atomic_open(&af, fname, false))) {
-      mud_log("ERROR: could not save Toplist File, {}.", fname);
-      return;
-    }
-    x = 0;
-    while (x < 25) {
-      file_print(fl, "{} {:d}\n", g->topname[x], g->toppoint[x]);
-      x++;
-    }
-
-    atomic_commit(&af);
+    save_toplist(g);
   }
   return;
 }

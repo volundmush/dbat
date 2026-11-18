@@ -119,6 +119,8 @@ char *fread_string(FILE *fl, const char *error);
 long get_id_by_name(GameWorld *g, const char *name);
 char *get_name_by_id(GameWorld *g, long id);
 void save_mud_time(GameWorld *g, struct time_info_data *when);
+/* Reads etc/time: the beginning of the game's time, and the dates and counters kept on g */
+void read_time_file(GameWorld *g, time_t &beginning);
 void free_player_index(GameWorld *g);
 void load_disabled(GameWorld *g);
 void free_disabled(GameWorld *g);

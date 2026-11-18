@@ -1,6 +1,7 @@
 #pragma once
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
+#include "dbat/io/load_error.hpp"
 
 /* don't change these */
 constexpr int BAN_NOT    = 0;
@@ -23,7 +24,10 @@ int isbanned(GameWorld *g, char *hostname);
 void Free_Invalid_List(GameWorld *g);
 void free_ban_list(GameWorld *g);
 bool Valid_Name(GameWorld *g, char *newname);
-void Read_Invalid_List(GameWorld *g);
+/* Reads misc/xnames; an error if it holds too many */
+io::loaded<void> Read_Invalid_List(GameWorld *g);
+/* Writes the ban list to etc/badsites */
+void save_ban_list(GameWorld *g);
 
 ACMD(do_ban);
 ACMD(do_unban);

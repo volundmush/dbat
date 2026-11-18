@@ -6,7 +6,6 @@
  * hold is loaded; then each is loaded by its kind's reader.
  */
 #include <algorithm>
-#include <cstdio>
 #include <optional>
 #include <vector>
 
@@ -17,8 +16,7 @@
 #include "dbat/help.hpp"
 #include "dbat/log.hpp"
 #include "dbat/shop.hpp"
-
-#include "../legacy_loaders.hpp"
+#include "dbat/text_files.hpp"
 
 namespace {
 
@@ -39,17 +37,6 @@ int count_hash_records(const io::text_reader &in)
 }
 
 int count_one(const io::text_reader &) { return 1; }
-
-/* Help counts its keywords, which are what its table holds */
-int count_help_keywords(const io::text_reader &in)
-{
-  std::FILE *fl = std::fopen(in.name().c_str(), "r");
-  if (!fl)
-    return 0;
-  int count = count_alias_records(fl);
-  std::fclose(fl);
-  return count;
-}
 
 void report_rooms(GameWorld *, int count)
 {
@@ -85,19 +72,6 @@ void sort_help(GameWorld *g)
   std::ranges::stable_sort(g->help_table, help_keyword_order);
 }
 
-/* The kinds still read through a FILE, until they move onto io::text_reader */
-template <void (*legacy)(GameWorld *, std::FILE *, const char *)>
-io::loaded<void> through_file(GameWorld *g, io::text_reader &in)
-{
-  std::FILE *fl = std::fopen(in.name().c_str(), "r");
-  if (!fl)
-    return std::unexpected(io::load_error{in.name(), 0, "can't be opened"});
-  legacy(g, fl, in.name().c_str());
-  std::fclose(fl);
-  return {};
-}
-
-
 struct world_kind {
   int mode;
   const char *prefix;
@@ -116,7 +90,7 @@ constexpr world_kind kinds[] = {
     {DB_BOOT_OBJ, OBJ_PREFIX, count_hash_records,  report_objects, false, read_object_file,             nullptr  },
     {DB_BOOT_SHP, SHP_PREFIX, count_hash_records,  nullptr,        true,  read_shop_file,               nullptr  },
     {DB_BOOT_GLD, GLD_PREFIX, count_hash_records,  nullptr,        true,  read_guild_file,              nullptr  },
-    {DB_BOOT_HLP, HLP_PREFIX, count_help_keywords, report_help,    false, through_file<load_help>,      sort_help},
+    {DB_BOOT_HLP, HLP_PREFIX, count_help_keywords, report_help,    false, read_help_file,               sort_help},
 };
 
 } // namespace
