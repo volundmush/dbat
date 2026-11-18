@@ -57,6 +57,8 @@ int scan_float(std::string_view text, float &x);
 
 /* text as atol() reads it: spaces, a sign and digits, or 0; past a long's range, the largest long of that sign */
 long c_atol(std::string_view text);
+/* text as atoll() reads it, held to a long long's range */
+long long c_atoll(std::string_view text);
 
 /* A flags word as asciiflag_conv() reads it: letters a-z for the bits from first_letter_bit (0, or 1 for the old
    affect flags) and A-F for bits 26-31, or a number if it is only digits and '-'. Other capitals are ignored, the

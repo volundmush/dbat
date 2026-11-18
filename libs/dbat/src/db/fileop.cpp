@@ -43,16 +43,26 @@ int get_line(FILE *fl, char *buf)
   return lines;
 }
 
+std::optional<std::string> player_path(int mode, const char *name)
+{
+  if (name == nullptr || *name == '\0') {
+    static const char buffer = 0; /* stands for the buffer get_filename() was given, which the log line names */
+    mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), {} or {}.", as_pointer(name),
+            as_pointer(&buffer));
+    return std::nullopt;
+  }
+  return io::player_file(mode, name);
+}
+
 /* The file of kind mode for the player or account orig_name, as io::player_file() gives it, cut to fbufsize. */
 bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name)
 {
-  if (orig_name == nullptr || *orig_name == '\0' || filename == nullptr) {
-    mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), {} or {}.",
-            as_pointer(orig_name), as_pointer(filename));
+  if (filename == nullptr) {
+    mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), {} or {}.", as_pointer(orig_name),
+            as_pointer(filename));
     return false;
   }
-
-  std::optional<std::string> path = io::player_file(mode, orig_name);
+  std::optional<std::string> path = player_path(mode, orig_name);
   if (!path)
     return false;
   if (fbufsize) { /* quirk: a name too long for the buffer is cut short, as snprintf() cut it */

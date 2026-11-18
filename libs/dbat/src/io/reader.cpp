@@ -117,6 +117,16 @@ long c_atol(std::string_view text)
   return read_long(text, at);
 }
 
+long long c_atoll(std::string_view text)
+{
+  size_t at = 0;
+  while (at < text.size() && is_space(text[at]))
+    at++;
+  if (at < text.size() && (text[at] == '+' || text[at] == '-') && (at + 1 >= text.size() || !is_digit(text[at + 1])))
+    return 0;
+  return read_signed<long long>(text, at);
+}
+
 int scan_ints(std::string_view text, std::span<int> out)
 {
   size_t at = 0;

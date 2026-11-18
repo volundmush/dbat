@@ -9,11 +9,9 @@
 ************************************************************************ */
 #include <algorithm>
 #include <cstdlib>
-#include <fstream>
+#include <filesystem>
 #include <optional>
 #include <string>
-
-#include <unistd.h>
 
 #include "dbat/interpreter.hpp"
 #include "dbat/utils.hpp"
@@ -22,73 +20,15 @@
 #include "dbat/fileop.hpp"
 #include "dbat/broadcast.hpp"
 #include "dbat/players.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
 #include "nanny_internal.hpp"
 
-/* An account's file, or nothing for a name that can't have one. */
-static std::optional<std::string> account_file(int mode, const char *name)
-{
-  char fname[40];
-
-  if (!get_filename(fname, sizeof(fname), mode, name))
-    return std::nullopt;
-  return fname;
-}
-
-/* The next line as get_line() reads one: blank lines and '*' comments passed over, the line ending gone, and cut to
-   READ_SIZE. Leaves line as it was at the end of the file. */
-static bool next_line(std::istream &in, std::string &line)
-{
-  std::string raw;
-
-  do {
-    if (!std::getline(in, raw))
-      return false;
-  } while (raw.empty() || raw[0] == '*' || raw[0] == '\r');
-  raw.resize(std::min<size_t>(raw.find_first_of(std::string_view("\r\n\0", 3)), READ_SIZE - 1));
-  line = std::move(raw);
-  return true;
-}
-
-static void read_field(const std::string &line, std::string &text)
-{
-  char word[100] = "";
-
-  sscanf(line.c_str(), "%99s", word);
-  text = word;
-}
-
-static void read_field(const std::string &line, int &number)
-{
-  sscanf(line.c_str(), "%d", &number); /* a line that isn't a number leaves it as it was */
-}
-
-/* Reads an account file over a, a line a field. quirk: reading carries on until the end of the file has been seen, so
-   a file ending in a newline gives its last line to the next field too, and an empty one gives the first field an
-   empty line. */
-static bool read_account_file(const std::string &path, account &a)
-{
-  std::ifstream in(path);
-  std::string line;
-
-  if (!in)
-    return false;
-  each_account_field(a, [&](auto &field) {
-    if (!in.good())
-      return;
-    next_line(in, line);
-    read_field(line, field);
-  });
-  return true;
-}
-
 /* Reads name's account over a, saying so in the log if its file can't be read. */
 static bool load_account(const char *name, account &a)
 {
-  auto path = account_file(USER_FILE, name);
+  auto path = player_path(USER_FILE, name);
 
   if (!path)
     return false;
@@ -99,55 +39,12 @@ static bool load_account(const char *name, account &a)
   return true;
 }
 
-/* Writes a to name's account file. False if it couldn't be opened. */
-static bool write_account(const char *name, const account &a)
-{
-  struct atomic_file af;
-  FILE *fl;
-  auto path = account_file(USER_FILE, name);
-
-  if (!path)
-    return false;
-  if (!(fl = atomic_open(&af, path->c_str(), true))) {
-    mud_log("ERROR: could not save user, {}, to filename, {}.", name, *path);
-    return false;
-  }
-  each_account_field(a, [&](const auto &field) { file_print(fl, "{}\n", field); });
-  atomic_commit(&af);
-  return true;
-}
-
 /* Empties every slot holding name (used when a character is deleted or missing). */
 void empty_account_slots_named(struct descriptor_data *d, const char *name)
 {
   for (auto &slot : d->acct.slots)
     if (!strcasecmp(name, slot.c_str()))
       slot = "Empty";
-}
-
-bool readUserIndex(const std::string &name)
-{
-  auto path = account_file(USER_FILE, name.c_str());
-
-  return path && std::ifstream(*path).is_open();
-}
-
-/* True if name is on the lockout list (lib/etc lockout intro file). */
-bool lockRead(const char *name)
-{
-  auto path  = account_file(INTRO_FILE, "lockout");
-  bool known = false;
-  std::string line;
-
-  if (!path)
-    return false;
-  std::ifstream in(*path);
-  while (next_line(in, line)) {
-    char word[50];
-    if (sscanf(line.c_str(), "%49s", word) == 1 && !strcasecmp(name, word))
-      known = true;
-  }
-  return known;
 }
 
 void userLoad(struct descriptor_data *d, const char *name)
@@ -184,7 +81,7 @@ void userCreate(struct descriptor_data *d)
 void userDelete(GameWorld *g, struct descriptor_data *d)
 {
   int player_i;
-  auto path = account_file(USER_FILE, d->acct.user.c_str());
+  auto path = player_path(USER_FILE, d->acct.user.c_str());
 
   if (!path) {
     write_to_output(g, d, "Error. Your user file doesn't even exist!\n");
@@ -193,32 +90,8 @@ void userDelete(GameWorld *g, struct descriptor_data *d)
   for (const auto &slot : d->acct.slots)
     if (strcasecmp(slot.c_str(), "Empty") && (player_i = get_ptable_by_name(g, slot.c_str())) >= 0)
       remove_player(g, player_i);
-  unlink(path->c_str());
-}
-
-/* For transfering money or doing things with an offline player: whose name ch knows by arg, or "NOTHING". */
-std::string rIntro(struct char_data *ch, std::string_view arg)
-{
-  char filler[50] = "", scrap[100] = "";
-  std::string line, name = "NOTHING";
-
-  if (char_is_npc(ch))
-    return name;
-  auto path = account_file(INTRO_FILE, char_get_name(ch));
-  if (!path)
-    return name;
-  std::ifstream in(*path);
-  if (!in)
-    return name;
-
-  /* quirk: as read_account_file(), the last line is read twice; and a line of one word keeps the last line's second */
-  while (in.good()) {
-    next_line(in, line);
-    sscanf(line.c_str(), "%49s %99s", filler, scrap);
-    if (str_eq_nocase(arg, scrap))
-      name = filler;
-  }
-  return name;
+  std::error_code ec;
+  std::filesystem::remove(*path, ec);
 }
 
 /* Saves the account d is logged in to, the name capitalised. */
@@ -253,7 +126,7 @@ void reward_offline_user(GameWorld *g, const std::string &name, int amt)
 void fingerUser(GameWorld *g, struct char_data *ch, const std::string &name)
 {
   account a;
-  auto path = account_file(USER_FILE, name.c_str());
+  auto path = player_path(USER_FILE, name.c_str());
 
   if (!path) {
     send_to_char(g, ch, "That user doesn't exist.\r\n");

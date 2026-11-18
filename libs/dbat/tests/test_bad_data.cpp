@@ -432,6 +432,25 @@ static void check_saved_affects_are_cleaned_up(void)
   th_shutdown(g);
 }
 
+/* A player file that ends partway through its description: the old reader shut the game down. */
+static void check_player_file_cut_short_in_its_description(void)
+{
+  GameWorld *g = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE), *copy;
+  char path[256];
+
+  save_char(g, ch);
+  save_path("plrfiles", "plr", "tester", path, sizeof(path));
+  append_file(path, "Desc:\nA tall fighter,\nwith no end to");
+
+  copy = new char_data();
+  clear_char(copy);
+  char_make_player_specials(copy);
+  CHECK(load_char(g, "tester", copy) == -1); /* refused, and the game goes on */
+  free_char(g, copy);
+  th_shutdown(g);
+}
+
 static void check_infravision_comes_off_an_android(void)
 {
   GameWorld *g = th_boot();
@@ -2424,6 +2443,7 @@ static const struct {
     {"zone_command_with_a_space_before_it",         check_zone_command_with_a_space_before_it        },
     {"help_line_starting_with_a_nul",               check_help_line_starting_with_a_nul              },
     {"empty_context_help",                          check_empty_context_help                         },
+    {"player_file_cut_short_in_its_description",    check_player_file_cut_short_in_its_description   },
     {"damaged_files_refuse_the_boot",               check_damaged_files_refuse_the_boot              },
 };
 
