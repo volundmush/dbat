@@ -136,9 +136,9 @@ ACMD(do_dig)
      */
     if (d->olc) {
       mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
-      delete d->olc;
+      d->olc.reset();
     }
-    d->olc      = new oasis_olc_data();
+    d->olc      = std::make_unique<oasis_olc_data>();
     OLC_ZNUM(d) = zone;
     OLC_NUM(d)  = rvnum;
     OLC_ROOM(d) = new room_data();
@@ -320,9 +320,9 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
        */
       if (d->olc) {
         mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
-        delete d->olc;
+        d->olc.reset();
       }
-      d->olc      = new oasis_olc_data();
+      d->olc      = std::make_unique<oasis_olc_data>();
       OLC_ZNUM(d) = room_get_zone(g, char_get_in_room(ch));
       OLC_NUM(d)  = vnum;
       OLC_ROOM(d) = new room_data();

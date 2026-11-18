@@ -20,18 +20,18 @@
 #include "dbat/log.hpp"
 #include "dbat/game_world.hpp"
 
-static int find_context_gedit(struct descriptor_data *d);
-static int find_context_medit(struct descriptor_data *d);
-static int find_context_oedit(struct descriptor_data *d);
-static int find_context_redit(struct descriptor_data *d);
-static int find_context_script_edit(struct descriptor_data *d);
-static int find_context_sedit(struct descriptor_data *d);
-static int find_context_trigedit(struct descriptor_data *d);
-static int find_context_zedit(struct descriptor_data *d);
+static int find_context_gedit(const struct descriptor_data *d);
+static int find_context_medit(const struct descriptor_data *d);
+static int find_context_oedit(const struct descriptor_data *d);
+static int find_context_redit(const struct descriptor_data *d);
+static int find_context_script_edit(const struct descriptor_data *d);
+static int find_context_sedit(const struct descriptor_data *d);
+static int find_context_trigedit(const struct descriptor_data *d);
+static int find_context_zedit(const struct descriptor_data *d);
 
 /* local global */
 
-static int find_context(struct descriptor_data *d)
+int legacy_help_context(const struct descriptor_data *d)
 {
   switch (desc_get_connected(d)) {
     case CON_TRIGEDIT: return find_context_trigedit(d);
@@ -46,7 +46,7 @@ static int find_context(struct descriptor_data *d)
   }
 }
 
-static int find_context_oedit(struct descriptor_data *d)
+static int find_context_oedit(const struct descriptor_data *d)
 {
   switch (OLC_MODE(d)) {
     case OEDIT_MAIN_MENU: return CONTEXT_OEDIT_MAIN_MENU;
@@ -80,7 +80,7 @@ static int find_context_oedit(struct descriptor_data *d)
   }
 }
 
-static int find_context_redit(struct descriptor_data *d)
+static int find_context_redit(const struct descriptor_data *d)
 {
   switch (OLC_MODE(d)) {
     case REDIT_MAIN_MENU: return CONTEXT_REDIT_MAIN_MENU;
@@ -104,7 +104,7 @@ static int find_context_redit(struct descriptor_data *d)
   }
 }
 
-static int find_context_zedit(struct descriptor_data *d)
+static int find_context_zedit(const struct descriptor_data *d)
 {
   switch (OLC_MODE(d)) {
     case ZEDIT_MAIN_MENU: return CONTEXT_ZEDIT_MAIN_MENU;
@@ -128,7 +128,7 @@ static int find_context_zedit(struct descriptor_data *d)
   }
 }
 
-static int find_context_medit(struct descriptor_data *d)
+static int find_context_medit(const struct descriptor_data *d)
 {
   switch (OLC_MODE(d)) {
     case MEDIT_MAIN_MENU: return CONTEXT_MEDIT_MAIN_MENU;
@@ -160,7 +160,7 @@ static int find_context_medit(struct descriptor_data *d)
   }
 }
 
-static int find_context_sedit(struct descriptor_data *d)
+static int find_context_sedit(const struct descriptor_data *d)
 {
   switch (OLC_MODE(d)) {
     case SEDIT_MAIN_MENU: return CONTEXT_SEDIT_MAIN_MENU;
@@ -195,7 +195,7 @@ static int find_context_sedit(struct descriptor_data *d)
   }
 }
 
-static int find_context_trigedit(struct descriptor_data *d)
+static int find_context_trigedit(const struct descriptor_data *d)
 {
   switch (OLC_MODE(d)) {
     case TRIGEDIT_MAIN_MENU: return CONTEXT_TRIGEDIT_MAIN_MENU;
@@ -211,7 +211,7 @@ static int find_context_trigedit(struct descriptor_data *d)
   }
 }
 
-static int find_context_script_edit(struct descriptor_data *d)
+static int find_context_script_edit(const struct descriptor_data *d)
 {
   switch (OLC_SCRIPT_EDIT_MODE(d)) {
     case SCRIPT_MAIN_MENU: return CONTEXT_SCRIPT_MAIN_MENU;
@@ -221,7 +221,7 @@ static int find_context_script_edit(struct descriptor_data *d)
   }
 }
 
-static int find_context_gedit(struct descriptor_data *d)
+static int find_context_gedit(const struct descriptor_data *d)
 {
   switch (OLC_MODE(d)) {
     case GEDIT_MAIN_MENU: return CONTEXT_GEDIT_MAIN_MENU;
@@ -258,7 +258,7 @@ bool context_help(GameWorld *g, struct descriptor_data *d, char *arg)
   skip_spaces(&tmp);
 
   if (!*tmp)
-    context = find_context(d);
+    context = d->olc ? d->olc->help_context(d) : NOTHING;
 
   if (context != NOTHING && context < NUM_CONTEXTS && *g->context_help_list[context]) {
     if (*g->context_help_list[context] == FIND_HELP_CHAR) {

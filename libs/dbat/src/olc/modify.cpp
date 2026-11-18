@@ -203,28 +203,21 @@ void string_add(GameWorld *g, struct descriptor_data *d, char *str)
   /* Ok, now final cleanup. */
 
   if (action == STRINGADD_SAVE || action == STRINGADD_ABORT) {
-    int i;
-    struct {
-      int mode{};
-      void (*func)(GameWorld *g, struct descriptor_data *dsc, int todo){};
-    } cleanup_modes[] = {
-        {CON_CEDIT,    cedit_string_cleanup   },
-        {CON_MEDIT,    medit_string_cleanup   },
-        {CON_OEDIT,    oedit_string_cleanup   },
-        {CON_REDIT,    redit_string_cleanup   },
-        {CON_TEDIT,    tedit_string_cleanup   },
-        {CON_TRIGEDIT, trigedit_string_cleanup},
-        {CON_EXDESC,   exdesc_string_cleanup  },
-        {CON_PLAYING,  playing_string_cleanup },
-        {CON_IEDIT,    oedit_string_cleanup   },
-        {CON_HEDIT,    hedit_string_cleanup   },
-        {CON_NEWSEDIT, news_string_cleanup    },
-        {-1,           nullptr                }
+    /* the editor that opened the text editor goes on from it; so does whatever opened it outside an editor */
+    static constexpr struct {
+      int state{};
+      void (*done)(GameWorld *g, struct descriptor_data *dsc, int todo){};
+    } NOT_EDITORS[] = {
+        {CON_EXDESC,   exdesc_string_cleanup },
+        {CON_PLAYING,  playing_string_cleanup},
+        {CON_NEWSEDIT, news_string_cleanup   },
     };
 
-    for (i = 0; cleanup_modes[i].func; i++)
-      if (desc_get_connected(d) == cleanup_modes[i].mode)
-        (*cleanup_modes[i].func)(g, d, action);
+    if (d->olc)
+      d->olc->text_done(g, d, action);
+    for (const auto &row : NOT_EDITORS)
+      if (desc_get_connected(d) == row.state)
+        row.done(g, d, action);
 
     /* Common post cleanup code. */
     d->str = nullptr;

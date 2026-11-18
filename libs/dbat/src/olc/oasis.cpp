@@ -292,8 +292,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     desc_set_connected(d, CON_PLAYING);
   }
 
-  delete d->olc;
-  d->olc = nullptr;
+  d->olc.reset();
 }
 
 /*

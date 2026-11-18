@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <deque>
+#include <memory>
 #include <string>
 
 #include <sys/socket.h>
@@ -11,6 +12,7 @@
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/constates.hpp"
+#include "dbat/olc/session.hpp"
 
 struct txt_block {
   char *text{};
@@ -59,7 +61,7 @@ struct descriptor_data {
   struct char_data *original{};        /* original char if switched		*/
   struct descriptor_data *snooping{};  /* Who is this char snooping	*/
   struct descriptor_data *snoop_by{};  /* And who is snooping this char	*/
-  struct oasis_olc_data *olc{};        /* OLC info                            */
+  std::unique_ptr<olc_session> olc{};  /* the editor in use, or character creation's stat points */
   struct account acct;                 /* the account logged in to            */
   std::string loadplay;                /* What character am I loading?        */
   int writenew{};                      /* What slot am I writing to?          */

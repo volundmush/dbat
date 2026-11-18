@@ -207,9 +207,9 @@ ACMD(do_tedit)
 
   if (char_get_desc(ch)->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
-    delete char_get_desc(ch)->olc;
+    char_get_desc(ch)->olc.reset();
   }
-  char_get_desc(ch)->olc = new oasis_olc_data();
+  char_get_desc(ch)->olc = std::make_unique<oasis_olc_data>();
 
   if (!fields[l].buffer->empty()) {
     send_to_char(g, ch, "{}", fields[l].buffer->c_str());

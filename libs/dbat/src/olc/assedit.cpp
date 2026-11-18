@@ -93,7 +93,7 @@ ACMD(do_assedit)
     }
   } else if (isdigit(buf[0])) {
     d = char_get_desc(ch);
-    d->olc = new oasis_olc_data();
+    d->olc = std::make_unique<oasis_olc_data>();
     assedit_setup(g, d, parse_int(buf));
   }
   return;

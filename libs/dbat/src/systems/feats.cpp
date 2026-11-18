@@ -223,7 +223,7 @@ void sort_feats(GameWorld *g)
 
 int find_feat_num(GameWorld *g, std::string_view name)
 {
-  for (int ftindex = 1; ftindex <= NUM_FEATS_DEFINED; ftindex++) {
+  for (int ftindex = 1; ftindex < NUM_FEATS_DEFINED; ftindex++) {
     if (is_abbrev(name, g->feat_list[ftindex].name))
       return (ftindex);
 

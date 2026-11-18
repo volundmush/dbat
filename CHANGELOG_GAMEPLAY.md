@@ -34,6 +34,7 @@
 - When aedit can't write the socials file, the socials stay listed as unsaved, rather than the game shutting down. [Volund]
 - A help file line that starts with a NUL byte is read as an empty line, rather than writing before the reader's buffer. [Volund]
 - Sensing someone new when your sense memory already holds more than 500 people no longer writes past the end of the list it was read into, which could crash the game. [Volund]
+- In oedit, a feat apply whose feat is named by something that is no feat no longer reads past the end of the feat list (which could crash the game). [Volund]
 - Moving up the RPP top list when your account is listed twice in its bottom places no longer reads past the end of the list of places, which could crash the game; the last place is left empty. [Volund]
 
 # 2.9.3

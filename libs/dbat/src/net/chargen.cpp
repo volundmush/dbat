@@ -1468,7 +1468,7 @@ static void state_qrollstats(GameWorld *g, struct descriptor_data *d, char *arg)
     } else
       cedit_creation(g, d->character);
     if (!d->olc) {
-      d->olc = new oasis_olc_data();
+      d->olc = std::make_unique<oasis_olc_data>();
     }
     if (CONFIG_CREATION_METHOD == CEDIT_CREATION_METHOD_3)
       OLC_VAL(d) = CONFIG_INITIAL_POINTS_POOL;
@@ -1492,8 +1492,7 @@ static void state_qstats(GameWorld *g, struct descriptor_data *d, char *arg)
   if (!parse_stats(g, d, arg))
     return;
   if (d->olc) {
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
   }
   finish_creation(g, d);
   char_set_rp(d->character, d->acct.rpp);

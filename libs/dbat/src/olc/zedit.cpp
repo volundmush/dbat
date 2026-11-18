@@ -144,10 +144,10 @@ ACMD(do_oasis_zedit)
   /****************************************************************************/
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_zedit: Player already had olc structure.");
-    delete d->olc;
+    d->olc.reset();
   }
 
-  d->olc = new oasis_olc_data();
+  d->olc = std::make_unique<oasis_olc_data>();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
@@ -159,8 +159,7 @@ ACMD(do_oasis_zedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -169,8 +168,7 @@ ACMD(do_oasis_zedit)
   /****************************************************************************/
   if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
     send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -192,8 +190,7 @@ ACMD(do_oasis_zedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -205,8 +202,7 @@ ACMD(do_oasis_zedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 

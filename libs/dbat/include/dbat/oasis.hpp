@@ -6,6 +6,7 @@
 #include "dbat/consts/zoneflags.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/room_utils.hpp"
+#include "dbat/olc/session.hpp"
 
 constexpr int _OASISOLC = 0x206; /* 2.0.6 */
 /*
@@ -85,12 +86,9 @@ void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone);
  */
 /* -------------------------------------------------------------------------- */
 
-struct oasis_olc_data {
-  int mode{};                        /* how to parse input       */
+/* The session the editors not yet rewritten share: each finds its own fields in it, and its code by the state */
+struct oasis_olc_data : olc_session {
   int index{};                       /* aedit's social, hedit's help entry */
-  struct zone_data *in_zone{};       /* the zone of what is being edited */
-  room_vnum number{};                /* vnum of subject          */
-  int value{};                       /* mostly 'has changed' flag*/
   std::string storage{};             /* tedit's file, trigedit's script, the new keyword for hedit and aedit */
   struct char_data *mob{};           /* used for 'medit'         */
   struct room_data *room{};          /* used for 'redit'         */
@@ -110,12 +108,16 @@ struct oasis_olc_data {
   struct assembly_data *OlcAssembly{}; /* used for 'assedit'         */
   struct guild_data *guild{};          /* used for 'gedit'         */
   struct help_index_element *help{};   /* Hedit uses this */
+
+  void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
+  void text_done(GameWorld *g, struct descriptor_data *d, int how) override;
+  int help_context(const struct descriptor_data *d) const override;
 };
 
 /*
  * Descriptor access macros.
  */
-#define OLC(d)      ((d)->olc)
+#define OLC(d)      (static_cast<oasis_olc_data *>((d)->olc.get()))
 #define OLC_MODE(d) (OLC(d)->mode)     /* Parse input mode.	*/
 #define OLC_NUM(d)  (OLC(d)->number)   /* Room/Obj VNUM.	*/
 #define OLC_VAL(d)  (OLC(d)->value)    /* Scratch variable.	*/
@@ -615,6 +617,8 @@ constexpr int NUM_CONTEXTS = 140;
 
 /* Prototypes for the context sensitive help system */
 bool context_help(GameWorld *g, struct descriptor_data *d, char *arg);
+/* The context help for an editor still sharing oasis_olc_data, by its state and mode */
+int legacy_help_context(const struct descriptor_data *d);
 void boot_context_help(GameWorld *g);
 #endif /* ifndef __GENOLC_C__ */
 

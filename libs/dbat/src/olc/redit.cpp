@@ -143,26 +143,24 @@ ACMD(do_oasis_redit)
   /* Give the descriptor an OLC structure. */
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_redit: Player already had olc structure.");
-    delete d->olc;
+    d->olc.reset();
   }
 
   /* Create the OLC structure. */
-  d->olc = new oasis_olc_data();
+  d->olc = std::make_unique<oasis_olc_data>();
 
   /* Find the zone. */
   OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
   if (OLC_ZNUM(d) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
   /* Make sure the builder is allowed to modify this zone. */
   if (!can_edit_zone(g, ch, OLC_ZNUM(d)) && remodeling == false) {
     send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -174,8 +172,7 @@ ACMD(do_oasis_redit)
     save_rooms(g, OLC_ZNUM(d));
 
     /* Free the olc data from the descriptor. */
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 

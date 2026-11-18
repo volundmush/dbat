@@ -79,9 +79,9 @@ ACMD(do_oasis_aedit)
    */
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis: Player already had olc structure.");
-    delete d->olc;
+    d->olc.reset();
   }
-  d->olc = new oasis_olc_data();
+  d->olc = std::make_unique<oasis_olc_data>();
 
   OLC_NUM(d)     = 0;
   OLC_STORAGE(d) = arg;

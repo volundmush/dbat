@@ -317,7 +317,7 @@ ACMD(do_oasis_cedit)
   d = char_get_desc(ch);
 
   if (buf1.empty()) {
-    d->olc      = new oasis_olc_data();
+    d->olc      = std::make_unique<oasis_olc_data>();
     OLC_ZONE(d) = nullptr;
     cedit_setup(g, d);
     desc_set_connected(d, CON_CEDIT);

@@ -897,10 +897,10 @@ ACMD(do_oasis_hsedit)
   /****************************************************************************/
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: do_oasis_hsedit: Player already had olc structure.");
-    delete d->olc;
+    d->olc.reset();
   }
 
-  d->olc = new oasis_olc_data();
+  d->olc = std::make_unique<oasis_olc_data>();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
@@ -914,8 +914,7 @@ ACMD(do_oasis_hsedit)
     /** Free the descriptor's OLC structure.                                 **/
 
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -932,8 +931,7 @@ ACMD(do_oasis_hsedit)
     /** Free the descriptor's OLC structure.                                **/
 
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -958,8 +956,7 @@ ACMD(do_oasis_hsedit)
     /** Free the descriptor's OLC structure.                                **/
 
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 

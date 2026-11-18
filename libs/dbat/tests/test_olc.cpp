@@ -166,6 +166,7 @@ namespace {
       impl("oedit, the type refused", {"oedit 300", "5", "0", "99", "abc", "12", "q", "y"}),
       impl("oedit, the applies", {"oedit 300", "d", "9", "-1", "1", "999", "-1", "1", "5", "1", "2", "5", "3", "1", "0", "2", "0", "q", "y"}),
       impl("oedit, a skill and a feat apply", {"oedit 300", "d", "1", "41", "5", "kick", "2", "42", "1", "alertness", "3", "41", "2", "12", "4", "42", "3", "7", "0", "q", "y"}),
+      impl("oedit, a feat apply naming no feat", {"oedit 300", "d", "1", "42", "2", "nonsense", "0", "q", "y"}),
       as(ADMLVL_GOD, "oedit, an apply twice, below a greater god", {"oedit 300", "d", "1", "1", "5", "2", "1", "0", "0", "q", "y"}, zone_3),
       impl("oedit, the spellbook", {"oedit 300", "t", "99", "-1", "1", "999", "-1", "1", "2", "1", "0", "1", "0", "0", "q", "y"}),
       impl("oedit, the extra descriptions", {"oedit 300", "e", "3", "9", "1", "", "1", "mark", "2", "A mark.", "/s", "3", "1", "rune", "2", "A rune.", "/s", "0", "e", "3", "0", "q", "y"}),

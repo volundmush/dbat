@@ -29,6 +29,7 @@
 #include "dbat/players.hpp"
 #include "dbat/assedit.hpp"
 #include "dbat/obj_edit.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/improved-edit.hpp"
 #include "dbat/aedit.hpp"
 #include "dbat/gedit.hpp"
@@ -1136,19 +1137,19 @@ static const con_state login_states[] = {
 
 /* The editors' states, each answered by context help first */
 static const con_state olc_states[] = {
-    {CON_OEDIT,    oedit_parse,     nullptr, true},
-    {CON_IEDIT,    oedit_parse,     nullptr, true},
-    {CON_ZEDIT,    zedit_parse,     nullptr, true},
-    {CON_SEDIT,    sedit_parse,     nullptr, true},
-    {CON_MEDIT,    medit_parse,     nullptr, true},
-    {CON_REDIT,    redit_parse,     nullptr, true},
-    {CON_CEDIT,    cedit_parse,     nullptr, true},
-    {CON_AEDIT,    aedit_parse,     nullptr, true},
-    {CON_TRIGEDIT, trigedit_parse,  nullptr, true},
-    {CON_ASSEDIT,  assedit_parse,   nullptr, true},
-    {CON_GEDIT,    gedit_parse,     nullptr, true},
-    {CON_HEDIT,    hedit_parse,     nullptr, true},
-    {CON_HSEDIT,   hsedit_parse,    nullptr, true},
+    {CON_OEDIT,    olc_parse,       nullptr, true},
+    {CON_IEDIT,    olc_parse,       nullptr, true},
+    {CON_ZEDIT,    olc_parse,       nullptr, true},
+    {CON_SEDIT,    olc_parse,       nullptr, true},
+    {CON_MEDIT,    olc_parse,       nullptr, true},
+    {CON_REDIT,    olc_parse,       nullptr, true},
+    {CON_CEDIT,    olc_parse,       nullptr, true},
+    {CON_AEDIT,    olc_parse,       nullptr, true},
+    {CON_TRIGEDIT, olc_parse,       nullptr, true},
+    {CON_ASSEDIT,  olc_parse,       nullptr, true},
+    {CON_GEDIT,    olc_parse,       nullptr, true},
+    {CON_HEDIT,    olc_parse,       nullptr, true},
+    {CON_HSEDIT,   olc_parse,       nullptr, true},
     {CON_POBJ,     pobj_edit_parse, nullptr, true},
 };
 

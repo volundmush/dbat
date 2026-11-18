@@ -135,10 +135,10 @@ ACMD(do_oasis_oedit)
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis: Player already had olc structure.");
-    delete d->olc;
+    d->olc.reset();
   }
 
-  d->olc = new oasis_olc_data();
+  d->olc = std::make_unique<oasis_olc_data>();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
@@ -150,8 +150,7 @@ ACMD(do_oasis_oedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -164,8 +163,7 @@ ACMD(do_oasis_oedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -187,8 +185,7 @@ ACMD(do_oasis_oedit)
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -1025,8 +1022,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
               act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
             }
             delete OLC_OBJ(d); /* its strings now belong to obj */
-            delete d->olc;
-            d->olc = nullptr;
+            d->olc.reset();
           }
           return;
         case '1':
@@ -1719,7 +1715,7 @@ ACMD(do_iedit)
   }
 
   /* set up here */
-  OLC(char_get_desc(ch)) = new oasis_olc_data();
+  char_get_desc(ch)->olc = std::make_unique<oasis_olc_data>();
   obj_extra_set(k, ITEM_UNIQUE_SAVE, true);
 
   char_plr_set(ch, PLR_WRITING, true);

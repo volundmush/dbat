@@ -126,18 +126,17 @@ ACMD(do_oasis_gedit)
   if (d->olc) {
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis_gedit: Player already had olc structure.");
-    delete d->olc;
+    d->olc.reset();
   }
 
-  d->olc = new oasis_olc_data();
+  d->olc = std::make_unique<oasis_olc_data>();
 
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
   if ((OLC_ZNUM(d) = find_zone_by_thing(g, number)) == nullptr) {
     send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -150,8 +149,7 @@ ACMD(do_oasis_gedit)
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
@@ -170,8 +168,7 @@ ACMD(do_oasis_gedit)
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
-    delete d->olc;
-    d->olc = nullptr;
+    d->olc.reset();
     return;
   }
 
