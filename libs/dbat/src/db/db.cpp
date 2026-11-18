@@ -35,7 +35,7 @@
 #include "dbat/affect.hpp"
 #include "dbat/weather.hpp"
 #include "dbat/time.hpp"
-#include "dbat/xdir.hpp"
+#include "dbat/io/paths.hpp"
 #include "dbat/search.hpp"
 #include "dbat/extract.hpp"
 #include "dbat/relocate.hpp"
@@ -425,7 +425,7 @@ void boot_db(GameWorld *g)
   if (g->ERAPLAYERS <= 0)
     g->ERAPLAYERS = g->top_of_p_table + 1;
 
-  insure_directory(LIB_PLROBJS "CRASH");
+  io::ensure_directory(LIB_PLROBJS "CRASH");
 
   mud_log("Booting mail system.");
   if (!scan_file(g)) {
@@ -492,7 +492,10 @@ void boot_db(GameWorld *g)
   /* Moved here so the object limit code works. -gg 6/24/98 */
   if (!g->mini_mud) {
     mud_log("Booting houses.");
-    House_boot(g);
+    if (io::loaded<void> houses = House_boot(g); !houses) {
+      mud_log("SYSERR: {}", houses.error().text());
+      exit(1);
+    }
   }
 
   for (struct zone_data *i : g->zones.all()) {
@@ -2156,125 +2159,6 @@ struct zone_data *find_zone(GameWorld *g, zone_vnum vnum)
   return g->zones.find(vnum);
 }
 
-/* file_print()s to fp, logging a failed write; false if it failed */
-template <class... Args>
-static bool obj_save_print(GameWorld *g, FILE *fp, struct obj_data *obj, const char *context, const char *file,
-                           int line, std::format_string<Args...> format, Args &&...args)
-{
-  int result = file_print(fp, format, std::forward<Args>(args)...);
-
-  if (result < 0 || ferror(fp)) {
-    int saved_errno = errno;
-    mud_log("SYSERR: {}:{:d}: write failed saving object #{:d} ({}): {}",
-            file, line, obj_get_vnum(g, obj), context,
-            saved_errno ? strerror(saved_errno) : "stream error");
-    return false;
-  }
-
-  return true;
-}
-
-#define OBJ_SAVE_PRINT(g, fp, obj, context, ...) \
-  obj_save_print(g, (fp), (obj), (context), __FILE__, __LINE__, __VA_ARGS__)
-
-bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate)
-{
-  int counter2, i;
-  std::string buf1;
-  char ebuf0[MAX_STRING_LENGTH], ebuf1[MAX_STRING_LENGTH];
-  char ebuf2[MAX_STRING_LENGTH], ebuf3[MAX_STRING_LENGTH];
-
-  if (obj_get_action_description(obj)) {
-    buf1 = obj_get_action_description(obj);
-    strip_cr(buf1);
-  } else
-    buf1.clear();
-
-  sprintascii(ebuf0, obj_get_extra_flags(obj)[0]);
-  sprintascii(ebuf1, obj_get_extra_flags(obj)[1]);
-  sprintascii(ebuf2, obj_get_extra_flags(obj)[2]);
-  sprintascii(ebuf3, obj_get_extra_flags(obj)[3]);
-
-  if (!OBJ_SAVE_PRINT(g, fp, obj, "base object data",
-                      "#{:d}\n"
-                      "{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {} {} {} {} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n",
-                      obj_get_vnum(g, obj), locate, obj_get_value(obj, 0), obj_get_value(obj, 1),
-                      obj_get_value(obj, 2), obj_get_value(obj, 3), obj_get_value(obj, 4),
-                      obj_get_value(obj, 5), obj_get_value(obj, 6), obj_get_value(obj, 7),
-                      ebuf0, ebuf1, ebuf2, ebuf3,
-                      obj_get_value(obj, 8), obj_get_value(obj, 9),
-                      obj_get_value(obj, 10), obj_get_value(obj, 11), obj_get_value(obj, 12),
-                      obj_get_value(obj, 13), obj_get_value(obj, 14), obj_get_value(obj, 15)))
-    return false;
-
-  /* An early "return 1" for non-unique, non-spellbook objects used to sit here, but its
-   * condition (!type == ITEM_SPELLBOOK) was always false, so every object saves its XAP data. */
-
-  if (!OBJ_SAVE_PRINT(g, fp, obj, "XAP object data",
-                      "XAP\n{}~\n{}~\n{}~\n{}~\n{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n",
-                      obj_get_name(obj) ? obj_get_name(obj) : "undefined",
-                      obj_get_short_description(obj) ? obj_get_short_description(obj) : "undefined",
-                      obj_get_description(obj) ? obj_get_description(obj) : "undefined",
-                      buf1.c_str(), obj_get_type_flag(obj), (int)obj_get_wear_flags(obj)[0], /* as signed, as always */
-                      (int)obj_get_wear_flags(obj)[1], (int)obj_get_wear_flags(obj)[2], (int)obj_get_wear_flags(obj)[3],
-                      obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj)))
-    return false;
-
-  if (obj_get_generation(obj))
-    if (!OBJ_SAVE_PRINT(g, fp, obj, "generation", "G\n{:d}\n", (long long)obj_get_generation(obj)))
-      return false;
-  if (obj_get_unique_id(obj))
-    if (!OBJ_SAVE_PRINT(g, fp, obj, "unique id", "U\n{:d}\n", obj_get_unique_id(obj)))
-      return false;
-
-  if (!OBJ_SAVE_PRINT(g, fp, obj, "size", "Z\n{:d}\n", obj_get_size(obj)))
-    return false;
-
-  /* Do we have affects? */
-  for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
-    if (obj_get_affected(obj)[counter2].modifier)
-      if (!OBJ_SAVE_PRINT(g, fp, obj, "affect", "A\n"
-                                                "{:d} {:d} {:d}\n",
-                          obj_get_affected(obj)[counter2].location, obj_get_affected(obj)[counter2].modifier,
-                          obj_get_affected(obj)[counter2].specific))
-        return false;
-
-  /* Do we have extra descriptions? */
-  for (const extra_descr_data &ex : obj_get_ex_description(obj)) { /*. Yep, save them too . */
-    {
-      const extra_descr_data *ex_desc = &ex;
-      /*. Sanity check to prevent nasty protection faults . */
-      if (ex_desc->keyword.empty() || ex_desc->description.empty()) {
-        continue;
-      }
-      buf1 = ex_desc->description;
-      strip_cr(buf1);
-      if (!OBJ_SAVE_PRINT(g, fp, obj, "extra description", "E\n"
-                                                           "{}~\n"
-                                                           "{}~\n",
-                          ex_desc->keyword.c_str(),
-                          buf1.c_str()))
-        return false;
-    }
-  }
-
-  /* Do we have spells? */
-  if (obj_get_sbinfo(obj)) { /*. Yep, save them too . */
-    for (i = 0; i < SPELLBOOK_SIZE; i++) {
-      if (obj_get_sbinfo(obj)[i].spellname == 0) {
-        break;
-      }
-      if (!OBJ_SAVE_PRINT(g, fp, obj, "spellbook", "S\n"
-                                                   "{:d} {:d}\n",
-                          obj_get_sbinfo(obj)[i].spellname, obj_get_sbinfo(obj)[i].pages))
-        return false;
-      continue;
-    }
-  }
-  return true;
-}
-
-#undef OBJ_SAVE_PRINT
 
 /* External variables from config.c */
 

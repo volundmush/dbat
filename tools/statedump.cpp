@@ -254,36 +254,11 @@ void houses(GameWorld *g)
   }
 }
 
-/* The letters waiting, read from the mail file as the game holds it: each one's header block, then its data
-   blocks, by the links in each */
+/* The letters waiting, in the order they will be received */
 void mail(GameWorld *g)
 {
-  auto block = [&](long pos) -> const char * {
-    return pos >= 0 && pos + BLOCK_SIZE <= g->mail_buf_len ? g->mail_buf + pos : nullptr;
-  };
-  for (const mail_index_type *m = g->mail_index; m; m = m->next)
-    for (const position_list_type *p = m->list_start; p; p = p->next) {
-      const char *raw = block(p->position);
-      if (!raw) {
-        file_print(out, "letter to {:d} at {:d}: outside the file\n", m->recipient, p->position);
-        continue;
-      }
-      header_block_type header;
-      memcpy(&header, raw, sizeof(header));
-      std::string body(header.txt, strnlen(header.txt, HEADER_BLOCK_DATASIZE));
-      long next = header.header_data.next_block;
-      for (int guard = 0; next != LAST_BLOCK && guard < 1000; guard++) {
-        const char *draw = block(next);
-        if (!draw)
-          break;
-        data_block_type data;
-        memcpy(&data, draw, sizeof(data));
-        body.append(data.txt, strnlen(data.txt, DATA_BLOCK_DATASIZE));
-        next = data.block_type;
-      }
-      file_print(out, "letter to {:d} from {:d} at {:d} {}\n", header.header_data.to, header.header_data.from,
-                 (long long)header.header_data.mail_time, text(body));
-    }
+  for (const mail_letter &m : g->mail)
+    file_print(out, "letter to {:d} from {:d} at {:d} {}\n", m.to, m.from, static_cast<long long>(m.time), text(m.text));
 }
 
 void boards(GameWorld *g)

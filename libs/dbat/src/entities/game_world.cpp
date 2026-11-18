@@ -48,8 +48,7 @@ void game_world_free_contents(GameWorld *g)
     mud_log("Clearing other memory.");
     free_bufpool(g);                        /* comm.c */
     free_player_index(g);                   /* players.c */
-    clear_free_list(g);                     /* mail.c */
-    free_mail_index(g);                     /* mail.c */
+    g->mail.clear();
     clear_boards(g);                        /* boards.c */
     delete[] g->cmd_sort_info;              /* act.informative.c */
     free_command_list(g);                   /* act.informative.c */

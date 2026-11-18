@@ -44,6 +44,8 @@
 #include "dbat/rooms.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/mail.hpp"
+#include "dbat/house.hpp"
+#include "dbat/object_records.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/utils.hpp"
@@ -448,6 +450,230 @@ static void check_player_file_cut_short_in_its_description(void)
   char_make_player_specials(copy);
   CHECK(load_char(g, "tester", copy) == -1); /* refused, and the game goes on */
   free_char(g, copy);
+  th_shutdown(g);
+}
+
+/* ------ F8: rent, houses and mail ------ */
+
+static bool boot_is_refused(void (*prepare)(void), const char *reason);
+
+static std::string read_whole(const char *path)
+{
+  FILE *fl = fopen(path, "rb");
+  std::string text;
+  char buf[4096];
+  size_t n;
+
+  if (!fl)
+    return text;
+  while ((n = fread(buf, 1, sizeof(buf), fl)) > 0)
+    text.append(buf, n);
+  fclose(fl);
+  return text;
+}
+
+static void put_le(std::string &bytes, size_t at, int64_t v, size_t n)
+{
+  for (size_t i = 0; i < n; i++)
+    bytes[at + i] = static_cast<char>((static_cast<uint64_t>(v) >> (8 * i)) & 0xff);
+}
+
+/* The old binary mail file: a letter in a header block and one data block, and a deleted block between them */
+static void old_binary_mail(void)
+{
+  std::string bytes(3 * 256, '\0');
+  put_le(bytes, 0, -1, 8);    /* a header block */
+  put_le(bytes, 8, 512, 8);   /* its text goes on at block 2 */
+  put_le(bytes, 16, 7, 8);    /* from */
+  put_le(bytes, 24, 9, 8);    /* to */
+  put_le(bytes, 32, 1234, 8); /* when */
+  std::string start(215, 'a');
+  bytes.replace(40, start.size(), start);
+  put_le(bytes, 256, -3, 8); /* a deleted block */
+  put_le(bytes, 512, -2, 8); /* the last block of the letter */
+  bytes.replace(520, 5, "tail!");
+  FILE *fl = fopen(MAIL_FILE, "wb");
+  if (!fl)
+    abort();
+  fwrite(bytes.data(), 1, bytes.size(), fl);
+  fclose(fl);
+}
+
+static void check_old_binary_mail_is_converted(void)
+{
+  th_before_boot(old_binary_mail);
+  GameWorld *g = th_boot();
+
+  CHECK(g->mail.size() == 1);
+  CHECK(g->mail[0].to == 9 && g->mail[0].from == 7 && g->mail[0].time == 1234);
+  CHECK(g->mail[0].text == std::string(215, 'a') + "tail!");
+  CHECK(read_whole(MAIL_FILE).starts_with("# dbat plrmail 2\n"));
+  CHECK(read_whole(MAIL_FILE ".bak").size() == 3 * 256); /* the old file, kept */
+
+  /* read again, it is the same, and saving it again changes nothing */
+  std::string text = read_whole(MAIL_FILE);
+  g->mail.clear();
+  CHECK(scan_file(g));
+  CHECK(g->mail.size() == 1 && g->mail[0].text == std::string(215, 'a') + "tail!");
+  CHECK(save_mail_file(g));
+  CHECK(read_whole(MAIL_FILE) == text);
+
+  /* a letter with "~" and line ends in it comes back as it was */
+  char message[] = "first line~\r\nsecond ~ line\r\n";
+  store_mail(g, 9, 7, message);
+  g->mail.clear();
+  CHECK(scan_file(g));
+  CHECK(g->mail.size() == 2 && g->mail[1].text == message);
+  th_shutdown(g);
+}
+
+/* A letter in the old mail file whose header links to a deleted block, as one in the live data does: receiving it
+   read past the file and looped on a garbage link. It keeps what could be read. */
+static void old_binary_mail_with_a_broken_link(void)
+{
+  std::string bytes(256, '\0');
+  put_le(bytes, 0, -1, 8);  /* a header block */
+  put_le(bytes, 8, -3, 8);  /* linking to "deleted" */
+  put_le(bytes, 16, 7, 8);
+  put_le(bytes, 24, 9, 8);
+  bytes.replace(40, 6, "start.");
+  FILE *fl = fopen(MAIL_FILE, "wb");
+  if (!fl)
+    abort();
+  fwrite(bytes.data(), 1, bytes.size(), fl);
+  fclose(fl);
+}
+
+static void check_old_binary_mail_with_a_broken_link(void)
+{
+  th_before_boot(old_binary_mail_with_a_broken_link);
+  GameWorld *g = th_boot();
+
+  CHECK(g->mail.size() == 1 && g->mail[0].text == "start.");
+  CHECK(has_mail(g, 9));
+  th_shutdown(g);
+}
+
+/* An old binary house record, read field by field */
+static void old_binary_houses(void)
+{
+  std::string bytes(200, '\0');
+  put_le(bytes, 0, 300, 4);   /* vnum */
+  put_le(bytes, 4, 301, 4);   /* atrium */
+  put_le(bytes, 8, -1, 2);    /* exit */
+  put_le(bytes, 16, 1000, 8); /* built */
+  put_le(bytes, 24, 3, 4);    /* mode */
+  put_le(bytes, 32, 42, 8);   /* owner */
+  put_le(bytes, 40, 99, 4);   /* guests: far more than there are room for */
+  put_le(bytes, 48, 5, 8);    /* the first guest */
+  put_le(bytes, 128, 2000, 8);
+  put_le(bytes, 136, 6, 8); /* bits */
+  put_le(bytes, 144, 77, 8); /* built by */
+  put_le(bytes, 192, 8, 8);  /* spare7 */
+  FILE *fl = fopen(HCONTROL_FILE, "wb");
+  if (!fl)
+    abort();
+  fwrite(bytes.data(), 1, bytes.size(), fl);
+  fclose(fl);
+}
+
+static void check_old_binary_houses_are_read(void)
+{
+  th_before_boot(old_binary_houses);
+  GameWorld *g = th_boot(); /* the owner doesn't exist, so the boot drops the house, but the file reads */
+  /* the boot saved the file as text, with no houses, keeping the old one */
+  CHECK(read_whole(HCONTROL_FILE) == "# dbat hcontrol 2\n");
+  CHECK(read_whole(HCONTROL_FILE ".bak").size() == 200);
+
+  old_binary_houses();
+  io::loaded<house_control_file> file = read_house_control();
+  CHECK(file && file->converted && file->houses.size() == 1);
+  const house_control_rec &h = file->houses[0];
+  CHECK(h.vnum == 300 && h.atrium == 301 && h.exit_num == -1 && h.built_on == 1000 && h.mode == 3);
+  CHECK(h.owner == 42 && h.num_of_guests == MAX_GUESTS && h.guests[0] == 5 && h.last_payment == 2000);
+  CHECK(h.bitvector == 6 && h.builtby == 77 && h.spare7 == 8);
+
+  /* written as text and read again, it is the same */
+  g->house_control[0] = h;
+  g->num_of_houses    = 1;
+  House_save_control(g);
+  io::loaded<house_control_file> again = read_house_control();
+  CHECK(again && !again->converted && again->houses.size() == 1);
+  CHECK(again && memcmp(&again->houses[0], &h, sizeof(h)) == 0);
+  g->num_of_houses = 0;
+  th_shutdown(g);
+}
+
+static const char *house_file_text;
+static void write_house_file(void)
+{
+  write_file(HCONTROL_FILE, house_file_text);
+}
+
+static void check_hcontrol_that_cant_be_read_refuses_the_boot(void)
+{
+  static const struct {
+    const char *text, *reason;
+  } cases[] = {
+      {"not a house file at all",  "SYSERR: etc/hcontrol:1: expected '# dbat hcontrol 2' to begin the file"},
+      {"# dbat hcontrol 1\n",      "SYSERR: etc/hcontrol:1: expected '# dbat hcontrol 2' to begin the file"},
+      {"# dbat hcontrol 2\n#300\nColour: red\n", "SYSERR: etc/hcontrol:3: house #300: 'Colour: red' isn't one of its fields"},
+      {"# dbat hcontrol 2\nOwner: 1\n", "SYSERR: etc/hcontrol:2: expected '#<vnum>' to begin a house, got 'Owner: 1'"},
+      {"# dbat hcontrol 2\n#300\nGuests: 1 2 3 4 5 6 7 8 9 10 11\n", "SYSERR: etc/hcontrol:3: house #300: can't read its Guests"},
+  };
+  for (const auto &c : cases) {
+    house_file_text = c.text;
+    if (!boot_is_refused(write_house_file, c.reason)) {
+      file_print(stdout, "not refused as expected: '{}', for '{}'\n", c.text, c.reason);
+      CHECK(false);
+    }
+  }
+
+  house_file_text = "# dbat hcontrol 2\n"; /* no houses is fine */
+  th_before_boot(write_house_file);
+  GameWorld *g = th_boot();
+  CHECK(g->num_of_houses == 0);
+  th_shutdown(g);
+}
+
+/* A house file's object records, read into a room: a spellbook with more pages than it holds, and an object with
+   a wear position, which the old reader read before its rows of containers for */
+static void check_house_records_past_their_limits(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  room_vnum room       = char_get_in_room(ch);
+  std::string text     = "#350\n0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\nXAP\n~\n~\n.~\n~\n2 0 0 0 0 0 0 0\n";
+
+  for (int i = 0; i < SPELLBOOK_SIZE + 5; i++)
+    text += "S\n10 3\n";
+  text += "#350\n3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\nXAP\n~\n~\n.~\n~\n2 0 0 0 0 0 0 0\n$~\n";
+
+  io::text_reader in("house/test.house", text);
+  record_lines lines(in);
+  lines.next();
+  bag_rows rows(g, nullptr, room);
+  int count = 0;
+  io::loaded<void> read = read_object_records(g, lines, record_kind::house, [&](obj_data *obj, int locate) {
+    obj_to_room(g, obj, room);
+    rows.place(obj, locate);
+    count++;
+  });
+  CHECK(read && count == 2);
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* A rent file cut short in an object's strings: the old reader shut the game down */
+static void check_rent_file_cut_short_in_a_string(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  char path[256];
+
+  save_path("plrobjs", "new", "tester", path, sizeof(path));
+  write_file(path, "1\n#350\n0\nXAP\nkeywords~\na short descr");
+  CHECK(Crash_load(g, ch) == 0); /* the file is refused, and the game goes on */
   th_shutdown(g);
 }
 
@@ -2444,6 +2670,12 @@ static const struct {
     {"help_line_starting_with_a_nul",               check_help_line_starting_with_a_nul              },
     {"empty_context_help",                          check_empty_context_help                         },
     {"player_file_cut_short_in_its_description",    check_player_file_cut_short_in_its_description   },
+    {"old_binary_mail_is_converted",                check_old_binary_mail_is_converted               },
+    {"old_binary_mail_with_a_broken_link",          check_old_binary_mail_with_a_broken_link         },
+    {"old_binary_houses_are_read",                  check_old_binary_houses_are_read                 },
+    {"hcontrol_that_cant_be_read_refuses_the_boot", check_hcontrol_that_cant_be_read_refuses_the_boot},
+    {"house_records_past_their_limits",             check_house_records_past_their_limits            },
+    {"rent_file_cut_short_in_a_string",             check_rent_file_cut_short_in_a_string            },
     {"damaged_files_refuse_the_boot",               check_damaged_files_refuse_the_boot              },
 };
 

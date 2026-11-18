@@ -22,7 +22,6 @@
 #include "dbat/db.hpp"
 #include "dbat/fileop.hpp"
 #include "dbat/format.hpp"
-#include "dbat/xdir.hpp"
 
 static int failures;
 #define CHECK(cond)                                                                                         \
@@ -443,10 +442,6 @@ static void check_replacing_files()
   io::touch(dir / "c");
   auto names = io::list_directory(dir);
   CHECK(names && *names == (std::vector<std::string>{"a", "c", "file", "file.bak"}));
-  struct xap_dir xd;
-  CHECK(xdir_scan(dir.c_str(), &xd) == 6 && !strcmp(xdir_get_name(&xd, 0), ".") && !strcmp(xdir_get_name(&xd, 2), "a"));
-  xdir_cleanup(&xd);
-  CHECK(xdir_scan((dir / "none").c_str(), &xd) == -1);
   CHECK(!io::list_directory(dir / "none"));
 
   io::replace_file((dir / "index").string(), "3.wld\n4.wld\n$\nafter\n", false);

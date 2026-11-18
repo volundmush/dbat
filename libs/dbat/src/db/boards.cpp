@@ -16,8 +16,13 @@
 #include <cstddef>
 #include <cstdlib>
 
-#include <sys/stat.h>
-#include <unistd.h>
+#include <algorithm>
+#include <chrono>
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
@@ -27,11 +32,12 @@
 #include "dbat/db.hpp"
 #include "dbat/broadcast.hpp"
 #include "dbat/config.hpp"
-#include "dbat/xdir.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/io/writer.hpp"
 #include "dbat/fileop.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/log.hpp"
-#include "dbat/atomicfile.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
@@ -116,9 +122,9 @@ static struct obj_data *board_proto(GameWorld *g, obj_vnum vnum)
   return obj_proto_of(g, vnum);
 }
 
-static void board_path(char *buf, size_t size, obj_vnum vnum)
+static std::string board_path(obj_vnum vnum)
 {
-  snprintf(buf, size, "%s%d", BOARD_DIRECTORY, vnum);
+  return str_format("{}{:d}", BOARD_DIRECTORY, vnum);
 }
 
 /* The memory[] bucket for a message. A deleted poster has id -1, which can make the sum negative. */
@@ -248,9 +254,13 @@ static bool mark_read(GameWorld *g, struct board_info *board, const struct board
 }
 
 /* Reads "Board File" level line: read write remove count version. Missing fields get defaults. */
-static void parse_header(GameWorld *g, const char *line, int t[5], obj_vnum vnum, const char *path)
+static void parse_header(GameWorld *g, std::string_view line, int t[5], obj_vnum vnum, const std::string &path)
 {
-  int found = sscanf(line, "%d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4);
+  io::fields f(line);
+  for (int i = 0; i < 5; i++)
+    if (!f.number(t[i]))
+      break;
+  int found = f.count();
 
   if (found == 5)
     return;
@@ -267,96 +277,99 @@ static void parse_header(GameWorld *g, const char *line, int t[5], obj_vnum vnum
 
 /* "S<slot> <reader> <timestamp>": a read record. Kept only if it still matches a loaded message,
    so messages must be loaded first. Records are dropped silently: deleted messages are normal. */
-static void parse_memory_line(GameWorld *g, struct board_info *board, const char *line)
+static void parse_memory_line(GameWorld *g, struct board_info *board, std::string_view line)
 {
-  char reader[128];
-  int slot, timestamp;
-  struct board_memory *mem;
-  struct board_msg *msg;
+  std::string reader;
+  int slot = 0, timestamp = 0;
 
-  if (sscanf(line, "S %d %127s %d ", &slot, reader, &timestamp) != 3)
+  io::fields f(line.substr(1));
+  if (!(f.number(slot) && f.word(reader, 127) && f.number(timestamp)))
     return;
   if (slot < 0 || slot >= BOARD_MEMORY_SLOTS)
     return;
 
+  struct board_msg *msg;
   for (msg = board->messages; msg; msg = msg->next)
     if (msg->timestamp == timestamp && memory_slot(g, msg) == slot)
       break;
   if (!msg)
     return;
 
-  mem                 = new board_memory();
+  auto *mem           = new board_memory();
   mem->name           = reader;
   mem->timestamp      = timestamp;
   mem->next           = board->memory[slot];
   board->memory[slot] = mem;
 }
 
-/* After a "#<n>" line: poster, timestamp, subject, then the text up to '~'. */
-static bool parse_message(FILE *fl, struct board_info *board, const char *path)
+/* After a "#<n>" line: poster, timestamp, subject, then the text up to '~'. The poster and the timestamp are read
+   as fscanf("%s\n") and fscanf("%ld\n") read them, so the whitespace after each goes too (quirk: the subject loses
+   the spaces it starts with, and blank lines before it). */
+static io::loaded<bool> parse_message(io::text_reader &in, struct board_info *board)
 {
-  struct board_msg *msg;
-  char poster[128], subject[READ_SIZE] = "";
-  long timestamp;
-
-  if (fscanf(fl, "%127s\n", poster) != 1 || fscanf(fl, "%ld\n", &timestamp) != 1) {
+  std::string_view rest = in.text().substr(in.position());
+  io::fields f(rest);
+  std::string poster;
+  long long timestamp = 0;
+  bool read           = f.word(poster, 127) && f.number(timestamp);
+  std::string_view after = f.rest();
+  if (read)
+    after = after.substr(std::min(after.find_first_not_of(" \t\n\r\v\f"), after.size()));
+  in.bytes(rest.size() - after.size());
+  if (!read) {
     mud_log("Parse error in message for board [vnum: {:d}].  Skipping.", board->vnum);
     return false;
   }
-  get_line(fl, subject);
+  std::string subject(in.line().value_or(""));
 
-  msg            = new board_msg();
+  io::loaded<std::string> data = in.tilde_string(str_format("board {:d}'s message", board->vnum));
+  if (!data)
+    return std::unexpected(data.error());
+  auto *msg      = new board_msg();
   msg->name      = poster;
   msg->timestamp = timestamp;
   msg->subject   = subject;
-  msg->data      = take_string(fread_string(fl, path));
+  msg->data      = std::move(*data);
   add_message_tail(board, msg);
   return true;
 }
 
 /* see accompanying document for board file format */
-static struct board_info *load_board(GameWorld *g, obj_vnum board_vnum)
+static io::loaded<struct board_info *> load_board(GameWorld *g, obj_vnum board_vnum)
 {
-  struct board_info *board;
-  struct obj_data *obj;
-  struct stat st;
-  int t[5], msg_num = 0;
-  char path[512], buf[READ_SIZE];
-  FILE *fl;
-
-  board_path(path, sizeof(path), board_vnum);
-  if (!(fl = fopen(path, "r"))) {
+  std::string path                 = board_path(board_vnum);
+  io::loaded<io::text_reader> file = io::text_reader::open(path);
+  if (!file) {
     mud_log("Request to open board [vnum {:d}] failed - unable to open file '{}'.", board_vnum, path);
     return nullptr;
   }
-  if (!get_line(fl, buf) || strcmp("Board File", buf)) {
+  if (file->line().value_or("") != "Board File") {
     mud_log("Invalid board file '{}' [vnum: {:d}] - failed to load.", path, board_vnum);
-    fclose(fl);
     return nullptr;
   }
 
   /* oddly enough, most errors in board files can be ignored, setting defaults */
-  *buf = '\0';
-  get_line(fl, buf);
-  parse_header(g, buf, t, board_vnum, path);
+  int t[5] = {};
+  parse_header(g, file->line().value_or(""), t, board_vnum, path);
   if (t[4] != CURRENT_BOARD_VER) {
     mud_log("SYSERR: Board file '{}' [vnum: {:d}] is format version {:d}; only version {:d} is supported. Not loaded.",
             path, board_vnum, t[4], CURRENT_BOARD_VER);
-    fclose(fl);
     return nullptr;
   }
 
-  board       = new board_info();
+  auto *board = new board_info();
   board->vnum = board_vnum;
 
   /* if the object exists, the object trumps the board file settings */
-  if (!(obj = board_proto(g, board_vnum))) {
+  struct obj_data *obj = board_proto(g, board_vnum);
+  if (!obj) {
     mud_log("No associated object exists when attempting to create a board [vnum {:d}].", board_vnum);
     /* auto delete only if the file hasn't been modified in the last 7 days */
-    if (!stat(path, &st) && time(nullptr) - st.st_mtime > (60 * 60 * 24 * 7)) {
+    std::error_code ec;
+    auto modified = std::filesystem::last_write_time(path, ec);
+    if (!ec && std::filesystem::file_time_type::clock::now() - modified > std::chrono::days(7)) {
       mud_log("Deleting old board file '{}' [vnum {:d}].  7 days without modification & no associated object.", path, board_vnum);
-      unlink(path);
-      fclose(fl);
+      std::filesystem::remove(path, ec);
       delete board;
       return nullptr;
     }
@@ -378,13 +391,19 @@ static struct board_info *load_board(GameWorld *g, obj_vnum board_vnum)
   }
   board->num_messages = t[3];
 
-  while (get_line(fl, buf)) {
-    if (*buf == 'S')
-      parse_memory_line(g, board, buf);
-    else if (*buf == '#' && parse_message(fl, board, path))
-      msg_num++;
+  int msg_num = 0;
+  while (std::optional<std::string_view> line = file->line()) {
+    if (line->starts_with('S'))
+      parse_memory_line(g, board, *line);
+    else if (line->starts_with('#')) {
+      io::loaded<bool> read = parse_message(*file, board);
+      if (!read) {
+        delete board;
+        return std::unexpected(read.error());
+      }
+      msg_num += *read;
+    }
   }
-  fclose(fl);
 
   if (msg_num != board->num_messages) {
     mud_log("Board [vnum: {:d}] message count ({:d}) not equal to actual message count ({:d}). Correcting.",
@@ -408,36 +427,34 @@ static bool is_number_name(const char *name)
 
 void init_boards(GameWorld *g)
 {
-  struct xap_dir xd;
-  struct board_info *board;
-  int count;
-
-  if (!insure_directory(BOARD_DIRECTORY)) {
+  if (!io::ensure_directory(BOARD_DIRECTORY)) {
     mud_log("Unable to open/create directory '{}' - Exiting", BOARD_DIRECTORY);
     exit(1);
   }
 
-  if ((count = xdir_scan(BOARD_DIRECTORY, &xd)) <= 0) {
+  std::optional<std::vector<std::string>> names = io::list_directory(BOARD_DIRECTORY);
+  if (!names) {
     mud_log("Funny, no board files found.\n");
-    xdir_cleanup(&xd);
     return;
   }
 
-  /* board files are named by vnum; skip ".", "..", ".cvsignore" and anything else */
-  for (int i = 0; i < count; i++) {
-    const char *name = xdir_get_name(&xd, i);
-
-    if (!is_number_name(name))
+  /* board files are named by vnum; skip ".cvsignore" and anything else */
+  for (const std::string &name : *names) {
+    if (!is_number_name(name.c_str()))
       continue;
-    if ((board = load_board(g, atoi(name))) != nullptr) {
-      board->next = g->bboards;
-      g->bboards     = board;
+    io::loaded<struct board_info *> board = load_board(g, atoi(name.c_str()));
+    if (!board) {
+      mud_log("SYSERR: {}", board.error().text());
+      exit(1);
+    }
+    if (*board) {
+      (*board)->next = g->bboards;
+      g->bboards     = *board;
     }
   }
-  xdir_cleanup(&xd);
 
   int boards = 0, messages = 0;
-  for (board = g->bboards; board; board = board->next, boards++)
+  for (struct board_info *board = g->bboards; board; board = board->next, boards++)
     for (struct board_msg *msg = board->messages; msg; msg = msg->next)
       messages++;
   mud_log("There are {:d} boards located; {:d} messages", boards, messages);
@@ -446,16 +463,14 @@ void init_boards(GameWorld *g)
 /* Creates an empty board for an object that has no board file yet, and adds it to bboards. */
 struct board_info *create_new_board(GameWorld *g, obj_vnum board_vnum)
 {
-  char path[512];
-  FILE *fl;
   struct board_info *board;
   struct obj_data *obj;
 
-  board_path(path, sizeof(path), board_vnum);
-  if ((fl = fopen(path, "r"))) {
-    fclose(fl);
+  std::string path = board_path(board_vnum);
+  std::error_code ec;
+  if (std::filesystem::exists(path, ec)) {
     mud_log("Preexisting board file when attempting to create new board [vnum: {:d}]. Attempting to correct.", board_vnum);
-    unlink(path);
+    std::filesystem::remove(path, ec);
   }
 
   board = new board_info();
@@ -526,35 +541,29 @@ struct board_info *locate_board(GameWorld *g, obj_vnum board_vnum)
 
 bool save_board(GameWorld *g, struct board_info *board)
 {
-  struct atomic_file af;
-  struct board_msg *msg;
-  FILE *fl;
-  char path[512];
-  int saved = 0, i = 1;
-
   if (!board)
     return false;
 
-  board_path(path, sizeof(path), board->vnum);
-  if (!(fl = atomic_open(&af, path, false))) {
-    mud_log("Hm. Error while creating attempting to save board [vnum: {:d}].  Unable to create file '{}'", board->vnum, path);
-    return false;
-  }
-
-  for (msg = board->messages; msg; msg = msg->next)
+  io::text_writer out(board_path(board->vnum));
+  int saved = 0, i = 1;
+  for (struct board_msg *msg = board->messages; msg; msg = msg->next)
     if (message_saveable(g, msg))
       saved++;
-  file_print(fl, "Board File\n{:d} {:d} {:d} {:d} {:d}\n", board->read_lvl, board->write_lvl, board->remove_lvl, saved, CURRENT_BOARD_VER);
+  out.print("Board File\n{:d} {:d} {:d} {:d} {:d}\n", board->read_lvl, board->write_lvl, board->remove_lvl, saved, CURRENT_BOARD_VER);
 
-  for (msg = board->messages; msg; msg = msg->next)
+  for (struct board_msg *msg = board->messages; msg; msg = msg->next)
     if (message_saveable(g, msg))
-      file_print(fl, "#{:d}\n{}\n{:d}\n{}\n{}~\n", i++, msg->name, (long)msg->timestamp, msg->subject, msg->data);
+      out.print("#{:d}\n{}\n{:d}\n{}\n{}~\n", i++, msg->name, static_cast<long>(msg->timestamp), msg->subject, msg->data);
 
   for (int slot = 0; slot < BOARD_MEMORY_SLOTS; slot++)
     for (struct board_memory *mem = board->memory[slot]; mem; mem = mem->next)
-      file_print(fl, "S{:d} {} {:d}\n", slot, mem->name, mem->timestamp);
+      out.print("S{:d} {} {:d}\n", slot, mem->name, mem->timestamp);
 
-  return atomic_commit(&af);
+  if (!out.commit()) {
+    mud_log("Hm. Error while creating attempting to save board [vnum: {:d}].  Unable to create file '{}'", board->vnum, out.path());
+    return false;
+  }
+  return true;
 }
 
 static void send_board_banner(GameWorld *g, struct char_data *ch, const struct obj_data *obj, obj_vnum board_vnum)

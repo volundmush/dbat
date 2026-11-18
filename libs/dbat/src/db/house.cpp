@@ -7,8 +7,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include <cerrno>
 #include <cstdlib>
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <vector>
 
 #include "dbat/args.hpp"
 #include "dbat/affect.hpp"
@@ -20,7 +23,9 @@
 #include "dbat/utils.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/fileop.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/log.hpp"
+#include "dbat/object_records.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
@@ -31,9 +36,9 @@ static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int qui
 /* local globals */
 
 /* local functions */
-static bool House_get_filename(room_vnum vnum, char *filename, size_t maxlen);
+static std::optional<std::string> House_get_filename(room_vnum vnum);
 static bool House_load(GameWorld *g, room_vnum vnum);
-static bool House_save(GameWorld *g, const id_list &list, FILE *fp, int location);
+static void House_save(GameWorld *g, const id_list &list, io::text_writer &out, int location);
 static void House_restore_weight(GameWorld *g, const id_list &list);
 
 static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string_view arg);
@@ -43,22 +48,18 @@ static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, std::string_v
 /* First, the basics: finding the filename; loading/saving objects */
 
 /* Return a filename given a house vnum */
-static bool House_get_filename(room_vnum vnum, char *filename, size_t maxlen)
+static std::optional<std::string> House_get_filename(room_vnum vnum)
 {
   if (vnum == NOWHERE)
-    return false;
-
-  snprintf(filename, maxlen, LIB_HOUSE "%d.house", vnum);
-  return true;
+    return std::nullopt;
+  return str_format("{}{:d}.house", LIB_HOUSE, vnum);
 }
 
-/* Save all objects for a house (recursive; initial call must be followed
-   by a call to House_restore_weight)  Assumes file is open already. */
-static bool House_save(GameWorld *g, const id_list &list, FILE *fp, int location)
+/* Save all objects for a house (recursive; initial call must be followed by a call to House_restore_weight) */
+static void House_save(GameWorld *g, const id_list &list, io::text_writer &out, int location)
 {
   std::vector<struct obj_data *> saved;
   std::vector<long> ids = list.ids();
-  bool result           = true;
 
   /* Newest first, an object that isn't to be rented is passed over, but only one at a time: the one after it is
    * saved whatever it is. That is how the old recursion along the list behaved, and what the house files hold. */
@@ -72,18 +73,14 @@ static bool House_save(GameWorld *g, const id_list &list, FILE *fp, int location
       saved.push_back(obj);
   }
 
-  /* Oldest first, each after what it contains. The result is the newest one's. */
+  /* Oldest first, each after what it contains. */
   for (std::size_t i = saved.size(); i-- > 0;) {
-    struct obj_data *obj = saved[i], *tmp;
-
-    House_save(g, obj_get_contains(obj), fp, MIN(0, location) - 1);
-    result = Obj_to_store(g, obj, fp, location);
-    if (!result)
-      continue;
-    for (tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
+    struct obj_data *obj = saved[i];
+    House_save(g, obj_get_contains(obj), out, MIN(0, location) - 1);
+    write_object_record(g, out, obj, location);
+    for (struct obj_data *tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
       obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
   }
-  return result;
 }
 
 /* restore weight of containers after House_save has changed them for saving */
@@ -101,45 +98,33 @@ static void House_restore_weight(GameWorld *g, const id_list &list)
 /* Save all objects in a house */
 static void House_crashsave(GameWorld *g, room_vnum vnum)
 {
-  struct atomic_file af;
-  room_vnum rnum;
-  char buf[MAX_STRING_LENGTH];
-  FILE *fp;
-
-  if (!room_of(g, rnum = vnum))
+  if (!room_of(g, vnum))
     return;
-  if (!House_get_filename(vnum, buf, sizeof(buf)))
+  std::optional<std::string> path = House_get_filename(vnum);
+  if (!path)
     return;
-  if (!(fp = atomic_open(&af, buf, true))) {
-    perror("SYSERR: Error saving house file");
-    return;
-  }
-  if (!House_save(g, room_get_contents(g, rnum), fp, 0)) {
-    atomic_abort(&af); /* keep the last good house file */
-    return;
-  }
-  bool saved = atomic_commit(&af);
-  House_restore_weight(g, room_get_contents(g, rnum));
+  io::text_writer out(*path, true);
+  House_save(g, room_get_contents(g, vnum), out, 0);
+  bool saved = out.commit();
+  House_restore_weight(g, room_get_contents(g, vnum));
   if (saved) /* otherwise leave it flagged so the next pass tries again */
-    room_set_flag(g, rnum, ROOM_HOUSE_CRASH, false);
+    room_set_flag(g, vnum, ROOM_HOUSE_CRASH, false);
 }
 
 /* Delete a house save file */
 void House_delete_file(room_vnum vnum)
 {
-  char filename[MAX_INPUT_LENGTH];
-  FILE *fl;
-
-  if (!House_get_filename(vnum, filename, sizeof(filename)))
+  std::optional<std::string> path = House_get_filename(vnum);
+  if (!path)
     return;
-  if (!(fl = fopen(filename, "rb"))) {
-    if (errno != ENOENT)
-      mud_log("SYSERR: Error deleting house file #{:d}. (1): {}", vnum, strerror(errno));
+  std::error_code ec;
+  if (!std::filesystem::exists(*path, ec)) {
+    if (ec)
+      mud_log("SYSERR: Error deleting house file #{:d}. (1): {}", vnum, ec.message());
     return;
   }
-  fclose(fl);
-  if (remove(filename) < 0)
-    mud_log("SYSERR: Error deleting house file #{:d}. (2): {}", vnum, strerror(errno));
+  if (!std::filesystem::remove(*path, ec) && ec)
+    mud_log("SYSERR: Error deleting house file #{:d}. (2): {}", vnum, ec.message());
 }
 
 /******************************************************************
@@ -157,62 +142,41 @@ int find_house(GameWorld *g, room_vnum vnum)
   return (NOWHERE);
 }
 
-/* Save the house control information */
-void House_save_control(GameWorld *g)
+/* call from boot_db - will load control recs, load objs, set atrium bits; a record whose owner or room is gone,
+   or whose room is a house already, is dropped */
+io::loaded<void> House_boot(GameWorld *g)
 {
-  struct atomic_file af;
-  FILE *fl;
+  for (house_control_rec &h : g->house_control)
+    h = {};
 
-  if (!(fl = atomic_open(&af, HCONTROL_FILE, true))) {
-    perror("SYSERR: Unable to open house control file.");
-    return;
+  io::loaded<house_control_file> file = read_house_control();
+  if (!file)
+    return std::unexpected(file.error());
+  if (file->missing) {
+    mud_log("   No houses to load. File '{}' does not exist.", HCONTROL_FILE);
+    return {};
   }
-  /* write all the house control recs in one fell swoop.  Pretty nifty, eh? */
-  fwrite(g->house_control, sizeof(struct house_control_rec), g->num_of_houses, fl);
 
-  atomic_commit(&af);
-}
-
-/* call from boot_db - will load control recs, load objs, set atrium bits */
-/* should do sanity checks on vnums & remove invalid records */
-void House_boot(GameWorld *g)
-{
-  struct house_control_rec temp_house;
-  room_vnum real_house;
-  FILE *fl;
-
-  memset((char *)g->house_control, 0, sizeof(struct house_control_rec) * MAX_HOUSES);
-
-  if (!(fl = fopen(HCONTROL_FILE, "rb"))) {
-    if (errno == ENOENT)
-      mud_log("   No houses to load. File '{}' does not exist.", HCONTROL_FILE);
-    else
-      perror("SYSERR: " HCONTROL_FILE);
-    return;
-  }
-  while (!feof(fl) && g->num_of_houses < MAX_HOUSES) {
-    fread(&temp_house, sizeof(struct house_control_rec), 1, fl);
-
-    if (feof(fl))
+  for (const house_control_rec &temp_house : file->houses) {
+    if (g->num_of_houses >= MAX_HOUSES)
       break;
-
     if (get_name_by_id(g, temp_house.owner) == nullptr)
       continue; /* owner no longer exists -- skip */
-
-    if (!room_of(g, real_house = temp_house.vnum))
+    if (!room_of(g, temp_house.vnum))
       continue; /* this vnum doesn't exist -- skip */
-
     if (find_house(g, temp_house.vnum) != NOWHERE)
       continue; /* this vnum is already a house -- skip */
 
     g->house_control[g->num_of_houses++] = temp_house;
-
-    room_set_flag(g, real_house, ROOM_HOUSE, true);
+    room_set_flag(g, temp_house.vnum, ROOM_HOUSE, true);
     House_load(g, temp_house.vnum);
   }
 
-  fclose(fl);
-  House_save_control(g);
+  House_save_control(g); /* keeps what it held as etc/hcontrol.bak */
+  if (file->converted)
+    mud_log("Converted {} from the old binary format ({:d} houses); the old file is kept as {}.bak", HCONTROL_FILE,
+            file->houses.size(), HCONTROL_FILE);
+  return {};
 }
 
 /* "House Control" functions */
@@ -532,268 +496,29 @@ static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int qui
 
 static bool House_load(GameWorld *g, room_vnum rvnum)
 {
-  FILE *fl;
-  char f1[READ_SIZE] = "", f2[READ_SIZE] = "", f3[READ_SIZE] = "", f4[READ_SIZE] = "";
-  char cmfname[MAX_STRING_LENGTH];
-  std::string buf1;
-  char buf2[MAX_STRING_LENGTH];
-  char line[256] = "";
-  int t[21] = {}, zwei = 0; /* a damaged line leaves some of these unread */
-  struct obj_data *temp;
-  int locate = 0, j;
-  obj_vnum nr;
-  std::vector<struct obj_data *> cont_row[MAX_BAG_ROWS]; /* each list in file order */
-  room_vnum rrnum;
-
-  if (!room_of(g, rrnum = rvnum))
+  if (!room_of(g, rvnum))
     return false;
-
-  if (!House_get_filename(rvnum, cmfname, sizeof(cmfname)))
+  std::optional<std::string> path = House_get_filename(rvnum);
+  if (!path)
     return false;
-
-  if (!(fl = fopen(cmfname, "rb"))) {
-    if (errno != ENOENT) { /* if it fails, NOT because of no file */
-      buf1 = str_format("SYSERR: READING HOUSE FILE {} (5)", cmfname);
-      perror(buf1.c_str());
-    }
+  io::loaded<io::text_reader> file = io::text_reader::open(*path);
+  if (!file) {
+    std::error_code ec;
+    if (std::filesystem::exists(*path, ec)) /* if it fails, NOT because of no file */
+      mud_log("SYSERR: READING HOUSE FILE {} (5): {}", *path, io::why_unreadable(*path));
     return false;
   }
 
-  for (j = 0; j < MAX_BAG_ROWS; j++)
-    cont_row[j].clear(); /* empty all cont lists (you never know ...) */
-
-  if (!feof(fl))
-    get_line(fl, line);
-  while (!feof(fl)) {
-    temp = nullptr;
-    /* first, we get the number. Not too hard. */
-    if (*line == '#') {
-      if (sscanf(line, "#%d", &nr) != 1) {
-        get_line(fl, line); /* skip it, or the loop never moves on */
-        continue;
-      }
-      /* we have the number, check it, load obj. */
-      if (nr == NOTHING) { /* then it is unique */
-        temp              = create_obj(g);
-        obj_set_item_number(temp, NOTHING);
-      } else if (nr < 0 || nr >= 999999) {
-        get_line(fl, line); /* skip it, or the loop never moves on */
-        continue;
-      } else {
-        temp = read_object(g, nr);
-        if (!temp) {
-          get_line(fl, line);
-          continue;
-        }
-      }
-
-      get_line(fl, line);
-      sscanf(line, "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, f1, f2, f3, f4, t + 13, t + 14, t + 15, t + 16, t + 17, t + 18, t + 19, t + 20);
-      locate = t[0];
-      obj_set_value(temp, 0, t[1]);
-      obj_set_value(temp, 1, t[2]);
-      obj_set_value(temp, 2, t[3]);
-      obj_set_value(temp, 3, t[4]);
-      obj_set_value(temp, 4, t[5]);
-      obj_set_value(temp, 5, t[6]);
-      obj_set_value(temp, 6, t[7]);
-      obj_set_value(temp, 7, t[8]);
-      obj_get_extra_flags(temp)[0] = asciiflag_conv(f1);
-      obj_get_extra_flags(temp)[1] = asciiflag_conv(f2);
-      obj_get_extra_flags(temp)[2] = asciiflag_conv(f3);
-      obj_get_extra_flags(temp)[3] = asciiflag_conv(f3);
-      obj_set_value(temp, 8, t[13]);
-      obj_set_value(temp, 9, t[14]);
-      obj_set_value(temp, 10, t[15]);
-      obj_set_value(temp, 11, t[16]);
-      obj_set_value(temp, 12, t[17]);
-      obj_set_value(temp, 13, t[18]);
-      obj_set_value(temp, 14, t[19]);
-      obj_set_value(temp, 15, t[20]);
-      obj_set_posted_to(temp, nullptr);
-      obj_set_posttype(temp, 0);
-
-      get_line(fl, line);
-      /* read line check for xap. */
-      if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
-                                       special care */
-        obj_set_name(temp, take_string(fread_string(fl, buf2)));
-        if (obj_get_name(temp) == nullptr) {
-          obj_set_name(temp, "undefined");
-        }
-
-        obj_set_short_description(temp, take_string(fread_string(fl, buf2)));
-        if (obj_get_short_description(temp) == nullptr) {
-          obj_set_short_description(temp, "undefined");
-        }
-
-        obj_set_description(temp, take_string(fread_string(fl, buf2)));
-        if (obj_get_description(temp) == nullptr) {
-          obj_set_description(temp, "undefined");
-        }
-
-        obj_set_action_description(temp, take_string(fread_string(fl, buf2)));
-        if (obj_get_action_description(temp) == nullptr) {
-          obj_set_action_description(temp, nullptr);
-        }
-
-        if (!get_line(fl, line) ||
-            (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) != 8)) {
-          file_print(stderr, "Format error in first numeric line (expecting _x_ args)");
-          return false;
-        }
-        obj_set_type_flag(temp, t[0]);
-        obj_get_wear_flags(temp)[0] = t[1];
-        obj_get_wear_flags(temp)[1] = t[2];
-        obj_get_wear_flags(temp)[2] = t[3];
-        obj_get_wear_flags(temp)[3] = t[4];
-        obj_set_weight(temp, t[5]);
-        obj_set_cost(temp, t[6]);
-        obj_set_cost_per_day(temp, t[7]);
-
-        /* buf2 is error codes pretty much */
-        //strcat(buf2, ", after numeric constants (expecting E/#xxx)");
-
-        /*add_unique_id(temp);*/
-        /* we're clearing these for good luck */
-
-        for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-          obj_get_affected(temp)[j].location = APPLY_NONE;
-          obj_get_affected(temp)[j].modifier = 0;
-          obj_get_affected(temp)[j].specific = 0;
-        }
-
-        obj_ex_description_slot(temp)->clear();
-
-        get_line(fl, line);
-        for (j = zwei = 0; !zwei && !feof(fl);) {
-          switch (*line) {
-            case 'E': {
-              extra_descr_data descr;
-              descr.keyword     = take_string(fread_string(fl, buf2));
-              descr.description = take_string(fread_string(fl, buf2));
-              obj_ex_description_slot(temp)->push_front(std::move(descr));
-              get_line(fl, line);
-              break;
-            }
-            case 'A':
-              if (j >= MAX_OBJ_AFFECT) {
-                mud_log("SYSERR: Too many object affectations in loading house file");
-              }
-              get_line(fl, line);
-              sscanf(line, "%d %d %d", t, t + 1, t + 2);
-              if (j < MAX_OBJ_AFFECT) {
-                obj_get_affected(temp)[j].location = t[0];
-                obj_get_affected(temp)[j].modifier = t[1];
-                obj_get_affected(temp)[j].specific = affect_checked_specific(t[0], t[2]);
-                j++;
-              }
-              get_line(fl, line);
-              break;
-
-            case 'G': {
-              long long generation;
-
-              get_line(fl, line);
-              if (sscanf(line, "%lld", &generation) == 1)
-                obj_set_generation(temp, generation);
-              get_line(fl, line);
-              break;
-            }
-            case 'U':
-              get_line(fl, line);
-              {
-                int64_t uid = obj_get_unique_id(temp);
-                sscanf(line, "%" SCNd64, &uid);
-                /* -1 is an object not yet given one; no real one is negative. */
-                if (uid < -1) {
-                  mud_log("SYSERR: Object #{:d} has unique id {:d}, which can't be; giving it a new one.",
-                          obj_get_vnum(g, temp), uid);
-                  uid = -1;
-                }
-                obj_set_unique_id(temp, uid);
-              }
-              get_line(fl, line);
-              break;
-            case 'S':
-              if (j >= SPELLBOOK_SIZE) {
-                mud_log("SYSERR: Too many spells in spellbook loading rent file");
-              }
-              get_line(fl, line);
-              sscanf(line, "%d %d", t, t + 1);
-
-              if (!obj_get_sbinfo(temp)) {
-                obj_make_sbinfo(temp);
-              }
-              obj_get_sbinfo(temp)[j].spellname = t[0];
-              obj_get_sbinfo(temp)[j].pages     = t[1];
-              j++;
-              get_line(fl, line);
-              break;
-            case 'Z':
-              get_line(fl, line);
-              {
-                int size = obj_get_size(temp);
-                sscanf(line, "%d", &size);
-                obj_set_size(temp, size);
-              }
-              get_line(fl, line);
-              break;
-            case '$':
-            case '#':
-              zwei = 1;
-              break;
-            default:
-              zwei = 1;
-              break;
-          }
-        } /* exit our for loop */
-      } /* exit our xap loop */
-      if (temp != nullptr) {
-        obj_to_room(g, temp, rrnum);
-      } else {
-        continue;
-      }
-
-      /*No need to check if its equipped since rooms can't equip things --firebird_223*/
-      for (j = MAX_BAG_ROWS - 1; j > -locate; j--)
-        if (!cont_row[j].empty()) { /* no container -> back to ch's inventory */
-          for (struct obj_data *row_obj : cont_row[j])
-            obj_to_room(g, row_obj, rrnum);
-          cont_row[j].clear();
-          cont_row[j].clear();
-        }
-
-      if (j == -locate && !cont_row[j].empty()) { /* content list existing */
-        if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
-          /* take item ; fill ; give to char again */
-          obj_from_room(g, temp);
-          obj_contains_slot(temp)->clear();
-          for (struct obj_data *row_obj : cont_row[j])
-            obj_to_obj(g, row_obj, temp);
-          cont_row[j].clear();
-          obj_to_room(g, temp, rrnum); /* add to inv first ... */
-        } else {                    /* object isn't container -> empty content list */
-          for (struct obj_data *row_obj : cont_row[j])
-            obj_to_room(g, row_obj, rrnum);
-          cont_row[j].clear();
-          cont_row[j].clear();
-        }
-      }
-
-      if (locate < 0 && locate >= -MAX_BAG_ROWS) {
-        /* let obj be part of content list
-                  but put it at the list's end thus having the items
-                  in the same order as before renting */
-        obj_from_room(g, temp);
-        cont_row[-locate - 1].push_back(temp);
-      }
-    } else {
-      get_line(fl, line);
-    }
+  record_lines in(*file);
+  in.next();
+  bag_rows rows(g, nullptr, rvnum);
+  io::loaded<void> read = read_object_records(g, in, record_kind::house, [&](obj_data *temp, int locate) {
+    obj_to_room(g, temp, rvnum);
+    rows.place(temp, locate);
+  });
+  if (!read) {
+    mud_log("SYSERR: {}", read.error().text());
+    return false;
   }
-
-  fclose(fl);
-
   return true;
 }

@@ -148,7 +148,6 @@ void free_obj(GameWorld *g, struct obj_data *obj);
 void obj_retire(GameWorld *g, struct obj_data *obj);
 struct obj_data *read_object(GameWorld *g, obj_vnum nr);
 int vnum_object(GameWorld *g, std::string_view searchname, struct char_data *ch);
-bool my_obj_save_to_disk(GameWorld *g, FILE *fp, struct obj_data *obj, int locate);
 void add_unique_id(GameWorld *g, struct obj_data *obj);
 void check_unique_id(GameWorld *g, struct obj_data *obj);
 /* the unique objects with vnums low to high, as "show uniques" lists them */

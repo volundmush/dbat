@@ -313,6 +313,19 @@ loaded<text_reader> text_reader::open(const std::filesystem::path &path)
 
 text_reader::text_reader(std::string name, std::string text) : name_(std::move(name)), text_(std::move(text)) {}
 
+std::optional<std::string_view> text_reader::bytes(size_t n)
+{
+  if (n > text_.size() - pos_)
+    return std::nullopt;
+  std::string_view out(text_.data() + pos_, n);
+  for (char c : out)
+    if (c == '\n')
+      newlines_++;
+  line_ = newlines_ + 1;
+  pos_ += n;
+  return out;
+}
+
 std::optional<std::string_view> text_reader::raw_line()
 {
   if (at_end())

@@ -8,9 +8,10 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 
-#include <cerrno>
-
-#include <unistd.h>
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <string_view>
 
 #include "dbat/iterate.hpp"
 #include "dbat/affect.hpp"
@@ -28,7 +29,9 @@
 #include "dbat/fileop.hpp"
 #include "dbat/consts/rents.hpp"
 #include "dbat/config.hpp"
-#include "dbat/atomicfile.hpp"
+#include "dbat/io/paths.hpp"
+#include "dbat/log.hpp"
+#include "dbat/object_records.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
@@ -36,118 +39,82 @@
 /* local functions */
 
 static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj, int location);
-static bool Crash_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location);
+static void Crash_save(GameWorld *g, struct obj_data *obj, io::text_writer &out, int location);
 static void Crash_restore_weight(GameWorld *g, struct obj_data *obj);
 static void Crash_restore_weight_list(GameWorld *g, const id_list &list);
-static bool Crash_save_list(GameWorld *g, const id_list &list, FILE *fp, int location);
+static void Crash_save_list(GameWorld *g, const id_list &list, io::text_writer &out, int location);
 static void Crash_extract_objs_from(GameWorld *g, const std::vector<long> &ids, std::size_t i);
 static void Crash_extract_norents_from(GameWorld *g, const std::vector<long> &ids, std::size_t i);
 static void Crash_extract_objs(GameWorld *g, struct obj_data *obj);
 static bool Crash_is_unrentable(struct obj_data *obj);
 static void Crash_extract_norents(GameWorld *g, struct obj_data *obj);
-static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const char *filename);
+static bool Crash_load_file(GameWorld *g, struct char_data *ch, io::text_reader &in);
 
-static void Crash_log_file_error(const char *operation, const char *filename, const char *file, int line)
+/* A rent file's first line: "<rent code> <when> <cost> <gold> <bank> <items>", 0 for any it doesn't have */
+struct rent_header {
+  int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
+  long long timed = 0;
+};
+
+static rent_header read_rent_header(std::string_view line, int rentcode)
 {
-  mud_log("SYSERR: {}:{:d}: {} failed for {}: {}", file, line, operation, filename, strerror(errno));
+  rent_header h{.rentcode = rentcode};
+  io::fields f(line);
+  f.number(h.rentcode) && f.number(h.timed) && f.number(h.netcost) && f.number(h.gold) && f.number(h.account) &&
+      f.number(h.nitems);
+  return h;
 }
 
-static bool Crash_build_save_filename(char *dst, size_t dst_size, const char *filename, const char *suffix,
-                                      const char *file, int line)
+/* The rent file of name, open; nothing, logging why with the message's number if it is there but can't be read
+   (unless doing is null) */
+static std::optional<io::text_reader> open_rent_file(const char *name, const char *doing, int number,
+                                                     std::string *path_out = nullptr)
 {
-  int written = snprintf(dst, dst_size, "%s%s", filename, suffix);
-
-  if (written < 0 || (size_t)written >= dst_size) {
-    mud_log("SYSERR: {}:{:d}: crashsave path too long for {}{}", file, line, filename, suffix);
-    return false;
+  std::optional<std::string> path = player_path(NEW_OBJ_FILES, name);
+  if (!path)
+    return std::nullopt;
+  if (path_out)
+    *path_out = *path;
+  io::loaded<io::text_reader> file = io::text_reader::open(*path);
+  if (!file) {
+    std::error_code ec;
+    if (doing && std::filesystem::exists(*path, ec))
+      mud_log("SYSERR: {} {} ({:d}): {}", doing, *path, number, io::why_unreadable(*path));
+    return std::nullopt;
   }
-
-  return true;
+  return std::move(*file);
 }
 
 static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentcode, int cost, const char *save_type)
 {
-  struct atomic_file af;
-  char filename[MAX_INPUT_LENGTH];
-  int j;
-  FILE *fp;
-
-  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch))) {
+  std::optional<std::string> path = player_path(NEW_OBJ_FILES, char_get_name(ch));
+  if (!path) {
     mud_log("SYSERR: {}:{:d}: get_filename failed for {} of {}", __FILE__, __LINE__, save_type, char_get_name(ch));
     return false;
   }
 
   /* the replaced file stays as <name>.bak, which Crash_load() falls back to */
-  if (!(fp = atomic_open(&af, filename, true)))
-    return false;
-
-  if (file_print(fp, "{:d} {:d} {:d} {:d} {:d} {:d}\r\n", rentcode, (long long)game_now(g), cost,
-                 char_get_gold(ch), char_get_bank_gold(ch), 0) < 0) {
-    Crash_log_file_error("fprintf", af.tmp.c_str(), __FILE__, __LINE__);
-    atomic_abort(&af);
-    return false;
-  }
-
-  for (j = 0; j < NUM_WEARS; j++)
+  io::text_writer out(*path, true);
+  out.print("{:d} {:d} {:d} {:d} {:d} {:d}\r\n", rentcode, static_cast<long long>(game_now(g)), cost,
+            char_get_gold(ch), char_get_bank_gold(ch), 0);
+  for (int j = 0; j < NUM_WEARS; j++)
     if (char_get_equipment(ch, j)) {
-      if (!Crash_save(g, char_get_equipment(ch, j), fp, j + 1)) {
-        Crash_restore_weight(g, char_get_equipment(ch, j));
-        mud_log("SYSERR: {}:{:d}: Crash_save failed for {} of {} equipment position {:d}", __FILE__, __LINE__, save_type, char_get_name(ch), j);
-        atomic_abort(&af);
-        return false;
-      }
-      if (ferror(fp)) {
-        Crash_restore_weight(g, char_get_equipment(ch, j));
-        Crash_log_file_error("write", af.tmp.c_str(), __FILE__, __LINE__);
-        atomic_abort(&af);
-        return false;
-      }
+      Crash_save(g, char_get_equipment(ch, j), out, j + 1);
       Crash_restore_weight(g, char_get_equipment(ch, j));
     }
-
-  if (!Crash_save_list(g, char_get_inventory(ch), fp, 0)) {
-    Crash_restore_weight_list(g, char_get_inventory(ch));
-    mud_log("SYSERR: {}:{:d}: Crash_save failed for {} of {} inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
-    atomic_abort(&af);
-    return false;
-  }
+  Crash_save_list(g, char_get_inventory(ch), out, 0);
   Crash_restore_weight_list(g, char_get_inventory(ch));
-
-  return atomic_commit(&af);
+  return out.commit();
 }
 
 void delete_inv_backup(struct char_data *ch)
 {
-  FILE *source;
-  char source_file[20480];
-  std::string filename;
-
-  if (!get_filename(source_file, sizeof(source_file), NEW_OBJ_FILES, char_get_name(ch))) {
+  std::optional<std::string> path = player_path(NEW_OBJ_FILES, char_get_name(ch));
+  if (!path)
     return;
-  }
-  filename = str_format("{}.bak", source_file);
-
-  if (!(source = fopen(filename.c_str(), "r"))) {
-    return;
-  }
-  fclose(source);
-
-  if (remove(filename.c_str()) < 0 && errno != ENOENT)
+  std::error_code ec;
+  if (!std::filesystem::remove(*path + ".bak", ec) && ec)
     mud_log("ERROR: Couldn't delete backup inv.");
-  /*  SYSERR_DESC:
-   *  When an alias file cannot be removed, this error will occur,
-   *  and the reason why will be the tail end of the error.
-   */
-
-  return;
-}
-
-bool Obj_to_store(GameWorld *g, struct obj_data *obj, FILE *fl, int location)
-{
-  my_obj_save_to_disk(g, fl, obj, location);
-  if (ferror(fl))
-    return false;
-  return true;
 }
 
 /*
@@ -264,113 +231,48 @@ static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj,
 
 bool Crash_delete_file(const char *name)
 {
-  char filename[50];
-  FILE *fl;
-
-  // if (!xap_objs) {
-  // if (!get_filename(filename, sizeof(filename), CRASH_FILE, name))
-  // return false;
-  //} else {
-  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
+  std::string path;
+  if (!open_rent_file(name, "deleting crash file", 1, &path))
     return false;
-  //}
-
-  if (!(fl = fopen(filename, "rb"))) {
-    if (errno != ENOENT) /* if it fails but NOT because of no file */
-      mud_log("SYSERR: deleting crash file {} (1): {}", filename, strerror(errno));
-    return false;
-  }
-  fclose(fl);
-
-  /* if it fails, NOT because of no file */
-  if (remove(filename) < 0 && errno != ENOENT)
-    mud_log("SYSERR: deleting crash file {} (2): {}", filename, strerror(errno));
-
+  std::error_code ec;
+  if (!std::filesystem::remove(path, ec) && ec)
+    mud_log("SYSERR: deleting crash file {} (2): {}", path, ec.message());
   return true;
 }
 
 bool Crash_delete_crashfile(struct char_data *ch)
 {
-  char filename[MAX_INPUT_LENGTH];
-  FILE *fl;
-  int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
-  long long timed = 0;
-  char line[MAX_INPUT_LENGTH];
-
-  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch)))
+  std::optional<io::text_reader> file = open_rent_file(char_get_name(ch), "checking for crash file", 3);
+  if (!file)
     return false;
-
-  if (!(fl = fopen(filename, "rb"))) {
-    if (errno != ENOENT) /* if it fails, NOT because of no file */
-      mud_log("SYSERR: checking for crash file {} (3): {}", filename, strerror(errno));
-    return false;
-  }
-
-  if (!feof(fl))
-    get_line(fl, line);
-  sscanf(line, "%d %lld %d %d %d %d", &rentcode, &timed, &netcost, &gold,
-         &account, &nitems);
-  fclose(fl);
-
-  if (rentcode == RENT_CRASH)
+  record_lines in(*file);
+  in.next();
+  if (read_rent_header(in.line(), 0).rentcode == RENT_CRASH)
     Crash_delete_file(char_get_name(ch));
-
   return true;
 }
 
 static bool Crash_clean_file(GameWorld *g, char *name)
 {
-  char filename[MAX_STRING_LENGTH];
-  FILE *fl;
-  int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
-  long long timed = 0;
-  char line[MAX_STRING_LENGTH];
-
-  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
+  std::optional<io::text_reader> file = open_rent_file(name, "OPENING OBJECT FILE", 4);
+  if (!file)
     return false;
+  record_lines in(*file);
+  in.next();
+  rent_header h = read_rent_header(in.line(), 0);
 
-  if (!(fl = fopen(filename, "rb"))) {
-    if (errno != ENOENT) /* if it fails, NOT because of no file */
-      mud_log("SYSERR: OPENING OBJECT FILE {} (4): {}", filename, strerror(errno));
-    return false;
-  }
-
-  if (!feof(fl)) {
-    get_line(fl, line);
-    sscanf(line, "%d %lld %d %d %d %d", &rentcode, &timed, &netcost,
-           &gold, &account, &nitems);
-    fclose(fl);
-
-    if ((rentcode == RENT_CRASH) ||
-        (rentcode == RENT_FORCED) || (rentcode == RENT_TIMEDOUT)) {
-      if (timed < game_now(g) - (CONFIG_CRASH_TIMEOUT * SECS_PER_REAL_DAY)) {
-        const char *filetype;
-
-        Crash_delete_file(name);
-        switch (rentcode) {
-          case RENT_CRASH:
-            filetype = "crash";
-            break;
-          case RENT_FORCED:
-            filetype = "forced rent";
-            break;
-          case RENT_TIMEDOUT:
-            filetype = "idlesave";
-            break;
-          default:
-            filetype = "UNKNOWN!";
-            break;
-        }
-        mud_log("    Deleting {}'s {} file.", name, filetype);
-        return true;
-      }
-      /* Must retrieve rented items w/in 30 days */
-    } else if (rentcode == RENT_RENTED)
-      if (timed < game_now(g) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY)) {
-        Crash_delete_file(name);
-        mud_log("    Deleting {}'s rent file.", name);
-        return true;
-      }
+  if (h.rentcode == RENT_CRASH || h.rentcode == RENT_FORCED || h.rentcode == RENT_TIMEDOUT) {
+    if (h.timed < game_now(g) - (CONFIG_CRASH_TIMEOUT * SECS_PER_REAL_DAY)) {
+      Crash_delete_file(name);
+      const char *filetype = h.rentcode == RENT_CRASH ? "crash" : h.rentcode == RENT_FORCED ? "forced rent" : "idlesave";
+      mud_log("    Deleting {}'s {} file.", name, filetype);
+      return true;
+    }
+    /* Must retrieve rented items w/in 30 days */
+  } else if (h.rentcode == RENT_RENTED && h.timed < game_now(g) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY)) {
+    Crash_delete_file(name);
+    mud_log("    Deleting {}'s rent file.", name);
+    return true;
   }
   return false;
 }
@@ -386,32 +288,17 @@ void update_obj_file(GameWorld *g)
 
 void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
 {
-  FILE *fl = nullptr;
-  char filename[MAX_STRING_LENGTH];
-  std::string buf;
-  struct obj_data *obj;
-  int rentcode = -1, netcost = 0, gold = 0, account = 0, nitems = 0;
-  long long timed = 0;
-  int t[10];
-  obj_vnum nr;
-  char line[MAX_STRING_LENGTH];
-
-  if (get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
-    fl = fopen(filename, "rb");
-  if (!fl) {
+  std::string path;
+  std::optional<io::text_reader> file = open_rent_file(name, nullptr, 0, &path);
+  if (!file) {
     send_to_char(g, ch, "{} has no rent file.\r\n", name);
     return;
   }
+  send_to_char(g, ch, "{}\r\n", path);
 
-  send_to_char(g, ch, "{}\r\n", filename);
-
-  if (!feof(fl)) {
-    get_line(fl, line);
-    sscanf(line, "%d %lld %d %d %d %d", &rentcode, &timed, &netcost,
-           &gold, &account, &nitems);
-  }
-
-  switch (rentcode) {
+  record_lines in(*file);
+  in.next();
+  switch (read_rent_header(in.line(), -1).rentcode) {
     case RENT_RENTED:
       send_to_char(g, ch, "Rent\r\n");
       break;
@@ -429,66 +316,63 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
       send_to_char(g, ch, "Undef\r\n");
       break;
   }
-  while (!feof(fl)) {
-    get_line(fl, line);
-    if (*line == '#') { /* swell - its an item */
-      sscanf(line, "#%d", &nr);
-      if (nr != NOTHING) { /* then we can dispense with it easily */
-        if (obj_proto_of(g, nr)) {
-          obj = read_object(g, nr);
-          buf += str_format("[{:>5d}] ({:>5d}au) {:<20}\r\n",
-                            nr, obj_get_cost_per_day(obj), obj_get_short_description(obj));
-          extract_obj(g, obj);
-        } else
-          buf += str_format("[-----] NONEXISTANT OBJECT #{:d}\r\n", nr);
-      } else {                                       /* its nothing, and a unique item. bleh. partial parse.*/
-        get_line(fl, line);                          /* this is obj+val */
-        get_line(fl, line);                          /* this is XAP */
-        free(fread_string(fl, ", listrent reading name")); /* screw the name */
-        std::string sdesc = take_string(fread_string(fl, ", listrent reading sdesc"));
-        free(fread_string(fl, ", listrent reading desc"));  /* screw the long desc */
-        free(fread_string(fl, ", listrent reading adesc")); /* screw the action desc. */
-        get_line(fl, line);                           /* this is an important line.rent..*/
-        sscanf(line, "%d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4);
-        /* great we got it all, make the buf */
-        buf += str_format("[{:>5d}] ({:>5d}au) {:<20}\r\n", nr, t[4], sdesc.empty() ? "(null)" : sdesc);
-        /* best of all, we don't care if there's descs, or stuff..*/
-        /* since we're only doing operations on lines beginning in # */
-        /* i suppose you don't want to make exdescs start with # .:) */
-      }
-    }
-  }
 
+  /* quirk: the last line is looked at twice, as while (!feof()) read it */
+  std::string buf;
+  int nr = 0, t[5] = {};
+  while (!in.eof()) {
+    in.next();
+    if (!in.line().starts_with('#'))
+      continue;
+    io::fields(std::string_view(in.line()).substr(1)).number(nr);
+    if (nr != NOTHING) {
+      if (obj_proto_of(g, nr)) {
+        struct obj_data *obj = read_object(g, nr);
+        buf += str_format("[{:>5d}] ({:>5d}au) {:<20}\r\n", nr, obj_get_cost_per_day(obj), obj_get_short_description(obj));
+        extract_obj(g, obj);
+      } else
+        buf += str_format("[-----] NONEXISTANT OBJECT #{:d}\r\n", nr);
+      continue;
+    }
+    /* a unique item: past its values and XAP lines, its name, its short description kept, its long and action
+       descriptions, then the line whose fifth number is shown as its cost (quirk: it is a wear flags word) */
+    in.next();
+    in.next();
+    io::loaded<std::string> strings[4];
+    bool cut_short = false;
+    for (io::loaded<std::string> &text : strings)
+      if (!(text = in.string("a listed rent file's object"))) {
+        mud_log("SYSERR: {}", text.error().text());
+        cut_short = true;
+        break;
+      }
+    if (cut_short)
+      break;
+    in.next();
+    io::fields f(in.line());
+    for (int &n : t)
+      if (!f.number(n))
+        break;
+    buf += str_format("[{:>5d}] ({:>5d}au) {:<20}\r\n", nr, t[4], strings[1]->empty() ? "(null)" : *strings[1]);
+  }
   send_to_char(g, ch, buf);
-  fclose(fl);
 }
 
 /* Saves obj after what it contains, taking their weight off the containers until Crash_restore_weight() */
-static bool Crash_save(GameWorld *g, struct obj_data *obj, FILE *fp, int location)
+static void Crash_save(GameWorld *g, struct obj_data *obj, io::text_writer &out, int location)
 {
-  struct obj_data *tmp;
-  int result;
-
-  if (obj) {
-    Crash_save_list(g, obj_get_contains(obj), fp, MIN(0, location) - 1);
-    result = Obj_to_store(g, obj, fp, location);
-
-    for (tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
-      obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
-
-    if (!result)
-      return (false);
-  }
-  return (true);
+  if (!obj)
+    return;
+  Crash_save_list(g, obj_get_contains(obj), out, MIN(0, location) - 1);
+  write_object_record(g, out, obj, location);
+  for (struct obj_data *tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
+    obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
 }
 
-/* The objects of list, oldest first, as the files have always had them. The result is the newest one's. */
-static bool Crash_save_list(GameWorld *g, const id_list &list, FILE *fp, int location)
+/* The objects of list, oldest first, as the files have always had them. */
+static void Crash_save_list(GameWorld *g, const id_list &list, io::text_writer &out, int location)
 {
-  bool result = true;
-
-  list.each_oldest_first([&](long id) { result = Crash_save(g, obj_by_id(g, id), fp, location); });
-  return result;
+  list.each_oldest_first([&](long id) { Crash_save(g, obj_by_id(g, id), out, location); });
 }
 
 static void Crash_restore_weight(GameWorld *g, struct obj_data *obj)
@@ -629,33 +513,28 @@ void Crash_save_all(GameWorld *g)
 
 int Crash_load(GameWorld *g, struct char_data *ch)
 {
-  FILE *fl;
-  char cmfname[MAX_STRING_LENGTH], cmfnamebak[MAX_STRING_LENGTH];
-  std::string buf1;
-
-  if (!get_filename(cmfname, sizeof(cmfname), NEW_OBJ_FILES, char_get_name(ch)))
+  std::optional<std::string> path = player_path(NEW_OBJ_FILES, char_get_name(ch));
+  if (!path)
     return 1;
+  std::string backup = *path + ".bak";
 
-  if (!Crash_build_save_filename(cmfnamebak, sizeof(cmfnamebak), cmfname, ".bak", __FILE__, __LINE__))
-    return -1;
+  if (io::loaded<io::text_reader> file = io::text_reader::open(*path))
+    return Crash_load_file(g, ch, *file);
 
-  if ((fl = fopen(cmfname, "rb")))
-    return Crash_load_file(g, ch, fl, cmfname);
+  std::error_code ec;
+  if (!std::filesystem::exists(*path, ec) && !std::filesystem::exists(backup, ec))
+    return 1; /* never had any, or lost them all and saved that */
 
-  if (errno == ENOENT && access(cmfnamebak, F_OK)) /* never had any, or lost them all and saved that */
-    return 1;
-
-  buf1 = str_format("SYSERR: READING OBJECT FILE {} (5)", cmfname);
-  perror(buf1.c_str());
+  mud_log("SYSERR: READING OBJECT FILE {} (5): {}", *path, io::why_unreadable(*path));
   send_to_char(g, ch,
                "\r\n********************* NOTICE *********************\r\nThere was a problem loading your objects from disk.\r\nTrying your backup object file.\r\n");
 
-  if ((fl = fopen(cmfnamebak, "rb"))) {
-    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "{} loading backup object file {}.", char_get_name(ch), cmfnamebak);
-    return Crash_load_file(g, ch, fl, cmfnamebak);
+  if (io::loaded<io::text_reader> file = io::text_reader::open(backup)) {
+    mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "{} loading backup object file {}.", char_get_name(ch), backup);
+    return Crash_load_file(g, ch, *file);
   }
 
-  Crash_log_file_error("fopen backup object file", cmfnamebak, __FILE__, __LINE__);
+  mud_log("SYSERR: {}:{:d}: fopen backup object file failed for {}: {}", __FILE__, __LINE__, backup, io::why_unreadable(backup));
   mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "{} entering game with no equipment. Loading backup failed.", char_get_name(ch));
   send_to_char(g, ch,
                "\r\n********************* NOTICE *********************\r\nThere was a problem loading your objects from backup.\r\nContact staff for assistance.\r\n");
@@ -663,30 +542,15 @@ int Crash_load(GameWorld *g, struct char_data *ch)
   return -1;
 }
 
-static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const char *filename)
+static bool Crash_load_file(GameWorld *g, struct char_data *ch, io::text_reader &file)
 {
-  std::string buf2;
-  char line[256] = "";
-  int t[30] = {}, zwei = 0; /* a damaged line leaves some of these unread */
-  int orig_rent_code;
-  struct obj_data *temp;
-  int locate = 0, j, num_objs = 0;
-  obj_vnum nr;
-  std::vector<struct obj_data *> cont_row[MAX_BAG_ROWS]; /* each list in file order */
-  int rentcode = 0, netcost = 0, gold = 0, account = 0, nitems = 0;
-  long long timed = 0;
-  char f1[READ_SIZE] = "", f2[READ_SIZE] = "", f3[READ_SIZE] = "", f4[READ_SIZE] = "";
+  record_lines in(file);
+  in.next();
+  int orig_rent_code = read_rent_header(in.line(), 0).rentcode;
 
-  if (!feof(fl))
-    get_line(fl, line);
-
-  sscanf(line, "%d %lld %d %d %d %d", &rentcode, &timed,
-         &netcost, &gold, &account, &nitems);
-
-  if (rentcode == RENT_RENTED || rentcode == RENT_TIMEDOUT) {
+  if (orig_rent_code == RENT_RENTED || orig_rent_code == RENT_TIMEDOUT)
     save_char(g, ch);
-  }
-  switch (orig_rent_code = rentcode) {
+  switch (orig_rent_code) {
     case RENT_RENTED:
       mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "{} un-renting and entering game.", char_get_name(ch));
       break;
@@ -705,310 +569,35 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, FILE *fl, const 
       break;
   }
 
-  for (j = 0; j < MAX_BAG_ROWS; j++)
-    cont_row[j].clear(); /* empty all cont lists (you never know ...) */
+  if (!in.eof())
+    in.next();
 
-  if (!feof(fl))
-    get_line(fl, line);
-
-  while (!feof(fl)) {
-    temp = nullptr;
-    /* first, we get the number. Not too hard. */
-    if (*line == '#') {
-      if (sscanf(line, "#%d", &nr) != 1) {
-        get_line(fl, line); /* skip it, or the loop never moves on */
-        continue;
-      }
-      /* we have the number, check it, load obj. */
-      if (nr == NOTHING) { /* then it is unique */
-        temp              = create_obj(g);
-        obj_set_item_number(temp, NOTHING);
-        obj_set_size(temp, SIZE_MEDIUM);
-      } else if (nr < 0 || nr >= 999999) {
-        get_line(fl, line); /* skip it, or the loop never moves on */
-        continue;
-      } else {
-        temp = read_object(g, nr);
-        if (!temp) {
-          get_line(fl, line);
-          continue;
-        }
-      }
-
-      get_line(fl, line);
-
-      sscanf(line, "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, f1, f2, f3, f4, t + 13, t + 14, t + 15, t + 16, t + 17, t + 18, t + 19, t + 20);
-
-      locate = t[0];
-      obj_set_value(temp, 0, t[1]);
-      obj_set_value(temp, 1, t[2]);
-      obj_set_value(temp, 2, t[3]);
-      obj_set_value(temp, 3, t[4]);
-      obj_set_value(temp, 4, t[5]);
-      obj_set_value(temp, 5, t[6]);
-      obj_set_value(temp, 6, t[7]);
-      obj_set_value(temp, 7, t[8]);
-      obj_get_extra_flags(temp)
-          [0] = asciiflag_conv(f1);
-      obj_get_extra_flags(temp)
-          [1] = asciiflag_conv(f2);
-      obj_get_extra_flags(temp)
-          [2] = asciiflag_conv(f3);
-      obj_get_extra_flags(temp)
-          [3] = asciiflag_conv(f4);
-      obj_set_value(temp, 8, t[13]);
-      obj_set_value(temp, 9, t[14]);
-      obj_set_value(temp, 10, t[15]);
-      obj_set_value(temp, 11, t[16]);
-      obj_set_value(temp, 12, t[17]);
-      obj_set_value(temp, 13, t[18]);
-      obj_set_value(temp, 14, t[19]);
-      obj_set_value(temp, 15, t[20]);
-
-      get_line(fl, line);
-      /* read line check for xap. */
-      if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
-              special care */
-        obj_set_name(temp, take_string(fread_string(fl, "rented object name")));
-        if (obj_get_name(temp) == nullptr) {
-          obj_set_name(temp, "undefined");
-        }
-
-        obj_set_short_description(temp, take_string(fread_string(fl, "rented object short desc")));
-        if (obj_get_short_description(temp) == nullptr) {
-          obj_set_short_description(temp, "undefined");
-        }
-
-        obj_set_description(temp, take_string(fread_string(fl, "rented object desc")));
-        if (obj_get_description(temp) == nullptr) {
-          obj_set_description(temp, "undefined");
-        }
-
-        obj_set_action_description(temp, take_string(fread_string(fl, "rented object adesc")));
-        if (obj_get_action_description(temp) == nullptr) {
-          obj_set_action_description(temp, nullptr);
-        }
-
-        if (!get_line(fl, line) ||
-            (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) != 8)) {
-          file_print(stderr, "Format error in first numeric line (expecting _x_ args)");
-          return false;
-        }
-        obj_set_type_flag(temp, t[0]);
-        obj_get_wear_flags(temp)[0] = t[1];
-        obj_get_wear_flags(temp)[1] = t[2];
-        obj_get_wear_flags(temp)[2] = t[3];
-        obj_get_wear_flags(temp)[3] = t[4];
-        obj_set_weight(temp, t[5]);
-        obj_set_cost(temp, t[6]);
-
-        /* we're clearing these for good luck */
-
-        for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-          obj_get_affected(temp)[j].location = APPLY_NONE;
-          obj_get_affected(temp)[j].modifier = 0;
-          obj_get_affected(temp)[j].specific = 0;
-        }
-
-        /* maybe clear spellbook for good luck too? */
-
-        obj_ex_description_slot(temp)->clear();
-
-        get_line(fl, line);
-        for (j = zwei = 0; !zwei && !feof(fl);) {
-          switch (*line) {
-            case 'E': {
-              extra_descr_data descr;
-              buf2              = str_format("rented object edesc keyword for object #{:d}", nr);
-              descr.keyword     = take_string(fread_string(fl, buf2.c_str()));
-              buf2              = str_format("rented object edesc text for object #{:d} keyword {}", nr, descr.keyword);
-              descr.description = take_string(fread_string(fl, buf2.c_str()));
-              obj_ex_description_slot(temp)->push_front(std::move(descr));
-              get_line(fl, line);
-              break;
-            }
-            case 'A':
-              if (j >= MAX_OBJ_AFFECT) {
-                mud_log("SYSERR: Too many object affectations in loading rent file");
-              }
-              get_line(fl, line);
-              sscanf(line, "%d %d %d", t, t + 1, t + 2);
-              if (j < MAX_OBJ_AFFECT) {
-                obj_get_affected(temp)[j].location = t[0];
-                obj_get_affected(temp)[j].modifier = t[1];
-                obj_get_affected(temp)[j].specific = affect_checked_specific(t[0], t[2]);
-                j++;
-              }
-              get_line(fl, line);
-              break;
-            case 'G': {
-              long long generation;
-
-              get_line(fl, line);
-              if (sscanf(line, "%lld", &generation) == 1)
-                obj_set_generation(temp, generation);
-              get_line(fl, line);
-              break;
-            }
-            case 'U':
-              get_line(fl, line);
-              {
-                int64_t uid = obj_get_unique_id(temp);
-                sscanf(line, "%" SCNd64, &uid);
-                /* -1 is an object not yet given one; no real one is negative. */
-                if (uid < -1) {
-                  mud_log("SYSERR: Object #{:d} has unique id {:d}, which can't be; giving it a new one.",
-                          obj_get_vnum(g, temp), uid);
-                  uid = -1;
-                }
-                obj_set_unique_id(temp, uid);
-              }
-              get_line(fl, line);
-              break;
-            case 'S':
-              if (j >= SPELLBOOK_SIZE) {
-                mud_log("SYSERR: Too many spells in spellbook loading rent file");
-              }
-              get_line(fl, line);
-              sscanf(line, "%d %d", t, t + 1);
-
-              j++;
-              get_line(fl, line);
-              break;
-            case 'Z':
-              get_line(fl, line);
-              {
-                int size = obj_get_size(temp);
-                sscanf(line, "%d", &size);
-                obj_set_size(temp, size);
-              }
-              get_line(fl, line);
-              break;
-            case '$':
-            case '#':
-              zwei = 1;
-              break;
-            default:
-              zwei = 1;
-              break;
-          }
-        } /* exit our for loop */
-      } /* exit our xap loop */
-      if (temp != nullptr) {
-        num_objs++;
-        check_unique_id(g, temp);
-        add_unique_id(g, temp);
-        if (obj_get_type_flag(temp) == ITEM_DRINKCON) {
-          name_from_drinkcon(g, temp);
-          if (obj_get_value(temp, 1) != 0)
-            name_to_drinkcon(g, temp, obj_get_value(temp, 2));
-        }
-        if (obj_get_vnum(g, temp) == 20099 || obj_get_vnum(g, temp) == 20098)
-          if (obj_extra_flagged(temp, ITEM_UNBREAKABLE))
-            obj_extra_set(temp, ITEM_UNBREAKABLE, false);
-        auto_equip(g, ch, temp, locate);
-      } else {
-        continue;
-      }
-      /*
-        what to do with a new loaded item:
-
-        if there's a list with <locate> less than 1 below this:
-          (equipped items are assumed to have <locate>==0 here) then its
-          container has disappeared from the file   *gasp*
-           -> put all the list back to ch's inventory
-        if there's a list of contents with <locate> 1 below this:
-          check if it's a container
-          - if so: get it from ch, fill it, and give it back to ch (this way the
-              container has its correct weight before modifying ch)
-          - if not: the container is missing -> put all the list to ch's inventory
-
-        for items with negative <locate>:
-          if there's already a list of contents with the same <locate> put obj to it
-          if not, start a new list
-
-      Confused? Well maybe you can think of some better text to be put here ...
-
-      since <locate> for contents is < 0 the list indices are switched to
-      non-negative
-      */
-
-      if (locate > 0) { /* item equipped */
-        for (j = MAX_BAG_ROWS - 1; j > 0; j--)
-          if (!cont_row[j].empty()) { /* no container -> back to ch's inventory */
-            for (struct obj_data *row_obj : cont_row[j])
-              obj_to_char(g, row_obj, ch);
-            cont_row[j].clear();
-            cont_row[j].clear();
-          }
-        if (!cont_row[0].empty()) { /* content list existing */
-          if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
-            /* auto_equip puts it in the inventory if it can't be worn after all */
-            bool worn = locate <= NUM_WEARS && char_get_equipment(ch, locate - 1) == temp;
-
-            /* rem item ; fill ; equip again */
-            if (worn)
-              temp = unequip_char(g, ch, locate - 1);
-            obj_contains_slot(temp)->clear(); /* should be empty - but who knows */
-            for (struct obj_data *row_obj : cont_row[0])
-              obj_to_obj(g, row_obj, temp);
-            cont_row[0].clear();
-            if (worn)
-              equip_char(g, ch, temp, locate - 1);
-          } else { /* object isn't container -> empty content list */
-            for (struct obj_data *row_obj : cont_row[0])
-              obj_to_char(g, row_obj, ch);
-            cont_row[0].clear();
-            cont_row[0].clear();
-          }
-        }
-      } else { /* locate <= 0 */
-        for (j = MAX_BAG_ROWS - 1; j > -locate; j--)
-          if (!cont_row[j].empty()) { /* no container -> back to ch's inventory */
-            for (struct obj_data *row_obj : cont_row[j])
-              obj_to_char(g, row_obj, ch);
-            cont_row[j].clear();
-            cont_row[j].clear();
-          }
-
-        if (j == -locate && !cont_row[j].empty()) { /* content list existing */
-          if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
-            /* take item ; fill ; give to char again */
-            obj_from_char(g, temp);
-            obj_contains_slot(temp)->clear();
-            for (struct obj_data *row_obj : cont_row[j])
-              obj_to_obj(g, row_obj, temp);
-            cont_row[j].clear();
-            obj_to_char(g, temp, ch); /* add to inv first ... */
-          } else {                 /* object isn't container -> empty content list */
-            for (struct obj_data *row_obj : cont_row[j])
-              obj_to_char(g, row_obj, ch);
-            cont_row[j].clear();
-            cont_row[j].clear();
-          }
-        }
-
-        if (locate < 0 && locate >= -MAX_BAG_ROWS) {
-          /* let obj be part of content list
-             but put it at the list's end thus having the items
-             in the same order as before renting */
-          obj_from_char(g, temp);
-          cont_row[-locate - 1].push_back(temp);
-        }
-      } /* locate less than zero */
-    } else {
-      get_line(fl, line);
+  /* quirk: objects still waiting for a container that never came at the end of the file are lost */
+  bag_rows rows(g, ch, NOWHERE);
+  int num_objs = 0;
+  io::loaded<void> read = read_object_records(g, in, record_kind::rent, [&](obj_data *temp, int locate) {
+    num_objs++;
+    check_unique_id(g, temp);
+    add_unique_id(g, temp);
+    if (obj_get_type_flag(temp) == ITEM_DRINKCON) {
+      name_from_drinkcon(g, temp);
+      if (obj_get_value(temp, 1) != 0)
+        name_to_drinkcon(g, temp, obj_get_value(temp, 2));
     }
+    if (obj_get_vnum(g, temp) == 20099 || obj_get_vnum(g, temp) == 20098)
+      if (obj_extra_flagged(temp, ITEM_UNBREAKABLE))
+        obj_extra_set(temp, ITEM_UNBREAKABLE, false);
+    auto_equip(g, ch, temp, locate);
+    rows.place(temp, locate);
+  });
+  if (!read) {
+    mud_log("SYSERR: {}", read.error().text());
+    return false;
   }
 
   /* Little hoarding check. -gg 3/1/98 */
   mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "{} (level {:d}) has {:d} objects (max {:d}).",
          char_get_name(ch), char_get_level(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
 
-  fclose(fl);
-
-  if ((orig_rent_code == RENT_RENTED) || (orig_rent_code == RENT_CRYO))
-    return false;
-  else
-    return true;
+  return orig_rent_code != RENT_RENTED && orig_rent_code != RENT_CRYO;
 }

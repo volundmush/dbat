@@ -120,6 +120,8 @@ public:
 
   /* The next raw line, with its '\n' if it has one, as getline() reads it */
   std::optional<std::string_view> raw_line();
+  /* The next n bytes as they are, line ends and all, or nothing if the file has fewer left */
+  std::optional<std::string_view> bytes(size_t n);
   /* The next line by get_line()'s rules, or nothing at the end of the file */
   std::optional<std::string_view> line();
   /* The next string by fread_string()'s rules ("" for an empty one), or an error naming what if the file ends first */

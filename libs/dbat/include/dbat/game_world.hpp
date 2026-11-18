@@ -18,6 +18,7 @@
 #include "dbat/dg_scripts.hpp"
 #include "dbat/feats.hpp"
 #include "dbat/house.hpp"
+#include "dbat/mail.hpp"
 #include "dbat/maputils.hpp"
 #include "dbat/oasis.hpp"
 #include "dbat/spells.hpp"
@@ -131,11 +132,7 @@ struct GameWorld {
   /* Boards, mail, houses and bans */
   struct board_info *bboards{};
   time_t BOARDNEWBUI{}, BOARDNEWCOD{}, BOARDNEWDUO{}, BOARDNEWIMM{}, BOARDNEWMORT{};
-  struct mail_index_type_d *mail_index{};
-  struct position_list_type_d *free_list{};
-  long file_end_pos{};
-  char *mail_buf{};
-  long mail_buf_len{}, mail_buf_alloc{};
+  std::vector<mail_letter> mail; /* the letters waiting, in the order they were sent */
   struct house_control_rec house_control[MAX_HOUSES]{};
   int num_of_houses{};
   struct ban_list_element *ban_list{};

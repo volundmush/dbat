@@ -1,4 +1,7 @@
 #pragma once
+#include <vector>
+
+#include "dbat/io/load_error.hpp"
 #include "dbat/consts/types.hpp"
 
 constexpr int MAX_HOUSES = 1000;
@@ -43,12 +46,21 @@ constexpr int HOUSE_NOSAVE     = (1 << 6); /* Do not crash save this room - priv
 constexpr int HOUSE_NUM_FLAGS = 7;
 
 
-void House_boot(GameWorld *g);
+/* Loads the houses at boot; an error if etc/hcontrol can't be read */
+io::loaded<void> House_boot(GameWorld *g);
 void House_save_all(GameWorld *g);
 bool House_can_enter(GameWorld *g, struct char_data *ch, room_vnum house);
 void hcontrol_list_houses(GameWorld *g, struct char_data *ch);
 int find_house(GameWorld *g, room_vnum vnum);         /* house.c */
-void House_save_control(GameWorld *g);          /* house.c */
+void House_save_control(GameWorld *g);
+
+/* What etc/hcontrol holds: every house in it, before any is checked */
+struct house_control_file {
+  std::vector<house_control_rec> houses;
+  bool missing{};   /* there is no file */
+  bool converted{}; /* it was the old binary file */
+};
+io::loaded<house_control_file> read_house_control();
 void House_delete_file(room_vnum vnum); /* house.c */
 
 ACMD(do_hcontrol);
