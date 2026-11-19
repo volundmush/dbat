@@ -125,7 +125,7 @@ size_t write_to_output(GameWorld *g, struct descriptor_data *d, std::format_stri
 {
   return write_to_output(g, d, str_format(fmt, std::forward<Args>(args)...));
 }
-void string_add(GameWorld *g, struct descriptor_data *d, char *str);
+void string_add(GameWorld *g, struct descriptor_data *d, std::string_view typed);
 void string_write(struct descriptor_data *d, std::string *txt, size_t len, long mailto);
 /* Starts the editor on target with what is there now, without string_write()'s player flags */
 void string_edit_begin(struct descriptor_data *d, std::string *target, size_t len);

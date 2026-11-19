@@ -42,12 +42,6 @@ static struct {
     {-1,     nullptr,      nullptr },
 };
 
-bool genolc_checkstring(struct descriptor_data *d, char *arg)
-{
-  smash_tilde(arg);
-  return true;
-}
-
 const char *npc_msg_format_problem(const char *msg, bool allow_int)
 {
   static std::string why; /* what is returned, until the next call */

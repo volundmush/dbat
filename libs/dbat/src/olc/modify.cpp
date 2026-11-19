@@ -32,72 +32,11 @@
 #include "dbat/hedit.hpp"
 #include "dbat/game_world.hpp"
 
-/* local functions */
-
+/* Every ~ in s made a space: the world files end their texts with one */
 void smash_tilde(std::string &s) { std::ranges::replace(s, '~', ' '); }
 
-static void smash_numb(char *str);
 static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int action);
 static void exdesc_string_cleanup(GameWorld *g, struct descriptor_data *d, int action);
-
-/* ************************************************************************
-*  modification of malloc'ed strings                                      *
-************************************************************************ */
-
-/*
- * Put '#if 1' here to erase ~, or roll your own method.  A common idea
- * is smash/show tilde to convert the tilde to another innocuous character
- * to save and then back to display it. Whatever you do, at least keep the
- * function around because other MUD packages use it, like mudFTP.
- *   -gg 9/9/98
- */
-void smash_tilde(char *str)
-{
-  /*
-   * Erase any _line ending_ tildes inserted in the editor.
-   * The load mechanism can't handle those, yet.
-   * -- Welcor 04/2003
-   */
-
-  char *p = str;
-  for (; *p; p++)
-    if (*p == '~' && (*(p + 1) == '\r' || *(p + 1) == '\n' || *(p + 1) == '\0'))
-      *p = ' ';
-#if 1
-  /*
-   * Erase any ~'s inserted by people in the editor.  This prevents anyone
-   * using online creation from causing parse errors in the world files.
-   * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
-   * his tildes thank you very much.), -gg 2/20/98
-   */
-  while ((str = strchr(str, '~')) != nullptr)
-    *str = ' ';
-#endif
-}
-
-static void smash_numb(char *str)
-{
-  /*
-   * Erase any _line ending_ tildes inserted in the editor.
-   * The load mechanism can't handle those, yet.
-   * -- Welcor 04/2003
-   */
-
-  char *p = str;
-  for (; *p; p++)
-    if (*p == '#' && (*(p + 1) == '\r' || *(p + 1) == '\n' || *(p + 1) == '\0'))
-      *p = ' ';
-#if 1
-  /*
-   * Erase any ~'s inserted by people in the editor.  This prevents anyone
-   * using online creation from causing parse errors in the world files.
-   * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
-   * his tildes thank you very much.), -gg 2/20/98
-   */
-  while ((str = strchr(str, '#')) != nullptr)
-    *str = ' ';
-#endif
-}
 
 /* Starts the editor on target, with the text there now, which is also kept to put back if the edit is aborted. */
 void string_edit_begin(struct descriptor_data *d, std::string *target, size_t len)
@@ -115,54 +54,35 @@ void string_write(struct descriptor_data *d, std::string *writeto, size_t len, l
     char_plr_set(d->character, PLR_WRITING, true);
 
   string_edit_begin(d, writeto, len);
-  if (!using_improved_editor) /* which can't abort */
-    d->backstr.clear();
   d->mail_to = mailto;
 }
 
-/*
- * Add user input to the 'current' string (as defined by d->str).
- * This is still overly complex.
- */
-void string_add(GameWorld *g, struct descriptor_data *d, char *str)
+/* A line typed into the text editor (d->str): text to add, an editor command, or "@" alone to end it */
+void string_add(GameWorld *g, struct descriptor_data *d, std::string_view typed)
 {
-  int action;
+  std::string line(typed);
+  delete_doubledollar(line);
+  smash_tilde(line);
+  std::ranges::replace(line, '#', ' '); /* a world file's records start with one */
 
-  delete_doubledollar(str);
-  smash_tilde(str);
-  smash_numb(str);
-
-  /* determine if this is the terminal string, and truncate if so */
-  /* changed to only accept '@' at the beginning of line - J. Elson 1/17/94 */
-  /* changed to only accept '@' if it's by itself - fnord 10/15/2004 */
-  if ((action = (*str == '@' && !str[1])))
-    *str = '\0';
-  else if ((action = improved_editor_execute(g, d, str)) == STRINGADD_ACTION)
+  int action = line == "@" ? STRINGADD_SAVE : improved_editor_execute(g, d, line);
+  if (action == STRINGADD_ACTION)
     return;
 
   std::string &text = d->edit_text;
-
   if (action != STRINGADD_OK)
-    /* Do nothing. */;
+    /* nothing to add */;
   else if (text.empty()) {
-    if (strlen(str) + 3 > d->max_str) { /* \r\n\0 */
+    if (line.size() + 3 > d->max_str) { /* \r\n\0 */
       send_to_char(g, d->character, "String too long - Truncated.\r\n");
-      strcpy(str + (d->max_str - 3), "\r\n");
-      text = str;
-      if (!using_improved_editor)
-        action = STRINGADD_SAVE;
+      text = line.substr(0, d->max_str - 3) + "\r\n";
     } else
-      text = str;
-  } else {
-    if (strlen(str) + text.size() + 3 > d->max_str) { /* \r\n\0 */
-      send_to_char(g, d->character, "String too long.  Last line skipped.\r\n");
-      if (!using_improved_editor)
-        action = STRINGADD_SAVE;
-      else if (action == STRINGADD_OK)
-        action = STRINGADD_ACTION; /* No appending \r\n\0, but still let them save. */
-    } else
-      text += str;
-  }
+      text = line;
+  } else if (line.size() + text.size() + 3 > d->max_str) { /* \r\n\0 */
+    send_to_char(g, d->character, "String too long.  Last line skipped.\r\n");
+    action = STRINGADD_ACTION; /* No appending \r\n\0, but still let them save. */
+  } else
+    text += line;
 
   /*
    * Common cleanup code.

@@ -9,7 +9,6 @@ constexpr int STRING_TERMINATOR = '~';
 
 #define CONFIG_GENOLC_MOBPROG 0
 
-bool genolc_checkstring(struct descriptor_data *d, char *arg);
 
 /* Shop and guild messages are builder text used as a printf format: one %s for the customer's name, plus one %d
  * for the price when allow_int is set (shop buy/sell). Returns NULL if msg is safe to use that way, else why not. */
