@@ -21,8 +21,6 @@
 #include "dbat/game_world.hpp"
 
 static int find_context_gedit(const struct descriptor_data *d);
-static int find_context_medit(const struct descriptor_data *d);
-static int find_context_script_edit(const struct descriptor_data *d);
 static int find_context_sedit(const struct descriptor_data *d);
 static int find_context_zedit(const struct descriptor_data *d);
 
@@ -31,7 +29,6 @@ static int find_context_zedit(const struct descriptor_data *d);
 int legacy_help_context(const struct descriptor_data *d)
 {
   switch (desc_get_connected(d)) {
-    case CON_MEDIT: return find_context_medit(d);
     case CON_ZEDIT: return find_context_zedit(d);
     case CON_SEDIT: return find_context_sedit(d);
     case CON_GEDIT: return find_context_gedit(d);
@@ -59,38 +56,6 @@ static int find_context_zedit(const struct descriptor_data *d)
     case ZEDIT_CONFIRM_SAVESTRING: return CONTEXT_ZEDIT_CONFIRM_SAVESTRING;
     case ZEDIT_SARG1: return CONTEXT_ZEDIT_SARG1;
     case ZEDIT_SARG2: return CONTEXT_ZEDIT_SARG2;
-    default: return NOTHING;
-  }
-}
-
-static int find_context_medit(const struct descriptor_data *d)
-{
-  switch (OLC_MODE(d)) {
-    case MEDIT_MAIN_MENU: return CONTEXT_MEDIT_MAIN_MENU;
-    case MEDIT_ALIAS: return CONTEXT_MEDIT_ALIAS;
-    case MEDIT_S_DESC: return CONTEXT_MEDIT_S_DESC;
-    case MEDIT_L_DESC: return CONTEXT_MEDIT_L_DESC;
-    case MEDIT_D_DESC: return CONTEXT_MEDIT_D_DESC;
-    case MEDIT_NPC_FLAGS: return CONTEXT_MEDIT_NPC_FLAGS;
-    case MEDIT_AFF_FLAGS: return CONTEXT_MEDIT_AFF_FLAGS;
-    case MEDIT_CONFIRM_SAVESTRING: return CONTEXT_MEDIT_CONFIRM_SAVESTRING;
-    case MEDIT_SEX: return CONTEXT_MEDIT_SEX;
-    case MEDIT_ACCURACY: return CONTEXT_MEDIT_ACCURACY;
-    case MEDIT_DAMAGE: return CONTEXT_MEDIT_DAMAGE;
-    case MEDIT_NDD: return CONTEXT_MEDIT_NDD;
-    case MEDIT_SDD: return CONTEXT_MEDIT_SDD;
-    case MEDIT_NUM_HP_DICE: return CONTEXT_MEDIT_NUM_HP_DICE;
-    case MEDIT_SIZE_HP_DICE: return CONTEXT_MEDIT_SIZE_HP_DICE;
-    case MEDIT_ADD_HP: return CONTEXT_MEDIT_ADD_HP;
-    case MEDIT_AC: return CONTEXT_MEDIT_AC;
-    case MEDIT_EXP: return CONTEXT_MEDIT_EXP;
-    case MEDIT_GOLD: return CONTEXT_MEDIT_GOLD;
-    case MEDIT_POS: return CONTEXT_MEDIT_POS;
-    case MEDIT_DEFAULT_POS: return CONTEXT_MEDIT_DEFAULT_POS;
-    case MEDIT_ATTACK: return CONTEXT_MEDIT_ATTACK;
-    case MEDIT_LEVEL: return CONTEXT_MEDIT_LEVEL;
-    case MEDIT_ALIGNMENT: return CONTEXT_MEDIT_ALIGNMENT;
-    case OLC_SCRIPT_EDIT: return find_context_script_edit(d);
     default: return NOTHING;
   }
 }
@@ -128,11 +93,6 @@ static int find_context_sedit(const struct descriptor_data *d)
     case SEDIT_NOTRADE: return CONTEXT_SEDIT_NOTRADE;
     default: return NOTHING;
   }
-}
-
-static int find_context_script_edit(const struct descriptor_data *d)
-{
-  return OLC(d)->script.help_context();
 }
 
 static int find_context_gedit(const struct descriptor_data *d)

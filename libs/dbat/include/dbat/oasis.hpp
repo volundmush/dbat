@@ -7,7 +7,6 @@
 #include "dbat/consts/types.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/olc/session.hpp"
-#include "dbat/olc/script_editor.hpp"
 
 constexpr int _OASISOLC = 0x206; /* 2.0.6 */
 /*
@@ -93,11 +92,9 @@ struct oasis_olc_data : olc_session {
   struct zone_data *in_zone{};       /* the zone of what is being edited */
   room_vnum number{};                /* vnum of subject          */
   int value{};                       /* mostly 'has changed' flag*/
-  struct char_data *mob{};           /* used for 'medit'         */
   struct zone_data *zone{};          /* used for 'zedit'         */
   struct shop_data *shop{};          /* used for 'sedit'         */
   struct config_data *config{};      /* used for 'cedit'         */
-  script_editor script{};             /* oedit's and medit's triggers */
   struct guild_data *guild{};          /* used for 'gedit'         */
 
   void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
@@ -109,9 +106,6 @@ struct oasis_olc_data : olc_session {
 /*
  * Descriptor access macros.
  */
-/* The mode of oedit and medit while their script_editor has the lines */
-constexpr int OLC_SCRIPT_EDIT = 82766;
-
 #define OLC(d)      (static_cast<oasis_olc_data *>((d)->olc.get()))
 #define OLC_MODE(d) (OLC(d)->mode)     /* Parse input mode.	*/
 #define OLC_NUM(d)  (OLC(d)->number)   /* Room/Obj VNUM.	*/
@@ -119,7 +113,6 @@ constexpr int OLC_SCRIPT_EDIT = 82766;
 #define OLC_ZNUM(d)  (OLC(d)->in_zone)  /* Zone of what is being edited. */
 
 #define OLC_ZONE(d)    (OLC(d)->zone)        /* Zone structure.	*/
-#define OLC_MOB(d)     (OLC(d)->mob)         /* Mob structure.	*/
 #define OLC_SHOP(d)    (OLC(d)->shop)        /* Shop structure.	*/
 #define OLC_CONFIG(d)  (OLC(d)->config)      /* Config structure.	*/
 
@@ -160,44 +153,6 @@ constexpr int ZEDIT_SARG2              = 19;
 constexpr int ZEDIT_ZONE_FLAGS         = 20;
 constexpr int ZEDIT_MIN_LEVEL          = 21;
 constexpr int ZEDIT_MAX_LEVEL          = 22;
-
-/*
- * Submodes of MEDIT connectedness.
- */
-constexpr int MEDIT_MAIN_MENU          = 0;
-constexpr int MEDIT_ALIAS              = 1;
-constexpr int MEDIT_S_DESC             = 2;
-constexpr int MEDIT_L_DESC             = 3;
-constexpr int MEDIT_D_DESC             = 4;
-constexpr int MEDIT_NPC_FLAGS          = 5;
-constexpr int MEDIT_AFF_FLAGS          = 6;
-constexpr int MEDIT_CONFIRM_SAVESTRING = 7;
-/*
- * Numerical responses.
- */
-constexpr int MEDIT_NUMERICAL_RESPONSE = 10;
-constexpr int MEDIT_SEX                = 11;
-constexpr int MEDIT_ACCURACY           = 12;
-constexpr int MEDIT_DAMAGE             = 13;
-constexpr int MEDIT_NDD                = 14;
-constexpr int MEDIT_SDD                = 15;
-constexpr int MEDIT_NUM_HP_DICE        = 16;
-constexpr int MEDIT_SIZE_HP_DICE       = 17;
-constexpr int MEDIT_ADD_HP             = 18;
-constexpr int MEDIT_AC                 = 19;
-constexpr int MEDIT_EXP                = 20;
-constexpr int MEDIT_GOLD               = 21;
-constexpr int MEDIT_POS                = 22;
-constexpr int MEDIT_DEFAULT_POS        = 23;
-constexpr int MEDIT_ATTACK             = 24;
-constexpr int MEDIT_LEVEL              = 25;
-constexpr int MEDIT_ALIGNMENT          = 26;
-constexpr int MEDIT_CLASS              = 33;
-constexpr int MEDIT_RACE               = 34;
-constexpr int MEDIT_SIZE               = 35;
-constexpr int MEDIT_COPY               = 36;
-constexpr int MEDIT_DELETE             = 37;
-constexpr int MEDIT_PERSONALITY        = 38;
 
 /*
  * Submodes of SEDIT connectedness.
@@ -277,8 +232,6 @@ ACMD(do_iedit);
 ACMD(do_show_save_list);
 ACMD(do_rcopy);
 
-void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
-void medit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 
 ACMD(do_oasis_oedit);
 

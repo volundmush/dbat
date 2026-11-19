@@ -326,6 +326,7 @@ namespace {
       impl("medit, deleting a mob, not", {"medit 302", "x", "maybe", "n", "q"}),
       impl("medit, deleting a mob", {"medit 302", "X", "y", "medit 302"}),
       impl("medit, a new mob", {"medit 304", "2", "fresh mob", "3", "a fresh mob", "q", "y", "load mob 304", "look"}),
+      impl("medit, context help", {"medit 300", "help", "2", "help", "guard", "5", "help", "/s", "1", "help", "1", "6", "help", "40", "i", "help", "5", "j", "help", "5", "l", "help", "0", "m", "help", "0", "s", "help", "q", "help", "n"}),
       impl("medit, already being edited", {"medit 300", "@2 medit 300", "q"}),
       /* ---- iedit ---- */
       impl("iedit, refusals", {"iedit", "iedit nothing"}),
