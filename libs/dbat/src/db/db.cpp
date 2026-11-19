@@ -95,8 +95,6 @@ io::loaded<void> boot_world(GameWorld *g)
 /* Free the world, in a memory allocation sense. */
 void destroy_db(GameWorld *g)
 {
-  ssize_t itr;
-
   free_extracted_triggers(g);
   free_extracted_objects(g, NOTHING); /* before the prototypes whose strings they share */
 
@@ -147,23 +145,7 @@ void destroy_db(GameWorld *g)
   /* Zones */
   g->reset_q.clear();
 
-#define THIS_CMD zone->cmd[itr]
-
-  for (struct zone_data *zone : g->zones.all()) {
-    if (!zone->cmd.empty()) {
-      /* the variables defined in this zone own their strings */
-      for (itr = 0; THIS_CMD.command != 'S'; itr++)
-        if (THIS_CMD.command == 'V') {
-          if (THIS_CMD.sarg1)
-            free(THIS_CMD.sarg1);
-          if (THIS_CMD.sarg2)
-            free(THIS_CMD.sarg2);
-        }
-    }
-  }
-  g->zones.clear();
-
-#undef THIS_CMD
+  g->zones.clear(); /* their commands own their strings */
 
   /* Triggers */
   for (struct index_data *entry : g->trig_index.all()) {

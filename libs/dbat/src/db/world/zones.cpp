@@ -162,8 +162,8 @@ io::loaded<void> read_zone_file(GameWorld *g, io::text_reader &in)
       ok = f.number(if_flag) && f.number(cmd.arg1) && f.number(cmd.arg2) && f.number(cmd.arg3) &&
            f.number(cmd.arg4) && f.number(cmd.arg5) && f.word(name, 79) && f.until(value, "\f\n\r\t\v", 79);
       if (ok) {
-        cmd.sarg1 = strdup(name.c_str());
-        cmd.sarg2 = strdup(value.c_str());
+        cmd.sarg1 = name;
+        cmd.sarg2 = value;
       }
     } else { /* 6 numbers, or 5 with no percentage */
       f.number(if_flag) && f.number(cmd.arg1) && f.number(cmd.arg2) && f.number(cmd.arg3) && f.number(cmd.arg4) &&

@@ -92,7 +92,6 @@ struct oasis_olc_data : olc_session {
   struct zone_data *in_zone{};       /* the zone of what is being edited */
   room_vnum number{};                /* vnum of subject          */
   int value{};                       /* mostly 'has changed' flag*/
-  struct zone_data *zone{};          /* used for 'zedit'         */
   struct shop_data *shop{};          /* used for 'sedit'         */
   struct config_data *config{};      /* used for 'cedit'         */
   struct guild_data *guild{};          /* used for 'gedit'         */
@@ -112,7 +111,6 @@ struct oasis_olc_data : olc_session {
 #define OLC_VAL(d)  (OLC(d)->value)    /* Scratch variable.	*/
 #define OLC_ZNUM(d)  (OLC(d)->in_zone)  /* Zone of what is being edited. */
 
-#define OLC_ZONE(d)    (OLC(d)->zone)        /* Zone structure.	*/
 #define OLC_SHOP(d)    (OLC(d)->shop)        /* Shop structure.	*/
 #define OLC_CONFIG(d)  (OLC(d)->config)      /* Config structure.	*/
 
@@ -127,32 +125,6 @@ constexpr int CLEANUP_STRUCTS = 2; /* Don't free strings.			*/
 constexpr int CLEANUP_CONFIG  = 3; /* Used just to send proper message. 	*/
 
 
-/*
- * Submodes of ZEDIT connectedness.
- */
-constexpr int ZEDIT_MAIN_MENU          = 0;
-constexpr int ZEDIT_DELETE_ENTRY       = 1;
-constexpr int ZEDIT_NEW_ENTRY          = 2;
-constexpr int ZEDIT_CHANGE_ENTRY       = 3;
-constexpr int ZEDIT_COMMAND_TYPE       = 4;
-constexpr int ZEDIT_IF_FLAG            = 5;
-constexpr int ZEDIT_ARG1               = 6;
-constexpr int ZEDIT_ARG2               = 7;
-constexpr int ZEDIT_ARG3               = 8;
-constexpr int ZEDIT_ARG4               = 9;
-constexpr int ZEDIT_ARG5               = 10;
-constexpr int ZEDIT_ZONE_NAME          = 11;
-constexpr int ZEDIT_ZONE_LIFE          = 12;
-constexpr int ZEDIT_ZONE_BOT           = 13;
-constexpr int ZEDIT_ZONE_TOP           = 14;
-constexpr int ZEDIT_ZONE_RESET         = 15;
-constexpr int ZEDIT_CONFIRM_SAVESTRING = 16;
-constexpr int ZEDIT_ZONE_BUILDERS      = 17;
-constexpr int ZEDIT_SARG1              = 18;
-constexpr int ZEDIT_SARG2              = 19;
-constexpr int ZEDIT_ZONE_FLAGS         = 20;
-constexpr int ZEDIT_MIN_LEVEL          = 21;
-constexpr int ZEDIT_MAX_LEVEL          = 22;
 
 /*
  * Submodes of SEDIT connectedness.
@@ -242,7 +214,6 @@ ACMD(do_oasis_redit);
 void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 ACMD(do_oasis_gedit);
 
-void zedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 ACMD(do_oasis_zedit);
 
 void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);

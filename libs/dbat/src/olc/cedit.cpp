@@ -318,7 +318,6 @@ ACMD(do_oasis_cedit)
 
   if (buf1.empty()) {
     d->olc      = std::make_unique<oasis_olc_data>();
-    OLC_ZONE(d) = nullptr;
     cedit_setup(g, d);
     desc_set_connected(d, CON_CEDIT);
     act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);

@@ -181,13 +181,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     OLC_CONFIG(d) = nullptr;
   }
 
-  /*
-   * Check for a zone.  cleanup_type is irrelevant here, free() everything.
-   */
-  if (OLC_ZONE(d)) {
-    delete OLC_ZONE(d);
-  }
-
   /* OLC_SHOP(d) is the editor's own copy, owning all it holds. */
   delete OLC_SHOP(d);
   /* OLC_GUILD(d) is the editor's own copy too. */

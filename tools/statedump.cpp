@@ -78,9 +78,10 @@ void zones(GameWorld *g)
     file_print(out, "zone {:d} {} builders {} life {:d} age {:d} rooms {:d}-{:d} mode {:d} levels {:d}-{:d} flags {}\n",
                z->number, text(z->name), text(z->builders), z->lifespan, z->age, z->bot, z->top, z->reset_mode,
                z->min_level, z->max_level, bits(z->zone_flags));
-    for (const reset_com &c : z->cmd)
+    for (const reset_com &c : z->cmd) /* a command without a global name or value has none: "(null)", as the char * had it */
       file_print(out, "  {:c} if {:d} {:d} {:d} {:d} {:d} {:d} line {:d} {} {}\n", as_char(c.command), (int)c.if_flag,
-                 c.arg1, c.arg2, c.arg3, c.arg4, c.arg5, c.line, text(c.sarg1), text(c.sarg2));
+                 c.arg1, c.arg2, c.arg3, c.arg4, c.arg5, c.line, c.sarg1.empty() ? "(null)" : text(c.sarg1),
+                 c.sarg2.empty() ? "(null)" : text(c.sarg2));
   }
 }
 

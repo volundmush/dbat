@@ -16,8 +16,8 @@ struct reset_com {
   int arg4{};     /* room_max  default 0			*/
   int arg5{};     /* percentages variable                 */
   int line{};     /* line number this command appears on  */
-  char *sarg1{};  /* string argument                      */
-  char *sarg2{};  /* string argument                      */
+  std::string sarg1; /* V: the global's name             */
+  std::string sarg2; /* V: the global's value            */
 
   /* 
 	*  Commands:              *

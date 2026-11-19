@@ -22,40 +22,14 @@
 
 static int find_context_gedit(const struct descriptor_data *d);
 static int find_context_sedit(const struct descriptor_data *d);
-static int find_context_zedit(const struct descriptor_data *d);
 
 /* local global */
 
 int legacy_help_context(const struct descriptor_data *d)
 {
   switch (desc_get_connected(d)) {
-    case CON_ZEDIT: return find_context_zedit(d);
     case CON_SEDIT: return find_context_sedit(d);
     case CON_GEDIT: return find_context_gedit(d);
-    default: return NOTHING;
-  }
-}
-
-static int find_context_zedit(const struct descriptor_data *d)
-{
-  switch (OLC_MODE(d)) {
-    case ZEDIT_MAIN_MENU: return CONTEXT_ZEDIT_MAIN_MENU;
-    case ZEDIT_DELETE_ENTRY: return CONTEXT_ZEDIT_DELETE_ENTRY;
-    case ZEDIT_NEW_ENTRY: return CONTEXT_ZEDIT_NEW_ENTRY;
-    case ZEDIT_CHANGE_ENTRY: return CONTEXT_ZEDIT_CHANGE_ENTRY;
-    case ZEDIT_COMMAND_TYPE: return CONTEXT_ZEDIT_COMMAND_TYPE;
-    case ZEDIT_IF_FLAG: return CONTEXT_ZEDIT_IF_FLAG;
-    case ZEDIT_ARG1: return CONTEXT_ZEDIT_ARG1;
-    case ZEDIT_ARG2: return CONTEXT_ZEDIT_ARG2;
-    case ZEDIT_ARG3: return CONTEXT_ZEDIT_ARG3;
-    case ZEDIT_ZONE_NAME: return CONTEXT_ZEDIT_ZONE_NAME;
-    case ZEDIT_ZONE_LIFE: return CONTEXT_ZEDIT_ZONE_LIFE;
-    case ZEDIT_ZONE_BOT: return CONTEXT_ZEDIT_ZONE_BOT;
-    case ZEDIT_ZONE_TOP: return CONTEXT_ZEDIT_ZONE_TOP;
-    case ZEDIT_ZONE_RESET: return CONTEXT_ZEDIT_ZONE_RESET;
-    case ZEDIT_CONFIRM_SAVESTRING: return CONTEXT_ZEDIT_CONFIRM_SAVESTRING;
-    case ZEDIT_SARG1: return CONTEXT_ZEDIT_SARG1;
-    case ZEDIT_SARG2: return CONTEXT_ZEDIT_SARG2;
     default: return NOTHING;
   }
 }

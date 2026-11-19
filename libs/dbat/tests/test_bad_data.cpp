@@ -1172,11 +1172,24 @@ static void check_new_prototypes_leave_other_editors_alone(void)
   struct char_data *zoner = th_player(g, "Zoner", ADMLVL_IMPL), *maker = th_player(g, "Maker", ADMLVL_IMPL);
   std::vector<int> before, after;
 
+  /* room 300's commands in the zone, in order: zedit's copy of them is saved back over them below */
+  auto room_commands = [&](std::vector<int> &out) {
+    struct zone_data *zone = find_zone_by_thing(g, 300);
+    room_vnum at           = NOWHERE;
+    for (const reset_com &c : zone->cmd) {
+      if (c.command == 'S')
+        break;
+      if (strchr("MOTV", c.command))
+        at = c.arg3;
+      else if (strchr("DR", c.command))
+        at = c.arg1;
+      if (at == 300)
+        out.push_back(c.arg1 * 7 + c.arg3);
+    }
+  };
+  room_commands(before);
   th_type(g, zoner, "zedit 300");
-  struct descriptor_data *d = char_get_desc(zoner);
-  CHECK(OLC_ZONE(d) != nullptr);
-  for (int i = 0; OLC_ZONE(d) && OLC_ZONE(d)->cmd[i].command != 'S'; i++)
-    before.push_back(OLC_ZONE(d)->cmd[i].arg1 * 7 + OLC_ZONE(d)->cmd[i].arg3);
+  CHECK(char_get_desc(zoner)->olc != nullptr);
 
   th_type(g, maker, "medit 305"); /* below the mobs the zone loads */
   th_type(g, maker, "2");         /* a change, so that quitting asks to save */
@@ -1197,8 +1210,11 @@ static void check_new_prototypes_leave_other_editors_alone(void)
   th_type(g, maker, "y");
   CHECK(room_of(g, 306) != nullptr);
 
-  for (int i = 0; OLC_ZONE(d) && OLC_ZONE(d)->cmd[i].command != 'S'; i++)
-    after.push_back(OLC_ZONE(d)->cmd[i].arg1 * 7 + OLC_ZONE(d)->cmd[i].arg3);
+  th_type(g, zoner, "l"); /* a change, so that zedit saves the room's commands */
+  th_type(g, zoner, "30");
+  th_type(g, zoner, "q");
+  th_type(g, zoner, "y");
+  room_commands(after);
   CHECK(!before.empty() && before == after);
   th_shutdown(g);
 }
