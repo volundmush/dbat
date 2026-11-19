@@ -22,7 +22,6 @@
 
 static int find_context_gedit(const struct descriptor_data *d);
 static int find_context_medit(const struct descriptor_data *d);
-static int find_context_oedit(const struct descriptor_data *d);
 static int find_context_script_edit(const struct descriptor_data *d);
 static int find_context_sedit(const struct descriptor_data *d);
 static int find_context_zedit(const struct descriptor_data *d);
@@ -33,45 +32,9 @@ int legacy_help_context(const struct descriptor_data *d)
 {
   switch (desc_get_connected(d)) {
     case CON_MEDIT: return find_context_medit(d);
-    case CON_OEDIT: return find_context_oedit(d);
     case CON_ZEDIT: return find_context_zedit(d);
     case CON_SEDIT: return find_context_sedit(d);
     case CON_GEDIT: return find_context_gedit(d);
-    case CON_IEDIT: return find_context_oedit(d);
-    default: return NOTHING;
-  }
-}
-
-static int find_context_oedit(const struct descriptor_data *d)
-{
-  switch (OLC_MODE(d)) {
-    case OEDIT_MAIN_MENU: return CONTEXT_OEDIT_MAIN_MENU;
-    case OEDIT_EDIT_NAMELIST: return CONTEXT_OEDIT_EDIT_NAMELIST;
-    case OEDIT_SHORTDESC: return CONTEXT_OEDIT_SHORTDESC;
-    case OEDIT_LONGDESC: return CONTEXT_OEDIT_LONGDESC;
-    case OEDIT_ACTDESC: return CONTEXT_OEDIT_ACTDESC;
-    case OEDIT_TYPE: return CONTEXT_OEDIT_TYPE;
-    case OEDIT_EXTRAS: return CONTEXT_OEDIT_EXTRAS;
-    case OEDIT_WEAR: return CONTEXT_OEDIT_WEAR;
-    case OEDIT_WEIGHT: return CONTEXT_OEDIT_WEIGHT;
-    case OEDIT_COST: return CONTEXT_OEDIT_COST;
-    case OEDIT_COSTPERDAY: return CONTEXT_OEDIT_COSTPERDAY;
-    case OEDIT_TIMER: return CONTEXT_OEDIT_TIMER;
-    case OEDIT_VALUE_1: return CONTEXT_OEDIT_VALUE_1;
-    case OEDIT_VALUE_2: return CONTEXT_OEDIT_VALUE_2;
-    case OEDIT_VALUE_3: return CONTEXT_OEDIT_VALUE_3;
-    case OEDIT_VALUE_4: return CONTEXT_OEDIT_VALUE_4;
-    case OEDIT_APPLY: return CONTEXT_OEDIT_APPLY;
-    case OEDIT_APPLYMOD: return CONTEXT_OEDIT_APPLYMOD;
-    case OEDIT_EXTRADESC_KEY: return CONTEXT_OEDIT_EXTRADESC_KEY;
-    case OEDIT_CONFIRM_SAVEDB: return CONTEXT_OEDIT_CONFIRM_SAVEDB;
-    case OEDIT_CONFIRM_SAVESTRING: return CONTEXT_OEDIT_CONFIRM_SAVESTRING;
-    case OEDIT_PROMPT_APPLY: return CONTEXT_OEDIT_PROMPT_APPLY;
-    case OEDIT_EXTRADESC_DESCRIPTION: return CONTEXT_OEDIT_EXTRADESC_DESCRIPTION;
-    case OEDIT_EXTRADESC_MENU: return CONTEXT_OEDIT_EXTRADESC_MENU;
-    case OEDIT_LEVEL: return CONTEXT_OEDIT_LEVEL;
-    case OEDIT_PERM: return CONTEXT_OEDIT_PERM;
-    case OLC_SCRIPT_EDIT: return find_context_script_edit(d);
     default: return NOTHING;
   }
 }

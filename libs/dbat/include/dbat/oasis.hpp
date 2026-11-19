@@ -94,12 +94,9 @@ struct oasis_olc_data : olc_session {
   room_vnum number{};                /* vnum of subject          */
   int value{};                       /* mostly 'has changed' flag*/
   struct char_data *mob{};           /* used for 'medit'         */
-  struct obj_data *obj{};            /* used for 'oedit'         */
-  int32_t iobj_uid{};                /* the object 'iedit' changes, by id */
   struct zone_data *zone{};          /* used for 'zedit'         */
   struct shop_data *shop{};          /* used for 'sedit'         */
   struct config_data *config{};      /* used for 'cedit'         */
-  struct extra_descr_data *desc{};   /* used in '[r|o|m]edit'    */
   script_editor script{};             /* oedit's and medit's triggers */
   struct guild_data *guild{};          /* used for 'gedit'         */
 
@@ -121,11 +118,9 @@ constexpr int OLC_SCRIPT_EDIT = 82766;
 #define OLC_VAL(d)  (OLC(d)->value)    /* Scratch variable.	*/
 #define OLC_ZNUM(d)  (OLC(d)->in_zone)  /* Zone of what is being edited. */
 
-#define OLC_OBJ(d)     (OLC(d)->obj)         /* Object structure.	*/
 #define OLC_ZONE(d)    (OLC(d)->zone)        /* Zone structure.	*/
 #define OLC_MOB(d)     (OLC(d)->mob)         /* Mob structure.	*/
 #define OLC_SHOP(d)    (OLC(d)->shop)        /* Shop structure.	*/
-#define OLC_DESC(d)    (OLC(d)->desc)        /* Extra description.	*/
 #define OLC_CONFIG(d)  (OLC(d)->config)      /* Config structure.	*/
 
 #define OLC_GUILD(d)  (OLC(d)->guild)  /* Guild structure      */
@@ -138,54 +133,6 @@ constexpr int CLEANUP_ALL     = 1; /* Free the whole lot.			*/
 constexpr int CLEANUP_STRUCTS = 2; /* Don't free strings.			*/
 constexpr int CLEANUP_CONFIG  = 3; /* Used just to send proper message. 	*/
 
-/*
- * Submodes of OEDIT connectedness.
- */
-constexpr int OEDIT_MAIN_MENU             = 1;
-constexpr int OEDIT_EDIT_NAMELIST         = 2;
-constexpr int OEDIT_SHORTDESC             = 3;
-constexpr int OEDIT_LONGDESC              = 4;
-constexpr int OEDIT_ACTDESC               = 5;
-constexpr int OEDIT_TYPE                  = 6;
-constexpr int OEDIT_EXTRAS                = 7;
-constexpr int OEDIT_WEAR                  = 8;
-constexpr int OEDIT_WEIGHT                = 9;
-constexpr int OEDIT_COST                  = 10;
-constexpr int OEDIT_COSTPERDAY            = 11;
-constexpr int OEDIT_TIMER                 = 12;
-constexpr int OEDIT_VALUE_1               = 13;
-constexpr int OEDIT_VALUE_2               = 14;
-constexpr int OEDIT_VALUE_3               = 15;
-constexpr int OEDIT_VALUE_4               = 16;
-constexpr int OEDIT_APPLY                 = 17;
-constexpr int OEDIT_APPLYMOD              = 18;
-constexpr int OEDIT_EXTRADESC_KEY         = 19;
-constexpr int OEDIT_CONFIRM_SAVEDB        = 20;
-constexpr int OEDIT_CONFIRM_SAVESTRING    = 21;
-constexpr int OEDIT_PROMPT_APPLY          = 22;
-constexpr int OEDIT_EXTRADESC_DESCRIPTION = 23;
-constexpr int OEDIT_EXTRADESC_MENU        = 24;
-constexpr int OEDIT_LEVEL                 = 25;
-constexpr int OEDIT_PERM                  = 26;
-constexpr int OEDIT_VALUE_5               = 27;
-constexpr int OEDIT_VALUE_6               = 28;
-constexpr int OEDIT_VALUE_7               = 29;
-constexpr int OEDIT_VALUE_8               = 30;
-constexpr int OEDIT_MATERIAL              = 31;
-constexpr int OEDIT_VALUE_9               = 32;
-constexpr int OEDIT_VALUE_10              = 33;
-constexpr int OEDIT_VALUE_11              = 34;
-constexpr int OEDIT_VALUE_12              = 35;
-constexpr int OEDIT_VALUE_13              = 36;
-constexpr int OEDIT_VALUE_14              = 37;
-constexpr int OEDIT_VALUE_15              = 38;
-constexpr int OEDIT_VALUE_16              = 39;
-constexpr int OEDIT_SIZE                  = 40;
-constexpr int OEDIT_APPLYSPEC             = 41;
-constexpr int OEDIT_PROMPT_SPELLBOOK      = 42;
-constexpr int OEDIT_SPELLBOOK             = 43;
-constexpr int OEDIT_COPY                  = 44;
-constexpr int OEDIT_DELETE                = 45;
 
 /*
  * Submodes of ZEDIT connectedness.
@@ -333,8 +280,6 @@ ACMD(do_rcopy);
 void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 void medit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 
-void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
-void oedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 ACMD(do_oasis_oedit);
 
 /* Puts room into the world as room vnum of zone, starting with triggers: a new room, or the one there changed */

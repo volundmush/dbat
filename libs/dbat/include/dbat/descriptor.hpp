@@ -12,6 +12,7 @@
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/constates.hpp"
+#include "dbat/obj_edit.hpp"
 #include "dbat/olc/session.hpp"
 
 struct txt_block {
@@ -67,16 +68,7 @@ struct descriptor_data {
   int writenew{};                      /* What slot am I writing to?          */
   struct chargen_draft chargen;         /* a character being made: what waits for the end */
   std::string newsbuf;
-  /*---------------Player Level Object Editing Variables-------------------*/
-  int obj_editval{};
-  int obj_editflag{};
-  std::string obj_was;
-  std::string obj_name;
-  std::string obj_short;
-  std::string obj_long;
-  int obj_type{};
-  int obj_weapon{};
-  int32_t obj_point_uid{}; /* the object being restrung, by id */
+  struct pobj_order pobj;              /* an order at the custom equipment or restring menu */
   /*---------------Ship Construction Editing Variables---------------------*/
   int shipmenu{};
   int shipsize{};

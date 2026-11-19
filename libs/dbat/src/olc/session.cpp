@@ -28,8 +28,6 @@ namespace {
   };
 
   constexpr legacy_editor LEGACY_EDITORS[] = {
-      {CON_OEDIT,    oedit_parse,    oedit_string_cleanup   },
-      {CON_IEDIT,    oedit_parse,    oedit_string_cleanup   },
       {CON_ZEDIT,    zedit_parse,    nullptr                },
       {CON_SEDIT,    sedit_parse,    nullptr                },
       {CON_MEDIT,    medit_parse,    medit_string_cleanup   },

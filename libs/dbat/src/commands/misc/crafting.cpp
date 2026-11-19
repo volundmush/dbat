@@ -706,17 +706,7 @@ ACMD(do_restring)
     send_to_char(g, ch, "You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
     return;
   }
-  desc_set_connected(d, CON_POBJ);
-  d->obj_name      = str_format("{}", obj_get_name(obj));
-  d->obj_was       = str_format("{}", obj_get_short_description(obj));
-  d->obj_short     = d->obj_was;
-  d->obj_long      = str_format("{}", obj_get_description(obj));
-  d->obj_point_uid = obj_get_id(obj);
-  d->obj_type      = 1;
-  d->obj_weapon    = 0;
-  disp_restring_menu(g, d);
-  d->obj_editflag = EDIT_RESTRING;
-  d->obj_editval  = EDIT_RESTRING_MAIN;
+  start_restring(g, d, obj);
 }
 
 ACMD(do_fish)

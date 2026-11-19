@@ -155,16 +155,7 @@ namespace {
   {
     if (short_of(g, ch, 20, "You need at least 20 RPP to initiate a custom equipment build.\r\n"))
       return 0;
-    struct descriptor_data *d = char_get_desc(ch);
-    desc_set_connected(d, CON_POBJ);
-    d->obj_name   = "Generic Armor Vest";
-    d->obj_short  = "@cGeneric @DArmor @WVest@n";
-    d->obj_long   = "@wA @cgeneric @Darmor @Wvest@w is lying here@n";
-    d->obj_type   = 1;
-    d->obj_weapon = 0;
-    disp_custom_menu(g, d);
-    d->obj_editflag = EDIT_CUSTOM;
-    d->obj_editval  = EDIT_CUSTOM_MAIN;
+    start_custom_order(g, char_get_desc(ch));
     return 0;
   }
 
@@ -356,18 +347,7 @@ namespace {
       send_to_char(g, ch, "You can not restring a custom piece. Why? Cause I say so. :P\r\n");
       return 0;
     }
-    struct descriptor_data *d = char_get_desc(ch);
-    desc_set_connected(d, CON_POBJ);
-    d->obj_name      = str_format("{}", obj_get_name(obj));
-    d->obj_was       = str_format("{}", obj_get_short_description(obj));
-    d->obj_short     = d->obj_was;
-    d->obj_long      = str_format("{}", obj_get_description(obj));
-    d->obj_point_uid = obj_get_id(obj);
-    d->obj_type      = 1;
-    d->obj_weapon    = 0;
-    disp_restring_menu(g, d);
-    d->obj_editflag = EDIT_RESTRING;
-    d->obj_editval  = EDIT_RESTRING_MAIN;
+    start_restring(g, char_get_desc(ch), obj);
     return 0;
   }
 

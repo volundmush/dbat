@@ -149,6 +149,7 @@ namespace {
       impl("redit, invalid save answer", {"redit 300", "1", "Changed", "q", "maybe", "", "Y"}),
       impl("redit, the script editor", {"redit 300", "s", "?", "n", "1, 99999", "1, 301", "n", "300", "n", "3, 300", "n", "0, 300", "n", "1, 0", "n", "abc", "d", "9", "d", "0", "d", "abc", "d", "1", "x", "S", "X", "q", "y"}),
       impl("redit, a mismatched trigger", {"redit 300", "s", "n", "1, 310", "x", "q", "y"}),
+      impl("oedit, context help", {"oedit 300", "help", "1", "help", "sword", "8", "help", "5", "5", "help", "1", "6", "help", "0", "7", "help", "0", "p", "help", "0", "d", "help", "1", "help", "1", "help", "5", "0", "e", "help", "0", "s", "help", "x", "4", "help", "/s", "c", "help", "0", "help", "0", "help", "0", "help", "0", "0", "0", "0", "0", "q", "help", "n"}),
       impl("redit, context help", {"redit 300", "help", "1", "help", "Helped", "3", "help", "0", "4", "help", "1", "5", "help", "1", "help", "300", "3", "help", "x", "4", "help", "1", "5", "help", "0", "7", "help", "1", "9", "help", "kick", "0", "h", "help", "1", "help", "k", "0", "s", "help", "n", "help", "0", "d", "help", "0", "x", "x", "help", "n", "q", "help", "n"}),
       impl("trigedit, context help", {"trigedit 300", "help", "1", "help", "Helped", "2", "help", "0", "3", "help", "0", "4", "help", "5", "5", "help", "x", "w", "help", "300", "1", "x", "q", "help", "n"}),
       impl("redit, already being edited", {"redit 300", "@2 redit 300", "q", "@2 redit 300", "@2 q"}),
@@ -339,6 +340,8 @@ namespace {
       impl("pobj, custom armor", {"rpp 3", "1", "", "1", "@Gvest", "1", "shiny vest", "2", "@ga shiny vest@n", "3", "A shiny vest", "4", "", "4", "99", "4", "2", "5", "q", "", "maybe", "y", "i"}, rich),
       impl("pobj, custom weapon of each kind", {"rpp 3", "4", "16", "5", "", "5", "9", "5", "1", "q", "y", "rpp 3", "4", "16", "5", "2", "q", "y", "rpp 3", "4", "16", "5", "3", "q", "y", "rpp 3", "4", "16", "5", "4", "q", "y", "rpp 3", "4", "16", "5", "5", "q", "y", "rpp 3", "4", "16", "5", "6", "q", "y", "i"}, rich),
       impl("pobj, custom of each slot", {"rpp 3", "4", "3", "q", "y", "rpp 3", "4", "4", "q", "y", "rpp 3", "4", "5", "q", "y", "rpp 3", "4", "6", "q", "y", "rpp 3", "4", "7", "q", "y", "rpp 3", "4", "8", "q", "y", "rpp 3", "4", "9", "q", "y", "rpp 3", "4", "10", "q", "y", "rpp 3", "4", "11", "q", "y", "rpp 3", "4", "12", "q", "y", "rpp 3", "4", "13", "q", "y", "rpp 3", "4", "14", "q", "y", "rpp 3", "4", "15", "q", "y", "i"}, rich),
+      impl("pobj, restring, nothing entered", {"load obj 301", "get sword", "rpp 14 sword", "2", "", "3", "", "1", "", "z", "q", "no"}, rich),
+      impl("pobj, custom weapon refused", {"rpp 3", "4", "16", "5", "0", "q", "y", "i"}, rich),
       impl("pobj, custom cancelled", {"rpp 3", "x", "q", "n"}, rich),
   };
   every_item_type(out);

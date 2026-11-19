@@ -182,15 +182,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
   }
 
   /*
-   * Check for an existing object in the OLC.  The strings
-   * aren't part of the prototype any longer.  They get added
-   * with strdup().
-   */
-  if (OLC_OBJ(d)) {
-    delete OLC_OBJ(d);
-  }
-
-  /*
    * Check for a mob.  free_mobile() makes sure strings are not in
    * the prototype.
    */
