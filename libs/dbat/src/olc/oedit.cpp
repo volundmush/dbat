@@ -1120,15 +1120,8 @@ ACMD(do_oasis_oedit)
       return;
     }
     save = true;
-    if (is_number(buf2))
-      number = parse_int(buf2);
-    else if (char_get_olc_zone(g, ch) > 0)
-      if (struct zone_data *zone = find_zone(g, char_get_olc_zone(g, ch)))
-        number = genolc_zone_bottom(g, zone);
-    if (number == NOWHERE) {
-      send_to_char(g, ch, "Save which zone?\r\n");
+    if ((number = zone_to_save(g, ch, buf2)) == NOWHERE)
       return;
-    }
   }
   if (number == NOWHERE)
     number = parse_int(buf1);
@@ -1143,23 +1136,13 @@ ACMD(do_oasis_oedit)
   open_session(g, d, std::make_unique<object_editor>(), "do_oasis");
   object_editor &editor = session_of<object_editor>(d);
 
-  editor.zone = save ? find_zone(g, number) : find_zone_by_thing(g, number);
-  if (editor.zone == nullptr) {
-    send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    d->olc.reset();
-    return;
-  }
-  if (!can_edit_zone(g, ch, editor.zone)) {
-    send_cannot_edit(g, ch, editor.zone->number);
+  if (!(editor.zone = zone_to_edit(g, ch, number, save))) {
     d->olc.reset();
     return;
   }
 
   if (save) {
-    send_to_char(g, ch, "Saving all objects in zone {:d}.\r\n", editor.zone->number);
-    mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: {} saves object info for zone {:d}.", char_get_name(ch),
-           editor.zone->number);
-    save_objects(g, editor.zone);
+    save_zone_files(g, ch, editor.zone, "objects", "object info", save_objects);
     d->olc.reset();
     return;
   }

@@ -10,7 +10,9 @@
 #include "dbat/db.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/genzon.hpp"
+#include "dbat/comm.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/format.hpp"
 
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'
@@ -34,31 +36,17 @@ struct shop_data *find_shop(GameWorld *g, shop_vnum vnum)
 
 /*-------------------------------------------------------------------*/
 
-/*
- * Generic string modifier for shop keeper messages. Returns NULL once stored, or why the message can't be used (the
- * old one is then kept).
- */
-const char *modify_string(std::string *str, const char *new_s, bool allow_int)
+/* Stores a builder's shopkeeper or guildmaster message, "%s " put before it if it doesn't start with a code, or tells
+   d why it won't do (the old one then stays) */
+void set_npc_message(GameWorld *g, struct descriptor_data *d, std::string &message, std::string_view text, bool allow_int)
 {
-
-  std::string buf;
-  const char *pointer;
-
-  /*
-   * Check the '%s' is present, if not, add it.
-   */
-  if (*new_s != '%') {
-    buf     = str_format("%s {}", new_s);
-    pointer = buf.c_str();
-  } else
-    pointer = new_s;
-
-  const char *problem = npc_msg_format_problem(pointer, allow_int);
-  if (problem)
-    return problem;
-
-  *str = pointer;
-  return nullptr;
+  std::string wanted = text.starts_with('%') ? std::string(text) : str_format("%s {}", text);
+  if (const char *problem = npc_msg_format_problem(wanted.c_str(), allow_int))
+    write_to_output(g, d,
+                    "Invalid message: {}. It starts with %s, the customer's name (added if you leave it off){}, and can have no other % codes.\r\n",
+                    problem, allow_int ? ", may then use one %d for the price" : "");
+  else
+    message = std::move(wanted);
 }
 
 /*-------------------------------------------------------------------*/

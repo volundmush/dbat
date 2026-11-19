@@ -64,5 +64,25 @@ constexpr std::optional<bool> yes_or_no(std::string_view line)
   }
 }
 
+/* What sedit's and gedit's number fields refuse ("Field must be numerical"): a minus sign with no digit after it.
+   Anything else is read as atoi() reads it. */
+constexpr bool minus_without_digit(std::string_view line)
+{
+  return line.starts_with('-') && !(line.size() > 1 && line[1] >= '0' && line[1] <= '9');
+}
+
 /* The "OLC: ... stops editing zone ..." line most editors log when the builder leaves them */
 void log_stops_editing(GameWorld *g, struct descriptor_data *d, zone_vnum zone);
+
+/* The number "<editor> save [zone]" saves: the zone named, else the bottom of the builder's own zone if it is at least
+   lowest_own; NOWHERE, the builder asked "Save which zone?", for neither */
+IDXTYPE zone_to_save(GameWorld *g, struct char_data *ch, std::string_view named, zone_vnum lowest_own = 1);
+
+/* The zone the builder is opening an editor in, found by zone number or by the vnum of something in it; null, the
+   builder told why, if there is none or it isn't theirs to edit */
+struct zone_data *zone_to_edit(GameWorld *g, struct char_data *ch, IDXTYPE number, bool by_zone_number);
+
+/* "<editor> save": tells the builder ("Saving all <things> in zone N."), logs it ("... saves <info> for zone N."), and
+   writes the zone's files of that kind */
+void save_zone_files(GameWorld *g, struct char_data *ch, struct zone_data *zone, std::string_view things, std::string_view info,
+                     bool (*save)(GameWorld *, struct zone_data *));

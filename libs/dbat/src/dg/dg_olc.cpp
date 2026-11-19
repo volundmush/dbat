@@ -321,13 +321,7 @@ ACMD(do_oasis_trigedit)
   open_session(g, d, std::make_unique<trigger_editor>(), "do_oasis_trigedit");
   trigger_editor &editor = session_of<trigger_editor>(d);
 
-  if ((editor.zone = find_zone_by_thing(g, number)) == nullptr) {
-    send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    d->olc.reset();
-    return;
-  }
-  if (!can_edit_zone(g, ch, editor.zone)) {
-    send_cannot_edit(g, ch, editor.zone->number);
+  if (!(editor.zone = zone_to_edit(g, ch, number, false))) {
     d->olc.reset();
     return;
   }

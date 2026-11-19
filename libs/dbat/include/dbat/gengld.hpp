@@ -25,4 +25,3 @@ constexpr int LEARNED_LEVEL = 0; /* % known which is considered "learned" */
 constexpr int MAX_PER_PRAC  = 1; /* max percent gain in skill per practice */
 constexpr int MIN_PER_PRAC  = 2; /* min percent gain in skill per practice */
 constexpr int PRAC_TYPE     = 3; /* should it say 'spell' or 'skill'?	 */
-const char *gedit_modify_string(std::string *str, const char *new_g);

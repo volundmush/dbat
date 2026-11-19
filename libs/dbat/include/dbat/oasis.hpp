@@ -77,7 +77,6 @@ constexpr int OASIS_CFG = 5;
  * Utilities exported from olc.c.
  *   -- Umm, shouldn't this say 'from oasis.c' now???  * Mythran
  */
-void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type);
 void split_argument(char *argument, char *tag);
 void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone);
 
@@ -92,13 +91,8 @@ struct oasis_olc_data : olc_session {
   struct zone_data *in_zone{};       /* the zone of what is being edited */
   room_vnum number{};                /* vnum of subject          */
   int value{};                       /* mostly 'has changed' flag*/
-  struct shop_data *shop{};          /* used for 'sedit'         */
-  struct config_data *config{};      /* used for 'cedit'         */
-  struct guild_data *guild{};          /* used for 'gedit'         */
 
-  void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
-  void text_done(GameWorld *g, struct descriptor_data *d, int how) override;
-  int help_context(const struct descriptor_data *d) const override;
+  void parse(GameWorld *, struct descriptor_data *, std::string_view) override {}
   void log_leaving(GameWorld *g, struct descriptor_data *d) const override;
 };
 
@@ -111,65 +105,10 @@ struct oasis_olc_data : olc_session {
 #define OLC_VAL(d)  (OLC(d)->value)    /* Scratch variable.	*/
 #define OLC_ZNUM(d)  (OLC(d)->in_zone)  /* Zone of what is being edited. */
 
-#define OLC_SHOP(d)    (OLC(d)->shop)        /* Shop structure.	*/
-#define OLC_CONFIG(d)  (OLC(d)->config)      /* Config structure.	*/
-
-#define OLC_GUILD(d)  (OLC(d)->guild)  /* Guild structure      */
-
-
-/*
- * Cleanup types.
- */
-constexpr int CLEANUP_ALL     = 1; /* Free the whole lot.			*/
-constexpr int CLEANUP_STRUCTS = 2; /* Don't free strings.			*/
-constexpr int CLEANUP_CONFIG  = 3; /* Used just to send proper message. 	*/
 
 
 
-/*
- * Submodes of SEDIT connectedness.
- */
-constexpr int SEDIT_MAIN_MENU          = 0;
-constexpr int SEDIT_CONFIRM_SAVESTRING = 1;
-constexpr int SEDIT_NOITEM1            = 2;
-constexpr int SEDIT_NOITEM2            = 3;
-constexpr int SEDIT_NOCASH1            = 4;
-constexpr int SEDIT_NOCASH2            = 5;
-constexpr int SEDIT_NOBUY              = 6;
-constexpr int SEDIT_BUY                = 7;
-constexpr int SEDIT_SELL               = 8;
-constexpr int SEDIT_PRODUCTS_MENU      = 11;
-constexpr int SEDIT_ROOMS_MENU         = 12;
-constexpr int SEDIT_NAMELIST_MENU      = 13;
-constexpr int SEDIT_NAMELIST           = 14;
-/*
- * Numerical responses.
- */
-constexpr int SEDIT_NUMERICAL_RESPONSE = 20;
-constexpr int SEDIT_OPEN1              = 21;
-constexpr int SEDIT_OPEN2              = 22;
-constexpr int SEDIT_CLOSE1             = 23;
-constexpr int SEDIT_CLOSE2             = 24;
-constexpr int SEDIT_KEEPER             = 25;
-constexpr int SEDIT_BUY_PROFIT         = 26;
-constexpr int SEDIT_SELL_PROFIT        = 27;
-constexpr int SEDIT_TYPE_MENU          = 29;
-constexpr int SEDIT_DELETE_TYPE        = 30;
-constexpr int SEDIT_DELETE_PRODUCT     = 31;
-constexpr int SEDIT_NEW_PRODUCT        = 32;
-constexpr int SEDIT_DELETE_ROOM        = 33;
-constexpr int SEDIT_NEW_ROOM           = 34;
-constexpr int SEDIT_SHOP_FLAGS         = 35;
-constexpr int SEDIT_NOTRADE            = 36;
-constexpr int SEDIT_COPY               = 37;
 
-/* 
- * Submodes of CEDIT connectedness.
- */
-constexpr int CEDIT_MAIN_MENU          = 0;
-constexpr int CEDIT_CONFIRM_SAVESTRING = 1;
-constexpr int CEDIT_SUBMENU            = 2; /* OLC_VAL: the submenu's main menu key */
-constexpr int CEDIT_OPTION             = 3; /* OLC_VAL: the option's index in cedit_options[] */
 
 
 constexpr int CEDIT_CREATION_METHOD_1 = 0;
@@ -211,13 +150,10 @@ ACMD(do_oasis_oedit);
 void redit_save_internally(GameWorld *g, struct room_data &room, room_vnum vnum, struct zone_data *zone, const std::vector<trig_vnum> &triggers);
 ACMD(do_oasis_redit);
 
-void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 ACMD(do_oasis_gedit);
 
 ACMD(do_oasis_zedit);
 
-void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
-void cedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 ACMD(do_oasis_cedit);
 
 
@@ -374,29 +310,8 @@ constexpr int NUM_CONTEXTS = 140;
 
 /* Prototypes for the context sensitive help system */
 bool context_help(GameWorld *g, struct descriptor_data *d, char *arg);
-/* The context help for an editor still sharing oasis_olc_data, by its state and mode */
-int legacy_help_context(const struct descriptor_data *d);
 void boot_context_help(GameWorld *g);
 #endif /* ifndef __GENOLC_C__ */
 
-/*. Submodes of GEDIT connectedness     . */
-constexpr int GEDIT_MAIN_MENU          = 0;
-constexpr int GEDIT_CONFIRM_SAVESTRING = 1;
-constexpr int GEDIT_NO_CASH            = 2;
-constexpr int GEDIT_NO_SKILL           = 3;
-
-/*. Numerical responses . */
-constexpr int GEDIT_NUMERICAL_RESPONSE = 5;
-constexpr int GEDIT_CHARGE             = 6;
-constexpr int GEDIT_OPEN               = 7;
-constexpr int GEDIT_CLOSE              = 8;
-constexpr int GEDIT_TRAINER            = 9;
-constexpr int GEDIT_NO_TRAIN           = 10;
-constexpr int GEDIT_MINLVL             = 11;
-constexpr int GEDIT_SELECT_SPELLS      = 12;
-constexpr int GEDIT_SELECT_SKILLS      = 13;
-constexpr int GEDIT_SELECT_WPS         = 14;
-constexpr int GEDIT_SELECT_LANGS       = 15;
-constexpr int GEDIT_SELECT_FEATS       = 16;
 
 

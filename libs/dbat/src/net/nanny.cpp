@@ -32,7 +32,6 @@
 #include "dbat/olc/session.hpp"
 #include "dbat/improved-edit.hpp"
 #include "dbat/aedit.hpp"
-#include "dbat/gedit.hpp"
 #include "dbat/hedit.hpp"
 #include "dbat/hsedit.hpp"
 #include "dbat/character_utils.hpp"

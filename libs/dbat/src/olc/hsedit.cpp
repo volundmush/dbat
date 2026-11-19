@@ -547,16 +547,8 @@ ACMD(do_oasis_hsedit)
       return;
     }
     save = true;
-    if (is_number(buf2))
-      number = parse_int(buf2);
-    else if (char_get_olc_zone(g, ch) > 0) {
-      struct zone_data *zone = find_zone(g, char_get_olc_zone(g, ch));
-      number                 = zone ? genolc_zone_bottom(g, zone) : NOWHERE;
-    }
-    if (number == NOWHERE) {
-      send_to_char(g, ch, "Save which zone?\r\n");
+    if ((number = zone_to_save(g, ch, buf2)) == NOWHERE)
       return;
-    }
   }
   if (number == NOWHERE)
     number = parse_int(buf1);

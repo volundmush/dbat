@@ -157,54 +157,6 @@ ACMD(do_oasis)
 \*------------------------------------------------------------*/
 
 /*
- * This procedure frees up the strings and/or the structures
- * attatched to a descriptor, sets all flags back to how they
- * should be.
- */
-void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
-{
-  /*
-   * Clean up WHAT?
-   */
-  if (d->olc == nullptr)
-    return;
-
-  /* an editor with a session of its own frees what it holds itself */
-  if (!dynamic_cast<oasis_olc_data *>(d->olc.get())) {
-    leave_olc(g, d);
-    return;
-  }
-
-  /* cedit's copy of the configuration */
-  if (OLC_CONFIG(d)) {
-    delete OLC_CONFIG(d);
-    OLC_CONFIG(d) = nullptr;
-  }
-
-  /* OLC_SHOP(d) is the editor's own copy, owning all it holds. */
-  delete OLC_SHOP(d);
-  /* OLC_GUILD(d) is the editor's own copy too. */
-  delete OLC_GUILD(d);
-
-  /*
-   * Restore descriptor playing status.
-   */
-  if (d->character) {
-    char_plr_set(d->character, PLR_WRITING, false);
-    act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-
-    if (cleanup_type == CLEANUP_CONFIG)
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing the game configuration", char_get_name(d->character));
-    else
-      d->olc->log_leaving(g, d);
-
-    desc_set_connected(d, CON_PLAYING);
-  }
-
-  d->olc.reset();
-}
-
-/*
  * This function is an exact duplicate of the tag_argument function found in
  * one of the ascii patches located on the circlemud ftp website.
  */

@@ -3,798 +3,501 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include <cstdlib>
+#include <algorithm>
+#include <cctype>
+#include <type_traits>
+#include <variant>
 
+#include "dbat/act.informative.hpp"
 #include "dbat/args.hpp"
-#include "dbat/iterate.hpp"
-#include "dbat/shop.hpp"
-#include "dbat/config.hpp"
-#include "dbat/sedit.hpp"
-#include "dbat/utils.hpp"
+#include "dbat/character_utils.hpp"
 #include "dbat/comm.hpp"
-#include "dbat/interpreter.hpp"
+#include "dbat/config.hpp"
 #include "dbat/db.hpp"
+#include "dbat/descriptor_utils.hpp"
+#include "dbat/game_world.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/genshp.hpp"
 #include "dbat/genzon.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/iterate.hpp"
+#include "dbat/modify.hpp"
 #include "dbat/oasis.hpp"
-#include "dbat/races.hpp"
-#include "dbat/act.informative.hpp"
-#include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
-#include "dbat/character_utils.hpp"
-#include "dbat/game_world.hpp"
+#include "dbat/races.hpp"
+#include "dbat/room_utils.hpp"
+#include "dbat/sedit.hpp"
+#include "dbat/shop.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/utils.hpp"
 
-static void sedit_disp_menu(GameWorld *g, struct descriptor_data *d);
-static void sedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct shop_data *shop);
-static void sedit_setup_new(struct descriptor_data *d);
+namespace {
+  /* What the shop editor is asking; from open1 on, the answer is a number */
+  enum class mode {
+    main_menu, confirm_save, products_menu, rooms_menu, namelist_menu, namelist,
+    no_item1, no_item2, no_cash1, no_cash2, no_buy, buy, sell,
+    open1, open2, close1, close2, keeper, buy_profit, sell_profit, type_menu, delete_type, delete_product, new_product,
+    delete_room, new_room, shop_flags, no_trade, copy
+  };
 
-/*
- * Should check more things.
- */
-static void sedit_save_internally(GameWorld *g, struct descriptor_data *d)
-{
-  OLC_SHOP(d)->vnum = OLC_NUM(d);
-  add_shop(g, OLC_SHOP(d));
-}
+  /* A field the main menu asks for straight away: its key, and where the answer goes */
+  struct field {
+    char key;
+    mode asks;
+    int context;
+    std::variant<int shop_data::*, float shop_data::*, std::string shop_data::*> where; /* an hour, a rate, a message */
+    bool allow_int = false; /* a message that may give the price (%d) */
+  };
 
-static void sedit_save_to_disk(GameWorld *g, struct zone_data *num)
-{
-  save_shops(g, num);
-}
+  constexpr field FIELDS[] = {
+      {'1', mode::open1,       CONTEXT_SEDIT_OPEN1,       &shop_data::open1        },
+      {'2', mode::close1,      CONTEXT_SEDIT_CLOSE1,      &shop_data::close1       },
+      {'3', mode::open2,       CONTEXT_SEDIT_OPEN2,       &shop_data::open2        },
+      {'4', mode::close2,      CONTEXT_SEDIT_CLOSE2,      &shop_data::close2       },
+      {'5', mode::buy_profit,  CONTEXT_SEDIT_BUY_PROFIT,  &shop_data::profit_buy   },
+      {'6', mode::sell_profit, CONTEXT_SEDIT_SELL_PROFIT, &shop_data::profit_sell  },
+      {'7', mode::no_item1,    CONTEXT_SEDIT_NOITEM1,     &shop_data::no_such_item1},
+      {'8', mode::no_item2,    CONTEXT_SEDIT_NOITEM2,     &shop_data::no_such_item2},
+      {'9', mode::no_cash1,    CONTEXT_SEDIT_NOCASH1,     &shop_data::missing_cash1},
+      {'a', mode::no_cash2,    CONTEXT_SEDIT_NOCASH2,     &shop_data::missing_cash2},
+      {'b', mode::no_buy,      CONTEXT_SEDIT_NOBUY,       &shop_data::do_not_buy   },
+      {'c', mode::buy,         CONTEXT_SEDIT_BUY,         &shop_data::message_buy,  true},
+      {'d', mode::sell,        CONTEXT_SEDIT_SELL,        &shop_data::message_sell, true},
+  };
 
-/*-------------------------------------------------------------------*\
-  utility functions 
-\*-------------------------------------------------------------------*/
+  /* The context help of the modes that aren't fields */
+  constexpr std::pair<mode, int> CONTEXTS[] = {
+      {mode::main_menu,      CONTEXT_SEDIT_MAIN_MENU         },
+      {mode::confirm_save,   CONTEXT_SEDIT_CONFIRM_SAVESTRING},
+      {mode::products_menu,  CONTEXT_SEDIT_PRODUCTS_MENU     },
+      {mode::rooms_menu,     CONTEXT_SEDIT_ROOMS_MENU        },
+      {mode::namelist_menu,  CONTEXT_SEDIT_NAMELIST_MENU     },
+      {mode::namelist,       CONTEXT_SEDIT_NAMELIST          },
+      {mode::keeper,         CONTEXT_SEDIT_KEEPER            },
+      {mode::type_menu,      CONTEXT_SEDIT_TYPE_MENU         },
+      {mode::delete_type,    CONTEXT_SEDIT_DELETE_TYPE       },
+      {mode::delete_product, CONTEXT_SEDIT_DELETE_PRODUCT    },
+      {mode::new_product,    CONTEXT_SEDIT_NEW_PRODUCT       },
+      {mode::delete_room,    CONTEXT_SEDIT_DELETE_ROOM       },
+      {mode::new_room,       CONTEXT_SEDIT_NEW_ROOM          },
+      {mode::shop_flags,     CONTEXT_SEDIT_SHOP_FLAGS        },
+      {mode::no_trade,       CONTEXT_SEDIT_NOTRADE           },
+  };
+
+  /* Removes the entry the builder numbered n, if there is one */
+  template <typename T> void erase_at(std::vector<T> &list, int n)
+  {
+    if (n >= 0 && n < std::ssize(list))
+      list.erase(list.begin() + n);
+  }
+
+  /* The shop editor: a copy of one shop, put into the world when saved */
+  struct shop_editor final : olc_session {
+    mode asking = mode::main_menu;
+    struct zone_data *zone{};
+    shop_vnum number = NOTHING;
+    shop_data shop{};
+    int new_type = 0; /* the item type of the namelist being added */
+    bool changed = false;
+
+    void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
+    int help_context(const struct descriptor_data *d) const override;
+    void log_leaving(GameWorld *g, struct descriptor_data *d) const override { log_stops_editing(g, d, zone->number); }
+
+    void edit_new();
+    void menu(GameWorld *g, struct descriptor_data *d);
+    void done(GameWorld *g, struct descriptor_data *d)
+    {
+      changed = true;
+      menu(g, d);
+    }
+    void products_menu(GameWorld *g, struct descriptor_data *d);
+    void rooms_menu(GameWorld *g, struct descriptor_data *d);
+    void compact_rooms_menu(GameWorld *g, struct descriptor_data *d);
+    void namelist_menu(GameWorld *g, struct descriptor_data *d);
+    void flags_menu(GameWorld *g, struct descriptor_data *d);
+    void no_trade_menu(GameWorld *g, struct descriptor_data *d);
+    void types_menu(GameWorld *g, struct descriptor_data *d);
+    void main_menu_choice(GameWorld *g, struct descriptor_data *d, std::string_view line);
+    void save_answer(GameWorld *g, struct descriptor_data *d, std::string_view line);
+    void set(GameWorld *g, struct descriptor_data *d, const field &f, std::string_view line);
+    bool takes_numbers() const { return asking >= mode::open1; }
+  };
+
+  const field *field_asked(mode asking)
+  {
+    auto found = std::ranges::find(FIELDS, asking, &field::asks);
+    return found == std::end(FIELDS) ? nullptr : found;
+  }
+
+  /* A new shop sells nothing, nowhere, and buys nothing, until the builder says otherwise */
+  void shop_editor::edit_new()
+  {
+    shop               = {};
+    shop.keeper        = NOBODY;
+    shop.close1        = 28;
+    shop.profit_buy    = 1.0;
+    shop.profit_sell   = 1.0;
+    shop.no_such_item1 = shop_default_msgs[SHOP_MSG_NOITEM1];
+    shop.no_such_item2 = shop_default_msgs[SHOP_MSG_NOITEM2];
+    shop.missing_cash1 = shop_default_msgs[SHOP_MSG_NOCASH1];
+    shop.missing_cash2 = shop_default_msgs[SHOP_MSG_NOCASH2];
+    shop.do_not_buy    = shop_default_msgs[SHOP_MSG_NOBUY];
+    shop.message_buy   = shop_default_msgs[SHOP_MSG_BUY];
+    shop.message_sell  = shop_default_msgs[SHOP_MSG_SELL];
+    shop_trade_set(&shop, TRADE_NOBROKEN, true);
+  }
+
+  void shop_editor::products_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    write_to_output(g, d, "##     VNUM     Product\r\n");
+    for (int i = 0; i < std::ssize(shop.producing); i++)
+      write_to_output(g, d, "{:>2d} - [@c{:>5d}@n] - @y{}@n\r\n", i, obj_index_of(g, shop.producing[i])->vnum,
+                      obj_get_short_description(obj_proto_of(g, shop.producing[i])));
+    write_to_output(g, d, "\r\n@gA@n) Add a new product.\r\n@gD@n) Delete a product.\r\n@gQ@n) Quit\r\nEnter choice : ");
+    asking = mode::products_menu;
+  }
+
+  void shop_editor::compact_rooms_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    for (int i = 0; i < std::ssize(shop.in_room); i++)
+      write_to_output(g, d, "{:>2d} - [@c{:>5d}@n]  | {}", i, shop.in_room[i], (i + 1) % 5 ? "" : "\r\n");
+    write_to_output(g, d, "\r\n@gA@n) Add a new room.\r\n@gD@n) Delete a room.\r\n@gL@n) Long display.\r\n@gQ@n) Quit\r\nEnter choice : ");
+    asking = mode::rooms_menu;
+  }
+
+  void shop_editor::rooms_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    write_to_output(g, d, "##     VNUM     Room\r\n\r\n");
+    for (int i = 0; i < std::ssize(shop.in_room); i++) {
+      if (room_of(g, shop.in_room[i]))
+        write_to_output(g, d, "{:>2d} - [@c{:>5d}@n] - @y{}@n\r\n", i, shop.in_room[i], room_get_name(g, shop.in_room[i]));
+      else
+        write_to_output(g, d, "{:>2d} - [@R!Removed Room!@n]\r\n", i);
+    }
+    write_to_output(g, d, "\r\n@gA@n) Add a new room.\r\n@gD@n) Delete a room.\r\n@gC@n) Compact Display.\r\n@gQ@n) Quit\r\nEnter choice : ");
+    asking = mode::rooms_menu;
+  }
+
+  void shop_editor::namelist_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    write_to_output(g, d, "##              Type   Namelist\r\n\r\n");
+    for (int i = 0; i < std::ssize(shop.type); i++)
+      write_to_output(g, d, "{:>2d} - @c{:>15}@n - @y{}@n\r\n", i, item_types[shop.type[i].type],
+                      shop.type[i].keywords.empty() ? "<None>" : shop.type[i].keywords);
+    write_to_output(g, d, "\r\n@gA@n) Add a new entry.\r\n@gD@n) Delete an entry.\r\n@gQ@n) Quit\r\nEnter choice : ");
+    asking = mode::namelist_menu;
+  }
+
+  void shop_editor::flags_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    for (int i = 0; i < NUM_SHOP_FLAGS; i++)
+      write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, shop_bits[i], (i + 1) % 2 ? "" : "\r\n");
+    write_to_output(g, d, "\r\nCurrent Shop Flags : @c{}@n\r\nEnter choice : ", sprintbit(shop.bitvector, shop_bits));
+    asking = mode::shop_flags;
+  }
+
+  void shop_editor::no_trade_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    for (int i = 0; i < NUM_TRADERS; i++)
+      write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, trade_letters[i], (i + 1) % 2 ? "" : "\r\n");
+    write_to_output(g, d, "\r\nCurrently won't trade with: @c{}@n\r\nEnter choice : ", sprintbitarray(shop.with_who, trade_letters, 4));
+    asking = mode::no_trade;
+  }
+
+  void shop_editor::types_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    for (int i = 0; i < NUM_ITEM_TYPES; i++)
+      write_to_output(g, d, "@g{:>2d}@n) @c{:<20}@n  {}", i, item_types[i], (i + 1) % 3 ? "" : "\r\n");
+    write_to_output(g, d, "@nEnter choice : ");
+    asking = mode::type_menu;
+  }
+
+  void shop_editor::menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    const bool keeper = shop.keeper != NOBODY;
+    write_to_output(g, d,
+                    "-- Shop Number : [@c{:d}@n]\r\n@g0@n) Keeper      : [@c{:d}@n] @y{}\r\n@g1@n) Open 1      : @c{:>4d}@n          @g2@n) Close 1     : @c{:>4d}\r\n@g3@n) Open 2      : @c{:>4d}@n          @g4@n) Close 2     : @c{:>4d}\r\n@g5@n) Sell rate   : @c{:>1.2f}@n          @g6@n) Buy rate    : @c{:>1.2f}\r\n@g7@n) Keeper no item : @y{}\r\n@g8@n) Player no item : @y{}\r\n@g9@n) Keeper no cash : @y{}\r\n@gA@n) Player no cash : @y{}\r\n@gB@n) Keeper no buy  : @y{}\r\n@gC@n) Buy success    : @y{}\r\n@gD@n) Sell success   : @y{}\r\n@gE@n) No Trade With  : @c{}\r\n@gF@n) Shop flags     : @c{}\r\n@gR@n) Rooms Menu\r\n@gP@n) Products Menu\r\n@gT@n) Accept Types Menu\r\n@gW@n) Copy Shop\r\n@gQ@n) Quit\r\nEnter Choice : ",
+                    number, keeper ? mob_index_of(g, shop.keeper)->vnum : -1, keeper ? char_get_sdesc(mob_proto_of(g, shop.keeper)) : "None",
+                    shop.open1, shop.close1, shop.open2, shop.close2, shop.profit_buy, shop.profit_sell, shop.no_such_item1,
+                    shop.no_such_item2, shop.missing_cash1, shop.missing_cash2, shop.do_not_buy, shop.message_buy, shop.message_sell,
+                    sprintbitarray(shop.with_who, trade_letters, 4), sprintbit(shop.bitvector, shop_bits));
+    asking = mode::main_menu;
+  }
+
+  void shop_editor::main_menu_choice(GameWorld *g, struct descriptor_data *d, std::string_view line)
+  {
+    const char key = tolower(first_char(line));
+    if (const field *f = std::ranges::find(FIELDS, key, &field::key); f != std::end(FIELDS)) {
+      asking = f->asks;
+      write_to_output(g, d, std::holds_alternative<std::string shop_data::*>(f->where) ? "\r\nEnter new text :\r\n] " : "\r\nEnter new value : ");
+      return;
+    }
+    switch (key) {
+      case 'q':
+        if (changed) {
+          write_to_output(g, d, "Do you wish to save your changes? : ");
+          asking = mode::confirm_save;
+        } else
+          leave_olc(g, d);
+        return;
+      case '0':
+        asking = mode::keeper;
+        write_to_output(g, d, "Enter vnum number of shop keeper : ");
+        return;
+      case 'e': no_trade_menu(g, d); return;
+      case 'f': flags_menu(g, d); return;
+      case 'r': rooms_menu(g, d); return;
+      case 'p': products_menu(g, d); return;
+      case 't': namelist_menu(g, d); return;
+      case 'w':
+        write_to_output(g, d, "Copy what shop? ");
+        asking = mode::copy;
+        return;
+      default: menu(g, d); return;
+    }
+  }
+
+  void shop_editor::save_answer(GameWorld *g, struct descriptor_data *d, std::string_view line)
+  {
+    std::optional<bool> save = yes_or_no(line);
+    if (!save) {
+      write_to_output(g, d, "Invalid choice!\r\nDo you wish to save your changes? : ");
+      return;
+    }
+    if (*save) {
+      shop.vnum = number;
+      add_shop(g, &shop);
+      mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true, "OLC: {} edits shop {:d}",
+             char_get_name(d->character), number);
+      if (CONFIG_OLC_SAVE) {
+        save_shops(g, find_zone_by_thing(g, number));
+        write_to_output(g, d, "Shop saved to disk.\r\n");
+      } else
+        write_to_output(g, d, "Shop saved to memory.\r\n");
+    }
+    leave_olc(g, d);
+  }
+
+  /* Stores the answer to one of the main menu's fields */
+  void shop_editor::set(GameWorld *g, struct descriptor_data *d, const field &f, std::string_view line)
+  {
+    std::visit(
+        [&](auto where) {
+          using value = std::remove_reference_t<decltype(shop.*where)>;
+          if constexpr (std::is_same_v<value, int>)
+            shop.*where = LIMIT(parse_int(line), 0, 28);
+          else if constexpr (std::is_same_v<value, float>)
+            scan_float(line, shop.*where);
+          else {
+            std::string text(line);
+            smash_tilde(text);
+            set_npc_message(g, d, shop.*where, text, f.allow_int);
+          }
+        },
+        f.where);
+  }
+
+  void shop_editor::parse(GameWorld *g, struct descriptor_data *d, std::string_view line)
+  {
+    if (takes_numbers() && minus_without_digit(line)) {
+      write_to_output(g, d, "Field must be numerical, try again : ");
+      return;
+    }
+    const int n = parse_int(line);
+
+    switch (asking) {
+      case mode::confirm_save: save_answer(g, d, line); return;
+      case mode::main_menu: main_menu_choice(g, d, line); return;
+
+      case mode::namelist_menu:
+        switch (tolower(first_char(line))) {
+          case 'a': types_menu(g, d); return;
+          case 'd':
+            write_to_output(g, d, "\r\nDelete which entry? : ");
+            asking = mode::delete_type;
+            return;
+        }
+        break;
+      case mode::products_menu:
+        switch (tolower(first_char(line))) {
+          case 'a':
+            write_to_output(g, d, "\r\nEnter new product vnum number : ");
+            asking = mode::new_product;
+            return;
+          case 'd':
+            write_to_output(g, d, "\r\nDelete which product? : ");
+            asking = mode::delete_product;
+            return;
+        }
+        break;
+      case mode::rooms_menu:
+        switch (tolower(first_char(line))) {
+          case 'a':
+            write_to_output(g, d, "\r\nEnter new room vnum number : ");
+            asking = mode::new_room;
+            return;
+          case 'c': compact_rooms_menu(g, d); return;
+          case 'l': rooms_menu(g, d); return;
+          case 'd':
+            write_to_output(g, d, "\r\nDelete which room? : ");
+            asking = mode::delete_room;
+            return;
+        }
+        break;
+
+      case mode::namelist: {
+        std::string keywords(line);
+        smash_tilde(keywords);
+        shop.type.push_back({.type = new_type, .keywords = keywords});
+        namelist_menu(g, d);
+        return;
+      }
+      case mode::keeper:
+        if (n != NOBODY && !mob_proto_of(g, n)) {
+          write_to_output(g, d, "That mobile does not exist, try again : ");
+          return;
+        }
+        shop.keeper = n;
+        if (n != NOBODY) { /* the keeper's own special goes behind the shop's */
+          auto *index = mob_index_of(g, n);
+          shop.func   = index->func != shop_keeper ? index->func : nullptr;
+          index->func = shop_keeper;
+        }
+        break;
+      case mode::type_menu:
+        new_type = LIMIT(n, 0, NUM_ITEM_TYPES - 1);
+        write_to_output(g, d, "Enter namelist (return for none) :-\r\n] ");
+        asking = mode::namelist;
+        return;
+      case mode::delete_type:
+        erase_at(shop.type, n);
+        namelist_menu(g, d);
+        return;
+      case mode::new_product:
+        if (n != NOTHING && !obj_proto_of(g, n)) {
+          write_to_output(g, d, "That object does not exist, try again : ");
+          return;
+        }
+        if (n > 0)
+          shop.producing.push_back(n);
+        products_menu(g, d);
+        return;
+      case mode::delete_product:
+        erase_at(shop.producing, n);
+        products_menu(g, d);
+        return;
+      case mode::new_room:
+        if (n != NOWHERE && !room_of(g, n)) {
+          write_to_output(g, d, "That room does not exist, try again : ");
+          return;
+        }
+        if (n >= 0)
+          shop.in_room.push_back(n);
+        rooms_menu(g, d);
+        return;
+      case mode::delete_room:
+        erase_at(shop.in_room, n);
+        rooms_menu(g, d);
+        return;
+      case mode::shop_flags:
+        if (int flag = LIMIT(n, 0, NUM_SHOP_FLAGS); flag > 0) {
+          shop.bitvector ^= 1U << (flag - 1);
+          flags_menu(g, d);
+          return;
+        }
+        break;
+      case mode::no_trade:
+        if (int trader = LIMIT(n, 0, NUM_TRADERS); trader > 0) {
+          shop_trade_toggle(&shop, trader - 1);
+          no_trade_menu(g, d);
+          return;
+        }
+        break;
+      case mode::copy:
+        if (struct shop_data *source = find_shop(g, n))
+          shop = *source;
+        else
+          write_to_output(g, d, "That shop does not exist.\r\n");
+        break;
+
+      default:
+        if (const field *f = field_asked(asking))
+          set(g, d, *f, line);
+        break;
+    }
+    done(g, d);
+  }
+
+  int shop_editor::help_context(const struct descriptor_data *) const
+  {
+    if (const field *f = field_asked(asking))
+      return f->context;
+    auto found = std::ranges::find(CONTEXTS, asking, &std::pair<mode, int>::first);
+    return found == std::end(CONTEXTS) ? NOTHING : found->second;
+  }
+} // namespace
 
 ACMD(do_oasis_sedit)
 {
-  IDXTYPE number = NOWHERE;
-  int save       = 0;
-  struct shop_data *existing;
-  struct descriptor_data *d;
-  std::string buf1;
-  std::string buf2;
-
-  /****************************************************************************/
-  /** Parse any arguments.                                                   **/
-  /****************************************************************************/
   std::string_view rest = argument;
-  buf1                  = take_arg(rest);
-  buf2                  = take_arg(rest);
+  std::string buf1      = take_arg(rest);
+  std::string buf2      = take_arg(rest);
 
   if (buf1.empty()) {
     send_to_char(g, ch, "Specify a shop VNUM to edit.\r\n");
     return;
   }
+
+  IDXTYPE number = NOWHERE;
+  bool save      = false;
   if (!isdigit(buf1[0])) {
     if (!str_eq_nocase("save", buf1)) {
       send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }
-
     save = true;
-
-    if (is_number(buf2))
-      number = parse_int(buf2);
-    else if (char_get_olc_zone(g, ch) > 0) {
-      struct zone_data *zlok;
-
-      if ((zlok = find_zone(g, char_get_olc_zone(g, ch))) == nullptr)
-        number = NOWHERE;
-      else
-        number = genolc_zone_bottom(g, zlok);
-    }
-
-    if (number == NOWHERE) {
-      send_to_char(g, ch, "Save which zone?\r\n");
+    if ((number = zone_to_save(g, ch, buf2)) == NOWHERE)
       return;
-    }
-  }
-
-  /****************************************************************************/
-  /** If a numeric argument was given, get it.                               **/
-  /****************************************************************************/
-  if (number == NOWHERE)
+  } else
     number = parse_int(buf1);
 
-  /****************************************************************************/
-  /** Check that the shop isn't already being edited.                        **/
-  /****************************************************************************/
-  for (descriptor_data *dd : each_desc(g)) {
-    if (desc_get_connected(dd) == CON_SEDIT) {
-      if (dd->olc && OLC_NUM(dd) == number) {
-        send_to_char(g, ch, "That shop is currently being edited by {}.\r\n",
-                     char_pers(g, dd->character, ch));
-        return;
-      }
+  for (descriptor_data *dd : each_desc(g))
+    if (desc_get_connected(dd) == CON_SEDIT && dd->olc && session_of<shop_editor>(dd).number == number) {
+      send_to_char(g, ch, "That shop is currently being edited by {}.\r\n", char_pers(g, dd->character, ch));
+      return;
     }
-  }
 
-  /****************************************************************************/
-  /** Point d to the builder's descriptor.                                   **/
-  /****************************************************************************/
-  d = char_get_desc(ch);
+  struct descriptor_data *d = char_get_desc(ch);
+  open_session(g, d, std::make_unique<shop_editor>(), "do_oasis_sedit");
+  shop_editor &editor = session_of<shop_editor>(d);
 
-  /****************************************************************************/
-  /** Give the descriptor an OLC structure.                                  **/
-  /****************************************************************************/
-  if (d->olc) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true,
-           "SYSERR: do_oasis_sedit: Player already had olc structure.");
-    d->olc.reset();
-  }
-
-  d->olc = std::make_unique<oasis_olc_data>();
-
-  /****************************************************************************/
-  /** Find the zone.                                                         **/
-  /****************************************************************************/
-  OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
-  if (OLC_ZNUM(d) == nullptr) {
-    send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
+  if (!(editor.zone = zone_to_edit(g, ch, number, save))) {
     d->olc.reset();
     return;
   }
-
-  /****************************************************************************/
-  /** Everyone but IMPLs can only edit zones they have been assigned.        **/
-  /****************************************************************************/
-  if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
-    send_cannot_edit(g, ch, OLC_ZNUM(d)->number);
-
-    /**************************************************************************/
-    /** Free the OLC structure.                                              **/
-    /**************************************************************************/
-    d->olc.reset();
-    return;
-  }
-
   if (save) {
-    send_to_char(g, ch, "Saving all shops in zone {:d}.\r\n",
-                 OLC_ZNUM(d)->number);
-    mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
-           "OLC: {} saves shop info for zone {:d}.",
-           char_get_name(ch), OLC_ZNUM(d)->number);
-
-    /**************************************************************************/
-    /** Save the shops to the shop file.                                     **/
-    /**************************************************************************/
-    save_shops(g, OLC_ZNUM(d));
-
-    /**************************************************************************/
-    /** Free the OLC structure.                                              **/
-    /**************************************************************************/
+    save_zone_files(g, ch, editor.zone, "shops", "shop info", save_shops);
     d->olc.reset();
     return;
   }
 
-  OLC_NUM(d) = number;
-
-  if ((existing = find_shop(g, number)) != nullptr)
-    sedit_setup_existing(g, d, existing);
+  editor.number = number;
+  if (struct shop_data *existing = find_shop(g, number))
+    editor.shop = *existing;
   else
-    sedit_setup_new(d);
+    editor.edit_new();
 
-  sedit_disp_menu(g, d);
-  desc_set_connected(d, CON_SEDIT);
-
-  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-  char_plr_set(ch, PLR_WRITING, true);
-
-  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} starts editing zone {:d} allowed zone {:d}",
-         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
-}
-
-static void sedit_setup_new(struct descriptor_data *d)
-{
-  struct shop_data *shop;
-
-  /*
-   * Allocate a scratch shop structure.
-   */
-  shop = new shop_data();
-
-  /*
-   * Fill in some default values.
-   */
-  shop_set_keeper(shop, NOBODY);
-  shop_set_close1(shop, 28);
-  shop_set_profit_buy(shop, 1.0);
-  shop_set_profit_sell(shop, 1.0);
-  /*
-   * Add a spice of default strings.
-   */
-  shop_set_no_such_item1(shop, shop_default_msgs[SHOP_MSG_NOITEM1]);
-  shop_set_no_such_item2(shop, shop_default_msgs[SHOP_MSG_NOITEM2]);
-  shop_set_missing_cash1(shop, shop_default_msgs[SHOP_MSG_NOCASH1]);
-  shop_set_missing_cash2(shop, shop_default_msgs[SHOP_MSG_NOCASH2]);
-  shop_set_do_not_buy(shop, shop_default_msgs[SHOP_MSG_NOBUY]);
-  shop_set_message_buy(shop, shop_default_msgs[SHOP_MSG_BUY]);
-  shop_set_message_sell(shop, shop_default_msgs[SHOP_MSG_SELL]);
-  /* It sells nothing, nowhere, and buys nothing, until the builder says otherwise. */
-  shop_trade_set(shop, TRADE_NOBROKEN, true);
-
-  /*
-   * Presto! A shop.
-   */
-  OLC_SHOP(d) = shop;
-}
-
-/*-------------------------------------------------------------------*/
-
-static void sedit_setup_existing(GameWorld *g, struct descriptor_data *d, struct shop_data *shop)
-{
-  /*
-   * Create a scratch shop structure.
-   */
-  OLC_SHOP(d) = new shop_data();
-
-  copy_shop(OLC_SHOP(d), shop);
-}
-
-/* Removes the entry the builder numbered n, if there is one. */
-template <typename T>
-static void erase_at(std::vector<T> &list, int n)
-{
-  if (n >= 0 && n < (int)list.size())
-    list.erase(list.begin() + n);
-}
-
-/**************************************************************************
- Menu functions 
- **************************************************************************/
-
-static void sedit_products_menu(GameWorld *g, struct descriptor_data *d)
-{
-  struct shop_data *shop;
-  int i;
-
-  shop = OLC_SHOP(d);
-
-  clear_screen(g, d);
-  write_to_output(g, d, "##     VNUM     Product\r\n");
-  for (i = 0; i < (int)shop_products(shop).size(); i++) {
-    write_to_output(g, d, "{:>2d} - [@c{:>5d}@n] - @y{}@n\r\n", i,
-                    obj_index_of(g, shop_products(shop)[i])->vnum,
-                    obj_get_short_description(obj_proto_of(g, shop_products(shop)[i])));
-  }
-  write_to_output(g, d, "\r\n@gA@n) Add a new product.\r\n@gD@n) Delete a product.\r\n@gQ@n) Quit\r\nEnter choice : ");
-
-  OLC_MODE(d) = SEDIT_PRODUCTS_MENU;
-}
-
-/*-------------------------------------------------------------------*/
-
-static void sedit_compact_rooms_menu(GameWorld *g, struct descriptor_data *d)
-{
-  struct shop_data *shop;
-  int i, count = 0;
-
-  shop = OLC_SHOP(d);
-
-  clear_screen(g, d);
-  for (i = 0; i < (int)shop_rooms(shop).size(); i++) {
-    write_to_output(g, d, "{:>2d} - [@c{:>5d}@n]  | {}", i, shop_rooms(shop)[i],
-                    !(++count % 5) ? "\r\n" : "");
-  }
-  write_to_output(g, d, "\r\n@gA@n) Add a new room.\r\n@gD@n) Delete a room.\r\n@gL@n) Long display.\r\n@gQ@n) Quit\r\nEnter choice : ");
-
-  OLC_MODE(d) = SEDIT_ROOMS_MENU;
-}
-
-/*-------------------------------------------------------------------*/
-
-static void sedit_rooms_menu(GameWorld *g, struct descriptor_data *d)
-{
-  struct shop_data *shop;
-  int i;
-
-  shop = OLC_SHOP(d);
-
-  clear_screen(g, d);
-  write_to_output(g, d, "##     VNUM     Room\r\n\r\n");
-  for (i = 0; i < (int)shop_rooms(shop).size(); i++) {
-    if (room_of(g, shop_rooms(shop)[i])) {
-      write_to_output(g, d, "{:>2d} - [@c{:>5d}@n] - @y{}@n\r\n", i, shop_rooms(shop)[i], room_get_name(g, shop_rooms(shop)[i]));
-    } else {
-      write_to_output(g, d, "{:>2d} - [@R!Removed Room!@n]\r\n", i);
-    }
-  }
-  write_to_output(g, d, "\r\n@gA@n) Add a new room.\r\n@gD@n) Delete a room.\r\n@gC@n) Compact Display.\r\n@gQ@n) Quit\r\nEnter choice : ");
-
-  OLC_MODE(d) = SEDIT_ROOMS_MENU;
-}
-
-/*-------------------------------------------------------------------*/
-
-static void sedit_namelist_menu(GameWorld *g, struct descriptor_data *d)
-{
-  struct shop_data *shop;
-  int i;
-
-  shop = OLC_SHOP(d);
-
-  clear_screen(g, d);
-  write_to_output(g, d, "##              Type   Namelist\r\n\r\n");
-  for (i = 0; i < (int)shop_buy_types(shop).size(); i++) {
-    write_to_output(g, d, "{:>2d} - @c{:>15}@n - @y{}@n\r\n", i,
-                    item_types[shop_buy_types(shop)[i].type],
-                    shop_buy_get_keywords(&shop_buy_types(shop)[i]) ? shop_buy_get_keywords(&shop_buy_types(shop)[i]) : "<None>");
-  }
-  write_to_output(g, d, "\r\n@gA@n) Add a new entry.\r\n@gD@n) Delete an entry.\r\n@gQ@n) Quit\r\nEnter choice : ");
-
-  OLC_MODE(d) = SEDIT_NAMELIST_MENU;
-}
-
-/*-------------------------------------------------------------------*/
-
-static void sedit_shop_flags_menu(GameWorld *g, struct descriptor_data *d)
-{
-  std::string bits;
-  int i, count = 0;
-
-  clear_screen(g, d);
-  for (i = 0; i < NUM_SHOP_FLAGS; i++) {
-    write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, shop_bits[i],
-                    !(++count % 2) ? "\r\n" : "");
-  }
-  bits = sprintbit(shop_get_bitvector(OLC_SHOP(d)), shop_bits);
-  write_to_output(g, d, "\r\nCurrent Shop Flags : @c{}@n\r\nEnter choice : ", bits);
-  OLC_MODE(d) = SEDIT_SHOP_FLAGS;
-}
-
-/*-------------------------------------------------------------------*/
-
-static void sedit_no_trade_menu(GameWorld *g, struct descriptor_data *d)
-{
-  std::string bits;
-  int i, count = 0;
-
-  clear_screen(g, d);
-  for (i = 0; i < NUM_TRADERS; i++) {
-    write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, trade_letters[i],
-                    !(++count % 2) ? "\r\n" : "");
-  }
-  bits = sprintbitarray(shop_get_with_who(OLC_SHOP(d)), trade_letters, 4);
-  write_to_output(g, d, "\r\nCurrently won't trade with: @c{}@n\r\nEnter choice : ",
-                  bits);
-  OLC_MODE(d) = SEDIT_NOTRADE;
-}
-
-/*-------------------------------------------------------------------*/
-
-static void sedit_types_menu(GameWorld *g, struct descriptor_data *d)
-{
-  int i, count = 0;
-
-  clear_screen(g, d);
-  for (i = 0; i < NUM_ITEM_TYPES; i++) {
-    write_to_output(g, d, "@g{:>2d}@n) @c{:<20}@n  {}", i, item_types[i],
-                    !(++count % 3) ? "\r\n" : "");
-  }
-  write_to_output(g, d, "@nEnter choice : ");
-  OLC_MODE(d) = SEDIT_TYPE_MENU;
-}
-
-/*-------------------------------------------------------------------*/
-
-/*
- * Display main menu.
- */
-static void sedit_disp_menu(GameWorld *g, struct descriptor_data *d)
-{
-  std::string buf1;
-  std::string buf2;
-  struct shop_data *shop;
-
-  shop = OLC_SHOP(d);
-
-  clear_screen(g, d);
-  buf1 = sprintbitarray(shop_get_with_who(shop), trade_letters, 4);
-  buf2 = sprintbit(shop_get_bitvector(shop), shop_bits);
-  write_to_output(g, d,
-                  "-- Shop Number : [@c{:d}@n]\r\n@g0@n) Keeper      : [@c{:d}@n] @y{}\r\n@g1@n) Open 1      : @c{:>4d}@n          @g2@n) Close 1     : @c{:>4d}\r\n@g3@n) Open 2      : @c{:>4d}@n          @g4@n) Close 2     : @c{:>4d}\r\n@g5@n) Sell rate   : @c{:>1.2f}@n          @g6@n) Buy rate    : @c{:>1.2f}\r\n@g7@n) Keeper no item : @y{}\r\n@g8@n) Player no item : @y{}\r\n@g9@n) Keeper no cash : @y{}\r\n@gA@n) Player no cash : @y{}\r\n@gB@n) Keeper no buy  : @y{}\r\n@gC@n) Buy success    : @y{}\r\n@gD@n) Sell success   : @y{}\r\n@gE@n) No Trade With  : @c{}\r\n@gF@n) Shop flags     : @c{}\r\n@gR@n) Rooms Menu\r\n@gP@n) Products Menu\r\n@gT@n) Accept Types Menu\r\n@gW@n) Copy Shop\r\n@gQ@n) Quit\r\nEnter Choice : ",
-
-                  OLC_NUM(d),
-                  shop_get_keeper(shop) == NOBODY ? -1 : mob_index_of(g, shop_get_keeper(shop))->vnum,
-                  shop_get_keeper(shop) == NOBODY ? "None" : char_get_sdesc(mob_proto_of(g, shop_get_keeper(shop))),
-                  shop_get_open1(shop),
-                  shop_get_close1(shop),
-                  shop_get_open2(shop),
-                  shop_get_close2(shop),
-                  shop_get_profit_buy(shop),
-                  shop_get_profit_sell(shop),
-                  shop_get_no_such_item1(shop),
-                  shop_get_no_such_item2(shop),
-                  shop_get_missing_cash1(shop),
-                  shop_get_missing_cash2(shop),
-                  shop_get_do_not_buy(shop),
-                  shop_get_message_buy(shop),
-                  shop_get_message_sell(shop),
-                  buf1,
-                  buf2);
-
-  OLC_MODE(d) = SEDIT_MAIN_MENU;
-}
-
-/**************************************************************************
-  The GARGANTUAN event handler
- **************************************************************************/
-
-/* Stores a builder-written shop message, or tells the builder why it can't be used. */
-static void sedit_set_message(GameWorld *g, struct descriptor_data *d, std::string *msg, char *arg, bool allow_int)
-{
-  const char *problem = modify_string(msg, arg, allow_int);
-
-  if (problem)
-    write_to_output(g, d,
-                    "Invalid message: {}. It starts with %s, the customer's name (added if you leave it off){}, and can have no other % codes.\r\n",
-                    problem, allow_int ? ", may then use one %d for the price" : "");
-}
-
-void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  IDXTYPE i;
-
-  if (OLC_MODE(d) > SEDIT_NUMERICAL_RESPONSE) {
-    if (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))) {
-      write_to_output(g, d, "Field must be numerical, try again : ");
-      return;
-    }
-  }
-  switch (OLC_MODE(d)) {
-      /*-------------------------------------------------------------------*/
-    case SEDIT_CONFIRM_SAVESTRING:
-      switch (*arg) {
-        case 'y':
-        case 'Y':
-          sedit_save_internally(g, d);
-          mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true,
-                 "OLC: {} edits shop {:d}", char_get_name(d->character), OLC_NUM(d));
-          if (CONFIG_OLC_SAVE) {
-            sedit_save_to_disk(g, find_zone_by_thing(g, OLC_NUM(d)));
-            write_to_output(g, d, "Shop saved to disk.\r\n");
-          } else
-            write_to_output(g, d, "Shop saved to memory.\r\n");
-          cleanup_olc(g, d, CLEANUP_STRUCTS);
-          return;
-        case 'n':
-        case 'N':
-          cleanup_olc(g, d, CLEANUP_ALL);
-          return;
-        default:
-          write_to_output(g, d, "Invalid choice!\r\nDo you wish to save your changes? : ");
-          return;
-      }
-      break;
-
-      /*-------------------------------------------------------------------*/
-    case SEDIT_MAIN_MENU:
-      i = 0;
-      switch (*arg) {
-        case 'q':
-        case 'Q':
-          if (OLC_VAL(d)) { /* Anything been changed? */
-            write_to_output(g, d, "Do you wish to save your changes? : ");
-            OLC_MODE(d) = SEDIT_CONFIRM_SAVESTRING;
-          } else
-            cleanup_olc(g, d, CLEANUP_ALL);
-          return;
-        case '0':
-          OLC_MODE(d) = SEDIT_KEEPER;
-          write_to_output(g, d, "Enter vnum number of shop keeper : ");
-          return;
-        case '1':
-          OLC_MODE(d) = SEDIT_OPEN1;
-          i++;
-          break;
-        case '2':
-          OLC_MODE(d) = SEDIT_CLOSE1;
-          i++;
-          break;
-        case '3':
-          OLC_MODE(d) = SEDIT_OPEN2;
-          i++;
-          break;
-        case '4':
-          OLC_MODE(d) = SEDIT_CLOSE2;
-          i++;
-          break;
-        case '5':
-          OLC_MODE(d) = SEDIT_BUY_PROFIT;
-          i++;
-          break;
-        case '6':
-          OLC_MODE(d) = SEDIT_SELL_PROFIT;
-          i++;
-          break;
-        case '7':
-          OLC_MODE(d) = SEDIT_NOITEM1;
-          i--;
-          break;
-        case '8':
-          OLC_MODE(d) = SEDIT_NOITEM2;
-          i--;
-          break;
-        case '9':
-          OLC_MODE(d) = SEDIT_NOCASH1;
-          i--;
-          break;
-        case 'a':
-        case 'A':
-          OLC_MODE(d) = SEDIT_NOCASH2;
-          i--;
-          break;
-        case 'b':
-        case 'B':
-          OLC_MODE(d) = SEDIT_NOBUY;
-          i--;
-          break;
-        case 'c':
-        case 'C':
-          OLC_MODE(d) = SEDIT_BUY;
-          i--;
-          break;
-        case 'd':
-        case 'D':
-          OLC_MODE(d) = SEDIT_SELL;
-          i--;
-          break;
-        case 'e':
-        case 'E':
-          sedit_no_trade_menu(g, d);
-          return;
-        case 'f':
-        case 'F':
-          sedit_shop_flags_menu(g, d);
-          return;
-        case 'r':
-        case 'R':
-          sedit_rooms_menu(g, d);
-          return;
-        case 'p':
-        case 'P':
-          sedit_products_menu(g, d);
-          return;
-        case 't':
-        case 'T':
-          sedit_namelist_menu(g, d);
-          return;
-        case 'w':
-        case 'W':
-          write_to_output(g, d, "Copy what shop? ");
-          OLC_MODE(d) = SEDIT_COPY;
-          return;
-        default:
-          sedit_disp_menu(g, d);
-          return;
-      }
-
-      if (i == 0)
-        break;
-      else if (i == 1)
-        write_to_output(g, d, "\r\nEnter new value : ");
-      else if (i == -1)
-        write_to_output(g, d, "\r\nEnter new text :\r\n] ");
-      else
-        write_to_output(g, d, "Oops...\r\n");
-      return;
-      /*-------------------------------------------------------------------*/
-    case SEDIT_NAMELIST_MENU:
-      switch (*arg) {
-        case 'a':
-        case 'A':
-          sedit_types_menu(g, d);
-          return;
-        case 'd':
-        case 'D':
-          write_to_output(g, d, "\r\nDelete which entry? : ");
-          OLC_MODE(d) = SEDIT_DELETE_TYPE;
-          return;
-        case 'q':
-        case 'Q':
-          break;
-      }
-      break;
-      /*-------------------------------------------------------------------*/
-    case SEDIT_PRODUCTS_MENU:
-      switch (*arg) {
-        case 'a':
-        case 'A':
-          write_to_output(g, d, "\r\nEnter new product vnum number : ");
-          OLC_MODE(d) = SEDIT_NEW_PRODUCT;
-          return;
-        case 'd':
-        case 'D':
-          write_to_output(g, d, "\r\nDelete which product? : ");
-          OLC_MODE(d) = SEDIT_DELETE_PRODUCT;
-          return;
-        case 'q':
-        case 'Q':
-          break;
-      }
-      break;
-      /*-------------------------------------------------------------------*/
-    case SEDIT_ROOMS_MENU:
-      switch (*arg) {
-        case 'a':
-        case 'A':
-          write_to_output(g, d, "\r\nEnter new room vnum number : ");
-          OLC_MODE(d) = SEDIT_NEW_ROOM;
-          return;
-        case 'c':
-        case 'C':
-          sedit_compact_rooms_menu(g, d);
-          return;
-        case 'l':
-        case 'L':
-          sedit_rooms_menu(g, d);
-          return;
-        case 'd':
-        case 'D':
-          write_to_output(g, d, "\r\nDelete which room? : ");
-          OLC_MODE(d) = SEDIT_DELETE_ROOM;
-          return;
-        case 'q':
-        case 'Q':
-          break;
-      }
-      break;
-      /*-------------------------------------------------------------------*/
-      /*
-     * String edits.
-     */
-    case SEDIT_NOITEM1:
-      if (genolc_checkstring(d, arg))
-        sedit_set_message(g, d, &((OLC_SHOP(d))->no_such_item1), arg, false);
-      break;
-    case SEDIT_NOITEM2:
-      if (genolc_checkstring(d, arg))
-        sedit_set_message(g, d, &((OLC_SHOP(d))->no_such_item2), arg, false);
-      break;
-    case SEDIT_NOCASH1:
-      if (genolc_checkstring(d, arg))
-        sedit_set_message(g, d, &((OLC_SHOP(d))->missing_cash1), arg, false);
-      break;
-    case SEDIT_NOCASH2:
-      if (genolc_checkstring(d, arg))
-        sedit_set_message(g, d, &((OLC_SHOP(d))->missing_cash2), arg, false);
-      break;
-    case SEDIT_NOBUY:
-      if (genolc_checkstring(d, arg))
-        sedit_set_message(g, d, &((OLC_SHOP(d))->do_not_buy), arg, false);
-      break;
-    case SEDIT_BUY:
-      if (genolc_checkstring(d, arg))
-        sedit_set_message(g, d, &((OLC_SHOP(d))->message_buy), arg, true);
-      break;
-    case SEDIT_SELL:
-      if (genolc_checkstring(d, arg))
-        sedit_set_message(g, d, &((OLC_SHOP(d))->message_sell), arg, true);
-      break;
-    case SEDIT_NAMELIST:
-      if (genolc_checkstring(d, arg)) {
-        shop_buy_types(OLC_SHOP(d)).push_back({.type = OLC_VAL(d), .keywords = arg});
-      }
-      sedit_namelist_menu(g, d);
-      return;
-
-      /*-------------------------------------------------------------------*/
-      /*
-     * Numerical responses.
-     */
-    case SEDIT_KEEPER:
-      i = atoi(arg);
-      if ((i = atoi(arg)) != -1)
-        if (!mob_proto_of(g, i)) {
-          write_to_output(g, d, "That mobile does not exist, try again : ");
-          return;
-        }
-      shop_set_keeper(OLC_SHOP(d), i);
-      if (i == -1)
-        break;
-      /*
-     * Fiddle with special procs.
-     */
-      shop_set_func(OLC_SHOP(d), mob_index_of(g, i)->func != shop_keeper ? mob_index_of(g, i)->func : nullptr);
-      mob_index_of(g, i)->func = shop_keeper;
-      break;
-    case SEDIT_OPEN1:
-      shop_set_open1(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
-      break;
-    case SEDIT_OPEN2:
-      shop_set_open2(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
-      break;
-    case SEDIT_CLOSE1:
-      shop_set_close1(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
-      break;
-    case SEDIT_CLOSE2:
-      shop_set_close2(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
-      break;
-    case SEDIT_BUY_PROFIT:
-      sscanf(arg, "%f", &((OLC_SHOP(d))->profit_buy));
-      break;
-    case SEDIT_SELL_PROFIT:
-      sscanf(arg, "%f", &((OLC_SHOP(d))->profit_sell));
-      break;
-    case SEDIT_TYPE_MENU:
-      OLC_VAL(d) = LIMIT(atoi(arg), 0, NUM_ITEM_TYPES - 1);
-      write_to_output(g, d, "Enter namelist (return for none) :-\r\n] ");
-      OLC_MODE(d) = SEDIT_NAMELIST;
-      return;
-    case SEDIT_DELETE_TYPE:
-      erase_at(shop_buy_types(OLC_SHOP(d)), atoi(arg));
-      sedit_namelist_menu(g, d);
-      return;
-    case SEDIT_NEW_PRODUCT:
-      if ((i = atoi(arg)) != -1)
-        if (!obj_proto_of(g, i)) {
-          write_to_output(g, d, "That object does not exist, try again : ");
-          return;
-        }
-      if (i > 0)
-        shop_products(OLC_SHOP(d)).push_back(i);
-      sedit_products_menu(g, d);
-      return;
-    case SEDIT_DELETE_PRODUCT:
-      erase_at(shop_products(OLC_SHOP(d)), atoi(arg));
-      sedit_products_menu(g, d);
-      return;
-    case SEDIT_NEW_ROOM:
-      if ((i = atoi(arg)) != -1)
-        if (!room_of(g, i)) {
-          write_to_output(g, d, "That room does not exist, try again : ");
-          return;
-        }
-      if (i >= 0)
-        shop_rooms(OLC_SHOP(d)).push_back(i);
-      sedit_rooms_menu(g, d);
-      return;
-    case SEDIT_DELETE_ROOM:
-      erase_at(shop_rooms(OLC_SHOP(d)), atoi(arg));
-      sedit_rooms_menu(g, d);
-      return;
-    case SEDIT_SHOP_FLAGS:
-      if ((i = LIMIT(atoi(arg), 0, NUM_SHOP_FLAGS)) > 0) {
-        shop_set_bitvector(OLC_SHOP(d), shop_get_bitvector(OLC_SHOP(d)) ^ (1U << (i - 1)));
-        sedit_shop_flags_menu(g, d);
-        return;
-      }
-      break;
-    case SEDIT_NOTRADE:
-      if ((i = LIMIT(atoi(arg), 0, NUM_TRADERS)) > 0) {
-        shop_trade_toggle(OLC_SHOP(d), i - 1);
-        sedit_no_trade_menu(g, d);
-        return;
-      }
-      break;
-    case SEDIT_COPY:
-      if (struct shop_data *source = find_shop(g, atoi(arg))) {
-        delete OLC_SHOP(d);
-        sedit_setup_existing(g, d, source);
-      } else
-        write_to_output(g, d, "That shop does not exist.\r\n");
-      break;
-
-      /*-------------------------------------------------------------------*/
-    default:
-      /*
-     * We should never get here.
-     */
-      cleanup_olc(g, d, CLEANUP_ALL);
-      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: sedit_parse(): Reached default case!");
-      write_to_output(g, d, "Oops...\r\n");
-      break;
-  }
-
-  /*-------------------------------------------------------------------*/
-
-  /*
- * END OF CASE 
- * If we get here, we have probably changed something, and now want to
- * return to main menu.  Use OLC_VAL as a 'has changed' flag.
- */
-  OLC_VAL(d) = 1;
-  sedit_disp_menu(g, d);
+  editor.menu(g, d);
+  begin_editing(g, d, CON_SEDIT);
+  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} starts editing zone {:d} allowed zone {:d}", char_get_name(ch), editor.zone->number,
+         char_get_olc_zone(g, ch));
 }

@@ -35,30 +35,6 @@ struct guild_data *find_guild(GameWorld *g, guild_vnum vnum)
 
 /*-------------------------------------------------------------------*/
 
-/* Generic string modifier for guild master messages. Returns NULL once stored, or why the message can't be used (the
- * old one is then kept). */
-const char *gedit_modify_string(std::string *str, const char *new_g)
-{
-  const char *pointer;
-  std::string buf;
-
-  /*. Check the '%s' is present, if not, add it . */
-  if (*new_g != '%') {
-    buf     = str_format("%s {}", new_g);
-    pointer = buf.c_str();
-  } else
-    pointer = new_g;
-
-  const char *problem = npc_msg_format_problem(pointer, false);
-  if (problem)
-    return problem;
-
-  *str = pointer;
-  return nullptr;
-}
-
-/*-------------------------------------------------------------------*/
-
 struct guild_data *add_guild(GameWorld *g, struct guild_data *ngld)
 {
   struct zone_data *rznum  = find_zone_by_thing(g, guild_get_vnum(ngld));

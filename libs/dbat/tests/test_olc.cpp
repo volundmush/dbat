@@ -229,6 +229,7 @@ namespace {
       impl("sedit, the save prompt", {"sedit 300", "1", "4", "q", "maybe", "n"}),
       impl("sedit, a new shop", {"sedit 304", "0", "300", "q", "y", "slist 3"}),
       impl("sedit, already being edited", {"sedit 300", "@2 sedit 300", "q"}),
+      impl("sedit, context help", {"sedit 300", "help", "1", "help", "5", "7", "help", "x", "0", "help", "300", "r", "help", "a", "help", "301", "d", "help", "0", "q", "p", "help", "a", "help", "301", "d", "help", "0", "q", "t", "help", "a", "help", "1", "help", "", "d", "help", "0", "e", "help", "0", "f", "help", "0", "w", "help", "300", "q", "help", "n"}),
       /* ---- gedit ---- */
       impl("gedit, refusals", {"gedit", "gedit nonsense", "gedit 99999", "gedit save 99999", "gedit save"}),
       as(ADMLVL_BUILDER, "gedit, a builder of no zone", {"gedit 300", "gedit save 3"}),
@@ -239,6 +240,8 @@ namespace {
       impl("gedit, the skills and feats", {"gedit 300", "9", "1", "407", "abc", "-5", "99999", "0", "8", "1", "3", "99999", "0", "b", "1", "0", "a", "A", "q", "y"}),
       impl("gedit, a new guild", {"gedit 304", "0", "300", "q", "y", "glist 3"}),
       impl("gedit, already being edited", {"gedit 300", "@2 gedit 300", "q"}),
+      impl("gedit, context help", {"gedit 300", "help", "0", "help", "300", "1", "help", "x", "2", "help", "y", "3", "help", "5", "4", "help", "5", "5", "help", "1", "6", "help", "1", "7", "help", "0", "8", "help", "0", "9", "help", "0", "b", "help", "0", "q", "help", "n"}),
+      impl("gedit, a tilde in a message", {"gedit 300", "1", "%s No~such~skill.", "2", "Bring~zenni~", "q", "y", "gedit 300", "q"}),
       /* ---- hsedit ---- */
       impl("hsedit, refusals", {"hsedit", "q", "hsedit nonsense", "hsedit 99999", "hsedit save 99999", "hsedit save"}),
       as(ADMLVL_BUILDER, "hsedit, a builder of no zone", {"hsedit 300", "hsedit save 3"}),
@@ -524,6 +527,19 @@ namespace {
   }
 } // namespace
 
+/* Every context help entry gives its own number, so a journey asking for help shows which one the editor chose */
+static void write_context_help()
+{
+  FILE *file = fopen("text/contexthelp", "w");
+  if (!file) {
+    perror("text/contexthelp");
+    exit(2);
+  }
+  for (int context = 0; context < 200; context++) /* past the last; the game passes over those */
+    fprintf(file, "#%d\nContext help %d.~\n", context, context);
+  fclose(file);
+}
+
 int main(int argc, char **argv)
 {
   int shard = 0, shards = 1, arg = 1;
@@ -544,6 +560,7 @@ int main(int argc, char **argv)
   }
   const char *only = argc > arg ? argv[arg] : nullptr;
 
+  th_before_boot(write_context_help);
   GameWorld *g = th_boot_at(TRANSCRIPT_TIME);
   int i        = 0;
   for (const journey &j : journeys()) {

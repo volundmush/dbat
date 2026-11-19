@@ -2258,8 +2258,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
   free_user(d);
 
   /*. Kill any OLC stuff (every editor, and character creation's stat points, keep theirs in d->olc) .*/
-  if (d->olc)
-    cleanup_olc(g, d, CLEANUP_ALL);
+  leave_olc(g, d);
 
   delete d;
 }

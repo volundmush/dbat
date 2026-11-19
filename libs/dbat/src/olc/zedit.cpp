@@ -796,15 +796,8 @@ ACMD(do_oasis_zedit)
   else if (!isdigit(buf1[0])) {
     if (str_eq_nocase("save", buf1)) {
       save = true;
-      if (is_number(buf2))
-        number = parse_int(buf2);
-      else if (char_get_olc_zone(g, ch) > 0)
-        if (struct zone_data *zone = find_zone(g, char_get_olc_zone(g, ch)))
-          number = genolc_zone_bottom(g, zone);
-      if (number == NOWHERE) {
-        send_to_char(g, ch, "Save which zone?\r\n");
+      if ((number = zone_to_save(g, ch, buf2)) == NOWHERE)
         return;
-      }
     } else if (char_get_admlevel(ch) >= ADMLVL_IMPL) {
       if (!str_eq_nocase("new", buf1) || skip_spaces(rest).empty())
         send_to_char(g, ch, "Format: zedit new <zone number> <bottom-room> <upper-room>\r\n");
@@ -833,14 +826,7 @@ ACMD(do_oasis_zedit)
   open_session(g, d, std::make_unique<zone_editor>(), "do_oasis_zedit");
   zone_editor &editor = session_of<zone_editor>(d);
 
-  editor.zone = save ? find_zone(g, number) : find_zone_by_thing(g, number);
-  if (editor.zone == nullptr) {
-    send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-    d->olc.reset();
-    return;
-  }
-  if (!can_edit_zone(g, ch, editor.zone)) {
-    send_cannot_edit(g, ch, editor.zone->number);
+  if (!(editor.zone = zone_to_edit(g, ch, number, save))) {
     d->olc.reset();
     return;
   }

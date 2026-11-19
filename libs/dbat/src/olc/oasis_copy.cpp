@@ -148,7 +148,7 @@ ACMD(do_dig)
     redit_save_internally(g, room, rvnum, zone, {});
 
     send_to_char(g, ch, "New room ({:d}) created.\r\n", rvnum);
-    cleanup_olc(g, d, CLEANUP_ALL);
+    leave_olc(g, d);
     update_space(g);
     /* 
      * update rrnum to the correct room rnum after adding the room 
@@ -332,7 +332,7 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
 
       /* Report room creation to user */
       send_to_char(g, ch, "@yRoom #{:d} created by BuildWalk.@n\r\n", vnum);
-      cleanup_olc(g, d, CLEANUP_STRUCTS);
+      leave_olc(g, d);
       update_space(g);
       return true;
     }

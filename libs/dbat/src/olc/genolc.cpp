@@ -5,6 +5,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <cstdio>
 #include <cstdlib>
 
 #include "dbat/genolc.hpp"
@@ -116,6 +117,8 @@ char *str_udup(const char *txt)
 }
 
 std::string text_or_undefined(std::string_view text) { return text.empty() ? "undefined" : std::string(text); }
+
+void scan_float(std::string_view text, float &field) { sscanf(std::string(text).c_str(), "%f", &field); }
 
 /* Original use: to be called at shutdown time.  */
 bool save_all(GameWorld *g)
