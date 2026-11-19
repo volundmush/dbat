@@ -7,6 +7,7 @@
 #include "dbat/consts/types.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/olc/session.hpp"
+#include "dbat/olc/script_editor.hpp"
 
 constexpr int _OASISOLC = 0x206; /* 2.0.6 */
 /*
@@ -92,20 +93,14 @@ struct oasis_olc_data : olc_session {
   struct zone_data *in_zone{};       /* the zone of what is being edited */
   room_vnum number{};                /* vnum of subject          */
   int value{};                       /* mostly 'has changed' flag*/
-  std::string storage{};             /* trigedit's script */
   struct char_data *mob{};           /* used for 'medit'         */
-  struct room_data *room{};          /* used for 'redit'         */
   struct obj_data *obj{};            /* used for 'oedit'         */
   int32_t iobj_uid{};                /* the object 'iedit' changes, by id */
   struct zone_data *zone{};          /* used for 'zedit'         */
   struct shop_data *shop{};          /* used for 'sedit'         */
   struct config_data *config{};      /* used for 'cedit'         */
   struct extra_descr_data *desc{};   /* used in '[r|o|m]edit'    */
-  struct trig_data *trig{};
-  int script_mode{};
-  int trigger_position{};
-  int item_type{};
-  std::vector<trig_vnum> script{};     /* for assigning triggers in [r|o|m]edit*/
+  script_editor script{};             /* oedit's and medit's triggers */
   struct guild_data *guild{};          /* used for 'gedit'         */
 
   void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
@@ -117,28 +112,24 @@ struct oasis_olc_data : olc_session {
 /*
  * Descriptor access macros.
  */
+/* The mode of oedit and medit while their script_editor has the lines */
+constexpr int OLC_SCRIPT_EDIT = 82766;
+
 #define OLC(d)      (static_cast<oasis_olc_data *>((d)->olc.get()))
 #define OLC_MODE(d) (OLC(d)->mode)     /* Parse input mode.	*/
 #define OLC_NUM(d)  (OLC(d)->number)   /* Room/Obj VNUM.	*/
 #define OLC_VAL(d)  (OLC(d)->value)    /* Scratch variable.	*/
 #define OLC_ZNUM(d)  (OLC(d)->in_zone)  /* Zone of what is being edited. */
 
-#define OLC_STORAGE(d) (OLC(d)->storage)     /* std::string.	*/
-#define OLC_ROOM(d)    (OLC(d)->room)        /* Room structure.	*/
 #define OLC_OBJ(d)     (OLC(d)->obj)         /* Object structure.	*/
 #define OLC_ZONE(d)    (OLC(d)->zone)        /* Zone structure.	*/
 #define OLC_MOB(d)     (OLC(d)->mob)         /* Mob structure.	*/
 #define OLC_SHOP(d)    (OLC(d)->shop)        /* Shop structure.	*/
 #define OLC_DESC(d)    (OLC(d)->desc)        /* Extra description.	*/
 #define OLC_CONFIG(d)  (OLC(d)->config)      /* Config structure.	*/
-#define OLC_TRIG(d)    (OLC(d)->trig)        /* Trigger structure.   */
 
 #define OLC_GUILD(d)  (OLC(d)->guild)  /* Guild structure      */
 
-/*
- * Other macros.
- */
-#define OLC_EXIT(d) room_get_dir_option(OLC_ROOM(d), OLC_VAL(d))
 
 /*
  * Cleanup types.
@@ -195,36 +186,6 @@ constexpr int OEDIT_PROMPT_SPELLBOOK      = 42;
 constexpr int OEDIT_SPELLBOOK             = 43;
 constexpr int OEDIT_COPY                  = 44;
 constexpr int OEDIT_DELETE                = 45;
-
-/*
- * Submodes of REDIT connectedness.
- */
-constexpr int REDIT_MAIN_MENU             = 1;
-constexpr int REDIT_NAME                  = 2;
-constexpr int REDIT_DESC                  = 3;
-constexpr int REDIT_FLAGS                 = 4;
-constexpr int REDIT_SECTOR                = 5;
-constexpr int REDIT_EXIT_MENU             = 6;
-constexpr int REDIT_CONFIRM_SAVEDB        = 7;
-constexpr int REDIT_CONFIRM_SAVESTRING    = 8;
-constexpr int REDIT_EXIT_NUMBER           = 9;
-constexpr int REDIT_EXIT_DESCRIPTION      = 10;
-constexpr int REDIT_EXIT_KEYWORD          = 11;
-constexpr int REDIT_EXIT_KEY              = 12;
-constexpr int REDIT_EXIT_DOORFLAGS        = 13;
-constexpr int REDIT_EXTRADESC_MENU        = 14;
-constexpr int REDIT_EXTRADESC_KEY         = 15;
-constexpr int REDIT_EXTRADESC_DESCRIPTION = 16;
-constexpr int REDIT_DELETE                = 17;
-constexpr int REDIT_EXIT_DCLOCK           = 18;
-constexpr int REDIT_EXIT_DCHIDE           = 19;
-constexpr int REDIT_EXIT_DCSKILL          = 20;
-constexpr int REDIT_EXIT_DCMOVE           = 21;
-constexpr int REDIT_EXIT_SAVETYPE         = 22;
-constexpr int REDIT_EXIT_DCSAVE           = 23;
-constexpr int REDIT_EXIT_FAILROOM         = 24;
-constexpr int REDIT_EXIT_TOTALFAILROOM    = 25;
-constexpr int REDIT_COPY                  = 26;
 
 /*
  * Submodes of ZEDIT connectedness.
@@ -376,10 +337,8 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 void oedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 ACMD(do_oasis_oedit);
 
-void redit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
-void redit_save_internally(GameWorld *g, struct descriptor_data *d);
-void redit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
-void free_room(GameWorld *g, struct room_data *room);
+/* Puts room into the world as room vnum of zone, starting with triggers: a new room, or the one there changed */
+void redit_save_internally(GameWorld *g, struct room_data &room, room_vnum vnum, struct zone_data *zone, const std::vector<trig_vnum> &triggers);
 ACMD(do_oasis_redit);
 
 void sedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
@@ -392,7 +351,6 @@ void cedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 void cedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator);
 ACMD(do_oasis_cedit);
 
-void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 
 ACMD(do_oasis_hsedit);
 

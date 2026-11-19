@@ -115,6 +115,8 @@ char *str_udup(const char *txt)
   return strdup((txt && *txt) ? txt : "undefined");
 }
 
+std::string text_or_undefined(std::string_view text) { return text.empty() ? "undefined" : std::string(text); }
+
 /* Original use: to be called at shutdown time.  */
 bool save_all(GameWorld *g)
 {

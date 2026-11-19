@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <algorithm>
 #include <cstdlib>
 
 #include "dbat/args.hpp"
@@ -32,6 +33,8 @@
 #include "dbat/game_world.hpp"
 
 /* local functions */
+
+void smash_tilde(std::string &s) { std::ranges::replace(s, '~', ' '); }
 
 static void smash_numb(char *str);
 static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int action);

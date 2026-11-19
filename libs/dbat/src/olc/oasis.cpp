@@ -175,25 +175,7 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     return;
   }
 
-  /*
-   * Check for a room. free_room doesn't perform
-   * sanity checks, we must be careful here.
-   */
-  if (OLC_ROOM(d)) {
-    switch (cleanup_type) {
-      case CLEANUP_ALL:
-        free_room(g, OLC_ROOM(d));
-        break;
-      case CLEANUP_STRUCTS:
-        delete OLC_ROOM(d);
-        break;
-      default: /* The caller has screwed up. */
-        mud_log("SYSERR: cleanup_olc: Unknown type!");
-        break;
-    }
-  }
-
-  /* cedit's copy of the configuration (it has no room, so this can't go above) */
+  /* cedit's copy of the configuration */
   if (OLC_CONFIG(d)) {
     delete OLC_CONFIG(d);
     OLC_CONFIG(d) = nullptr;
@@ -226,20 +208,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
   delete OLC_SHOP(d);
   /* OLC_GUILD(d) is the editor's own copy too. */
   delete OLC_GUILD(d);
-
-  /*
-    * Free this one regardless. If we've left olc, we've either made
-    * a fresh copy of it in the trig index, or we lost connection.
-    * Either way, we need to get rid of this.
-    */
-  if (OLC_TRIG(d)) {
-    free_trigger(g, OLC_TRIG(d));
-    OLC_TRIG(d) = nullptr;
-  }
-  /*
-    * OLC_SCRIPT is always set as trig_proto of OLC_OBJ/MOB/ROOM.
-    * Therefore it should not be free'd here.
-    */
 
   /*
    * Restore descriptor playing status.
@@ -343,5 +311,5 @@ void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone)
 
 void oasis_olc_data::log_leaving(GameWorld *g, struct descriptor_data *d) const
 {
-  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing zone {:d} allowed zone {:d}", char_get_name(d->character), in_zone ? in_zone->number : NOWHERE, char_get_olc_zone(g, d->character));
+  log_stops_editing(g, d, in_zone ? in_zone->number : NOWHERE);
 }

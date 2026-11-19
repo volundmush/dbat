@@ -149,6 +149,8 @@ namespace {
       impl("redit, invalid save answer", {"redit 300", "1", "Changed", "q", "maybe", "", "Y"}),
       impl("redit, the script editor", {"redit 300", "s", "?", "n", "1, 99999", "1, 301", "n", "300", "n", "3, 300", "n", "0, 300", "n", "1, 0", "n", "abc", "d", "9", "d", "0", "d", "abc", "d", "1", "x", "S", "X", "q", "y"}),
       impl("redit, a mismatched trigger", {"redit 300", "s", "n", "1, 310", "x", "q", "y"}),
+      impl("redit, context help", {"redit 300", "help", "1", "help", "Helped", "3", "help", "0", "4", "help", "1", "5", "help", "1", "help", "300", "3", "help", "x", "4", "help", "1", "5", "help", "0", "7", "help", "1", "9", "help", "kick", "0", "h", "help", "1", "help", "k", "0", "s", "help", "n", "help", "0", "d", "help", "0", "x", "x", "help", "n", "q", "help", "n"}),
+      impl("trigedit, context help", {"trigedit 300", "help", "1", "help", "Helped", "2", "help", "0", "3", "help", "0", "4", "help", "5", "5", "help", "x", "w", "help", "300", "1", "x", "q", "help", "n"}),
       impl("redit, already being edited", {"redit 300", "@2 redit 300", "q", "@2 redit 300", "@2 q"}),
       impl("redit, the room you are in", {"goto 301", "redit", "q"}),
       /* ---- trigedit ---- */
@@ -162,6 +164,7 @@ namespace {
       impl("trigedit, copying", {"trigedit 304", "w", "99999", "w", "300", "q", "y"}),
       impl("trigedit, wiznet and the save prompt", {"trigedit 300", "z hello", "1", "Changed", "q", "maybe", "n"}),
       impl("trigedit, already being edited", {"trigedit 300", "@2 trigedit 300", "q"}),
+      impl("trigedit, formatting a script", {"trigedit 303", "6", "/c", "while %self%", "switch %actor%", "case 1", "case 2", "say two", "break", "default", "  say other", "break", "done", "if 1", "else", "end", "/f", "/l", "/c", "end", "/f", "/c", "else", "/f", "/c", "case 1", "/f", "/c", "if 1", "break", "/f", "/c", "if 1", "", "   ", "say open", "/f", "/l", "/s", "q", "n"}),
       impl("trigedit, saving and attaching", {"trigedit 300", "1", "Saved name", "q", "y", "redit 300", "s", "n", "1, 300", "x", "q", "y", "@pulse 5"}),
       /* ---- oedit ---- */
       impl("oedit, refusals", {"oedit", "oedit nonsense", "oedit 99999", "oedit save 99999", "oedit save"}),
@@ -203,6 +206,7 @@ namespace {
       impl("zedit, changing and deleting commands", {"zedit", "e", "abc", "e", "99", "e", "1", "o", "n", "300", "1", "1", "1", "e", "a", "d", "abc", "d", "99", "d", "1", "d", "0", "q", "n"}),
       impl("zedit, a new command at the top", {"zedit", "n", "0", "m", "300", "1", "1", "1", "q", "y"}),
       impl("zedit, no changes", {"zedit", "q"}),
+      impl("zedit, a new zone while others edit", {"@2 redit 300", "zedit new 7 700 799", "@2 1", "@2 Still here", "@2 q", "@2 y"}),
       impl("zedit, a new zone", {"zedit new 5 500 599", "zedit new 5 500 599", "zedit new 6 600 550", "zedit new 1000 100000 100099", "redit 500", "q", "zlist"}),
       impl("zedit, already being edited", {"zedit", "@2 zedit 300", "q"}),
       /* ---- sedit ---- */

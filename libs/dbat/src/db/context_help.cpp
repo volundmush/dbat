@@ -23,10 +23,8 @@
 static int find_context_gedit(const struct descriptor_data *d);
 static int find_context_medit(const struct descriptor_data *d);
 static int find_context_oedit(const struct descriptor_data *d);
-static int find_context_redit(const struct descriptor_data *d);
 static int find_context_script_edit(const struct descriptor_data *d);
 static int find_context_sedit(const struct descriptor_data *d);
-static int find_context_trigedit(const struct descriptor_data *d);
 static int find_context_zedit(const struct descriptor_data *d);
 
 /* local global */
@@ -34,8 +32,6 @@ static int find_context_zedit(const struct descriptor_data *d);
 int legacy_help_context(const struct descriptor_data *d)
 {
   switch (desc_get_connected(d)) {
-    case CON_TRIGEDIT: return find_context_trigedit(d);
-    case CON_REDIT: return find_context_redit(d);
     case CON_MEDIT: return find_context_medit(d);
     case CON_OEDIT: return find_context_oedit(d);
     case CON_ZEDIT: return find_context_zedit(d);
@@ -75,30 +71,6 @@ static int find_context_oedit(const struct descriptor_data *d)
     case OEDIT_EXTRADESC_MENU: return CONTEXT_OEDIT_EXTRADESC_MENU;
     case OEDIT_LEVEL: return CONTEXT_OEDIT_LEVEL;
     case OEDIT_PERM: return CONTEXT_OEDIT_PERM;
-    case OLC_SCRIPT_EDIT: return find_context_script_edit(d);
-    default: return NOTHING;
-  }
-}
-
-static int find_context_redit(const struct descriptor_data *d)
-{
-  switch (OLC_MODE(d)) {
-    case REDIT_MAIN_MENU: return CONTEXT_REDIT_MAIN_MENU;
-    case REDIT_NAME: return CONTEXT_REDIT_NAME;
-    case REDIT_DESC: return CONTEXT_REDIT_DESC;
-    case REDIT_FLAGS: return CONTEXT_REDIT_FLAGS;
-    case REDIT_SECTOR: return CONTEXT_REDIT_SECTOR;
-    case REDIT_EXIT_MENU: return CONTEXT_REDIT_EXIT_MENU;
-    case REDIT_CONFIRM_SAVEDB: return CONTEXT_REDIT_CONFIRM_SAVEDB;
-    case REDIT_CONFIRM_SAVESTRING: return CONTEXT_REDIT_CONFIRM_SAVESTRING;
-    case REDIT_EXIT_NUMBER: return CONTEXT_REDIT_EXIT_NUMBER;
-    case REDIT_EXIT_DESCRIPTION: return CONTEXT_REDIT_EXIT_DESCRIPTION;
-    case REDIT_EXIT_KEYWORD: return CONTEXT_REDIT_EXIT_KEYWORD;
-    case REDIT_EXIT_KEY: return CONTEXT_REDIT_EXIT_KEY;
-    case REDIT_EXIT_DOORFLAGS: return CONTEXT_REDIT_EXIT_DOORFLAGS;
-    case REDIT_EXTRADESC_MENU: return CONTEXT_REDIT_EXTRADESC_MENU;
-    case REDIT_EXTRADESC_KEY: return CONTEXT_REDIT_EXTRADESC_KEY;
-    case REDIT_EXTRADESC_DESCRIPTION: return CONTEXT_REDIT_EXTRADESC_DESCRIPTION;
     case OLC_SCRIPT_EDIT: return find_context_script_edit(d);
     default: return NOTHING;
   }
@@ -195,30 +167,9 @@ static int find_context_sedit(const struct descriptor_data *d)
   }
 }
 
-static int find_context_trigedit(const struct descriptor_data *d)
-{
-  switch (OLC_MODE(d)) {
-    case TRIGEDIT_MAIN_MENU: return CONTEXT_TRIGEDIT_MAIN_MENU;
-    case TRIGEDIT_TRIGTYPE: return CONTEXT_TRIGEDIT_TRIGTYPE;
-    case TRIGEDIT_CONFIRM_SAVESTRING: return CONTEXT_TRIGEDIT_CONFIRM_SAVESTRING;
-    case TRIGEDIT_NAME: return CONTEXT_TRIGEDIT_NAME;
-    case TRIGEDIT_INTENDED: return CONTEXT_TRIGEDIT_INTENDED;
-    case TRIGEDIT_TYPES: return CONTEXT_TRIGEDIT_TYPES;
-    case TRIGEDIT_COMMANDS: return CONTEXT_TRIGEDIT_COMMANDS;
-    case TRIGEDIT_NARG: return CONTEXT_TRIGEDIT_NARG;
-    case TRIGEDIT_ARGUMENT: return CONTEXT_TRIGEDIT_ARGUMENT;
-    default: return NOTHING;
-  }
-}
-
 static int find_context_script_edit(const struct descriptor_data *d)
 {
-  switch (OLC_SCRIPT_EDIT_MODE(d)) {
-    case SCRIPT_MAIN_MENU: return CONTEXT_SCRIPT_MAIN_MENU;
-    case SCRIPT_NEW_TRIGGER: return CONTEXT_SCRIPT_NEW_TRIGGER;
-    case SCRIPT_DEL_TRIGGER: return CONTEXT_SCRIPT_DEL_TRIGGER;
-    default: return NOTHING;
-  }
+  return OLC(d)->script.help_context();
 }
 
 static int find_context_gedit(const struct descriptor_data *d)

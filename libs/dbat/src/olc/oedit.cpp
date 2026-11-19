@@ -226,14 +226,14 @@ static void oedit_setup_new(struct descriptor_data *d)
   obj_set_short_description(OLC_OBJ(d), "an unfinished object");
   obj_wear_set(OLC_OBJ(d), ITEM_WEAR_TAKE, true);
   OLC_VAL(d)       = 0;
-  OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
+  OLC(d)->script.attach_type = OBJ_TRIGGER;
   obj_set_type_flag(OLC_OBJ(d), ITEM_WORN);
   obj_set_value(OLC_OBJ(d), VAL_ALL_HEALTH, 100);
   obj_set_value(OLC_OBJ(d), VAL_ALL_MAXHEALTH, 100);
   obj_set_value(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
   obj_set_size(OLC_OBJ(d), SIZE_MEDIUM);
 
-  OLC_SCRIPT(d).clear();
+  OLC(d)->script.triggers.clear();
 }
 
 /*------------------------------------------------------------------------*/
@@ -253,8 +253,8 @@ static void oedit_setup_existing(GameWorld *g, struct descriptor_data *d, obj_vn
    */
   OLC_OBJ(d)       = obj;
   OLC_VAL(d)       = 0;
-  OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
-  dg_olc_script_copy(d);
+  OLC(d)->script.attach_type = OBJ_TRIGGER;
+  OLC(d)->script.triggers = obj_get_proto_script(OLC_OBJ(d));
   /*
    * The edited obj must not have a script.
    * It will be assigned to the updated obj later, after editing.
@@ -276,7 +276,7 @@ static void oedit_save_internally(GameWorld *g, struct descriptor_data *d)
 
   /* Update triggers : */
   /* this will handle new instances of the object: */
-  obj_set_proto_script(obj_proto_of(g, robj_num), OLC_SCRIPT(d));
+  obj_set_proto_script(obj_proto_of(g, robj_num), OLC(d)->script.triggers);
 
   /* this takes care of the objects currently in-game */
   for (obj_data *obj : each_obj(g)) {
@@ -904,7 +904,7 @@ static void oedit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   obj_get_value(obj, 11), obj_get_value(obj, 12), obj_get_value(obj, 13),
                   obj_get_value(obj, 14), obj_get_value(obj, 15), obj_get_extra_flags(obj) ? "Set." : "Not Set.",
                   obj_get_level(obj), material_names[obj_get_value(obj, 7)],
-                  ebitbuf, !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.",
+                  ebitbuf, !OLC(d)->script.triggers.empty() ? "Set." : "Not Set.",
                   size_names[obj_get_size(obj)]);
   OLC_MODE(d) = OEDIT_MAIN_MENU;
 }
@@ -1124,8 +1124,8 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
         case 's':
         case 'S':
           if (desc_get_connected(d) != CON_IEDIT) {
-            OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_MAIN_MENU;
-            dg_script_menu(g, d);
+            OLC_MODE(d) = OLC_SCRIPT_EDIT;
+            OLC(d)->script.menu(g, d);
           } else {
             write_to_output(g, d, "\r\nScripts cannot be modified on individual objects.\r\nEnter choice : ");
           }
@@ -1167,7 +1167,7 @@ void oedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 				 */
 
     case OLC_SCRIPT_EDIT:
-      if (dg_script_edit_parse(g, d, arg)) return;
+      if (OLC(d)->script.parse(g, d, arg)) return;
       break;
 
     case OEDIT_EDIT_NAMELIST:

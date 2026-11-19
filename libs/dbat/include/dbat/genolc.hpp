@@ -25,6 +25,8 @@ void strip_cr(char *);
 void strip_cr(std::string &text);
 bool save_all(GameWorld *g);
 char *str_udup(const char *);
+/* text, or "undefined" for none: what str_udup() made of it */
+std::string text_or_undefined(std::string_view text);
 void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);
 int sprintascii(char *out, bitvector_t bits);
 void free_save_list(GameWorld *g);

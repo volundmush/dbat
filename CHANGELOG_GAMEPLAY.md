@@ -36,6 +36,7 @@
 - Sensing someone new when your sense memory already holds more than 500 people no longer writes past the end of the list it was read into, which could crash the game. [Volund]
 - In oedit, a feat apply whose feat is named by something that is no feat no longer reads past the end of the feat list (which could crash the game). [Volund]
 - In hsedit, deleting a guest from a full guest list no longer reads past the end of the list, which left the house's last payment date in the empty place as a guest's id. [Volund]
+- Creating a zone with `zedit new` no longer moves the zone of another builder's open editor to the memory after it, when that zone happened to lie after the new one in memory: leftover renumbering from when zones were kept in an array, which could make the editor show garbage, or crash the game. [Volund]
 - Moving up the RPP top list when your account is listed twice in its bottom places no longer reads past the end of the list of places, which could crash the game; the last place is left empty. [Volund]
 
 # 2.9.3

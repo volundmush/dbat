@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
@@ -50,3 +51,18 @@ void olc_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 
 /* The first character of an answer, or '\0' for none: what the menus switch on */
 constexpr char first_char(std::string_view line) { return line.empty() ? '\0' : line.front(); }
+
+/* An answer to a yes-or-no question ("Do you wish to save your changes?"): y or n in either case, or neither */
+constexpr std::optional<bool> yes_or_no(std::string_view line)
+{
+  switch (first_char(line)) {
+    case 'y':
+    case 'Y': return true;
+    case 'n':
+    case 'N': return false;
+    default: return std::nullopt;
+  }
+}
+
+/* The "OLC: ... stops editing zone ..." line most editors log when the builder leaves them */
+void log_stops_editing(GameWorld *g, struct descriptor_data *d, zone_vnum zone);

@@ -37,8 +37,7 @@ namespace {
     void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
     void log_leaving(GameWorld *g, struct descriptor_data *d) const override
     {
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing zone {:d} allowed zone {:d}", char_get_name(d->character), NOWHERE,
-             char_get_olc_zone(g, d->character));
+      log_stops_editing(g, d, NOWHERE);
     }
 
     void menu(GameWorld *g, struct descriptor_data *d);

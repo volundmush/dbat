@@ -217,12 +217,12 @@ static void medit_setup_new(GameWorld *g, struct descriptor_data *d)
   char_set_ldesc(mob, "An unfinished mob stands here.\r\n");
   char_set_ddesc(mob, "It looks unfinished.\r\n");
   char_set_race(mob, RACE_HUMAN);
-  OLC_SCRIPT(d).clear();
+  OLC(d)->script.triggers.clear();
 
   OLC_MOB(d) = mob;
   /* Has changed flag. (It hasn't so far, we just made it.) */
   OLC_VAL(d)       = false;
-  OLC_ITEM_TYPE(d) = MOB_TRIGGER;
+  OLC(d)->script.attach_type = MOB_TRIGGER;
 }
 
 /*-------------------------------------------------------------------*/
@@ -239,8 +239,8 @@ static void medit_setup_existing(GameWorld *g, struct descriptor_data *d, mob_vn
   copy_mobile(g, mob, mob_proto_of(g, rmob_num));
 
   OLC_MOB(d)       = mob;
-  OLC_ITEM_TYPE(d) = MOB_TRIGGER;
-  dg_olc_script_copy(d);
+  OLC(d)->script.attach_type = MOB_TRIGGER;
+  OLC(d)->script.triggers = char_get_proto_script(OLC_MOB(d));
   /*
    * The edited mob must not have a script.
    * It will be assigned to the updated mob later, after editing.
@@ -297,7 +297,7 @@ static void medit_save_internally(GameWorld *g, struct descriptor_data *d)
   }
 
   /* Update triggers */
-  char_set_proto_script(mob_proto_of(g, new_rnum), OLC_SCRIPT(d));
+  char_set_proto_script(mob_proto_of(g, new_rnum), OLC(d)->script.triggers);
 
   /* this takes care of the mobs currently in-game */
   for (char_data *mob : each_char(g)) {
@@ -479,7 +479,7 @@ static void medit_disp_menu(GameWorld *g, struct descriptor_data *d)
                   npc_personality[char_get_personality(mob)],
                   flags, flag2, char_sensei_name(mob),
                   char_true_race_name(mob),
-                  !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[get_size(mob)]);
+                  !OLC(d)->script.triggers.empty() ? "Set." : "Not Set.", size_names[get_size(mob)]);
 
   OLC_MODE(d) = MEDIT_MAIN_MENU;
 }
@@ -670,8 +670,8 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
           return;
         case 's':
         case 'S':
-          OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_MAIN_MENU;
-          dg_script_menu(g, d);
+          OLC_MODE(d) = OLC_SCRIPT_EDIT;
+          OLC(d)->script.menu(g, d);
           return;
         case 'w':
         case 'W':
@@ -708,7 +708,7 @@ void medit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
       return;
       /*-------------------------------------------------------------------*/
     case OLC_SCRIPT_EDIT:
-      if (dg_script_edit_parse(g, d, arg)) return;
+      if (OLC(d)->script.parse(g, d, arg)) return;
       break;
       /*-------------------------------------------------------------------*/
     case MEDIT_ALIAS:

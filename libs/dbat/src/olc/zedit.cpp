@@ -313,24 +313,6 @@ static void zedit_new_zone(GameWorld *g, struct char_data *ch, zone_vnum vzone_n
     return;
   }
 
-  for (descriptor_data *dsc : each_desc(g)) {
-    switch (desc_get_connected(dsc)) {
-      case CON_REDIT:
-        room_set_zone(OLC_ROOM(dsc), room_get_zone(OLC_ROOM(dsc)) + ((OLC_ZNUM(dsc) >= result)));
-        [[fallthrough]];
-      case CON_ZEDIT:
-      case CON_MEDIT:
-      case CON_SEDIT:
-      case CON_OEDIT:
-      case CON_TRIGEDIT:
-      case CON_GEDIT:
-        OLC_ZNUM(dsc) += (OLC_ZNUM(dsc) >= result);
-        break;
-      default:
-        break;
-    }
-  }
-
   zedit_save_to_disk(g, result); /* save to disk .. */
 
   mudlog(g, LOG_BRF, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: {} creates new zone #{:d}", char_get_name(ch), vzone_num);

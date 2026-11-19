@@ -132,7 +132,7 @@ ACMD(do_dig)
   if (!room_of(g, rrnum)) {
     /*
      * Give the descriptor an olc struct.
-     * This way we can let redit_save_internally handle the room adding.
+     * Its leaving logs the builder leaving OLC.
      */
     if (d->olc) {
       mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
@@ -141,25 +141,11 @@ ACMD(do_dig)
     d->olc      = std::make_unique<oasis_olc_data>();
     OLC_ZNUM(d) = zone;
     OLC_NUM(d)  = rvnum;
-    OLC_ROOM(d) = new room_data();
 
-    /* Copy the room's name. */
-    if (!new_room_name.empty())
-      room_set_name(OLC_ROOM(d), new_room_name);
-    else
-      room_set_name(OLC_ROOM(d), "An unfinished room");
-
-    /* Copy the room's description.*/
-    room_set_description(OLC_ROOM(d), "You are in an unfinished room.\r\n");
-    room_set_zone(OLC_ROOM(d), OLC_ZNUM(d));
-    room_set_number(OLC_ROOM(d), NOWHERE);
-
-    /*
-     * Save the new room to memory.
-     * redit_save_internally handles adding the room in the right place, etc.
-     */
-    redit_save_internally(g, d);
-    OLC_VAL(d) = 0;
+    struct room_data room;
+    room.name        = !new_room_name.empty() ? new_room_name : "An unfinished room";
+    room.description = "You are in an unfinished room.\r\n";
+    redit_save_internally(g, room, rvnum, zone, {});
 
     send_to_char(g, ch, "New room ({:d}) created.\r\n", rvnum);
     cleanup_olc(g, d, CLEANUP_ALL);
@@ -316,7 +302,7 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
       struct descriptor_data *d = char_get_desc(ch);
       /*
        * Give the descriptor an olc struct.
-       * This way we can let redit_save_internally handle the room adding.
+       * Its leaving logs the builder leaving OLC.
        */
       if (d->olc) {
         mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
@@ -325,20 +311,11 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
       d->olc      = std::make_unique<oasis_olc_data>();
       OLC_ZNUM(d) = room_get_zone(g, char_get_in_room(ch));
       OLC_NUM(d)  = vnum;
-      OLC_ROOM(d) = new room_data();
 
-      room_set_name(OLC_ROOM(d), "New BuildWalk Room");
-
-      room_set_description(OLC_ROOM(d), str_format("This unfinished room was created by {}.\r\n", char_get_name(ch)));
-      room_set_zone(OLC_ROOM(d), OLC_ZNUM(d));
-      room_set_number(OLC_ROOM(d), NOWHERE);
-
-      /*
-       * Save the new room to memory.
-       * redit_save_internally handles adding the room in the right place, etc.
-       */
-      redit_save_internally(g, d);
-      OLC_VAL(d) = 0;
+      struct room_data room;
+      room.name        = "New BuildWalk Room";
+      room.description = str_format("This unfinished room was created by {}.\r\n", char_get_name(ch));
+      redit_save_internally(g, room, vnum, OLC_ZNUM(d), {});
 
       /* Link rooms */
       rnum = vnum;

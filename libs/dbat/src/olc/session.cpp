@@ -33,9 +33,7 @@ namespace {
       {CON_ZEDIT,    zedit_parse,    nullptr                },
       {CON_SEDIT,    sedit_parse,    nullptr                },
       {CON_MEDIT,    medit_parse,    medit_string_cleanup   },
-      {CON_REDIT,    redit_parse,    redit_string_cleanup   },
       {CON_CEDIT,    cedit_parse,    cedit_string_cleanup   },
-      {CON_TRIGEDIT, trigedit_parse, trigedit_string_cleanup},
       {CON_GEDIT,    gedit_parse,    nullptr                },
   };
 
@@ -86,6 +84,12 @@ void leave_olc(GameWorld *g, struct descriptor_data *d)
     desc_set_connected(d, CON_PLAYING);
   }
   d->olc.reset();
+}
+
+void log_stops_editing(GameWorld *g, struct descriptor_data *d, zone_vnum zone)
+{
+  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing zone {:d} allowed zone {:d}", char_get_name(d->character), zone,
+         char_get_olc_zone(g, d->character));
 }
 
 void olc_parse(GameWorld *g, struct descriptor_data *d, char *arg)
