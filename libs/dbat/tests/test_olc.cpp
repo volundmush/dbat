@@ -34,6 +34,7 @@
 #include "dbat/handler.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/relocate.hpp"
+#include "dbat/players.hpp"
 #include "dbat/random.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/utils.hpp"
@@ -71,6 +72,15 @@ namespace {
 
   void zone_3(GameWorld *g, struct char_data *ch) { char_set_olc_zone(g, ch, 3); }
   void zone_4(GameWorld *g, struct char_data *ch) { char_set_olc_zone(g, ch, 4); }
+
+  /* Ten more players, Guesta to Guestj, to fill a house's guest list */
+  void ten_players(GameWorld *g, struct char_data *)
+  {
+    for (char last = 'a'; last <= 'j'; last++) {
+      int pos                  = create_entry(g, str_format("Guest{:c}", last).c_str());
+      g->player_table[pos].id = 5000 + (last - 'a');
+    }
+  }
 
   /* With RPP and zenni to spend */
   void rich(GameWorld *g, struct char_data *ch)
@@ -228,6 +238,7 @@ namespace {
       impl("hsedit, a new house", {"hsedit 300", "?", "1", "1", "nobody", "1", "1", "watcher", "1", "2", "99999", "1", "2", "1", "1", "Q", "2", "99999", "0", "2", "302", "2", "301", "3", "99", "1", "3", "q", "3", "4", "4", "99", "4", "2", "5", "maybe", "y", "5", "n", "6", "maybe", "y", "6", "n", "8", "1", "999", "0", "q", "maybe", "y", "hcontrol"}),
       impl("hsedit, the guests", {"hsedit 300", "1", "1", "watcher", "7", "a", "nobody", "a", "builder", "a", "second", "@2 look", "a", "second", "a", "second", "d", "nobody", "d", "builder", "d", "watcher", "d", "second", "c", "maybe", "n", "c", "y", "x", "q", "q", "y"}),
       impl("hsedit, deleting a house", {"hsedit 300", "1", "1", "watcher", "q", "y", "hsedit 300", "x", "maybe", "n", "x", "y", "hsedit 300", "q", "n"}),
+      impl("hsedit, a full guest list", {"hsedit 300", "6", "y", "7", "a", "guesta", "a", "guestb", "a", "guestc", "a", "guestd", "a", "gueste", "a", "guestf", "a", "guestg", "a", "guesth", "a", "guesti", "a", "guestj", "a", "d", "guestj", "d", "guesta", "q", "q", "y"}, ten_players),
       impl("hsedit, the type", {"hsedit 300", "4", "99", "4", "abc", "4", "2", "q", "y"}),
       impl("hsedit, quitting unchanged", {"hsedit 300", "q"}),
       impl("hsedit, already being edited", {"hsedit 300", "@2 hsedit 300", "q"}),

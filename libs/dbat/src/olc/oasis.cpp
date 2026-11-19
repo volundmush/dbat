@@ -169,6 +169,12 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
   if (d->olc == nullptr)
     return;
 
+  /* an editor with a session of its own frees what it holds itself */
+  if (!dynamic_cast<oasis_olc_data *>(d->olc.get())) {
+    leave_olc(g, d);
+    return;
+  }
+
   /*
    * Check for a room. free_room doesn't perform
    * sanity checks, we must be careful here.
@@ -221,37 +227,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
   /* OLC_GUILD(d) is the editor's own copy too. */
   delete OLC_GUILD(d);
 
-  if (OLC_HOUSE(d)) { /*. free_house performs no sanity checks, must be careful here .*/
-    switch (cleanup_type) {
-      case CLEANUP_ALL:
-        free_house(OLC_HOUSE(d)); /* (its contents: the house is the editor's own copy) */
-        delete OLC_HOUSE(d);
-        break;
-      case CLEANUP_STRUCTS:
-        delete OLC_HOUSE(d);
-        break;
-      default:
-        /*. Caller has screwed up .*/
-        break;
-    }
-  }
-
-  /*. Check for aedit stuff -- M. Scott */
-  if (OLC_ACTION(d)) {
-    switch (cleanup_type) {
-      case CLEANUP_ALL:
-        free_action(OLC_ACTION(d)); /* (its strings: the action is the editor's own copy) */
-        delete OLC_ACTION(d);
-        break;
-      case CLEANUP_STRUCTS:
-        delete OLC_ACTION(d);
-        break;
-      default:
-        /* Caller has screwed up */
-        break;
-    }
-  }
-
   /*
     * Free this one regardless. If we've left olc, we've either made
     * a fresh copy of it in the trig index, or we lost connection.
@@ -266,13 +241,6 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
     * Therefore it should not be free'd here.
     */
 
-  /* hedit's copy of the entry: saving it copied it into the help table */
-  delete OLC_HELP(d);
-
-  /* Only one person edits help at a time, and this one has stopped, whichever way they left. */
-  if (desc_get_connected(d) == CON_HEDIT)
-    g->HEDITS = false;
-
   /*
    * Restore descriptor playing status.
    */
@@ -282,12 +250,8 @@ void cleanup_olc(GameWorld *g, struct descriptor_data *d, int8_t cleanup_type)
 
     if (cleanup_type == CLEANUP_CONFIG)
       mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing the game configuration", char_get_name(d->character));
-    else if (desc_get_connected(d) == CON_TEDIT)
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing text files.", char_get_name(d->character));
-    else if (desc_get_connected(d) == CON_HEDIT)
-      mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: {} stops editing help files.", char_get_name(d->character));
     else
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing zone {:d} allowed zone {:d}", char_get_name(d->character), OLC_ZNUM(d) ? OLC_ZNUM(d)->number : NOWHERE, char_get_olc_zone(g, d->character));
+      d->olc->log_leaving(g, d);
 
     desc_set_connected(d, CON_PLAYING);
   }
@@ -375,4 +339,9 @@ void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone)
   send_to_char(g, ch, "\r\n");
   mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "OLC: {} tried to edit zone {:d} allowed zone {:d}",
          char_get_name(ch), zone, char_get_olc_zone(g, ch));
+}
+
+void oasis_olc_data::log_leaving(GameWorld *g, struct descriptor_data *d) const
+{
+  mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing zone {:d} allowed zone {:d}", char_get_name(d->character), in_zone ? in_zone->number : NOWHERE, char_get_olc_zone(g, d->character));
 }

@@ -1467,13 +1467,7 @@ static void state_qrollstats(GameWorld *g, struct descriptor_data *d, char *arg)
       }
     } else
       cedit_creation(g, d->character);
-    if (!d->olc) {
-      d->olc = std::make_unique<oasis_olc_data>();
-    }
-    if (CONFIG_CREATION_METHOD == CEDIT_CREATION_METHOD_3)
-      OLC_VAL(d) = CONFIG_INITIAL_POINTS_POOL;
-    else
-      OLC_VAL(d) = 0;
+    start_stat_points(g, d, CONFIG_CREATION_METHOD == CEDIT_CREATION_METHOD_3 ? CONFIG_INITIAL_POINTS_POOL : 0);
 
     desc_set_connected(d, CON_QSTATS);
     stats_disp_menu(g, d);

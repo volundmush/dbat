@@ -90,3 +90,8 @@ struct descriptor_data {
   std::string title;
 };
 
+template <class Editor>
+Editor &session_of(struct descriptor_data *d)
+{
+  return static_cast<Editor &>(*d->olc);
+}

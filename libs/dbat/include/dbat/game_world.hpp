@@ -165,7 +165,6 @@ struct GameWorld {
 
   /* OLC and bookkeeping */
   struct save_list_data *save_list{};
-  obj_vnum lRnum{};
   int extractions_pending{};
 
   /* The zone clock */

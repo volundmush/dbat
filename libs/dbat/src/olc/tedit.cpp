@@ -78,66 +78,74 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
   desc_set_connected(d, CON_PLAYING);
 }
 
-void tedit_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator)
-{
-  const char *storage = !OLC_STORAGE(d).empty() ? OLC_STORAGE(d).c_str() : nullptr;
-  std::string *text   = d->str; /* the file's text, as now edited */
+namespace {
+  /* Editing one of the text files: the text editor does it all, and this writes the file out when it's saved */
+  struct text_file_editor final : olc_session {
+    std::string file; /* where the text is written */
 
-  if (!storage || !text)
-    terminator = STRINGADD_ABORT;
+    explicit text_file_editor(const char *path) : file(path) {}
 
-  switch (terminator) {
-    case STRINGADD_SAVE:
-      {
-        io::text_writer fl(storage);
-        if (!text->empty() && !(strcmp(storage, "text/news"))) {
-          char *tmstr;
-          time_t mytime                = game_now(g);
-          tmstr                        = asctime(localtime(&mytime));
-          *(tmstr + strlen(tmstr) - 1) = '\0';
+    void parse(GameWorld *, struct descriptor_data *, std::string_view) override {} /* the text editor has every line */
+    void text_done(GameWorld *g, struct descriptor_data *d, int action) override;
+    void log_leaving(GameWorld *g, struct descriptor_data *d) const override
+    {
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing text files.", char_get_name(d->character));
+    }
 
-          strip_cr(*text);
-          fl.print("\n-----------------------------------------------\n@Y{} @cUpdated By@D: @C{}@n\r\n-----------------------------------------------\n{}\n", tmstr, char_get_name(d->character), text->c_str());
-        } else if (!text->empty()) {
-          strip_cr(*text);
-          fl.write(text->c_str());
-        }
-        if (!fl.commit()) {
-          write_to_output(g, d, "Could not write the file; nothing was changed.\r\n");
-          break;
-        }
-        mudlog(g, LOG_CMP, ADMLVL_GOD, true, "OLC: {} saves '{}'.", char_get_name(d->character), storage);
-        write_to_output(g, d, "Saved.\r\n");
+    bool save(GameWorld *g, struct descriptor_data *d, std::string &text) const;
+  };
 
-        if (!(strcmp(storage, "text/news"))) {
-          g->NEWSUPDATE = game_now(g);
-          save_mud_time(g, &g->time_info);
+  /* Writes the text to the file (the news with a heading); false, and the builder told, if it couldn't */
+  bool text_file_editor::save(GameWorld *g, struct descriptor_data *d, std::string &text) const
+  {
+    const bool news = file == "text/news";
+    io::text_writer fl(file);
+    if (!text.empty()) {
+      strip_cr(text);
+      if (news) {
+        time_t now        = game_now(g);
+        std::string stamp = asctime(localtime(&now));
+        stamp.pop_back(); /* its newline */
+        fl.print("\n-----------------------------------------------\n@Y{} @cUpdated By@D: @C{}@n\r\n-----------------------------------------------\n{}\n", stamp,
+                 char_get_name(d->character), text);
+      } else
+        fl.write(text.c_str());
+    }
+    if (!fl.commit()) {
+      write_to_output(g, d, "Could not write the file; nothing was changed.\r\n");
+      return false;
+    }
+    mudlog(g, LOG_CMP, ADMLVL_GOD, true, "OLC: {} saves '{}'.", char_get_name(d->character), file);
+    write_to_output(g, d, "Saved.\r\n");
 
-          for (descriptor_data *i : each_desc(g)) {
-            if (!desc_is_playing(i))
-              continue;
-            if (char_plr_flagged(i->character, PLR_WRITING))
-              continue;
-            if (g->NEWSUPDATE > char_get_lastpl(i->character))
-              send_to_char(g, i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
-          }
-          do_reboot(g, d->character, "all", 0, 0);
-        }
-      }
-      break;
-    case STRINGADD_ABORT:
-      write_to_output(g, d, "Edit aborted.\r\n");
-      act(g, "$n stops editing some scrolls.", true, d->character, nullptr, nullptr, TO_ROOM);
-      break;
-    default:
-      mud_log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
-      break;
+    if (news) {
+      g->NEWSUPDATE = game_now(g);
+      save_mud_time(g, &g->time_info);
+      for (descriptor_data *i : each_desc(g))
+        if (desc_is_playing(i) && !char_plr_flagged(i->character, PLR_WRITING) && g->NEWSUPDATE > char_get_lastpl(i->character))
+          send_to_char(g, i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
+      do_reboot(g, d->character, "all", 0, 0);
+    }
+    return true;
   }
 
-  /* Common cleanup code. */
-  cleanup_olc(g, d, CLEANUP_ALL);
-  desc_set_connected(d, CON_PLAYING);
-}
+  void text_file_editor::text_done(GameWorld *g, struct descriptor_data *d, int action)
+  {
+    if (file.empty() || !d->str)
+      action = STRINGADD_ABORT;
+
+    if (action == STRINGADD_SAVE)
+      save(g, d, *d->str);
+    else if (action == STRINGADD_ABORT) {
+      write_to_output(g, d, "Edit aborted.\r\n");
+      act(g, "$n stops editing some scrolls.", true, d->character, nullptr, nullptr, TO_ROOM);
+    } else
+      mud_log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
+
+    leave_olc(g, d);
+    desc_set_connected(d, CON_PLAYING);
+  }
+} // namespace
 
 ACMD(do_tedit)
 {
@@ -205,17 +213,12 @@ ACMD(do_tedit)
   send_editor_help(g, char_get_desc(ch));
   send_to_char(g, ch, "Edit file below:\r\n\r\n");
 
-  if (char_get_desc(ch)->olc) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
-    char_get_desc(ch)->olc.reset();
-  }
-  char_get_desc(ch)->olc = std::make_unique<oasis_olc_data>();
+  open_session(g, char_get_desc(ch), std::make_unique<text_file_editor>(fields[l].filename), "do_tedit");
 
   if (!fields[l].buffer->empty()) {
     send_to_char(g, ch, "{}", fields[l].buffer->c_str());
   }
 
-  OLC_STORAGE(char_get_desc(ch)) = fields[l].filename;
   string_write(char_get_desc(ch), fields[l].buffer, fields[l].size, 0);
 
   act(g, "$n begins editing a text file.", true, ch, nullptr, nullptr, TO_ROOM);

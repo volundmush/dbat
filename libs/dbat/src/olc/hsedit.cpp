@@ -1,998 +1,614 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *  AderonMUD by Jamdog.                                                  *
-*  Based on CircleMud3.5                                                 * 
-*  OasisOLC - hsedit.c                                                   * 
-*                                                                        * 
-*  Copyright 2007 Stefan Cole (aka Jamdog)                               * 
-*  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    * 
+*  Based on CircleMud3.5                                                 *
+*  OasisOLC - hsedit.c                                                   *
+*                                                                        *
+*  Copyright 2007 Stefan Cole (aka Jamdog)                               *
+*  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <algorithm>
 #include <cstdlib>
 
+#include "dbat/act.informative.hpp"
 #include "dbat/args.hpp"
-#include "dbat/iterate.hpp"
-#include "dbat/hsedit.hpp"
-#include "dbat/config.hpp"
+#include "dbat/character_utils.hpp"
 #include "dbat/comm.hpp"
-#include "dbat/utils.hpp"
-#include "dbat/handler.hpp"
-#include "dbat/interpreter.hpp"
+#include "dbat/config.hpp"
 #include "dbat/db.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/game_world.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/genzon.hpp"
+#include "dbat/handler.hpp"
 #include "dbat/house.hpp"
-#include "dbat/act.informative.hpp"
+#include "dbat/hsedit.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/iterate.hpp"
+#include "dbat/oasis.hpp"
 #include "dbat/room_utils.hpp"
-#include "dbat/character_utils.hpp"
-#include "dbat/game_world.hpp"
+#include "dbat/utils.hpp"
 
-static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d);
+namespace {
+  const char *const house_flags[] = {"!GUEST", "FREE", "!IMM", "IMP_ONLY", "RENTFREE", "SAVE_!RENT", "!SAVE", "\n"};
 
-/*------------------------------------------------------------------------*/
-/* internal globals */
-static const char *const house_flags[] = {
-    "!GUEST",
-    "FREE",
-    "!IMM",
-    "IMP_ONLY",
-    "RENTFREE",
-    "SAVE_!RENT",
-    "!SAVE",
-    "\n"};
+  const char *const house_types[] = {"PLAYER_OWNED", "IMM_OWNED", "CLAN_OWNED", "UNOWNED", "\n"};
 
-static const char *const house_types[] = {
-    "PLAYER_OWNED",
-    "IMM_OWNED",
-    "CLAN_OWNED",
-    "UNOWNED",
-    "\n"};
-/*------------------------------------------------------------------------*\ 
-  Utils and exported functions. 
-\*------------------------------------------------------------------------*/
+  /* The atrium directions' menu lines, in the order of the directions */
+  const char *const atrium_directions[] = {"North  ", "East   ", "South  ", "West   ", "Up     ", "Down   ",
+                                           "NorthW ", "NorthE ", "SouthE ", "SouthW ", "Inside ", "Outside"};
 
-static void hsedit_setup_new(GameWorld *g, struct descriptor_data *d)
-{
-  OLC_HOUSE(d)           = new house_control_rec();
-  OLC_HOUSE(d)->vnum     = OLC_NUM(d);
-  OLC_HOUSE(d)->exit_num = -1;
-  OLC_HOUSE(d)->built_on = game_now(g);
-  OLC_HOUSE(d)->mode     = HOUSE_PRIVATE;
-  OLC_VAL(d)             = 0;
-  hsedit_disp_menu(g, d);
-}
+  /* The house editor: the house in one room, as the house control list has it, or new */
+  struct house_editor final : olc_session {
+    /* numbered as hsedit_parse() logs them */
+    enum class mode {
+      main_menu     = 0,
+      confirm_save  = 1,
+      owner_menu    = 2,
+      owner_name    = 3,
+      owner_id      = 4,
+      atrium        = 6,
+      dir_menu      = 7,
+      guest_menu    = 8,
+      guest_add     = 9,
+      guest_delete  = 10,
+      guest_clear   = 11,
+      flags         = 12,
+      build_date    = 13,
+      payment       = 14,
+      type          = 15,
+      confirm_delete = 16,
+      no_vnum       = 21,
+    };
 
-/*------------------------------------------------------------------------*/
+    mode asking = mode::main_menu;
+    struct zone_data *zone{};   /* the zone the house's room is in */
+    room_vnum number = NOWHERE; /* the house's room */
+    house_control_rec house{};  /* the house as it's being edited */
+    bool changed = false;
 
-static void hsedit_setup_existing(GameWorld *g, struct descriptor_data *d, int real_num)
-{
-  struct house_control_rec *house;
-  int i;
+    void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
+    void log_leaving(GameWorld *g, struct descriptor_data *d) const override
+    {
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing zone {:d} allowed zone {:d}", char_get_name(d->character),
+             zone ? zone->number : NOWHERE, char_get_olc_zone(g, d->character));
+    }
 
-  /*. Build a copy of the house .*/
-  house  = new house_control_rec();
-  *house = g->house_control[real_num];
+    void menu(GameWorld *g, struct descriptor_data *d);
+    void owner_menu(GameWorld *g, struct descriptor_data *d);
+    void dir_menu(GameWorld *g, struct descriptor_data *d);
+    void type_menu(GameWorld *g, struct descriptor_data *d);
+    void guest_menu(GameWorld *g, struct descriptor_data *d);
+    void flags_menu(GameWorld *g, struct descriptor_data *d);
+    void save(GameWorld *g, struct descriptor_data *d);
+    void delete_house(GameWorld *g, struct descriptor_data *d);
+    bool parse_guests(GameWorld *g, struct descriptor_data *d, std::string_view line);
+  };
 
-  /* allocate space for all strings  */
+  /* The guests' names, as the main menu lists them */
+  std::string list_guests(GameWorld *g, const house_control_rec &house)
+  {
+    if (house.num_of_guests == 0)
+      return "NONE";
+    std::string list;
+    int printed = 0;
+    for (int j = 0; j < house.num_of_guests; j++) {
+      const char *name = get_name_by_id(g, house.guests[j]);
+      if (!name) /* Avoid <UNDEF>. -gg 6/21/98 */
+        continue;
+      printed++;
+      list += str_format("{:c}{} ", as_char(toupper(*name)), name + 1);
+    }
+    return printed ? list : "all dead";
+  }
 
-  /* Copy all non-string variables */
-  house->vnum          = g->house_control[real_num].vnum;
-  house->atrium        = g->house_control[real_num].atrium;
-  house->owner         = g->house_control[real_num].owner;
-  house->exit_num      = g->house_control[real_num].exit_num;
-  house->built_on      = g->house_control[real_num].built_on;
-  house->mode          = g->house_control[real_num].mode;
-  house->bitvector     = g->house_control[real_num].bitvector;
-  house->last_payment  = g->house_control[real_num].last_payment;
-  house->num_of_guests = g->house_control[real_num].num_of_guests;
-  for (i = 0; i < MAX_GUESTS; i++)
-    house->guests[i] = g->house_control[real_num].guests[i];
+  /* A date as the menu shows it: the day, without the time */
+  std::string menu_date(time_t when, const char *never)
+  {
+    if (!when)
+      return never;
+    return std::string(asctime(localtime(&when)), 10);
+  }
 
-  /*. Attach room copy to players descriptor .*/
-  OLC_HOUSE(d) = house;
-  OLC_VAL(d)   = 0;
-  hsedit_disp_menu(g, d);
-}
+  void house_editor::menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    const char *owner = get_name_by_id(g, house.owner);
+    send_to_char(g, d->character, "{}",
+                 str_format("@D-- @RJamdog's House OLC Editor @D--\r\n@D--@g House number : @D[@c{:d}@D]     @gHouse zone: @D[@c{:d}@D]\r\n@g1@D)@g Owner       : @c{:d} -- {}\r\n@g2@D)@g Atrium      : @c{:d}\r\n@g3@D)@g Direction   : @c{}\r\n@g4@D)@g House Type  : @c{}\r\n@g5@D)@g Built on    : @c{}\r\n@g6@D)@g Payment     : @c{}\r\n@g7@D)@g Guests      : @c{}\r\n@g8@D)@g Flags       : @c{}\r\n@gX@D)@g Delete this house\r\n@gQ@D)@g Quit\r\n@gEnter choice : @n",
+                            number, zone->number, house.owner, owner ? owner : "(NOBODY)", house.atrium,
+                            house.exit_num >= 0 && house.exit_num <= 11 ? dirs[house.exit_num] : "NONE", house_types[house.mode],
+                            menu_date(house.built_on, "Unknown"), menu_date(house.last_payment, "None"), list_guests(g, house),
+                            sprintbit(house.bitvector, house_flags)));
+    asking = mode::main_menu;
+  }
 
-/*-----------------------------------------------------------1-------------*/
-static void hsedit_save_internally(GameWorld *g, struct descriptor_data *d)
-{
-  int house_rnum;
+  void house_editor::owner_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    /* quirk: an owner with no name is shown as "(null)" */
+    send_to_char(g, d->character, str_format("@g1@D)@g Owner Name : @c{}@n\r\n@g2@D)@g Owner ID   : @c{:d}\r\n@gQ@D)@g Back to main menu\r\n@gEnter choice : @n",
+                                             get_name_by_id(g, house.owner), house.owner));
+    asking = mode::owner_menu;
+  }
 
-  /* this is done rather differently from the other OLCs */
-  /* Houses have a pre-allocated list size, so just copy */
-  /* the OLC house back into it */
+  void house_editor::dir_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    mudlog(g, LOG_CMP, ADMLVL_BUILDER, true, "(LOG) hsedit_dir_menu: house vnum = {:d}", house.vnum);
+    if (house.vnum < 0 || !room_of(g, house.vnum)) {
+      send_to_char(g, d->character, "WARNING: You cannot set an atium direction before selecting a valid room vnum\r\n(Press Enter)\r\n");
+      asking = mode::no_vnum;
+      return;
+    }
+    std::string menu;
+    for (int dir = 0; dir < 12; dir++) {
+      struct room_direction_data *exit = room_get_dir_option(g, house.vnum, dir);
+      room_vnum to                     = exit ? exit->to_room : NOWHERE;
+      menu += str_format("@g{:d}@D)@g {}: @D(@c{}@D)\r\n", dir + 1, atrium_directions[dir], to == NOWHERE ? "NO ROOM" : room_get_name(g, to));
+    }
+    menu += "@gQ@D)@g Back to main menu\r\n@gEnter atrium direction : @n";
+    asking = mode::dir_menu;
+    send_to_char(g, d->character, menu);
+  }
 
-  house_rnum = find_house(g, OLC_NUM(d));
-  if (house_rnum != NOWHERE) {
-    /* This house VNUM is already in the list */
-    /* Replace the old data                   */
-    free_house(g->house_control + house_rnum);
-    g->house_control[house_rnum] = *OLC_HOUSE(d);
-  } else {
-    /*. House doesn't exist, hafta add it .*/
-    house_rnum = g->num_of_houses++;
-    if (house_rnum < MAX_HOUSES) {
-      g->house_control[house_rnum]      = *(OLC_HOUSE(d));
-      g->house_control[house_rnum].vnum = OLC_NUM(d);
+  void house_editor::type_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    for (int type = 0; type < NUM_HOUSE_TYPES; type++) {
+      send_to_char(g, d->character, "@g{:>2d}@D)@y {:<20.20} @n", type, house_types[type]);
+      if (type % 2)
+        send_to_char(g, d->character, "\r\n");
+    }
+    send_to_char(g, d->character, "\r\nEnter house type : ");
+    asking = mode::type;
+  }
+
+  void house_editor::guest_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    std::string menu;
+    for (int i = 0; i < MAX_GUESTS; i++) {
+      const char *name = get_name_by_id(g, house.guests[i]);
+      menu += str_format("{}@g{:d}@D)@c {} @D(@gID: @c{:d}@D)@n\r\n", i < 9 ? " " : "", i + 1, name ? name : "@D(@yNOT SET@D)@n",
+                         house.guests[i] < 1 ? 0 : house.guests[i]);
+    }
+    menu += "\r\n@gA@D)@g Add a guest\r\n@gD@D)@g Delete a guest\r\n@gC@D)@g Clear guest list\r\n@gQ@D)@g Back to main menu\r\n@gEnter selection @D(@gA@D/@gD@D/@gC@D/@gQ@D)@n: ";
+    send_to_char(g, d->character, menu);
+    asking = mode::guest_menu;
+  }
+
+  void house_editor::flags_menu(GameWorld *g, struct descriptor_data *d)
+  {
+    clear_screen(g, d);
+    for (int flag = 0; flag < HOUSE_NUM_FLAGS; flag++) {
+      send_to_char(g, d->character, "@g{:>2d}@D)@y {:<20.20} @n", flag + 1, house_flags[flag]);
+      if (flag % 2)
+        send_to_char(g, d->character, "\r\n");
+    }
+    send_to_char(g, d->character, "\r\nHouse flags: @g{}@n\r\nEnter house flags, 0 to quit : ", sprintbit(house.bitvector, house_flags));
+    asking = mode::flags;
+  }
+
+  /* Puts the house into the house control list, and flags its rooms */
+  void house_editor::save(GameWorld *g, struct descriptor_data *d)
+  {
+    if (int existing = find_house(g, number); existing != NOWHERE)
+      g->house_control[existing] = house;
+    else if (int added = g->num_of_houses++; added < MAX_HOUSES) {
+      g->house_control[added]      = house;
+      g->house_control[added].vnum = number;
     } else {
       send_to_char(g, d->character, "MAX House limit reached - Unable to save this house!");
       mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "HSEDIT: Max houses limit reached - Unable to save OLC data");
     }
-  }
-  /* The new house is stored - now to ensure the roomsflags are correct */
-  if (room_of(g, OLC_HOUSE(d)->vnum))
-    room_set_flag(g, OLC_HOUSE(d)->vnum, ROOM_HOUSE, true);
-
-  if (room_of(g, OLC_HOUSE(d)->atrium))
-    room_set_flag(g, OLC_HOUSE(d)->atrium, ROOM_ATRIUM, true);
-
-  //  olc_add_to_save_list(zone_table[OLC_ZNUM(d)].number, OLC_SAVE_HOUSE);
-}
-
-/*------------------------------------------------------------------------*/
-
-static void hsedit_save_to_disk(GameWorld *g)
-{
-  /* Why bother writing a new function when there is already one that does the job */
-  House_save_control(g);
-}
-
-/*------------------------------------------------------------------------*/
-
-void free_house(struct house_control_rec *house)
-{
-  /* House structure has no strings to free                */
-  /* This function is here in case someone adds some later */
-}
-
-/*------------------------------------------------------------------------*/
-
-static void hedit_delete_house(GameWorld *g, struct descriptor_data *d, room_vnum house_vnum)
-{
-  int i, j;
-  room_vnum real_house;
-
-  if ((i = find_house(g, house_vnum)) == NOWHERE) {
-    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n");
-    cleanup_olc(g, d, CLEANUP_STRUCTS);
-    return;
+    if (room_of(g, house.vnum))
+      room_set_flag(g, house.vnum, ROOM_HOUSE, true);
+    if (room_of(g, house.atrium))
+      room_set_flag(g, house.atrium, ROOM_ATRIUM, true);
   }
 
-  if (!room_of(g, real_house = g->house_control[i].vnum))
-    mud_log("SYSERR: House {:d} had invalid vnum {:d}!", house_vnum, g->house_control[i].vnum);
-  else
-    room_set_flag(g, real_house, ROOM_HOUSE | ROOM_HOUSE_CRASH, false);
-
-  House_delete_file(g->house_control[i].vnum);
-
-  for (j = i; j < g->num_of_houses - 1; j++)
-    g->house_control[j] = g->house_control[j + 1];
-
-  g->num_of_houses--;
-
-  send_to_char(g, d->character, "House deleted.\r\n");
-  House_save_control(g);
-
-  cleanup_olc(g, d, CLEANUP_ALL);
-}
-
-/************************************************************************** 
- Menu functions 
- 
-**************************************************************************/
-
-static void hsedit_disp_flags_menu(GameWorld *g, struct descriptor_data *d)
-{
-  int counter, columns = 0;
-  std::string buf1;
-
-  clear_screen(g, d);
-  for (counter = 0; counter < HOUSE_NUM_FLAGS; counter++) {
-    send_to_char(g, d->character, "@g{:>2d}@D)@y {:<20.20} @n", counter + 1, house_flags[counter]);
-    if (!(++columns % 2))
-      send_to_char(g, d->character, "\r\n");
-  }
-  buf1 = sprintbit(OLC_HOUSE(d)->bitvector, house_flags);
-  send_to_char(g, d->character,
-               "\r\nHouse flags: @g{}@n\r\nEnter house flags, 0 to quit : ",
-               buf1);
-  OLC_MODE(d) = HSEDIT_FLAGS;
-}
-
-static void hsedit_owner_menu(GameWorld *g, struct descriptor_data *d)
-{
-  std::string buf;
-  struct house_control_rec *house;
-
-  house = OLC_HOUSE(d);
-
-  buf = str_format("@g1@D)@g Owner Name : @c{}@n\r\n@g2@D)@g Owner ID   : @c{:d}\r\n@gQ@D)@g Back to main menu\r\n@gEnter choice : @n",
-                   get_name_by_id(g, house->owner), house->owner);
-  send_to_char(g, d->character, buf);
-
-  OLC_MODE(d) = HSEDIT_OWNER_MENU;
-}
-
-static void hsedit_dir_menu(GameWorld *g, struct descriptor_data *d)
-{
-  std::string buf;
-  struct house_control_rec *house;
-  room_vnum house_rnum, newroom[12];
-  int i;
-
-  house = OLC_HOUSE(d);
-
-  mudlog(g, LOG_CMP, ADMLVL_BUILDER, true, "(LOG) hsedit_dir_menu: house vnum = {:d}", house->vnum);
-  house_rnum = house->vnum;
-
-  if ((house_rnum < 0) || (!room_of(g, house_rnum))) {
-    buf         = "WARNING: You cannot set an atium direction before selecting a valid room vnum\r\n(Press Enter)\r\n";
-    OLC_MODE(d) = HSEDIT_NOVNUM;
-  } else {
-    /* Grab exit rooms */
-    for (i = 0; i < 12; i++) {
-      if (room_get_dir_option(g, house_rnum, i))
-        newroom[i] = room_get_dir_option(g, house_rnum, i)->to_room;
-      else
-        newroom[i] = NOWHERE;
+  void house_editor::delete_house(GameWorld *g, struct descriptor_data *d)
+  {
+    int i = find_house(g, house.vnum);
+    if (i == NOWHERE) {
+      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n");
+      leave_olc(g, d);
+      return;
     }
-
-    buf         = str_format("@g1@D)@g North  : @D(@c{}@D)\r\n@g2@D)@g East   : @D(@c{}@D)\r\n@g3@D)@g South  : @D(@c{}@D)\r\n@g4@D)@g West   : @D(@c{}@D)\r\n@g5@D)@g Up     : @D(@c{}@D)\r\n@g6@D)@g Down   : @D(@c{}@D)\r\n@g7@D)@g NorthW : @D(@c{}@D)\r\n@g8@D)@g NorthE : @D(@c{}@D)\r\n@g9@D)@g SouthE : @D(@c{}@D)\r\n@g10@D)@g SouthW : @D(@c{}@D)\r\n@g11@D)@g Inside : @D(@c{}@D)\r\n@g12@D)@g Outside: @D(@c{}@D)\r\n@gQ@D)@g Back to main menu\r\n@gEnter atrium direction : @n",
-
-                     newroom[0] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[0])),
-                     newroom[1] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[1])),
-                     newroom[2] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[2])),
-                     newroom[3] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[3])),
-                     newroom[4] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[4])),
-                     newroom[5] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[5])),
-                     newroom[6] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[6])),
-                     newroom[7] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[7])),
-                     newroom[8] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[8])),
-                     newroom[9] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[9])),
-                     newroom[10] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[10])),
-                     newroom[11] == NOWHERE ? "NO ROOM" : room_get_name(g, (newroom[11])));
-    OLC_MODE(d) = HSEDIT_DIR_MENU;
-  }
-  send_to_char(g, d->character, buf);
-}
-
-static void hsedit_disp_type_menu(GameWorld *g, struct descriptor_data *d)
-{
-  int counter, columns = 0;
-
-  clear_screen(g, d);
-  for (counter = 0; counter < NUM_HOUSE_TYPES; counter++) {
-    send_to_char(g, d->character, "@g{:>2d}@D)@y {:<20.20} @n", counter, house_types[counter]);
-    if (!(++columns % 2))
-      send_to_char(g, d->character, "\r\n");
-  }
-  send_to_char(g, d->character, "\r\nEnter house type : ");
-  OLC_MODE(d) = HSEDIT_TYPE;
-}
-
-static void hsedit_disp_guest_menu(GameWorld *g, struct descriptor_data *d)
-{
-  std::string buf;
-  std::string not_set;
-  struct house_control_rec *house;
-
-  house = OLC_HOUSE(d);
-
-  not_set = "@D(@yNOT SET@D)@n";
-
-  buf = str_format(" @g1@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g2@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g3@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g4@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g5@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g6@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g7@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g8@D)@c {} @D(@gID: @c{:d}@D)@n\r\n @g9@D)@c {} @D(@gID: @c{:d}@D)@n\r\n@g10@D)@c {} @D(@gID: @c{:d}@D)@n\r\n\r\n@gA@D)@g Add a guest\r\n@gD@D)@g Delete a guest\r\n@gC@D)@g Clear guest list\r\n@gQ@D)@g Back to main menu\r\n@gEnter selection @D(@gA@D/@gD@D/@gC@D/@gQ@D)@n: ",
-
-                   get_name_by_id(g, house->guests[0]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[0]),
-                   house->guests[0] < 1 ? 0 : house->guests[0],
-                   get_name_by_id(g, house->guests[1]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[1]),
-                   house->guests[1] < 1 ? 0 : house->guests[1],
-                   get_name_by_id(g, house->guests[2]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[2]),
-                   house->guests[2] < 1 ? 0 : house->guests[2], get_name_by_id(g, house->guests[3]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[3]),
-                   house->guests[3] < 1 ? 0 : house->guests[3],
-                   get_name_by_id(g, house->guests[4]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[4]),
-                   house->guests[4] < 1 ? 0 : house->guests[4],
-                   get_name_by_id(g, house->guests[5]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[5]),
-                   house->guests[5] < 1 ? 0 : house->guests[5],
-                   get_name_by_id(g, house->guests[6]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[6]),
-                   house->guests[6] < 1 ? 0 : house->guests[6],
-                   get_name_by_id(g, house->guests[7]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[7]),
-                   house->guests[7] < 1 ? 0 : house->guests[7],
-                   get_name_by_id(g, house->guests[8]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[8]),
-                   house->guests[8] < 1 ? 0 : house->guests[8],
-                   get_name_by_id(g, house->guests[9]) == nullptr ? not_set.c_str() : get_name_by_id(g, house->guests[9]),
-                   house->guests[9] < 1 ? 0 : house->guests[9]);
-  send_to_char(g, d->character, buf);
-
-  OLC_MODE(d) = HSEDIT_GUEST_MENU;
-}
-
-static std::string hsedit_list_guests(GameWorld *g, struct house_control_rec *thishouse)
-{
-  std::string guestlist;
-  int num_printed = 0;
-  char *temp;
-
-  if (thishouse->num_of_guests == 0)
-    return "NONE";
-
-  for (int j = 0; j < thishouse->num_of_guests; j++) {
-    /* Avoid <UNDEF>. -gg 6/21/98 */
-    if ((temp = get_name_by_id(g, thishouse->guests[j])) == nullptr)
-      continue;
-
-    num_printed++;
-    guestlist += str_format("{:c}{} ", as_char(toupper(*temp)), temp + 1);
+    if (room_vnum room = g->house_control[i].vnum; !room_of(g, room))
+      mud_log("SYSERR: House {:d} had invalid vnum {:d}!", house.vnum, room);
+    else
+      room_set_flag(g, room, ROOM_HOUSE | ROOM_HOUSE_CRASH, false);
+    House_delete_file(g->house_control[i].vnum);
+    std::copy(g->house_control + i + 1, g->house_control + g->num_of_houses, g->house_control + i);
+    g->num_of_houses--;
+    send_to_char(g, d->character, "House deleted.\r\n");
+    House_save_control(g);
+    leave_olc(g, d);
   }
 
-  if (num_printed == 0)
-    return "all dead";
-  return guestlist;
-}
-
-/* the main menu */
-static void hsedit_disp_menu(GameWorld *g, struct descriptor_data *d)
-{
-  std::string buf;
-  std::string buf1;
-  std::string built_on;
-  std::string last_pay;
-  char *timestr;
-  std::string no_name;
-  struct house_control_rec *house;
-
-  clear_screen(g, d);
-  house = OLC_HOUSE(d);
-
-  if (house->built_on) {
-    timestr         = asctime(localtime(&(house->built_on)));
-    *(timestr + 10) = '\0';
-    built_on        = timestr;
-  } else
-    built_on = "Unknown"; /* strcpy: OK (for 'strlen("Unknown") < 128') */
-
-  if (house->last_payment) {
-    timestr         = asctime(localtime(&(house->last_payment)));
-    *(timestr + 10) = '\0';
-    last_pay        = timestr;
-  } else
-    last_pay = "None"; /* strcpy: OK (for 'strlen("None") < 128') */
-
-  buf1  = sprintbit(house->bitvector, house_flags);
-  //  sprintf(buf2, "%d %d %d %d", house->value[0], house->value[1], house->value[2], house->value[3]);
-  no_name = "(NOBODY)";
-  /* there is no "9) Values" line */
-  buf = str_format("@D-- @RJamdog's House OLC Editor @D--\r\n@D--@g House number : @D[@c{:d}@D]     @gHouse zone: @D[@c{:d}@D]\r\n@g1@D)@g Owner       : @c{:d} -- {}\r\n@g2@D)@g Atrium      : @c{:d}\r\n@g3@D)@g Direction   : @c{}\r\n@g4@D)@g House Type  : @c{}\r\n@g5@D)@g Built on    : @c{}\r\n@g6@D)@g Payment     : @c{}\r\n@g7@D)@g Guests      : @c{}\r\n@g8@D)@g Flags       : @c{}\r\n@gX@D)@g Delete this house\r\n@gQ@D)@g Quit\r\n@gEnter choice : @n",
-
-                   OLC_NUM(d), OLC_ZNUM(d)->number,
-                   house->owner, get_name_by_id(g, house->owner) == nullptr ? no_name.c_str() : get_name_by_id(g, house->owner),
-                   house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE",
-                   house_types[(house->mode)], built_on, last_pay, hsedit_list_guests(g, house), buf1);
-  send_to_char(g, d->character, "{}", buf);
-
-  OLC_MODE(d) = HSEDIT_MAIN_MENU;
-}
-
-/************************************************************************** 
-  The main loop 
- 
-**************************************************************************/
-
-void hsedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  int number = 0, id = 0, i;
-  room_vnum house, rnum;
-  char *tmp;
-  bool found = false;
-
-  mudlog(g, LOG_CMP, ADMLVL_BUILDER, false, "(LOG) hsedit_parse: OLC mode {:d}", OLC_MODE(d));
-
-  switch (OLC_MODE(d)) {
-    case HSEDIT_CONFIRM_SAVESTRING:
-      switch (*arg) {
-        case 'y':
-        case 'Y':
-          hsedit_save_internally(g, d);
-          mudlog(g, LOG_CMP, ADMLVL_BUILDER, true, "OLC: {} edits house {:d}", char_get_name(d->character), OLC_NUM(d));
-          if (CONFIG_OLC_SAVE) {
-            hsedit_save_to_disk(g);
-            write_to_output(g, d, "House saved to disk.\r\n");
-          } else
-            write_to_output(g, d, "House saved to memory.\r\n");
-          /*. Do NOT free strings! just the room structure .*/
-          cleanup_olc(g, d, CLEANUP_STRUCTS);
-          break;
-        case 'n':
-        case 'N':
-          /* free everything up, including strings etc */
-          cleanup_olc(g, d, CLEANUP_ALL);
-          break;
-        default:
-          send_to_char(g, d->character, "Invalid choice!\r\n");
-          send_to_char(g, d->character, "Do you wish to save this house internally? : ");
-          break;
-      }
-      return;
-
-    case HSEDIT_MAIN_MENU:
-      switch (*arg) {
-        case 'q':
-        case 'Q':
-          if (OLC_VAL(d)) { /*. Something has been modified .*/
-            send_to_char(g, d->character, "Do you wish to save this house internally? : ");
-            OLC_MODE(d) = HSEDIT_CONFIRM_SAVESTRING;
-          } else
-            cleanup_olc(g, d, CLEANUP_ALL);
-          return;
-        case '1':
-          hsedit_owner_menu(g, d);
-          break;
-
-        case '2':
-          if ((OLC_HOUSE(d)->vnum == NOWHERE) || (!room_of(g, OLC_HOUSE(d)->vnum))) {
-            send_to_char(g, d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n");
-            mudlog(g, LOG_NRM, ADMLVL_GRGOD, true, "SYSERR: Invalid house VNUM in hsedit");
-          } else {
-            send_to_char(g, d->character, "Enter atrium room vnum:");
-            OLC_MODE(d) = HSEDIT_ATRIUM;
-          }
-          break;
-
-        case '3':
-          if ((OLC_HOUSE(d)->vnum == NOWHERE) || (!room_of(g, OLC_HOUSE(d)->vnum))) {
-            send_to_char(g, d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n");
-            mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Invalid house VNUM in hsedit");
-          } else {
-            hsedit_dir_menu(g, d);
-          }
-          break;
-
-        case '4':
-          hsedit_disp_type_menu(g, d);
-          break;
-
-        case '5':
-          send_to_char(g, d->character, "Set build date to now? (Y/N):");
-          OLC_MODE(d) = HSEDIT_BUILD_DATE;
-          break;
-
-        case '6':
-          send_to_char(g, d->character, "Set last payment as now? (Y/N) : ");
-          OLC_MODE(d) = HSEDIT_PAYMENT;
-          break;
-
-        case '7':
-          hsedit_disp_guest_menu(g, d);
-          break;
-
-        case '8':
-          hsedit_disp_flags_menu(g, d);
-          break;
-
-          //  case '9':
-          //    hsedit_disp_val0_menu(d);
-          //    break;
-
-        case 'x':
-        case 'X':
-          send_to_char(g, d->character, "Are you sure you want to delete this house? (Y/N) : ");
-          OLC_MODE(d) = HSEDIT_DELETE;
-          break;
-
-        default:
-          send_to_char(g, d->character, "Invalid choice!\r\n");
-          hsedit_disp_menu(g, d);
-          break;
-      }
-      return;
-
-    case HSEDIT_OWNER_MENU:
-      switch (*arg) {
-        case '1':
-          send_to_char(g, d->character, "Enter the name of the owner : ");
-          OLC_MODE(d) = HSEDIT_OWNER_NAME;
-          break;
-
-        case '2':
-          send_to_char(g, d->character, "Enter the user id of the owner : ");
-          OLC_MODE(d) = HSEDIT_OWNER_ID;
-          break;
-
-        case 'Q':
-          hsedit_disp_menu(g, d);
-          break;
-      }
-      return;
-      break;
-
-    case HSEDIT_OWNER_NAME:
-      if ((id = get_id_by_name(g, arg)) < 0) {
-        send_to_char(g, d->character, "There is no such player.\r\n");
-        hsedit_owner_menu(g, d);
-        return;
-      }
-      OLC_HOUSE(d)->owner = id;
-      break;
-
-    case HSEDIT_OWNER_ID:
-      id = atoi(arg);
-      if ((tmp = get_name_by_id(g, id)) == nullptr) {
-        send_to_char(g, d->character, "There is no such player.\r\n");
-        hsedit_owner_menu(g, d);
-        return;
-      }
-      OLC_HOUSE(d)->owner = id;
-      break;
-
-    case HSEDIT_ATRIUM:
-      number = atoi(arg);
-      if (number == 0) {
-        /* '0' chosen - go back to main menu */
-        hsedit_disp_menu(g, d);
-        return;
-      }
-      rnum = OLC_HOUSE(d)->vnum;
-      if (!room_of(g, number)) {
-        send_to_char(g, d->character, "Room VNUM does not exist.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
-        return;
-      }
-      for (i = 0; i < 12; i++) {
-        if (room_get_dir_option(g, rnum, i)) {
-          if (room_get_dir_option(g, rnum, i)->to_room == number) {
-            found = true;
-            id    = i;
-          }
+  /* The guest list's menu and the prompts it leads to; false if the line is for the main menu's end */
+  bool house_editor::parse_guests(GameWorld *g, struct descriptor_data *d, std::string_view line)
+  {
+    const char answer = first_char(line);
+    switch (asking) {
+      case mode::guest_menu:
+        switch (answer) {
+          case 'a':
+          case 'A':
+            if (house.num_of_guests > MAX_GUESTS - 1)
+              send_to_char(g, d->character, "Guest List Full! - delete some before adding more\r\nEnter selection (A/D/C/Q) : ");
+            else {
+              send_to_char(g, d->character, "Name of guest to add: ");
+              asking = mode::guest_add;
+            }
+            break;
+          case 'd':
+          case 'D':
+            if (house.num_of_guests < 1)
+              send_to_char(g, d->character, "Guest List Empty! - add a guest before trying to delete one\r\nEnter selection (A/D/C/Q) : ");
+            else {
+              send_to_char(g, d->character, "Name of guest to delete : ");
+              asking = mode::guest_delete;
+            }
+            break;
+          case 'c':
+          case 'C':
+            send_to_char(g, d->character, "Clear guest list? (Y/N) : ");
+            asking = mode::guest_clear;
+            break;
+          case 'q':
+          case 'Q':
+            menu(g, d);
+            break;
+          default:
+            send_to_char(g, d->character, "Invalid choice!\r\n\r\n");
+            guest_menu(g, d);
+            break;
         }
-      }
+        return true;
 
-      if (found == false) {
-        send_to_char(g, d->character, "Atrium MUST be an adjoining room.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
-        return;
-      }
-      OLC_HOUSE(d)->atrium   = number;
-      OLC_HOUSE(d)->exit_num = id;
-      break;
-
-    case HSEDIT_DIR_MENU:
-
-      number = atoi(arg) - 1;
-
-      if ((*arg == 'q') || (*arg == 'Q') || (number == -1)) {
-        hsedit_disp_menu(g, d);
-        return;
-      }
-      if ((number < 0) || (number >= NUM_OF_DIRS)) {
-        send_to_char(g, d->character, "Invalid choice, Please select a direction (1-12, Q to quit) : ");
-        return;
-      }
-      house = OLC_HOUSE(d)->vnum;
-      if (!(room_get_dir_option(g, house, number))) {
-        send_to_char(g, d->character, "You cannot set the atrium to a room that doesn't exist!\r\n");
-        hsedit_dir_menu(g, d);
-        return;
-      }
-      if ((room_get_dir_option(g, house, number)->to_room) == NOWHERE) {
-        send_to_char(g, d->character, "You cannot set the atrium to nowhere!\r\n");
-        hsedit_dir_menu(g, d);
-        return;
-      }
-      OLC_HOUSE(d)->exit_num = number;
-
-      rnum                 = room_get_dir_option(g, house, number)->to_room;
-      OLC_HOUSE(d)->atrium = rnum;
-      break;
-
-    case HSEDIT_NOVNUM:
-      /* Just an 'enter' keypress - don't do anything */
-      break;
-
-    case HSEDIT_BUILD_DATE:
-      switch (*arg) {
-        case 'y':
-        case 'Y':
-          OLC_HOUSE(d)->built_on = game_now(g);
-          break;
-        case 'n':
-        case 'N':
-          send_to_char(g, d->character, "Build Date not changed\r\n");
-          hsedit_disp_menu(g, d);
-          return;
-          break;
-      }
-      break;
-
-    case HSEDIT_DELETE:
-      switch (*arg) {
-        case 'y':
-        case 'Y':
-          hedit_delete_house(g, d, OLC_HOUSE(d)->vnum);
-          return;
-        case 'n':
-        case 'N':
-          send_to_char(g, d->character, "House not deleted!\r\n");
-          hsedit_disp_menu(g, d);
-          return;
-          break;
-      }
-      break;
-
-    case HSEDIT_BUILDER:
-      if ((id = get_id_by_name(g, arg)) < 0) {
-        send_to_char(g, d->character, "No such player.\r\n");
-        return;
-      }
-      OLC_HOUSE(d)->builtby = id;
-      send_to_char(g, d->character, "Builder changed.\r\n");
-      break;
-
-    case HSEDIT_PAYMENT:
-      switch (*arg) {
-        case 'y':
-        case 'Y':
-          OLC_HOUSE(d)->last_payment = game_now(g);
-          break;
-        case 'n':
-        case 'N':
-          send_to_char(g, d->character, "Last Payment Date not changed\r\n");
-          hsedit_disp_menu(g, d);
-          return;
-          break;
-      }
-      break;
-
-    case HSEDIT_GUEST_MENU:
-      switch (*arg) {
-        case 'a':
-        case 'A':
-          if (OLC_HOUSE(d)->num_of_guests > (MAX_GUESTS - 1)) {
-            send_to_char(g, d->character, "Guest List Full! - delete some before adding more\r\nEnter selection (A/D/C/Q) : ");
-          } else {
-            send_to_char(g, d->character, "Name of guest to add: ");
-            OLC_MODE(d) = HSEDIT_GUEST_ADD;
-          }
-          break;
-
-        case 'd':
-        case 'D':
-          if (OLC_HOUSE(d)->num_of_guests < 1) {
-            send_to_char(g, d->character, "Guest List Empty! - add a guest before trying to delete one\r\nEnter selection (A/D/C/Q) : ");
-          } else {
-            send_to_char(g, d->character, "Name of guest to delete : ");
-            OLC_MODE(d) = HSEDIT_GUEST_DELETE;
-          }
-          break;
-
-        case 'c':
-        case 'C':
-          send_to_char(g, d->character, "Clear guest list? (Y/N) : ");
-          OLC_MODE(d) = HSEDIT_GUEST_CLEAR;
-          break;
-
-        case 'q':
-        case 'Q':
-          hsedit_disp_menu(g, d);
-          break;
-
-        default:
-          send_to_char(g, d->character, "Invalid choice!\r\n\r\n");
-          hsedit_disp_guest_menu(g, d);
-          break;
-      }
-      return;
-      break;
-
-    case HSEDIT_GUEST_ADD:
-      if ((id = get_id_by_name(g, arg)) < 0) {
-        send_to_char(g, d->character, "No such player.\r\n");
-        hsedit_disp_guest_menu(g, d);
-        return;
-      }
-      if (id == char_get_idnum(d->character)) {
-        send_to_char(g, d->character, "House owner should not be in the guest list!\r\n");
-        hsedit_disp_guest_menu(g, d);
-        return;
-      }
-      for (i = 0; i < OLC_HOUSE(d)->num_of_guests; i++) {
-        if (OLC_HOUSE(d)->guests[i] == id) {
+      case mode::guest_add:
+      case mode::guest_delete: {
+        long id = get_id_by_name(g, std::string(line).c_str());
+        long *end = house.guests + house.num_of_guests;
+        long *at  = std::find(house.guests, end, id);
+        if (id < 0)
+          send_to_char(g, d->character, "No such player.\r\n");
+        else if (id == char_get_idnum(d->character))
+          send_to_char(g, d->character, "House owner should not be in the guest list!\r\n");
+        else if (asking == mode::guest_add && at != end)
           send_to_char(g, d->character, "That player is already in the guest list!.\r\n");
-          hsedit_disp_guest_menu(g, d);
-          return;
-        }
-      }
-      i                       = OLC_HOUSE(d)->num_of_guests++;
-      OLC_HOUSE(d)->guests[i] = id;
-      send_to_char(g, d->character, "Guest added.\r\n");
-      hsedit_disp_guest_menu(g, d);
-      return;
-      break;
-
-    case HSEDIT_GUEST_DELETE:
-      if ((id = get_id_by_name(g, arg)) < 0) {
-        send_to_char(g, d->character, "No such player.\r\n");
-        hsedit_disp_guest_menu(g, d);
-        return;
-      }
-      if (id == char_get_idnum(d->character)) {
-        send_to_char(g, d->character, "House owner should not be in the guest list!\r\n");
-        hsedit_disp_guest_menu(g, d);
-        return;
-      }
-      for (i = 0; i < OLC_HOUSE(d)->num_of_guests; i++) {
-        if (OLC_HOUSE(d)->guests[i] == id) {
-          for (; i < OLC_HOUSE(d)->num_of_guests; i++)
-            OLC_HOUSE(d)->guests[i] = OLC_HOUSE(d)->guests[i + 1];
-          OLC_HOUSE(d)->num_of_guests--;
-          send_to_char(g, d->character, "Guest deleted.\r\n");
-          OLC_VAL(d) = 1;
-          hsedit_disp_guest_menu(g, d);
-          return;
-        }
-      }
-      send_to_char(g, d->character, "That player isn't in the guest list!\r\n");
-      hsedit_disp_guest_menu(g, d);
-      return;
-      break;
-
-    case HSEDIT_GUEST_CLEAR:
-      switch (*arg) {
-        case 'n':
-        case 'N':
-          send_to_char(g, d->character, "Invalid choice!");
-          return;
-
-        case 'y':
-        case 'Y':
-          OLC_HOUSE(d)->num_of_guests = 0;
-          for (i = 0; i < MAX_GUESTS; i++)
-            OLC_HOUSE(d)->guests[i] = 0;
-
-          send_to_char(g, d->character, "Guest List Cleared!");
-          OLC_VAL(d) = 1;
-          hsedit_disp_guest_menu(g, d);
-          break;
-
-        default:
-          send_to_char(g, d->character, "Invalid choice!\r\nClear Guest List? (Y/N) : ");
-          return;
-      }
-      break;
-
-    case HSEDIT_TYPE:
-      number = atoi(arg);
-      if (number < 0 || number >= NUM_HOUSE_TYPES) {
-        send_to_char(g, d->character, "Invalid choice!");
-        hsedit_disp_type_menu(g, d);
-        return;
-      } else
-        OLC_HOUSE(d)->mode = number;
-      break;
-
-    case HSEDIT_FLAGS:
-      number = atoi(arg);
-      if ((number < 0) || (number > HOUSE_NUM_FLAGS)) {
-        send_to_char(g, d->character, "That's not a valid choice!\r\n");
-        hsedit_disp_flags_menu(g, d);
-      } else {
-        if (number == 0)
-          break;
+        else if (asking == mode::guest_add) {
+          house.guests[house.num_of_guests++] = id;
+          send_to_char(g, d->character, "Guest added.\r\n");
+        } else if (at == end)
+          send_to_char(g, d->character, "That player isn't in the guest list!\r\n");
         else {
-          /* toggle bits */
-          if (IS_SET(OLC_HOUSE(d)->bitvector, 1U << (number - 1)))
-            REMOVE_BIT(OLC_HOUSE(d)->bitvector, 1U << (number - 1));
-          else
-            SET_BIT(OLC_HOUSE(d)->bitvector, 1U << (number - 1));
-          hsedit_disp_flags_menu(g, d);
+          std::copy(at + 1, end, at);
+          end[-1] = end == house.guests + MAX_GUESTS ? 0 : *end; /* what was after the list moves up, as it always did */
+          house.num_of_guests--;
+          send_to_char(g, d->character, "Guest deleted.\r\n");
+          changed = true;
         }
+        guest_menu(g, d);
+        return true;
       }
-      return;
 
-      /* Houses have no 'values', but this is left commented out for future 
-expansion    
-  case HSEDIT_VALUE_0: 
-    number = atoi(arg); 
-    OLC_HOUSE(d)->value[0] = number; 
-    hsedit_disp_val1_menu(d); 
-    return; 
-    
-  case HSEDIT_VALUE_1: 
-    OLC_HOUSE(d)->value[1] = atoi(arg); 
-    hsedit_disp_val2_menu(d); 
-    return;  
-    
-  case HSEDIT_VALUE_2: 
-    OLC_HOUSE(d)->value[2] = atoi(arg); 
-    hsedit_disp_val3_menu(d); 
-    return;  
-    
-  case HSEDIT_VALUE_3: 
-    OLC_HOUSE(d)->value[3] = atoi(arg); 
-    break;    
-*/
+      case mode::guest_clear:
+        switch (answer) {
+          case 'n':
+          case 'N':
+            send_to_char(g, d->character, "Invalid choice!"); /* quirk: that's no answer */
+            return true;
+          case 'y':
+          case 'Y':
+            house.num_of_guests = 0;
+            std::fill(std::begin(house.guests), std::end(house.guests), 0);
+            send_to_char(g, d->character, "Guest List Cleared!");
+            changed = true;
+            guest_menu(g, d);
+            return false; /* quirk: and the main menu after it */
+          default:
+            send_to_char(g, d->character, "Invalid choice!\r\nClear Guest List? (Y/N) : ");
+            return true;
+        }
 
-    default:
-      /* we should never get here */
-      mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: Reached default case in parse_hsedit");
-      break;
+      default:
+        return false;
+    }
   }
-  /*. If we get this far, something has been changed .*/
-  OLC_VAL(d) = 1;
-  hsedit_disp_menu(g, d);
-}
+
+  void house_editor::parse(GameWorld *g, struct descriptor_data *d, std::string_view line)
+  {
+    const char answer = first_char(line);
+    const int number_given = atoi(std::string(line).c_str());
+
+    mudlog(g, LOG_CMP, ADMLVL_BUILDER, false, "(LOG) hsedit_parse: OLC mode {:d}", (int)asking);
+    switch (asking) {
+      case mode::confirm_save:
+        switch (answer) {
+          case 'y':
+          case 'Y':
+            save(g, d);
+            mudlog(g, LOG_CMP, ADMLVL_BUILDER, true, "OLC: {} edits house {:d}", char_get_name(d->character), number);
+            if (CONFIG_OLC_SAVE) {
+              House_save_control(g);
+              write_to_output(g, d, "House saved to disk.\r\n");
+            } else
+              write_to_output(g, d, "House saved to memory.\r\n");
+            leave_olc(g, d);
+            return;
+          case 'n':
+          case 'N':
+            leave_olc(g, d);
+            return;
+          default:
+            send_to_char(g, d->character, "Invalid choice!\r\n");
+            send_to_char(g, d->character, "Do you wish to save this house internally? : ");
+            return;
+        }
+
+      case mode::main_menu:
+        switch (answer) {
+          case 'q':
+          case 'Q':
+            if (changed) {
+              send_to_char(g, d->character, "Do you wish to save this house internally? : ");
+              asking = mode::confirm_save;
+            } else
+              leave_olc(g, d);
+            return;
+          case '1':
+            owner_menu(g, d);
+            return;
+          case '2':
+          case '3':
+            if (house.vnum == NOWHERE || !room_of(g, house.vnum)) {
+              send_to_char(g, d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n");
+              mudlog(g, LOG_NRM, answer == '2' ? ADMLVL_GRGOD : ADMLVL_BUILDER, true, "SYSERR: Invalid house VNUM in hsedit");
+            } else if (answer == '2') {
+              send_to_char(g, d->character, "Enter atrium room vnum:");
+              asking = mode::atrium;
+            } else
+              dir_menu(g, d);
+            return;
+          case '4':
+            type_menu(g, d);
+            return;
+          case '5':
+            send_to_char(g, d->character, "Set build date to now? (Y/N):");
+            asking = mode::build_date;
+            return;
+          case '6':
+            send_to_char(g, d->character, "Set last payment as now? (Y/N) : ");
+            asking = mode::payment;
+            return;
+          case '7':
+            guest_menu(g, d);
+            return;
+          case '8':
+            flags_menu(g, d);
+            return;
+          case 'x':
+          case 'X':
+            send_to_char(g, d->character, "Are you sure you want to delete this house? (Y/N) : ");
+            asking = mode::confirm_delete;
+            return;
+          default:
+            send_to_char(g, d->character, "Invalid choice!\r\n");
+            menu(g, d);
+            return;
+        }
+
+      case mode::owner_menu:
+        switch (answer) {
+          case '1':
+            send_to_char(g, d->character, "Enter the name of the owner : ");
+            asking = mode::owner_name;
+            break;
+          case '2':
+            send_to_char(g, d->character, "Enter the user id of the owner : ");
+            asking = mode::owner_id;
+            break;
+          case 'Q': /* quirk: not 'q' */
+            menu(g, d);
+            break;
+        }
+        return;
+
+      case mode::owner_name:
+      case mode::owner_id: {
+        long id = asking == mode::owner_name ? get_id_by_name(g, std::string(line).c_str()) : number_given;
+        if (asking == mode::owner_name ? id < 0 : get_name_by_id(g, id) == nullptr) {
+          send_to_char(g, d->character, "There is no such player.\r\n");
+          owner_menu(g, d);
+          return;
+        }
+        house.owner = id;
+        break;
+      }
+
+      case mode::atrium: {
+        if (number_given == 0) {
+          menu(g, d);
+          return;
+        }
+        if (!room_of(g, number_given)) {
+          send_to_char(g, d->character, "Room VNUM does not exist.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
+          return;
+        }
+        int exit_to = -1; /* the last direction leading there */
+        for (int dir = 0; dir < 12; dir++)
+          if (struct room_direction_data *exit = room_get_dir_option(g, house.vnum, dir); exit && exit->to_room == number_given)
+            exit_to = dir;
+        if (exit_to < 0) {
+          send_to_char(g, d->character, "Atrium MUST be an adjoining room.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
+          return;
+        }
+        house.atrium   = number_given;
+        house.exit_num = exit_to;
+        break;
+      }
+
+      case mode::dir_menu: {
+        int dir = number_given - 1;
+        if (answer == 'q' || answer == 'Q' || dir == -1) {
+          menu(g, d);
+          return;
+        }
+        if (dir < 0 || dir >= NUM_OF_DIRS) {
+          send_to_char(g, d->character, "Invalid choice, Please select a direction (1-12, Q to quit) : ");
+          return;
+        }
+        struct room_direction_data *exit = room_get_dir_option(g, house.vnum, dir);
+        if (!exit || exit->to_room == NOWHERE) {
+          send_to_char(g, d->character, !exit ? "You cannot set the atrium to a room that doesn't exist!\r\n" : "You cannot set the atrium to nowhere!\r\n");
+          dir_menu(g, d);
+          return;
+        }
+        house.exit_num = dir;
+        house.atrium   = exit->to_room;
+        break;
+      }
+
+      case mode::no_vnum: /* Just an 'enter' keypress - don't do anything */
+        break;
+
+      /* quirk: any answer but 'n' counts as a change, though only 'y' makes one */
+      case mode::build_date:
+      case mode::payment:
+        if (answer == 'y' || answer == 'Y')
+          (asking == mode::build_date ? house.built_on : house.last_payment) = game_now(g);
+        else if (answer == 'n' || answer == 'N') {
+          send_to_char(g, d->character, asking == mode::build_date ? "Build Date not changed\r\n" : "Last Payment Date not changed\r\n");
+          menu(g, d);
+          return;
+        }
+        break;
+
+      case mode::confirm_delete:
+        if (answer == 'y' || answer == 'Y') {
+          delete_house(g, d);
+          return;
+        }
+        if (answer == 'n' || answer == 'N') {
+          send_to_char(g, d->character, "House not deleted!\r\n");
+          menu(g, d);
+          return;
+        }
+        break;
+
+      case mode::guest_menu:
+      case mode::guest_add:
+      case mode::guest_delete:
+      case mode::guest_clear:
+        if (parse_guests(g, d, line))
+          return;
+        break;
+
+      case mode::type:
+        if (number_given < 0 || number_given >= NUM_HOUSE_TYPES) {
+          send_to_char(g, d->character, "Invalid choice!");
+          type_menu(g, d);
+          return;
+        }
+        house.mode = number_given;
+        break;
+
+      case mode::flags:
+        if (number_given < 0 || number_given > HOUSE_NUM_FLAGS) {
+          send_to_char(g, d->character, "That's not a valid choice!\r\n");
+          flags_menu(g, d);
+          return;
+        }
+        if (number_given == 0)
+          break;
+        house.bitvector ^= 1L << (number_given - 1);
+        flags_menu(g, d);
+        return;
+    }
+    /*. If we get this far, something has been changed .*/
+    changed = true;
+    menu(g, d);
+  }
+} // namespace
 
 ACMD(do_oasis_hsedit)
 {
-  IDXTYPE number = NOWHERE;
-  int save = 0, real_num;
-  struct descriptor_data *d;
-  std::string buf1;
-  std::string buf2;
-
-  /****************************************************************************/
-  /** Parse any arguments.                                                  **/
-
-  /****************************************************************************/
   std::string_view rest = argument;
-  buf1                  = take_arg(rest);
-  buf2                  = take_arg(rest);
+  std::string buf1      = take_arg(rest);
+  std::string buf2      = take_arg(rest);
+  room_vnum number      = NOWHERE;
+  bool save             = false;
 
-  /****************************************************************************/
-  /** If there aren't any arguments...grab the number of the current room... **/
-
-  /****************************************************************************/
-  if (buf1.empty()) {
+  /* If there aren't any arguments...grab the number of the current room... */
+  if (buf1.empty())
     number = char_get_in_room(ch);
-  } else if (!isdigit(buf1[0])) {
+  else if (!isdigit(buf1[0])) {
     if (!str_eq_nocase("save", buf1)) {
       send_to_char(g, ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }
     save = true;
-
     if (is_number(buf2))
       number = parse_int(buf2);
     else if (char_get_olc_zone(g, ch) > 0) {
-      struct zone_data *zlok;
-
-      if ((zlok = find_zone(g, char_get_olc_zone(g, ch))) == nullptr)
-        number = NOWHERE;
-      else
-        number = genolc_zone_bottom(g, zlok);
+      struct zone_data *zone = find_zone(g, char_get_olc_zone(g, ch));
+      number                 = zone ? genolc_zone_bottom(g, zone) : NOWHERE;
     }
-
     if (number == NOWHERE) {
       send_to_char(g, ch, "Save which zone?\r\n");
       return;
     }
   }
-
-  /****************************************************************************/
-  /** If a numeric argument was given, get it.                              **/
-
-  /****************************************************************************/
   if (number == NOWHERE)
     number = parse_int(buf1);
 
-  /****************************************************************************/
-  /** Check that whatever it is isn't already being edited.                **/
-
-  /****************************************************************************/
-  for (descriptor_data *dd : each_desc(g)) {
-    if (desc_get_connected(dd) == CON_HSEDIT) {
-      if (dd->olc && OLC_NUM(dd) == number) {
-        send_to_char(g, ch, "That house is currently being edited by {}.\r\n",
-                     char_pers(g, dd->character, ch));
-        return;
-      }
-    }
-  }
-
-  /****************************************************************************/
-  /** Point d to the builder's descriptor (for easier typing later).         **/
-
-  /****************************************************************************/
-  d = char_get_desc(ch);
-
-  /****************************************************************************/
-  /** Give the descriptor an OLC structure.                                 **/
-
-  /****************************************************************************/
-  if (d->olc) {
-    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: do_oasis_hsedit: Player already had olc structure.");
-    d->olc.reset();
-  }
-
-  d->olc = std::make_unique<oasis_olc_data>();
-
-  /****************************************************************************/
-  /** Find the zone.                                                         **/
-
-  /****************************************************************************/
-  OLC_ZNUM(d) = save ? find_zone(g, number) : find_zone_by_thing(g, number);
-  if (OLC_ZNUM(d) == nullptr) {
-    send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
-
-    /**************************************************************************/
-    /** Free the descriptor's OLC structure.                                 **/
-
-    /**************************************************************************/
-    d->olc.reset();
-    return;
-  }
-
-  /****************************************************************************/
-  /** Everyone but IMPLs can only edit zones they have been assigned.        **/
-
-  /****************************************************************************/
-  if (!can_edit_zone(g, ch, OLC_ZNUM(d))) {
-    send_to_char(g, ch, " You do not have permission to edit zone {:d}. Try zone {:d}.\r\n", OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
-    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "OLC: {} tried to edit zone {:d} allowed zone {:d}",
-           char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
-
-    /**************************************************************************/
-    /** Free the descriptor's OLC structure.                                **/
-
-    /**************************************************************************/
-    d->olc.reset();
-    return;
-  }
-
-  /****************************************************************************/
-  /** If we need to save, save the houses.                                  **/
-
-  /****************************************************************************/
-  if (save) {
-    send_to_char(g, ch, "Saving all houses in zone {:d}.\r\n",
-                 OLC_ZNUM(d)->number);
-    mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true,
-           "OLC: {} saves house info for zone {:d}.", char_get_name(ch),
-           OLC_ZNUM(d)->number);
-
-    /**************************************************************************/
-    /** Save the houses in this zone.                                       **/
-
-    /**************************************************************************/
-    hsedit_save_to_disk(g);
-
-    /**************************************************************************/
-    /** Free the descriptor's OLC structure.                                **/
-
-    /**************************************************************************/
-    d->olc.reset();
-    return;
-  }
-
-  OLC_NUM(d) = number;
-
-  /****************************************************************************/
-  /** If this is a new house, setup a new house, otherwise setup the       **/
-  /** existing house.                                                    **/
-
-  /****************************************************************************/
-  real_num = find_house(g, number);
-  if (real_num == NOWHERE) {
-    /* Do a quick check to ensure there is room for more */
-    if (g->num_of_houses >= MAX_HOUSES) {
-      send_to_char(g, ch, "MAX houses limit reached ({:d}) - Unable to create more.\r\n", MAX_HOUSES);
-      mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "HSEDIT: MAX houses limit reached ({:d})\r\n", MAX_HOUSES);
+  /* Check that whatever it is isn't already being edited. */
+  for (descriptor_data *dd : each_desc(g))
+    if (desc_get_connected(dd) == CON_HSEDIT && dd->olc && session_of<house_editor>(dd).number == number) {
+      send_to_char(g, ch, "That house is currently being edited by {}.\r\n", char_pers(g, dd->character, ch));
       return;
     }
-    hsedit_setup_new(g, d);
-  } else {
-    hsedit_setup_existing(g, d, real_num);
+
+  struct descriptor_data *d = char_get_desc(ch);
+  open_session(g, d, std::make_unique<house_editor>(), "do_oasis_hsedit");
+  house_editor &editor = session_of<house_editor>(d);
+
+  editor.zone = save ? find_zone(g, number) : find_zone_by_thing(g, number);
+  if (!editor.zone) {
+    send_to_char(g, ch, "Sorry, there is no zone for that number!\r\n");
+    d->olc.reset();
+    return;
   }
 
-  desc_set_connected(d, CON_HSEDIT);
+  /* Everyone but IMPLs can only edit zones they have been assigned. */
+  if (!can_edit_zone(g, ch, editor.zone)) {
+    send_to_char(g, ch, " You do not have permission to edit zone {:d}. Try zone {:d}.\r\n", editor.zone->number, char_get_olc_zone(g, ch));
+    mudlog(g, LOG_BRF, ADMLVL_BUILDER, true, "OLC: {} tried to edit zone {:d} allowed zone {:d}", char_get_name(ch), editor.zone->number,
+           char_get_olc_zone(g, ch));
+    d->olc.reset();
+    return;
+  }
 
-  /****************************************************************************/
-  /** Send the OLC message to the players in the same room as the builder.   **/
+  if (save) {
+    send_to_char(g, ch, "Saving all houses in zone {:d}.\r\n", editor.zone->number);
+    mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: {} saves house info for zone {:d}.", char_get_name(ch),
+           editor.zone->number);
+    House_save_control(g);
+    d->olc.reset();
+    return;
+  }
 
-  /****************************************************************************/
-  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-  char_plr_set(ch, PLR_WRITING, true);
-
-  /****************************************************************************/
-  /** Log the OLC message.                                                   **/
-
-  /****************************************************************************/
-  mudlog(g, LOG_CMP, ADMLVL_BUILDER, true, "OLC: (hsedit) {} starts editing zone {:d} allowed zone {:d}",
-         char_get_name(ch), OLC_ZNUM(d)->number, char_get_olc_zone(g, ch));
+  editor.number = number;
+  if (int existing = find_house(g, number); existing != NOWHERE)
+    editor.house = g->house_control[existing];
+  else if (g->num_of_houses >= MAX_HOUSES) {
+    /* quirk: the session is left behind, though the builder isn't editing */
+    send_to_char(g, ch, "MAX houses limit reached ({:d}) - Unable to create more.\r\n", MAX_HOUSES);
+    mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "HSEDIT: MAX houses limit reached ({:d})\r\n", MAX_HOUSES);
+    return;
+  } else
+    editor.house = {.vnum = number, .exit_num = -1, .built_on = game_now(g), .mode = HOUSE_PRIVATE};
+  editor.menu(g, d);
+  begin_editing(g, d, CON_HSEDIT);
+  mudlog(g, LOG_CMP, ADMLVL_BUILDER, true, "OLC: (hsedit) {} starts editing zone {:d} allowed zone {:d}", char_get_name(ch), editor.zone->number,
+         char_get_olc_zone(g, ch));
 }

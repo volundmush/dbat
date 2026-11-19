@@ -88,30 +88,30 @@ void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone);
 
 /* The session the editors not yet rewritten share: each finds its own fields in it, and its code by the state */
 struct oasis_olc_data : olc_session {
-  int index{};                       /* aedit's social, hedit's help entry */
-  std::string storage{};             /* tedit's file, trigedit's script, the new keyword for hedit and aedit */
+  int mode{};                        /* how to parse input       */
+  struct zone_data *in_zone{};       /* the zone of what is being edited */
+  room_vnum number{};                /* vnum of subject          */
+  int value{};                       /* mostly 'has changed' flag*/
+  std::string storage{};             /* trigedit's script */
   struct char_data *mob{};           /* used for 'medit'         */
   struct room_data *room{};          /* used for 'redit'         */
   struct obj_data *obj{};            /* used for 'oedit'         */
   int32_t iobj_uid{};                /* the object 'iedit' changes, by id */
   struct zone_data *zone{};          /* used for 'zedit'         */
   struct shop_data *shop{};          /* used for 'sedit'         */
-  struct house_control_rec *house{}; /* used for 'hsedit'      */
   struct config_data *config{};      /* used for 'cedit'         */
   struct extra_descr_data *desc{};   /* used in '[r|o|m]edit'    */
-  struct social_messg *action{};     /* Aedit uses this one      */
   struct trig_data *trig{};
   int script_mode{};
   int trigger_position{};
   int item_type{};
   std::vector<trig_vnum> script{};     /* for assigning triggers in [r|o|m]edit*/
-  struct assembly_data *OlcAssembly{}; /* used for 'assedit'         */
   struct guild_data *guild{};          /* used for 'gedit'         */
-  struct help_index_element *help{};   /* Hedit uses this */
 
   void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
   void text_done(GameWorld *g, struct descriptor_data *d, int how) override;
   int help_context(const struct descriptor_data *d) const override;
+  void log_leaving(GameWorld *g, struct descriptor_data *d) const override;
 };
 
 /*
@@ -122,23 +122,18 @@ struct oasis_olc_data : olc_session {
 #define OLC_NUM(d)  (OLC(d)->number)   /* Room/Obj VNUM.	*/
 #define OLC_VAL(d)  (OLC(d)->value)    /* Scratch variable.	*/
 #define OLC_ZNUM(d)  (OLC(d)->in_zone)  /* Zone of what is being edited. */
-#define OLC_INDEX(d) (OLC(d)->index)    /* aedit's and hedit's entry. */
 
 #define OLC_STORAGE(d) (OLC(d)->storage)     /* std::string.	*/
 #define OLC_ROOM(d)    (OLC(d)->room)        /* Room structure.	*/
 #define OLC_OBJ(d)     (OLC(d)->obj)         /* Object structure.	*/
 #define OLC_ZONE(d)    (OLC(d)->zone)        /* Zone structure.	*/
 #define OLC_MOB(d)     (OLC(d)->mob)         /* Mob structure.	*/
-#define OLC_HOUSE(d)   (OLC(d)->house)       /* house structure      */
 #define OLC_SHOP(d)    (OLC(d)->shop)        /* Shop structure.	*/
 #define OLC_DESC(d)    (OLC(d)->desc)        /* Extra description.	*/
 #define OLC_CONFIG(d)  (OLC(d)->config)      /* Config structure.	*/
 #define OLC_TRIG(d)    (OLC(d)->trig)        /* Trigger structure.   */
-#define OLC_ASSEDIT(d) (OLC(d)->OlcAssembly) /* assembly olc        */
 
-#define OLC_ACTION(d) (OLC(d)->action) /* Action structure     */
 #define OLC_GUILD(d)  (OLC(d)->guild)  /* Guild structure      */
-#define OLC_HELP(d)   (OLC(d)->help)   /* Hedit structure      */
 
 /*
  * Other macros.
@@ -152,30 +147,6 @@ constexpr int CLEANUP_ALL     = 1; /* Free the whole lot.			*/
 constexpr int CLEANUP_STRUCTS = 2; /* Don't free strings.			*/
 constexpr int CLEANUP_CONFIG  = 3; /* Used just to send proper message. 	*/
 
-/* Submodes of AEDIT connectedness     */
-constexpr int AEDIT_CONFIRM_SAVESTRING     = 0;
-constexpr int AEDIT_CONFIRM_EDIT           = 1;
-constexpr int AEDIT_CONFIRM_ADD            = 2;
-constexpr int AEDIT_MAIN_MENU              = 3;
-constexpr int AEDIT_ACTION_NAME            = 4;
-constexpr int AEDIT_SORT_AS                = 5;
-constexpr int AEDIT_MIN_CHAR_POS           = 6;
-constexpr int AEDIT_MIN_VICT_POS           = 7;
-constexpr int AEDIT_HIDDEN_FLAG            = 8;
-constexpr int AEDIT_MIN_CHAR_LEVEL         = 9;
-constexpr int AEDIT_NOVICT_CHAR            = 10;
-constexpr int AEDIT_NOVICT_OTHERS          = 11;
-constexpr int AEDIT_VICT_CHAR_FOUND        = 12;
-constexpr int AEDIT_VICT_OTHERS_FOUND      = 13;
-constexpr int AEDIT_VICT_VICT_FOUND        = 14;
-constexpr int AEDIT_VICT_NOT_FOUND         = 15;
-constexpr int AEDIT_SELF_CHAR              = 16;
-constexpr int AEDIT_SELF_OTHERS            = 17;
-constexpr int AEDIT_VICT_CHAR_BODY_FOUND   = 18;
-constexpr int AEDIT_VICT_OTHERS_BODY_FOUND = 19;
-constexpr int AEDIT_VICT_VICT_BODY_FOUND   = 20;
-constexpr int AEDIT_OBJ_CHAR_FOUND         = 21;
-constexpr int AEDIT_OBJ_OTHERS_FOUND       = 22;
 /*
  * Submodes of OEDIT connectedness.
  */
@@ -365,14 +336,6 @@ constexpr int CEDIT_CONFIRM_SAVESTRING = 1;
 constexpr int CEDIT_SUBMENU            = 2; /* OLC_VAL: the submenu's main menu key */
 constexpr int CEDIT_OPTION             = 3; /* OLC_VAL: the option's index in cedit_options[] */
 
-constexpr int ASSEDIT_DO_NOT_USE       = 0;
-constexpr int ASSEDIT_MAIN_MENU        = 1;
-constexpr int ASSEDIT_ADD_COMPONENT    = 2;
-constexpr int ASSEDIT_EDIT_COMPONENT   = 3;
-constexpr int ASSEDIT_DELETE_COMPONENT = 4;
-constexpr int ASSEDIT_EDIT_EXTRACT     = 5;
-constexpr int ASSEDIT_EDIT_INROOM      = 6;
-constexpr int ASSEDIT_EDIT_TYPES       = 7;
 
 constexpr int CEDIT_CREATION_METHOD_1 = 0;
 constexpr int CEDIT_CREATION_METHOD_2 = 1;
@@ -380,39 +343,7 @@ constexpr int CEDIT_CREATION_METHOD_3 = 2;
 constexpr int CEDIT_CREATION_METHOD_4 = 3;
 constexpr int CEDIT_CREATION_METHOD_5 = 4;
 
-/* Submodes of HEDIT connectedness     */
-constexpr int HEDIT_CONFIRM_SAVESTRING = 0;
-constexpr int HEDIT_CONFIRM_EDIT       = 1;
-constexpr int HEDIT_CONFIRM_ADD        = 2;
-constexpr int HEDIT_MAIN_MENU          = 3;
-constexpr int HEDIT_ENTRY              = 4;
-constexpr int HEDIT_KEYWORDS           = 5;
-constexpr int HEDIT_MIN_LEVEL          = 6;
 
-/*. House editor .*/
-constexpr int HSEDIT_MAIN_MENU          = 0;
-constexpr int HSEDIT_CONFIRM_SAVESTRING = 1;
-constexpr int HSEDIT_OWNER_MENU         = 2;
-constexpr int HSEDIT_OWNER_NAME         = 3;
-constexpr int HSEDIT_OWNER_ID           = 4;
-constexpr int HSEDIT_ROOM               = 5;
-constexpr int HSEDIT_ATRIUM             = 6;
-constexpr int HSEDIT_DIR_MENU           = 7;
-constexpr int HSEDIT_GUEST_MENU         = 8;
-constexpr int HSEDIT_GUEST_ADD          = 9;
-constexpr int HSEDIT_GUEST_DELETE       = 10;
-constexpr int HSEDIT_GUEST_CLEAR        = 11;
-constexpr int HSEDIT_FLAGS              = 12;
-constexpr int HSEDIT_BUILD_DATE         = 13;
-constexpr int HSEDIT_PAYMENT            = 14;
-constexpr int HSEDIT_TYPE               = 15;
-constexpr int HSEDIT_DELETE             = 16;
-constexpr int HSEDIT_VALUE_0            = 17;
-constexpr int HSEDIT_VALUE_1            = 18;
-constexpr int HSEDIT_VALUE_2            = 19;
-constexpr int HSEDIT_VALUE_3            = 20;
-constexpr int HSEDIT_NOVNUM             = 21;
-constexpr int HSEDIT_BUILDER            = 22;
 
 /* -------------------------------------------------------------------------- */
 
@@ -465,7 +396,6 @@ void trigedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
 
 ACMD(do_oasis_hsedit);
 
-bool parse_stats(GameWorld *g, struct descriptor_data *d, char *arg);
 
 void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum);
 bool can_edit_zone(GameWorld *g, struct char_data *ch, struct zone_data *rnum);
@@ -642,17 +572,4 @@ constexpr int GEDIT_SELECT_WPS         = 14;
 constexpr int GEDIT_SELECT_LANGS       = 15;
 constexpr int GEDIT_SELECT_FEATS       = 16;
 
-/*
- * Statedit Connectedness
- * --relistan 2/23/99
- */
-
-constexpr int STAT_GET_STR    = 0;
-constexpr int STAT_GET_INT    = 1;
-constexpr int STAT_GET_WIS    = 2;
-constexpr int STAT_GET_DEX    = 3;
-constexpr int STAT_GET_CON    = 4;
-constexpr int STAT_GET_CHA    = 5;
-constexpr int STAT_QUIT       = 6;
-constexpr int STAT_PARSE_MENU = 7;
 

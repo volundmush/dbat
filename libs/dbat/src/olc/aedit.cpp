@@ -1,45 +1,357 @@
-/*
- * File: aedit.c
- * Comment: OLC for MUDs -- this one edits socials
- * by Michael Scott <scottm@workcomm.net> -- 06/10/96
- * for use with OasisOLC
- * ftpable from ftp.circlemud.org:/pub/CircleMUD/contrib/code
- */
+/************************************************************************
+ * OasisOLC - Socials / aedit.c                                         *
+ *                                                                      *
+ * Copyright 1996 Harvey Gilpin                                         *
+ * Copyright 1997-2001 George Greer (greerga@circlemud.org)             *
+ ************************************************************************/
 #include <cstdlib>
+#include <cstring>
 
-#include "dbat/args.hpp"
-#include "dbat/iterate.hpp"
 #include "dbat/aedit.hpp"
-#include "dbat/consts/maximums.hpp"
-#include "dbat/social.hpp"
-#include "dbat/utils.hpp"
-#include "dbat/config.hpp"
-#include "dbat/character_utils.hpp"
-#include "dbat/descriptor_utils.hpp"
-#include "dbat/stringutils.hpp"
 #include "dbat/act.informative.hpp"
 #include "dbat/act.social.hpp"
-#include "dbat/interpreter.hpp"
+#include "dbat/args.hpp"
+#include "dbat/character_utils.hpp"
 #include "dbat/comm.hpp"
-#include "dbat/oasis.hpp"
-#include "dbat/genolc.hpp"
-#include "dbat/text_files.hpp"
+#include "dbat/config.hpp"
+#include "dbat/consts/maximums.hpp"
+#include "dbat/descriptor_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/genolc.hpp"
+#include "dbat/interpreter.hpp"
+#include "dbat/iterate.hpp"
+#include "dbat/oasis.hpp"
+#include "dbat/social.hpp"
+#include "dbat/stringutils.hpp"
+#include "dbat/text_files.hpp"
+#include "dbat/utils.hpp"
 
-static void aedit_disp_menu(GameWorld *g, struct descriptor_data *d);
-static int aedit_find_command(GameWorld *g, const char *txt);
-static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *);
+namespace {
+  /* A social's messages, in the order the menu and astat list them */
+  struct message_row {
+    char key;
+    const char *label;  /* as the menu shows it, before the ": " */
+    const char *prompt; /* asking for a new one, before the old one is shown */
+    char *social_messg::*text;
+  };
 
-/*------------------------------------------------------------------------*\
-  Utils and exported functions.
-\*------------------------------------------------------------------------*/
+  constexpr message_row MESSAGES[] = {
+      {'a', "Char    [NO ARG]", "Enter social shown to the Character when there is no argument supplied.", &social_messg::char_no_arg},
+      {'b', "Others  [NO ARG]", "Enter social shown to Others when there is no argument supplied.", &social_messg::others_no_arg},
+      {'c', "Char [NOT FOUND]", "Enter text shown to the Character when his victim isnt found.", &social_messg::not_found},
+      {'d', "Char  [ARG SELF]", "Enter social shown to the Character when it is its own victim.", &social_messg::char_auto},
+      {'e', "Others[ARG SELF]", "Enter social shown to Others when the Char is its own victim.", &social_messg::others_auto},
+      {'f', "Char      [VICT]", "Enter normal social shown to the Character when the victim is found.", &social_messg::char_found},
+      {'g', "Others    [VICT]", "Enter normal social shown to Others when the victim is found.", &social_messg::others_found},
+      {'h', "Victim    [VICT]", "Enter normal social shown to the Victim when the victim is found.", &social_messg::vict_found},
+      {'i', "Char  [BODY PRT]", "Enter 'body part' social shown to the Character when the victim is found.", &social_messg::char_body_found},
+      {'j', "Others[BODY PRT]", "Enter 'body part' social shown to Others when the victim is found.", &social_messg::others_body_found},
+      {'k', "Victim[BODY PRT]", "Enter 'body part' social shown to the Victim when the victim is found.", &social_messg::vict_body_found},
+      {'l', "Char       [OBJ]", "Enter 'object' social shown to the Character when the object is found.", &social_messg::char_obj_found},
+      {'m', "Others     [OBJ]", "Enter 'object' social shown to the Room when the object is found.", &social_messg::others_obj_found},
+  };
+
+  /* The command (other than a social) the text names, by abbreviating what it's sorted as or being it; -1 for none */
+  int find_named_command(GameWorld *g, const char *txt)
+  {
+    for (int cmd = 1; *g->complete_cmd_info[cmd].command != '\n'; cmd++)
+      if (!strncmp(g->complete_cmd_info[cmd].sort_as, txt, strlen(txt)) || !strcmp(g->complete_cmd_info[cmd].command, txt))
+        return cmd;
+    return -1;
+  }
+
+  void save_to_disk(GameWorld *g)
+  {
+    if (save_socials(g)) /* otherwise still listed as unsaved */
+      remove_from_save_list(g, AEDIT_PERMISSION, SL_ACT);
+  }
+
+  char *copy_or_null(const char *text) { return text ? strdup(text) : nullptr; }
+
+  /* The social editor: one social, found by what it abbreviates or new */
+  struct social_editor final : olc_session {
+    enum class mode { confirm_save, confirm_edit, confirm_add, main_menu, name, sort_as, min_char_pos, min_vict_pos, min_level, message };
+
+    mode asking = mode::confirm_edit;
+    std::string keyword;          /* what the builder asked to edit */
+    int index = 0;                /* the social in g->soc_mess_list, or past its end for a new one */
+    social_messg action{};        /* the social as it's being edited, owning its strings */
+    const message_row *message{}; /* the message being asked for */
+    bool changed = false;
+
+    explicit social_editor(std::string_view asked) : keyword(asked) {}
+    ~social_editor() override { free_action(&action); }
+
+    void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
+    void log_leaving(GameWorld *g, struct descriptor_data *d) const override
+    {
+      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "OLC: {} stops editing zone {:d} allowed zone {:d}", char_get_name(d->character), NOWHERE,
+             char_get_olc_zone(g, d->character));
+    }
+
+    void menu(GameWorld *g, struct descriptor_data *d);
+    bool find_from(GameWorld *g, int first);
+    void ask(GameWorld *g, struct descriptor_data *d);
+    void setup_existing(GameWorld *g);
+    void setup_new();
+    void save(GameWorld *g);
+    void ask_position(GameWorld *g, struct descriptor_data *d, const char *whose, mode next);
+  };
+
+  void social_editor::menu(GameWorld *g, struct descriptor_data *d)
+  {
+    std::string messages;
+    for (const message_row &row : MESSAGES)
+      messages += str_format("@g{:c}@n) {}: @c{}\r\n", row.key, row.label, action.*row.text ? action.*row.text : "<Null>");
+    write_to_output(g, d,
+                    "@n-- Action editor\r\n@gn@n) Command         : @y{:<15.15}@n @g1@n) Sort as Command  : @y{:<15.15}@n\r\n@g2@n) Min Position[CH]: @c{:<8.8}        @g3@n) Min Position [VT]: @c{:<8.8}\r\n@g4@n) Min Level   [CH]: @c{:<3d}             @g5@n) Show if Invisible: @c{}\r\n{}@gq@n) Quit\r\nEnter Choice:",
+                    action.command, action.sort_as, position_types[action.min_char_position], position_types[action.min_victim_position],
+                    action.min_level_char, action.hide ? "HIDDEN" : "NOT HIDDEN", messages);
+    asking = mode::main_menu;
+  }
+
+  /* Finds the first social from `first` on that the keyword abbreviates: true if there is one */
+  bool social_editor::find_from(GameWorld *g, int first)
+  {
+    for (index = first; index <= g->top_of_socialt; index++)
+      if (is_abbrev(keyword.c_str(), g->soc_mess_list[index].command))
+        return true;
+    return false;
+  }
+
+  /* Asks whether to edit the social found, or to add a new one */
+  void social_editor::ask(GameWorld *g, struct descriptor_data *d)
+  {
+    if (index > g->top_of_socialt) {
+      write_to_output(g, d, "Do you wish to add the '{}' action? ", keyword);
+      asking = mode::confirm_add;
+    } else {
+      write_to_output(g, d, "Do you wish to edit the '{}' action? ", g->soc_mess_list[index].command);
+      asking = mode::confirm_edit;
+    }
+  }
+
+  void social_editor::setup_existing(GameWorld *g)
+  {
+    const social_messg &from   = g->soc_mess_list[index];
+    action.command             = strdup(from.command);
+    action.sort_as             = strdup(from.sort_as);
+    action.hide                = from.hide;
+    action.min_victim_position = from.min_victim_position;
+    action.min_char_position   = from.min_char_position;
+    action.min_level_char      = from.min_level_char;
+    for (const message_row &row : MESSAGES)
+      action.*row.text = copy_or_null(from.*row.text);
+  }
+
+  void social_editor::setup_new()
+  {
+    action.command             = strdup(keyword.c_str());
+    action.sort_as             = strdup(keyword.c_str());
+    action.min_victim_position = POS_STANDING;
+    action.min_char_position   = POS_STANDING;
+    action.char_no_arg         = strdup("This action is unfinished.");
+    action.others_no_arg       = strdup("This action is unfinished.");
+  }
+
+  /* Puts the social into the table, which takes its strings, and writes the socials out */
+  void social_editor::save(GameWorld *g)
+  {
+    if (index > g->top_of_socialt) {
+      auto *grown = new social_messg[g->top_of_socialt + 2]();
+      std::copy_n(g->soc_mess_list, g->top_of_socialt + 1, grown);
+      grown[++g->top_of_socialt] = action;
+      delete[] g->soc_mess_list;
+      g->soc_mess_list = grown;
+    } else {
+      action.act_nr = g->soc_mess_list[index].act_nr;
+      free_action(g->soc_mess_list + index);
+      g->soc_mess_list[index] = action;
+    }
+    action = {}; /* the table's now */
+
+    create_command_list(g);
+    sort_commands(g);
+
+    add_to_save_list(g, AEDIT_PERMISSION, SL_ACT);
+    save_to_disk(g); /* autosave by Rumble */
+  }
+
+  void social_editor::ask_position(GameWorld *g, struct descriptor_data *d, const char *whose, mode next)
+  {
+    write_to_output(g, d, "Enter the minimum position the {} has to be in to activate social:\r\n", whose);
+    for (int i = POS_DEAD; i <= POS_STANDING; i++)
+      write_to_output(g, d, "   {:d}) {}\r\n", i, position_types[i]);
+    write_to_output(g, d, "Enter choice: ");
+    asking = next;
+  }
+
+  void social_editor::parse(GameWorld *g, struct descriptor_data *d, std::string_view line)
+  {
+    const char answer = first_char(line);
+    std::string text(line);
+
+    switch (asking) {
+      case mode::confirm_save:
+        switch (answer) {
+          case 'y':
+          case 'Y': {
+            std::string command = action.command;
+            save(g);
+            mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "OLC: {} edits action {}", char_get_name(d->character), command);
+            leave_olc(g, d);
+            write_to_output(g, d, "Action saved to disk.\r\n");
+            return;
+          }
+          case 'n':
+          case 'N':
+            leave_olc(g, d);
+            return;
+          default:
+            write_to_output(g, d, "Invalid choice!\r\nDo you wish to save your changes? : ");
+            return;
+        }
+
+      case mode::confirm_edit:
+        switch (answer) {
+          case 'y':
+          case 'Y':
+            setup_existing(g);
+            changed = false;
+            menu(g, d);
+            return;
+          case 'q':
+          case 'Q':
+            leave_olc(g, d);
+            return;
+          case 'n':
+          case 'N':
+            if (!find_from(g, index + 1) && find_named_command(g, keyword.c_str()) != -1) {
+              leave_olc(g, d);
+              return;
+            }
+            ask(g, d);
+            return;
+          default:
+            write_to_output(g, d, "Invalid choice!\r\nDo you wish to edit the '{}' action? ", g->soc_mess_list[index].command);
+            return;
+        }
+
+      case mode::confirm_add:
+        switch (answer) {
+          case 'y':
+          case 'Y':
+            setup_new();
+            menu(g, d);
+            changed = false;
+            return;
+          case 'n':
+          case 'N':
+          case 'q':
+          case 'Q':
+            leave_olc(g, d);
+            return;
+          default:
+            write_to_output(g, d, "Invalid choice!\r\nDo you wish to add the '{}' action? ", keyword);
+            return;
+        }
+
+      case mode::main_menu:
+        switch (answer) {
+          case 'q':
+          case 'Q':
+            if (changed) {
+              write_to_output(g, d, "Do you wish to save your changes? : ");
+              asking = mode::confirm_save;
+            } else
+              leave_olc(g, d);
+            return;
+          case 'n': /* quirk: not 'N' */
+            write_to_output(g, d, "Enter action name: ");
+            asking = mode::name;
+            return;
+          case '1':
+            write_to_output(g, d, "Enter sort info for this action (for the command listing): ");
+            asking = mode::sort_as;
+            return;
+          case '2':
+            ask_position(g, d, "Character", mode::min_char_pos);
+            return;
+          case '3':
+            ask_position(g, d, "Victim", mode::min_vict_pos);
+            return;
+          case '4':
+            write_to_output(g, d, "Enter new minimum level for social: ");
+            asking = mode::min_level;
+            return;
+          case '5':
+            action.hide = !action.hide;
+            menu(g, d);
+            changed = true;
+            return;
+          default:
+            if (auto row = std::ranges::find(MESSAGES, tolower(answer), &message_row::key); answer && row != std::end(MESSAGES)) {
+              write_to_output(g, d, "{}\r\n[OLD]: {}\r\n[NEW]: ", row->prompt, action.*row->text ? action.*row->text : "NULL");
+              message = row;
+              asking  = mode::message;
+              return;
+            }
+            menu(g, d);
+            return;
+        }
+
+      case mode::name:
+      case mode::sort_as:
+        if (text.empty() || text.contains(' ')) {
+          menu(g, d);
+          return;
+        }
+        if (asking == mode::name) {
+          free(action.command);
+          action.command = strdup(text.c_str());
+        } else {
+          free(action.sort_as);
+          action.sort_as = strdup(text.c_str());
+        }
+        break;
+
+      case mode::min_char_pos:
+      case mode::min_vict_pos: {
+        int position = atoi(text.c_str());
+        if (text.empty() || position < POS_DEAD || position > POS_STANDING) {
+          menu(g, d);
+          return;
+        }
+        (asking == mode::min_char_pos ? action.min_char_position : action.min_victim_position) = position;
+        break;
+      }
+
+      case mode::min_level: {
+        int level = atoi(text.c_str());
+        if (text.empty() || level < 0) {
+          menu(g, d);
+          return;
+        }
+        action.min_level_char = level;
+        break;
+      }
+
+      case mode::message:
+        free(action.*message->text);
+        if (!text.empty()) {
+          delete_doubledollar(text);
+          action.*message->text = strdup(text.c_str());
+        } else
+          action.*message->text = nullptr;
+        break;
+    }
+    changed = true;
+    menu(g, d);
+  }
+} // namespace
 
 ACMD(do_oasis_aedit)
 {
-  std::string arg;
-  struct descriptor_data *d;
-  int i;
-
   if (CONFIG_NEW_SOCIALS == 0) {
     send_to_char(g, ch, "Socials cannot be edited at the moment.\r\n");
     return;
@@ -57,663 +369,63 @@ ACMD(do_oasis_aedit)
     }
 
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
+  std::string arg       = take_arg(rest);
   if (arg.empty()) {
     send_to_char(g, ch, "Please specify a social to edit.\r\n");
     return;
   }
 
-  d = char_get_desc(ch);
+  struct descriptor_data *d = char_get_desc(ch);
 
   if (str_eq_nocase("save", arg)) {
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: {} saves socials.", char_get_name(ch));
     send_to_char(g, ch, "Writing social file..\r\n");
-    aedit_save_to_disk(g, d);
+    save_to_disk(g);
     send_to_char(g, ch, "Done.\r\n");
     return;
   }
 
-  /*
-   * Give descriptor an OLC structure.
-   */
-  if (d->olc) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis: Player already had olc structure.");
-    d->olc.reset();
-  }
-  d->olc = std::make_unique<oasis_olc_data>();
+  open_session(g, d, std::make_unique<social_editor>(arg), "do_oasis");
+  social_editor &editor = session_of<social_editor>(d);
 
-  OLC_NUM(d)     = 0;
-  OLC_STORAGE(d) = arg;
-
-  for (OLC_INDEX(d) = 0; (OLC_INDEX(d) <= g->top_of_socialt); OLC_INDEX(d)++)
-    if (is_abbrev(OLC_STORAGE(d).c_str(), g->soc_mess_list[OLC_INDEX(d)].command))
-      break;
-
-  if (OLC_INDEX(d) > g->top_of_socialt) {
-    if ((i = aedit_find_command(g, OLC_STORAGE(d).c_str())) != -1) {
-      send_to_char(g, ch, "The '{}' command already exists ({}).\r\n", OLC_STORAGE(d), g->complete_cmd_info[i].command);
-      cleanup_olc(g, d, CLEANUP_ALL);
+  if (!editor.find_from(g, 0)) {
+    if (int i = find_named_command(g, arg.c_str()); i != -1) {
+      send_to_char(g, ch, "The '{}' command already exists ({}).\r\n", arg, g->complete_cmd_info[i].command);
+      leave_olc(g, d);
       return;
     }
-    send_to_char(g, ch, "Do you wish to add the '{}' action? ", OLC_STORAGE(d));
-    OLC_MODE(d) = AEDIT_CONFIRM_ADD;
-  } else {
-    send_to_char(g, ch, "Do you wish to edit the '{}' action? ", g->soc_mess_list[OLC_INDEX(d)].command);
-    OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
   }
-  desc_set_connected(d, CON_AEDIT);
-  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-  char_plr_set(ch, PLR_WRITING, true);
+  editor.ask(g, d);
+  begin_editing(g, d, CON_AEDIT);
   mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "OLC: {} starts editing actions.", char_get_name(ch));
-}
-
-static void aedit_setup_new(GameWorld *g, struct descriptor_data *d)
-{
-  OLC_ACTION(d)                      = new social_messg();
-  OLC_ACTION(d)->command             = strdup(OLC_STORAGE(d).c_str());
-  OLC_ACTION(d)->sort_as             = strdup(OLC_STORAGE(d).c_str());
-  OLC_ACTION(d)->min_victim_position = POS_STANDING;
-  OLC_ACTION(d)->min_char_position   = POS_STANDING;
-  OLC_ACTION(d)->char_no_arg         = strdup("This action is unfinished.");
-  OLC_ACTION(d)->others_no_arg       = strdup("This action is unfinished.");
-  aedit_disp_menu(g, d);
-  OLC_VAL(d) = 0;
-}
-
-/*------------------------------------------------------------------------*/
-
-static void aedit_setup_existing(GameWorld *g, struct descriptor_data *d, int real_num)
-{
-  OLC_ACTION(d)                      = new social_messg();
-  OLC_ACTION(d)->command             = strdup(g->soc_mess_list[real_num].command);
-  OLC_ACTION(d)->sort_as             = strdup(g->soc_mess_list[real_num].sort_as);
-  OLC_ACTION(d)->hide                = g->soc_mess_list[real_num].hide;
-  OLC_ACTION(d)->min_victim_position = g->soc_mess_list[real_num].min_victim_position;
-  OLC_ACTION(d)->min_char_position   = g->soc_mess_list[real_num].min_char_position;
-  OLC_ACTION(d)->min_level_char      = g->soc_mess_list[real_num].min_level_char;
-  if (g->soc_mess_list[real_num].char_no_arg)
-    OLC_ACTION(d)->char_no_arg = strdup(g->soc_mess_list[real_num].char_no_arg);
-  if (g->soc_mess_list[real_num].others_no_arg)
-    OLC_ACTION(d)->others_no_arg = strdup(g->soc_mess_list[real_num].others_no_arg);
-  if (g->soc_mess_list[real_num].char_found)
-    OLC_ACTION(d)->char_found = strdup(g->soc_mess_list[real_num].char_found);
-  if (g->soc_mess_list[real_num].others_found)
-    OLC_ACTION(d)->others_found = strdup(g->soc_mess_list[real_num].others_found);
-  if (g->soc_mess_list[real_num].vict_found)
-    OLC_ACTION(d)->vict_found = strdup(g->soc_mess_list[real_num].vict_found);
-  if (g->soc_mess_list[real_num].not_found)
-    OLC_ACTION(d)->not_found = strdup(g->soc_mess_list[real_num].not_found);
-  if (g->soc_mess_list[real_num].char_auto)
-    OLC_ACTION(d)->char_auto = strdup(g->soc_mess_list[real_num].char_auto);
-  if (g->soc_mess_list[real_num].others_auto)
-    OLC_ACTION(d)->others_auto = strdup(g->soc_mess_list[real_num].others_auto);
-  if (g->soc_mess_list[real_num].char_body_found)
-    OLC_ACTION(d)->char_body_found = strdup(g->soc_mess_list[real_num].char_body_found);
-  if (g->soc_mess_list[real_num].others_body_found)
-    OLC_ACTION(d)->others_body_found = strdup(g->soc_mess_list[real_num].others_body_found);
-  if (g->soc_mess_list[real_num].vict_body_found)
-    OLC_ACTION(d)->vict_body_found = strdup(g->soc_mess_list[real_num].vict_body_found);
-  if (g->soc_mess_list[real_num].char_obj_found)
-    OLC_ACTION(d)->char_obj_found = strdup(g->soc_mess_list[real_num].char_obj_found);
-  if (g->soc_mess_list[real_num].others_obj_found)
-    OLC_ACTION(d)->others_obj_found = strdup(g->soc_mess_list[real_num].others_obj_found);
-  OLC_VAL(d) = 0;
-  aedit_disp_menu(g, d);
-}
-
-static void aedit_save_internally(GameWorld *g, struct descriptor_data *d)
-{
-  struct social_messg *new_soc_mess_list = nullptr;
-  int i;
-
-  /* add a new social into the list */
-  if (OLC_INDEX(d) > g->top_of_socialt) {
-    new_soc_mess_list = new social_messg[g->top_of_socialt + 2]();
-    for (i = 0; i <= g->top_of_socialt; i++)
-      new_soc_mess_list[i] = g->soc_mess_list[i];
-    new_soc_mess_list[++g->top_of_socialt] = *OLC_ACTION(d);
-    delete[] g->soc_mess_list;
-    g->soc_mess_list = new_soc_mess_list;
-  }
-  /* pass the editted action back to the list - no need to add */
-  else {
-    i                     = aedit_find_command(g, OLC_ACTION(d)->command);
-    OLC_ACTION(d)->act_nr = g->soc_mess_list[OLC_INDEX(d)].act_nr;
-    /* why did i do this..? hrm */
-    free_action(g->soc_mess_list + OLC_INDEX(d));
-    g->soc_mess_list[OLC_INDEX(d)] = *OLC_ACTION(d);
-  }
-
-  create_command_list(g);
-  sort_commands(g);
-
-  add_to_save_list(g, AEDIT_PERMISSION, SL_ACT);
-  aedit_save_to_disk(g, d); /* autosave by Rumble */
-}
-
-/*------------------------------------------------------------------------*/
-
-static void aedit_save_to_disk(GameWorld *g, struct descriptor_data *)
-{
-  if (save_socials(g)) /* otherwise still listed as unsaved */
-    remove_from_save_list(g, AEDIT_PERMISSION, SL_ACT);
-}
-
-/*------------------------------------------------------------------------*/
-
-/* Menu functions */
-
-/* the main menu */
-static void aedit_disp_menu(GameWorld *g, struct descriptor_data *d)
-{
-  struct social_messg *action = OLC_ACTION(d);
-
-  write_to_output(g, d,
-                  "@n-- Action editor\r\n@gn@n) Command         : @y{:<15.15}@n @g1@n) Sort as Command  : @y{:<15.15}@n\r\n@g2@n) Min Position[CH]: @c{:<8.8}        @g3@n) Min Position [VT]: @c{:<8.8}\r\n@g4@n) Min Level   [CH]: @c{:<3d}             @g5@n) Show if Invisible: @c{}\r\n@ga@n) Char    [NO ARG]: @c{}\r\n@gb@n) Others  [NO ARG]: @c{}\r\n@gc@n) Char [NOT FOUND]: @c{}\r\n@gd@n) Char  [ARG SELF]: @c{}\r\n@ge@n) Others[ARG SELF]: @c{}\r\n@gf@n) Char      [VICT]: @c{}\r\n@gg@n) Others    [VICT]: @c{}\r\n@gh@n) Victim    [VICT]: @c{}\r\n@gi@n) Char  [BODY PRT]: @c{}\r\n@gj@n) Others[BODY PRT]: @c{}\r\n@gk@n) Victim[BODY PRT]: @c{}\r\n@gl@n) Char       [OBJ]: @c{}\r\n@gm@n) Others     [OBJ]: @c{}\r\n@gq@n) Quit\r\nEnter Choice:",
-                  action->command,
-                  action->sort_as,
-                  position_types[action->min_char_position],
-                  position_types[action->min_victim_position],
-                  action->min_level_char,
-                  (action->hide ? "HIDDEN" : "NOT HIDDEN"),
-                  action->char_no_arg ? action->char_no_arg : "<Null>",
-                  action->others_no_arg ? action->others_no_arg : "<Null>",
-                  action->not_found ? action->not_found : "<Null>",
-                  action->char_auto ? action->char_auto : "<Null>",
-                  action->others_auto ? action->others_auto : "<Null>",
-                  action->char_found ? action->char_found : "<Null>",
-                  action->others_found ? action->others_found : "<Null>",
-                  action->vict_found ? action->vict_found : "<Null>",
-                  action->char_body_found ? action->char_body_found : "<Null>",
-                  action->others_body_found ? action->others_body_found : "<Null>",
-                  action->vict_body_found ? action->vict_body_found : "<Null>",
-                  action->char_obj_found ? action->char_obj_found : "<Null>",
-                  action->others_obj_found ? action->others_obj_found : "<Null>");
-
-  OLC_MODE(d) = AEDIT_MAIN_MENU;
-}
-
-/*
- * The main loop
- */
-
-void aedit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
-{
-  int i;
-
-  switch (OLC_MODE(d)) {
-    case AEDIT_CONFIRM_SAVESTRING:
-      switch (*arg) {
-        case 'y':
-        case 'Y':
-          aedit_save_internally(g, d);
-          mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "OLC: {} edits action {}",
-                 char_get_name(d->character), OLC_ACTION(d)->command);
-
-          /* do not free the strings.. just the structure */
-          cleanup_olc(g, d, CLEANUP_STRUCTS);
-          write_to_output(g, d, "Action saved to disk.\r\n");
-          break;
-        case 'n':
-        case 'N':
-          /* free everything up, including strings etc */
-          cleanup_olc(g, d, CLEANUP_ALL);
-          break;
-        default:
-          write_to_output(g, d, "Invalid choice!\r\nDo you wish to save your changes? : ");
-          break;
-      }
-      return; /* end of AEDIT_CONFIRM_SAVESTRING */
-
-    case AEDIT_CONFIRM_EDIT:
-      switch (*arg) {
-        case 'y':
-        case 'Y':
-          aedit_setup_existing(g, d, OLC_INDEX(d));
-          break;
-        case 'q':
-        case 'Q':
-          cleanup_olc(g, d, CLEANUP_ALL);
-          break;
-        case 'n':
-        case 'N':
-          OLC_INDEX(d)
-          ++;
-          for (; (OLC_INDEX(d) <= g->top_of_socialt); OLC_INDEX(d)++)
-            if (is_abbrev(OLC_STORAGE(d).c_str(), g->soc_mess_list[OLC_INDEX(d)].command))
-              break;
-
-          if (OLC_INDEX(d) > g->top_of_socialt) {
-            if (aedit_find_command(g, OLC_STORAGE(d).c_str()) != -1) {
-              cleanup_olc(g, d, CLEANUP_ALL);
-              break;
-            }
-            write_to_output(g, d, "Do you wish to add the '{}' action? ",
-                            OLC_STORAGE(d));
-            OLC_MODE(d) = AEDIT_CONFIRM_ADD;
-          } else {
-            write_to_output(g, d, "Do you wish to edit the '{}' action? ",
-                            g->soc_mess_list[OLC_INDEX(d)].command);
-            OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
-          }
-          break;
-        default:
-          write_to_output(g, d, "Invalid choice!\r\nDo you wish to edit the '{}' action? ",
-                          g->soc_mess_list[OLC_INDEX(d)].command);
-          break;
-      }
-      return;
-
-    case AEDIT_CONFIRM_ADD:
-      switch (*arg) {
-        case 'y':
-        case 'Y':
-          aedit_setup_new(g, d);
-          break;
-        case 'n':
-        case 'N':
-        case 'q':
-        case 'Q':
-          cleanup_olc(g, d, CLEANUP_ALL);
-          break;
-        default:
-          write_to_output(g, d, "Invalid choice!\r\nDo you wish to add the '{}' action? ",
-                          OLC_STORAGE(d));
-          break;
-      }
-      return;
-
-    case AEDIT_MAIN_MENU:
-      switch (*arg) {
-        case 'q':
-        case 'Q':
-          if (OLC_VAL(d)) { /* Something was modified */
-            write_to_output(g, d, "Do you wish to save your changes? : ");
-            OLC_MODE(d) = AEDIT_CONFIRM_SAVESTRING;
-          } else cleanup_olc(g, d, CLEANUP_ALL);
-          break;
-        case 'n':
-          write_to_output(g, d, "Enter action name: ");
-          OLC_MODE(d) = AEDIT_ACTION_NAME;
-          return;
-        case '1':
-          write_to_output(g, d, "Enter sort info for this action (for the command listing): ");
-          OLC_MODE(d) = AEDIT_SORT_AS;
-          return;
-        case '2':
-          write_to_output(g, d, "Enter the minimum position the Character has to be in to activate social:\r\n");
-          {
-            for (i = POS_DEAD; i <= POS_STANDING; i++)
-              write_to_output(g, d, "   {:d}) {}\r\n", i, position_types[i]);
-
-            write_to_output(g, d, "Enter choice: ");
-          }
-          OLC_MODE(d) = AEDIT_MIN_CHAR_POS;
-          return;
-        case '3':
-          write_to_output(g, d, "Enter the minimum position the Victim has to be in to activate social:\r\n");
-          {
-            for (i = POS_DEAD; i <= POS_STANDING; i++)
-              write_to_output(g, d, "   {:d}) {}\r\n", i, position_types[i]);
-
-            write_to_output(g, d, "Enter choice: ");
-          }
-          OLC_MODE(d) = AEDIT_MIN_VICT_POS;
-          return;
-        case '4':
-          write_to_output(g, d, "Enter new minimum level for social: ");
-          OLC_MODE(d) = AEDIT_MIN_CHAR_LEVEL;
-          return;
-        case '5':
-          OLC_ACTION(d)->hide = !OLC_ACTION(d)->hide;
-          aedit_disp_menu(g, d);
-          OLC_VAL(d) = 1;
-          break;
-        case 'a':
-        case 'A':
-          write_to_output(g, d, "Enter social shown to the Character when there is no argument supplied.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->char_no_arg) ? OLC_ACTION(d)->char_no_arg : "NULL"));
-          OLC_MODE(d) = AEDIT_NOVICT_CHAR;
-          return;
-        case 'b':
-        case 'B':
-          write_to_output(g, d, "Enter social shown to Others when there is no argument supplied.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->others_no_arg) ? OLC_ACTION(d)->others_no_arg : "NULL"));
-          OLC_MODE(d) = AEDIT_NOVICT_OTHERS;
-          return;
-        case 'c':
-        case 'C':
-          write_to_output(g, d, "Enter text shown to the Character when his victim isnt found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->not_found) ? OLC_ACTION(d)->not_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_VICT_NOT_FOUND;
-          return;
-        case 'd':
-        case 'D':
-          write_to_output(g, d, "Enter social shown to the Character when it is its own victim.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->char_auto) ? OLC_ACTION(d)->char_auto : "NULL"));
-
-          OLC_MODE(d) = AEDIT_SELF_CHAR;
-          return;
-        case 'e':
-        case 'E':
-          write_to_output(g, d, "Enter social shown to Others when the Char is its own victim.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->others_auto) ? OLC_ACTION(d)->others_auto : "NULL"));
-
-          OLC_MODE(d) = AEDIT_SELF_OTHERS;
-          return;
-        case 'f':
-        case 'F':
-          write_to_output(g, d, "Enter normal social shown to the Character when the victim is found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->char_found) ? OLC_ACTION(d)->char_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_VICT_CHAR_FOUND;
-          return;
-        case 'g':
-        case 'G':
-          write_to_output(g, d, "Enter normal social shown to Others when the victim is found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->others_found) ? OLC_ACTION(d)->others_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_VICT_OTHERS_FOUND;
-          return;
-        case 'h':
-        case 'H':
-          write_to_output(g, d, "Enter normal social shown to the Victim when the victim is found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->vict_found) ? OLC_ACTION(d)->vict_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_VICT_VICT_FOUND;
-          return;
-        case 'i':
-        case 'I':
-          write_to_output(g, d, "Enter 'body part' social shown to the Character when the victim is found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->char_body_found) ? OLC_ACTION(d)->char_body_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_VICT_CHAR_BODY_FOUND;
-          return;
-        case 'j':
-        case 'J':
-          write_to_output(g, d, "Enter 'body part' social shown to Others when the victim is found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->others_body_found) ? OLC_ACTION(d)->others_body_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_VICT_OTHERS_BODY_FOUND;
-          return;
-        case 'k':
-        case 'K':
-          write_to_output(g, d, "Enter 'body part' social shown to the Victim when the victim is found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->vict_body_found) ? OLC_ACTION(d)->vict_body_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_VICT_VICT_BODY_FOUND;
-          return;
-        case 'l':
-        case 'L':
-          write_to_output(g, d, "Enter 'object' social shown to the Character when the object is found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->char_obj_found) ? OLC_ACTION(d)->char_obj_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_OBJ_CHAR_FOUND;
-          return;
-        case 'm':
-        case 'M':
-          write_to_output(g, d, "Enter 'object' social shown to the Room when the object is found.\r\n[OLD]: {}\r\n[NEW]: ",
-                          ((OLC_ACTION(d)->others_obj_found) ? OLC_ACTION(d)->others_obj_found : "NULL"));
-
-          OLC_MODE(d) = AEDIT_OBJ_OTHERS_FOUND;
-          return;
-        default:
-          aedit_disp_menu(g, d);
-          break;
-      }
-      return;
-
-    case AEDIT_ACTION_NAME:
-      if (!*arg || strchr(arg, ' ')) {
-        aedit_disp_menu(g, d);
-        return;
-      }
-      if (OLC_ACTION(d)->command)
-        free(OLC_ACTION(d)->command);
-      OLC_ACTION(d)->command = strdup(arg);
-
-      break;
-
-    case AEDIT_SORT_AS:
-      if (!*arg || strchr(arg, ' ')) {
-        aedit_disp_menu(g, d);
-        return;
-      }
-      if (OLC_ACTION(d)->sort_as) {
-        free(OLC_ACTION(d)->sort_as);
-        OLC_ACTION(d)->sort_as = strdup(arg);
-      }
-      break;
-
-    case AEDIT_MIN_CHAR_POS:
-    case AEDIT_MIN_VICT_POS:
-      if (!*arg) {
-        aedit_disp_menu(g, d);
-        return;
-      }
-      i = atoi(arg);
-      if ((i < POS_DEAD) || (i > POS_STANDING)) {
-        aedit_disp_menu(g, d);
-        return;
-      }
-      if (OLC_MODE(d) == AEDIT_MIN_CHAR_POS)
-        OLC_ACTION(d)->min_char_position = i;
-      else
-        OLC_ACTION(d)->min_victim_position = i;
-      break;
-
-    case AEDIT_MIN_CHAR_LEVEL:
-      if (!*arg) {
-        aedit_disp_menu(g, d);
-        return;
-      }
-      i = atoi(arg);
-      if (i < 0) {
-        aedit_disp_menu(g, d);
-        return;
-      }
-      OLC_ACTION(d)->min_level_char = i;
-      break;
-
-    case AEDIT_NOVICT_CHAR:
-      if (OLC_ACTION(d)->char_no_arg)
-        free(OLC_ACTION(d)->char_no_arg);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->char_no_arg = strdup(arg);
-      } else
-        OLC_ACTION(d)->char_no_arg = nullptr;
-      break;
-
-    case AEDIT_NOVICT_OTHERS:
-      if (OLC_ACTION(d)->others_no_arg)
-        free(OLC_ACTION(d)->others_no_arg);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->others_no_arg = strdup(arg);
-      } else
-        OLC_ACTION(d)->others_no_arg = nullptr;
-      break;
-
-    case AEDIT_VICT_CHAR_FOUND:
-      if (OLC_ACTION(d)->char_found)
-        free(OLC_ACTION(d)->char_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->char_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->char_found = nullptr;
-      break;
-
-    case AEDIT_VICT_OTHERS_FOUND:
-      if (OLC_ACTION(d)->others_found)
-        free(OLC_ACTION(d)->others_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->others_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->others_found = nullptr;
-      break;
-
-    case AEDIT_VICT_VICT_FOUND:
-      if (OLC_ACTION(d)->vict_found)
-        free(OLC_ACTION(d)->vict_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->vict_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->vict_found = nullptr;
-      break;
-
-    case AEDIT_VICT_NOT_FOUND:
-      if (OLC_ACTION(d)->not_found)
-        free(OLC_ACTION(d)->not_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->not_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->not_found = nullptr;
-      break;
-
-    case AEDIT_SELF_CHAR:
-      if (OLC_ACTION(d)->char_auto)
-        free(OLC_ACTION(d)->char_auto);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->char_auto = strdup(arg);
-      } else
-        OLC_ACTION(d)->char_auto = nullptr;
-      break;
-
-    case AEDIT_SELF_OTHERS:
-      if (OLC_ACTION(d)->others_auto)
-        free(OLC_ACTION(d)->others_auto);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->others_auto = strdup(arg);
-      } else
-        OLC_ACTION(d)->others_auto = nullptr;
-      break;
-
-    case AEDIT_VICT_CHAR_BODY_FOUND:
-      if (OLC_ACTION(d)->char_body_found)
-        free(OLC_ACTION(d)->char_body_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->char_body_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->char_body_found = nullptr;
-      break;
-
-    case AEDIT_VICT_OTHERS_BODY_FOUND:
-      if (OLC_ACTION(d)->others_body_found)
-        free(OLC_ACTION(d)->others_body_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->others_body_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->others_body_found = nullptr;
-      break;
-
-    case AEDIT_VICT_VICT_BODY_FOUND:
-      if (OLC_ACTION(d)->vict_body_found)
-        free(OLC_ACTION(d)->vict_body_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->vict_body_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->vict_body_found = nullptr;
-      break;
-
-    case AEDIT_OBJ_CHAR_FOUND:
-      if (OLC_ACTION(d)->char_obj_found)
-        free(OLC_ACTION(d)->char_obj_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->char_obj_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->char_obj_found = nullptr;
-      break;
-
-    case AEDIT_OBJ_OTHERS_FOUND:
-      if (OLC_ACTION(d)->others_obj_found)
-        free(OLC_ACTION(d)->others_obj_found);
-      if (*arg) {
-        delete_doubledollar(arg);
-        OLC_ACTION(d)->others_obj_found = strdup(arg);
-      } else
-        OLC_ACTION(d)->others_obj_found = nullptr;
-      break;
-
-    default:
-      /* we should never get here */
-      break;
-  }
-  OLC_VAL(d) = 1;
-  aedit_disp_menu(g, d);
 }
 
 ACMD(do_astat)
 {
-  int i, real = false;
-  std::string arg;
-
   if (char_is_npc(ch))
     return;
 
   std::string_view rest = argument;
-  arg                   = take_arg(rest);
-
+  std::string arg       = take_arg(rest);
   if (arg.empty()) {
     send_to_char(g, ch, "Astat which social?\r\n");
     return;
   }
 
-  for (i = 0; i <= g->top_of_socialt; i++) {
-    if (is_abbrev(arg, g->soc_mess_list[i].command)) {
-      real = true;
-      break;
-    }
-  }
-
-  if (!real) {
+  int i = 0;
+  while (i <= g->top_of_socialt && !is_abbrev(arg, g->soc_mess_list[i].command))
+    i++;
+  if (i > g->top_of_socialt) {
     send_to_char(g, ch, "No such social.\r\n");
     return;
   }
 
+  const social_messg &social = g->soc_mess_list[i];
+  std::string messages;
+  for (const message_row &row : MESSAGES)
+    messages += str_format("{:c}) {}: @c{}@n\r\n", row.key, row.label, social.*row.text ? social.*row.text : "");
   send_to_char(g, ch,
-               "n) Command         : @y{:<15.15}@n 1) Sort as Command : @y{:<15.15}@n\r\n2) Min Position[CH]: @c{:<8.8}@n        3) Min Position[VT]: @c{:<8.8}@n\r\n4) Min Level   [CH]: @c{:<3d}@n             5) Show if Invis   : @c{}@n\r\na) Char    [NO ARG]: @c{}@n\r\nb) Others  [NO ARG]: @c{}@n\r\nc) Char [NOT FOUND]: @c{}@n\r\nd) Char  [ARG SELF]: @c{}@n\r\ne) Others[ARG SELF]: @c{}@n\r\nf) Char      [VICT]: @c{}@n\r\ng) Others    [VICT]: @c{}@n\r\nh) Victim    [VICT]: @c{}@n\r\ni) Char  [BODY PRT]: @c{}@n\r\nj) Others[BODY PRT]: @c{}@n\r\nk) Victim[BODY PRT]: @c{}@n\r\nl) Char       [OBJ]: @c{}@n\r\nm) Others     [OBJ]: @c{}@n\r\n",
-
-               g->soc_mess_list[i].command,
-               g->soc_mess_list[i].sort_as,
-               position_types[g->soc_mess_list[i].min_char_position],
-               position_types[g->soc_mess_list[i].min_victim_position],
-               g->soc_mess_list[i].min_level_char,
-               (g->soc_mess_list[i].hide ? "HIDDEN" : "NOT HIDDEN"),
-               g->soc_mess_list[i].char_no_arg ? g->soc_mess_list[i].char_no_arg : "",
-               g->soc_mess_list[i].others_no_arg ? g->soc_mess_list[i].others_no_arg : "",
-               g->soc_mess_list[i].not_found ? g->soc_mess_list[i].not_found : "",
-               g->soc_mess_list[i].char_auto ? g->soc_mess_list[i].char_auto : "",
-               g->soc_mess_list[i].others_auto ? g->soc_mess_list[i].others_auto : "",
-               g->soc_mess_list[i].char_found ? g->soc_mess_list[i].char_found : "",
-               g->soc_mess_list[i].others_found ? g->soc_mess_list[i].others_found : "",
-               g->soc_mess_list[i].vict_found ? g->soc_mess_list[i].vict_found : "",
-               g->soc_mess_list[i].char_body_found ? g->soc_mess_list[i].char_body_found : "",
-               g->soc_mess_list[i].others_body_found ? g->soc_mess_list[i].others_body_found : "",
-               g->soc_mess_list[i].vict_body_found ? g->soc_mess_list[i].vict_body_found : "",
-               g->soc_mess_list[i].char_obj_found ? g->soc_mess_list[i].char_obj_found : "",
-               g->soc_mess_list[i].others_obj_found ? g->soc_mess_list[i].others_obj_found : "");
-}
-
-static int aedit_find_command(GameWorld *g, const char *txt)
-{
-  int cmd;
-
-  for (cmd = 1; *g->complete_cmd_info[cmd].command != '\n'; cmd++)
-    if (!strncmp(g->complete_cmd_info[cmd].sort_as, txt, strlen(txt)) ||
-        !strcmp(g->complete_cmd_info[cmd].command, txt))
-      return (cmd);
-  return (-1);
+               "n) Command         : @y{:<15.15}@n 1) Sort as Command : @y{:<15.15}@n\r\n2) Min Position[CH]: @c{:<8.8}@n        3) Min Position[VT]: @c{:<8.8}@n\r\n4) Min Level   [CH]: @c{:<3d}@n             5) Show if Invis   : @c{}@n\r\n{}",
+               social.command, social.sort_as, position_types[social.min_char_position], position_types[social.min_victim_position],
+               social.min_level_char, social.hide ? "HIDDEN" : "NOT HIDDEN", messages);
 }

@@ -1,7 +1,5 @@
 #pragma once
 #include "dbat/consts/types.hpp"
 
-void assedit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
-
 ACMD(do_assedit);
 

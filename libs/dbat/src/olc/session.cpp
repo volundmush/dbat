@@ -5,18 +5,19 @@
 #include <algorithm>
 #include <cstring>
 
-#include "dbat/aedit.hpp"
-#include "dbat/assedit.hpp"
 #include "dbat/consts/constates.hpp"
 #include "dbat/consts/maximums.hpp"
+#include "dbat/character_utils.hpp"
+#include "dbat/comm.hpp"
+#include "dbat/consts/admlevel.hpp"
+#include "dbat/consts/playerflags.hpp"
 #include "dbat/descriptor_utils.hpp"
+#include "dbat/handler.hpp"
+#include "dbat/log.hpp"
 #include "dbat/dg_olc.hpp"
 #include "dbat/gedit.hpp"
-#include "dbat/hedit.hpp"
-#include "dbat/hsedit.hpp"
 #include "dbat/oasis.hpp"
 #include "dbat/olc/session.hpp"
-#include "dbat/tedit.hpp"
 
 namespace {
   /* An editor still written the old way: what answers a line, and what runs when its text editor closes */
@@ -34,13 +35,8 @@ namespace {
       {CON_MEDIT,    medit_parse,    medit_string_cleanup   },
       {CON_REDIT,    redit_parse,    redit_string_cleanup   },
       {CON_CEDIT,    cedit_parse,    cedit_string_cleanup   },
-      {CON_AEDIT,    aedit_parse,    nullptr                },
       {CON_TRIGEDIT, trigedit_parse, trigedit_string_cleanup},
-      {CON_ASSEDIT,  assedit_parse,  nullptr                },
       {CON_GEDIT,    gedit_parse,    nullptr                },
-      {CON_HEDIT,    hedit_parse,    hedit_string_cleanup   },
-      {CON_HSEDIT,   hsedit_parse,   nullptr                },
-      {CON_TEDIT,    nullptr,        tedit_string_cleanup   },
   };
 
   const legacy_editor *legacy_editor_for(const struct descriptor_data *d)
@@ -64,6 +60,33 @@ namespace {
 } // namespace
 
 int olc_session::help_context(const struct descriptor_data *) const { return NOTHING; }
+
+void open_session(GameWorld *g, struct descriptor_data *d, std::unique_ptr<olc_session> session, std::string_view who)
+{
+  if (d->olc && !who.empty())
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: {}: Player already had olc structure.", who);
+  d->olc = std::move(session);
+}
+
+void begin_editing(GameWorld *g, struct descriptor_data *d, int state)
+{
+  desc_set_connected(d, state);
+  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
+  char_plr_set(d->character, PLR_WRITING, true);
+}
+
+void leave_olc(GameWorld *g, struct descriptor_data *d)
+{
+  if (!d->olc)
+    return;
+  if (d->character) {
+    char_plr_set(d->character, PLR_WRITING, false);
+    act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
+    d->olc->log_leaving(g, d);
+    desc_set_connected(d, CON_PLAYING);
+  }
+  d->olc.reset();
+}
 
 void olc_parse(GameWorld *g, struct descriptor_data *d, char *arg)
 {
