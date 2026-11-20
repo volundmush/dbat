@@ -7,73 +7,18 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include <climits>
-#include <cerrno>
-#include <cstring>
-#include <cstdlib>
 
-#include <unistd.h>
-#include <sys/time.h>
 
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
-#include "dbat/consts/maximums.hpp"
-#include "dbat/players.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/io/paths.hpp"
-#include "dbat/io/writer.hpp"
-#include "dbat/db.hpp"
-#include "dbat/objsave.hpp"
 #include "dbat/interpreter.hpp"
-#include "dbat/time.hpp"
-#include "dbat/character_utils.hpp"
-#include "dbat/descriptor_utils.hpp"
-#include "dbat/object_utils.hpp"
-#include "dbat/zone_utils.hpp"
-#include "dbat/room_utils.hpp"
-#include "dbat/stringutils.hpp"
-#include "dbat/search.hpp"
-#include "dbat/relocate.hpp"
-#include "dbat/fileop.hpp"
-#include "dbat/extract.hpp"
-#include "dbat/affect.hpp"
-#include "dbat/config.hpp"
-#include "dbat/act.other.hpp"
-#include "dbat/maputils.hpp"
-#include "dbat/broadcast.hpp"
-#include "dbat/handler.hpp"
-#include "dbat/act.item.hpp"
-#include "dbat/act.informative.hpp"
-#include "dbat/weather.hpp"
-#include "dbat/assemblies.hpp"
-#include "dbat/house.hpp"
 #include "dbat/comm.hpp"
-#include "dbat/dg_scripts.hpp"
-#include "dbat/races.hpp"
-#include "dbat/class.hpp"
-#include "dbat/spells.hpp"
-#include "dbat/improved-edit.hpp"
-#include "dbat/feats.hpp"
-#include "dbat/fight.hpp"
 #include "dbat/genolc.hpp"
-#include "dbat/screen.hpp"
 #include "dbat/local_limits.hpp"
-#include "dbat/shop.hpp"
-#include "dbat/guild.hpp"
-#include "dbat/spell_parser.hpp"
-#include "dbat/game_world.hpp"
-
-/* local functions */
-static void execute_copyover(GameWorld *g);
-/* Tells everyone playing (or building) about the copyover */
-static void game_info(GameWorld *g, std::string_view text);
-template <class... Args>
-  requires(sizeof...(Args) > 0)
-static void game_info(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
-{
-  game_info(g, str_format(fmt, std::forward<Args>(args)...));
-}
+#include "dbat/copyover.hpp"
 
 /* local variables */
 
@@ -150,36 +95,6 @@ ACMD(do_shutdown)
     g->circle_reboot = mode->reboot;
 }
 
-/* Path of the binary to re-exec on copyover: whatever file is now at the path this process was started
- * from (so a freshly rebuilt binary is picked up, whichever build system produced it). After a rebuild
- * replaces the file, the kernel reports the old path with a " (deleted)" suffix, which is stripped. */
-static bool copyover_exe_path(char *out, size_t size)
-{
-  ssize_t len = readlink("/proc/self/exe", out, size - 1);
-  if (len <= 0)
-    return false;
-  out[len]           = '\0';
-  /* what a binary rebuilt while running looks like: the new one is what we want */
-  const char *suffix = " (deleted)";
-  size_t slen        = strlen(suffix);
-  if ((size_t)len > slen && !strcmp(out + len - slen, suffix))
-    out[len - slen] = '\0';
-  return true;
-}
-
-static void game_info(GameWorld *g, std::string_view text)
-{
-  for (descriptor_data *i : each_desc(g)) {
-    if (desc_get_connected(i) != CON_PLAYING && (desc_get_connected(i) != CON_REDIT && desc_get_connected(i) != CON_OEDIT && desc_get_connected(i) != CON_MEDIT))
-      continue;
-    if (!(i->character))
-      continue;
-
-    write_to_output(g, i, "@r-@R=@D<@GCOPYOVER@D>@R=@r- @W");
-    write_to_output(g, i, text);
-    write_to_output(g, i, "@n\r\n@R>>>@GMake sure to pick up your bed items and save.@n\r\n");
-  }
-}
 
 /* (c) 1996-97 Erwin S. Andreasen <erwin@pip.dknet.dk> */
 ACMD(do_copyover)
@@ -223,145 +138,6 @@ ACMD(do_copyover)
   }
 }
 
-/* Whoever a connection's player really is: someone switched into a mob is still themselves. */
-static struct char_data *copyover_player(const struct descriptor_data *d)
-{
-  struct char_data *player = d->original ? d->original : d->character;
-
-  return player && !char_is_npc(player) && desc_is_playing(d) ? player : nullptr;
-}
-
-/* Who to bring back, and how. Returns false, having changed nothing, if it can't all be written down. */
-static bool write_copyover_file(GameWorld *g)
-{
-  io::text_writer out(COPYOVER_FILE);
-
-  for (descriptor_data *d : each_desc(g)) {
-    struct char_data *player = copyover_player(d);
-    room_vnum room           = 300;
-
-    if (!player)
-      continue;
-    if (char_get_in_room(player) > 1)
-      room = char_get_in_room(player);
-    else if (char_get_was_in_room(player) > 1)
-      room = char_get_was_in_room(player);
-    out.print("{:d} {} {} {:d} {}\n", d->descriptor, char_get_name(player), *d->host ? d->host : "unknown", room,
-               !d->acct.user.empty() ? d->acct.user.c_str() : "Empty");
-  }
-
-  /* After the end marker, so that an older server ignores it. What else outlives the process goes here. */
-  out.print("-1 restrict {:d}\n", g->circle_restrict);
-  return out.commit();
-}
-
-/* Saves everyone in the game who has no connection to bring back: link-dead players. */
-static void save_players_without_connections(GameWorld *g)
-{
-  for (char_data *ch : each_char(g)) {
-    bool connected = char_get_desc(ch) != nullptr;
-
-    for (descriptor_data *d : each_desc(g)) {
-      if (connected)
-        break;
-      connected = d->original == ch;
-    }
-    if (!char_is_npc(ch) && !connected) {
-      Crash_crashsave(g, ch);
-      save_char(g, ch);
-    }
-  }
-}
-
-/*
- * Everything that can fail comes first, while nothing has changed and the game can simply carry on:
- * Crash_rentsave() takes each player's objects out of the game, so after that there's no way back.
- */
-static void execute_copyover(GameWorld *g)
-{
-  struct itimerval no_timer = {{0, 0}, {0, 0}};
-  char exe[PATH_MAX];
-  std::string fold;
-  std::string mother; /* lasts until the exec */
-  char **args;
-  int num_args = 0;
-
-  if (!copyover_exe_path(exe, sizeof(exe)) || access(exe, X_OK) < 0) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: Copyover aborted: can't run the server binary: {}", strerror(errno));
-    return;
-  }
-  if (!write_copyover_file(g)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: Copyover aborted: can't write {}: {}", COPYOVER_FILE, strerror(errno));
-    return;
-  }
-
-  /* Consider changing all saved areas here, if you use OLC */
-  save_all(g);
-  save_mud_time(g, &g->time_info);
-  House_save_all(g);
-  save_players_without_connections(g);
-
-  fold = "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n";
-  for (descriptor_data *d : each_desc(g)) {
-    struct char_data *player = copyover_player(d);
-
-    if (!player) {
-      write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
-      close_socket(g, d); /* throw'em out */
-      continue;
-    }
-    if (d->output && *d->output)
-      write_to_descriptor(d->descriptor, d->output); /* whatever they haven't been sent yet */
-    if (desc_get_connected(d) != CON_PLAYING)
-      write_to_descriptor(d->descriptor, "\n\rWhatever you were editing has been lost.\n\r");
-    Crash_rentsave(g, player, 0);
-    save_char(g, player);
-    write_to_descriptor(d->descriptor, fold.c_str());
-  }
-
-  /* Everything the game was started with, so that it comes back the same, and in the same place. */
-  args = new char *[g->launch_argc + 2]();
-  mother           = str_format("-C{:d}", g->mother_desc);
-  args[num_args++] = g->launch_argv[0];
-  args[num_args++] = mother.data();
-  for (int i = 1; i < g->launch_argc; i++)
-    if (strncmp(g->launch_argv[i], "-C", 2))
-      args[num_args++] = g->launch_argv[i];
-  args[num_args] = nullptr;
-  if (chdir(g->launch_dir) < 0)
-    perror("do_copyover: chdir");
-
-  /* The deadlock timer outlives exec, and would kill the new process if it ran out during boot. */
-  setitimer(ITIMER_VIRTUAL, &no_timer, nullptr);
-
-  /* exec - descriptors are inherited, but anything still buffered here would be lost */
-  fflush(nullptr);
-  execv(exe, args);
-  /* Failed - sucessful exec will not return */
-
-  perror("do_copyover: execv");
-  mud_log("SYSERR: Copyover failed after saving everyone. Rebooting.");
-  exit(52); /* everything is saved, but objects have left the game: what autorun takes to mean reboot */
-}
-
-void copyover_check(GameWorld *g)
-{
-  if (!g->copyover_timer)
-    return;
-  g->copyover_timer--;
-  int left = g->copyover_timer;
-  if (!left) {
-    execute_copyover(g);
-    return; /* only if it was aborted */
-  }
-  /* Each minute, then every ten seconds of the last minute, then every five of the last thirty */
-  if (left > 59) {
-    if (left % 60 == 0)
-      game_info(g, "A copyover will be performed in {:d} minute{}.", left / 60, left / 60 > 1 ? "s" : "");
-  } else if (left % (left > 29 ? 10 : 5) == 0) {
-    game_info(g, "A copyover will be performed in {:d} seconds.", left);
-  }
-}
 
 ACMD(do_dc)
 {

@@ -16,7 +16,8 @@ def functions(objdir):
     for line in out.splitlines():
         m = re.match(r'^[0-9a-f]+ <(.+)>:$', line)
         if m:
-            cur = re.sub(r'\.(isra|constprop|part|cold)\.\d+', '', m.group(1))
+            # a function made extern (or static) only loses (or gains) the L of internal linkage
+            cur = re.sub(r'^_ZL', '_Z', re.sub(r'\.(isra|constprop|part|cold)\.\d+', '', m.group(1)))
             fns[cur].append([])
             continue
         if line.startswith('Disassembly of section') or 'file format' in line:
@@ -32,12 +33,16 @@ def functions(objdir):
                       r'\.(?!str\d|cst\d)([A-Za-z_]\w*)(?![\w.])', r'\1\2', line)
         line = re.sub(r'\.LC\d+|\.rodata[\w.]*(\+0x[0-9a-f]+)?', '<STR>', line)  # string literals
         line = re.sub(r'(R_X86_64_\w+\s+)([\w.]+)\.(isra|constprop|part|cold)\.\d+', r'\1\2', line)
+        # a variable made extern (or static) loses (or gains) its internal-linkage mangling: _ZL3foo is foo
+        line = re.sub(r'\b_ZL(\d+)(\w+)', lambda m: m.group(2) if len(m.group(2)) == int(m.group(1)) else '_Z' + m.group(1) + m.group(2), line)
         # static vs extern linkage only changes how a call is relocated and whether endbr64 is emitted
         if line.strip() == 'endbr64':
             continue
         # alignment padding varies with the size of neighbouring code
         if re.match(r'^(data16 |cs )*(nop[wl]?|xchg\s+%ax,%ax)\b', line.strip()):
             continue
+        # a .cold part jumps back into its function, at an offset that moves with the function's start (endbr64)
+        line = re.sub(r'(R_X86_64_\w+\s+)\.text\.([\w.]+)\+0x[0-9a-f]+', lambda m: m.group(1) + '<PARENT>' if cur.startswith(re.sub(r'^_ZL', '_Z', m.group(2))) else m.group(0), line)
         # offsets into a file's own data sections depend on what else lives in that file
         line = re.sub(r'(R_X86_64_\w+)\s+\.(data|bss|rodata)[\w.]*([+-]0x[0-9a-f]+)?', r'\1 <DATA>', line)
         line = re.sub(r'R_X86_64_(PLT32|PC32)\s+(\.text\.)?([\w.]+)-0x4', r'R_CALL \3', line)
@@ -45,7 +50,9 @@ def functions(objdir):
         if line == 'R_CALL ' + cur:
             continue
         fns[cur][-1].append(line)
-    return {k: sorted('\n'.join(b) for b in v) for k, v in fns.items()}
+    # an inline function or template is compiled into every file that uses it, so moving code between files
+    # changes how many copies there are: compare the distinct bodies
+    return {k: sorted(set('\n'.join(b) for b in v)) for k, v in fns.items()}
 
 ref, new = functions(sys.argv[1]), functions(sys.argv[2])
 if RENAME:

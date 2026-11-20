@@ -9,7 +9,8 @@ root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 here="$root/tools"
 work=$(mktemp -d "${TMPDIR:-/tmp}/dbat-objdiff.XXXXXX")
 mkdir -p "$work/ref-src"
-git -C "$root" archive "$ref" libs apps | tar -x -C "$work/ref-src"
+# tools too, so that both builds take their own roundtrip.cpp and statedump.cpp
+git -C "$root" archive "$ref" libs apps tools | tar -x -C "$work/ref-src"
 # No inlining and no interprocedural optimisation, so each function's code depends only on its own
 # source: otherwise e.g. making a function static changes how GCC specialises it and its callers.
 flags=(-O2 -fno-inline -fno-ipa-sra -fno-ipa-cp -fno-ipa-ra -fno-ipa-icf -fno-ipa-pure-const
@@ -20,5 +21,6 @@ flags=(-O2 -fno-inline -fno-ipa-sra -fno-ipa-cp -fno-ipa-ra -fno-ipa-icf -fno-ip
 "$here/build-tree.sh" "$root" "$work/new" "${flags[@]}"
 set +e
 python3 "$here/objdiff.py" "$work/ref/obj" "$work/new/obj"; status=$?
-rm -rf "$work"
+# OBJDIFF_KEEP=1 keeps the two builds, for a closer look
+[ -n "${OBJDIFF_KEEP:-}" ] && echo "objdiff: kept $work" || rm -rf "$work"
 exit $status

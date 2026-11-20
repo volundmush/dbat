@@ -11,7 +11,7 @@ allowed='
 io/writer.cpp replace_file                      the writer itself (writes <path>.tmp, then renames it over <path>)
 io/writer.cpp append_file                       append-only logs (news, bug/idea/typo, requests): a crash can only cut the last entry
 io/paths.cpp touch                              appends nothing; only creates a missing file
-net/comm.cpp open_logfile                       the syslog
+util/log.cpp open_logfile                       the syslog
 '
 
 fail=0

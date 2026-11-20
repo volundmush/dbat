@@ -8,6 +8,10 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
+FILE *logfile = nullptr; /* Where to send the log messages. */
+
+static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode);
+
 /* log a death trap hit */
 void log_death_trap(GameWorld *g, struct char_data *ch)
 {
@@ -79,3 +83,51 @@ void core_dump_real(const char *who, int line)
   log_backtrace();
 }
 
+/* Prefer the file over the descriptor. */
+void setup_log(const char *filename, int fd, bool keep_old_log)
+{
+  const char *mode = keep_old_log ? "a" : "w"; /* a copyover carries on the same log */
+  FILE *s_fp;
+
+  s_fp = stderr;
+
+  if (filename == nullptr || *filename == '\0') {
+    /* No filename, set us up with the descriptor we just opened. */
+    logfile = s_fp;
+    puts("Using file descriptor for logging.");
+    return;
+  }
+
+  /* We honor the default filename first. */
+  if (open_logfile(filename, s_fp, mode))
+    return;
+
+  /* Well, that failed but we want it logged to a file so try a default. */
+  if (open_logfile("log/syslog", s_fp, mode))
+    return;
+
+  /* Ok, one last shot at a file. */
+  if (open_logfile("syslog", s_fp, mode))
+    return;
+
+  /* Erp, that didn't work either, just die. */
+  puts("SYSERR: Couldn't open anything to log to, giving up.");
+  exit(1);
+}
+
+static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode)
+{
+  if (stderr_fp) /* freopen() the descriptor. */
+    logfile = freopen(filename, mode, stderr_fp);
+  else
+    logfile = fopen(filename, mode);
+
+  if (logfile) {
+    file_print(stdout, "Using log file '{}'{}.\n",
+               filename, stderr_fp ? " with redirection" : "");
+    return (true);
+  }
+
+  file_print(stdout, "SYSERR: Error opening file '{}': {}\n", filename, strerror(errno));
+  return (false);
+}
