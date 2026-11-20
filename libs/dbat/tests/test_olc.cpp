@@ -314,6 +314,8 @@ namespace {
       as(ADMLVL_BUILDER, "buildwalk, a builder of no zone", {"buildwalk", "west", "buildwalk"}),
       impl("restring, away from the shop", {"load obj 301", "restring sword"}, rich),
       impl("the save list", {"olc", "redit 300", "1", "Changed", "q", "y", "olc"}),
+      impl("the save list, several kinds", {"cedit", "o", "k", "q", "q", "y", "redit 300", "1", "Changed", "q", "y", "medit 300", "2", "guard", "q", "y", "sedit 300", "1", "5", "q", "y", "gedit 300", "3", "4", "q", "y", "olc", "zedit", "1", "Renamed", "q", "y", "olc"}),
+      impl("lists, ranges", {"rlist 300 900", "olist 310 300", "slist 300 310", "slist 1 2", "glist 300 310", "mlist .", "tlist 0", "tlist 1 2", "olist 3", "zlist 0 4", "links ."}),
       impl("skillset", {"skillset", "skillset watcher", "skillset watcher kick", "skillset watcher 'kick' 50", "skillset watcher 'kick' 500", "skillset nobody 'kick' 5", "skillset watcher 'nonsense' 5", "stat watcher"}),
       /* ---- medit ---- */
       impl("medit, refusals", {"medit", "medit nonsense", "medit 99999", "medit save 99999", "medit save"}),

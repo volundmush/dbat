@@ -20,7 +20,7 @@
 #include "dbat/genolc.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/iterate.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/social.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/text_files.hpp"

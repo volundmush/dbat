@@ -9,8 +9,7 @@
  * An editor's session: what a connection in one of the OLC states is editing, and how that editor answers a line.
  * The connection owns it (d->olc), and freeing it frees whatever the editor was still holding.
  *
- * Each editor is a session of its own kind; the ones not yet rewritten share oasis_olc_data (oasis.hpp), which finds
- * the editor's code by the connection's state.
+ * Each editor is a session of its own kind, in an anonymous namespace in its file.
  */
 struct olc_session {
   olc_session()                               = default;
@@ -86,3 +85,12 @@ struct zone_data *zone_to_edit(GameWorld *g, struct char_data *ch, IDXTYPE numbe
    writes the zone's files of that kind */
 void save_zone_files(GameWorld *g, struct char_data *ch, struct zone_data *zone, std::string_view things, std::string_view info,
                      bool (*save)(GameWorld *, struct zone_data *));
+
+/* Clears the builder's screen, if they want it cleared before a menu */
+void clear_screen(GameWorld *g, struct descriptor_data *d);
+
+/* May ch edit the zone? Builders their own, or one they helped build; greater gods any. */
+bool can_edit_zone(GameWorld *g, struct char_data *ch, struct zone_data *zone);
+
+/* Tells ch they may not edit the zone (and which they may), and logs the try */
+void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone);

@@ -26,7 +26,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/feats.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
@@ -39,6 +39,7 @@
 #include "dbat/stringutils.hpp"
 #include "dbat/local_limits.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/consts/create.hpp"
 
 static const char *sensei_abbr(int s);
 

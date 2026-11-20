@@ -197,9 +197,6 @@ io::loaded<void> read_room_file(GameWorld *g, io::text_reader &in)
 
 bool save_rooms(GameWorld *g, struct zone_data *zone_num)
 {
-  char rbuf1[MAX_STRING_LENGTH], rbuf2[MAX_STRING_LENGTH];
-  char rbuf3[MAX_STRING_LENGTH], rbuf4[MAX_STRING_LENGTH];
-
   if (!zone_num) {
     mud_log("SYSERR: no zone given.");
     return false;
@@ -216,17 +213,14 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
 
     std::string description = room_get_description(room) ? room_get_description(room) : "Empty room.";
     strip_cr(description);
-    sprintascii(rbuf1, room_get_room_flags(room)[0]);
-    sprintascii(rbuf2, room_get_room_flags(room)[1]);
-    sprintascii(rbuf3, room_get_room_flags(room)[2]);
-    sprintascii(rbuf4, room_get_room_flags(room)[3]);
     out.print("#{:d}\n"
               "{}{:c}\n"
               "{}{:c}\n"
               "{:d} {} {} {} {} {:d}\n",
               room_get_number(room), room_get_name(room) ? room_get_name(room) : "Untitled",
-              as_char(STRING_TERMINATOR), description, as_char(STRING_TERMINATOR), room_get_zone(room)->number, rbuf1,
-              rbuf2, rbuf3, rbuf4, room_get_sector_type(room));
+              as_char(STRING_TERMINATOR), description, as_char(STRING_TERMINATOR), room_get_zone(room)->number,
+              flag_letters(room_get_room_flags(room)[0]), flag_letters(room_get_room_flags(room)[1]),
+              flag_letters(room_get_room_flags(room)[2]), flag_letters(room_get_room_flags(room)[3]), room_get_sector_type(room));
 
     for (int j = 0; j < NUM_OF_DIRS; j++) {
       room_direction_data *exit = room_get_dir_option(room, j);

@@ -35,7 +35,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/fight.hpp"
 #include "dbat/spells.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/guild.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/local_limits.hpp"

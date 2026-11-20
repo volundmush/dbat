@@ -83,7 +83,6 @@ io::loaded<void> read_trigger_file(GameWorld *g, io::text_reader &in)
 /* Writes every trigger of the zone to <zone>.trg. Returns false, having logged why, if it couldn't. */
 bool save_triggers(GameWorld *g, struct zone_data *in_zone)
 {
-  char bitBuf[MAX_INPUT_LENGTH];
   zone_vnum zone = in_zone->number;
 
   io::text_writer out(str_format("{}{:d}.trg", TRG_PREFIX, zone));
@@ -94,12 +93,11 @@ bool save_triggers(GameWorld *g, struct zone_data *in_zone)
     trig_data *trig = rnum->proto;
 
     out.print("#{:d}\n", i);
-    sprintascii(bitBuf, trig->trigger_type);
     out.print("{}{:c}\n"
               "{:d} {} {:d}\n"
               "{}{:c}\n",
               !trig->name.empty() ? trig->name.c_str() : "unknown trigger", as_char(STRING_TERMINATOR),
-              trig->attach_type, *bitBuf ? bitBuf : "0", trig->narg, trig->arglist, as_char(STRING_TERMINATOR));
+              trig->attach_type, flag_letters(trig->trigger_type), trig->narg, trig->arglist, as_char(STRING_TERMINATOR));
 
     /* the script, one line per command */
     if (!trig->program)

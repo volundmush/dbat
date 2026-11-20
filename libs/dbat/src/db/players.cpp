@@ -121,13 +121,11 @@ int create_entry(GameWorld *g, const char *name)
 void save_player_index(GameWorld *g)
 {
   io::text_writer out(str_format("{}{}", LIB_PLRFILES, INDEX_FILE), true);
-  char bits[64];
   for (int i = 0; i <= g->top_of_p_table; i++) {
     const player_index_element &p = g->player_table[i];
     if (!*p.name)
       continue;
-    sprintascii(bits, p.flags);
-    out.print("{:d} {} {:d} {} {:d} {:d} {:d} {:d} {:d}\n", p.id, p.name, p.level, *bits ? bits : "0",
+    out.print("{:d} {} {:d} {} {:d} {:d} {:d} {:d} {:d}\n", p.id, p.name, p.level, flag_letters(p.flags),
               static_cast<long long>(p.last), p.admlevel, p.ship, p.shiproom, static_cast<long long>(p.played));
   }
   out.write("~\n");

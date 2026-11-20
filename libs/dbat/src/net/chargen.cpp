@@ -20,6 +20,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/consts/create.hpp"
 
 #include "nanny_internal.hpp"
 

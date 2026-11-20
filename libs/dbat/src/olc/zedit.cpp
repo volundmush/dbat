@@ -25,7 +25,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/modify.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/races.hpp"
 #include "dbat/room_utils.hpp"
@@ -33,6 +33,8 @@
 #include "dbat/utils.hpp"
 #include "dbat/zone_utils.hpp"
 #include "dbat/zones.hpp"
+#include "dbat/olc/commands.hpp"
+#include "dbat/olc/limits.hpp"
 
 namespace {
   /* ---- the arguments of a reset command, as zedit asks for them ---- */

@@ -130,45 +130,22 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
 
 /*-------------------------------------------------------------------*/
 
-void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
+void create_world_index(GameWorld *g, zone_vnum znum, std::string_view type)
 {
-  std::string old_name;
-  const char *prefix;
-  zone_vnum num;
-  int found = false;
-  char buf1[MAX_STRING_LENGTH];
+  static constexpr std::pair<char, const char *> PREFIXES[] = {
+      {'z', ZON_PREFIX},
+      {'w', WLD_PREFIX},
+      {'o', OBJ_PREFIX},
+      {'m', MOB_PREFIX},
+      {'s', SHP_PREFIX},
+      {'t', TRG_PREFIX},
+      {'g', GLD_PREFIX},
+  };
+  auto prefix = std::ranges::find(PREFIXES, type.empty() ? '\0' : type.front(), &std::pair<char, const char *>::first);
+  if (prefix == std::end(PREFIXES))
+    return; /* Caller messed up */
 
-  switch (*type) {
-    case 'z':
-      prefix = ZON_PREFIX;
-      break;
-    case 'w':
-      prefix = WLD_PREFIX;
-      break;
-    case 'o':
-      prefix = OBJ_PREFIX;
-      break;
-    case 'm':
-      prefix = MOB_PREFIX;
-      break;
-    case 's':
-      prefix = SHP_PREFIX;
-      break;
-    case 't':
-      prefix = TRG_PREFIX;
-      break;
-    case 'g':
-      prefix = GLD_PREFIX;
-      break;
-    default:
-      /*
-     * Caller messed up  
-     */
-      return;
-  }
-
-  old_name = str_format("{}/index", prefix);
-
+  const std::string old_name = str_format("{}/index", prefix->second);
   io::loaded<io::text_reader> oldfile = io::text_reader::open(old_name);
   if (!oldfile) {
     mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open {}.", old_name);
@@ -178,25 +155,25 @@ void create_world_index(GameWorld *g, zone_vnum znum, const char *type)
 
   /*
    * Index contents must be in order: search through the old file for the
-   * right place, insert the new file, then copy the rest over. 
+   * right place, insert the new file, then copy the rest over.
    */
-  snprintf(buf1, sizeof(buf1), "%d.%s", znum, type);
+  const std::string entry = str_format("{:d}.{}", znum, type);
+  bool found              = false;
+  zone_vnum num           = 0;
   while (std::optional<std::string_view> line = oldfile->line()) {
     std::string buf(*line);
     if (buf[0] == '$') {
-      /*
-       * The following used to add a blank line, thanks to Brian Taylor for the fix... (Mythran)
-       */
-      newfile.print("{}", (!found ? strncat(buf1, "\n$\n", sizeof(buf1) - 1) : "$\n"));
+      /* The following used to add a blank line, thanks to Brian Taylor for the fix... (Mythran) */
+      newfile.print("{}", !found ? entry + "\n$\n" : "$\n");
       break;
     }
     if (!found) {
-      sscanf(buf.c_str(), "%d", &num);
+      sscanf(buf.c_str(), "%d", &num); /* a line that isn't a number keeps the last one's */
       if (num == znum) {
         found = true;
       } else if (num > znum) {
         found = true;
-        newfile.print("{}\n", buf1);
+        newfile.print("{}\n", entry);
       }
     }
     newfile.print("{}\n", buf);

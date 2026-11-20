@@ -24,7 +24,7 @@
 #include "dbat/index.hpp"
 #include "dbat/db.hpp"
 #include "dbat/genzon.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/registry.hpp"
 
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 

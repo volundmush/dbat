@@ -19,7 +19,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/feats.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/config.hpp"
 #include "dbat/act.item.hpp"
 #include "dbat/act.movement.hpp"

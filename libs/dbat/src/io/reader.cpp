@@ -270,7 +270,7 @@ bitvector_t ascii_flags(std::string_view word, int first_letter_bit, const char 
     else if (c >= 'A' && c <= 'F')
       flags |= 1U << (26 + (c - 'A'));
     else if (c >= 'A' && c <= 'Z' && !warned) {
-      /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
+      /* Only a-z and A-F fit in a 32-bit bitvector_t; see flag_letters(). */
       mud_log("SYSERR: {}: ignoring out-of-range flag letter '{:c}' in \"{}\".", who, as_char(c), word);
       warned = true;
     }

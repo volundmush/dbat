@@ -17,7 +17,7 @@
 #include "dbat/db.hpp"
 #include "dbat/game_world.hpp"
 #include "dbat/interpreter.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/statedit.hpp"
 #include "dbat/utils.hpp"
 

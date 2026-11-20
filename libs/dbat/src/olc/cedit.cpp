@@ -16,7 +16,7 @@
 #include "dbat/config.hpp"
 #include "dbat/cedit.hpp"
 #include "dbat/comm.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/modify.hpp"
 #include "dbat/spec_assign.hpp"
 #include "dbat/db.hpp"
@@ -29,6 +29,7 @@
 #include "dbat/stringutils.hpp"
 #include "dbat/io/writer.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/olc/commands.hpp"
 
 /*
  * Every configuration option is one row of cedit_options[], in the order the config file

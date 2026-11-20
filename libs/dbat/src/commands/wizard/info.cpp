@@ -62,6 +62,8 @@
 #include "dbat/spell_parser.hpp"
 #include "dbat/world_audit.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/olc/commands.hpp"
+#include "dbat/olc/limits.hpp"
 
 /* local functions */
 static void do_stat_room(GameWorld *g, struct char_data *ch);

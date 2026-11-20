@@ -193,10 +193,6 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
   int arg4 = -1, arg5 = -1;
   IDXTYPE arg1 = -1, arg2 = -1, arg3 = -1;
   const char *comment = nullptr;
-  char zbuf1[MAX_STRING_LENGTH];
-  char zbuf2[MAX_STRING_LENGTH];
-  char zbuf3[MAX_STRING_LENGTH];
-  char zbuf4[MAX_STRING_LENGTH];
 
   if (!zone_num) {
     mud_log("SYSERR: no zone given.");
@@ -205,11 +201,6 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
 
   io::text_writer out(str_format("{}{:d}.zon", ZON_PREFIX, zone_num->number));
 
-  sprintascii(zbuf1, zone_num->zone_flags[0]);
-  sprintascii(zbuf2, zone_num->zone_flags[1]);
-  sprintascii(zbuf3, zone_num->zone_flags[2]);
-  sprintascii(zbuf4, zone_num->zone_flags[3]);
-
   out.print("@Version: {:d}\n", CUR_ZONE_VERSION);
   out.print("#{:d}\n"
             "{}~\n"
@@ -217,7 +208,8 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
             "{:d} {:d} {:d} {:d} {} {} {} {} {:d} {:d}\n",
             zone_num->number, !zone_num->builders.empty() ? zone_num->builders.c_str() : "None.",
             !zone_num->name.empty() ? zone_num->name.c_str() : "undefined", genolc_zone_bottom(g, zone_num),
-            zone_num->top, zone_num->lifespan, zone_num->reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, zone_num->min_level,
+            zone_num->top, zone_num->lifespan, zone_num->reset_mode, flag_letters(zone_num->zone_flags[0]),
+            flag_letters(zone_num->zone_flags[1]), flag_letters(zone_num->zone_flags[2]), flag_letters(zone_num->zone_flags[3]), zone_num->min_level,
             zone_num->max_level);
 
   /*

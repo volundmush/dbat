@@ -26,12 +26,26 @@
 #include "dbat/room_utils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/olc/commands.hpp"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
 
 static room_vnum redit_find_new_vnum(GameWorld *g, struct zone_data *zone);
+
+namespace {
+  /*
+   * dig and buildwalk make a room as redit would, for that moment in a session of their own: quirk: so leaving it,
+   * the room sees the builder stop using OLC, and the log has them stop editing the zone, never having started.
+   */
+  struct room_maker final : olc_session {
+    struct zone_data *zone;
+    explicit room_maker(struct zone_data *in) : zone(in) {}
+    void parse(GameWorld *, struct descriptor_data *, std::string_view) override {}
+    void log_leaving(GameWorld *g, struct descriptor_data *d) const override { log_stops_editing(g, d, zone->number); }
+  };
+} // namespace
 
 /* External Functions */
 
@@ -130,17 +144,7 @@ ACMD(do_dig)
    */
   /* If the room doesn't exist, create it.*/
   if (!room_of(g, rrnum)) {
-    /*
-     * Give the descriptor an olc struct.
-     * Its leaving logs the builder leaving OLC.
-     */
-    if (d->olc) {
-      mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
-      d->olc.reset();
-    }
-    d->olc      = std::make_unique<oasis_olc_data>();
-    OLC_ZNUM(d) = zone;
-    OLC_NUM(d)  = rvnum;
+    open_session(g, d, std::make_unique<room_maker>(zone), "do_dig");
 
     struct room_data room;
     room.name        = !new_room_name.empty() ? new_room_name : "An unfinished room";
@@ -253,8 +257,8 @@ ACMD(do_rcopy)
   room_set_sector_type(g, rrnum, room_sect(g, trnum));
 
   /* Copy over description name and extra descriptions */
-  room_set_description(g, rrnum, take_string(str_udup(room_get_description(g, trnum))));
-  room_set_name(g, rrnum, take_string(str_udup(room_get_name(g, trnum))));
+  room_set_description(g, rrnum, text_or_undefined(room_get_description(g, trnum)));
+  room_set_name(g, rrnum, text_or_undefined(room_get_name(g, trnum)));
 
   /* Copy over any existings extra descriptions */
   *room_ex_description_slot(room_of(g, rrnum)) = room_get_ex_description(g, trnum);
@@ -300,22 +304,13 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
       send_to_char(g, ch, "No free vnums are available in this zone!\r\n");
     else {
       struct descriptor_data *d = char_get_desc(ch);
-      /*
-       * Give the descriptor an olc struct.
-       * Its leaving logs the builder leaving OLC.
-       */
-      if (d->olc) {
-        mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
-        d->olc.reset();
-      }
-      d->olc      = std::make_unique<oasis_olc_data>();
-      OLC_ZNUM(d) = room_get_zone(g, char_get_in_room(ch));
-      OLC_NUM(d)  = vnum;
+      struct zone_data *zone    = room_get_zone(g, char_get_in_room(ch));
+      open_session(g, d, std::make_unique<room_maker>(zone), "buildwalk()");
 
       struct room_data room;
       room.name        = "New BuildWalk Room";
       room.description = str_format("This unfinished room was created by {}.\r\n", char_get_name(ch));
-      redit_save_internally(g, room, vnum, OLC_ZNUM(d), {});
+      redit_save_internally(g, room, vnum, zone, {});
 
       /* Link rooms */
       rnum = vnum;

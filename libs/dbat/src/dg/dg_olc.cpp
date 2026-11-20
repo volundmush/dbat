@@ -23,7 +23,7 @@
 #include "dbat/db.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/interpreter.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/modify.hpp"
 #include "dbat/flags.hpp"

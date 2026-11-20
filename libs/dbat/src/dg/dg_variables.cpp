@@ -21,7 +21,7 @@
 #include "dbat/db.hpp"
 #include "dbat/screen.hpp"
 #include "dbat/spells.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/class.hpp"
 #include "dbat/races.hpp"
 #include "dbat/local_limits.hpp"

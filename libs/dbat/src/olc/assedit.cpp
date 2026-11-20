@@ -19,7 +19,7 @@
 #include "dbat/handler.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/iterate.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/stringutils.hpp"
 

@@ -20,12 +20,18 @@
 #include "dbat/house.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/maputils.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/context_help.hpp"
 #include "dbat/spells.hpp"
 #include "dbat/weather.hpp"
 #include "dbat/zones.hpp"
 
 /* The state of one running game. */
+/* A zone's files of one kind (SL_*, genolc.hpp) that OLC changed and hasn't saved yet */
+struct save_list_data {
+  zone_vnum zone{};
+  int type{};
+};
+
 struct GameWorld {
   /* Entities and their prototypes */
   vnum_table<room_data, room_vnum> rooms; /* all rooms, by vnum */
@@ -164,7 +170,7 @@ struct GameWorld {
   room_vnum mapnums[MAP_ROWS + 1][MAP_COLS + 1]{};
 
   /* OLC and bookkeeping */
-  struct save_list_data *save_list{};
+  std::vector<save_list_data> save_list; /* what OLC changed and hasn't saved, oldest first */
   int extractions_pending{};
 
   /* The zone clock */

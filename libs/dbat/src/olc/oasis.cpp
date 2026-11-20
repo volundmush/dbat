@@ -17,7 +17,7 @@
 #include "dbat/genshp.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/genobj.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/dg_olc.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/guild.hpp"
@@ -31,6 +31,7 @@
 #include "dbat/hsedit.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/olc/commands.hpp"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
@@ -50,137 +51,58 @@ void clear_screen(GameWorld *g, struct descriptor_data *d)
 /* -------------------------------------------------------------------------- */
 
 /*
- * Exported ACMD do_oasis function.
- *
- * This function is the OLC interface.  It deals with all the 
- * generic OLC stuff, then passes control to the sub-olc sections.
- *
- * UPDATE:
- *  I believe that yes, putting the code together that is common in all of the
- *  olc functions is good to a certain extent, but the do_oasis command was
- *  getting ridiculous.  Therefore, I have separated them into separate
- *  functions that get called from in do_oasis....yes, similar code, but it is
- *  easier to handle....   - Kip Potter
+ * The OLC commands, as their subcommands reach do_oasis(). Each editor's command does its own work; this only keeps a
+ * mob, or someone not playing, from starting one.
  */
+namespace {
+  constexpr std::pair<int, void (*)(GameWorld *, struct char_data *, std::string_view, int, int)> OASIS_COMMANDS[] = {
+      {SCMD_OASIS_CEDIT,    do_oasis_cedit   },
+      {SCMD_OASIS_ZEDIT,    do_oasis_zedit   },
+      {SCMD_OASIS_REDIT,    do_oasis_redit   },
+      {SCMD_OASIS_OEDIT,    do_oasis_oedit   },
+      {SCMD_OASIS_MEDIT,    do_oasis_medit   },
+      {SCMD_OASIS_SEDIT,    do_oasis_sedit   },
+      {SCMD_OASIS_AEDIT,    do_oasis_aedit   },
+      {SCMD_OASIS_HEDIT,    do_oasis_hedit   },
+      {SCMD_OASIS_HSEDIT,   do_oasis_hsedit  },
+      {SCMD_OASIS_RLIST,    do_oasis_list    },
+      {SCMD_OASIS_MLIST,    do_oasis_list    },
+      {SCMD_OASIS_OLIST,    do_oasis_list    },
+      {SCMD_OASIS_SLIST,    do_oasis_list    },
+      {SCMD_OASIS_ZLIST,    do_oasis_list    },
+      {SCMD_OASIS_TLIST,    do_oasis_list    },
+      {SCMD_OASIS_GLIST,    do_oasis_list    },
+      {SCMD_OASIS_TRIGEDIT, do_oasis_trigedit},
+      {SCMD_OASIS_LINKS,    do_oasis_links   },
+      {SCMD_OASIS_GEDIT,    do_oasis_gedit   },
+  };
+} // namespace
+
 ACMD(do_oasis)
 {
-  /*
-   * No screwing around as a mobile.
-   */
+  /* No screwing around as a mobile. */
   if (char_is_npc(ch) || !char_get_desc(ch))
     return;
 
   /*
-   * Prevent forcing people in OLC to edit other stuff.
-   * 'force' just lets command_interpreter() handle the input,
-   * regardless of the state of the victim. 
-   * This can wreck havoc if people are i OLC already 
-   * - ie. their input should have been redirected by nanny(), and
-   * never get to command_interpreter().
-   * -- Welcor 09/03 
-   * - thanks to Mark Garringer (zizazat@hotmail.com) for the bug report.
+   * Prevent forcing people in OLC to edit other stuff: 'force' hands the line to command_interpreter() whatever the
+   * victim's state, and someone in OLC has their input go to nanny() instead. -- Welcor 09/03 (thanks to Mark Garringer
+   * for the bug report)
    */
   if (desc_get_connected(char_get_desc(ch)) != CON_PLAYING)
     return;
 
-  switch (subcmd) {
-      /* The command to see what needs to be saved, typically 'olc'.  */
-
-    case SCMD_OASIS_CEDIT:
-      do_oasis_cedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_ZEDIT:
-      do_oasis_zedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_REDIT:
-      do_oasis_redit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_OEDIT:
-      do_oasis_oedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_MEDIT:
-      do_oasis_medit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_SEDIT:
-      do_oasis_sedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_AEDIT:
-      do_oasis_aedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_HEDIT:
-      do_oasis_hedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_HSEDIT:
-      do_oasis_hsedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_RLIST:
-    case SCMD_OASIS_MLIST:
-    case SCMD_OASIS_OLIST:
-    case SCMD_OASIS_SLIST:
-    case SCMD_OASIS_ZLIST:
-    case SCMD_OASIS_TLIST:
-    case SCMD_OASIS_GLIST:
-      do_oasis_list(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_TRIGEDIT:
-      do_oasis_trigedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_LINKS:
-      do_oasis_links(g, ch, argument, cmd, subcmd);
-      break;
-
-    case SCMD_OASIS_GEDIT:
-      do_oasis_gedit(g, ch, argument, cmd, subcmd);
-      break;
-
-    default:
-      mud_log("SYSERR: (OLC) Invalid subcmd passed to do_oasis, subcmd - ({:d})", subcmd);
-      return;
+  auto command = std::ranges::find(OASIS_COMMANDS, subcmd, &std::pair<int, void (*)(GameWorld *, struct char_data *, std::string_view, int, int)>::first);
+  if (command == std::end(OASIS_COMMANDS)) {
+    mud_log("SYSERR: (OLC) Invalid subcmd passed to do_oasis, subcmd - ({:d})", subcmd);
+    return;
   }
-
-  return;
+  command->second(g, ch, argument, cmd, subcmd);
 }
 
 /*------------------------------------------------------------*\
  Exported utilities 
 \*------------------------------------------------------------*/
-
-/*
- * This function is an exact duplicate of the tag_argument function found in
- * one of the ascii patches located on the circlemud ftp website.
- */
-void split_argument(char *argument, char *tag)
-{
-  char *tmp = argument, *ttag = tag, *wrt = argument;
-
-  for (; *tmp; tmp++) {
-    if (*tmp != ' ' && *tmp != '=')
-      *(ttag++) = *tmp;
-    else if (*tmp == '=')
-      break;
-  }
-
-  *ttag = '\0';
-
-  while (*tmp == '=' || *tmp == ' ')
-    tmp++;
-
-  while (*tmp)
-    *(wrt++) = *(tmp++);
-
-  *wrt = '\0';
-}
 
 /******************************************************************************/
 /**                                                                          **/
@@ -236,9 +158,4 @@ void send_cannot_edit(GameWorld *g, struct char_data *ch, zone_vnum zone)
   send_to_char(g, ch, "\r\n");
   mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "OLC: {} tried to edit zone {:d} allowed zone {:d}",
          char_get_name(ch), zone, char_get_olc_zone(g, ch));
-}
-
-void oasis_olc_data::log_leaving(GameWorld *g, struct descriptor_data *d) const
-{
-  log_stops_editing(g, d, in_zone ? in_zone->number : NOWHERE);
 }

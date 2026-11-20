@@ -23,9 +23,10 @@
 #include "dbat/hsedit.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/iterate.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/utils.hpp"
+#include "dbat/olc/commands.hpp"
 
 namespace {
   const char *const house_flags[] = {"!GUEST", "FREE", "!IMM", "IMP_ONLY", "RENTFREE", "SAVE_!RENT", "!SAVE", "\n"};

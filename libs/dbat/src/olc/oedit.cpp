@@ -33,7 +33,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/modify.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/olc/extra_desc.hpp"
 #include "dbat/olc/script_editor.hpp"
@@ -44,6 +44,8 @@
 #include "dbat/spells.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/utils.hpp"
+#include "dbat/olc/commands.hpp"
+#include "dbat/olc/limits.hpp"
 
 namespace {
   struct object_editor;

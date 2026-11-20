@@ -28,14 +28,17 @@
 #include "dbat/iterate.hpp"
 #include "dbat/medit.hpp"
 #include "dbat/modify.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/olc/script_editor.hpp"
 #include "dbat/races.hpp"
 #include "dbat/spells.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/utils.hpp"
+#include "dbat/olc/limits.hpp"
 
 namespace {
+  constexpr int NUM_GENDERS = 3; /* the sexes medit offers */
+
   struct mob_editor;
   using list_menu = void (*)(GameWorld *g, struct descriptor_data *d, mob_editor &e);
 

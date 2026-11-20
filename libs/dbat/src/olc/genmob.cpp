@@ -21,9 +21,6 @@
 #include "dbat/game_world.hpp"
 
 
-/* From db.c */
-void init_mobile_skills(void);
-
 static bool update_mobile_strings(struct char_data *t, struct char_data *f);
 
 
@@ -59,15 +56,6 @@ mob_vnum add_mobile(GameWorld *g, struct char_data *mob, mob_vnum vnum)
   found         = vnum;
 
   mud_log("GenOLC: add_mobile: Added mobile {:d} at index #{:d}.", vnum, found);
-
-#if CONFIG_GENOLC_MOBPROG
-  GET_MPROG(OLC_MOB(d))      = OLC_MPROGL(d);
-  GET_MPROG_TYPE(OLC_MOB(d)) = (OLC_MPROGL(d) ? OLC_MPROGL(d)->type : 0);
-  while (OLC_MPROGL(d)) {
-    GET_MPROG_TYPE(OLC_MOB(d)) |= OLC_MPROGL(d)->type;
-    OLC_MPROGL(d) = OLC_MPROGL(d)->next;
-  }
-#endif
 
   add_to_save_list(g, find_zone_by_thing(g, vnum)->number, SL_MOB);
   return found;

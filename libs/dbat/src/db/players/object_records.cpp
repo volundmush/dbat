@@ -201,9 +201,9 @@ io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_k
 
 void write_object_record(GameWorld *g, io::text_writer &out, obj_data *obj, int locate)
 {
-  char flags[4][MAX_STRING_LENGTH];
+  std::string flags[4];
   for (int i = 0; i < 4; i++)
-    sprintascii(flags[i], obj_get_extra_flags(obj)[i]);
+    flags[i] = flag_letters(obj_get_extra_flags(obj)[i]);
   out.print("#{:d}\n{:d}", obj_get_vnum(g, obj), locate);
   for (int i = 0; i < 8; i++)
     out.print(" {:d}", obj_get_value(obj, i));

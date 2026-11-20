@@ -187,8 +187,8 @@ static bool copy_room_strings(struct room_data *dest, struct room_data *source)
     return false;
   }
 
-  room_set_description(dest, take_string(str_udup(room_get_description(source))));
-  room_set_name(dest, take_string(str_udup(room_get_name(source))));
+  room_set_description(dest, text_or_undefined(room_get_description(source)));
+  room_set_name(dest, text_or_undefined(room_get_name(source)));
 
   /* exits and extra descriptions are copied with the room */
 

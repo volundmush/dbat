@@ -35,11 +35,12 @@
 #include "dbat/hedit.hpp"
 #include "dbat/house.hpp"
 #include "dbat/modify.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/oasis_copy.hpp"
 #include "dbat/tedit.hpp"
 #include "dbat/vehicles.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/olc/commands.hpp"
 
 /*
  * The command table. How a typed word finds its command:

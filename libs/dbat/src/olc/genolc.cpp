@@ -5,8 +5,10 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <ranges>
 
 #include "dbat/genolc.hpp"
 #include "dbat/gengld.hpp"
@@ -17,12 +19,11 @@
 #include "dbat/genwld.hpp"
 #include "dbat/modify.hpp"
 #include "dbat/genzon.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
 #include "dbat/game_world.hpp"
-
-/* List of zones to be saved.  */
+#include "dbat/olc/commands.hpp"
 
 /* Structure defining all known save types.  */
 static struct {
@@ -42,26 +43,24 @@ static struct {
     {-1,     nullptr,      nullptr },
 };
 
-const char *npc_msg_format_problem(const char *msg, bool allow_int)
+const char *npc_msg_format_problem(std::string_view msg, bool allow_int)
 {
   static std::string why; /* what is returned, until the next call */
   int ss = 0, ds = 0;
 
-  for (const char *p = msg; *p; p++) {
-    if (*p != '%')
+  for (size_t i = 0; i < msg.size(); i++) {
+    if (msg[i] != '%')
       continue;
-
-    p++;
-    if (*p == 's')
+    if (++i == msg.size())
+      return "a '%' at the very end";
+    if (msg[i] == 's')
       ss++;
-    else if (*p == 'd' && allow_int) {
+    else if (msg[i] == 'd' && allow_int) {
       if (ss == 0)
         return "%d before %s";
       ds++;
-    } else if (*p == '\0')
-      return "a '%' at the very end";
-    else if (*p != '%') {
-      why = str_format("invalid format '%{:c}'", *p);
+    } else if (msg[i] != '%') {
+      why = str_format("invalid format '%{:c}'", msg[i]);
       return why.c_str();
     }
   }
@@ -105,53 +104,31 @@ void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const
     write_to_output(g, d, "@g{:>2d}@n) {:<20.20}{}{}", i + first_number, names[i], gap, !((i + 1) % columns) ? "\r\n" : "");
 }
 
-char *str_udup(const char *txt)
-{
-  return strdup((txt && *txt) ? txt : "undefined");
-}
-
 std::string text_or_undefined(std::string_view text) { return text.empty() ? "undefined" : std::string(text); }
+
+std::string text_or_undefined(const char *text) { return text_or_undefined(std::string_view(text ? text : "")); }
 
 void scan_float(std::string_view text, float &field) { sscanf(std::string(text).c_str(), "%f", &field); }
 
-/* Original use: to be called at shutdown time.  */
+/* Writes out everything listed as unsaved. Original use: to be called at shutdown time. */
 bool save_all(GameWorld *g)
 {
-  while (g->save_list) {
-    if (g->save_list->type < 0 || g->save_list->type > SL_MAX) {
-      switch (g->save_list->type) {
-        case SL_ACT:
-          mud_log("Actions not saved - can not autosave. Use 'aedit save'.");
-          g->save_list = g->save_list->next; /* Fatal error, skip this one. */
-          break;
-        case SL_HLP:
-          mud_log("Help not saved - can not autosave. Use 'hedit save'.");
-          g->save_list = g->save_list->next; /* Fatal error, skip this one. */
-          break;
-        default:
-          mud_log("SYSERR: GenOLC: Invalid save type {:d} in save list.\n", g->save_list->type);
-          break;
-      }
-    } else if (!save_types[g->save_list->type].func(g, find_zone(g, g->save_list->zone)))
-      g->save_list = g->save_list->next; /* Fatal error, skip this one. */
+  /* each save takes its zone and kind off the list, newest first */
+  while (!g->save_list.empty()) {
+    const save_list_data item = g->save_list.back();
+    if (item.type < 0 || item.type > SL_MAX) {
+      if (item.type == SL_ACT)
+        mud_log("Actions not saved - can not autosave. Use 'aedit save'.");
+      else if (item.type == SL_HLP)
+        mud_log("Help not saved - can not autosave. Use 'hedit save'.");
+      else
+        mud_log("SYSERR: GenOLC: Invalid save type {:d} in save list.\n", item.type);
+      g->save_list.pop_back(); /* it can't be saved from here */
+    } else if (!save_types[item.type].func(g, find_zone(g, item.zone)))
+      g->save_list.pop_back(); /* Fatal error, skip this one. */
   }
 
   return true;
-}
-
-/* NOTE: This changes the buffer passed in.  */
-void strip_cr(char *buffer)
-{
-  int rpos, wpos;
-
-  if (buffer == nullptr)
-    return;
-
-  for (rpos = 0, wpos = 0; buffer[rpos]; rpos++) {
-    buffer[wpos] = buffer[rpos];
-    wpos += (buffer[rpos] != '\r');
-  }
-  buffer[wpos] = '\0';
 }
 
 /* Takes out every carriage return. */
@@ -160,88 +137,54 @@ void strip_cr(std::string &text)
   std::erase(text, '\r');
 }
 
+namespace {
+  auto listed(GameWorld *g, zone_vnum zone, int type)
+  {
+    return std::ranges::find_if(g->save_list, [&](const save_list_data &item) { return item.zone == zone && item.type == type; });
+  }
+} // namespace
+
 bool remove_from_save_list(GameWorld *g, zone_vnum zone, int type)
 {
-  struct save_list_data *ritem, *temp;
-
-  for (ritem = g->save_list; ritem; ritem = ritem->next)
-    if (ritem->zone == zone && ritem->type == type)
-      break;
-
-  if (ritem == nullptr) {
+  auto item = listed(g, zone, type);
+  if (item == g->save_list.end()) {
     mud_log("SYSERR: remove_from_save_list: Saved item not found. ({:d}/{:d})", zone, type);
     return false;
   }
-  REMOVE_FROM_LIST(ritem, g->save_list, next, temp);
-  delete ritem;
+  g->save_list.erase(item);
   return true;
 }
 
 bool add_to_save_list(GameWorld *g, zone_vnum zone, int type)
 {
-  struct save_list_data *nitem;
-  struct zone_data *rznum;
-
   if (type == SL_CFG)
     return false;
 
-  rznum = find_zone(g, zone);
-  if (rznum == nullptr) {
-    if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-      mud_log("SYSERR: add_to_save_list: Invalid zone number passed. ({:d})", zone);
-      return false;
-    }
+  if (!find_zone(g, zone) && zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
+    mud_log("SYSERR: add_to_save_list: Invalid zone number passed. ({:d})", zone);
+    return false;
   }
-
-  for (nitem = g->save_list; nitem; nitem = nitem->next)
-    if (nitem->zone == zone && nitem->type == type)
-      return false;
-
-  nitem          = new save_list_data();
-  nitem->zone = zone;
-  nitem->type = type;
-  nitem->next = g->save_list;
-  g->save_list   = nitem;
+  if (in_save_list(g, zone, type))
+    return false;
+  g->save_list.push_back({.zone = zone, .type = type});
   return true;
 }
 
-bool in_save_list(GameWorld *g, zone_vnum zone, int type)
-{
-  struct save_list_data *nitem;
-
-  for (nitem = g->save_list; nitem; nitem = nitem->next)
-    if (nitem->zone == zone && nitem->type == type)
-      return true;
-
-  return false;
-}
-
-void free_save_list(GameWorld *g)
-{
-  struct save_list_data *sld, *next_sld;
-
-  for (sld = g->save_list; sld; sld = next_sld) {
-    next_sld = sld->next;
-    delete sld;
-  }
-}
+bool in_save_list(GameWorld *g, zone_vnum zone, int type) { return listed(g, zone, type) != g->save_list.end(); }
 
 /* Used from do_show(), ideally.  */
 ACMD(do_show_save_list)
 {
-  if (g->save_list == nullptr)
+  if (g->save_list.empty()) {
     send_to_char(g, ch, "All world files are up to date.\r\n");
-  else {
-    struct save_list_data *item;
-
-    send_to_char(g, ch, "The following files need saving:\r\n");
-    for (item = g->save_list; item; item = item->next) {
-      if (item->type != SL_CFG)
-        send_to_char(g, ch, " - {} data for zone {:d}.\r\n", save_types[item->type].message, item->zone);
-      else
-        send_to_char(g, ch, " - Game configuration data.\r\n");
-    }
+    return;
   }
+  send_to_char(g, ch, "The following files need saving:\r\n");
+  for (const save_list_data &item : g->save_list | std::views::reverse) /* newest first */
+    if (item.type != SL_CFG)
+      send_to_char(g, ch, " - {} data for zone {:d}.\r\n", save_types[item.type].message, item.zone);
+    else
+      send_to_char(g, ch, " - Game configuration data.\r\n");
 }
 
 room_vnum genolc_zonep_bottom(struct zone_data *zone)
@@ -254,20 +197,13 @@ zone_vnum genolc_zone_bottom(GameWorld *g, struct zone_data *rznum)
   return rznum->bot;
 }
 
-int sprintascii(char *out, bitvector_t bits)
+std::string flag_letters(bitvector_t bits)
 {
-  int i, j = 0;
   /* 32 bits, don't just add letters to try to get more unless your bitvector_t is also as large. */
-  const char *flags = "abcdefghijklmnopqrstuvwxyzABCDEF";
-
-  for (i = 0; flags[i] != '\0'; i++)
+  static constexpr std::string_view LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEF";
+  std::string out;
+  for (size_t i = 0; i < LETTERS.size(); i++)
     if (bits & (1U << i))
-      out[j++] = flags[i];
-
-  if (j == 0) /* Didn't write anything. */
-    out[j++] = '0';
-
-  /* NUL terminate the output string. */
-  out[j++] = '\0';
-  return j;
+      out += LETTERS[i];
+  return out.empty() ? "0" : out;
 }

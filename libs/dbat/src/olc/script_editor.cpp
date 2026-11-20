@@ -8,9 +8,10 @@
 
 #include "dbat/comm.hpp"
 #include "dbat/dg_scripts.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/olc/script_editor.hpp"
 #include "dbat/stringutils.hpp"
+#include "dbat/context_help.hpp"
 
 namespace {
   /* A number as sscanf()'s %d reads one: blanks, a sign and at least one digit; what follows it is left in s */

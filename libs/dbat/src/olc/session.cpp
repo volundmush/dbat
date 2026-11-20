@@ -10,7 +10,7 @@
 #include "dbat/descriptor_utils.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/log.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/interpreter.hpp"

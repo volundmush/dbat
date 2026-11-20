@@ -22,7 +22,7 @@
 #include "dbat/mail.hpp"
 #include "dbat/boards.hpp"
 #include "dbat/improved-edit.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/tedit.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/guild.hpp"

@@ -57,7 +57,6 @@ void game_world_free_contents(GameWorld *g)
     Free_Invalid_List(g);                   /* ban.c */
     free_ban_list(g);                       /* ban.c */
     free_disabled(g);                       /* interpreter.c */
-    free_save_list(g);                      /* genolc.c */
   }
 
   if (g->last_act_message)

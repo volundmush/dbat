@@ -22,7 +22,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/modify.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/races.hpp"
 #include "dbat/room_utils.hpp"

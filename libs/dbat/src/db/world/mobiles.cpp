@@ -302,10 +302,10 @@ void write_mob(GameWorld *g, io::text_writer &out, mob_vnum vnum, char_data *mob
   strip_cr(ddesc);
   out.print("#{:d}\n{}~\n{}~\n{}~\n{}~\n", vnum, char_get_alias(mob), char_get_sdesc(mob), ldesc, ddesc);
 
-  char flags[8][MAX_STRING_LENGTH];
+  std::string flags[8];
   for (int i = 0; i < 4; i++) {
-    sprintascii(flags[i], char_get_act(mob)[i]);
-    sprintascii(flags[i + 4], char_get_affected_by(mob)[i]);
+    flags[i]     = flag_letters(char_get_act(mob)[i]);
+    flags[i + 4] = flag_letters(char_get_affected_by(mob)[i]);
   }
   out.print("{} {} {} {} {} {} {} {} {:d} E\n"
             "{:d} {:d} {:d} {:d}d{:d}+{:d} {:d}d{:d}+{:d}\n"

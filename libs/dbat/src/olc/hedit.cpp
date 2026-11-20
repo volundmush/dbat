@@ -24,7 +24,7 @@
 #include "dbat/help.hpp"
 #include "dbat/improved-edit.hpp"
 #include "dbat/interpreter.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/text_files.hpp"
 #include "dbat/utils.hpp"
 

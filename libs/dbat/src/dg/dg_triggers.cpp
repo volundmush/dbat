@@ -22,7 +22,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/db.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/spell_parser.hpp"
 #include "dbat/act.movement.hpp"
 #include "dbat/spells.hpp"

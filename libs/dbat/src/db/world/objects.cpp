@@ -292,14 +292,14 @@ void write_object(GameWorld *g, io::text_writer &out, obj_data *obj)
   out.print("#{:d}\n{}~\n{}~\n{}~\n{}~\n", obj_get_vnum(g, obj), or_undefined(obj_get_name(obj)),
             or_undefined(obj_get_short_description(obj)), or_undefined(obj_get_description(obj)), action);
 
-  char flags[12][MAX_STRING_LENGTH];
+  std::string flags[12];
   for (int i = 0; i < 4; i++) {
-    sprintascii(flags[i], obj_get_extra_flags(obj)[i]);
-    sprintascii(flags[i + 4], obj_get_wear_flags(obj)[i]);
-    sprintascii(flags[i + 8], obj_get_bitvector(obj)[i]);
+    flags[i]     = flag_letters(obj_get_extra_flags(obj)[i]);
+    flags[i + 4] = flag_letters(obj_get_wear_flags(obj)[i]);
+    flags[i + 8] = flag_letters(obj_get_bitvector(obj)[i]);
   }
   out.print("{:d}", obj_get_type_flag(obj));
-  for (const char *flag : flags)
+  for (const std::string &flag : flags)
     out.print(" {}", flag);
   out.write("\n");
   for (int i = 0; i < NUM_OBJ_VAL_POSITIONS; i++)

@@ -14,7 +14,7 @@
 #include "dbat/comm.hpp"
 #include "dbat/db.hpp"
 #include "dbat/genolc.hpp"
-#include "dbat/oasis.hpp"
+#include "dbat/olc/session.hpp"
 #include "dbat/improved-edit.hpp"
 #include "dbat/tedit.hpp"
 #include "dbat/config.hpp"

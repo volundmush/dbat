@@ -98,10 +98,7 @@ struct pfile_writer {
   }
   void flags(const char *tag, const bitvector_t *bits)
   {
-    char words[4][MAX_STRING_LENGTH];
-    for (int i = 0; i < 4; i++)
-      sprintascii(words[i], bits[i]);
-    out.print("{}: {} {} {} {}\n", tag, words[0], words[1], words[2], words[3]);
+    out.print("{}: {} {} {} {}\n", tag, flag_letters(bits[0]), flag_letters(bits[1]), flag_letters(bits[2]), flag_letters(bits[3]));
   }
 };
 
