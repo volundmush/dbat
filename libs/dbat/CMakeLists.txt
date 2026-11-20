@@ -121,7 +121,7 @@ add_test(NAME corpus COMMAND dbat_test_bot --corpus ${CMAKE_CURRENT_SOURCE_DIR}/
 # Coverage-guided fuzzing, for the fuzz preset: see tools/fuzz.sh.
 if(DBAT_FUZZ)
   target_compile_definitions(dbat_test_harness PRIVATE DBAT_FUZZ)
-  foreach(target load boot script bot olc)
+  foreach(target load boot script bot olc net)
     add_executable(dbat_fuzz_${target} tests/fuzz/fuzz_${target}.cpp tests/fuzz/fuzz.cpp)
     target_include_directories(dbat_fuzz_${target} PRIVATE tests tests/fuzz)
     target_compile_options(dbat_fuzz_${target} PRIVATE -g)

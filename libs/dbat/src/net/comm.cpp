@@ -1634,6 +1634,42 @@ static void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc
   newd->desc_num = g->last_desc;
 }
 
+struct descriptor_data *add_descriptor(GameWorld *g, int socket, std::string_view host)
+{
+  auto *d = new descriptor_data();
+  snprintf(d->host, sizeof(d->host), "%.*s", (int)host.size(), host.data());
+  init_descriptor(g, d, socket);
+  g->descriptors.add(d->desc_num, d);
+  return d;
+}
+
+std::string_view desc_output(const struct descriptor_data *d) { return d->output ? d->output : ""; }
+
+void desc_discard_output(GameWorld *g, struct descriptor_data *d)
+{
+  if (d->large_outbuf) {
+    d->large_outbuf->next = g->bufpool;
+    g->bufpool            = d->large_outbuf;
+    d->large_outbuf       = nullptr;
+  }
+  d->output   = d->small_outbuf;
+  d->bufspace = SMALL_BUFSIZE - 1;
+  d->bufptr   = 0;
+  *d->output  = '\0';
+}
+
+void desc_rewrite_output(struct descriptor_data *d, std::string_view text)
+{
+  /* quirk: measured, as bufptr can be off (process_output() leaves it negative after saving an unsent prompt) */
+  const int shrunk = (int)(strlen(d->output) - text.size());
+  memcpy(d->output, text.data(), text.size());
+  d->output[text.size()] = '\0';
+  d->bufspace += shrunk;
+  d->bufptr -= shrunk;
+}
+
+int desc_socket(const struct descriptor_data *d) { return d->descriptor; }
+
 /* What a connection holds before it has logged in to an account. */
 static void set_empty_account(struct descriptor_data *d)
 {

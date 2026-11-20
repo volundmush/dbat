@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """fuzz.py TARGET [options]
-Runs one of the coverage-guided fuzz targets (load, boot, script, bot, olc) on many cores, carrying on past
+Runs one of the coverage-guided fuzz targets (load, boot, script, bot, olc, net) on many cores, carrying on past
 what it finds, and sorts what it found by where it happened. Build the fuzz preset first:
   cmake --preset fuzz && cmake --build --preset fuzz
 Everything goes under --out, including a corpus that later runs carry on from. See tools/README.md."""
@@ -64,6 +64,15 @@ def seeds_olc(corpus):
         write_seed(corpus, f"quit{number}", bytes([number]) + b"q\nn\n")
 
 
+def seeds_net(corpus):
+    """A new account and character made, a returning one, and some line editing, as a client would send them"""
+    login = b"Tester\r\ny\r\ntester@example.com\r\nPa55word1\r\n1\r\nTestchar\r\n"
+    write_seed(corpus, "login", login + b"\xffhuman\r\n\xffm\r\n\xfe")
+    write_seed(corpus, "split", b"Tes\xffter\r\n\xffy\r\n")
+    write_seed(corpus, "editing", b"ab\bc\x7f\r\n\xff!\r\n\xff^a^b\r\n\xff--\r\n\xff$$$\r\n")
+    write_seed(corpus, "idle", b"\xfe\xfe\xfe\xfe\xfe\xfe")
+
+
 def seeds_bot(corpus, binary):
     for path in glob.glob(os.path.join(TESTS, "corpus", "*.txt")):
         shutil.copy(path, os.path.join(corpus, os.path.basename(path)))
@@ -92,6 +101,8 @@ def make_dictionary(path, target):
                   "%teleport%", "%load%", "wait 1", "if ", "elseif ", "else", "end", "while ", "done", "switch ", "case ",
                   "break", "return 0", "halt", "eval ", "set ", "global ", "remote ", "rdelete ", "context ", "unset ",
                   "extract ", "dg_letter ", "makeuid ", "nop "}
+    elif target == "net":
+        words |= {"\r\n", "\n\r", "\b", "\x7f", "!", "^", "--", "$", "Tester", "Pa55word1", "y\r\n", "1\r\n", "say ", "look"}
     elif target == "olc":
         for name in glob.glob(os.path.join(source, "olc", "*.cpp")) + [os.path.join(source, "dg/dg_olc.cpp")]:
             with open(name, errors="replace") as f:
@@ -103,7 +114,8 @@ def make_dictionary(path, target):
             words |= {t + ": " for t in re.findall(r'strcmp\(tag, "([^"]{4})"\)', f.read())}
     with open(path, "w") as f:
         for word in sorted(words):
-            escaped = word.replace("\\", "\\\\").replace('"', '\\"')
+            escaped = "".join(c if c.isprintable() and c not in '\\"' else ("\\" + c if c in '\\"' else f"\\x{ord(c):02x}")
+                              for c in word)
             f.write(f'"{escaped}"\n')
 
 
@@ -159,7 +171,7 @@ def summarize(out, binary, artifacts, jobs):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("target", choices=["load", "boot", "script", "bot", "olc"])
+    parser.add_argument("target", choices=["load", "boot", "script", "bot", "olc", "net"])
     parser.add_argument("--binary-dir", default=os.path.join(ROOT, "build-fuzz/bin"))
     parser.add_argument("--out", default=None)
     parser.add_argument("-j", "--jobs", type=int, default=8)
@@ -175,10 +187,10 @@ def main():
         if args.target == "bot":
             seeds_bot(corpus, binary)
         else:
-            {"load": seeds_load, "boot": seeds_boot, "script": seeds_script, "olc": seeds_olc}[args.target](corpus)
+            {"load": seeds_load, "boot": seeds_boot, "script": seeds_script, "olc": seeds_olc, "net": seeds_net}[args.target](corpus)
     dictionary = os.path.join(out, "dictionary")
     make_dictionary(dictionary, args.target)
-    limits = {"load": 65536, "boot": 65536, "script": 4096, "bot": 8192, "olc": 4096}
+    limits = {"load": 65536, "boot": 65536, "script": 4096, "bot": 8192, "olc": 4096, "net": 20000}
     command = [binary, corpus, f"-fork={args.jobs}", f"-max_total_time={args.time}", "-ignore_crashes=1", "-ignore_timeouts=1",
                "-ignore_ooms=1", f"-artifact_prefix={artifacts}/", f"-max_len={args.max_len or limits[args.target]}", "-timeout=30",
                "-rss_limit_mb=4096", "-close_fd_mask=1", "-print_final_stats=1", "-detect_leaks=0"]

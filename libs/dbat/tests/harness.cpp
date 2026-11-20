@@ -25,6 +25,7 @@
 #include "dbat/utils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/descriptor_utils.hpp"
 
 #include "harness.hpp"
 
@@ -214,20 +215,13 @@ static struct descriptor_data *new_test_descriptor(GameWorld *g)
 {
   struct descriptor_data *d;
 
-  d             = new descriptor_data();
-  d->descriptor = open("/dev/null", O_RDWR); /* for the few messages that skip the output buffer */
-  d->output     = d->small_outbuf;
-  d->bufspace   = SMALL_BUFSIZE - 1;
-  d->login_time = game_now(g);
-  d->has_prompt = 1;
-  d->desc_num   = ++g->last_desc;
-  strcpy(d->host, "test");
+  d = add_descriptor(g, open("/dev/null", O_RDWR), "test"); /* for the few messages that skip the output buffer */
+  desc_set_connected(d, CON_PLAYING); /* as it was made: the caller puts the player in the game */
   th_account(d).user       = "Test";
   th_account(d).pass       = "Test";
   th_account(d).email      = "Test";
   th_empty_slots(d);
   th_account(d).customfile = 1;
-  g->descriptors.add(d->desc_num, d);
   return d;
 }
 
@@ -292,7 +286,7 @@ struct descriptor_data *th_connect(GameWorld *g, int *peer)
   game_add_connection(g, ends[0], "127.0.0.1");
   *peer = ends[1];
   /* a new connection goes on the front, and a refused one is closed */
-  if (g->descriptors.newest() && g->descriptors.newest()->descriptor == ends[0])
+  if (g->descriptors.newest() && desc_socket(g->descriptors.newest()) == ends[0])
     return g->descriptors.newest();
   close(ends[1]);
   return nullptr;
@@ -356,20 +350,15 @@ std::string th_mask_script_context(std::string_view text)
 
 void th_mask_script_context(struct descriptor_data *d)
 {
-  if (!strstr(d->output, " [trig #"))
+  if (!desc_output(d).contains(" [trig #"))
     return;
-  size_t length       = strlen(d->output);
-  std::string masked = th_mask_script_context(std::string_view(d->output, length));
-  /* never longer than what it masks */
-  memcpy(d->output, masked.c_str(), masked.size() + 1);
-  d->bufspace += (int)(length - masked.size());
-  d->bufptr -= (int)(length - masked.size());
+  desc_rewrite_output(d, th_mask_script_context(desc_output(d))); /* never longer than what it masks */
 }
 
 const char *th_output(struct char_data *ch)
 {
   th_mask_script_context(char_get_desc(ch));
-  return char_get_desc(ch)->output;
+  return desc_output(char_get_desc(ch)).data(); /* the buffer's own text, which ends in a NUL */
 }
 
 void th_take_output(GameWorld *g, struct char_data *ch)
@@ -379,15 +368,7 @@ void th_take_output(GameWorld *g, struct char_data *ch)
 
 void th_take_output_at(GameWorld *g, struct descriptor_data *d)
 {
-  if (d->large_outbuf) {
-    d->large_outbuf->next = g->bufpool;
-    g->bufpool            = d->large_outbuf;
-    d->large_outbuf       = nullptr;
-  }
-  d->output   = d->small_outbuf;
-  d->bufspace = SMALL_BUFSIZE - 1;
-  d->bufptr   = 0;
-  *d->output  = '\0';
+  desc_discard_output(g, d);
 }
 
 void th_exit(int status)

@@ -18,6 +18,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <string>
+#include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
@@ -31,6 +32,7 @@
 #include "dbat/players.hpp"
 #include "dbat/random.hpp"
 #include "dbat/utils.hpp"
+#include "dbat/ban.hpp"
 #include "dbat/world_audit.hpp"
 #include "dbat/game_world.hpp"
 #include "harness.hpp"
@@ -137,6 +139,19 @@ namespace {
     first.insert(first.end(), STATS.begin(), STATS.end());
     return first;
   }
+
+  /* For the network journeys: a game with room for one, and one that bans the clients' address */
+  void one_player_game(GameWorld *g) { CONFIG_MAX_PLAYING = 1; }
+  void banned_address(GameWorld *g)
+  {
+    auto *ban = new ban_list_element();
+    strcpy(ban->site, "127.0.0.1");
+    ban->type   = BAN_ALL;
+    ban->next   = g->ban_list;
+    g->ban_list = ban;
+  }
+  const std::string LONG_SAY    = "say " + std::string(300, 'x');
+  const std::string DOLLARS_SAY = "say " + std::string(248, 'y') + "$$$$$$";
 
   const journey JOURNEYS[] = {
       made("chargen, stats by points, rerolling first", with_stats({{CON_QROLLSTATS, "n"}, {CON_QROLLSTATS, "y"}}), {}, points_method_2),
@@ -332,6 +347,24 @@ namespace {
       made("chargen, an android's barred traits", {{CON_QRACE, "android"}, {CON_QCLASS, "android 16"}, {CON_BONUS, "n"}, {CON_NEGATIVE, "22"}, {CON_NEGATIVE, "b"}, {CON_BONUS, "4"}, {CON_BONUS, "17"}, {CON_BONUS, "x"}}),
       made("chargen, a demon's barred trait", {{CON_QRACE, "demon"}, {CON_QCLASS, "dabura"}, {CON_BONUS, "n"}, {CON_NEGATIVE, "22"}, {CON_NEGATIVE, "b"}, {CON_BONUS, "18"}, {CON_BONUS, "x"}}),
       {"chargen, a human of roshi", then(NEW_ACCOUNT, {"1", "Testchar", "human", "m", "1", "1", "1", "1", "1", "1", "1", "1", "roshi", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "keep", "x", "", "", "", "1", ""})},
+      /* ---- the connection itself: what process_input() and process_output() make of the bytes ---- */
+      made("network, line editing", {}, {"@raw say ab\\bc\\x7fd\\r\\n", "@raw say tab\\there\\x01\\x1b[1mx\\xffz\\r\\n", "say a $ sign and $$ two",
+                                          "@raw say one\\r\\nsay two\\nsay three\\n\\rsay four\\r\\r\\n", "@raw say spl", "@raw it\\r\\n", "@raw \\r\\n", "@raw \\b\\b\\r\\n"}),
+      made("network, long lines", {}, {LONG_SAY.c_str(), DOLLARS_SAY.c_str(), "@fill 16000 a", "@raw \\r\\n"}),
+      made("network, history", {}, {"say first", "!", "say second", "!sa", "!   sa", "!zzz", "^second^SECOND", "^nothere^x", "^nocaret", "look", "!", "say 3", "say 4", "say 5", "say 6", "!say f", "@raw say a\\r\\nsay b\\r\\n--\\r\\n", "--", "@show"}),
+      made("network, a flood", {}, {"@lines 99 say queued", "@lines 101 say flood"}),
+      made("network, an endless line", {}, {"@fill 16400 a"}),
+      made("network, big output", {}, {"@output 10 1000", "@output 120 1000", "@output 1 100000", "compact", "look", "compact", "look"}),
+      made("network, a slow client", {}, {"@sndbuf 4096", "@output 40 1000", "@drain", "look"}),
+      made("network, a full game", {}, {"@connect", "@show"}, one_player_game),
+      {"network, ten from one address", {"@connect", "@connect", "@connect", "@connect", "@connect", "@connect", "@connect", "@connect", "@connect", "@connect", "@show"}},
+      {"network, a banned address", {"@show"}, banned_address},
+      {"network, idle at the first prompt", {"@pulse 600", "@show", "@pulse 600", "@show"}},
+      made("network, colour codes", {}, {"say trailing @", "say a@@b and @[ open", "say @[99]x@[3]y@[12]z@nw@qv", "@raw say @[\\r\\n", "color off", "say a@@b @rred@[3]x@[", "color on", "@colours 30000"}),
+      made("network, odd input", {}, {"@raw say a$\\b\\bz\\r\\n", "@raw say x\\r\\nsay part", "@raw ial\\r\\n", "say first", "^ir^IR", "^first^", "@output 10 1000", "@leave"}),
+      made("network, a full socket", {}, {"@sndbuf 2048", "@output 60 1000", "@stall 6", "@drain"}),
+      made("network, the client stops sending", {}, {"@eof"}),
+      {"network, idle at the password", {"Tester", "@pulse 150", "@show", "@pulse 150", "@show", "@pulse 150", "@show"}, rich_account},
   };
 
   unsigned long seed_for(const std::string &what)
@@ -356,7 +389,7 @@ namespace {
     ssize_t length;
     if (!c.d || c.peer < 0)
       return got;
-    if (*c.d->output && game_send_output(g, c.d) < 0)
+    if (!desc_output(c.d).empty() && game_send_output(g, c.d) < 0)
       return got;
     while ((length = read(c.peer, buffer, sizeof(buffer))) > 0)
       got.append(buffer, length);
@@ -464,6 +497,102 @@ namespace {
     }
   }
 
+  /* text with C's escapes (\\r \\n \\t \\b \\\\ \\xNN) made the bytes they stand for */
+  std::string unescape(std::string_view text)
+  {
+    std::string out;
+    for (size_t i = 0; i < text.size(); i++) {
+      if (text[i] != '\\' || i + 1 == text.size()) {
+        out += text[i];
+        continue;
+      }
+      switch (char e = text[++i]) {
+        case 'r': out += '\r'; break;
+        case 'n': out += '\n'; break;
+        case 't': out += '\t'; break;
+        case 'b': out += '\b'; break;
+        case 'x':
+          out += (char)std::stoi(std::string(text.substr(i + 1, 2)), nullptr, 16);
+          i += 2;
+          break;
+        default: out += e; break;
+      }
+    }
+    return out;
+  }
+
+  /* A long text as its length, hash and last bytes */
+  std::string summary(const std::string &text)
+  {
+    std::string tail = text.substr(text.size() > 120 ? text.size() - 120 : 0);
+    return str_format("({:d} bytes, hash {:x}; ending: {})\n", text.size(), hash_of(text), tail);
+  }
+
+  /* Sends bytes exactly as they are, shown as label */
+  void send_bytes(GameWorld *g, client &c, const char *label, const std::string &bytes, bool summarized)
+  {
+    bool open       = th_send(g, c.d, c.peer, bytes.data(), bytes.size());
+    std::string got = open ? received(g, c) : std::string("(closed)\n");
+    file_print(stdout, "> {}\n{}", label, summarized && open ? summary(got) : got);
+    if (open && still_connected(g, c))
+      file_print(stdout, "\n[state {:d}]\n", desc_get_connected(c.d));
+  }
+
+  /* The network journeys' own lines, or false for one that isn't */
+  bool network_line(GameWorld *g, client &c, const char *line)
+  {
+    int n = 0, length = 0, skip = 0;
+    if (!strncmp(line, "@raw ", 5)) {
+      send_bytes(g, c, line, unescape(line + 5), false);
+    } else if (!strncmp(line, "@fill ", 6) && sscanf(line + 6, "%d %n", &n, &skip) == 1) {
+      send_bytes(g, c, line, std::string(n, line[6 + skip]), true);
+    } else if (!strncmp(line, "@lines ", 7) && sscanf(line + 7, "%d %n", &n, &skip) == 1) {
+      std::string all;
+      while (n-- > 0)
+        all += std::string(line + 7 + skip) + "\r\n";
+      send_bytes(g, c, line, all, true);
+    } else if (!strncmp(line, "@output ", 8) && sscanf(line + 8, "%d %d", &n, &length) == 2) {
+      /* text for the client straight into its output, n pieces of length (each ending in a newline) */
+      while (n-- > 0)
+        write_to_output(g, c.d, std::string(length - 2, 'o') + "\r\n");
+      file_print(stdout, "> {}\n{}", line, summary(received(g, c)));
+    } else if (!strncmp(line, "@colours ", 9)) {
+      /* one text of n colour codes, which grows past the pending buffer when they are turned into ANSI */
+      n = atoi(line + 9);
+      std::string text;
+      while (n-- > 0)
+        text += "@R";
+      write_to_output(g, c.d, text);
+      file_print(stdout, "> {}\n{}", line, summary(received(g, c)));
+    } else if (!strncmp(line, "@stall ", 7)) {
+      /* sends n times without the client reading: the socket fills */
+      for (n = atoi(line + 7); n > 0 && still_connected(g, c) && !desc_output(c.d).empty(); n--)
+        game_send_output(g, c.d);
+      file_print(stdout, "{}\n{} bytes still waiting\n", line, still_connected(g, c) ? desc_output(c.d).size() : 0);
+    } else if (!strcmp(line, "@eof")) {
+      /* the client closes its sending side: the game reads the end of the stream */
+      shutdown(c.peer, SHUT_WR);
+      bool open = game_read_input(g, c.d) >= 0;
+      if (!open)
+        close_socket(g, c.d);
+      file_print(stdout, "> {}\n{}\n", line, open ? "(still open)" : "(closed)");
+    } else if (!strcmp(line, "@drain")) {
+      std::string got;
+      for (int round = 0; round < 100 && still_connected(g, c) && !desc_output(c.d).empty(); round++)
+        got += received(g, c);
+      file_print(stdout, "> {}\n{}", line, summary(got));
+    } else if (!strncmp(line, "@sndbuf ", 8)) {
+      n = atoi(line + 8);
+      setsockopt(desc_socket(c.d), SOL_SOCKET, SO_SNDBUF, &n, sizeof(n));
+      setsockopt(c.peer, SOL_SOCKET, SO_RCVBUF, &n, sizeof(n));
+      file_print(stdout, "{}\n", line);
+    } else if (!strcmp(line, "@show")) {
+      file_print(stdout, "> {}\n{}", line, received(g, c));
+    } else
+      return false;
+    return true;
+  }
+
   void play(GameWorld *g, const journey &j, unsigned long seed)
   {
     circle_srandom(g, seed);
@@ -490,7 +619,8 @@ namespace {
         file_print(stdout, "> {}\n(closed)\n", line);
         continue;
       }
-      type(g, c, line);
+      if (!network_line(g, c, line))
+        type(g, c, line);
     }
     };
     lines(j.lines);

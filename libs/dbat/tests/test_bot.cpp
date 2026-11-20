@@ -64,6 +64,7 @@
 #include "dbat/world_audit.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/descriptor_utils.hpp"
 
 #include "harness.hpp"
 
@@ -249,7 +250,7 @@ static void send_real_output(GameWorld *g, struct connection *c)
   static char received[32768];
   ssize_t length;
 
-  if (*c->d->output && game_send_output(g, c->d) >= 0)
+  if (!desc_output(c->d).empty() && game_send_output(g, c->d) >= 0)
     while ((length = read(c->peer, received, sizeof(received))) > 0)
       fingerprint_bytes(received, length);
 }
@@ -265,7 +266,7 @@ static void take_all_output(GameWorld *g)
 
   for (descriptor_data *d : each_desc(g)) {
     th_mask_script_context(d);
-    fingerprint_bytes(d->output, strlen(d->output));
+    fingerprint_bytes(desc_output(d).data(), desc_output(d).size());
     th_take_output_at(g, d);
   }
 }
