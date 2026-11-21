@@ -58,8 +58,6 @@ void game_world_free_contents(GameWorld *g)
     free_disabled(g);                       /* interpreter.c */
   }
 
-  if (g->last_act_message)
-    free(g->last_act_message);
 }
 
 time_t game_now(const GameWorld *g)

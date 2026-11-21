@@ -9,22 +9,12 @@
 #include "dbat/descriptor.hpp"
 #include "dbat/net/platform.hpp"
 
-/*
- * Note, most includes for all platforms are in sysdep.h.  The list of
- * files that is included is controlled by conf.h for that platform.
- */
-
-constexpr int INVALID_SOCKET = -1;
-
-/* mccp defines */
-constexpr int COMPRESS2 = 86;
-
 constexpr int NUM_RESERVED_DESCS     = 8;
 constexpr int MAX_CONNECTIONS_PER_IP = 10;  /* simultaneous connections from one address */
 constexpr int MAX_QUEUED_INPUT       = 100; /* typed commands waiting to run before a client counts as flooding */
 #define COPYOVER_FILE "copyover.dat"
 
-/* comm.c */
+/* messages.cpp */
 int arena_watch(GameWorld *g, struct char_data *ch);
 
 /* send_to_room(): the text as it is */
@@ -86,7 +76,7 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::format_
 {
   send_to_range(g, start, finish, str_format(fmt, std::forward<Args>(args)...));
 }
-char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+const char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 /* The three messages of an act() at a victim: to the actor, to the victim and to everyone else, and act()'s
  * hide_invisible for them. A null one isn't sent. */
 struct act_msgs {
@@ -135,7 +125,6 @@ void show_help(GameWorld *g, struct descriptor_data *t, const char *entry);
 
 /* variables */
 extern FILE *logfile;
-extern const char compress_offer[4];
 
 // functions
 void init_game(GameWorld *g, uint16_t port);

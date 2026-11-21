@@ -97,7 +97,7 @@ struct GameWorld {
   time_t boot_time{};
   unsigned long pulse{};
   int mins_since_crashsave{};
-  char *last_act_message{};
+  std::string last_act_message;
 
   /* Run modes */
   int mini_mud{}, no_mail{}, no_rent_check{}, no_specials{}, scheck{};

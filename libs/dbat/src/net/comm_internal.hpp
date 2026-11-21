@@ -1,7 +1,24 @@
 #pragma once
 
-/* Shared by the files that were comm.c only: connection, input, output, colour, prompt, the game loop,
- * signals and copyover. */
+/*
+ * What the networking's files share, which nothing else needs. How they fit together:
+ *
+ *   game_loop.cpp   init_game(), and the loop: one pass polls the listener and every connection (net::poll_set),
+ *                   accepts, reads, runs a command for each, sends, closes the finished, then runs the heartbeat
+ *                   table for each pulse due, and sleeps until the next (pulse_clock)
+ *   connection.cpp  a connection's start (game_add_connection(): full, too many from one site, banned) and end
+ *                   (close_socket()), and the idle time-outs
+ *   input.cpp       raw bytes to typed lines (process_input()), and the line rules: !, ^old^new, --, flooding
+ *   output.cpp      a connection's pending text (write_to_output(), output_buffer) and sending it with the prompt
+ *                   (process_output())
+ *   colour.cpp      @ codes to ANSI (colourize())
+ *   prompt.cpp      the prompt; messages.cpp: act() and the send_to_*() broadcasts
+ *   signals.cpp     what the signals and the deadlock timer do; copyover.cpp: the exec, and coming back from it
+ *   platform_posix.cpp, platform_win32.cpp
+ *                   everything that talks to the system (dbat/net/platform.hpp); nothing else here does
+ *
+ * nanny.cpp, chargen.cpp and accounts.cpp, the login and character creation, have nanny_internal.hpp.
+ */
 #include <cstddef>
 #include <cstdint>
 #include <optional>

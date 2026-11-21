@@ -19,6 +19,8 @@
 #include "dbat/random.hpp"
 #include "dbat/screen.hpp"
 
+#include "dbat/io/reader.hpp"
+
 #include "comm_internal.hpp"
 
 /*
@@ -85,18 +87,8 @@ const char *choice(const std::string *choices, int i)
   return choices && !choices[i].empty() ? choices[i].c_str() : default_color_choices[i];
 }
 
-/* The number atoi() reads at txt[at]: leading spaces, a sign, then digits */
-int number_at(std::string_view txt, size_t at)
-{
-  size_t end = at;
-  while (end < txt.size() && isspace(txt[end]))
-    end++;
-  if (end < txt.size() && (txt[end] == '+' || txt[end] == '-'))
-    end++;
-  while (end < txt.size() && isdigit(txt[end]))
-    end++;
-  return atoi(std::string(txt.substr(at, end - at)).c_str());
-}
+/* The number atoi() reads at txt[at]: leading spaces, a sign, then digits (atoi() is strtol() cut to an int) */
+int number_at(std::string_view txt, size_t at) { return static_cast<int>(io::c_atol(txt.substr(at))); }
 
 } // namespace
 

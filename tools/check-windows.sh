@@ -1,24 +1,16 @@
 #!/usr/bin/env bash
-# check-windows.sh: the networking files that should build on Windows do, compiled for x86_64-windows-gnu with
-# `zig c++` (Zig 0.17 or later; nothing is linked). There is no Windows build of the game: this keeps the platform
+# check-windows.sh: the networking, the log and the server's main() build on Windows, compiled for x86_64-windows-gnu
+# with `zig c++` (Zig 0.17 or later; nothing is linked). There is no Windows build of the game: this keeps the platform
 # layer (src/net/platform_win32.cpp) and the files on it honest. Skipped, with a note, if zig isn't installed.
 set -uo pipefail
 root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 cd "$root/libs/dbat" || exit 1
 
-# The files checked: all of the networking's but the POSIX layer. (copyover.cpp builds, and says it isn't available.)
-files='
-src/net/platform_win32.cpp
-src/net/connection.cpp
-src/net/input.cpp
-src/net/output.cpp
-src/net/colour.cpp
-src/net/prompt.cpp
-src/net/messages.cpp
-src/net/game_loop.cpp
-src/net/signals.cpp
-src/net/copyover.cpp
-'
+# The files checked: all of the networking's but the POSIX layer (copyover.cpp builds, and says it isn't available),
+# the log, and the server's main().
+files="$(find src/net -name '*.cpp' ! -name platform_posix.cpp | sort)
+src/util/log.cpp
+../../apps/server/src/main.cpp"
 
 if ! command -v zig > /dev/null; then
   echo "check-windows: skipped (no zig)"

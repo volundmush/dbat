@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <string>
 
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
@@ -142,140 +143,131 @@ void send_to_room(GameWorld *g, room_vnum room, std::string_view text)
 
 static const char *const ACTNULL = "<NULL>";
 
-#define CHECK_NULL(pointer, expression)  \
-  i = (pointer) == nullptr ? nullptr : (expression); \
-  if (i == nullptr) i = ACTNULL;
+/* what $N and the rest give: "<NULL>" for nothing */
+static const char *or_null(const char *text) { return text ? text : ACTNULL; }
 
 /* higher-level communication: the act() function */
 static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)
 {
-  const char *i = nullptr;
-  char lbuf[MAX_STRING_LENGTH], *buf, *j;
-  char *const end                   = lbuf + sizeof(lbuf) - 3; /* the last char of the message; then "\r\n" and its end */
+  constexpr size_t room             = MAX_STRING_LENGTH - 3; /* the most of the message kept, before its "\r\n" */
+  std::string text;
   bool uppercasenext                = false;
   const struct char_data *dg_victim = nullptr;
   const struct obj_data *dg_target  = nullptr;
   const char *dg_arg                = nullptr;
 
-  buf = lbuf;
-
-  for (;;) {
-    if (*orig == '$') {
-      switch (*(++orig)) {
-        case 'n':
-          i = char_pers(g, ch, to);
-          break;
-        case 'N':
-          CHECK_NULL(vict_obj, char_pers(g, (struct char_data *)const_cast<void *>(vict_obj), to));
-          dg_victim = (const struct char_data *)vict_obj;
-          break;
-        case 'm':
-          i = char_hmhr(ch);
-          break;
-        case 'M':
-          CHECK_NULL(vict_obj, char_hmhr((const struct char_data *)vict_obj));
-          dg_victim = (const struct char_data *)vict_obj;
-          break;
-        case 's':
-          i = char_hshr(ch);
-          break;
-        case 'S':
-          CHECK_NULL(vict_obj, char_hshr((const struct char_data *)vict_obj));
-          dg_victim = (const struct char_data *)vict_obj;
-          break;
-        case 'e':
-          i = char_hssh(ch);
-          break;
-        case 'E':
-          CHECK_NULL(vict_obj, char_hssh((const struct char_data *)vict_obj));
-          dg_victim = (const struct char_data *)vict_obj;
-          break;
-        case 'o':
-          CHECK_NULL(obj, obj_fname_for(g, obj, to));
-          break;
-        case 'O':
-          CHECK_NULL(vict_obj, obj_fname_for(g, (const struct obj_data *)vict_obj, to));
-          dg_target = (const struct obj_data *)vict_obj;
-          break;
-        case 'p':
-          CHECK_NULL(obj, obj_shortdesc_for(g, obj, to));
-          break;
-        case 'P':
-          CHECK_NULL(vict_obj, obj_shortdesc_for(g, (const struct obj_data *)vict_obj, to));
-          dg_target = (const struct obj_data *)vict_obj;
-          break;
-        case 'a':
-          CHECK_NULL(obj, obj_sana(obj));
-          break;
-        case 'A':
-          CHECK_NULL(vict_obj, obj_sana((const struct obj_data *)vict_obj));
-          dg_target = (const struct obj_data *)vict_obj;
-          break;
-        case 'T':
-          CHECK_NULL(vict_obj, (const char *)vict_obj);
-          dg_arg = (const char *)vict_obj;
-          break;
-        case 't':
-          CHECK_NULL(obj, (char *)obj);
-          break;
-        case 'F':
-          CHECK_NULL(vict_obj, fname((const char *)vict_obj));
-          break;
-        /* uppercase previous word */
-        case 'u':
-          for (j = buf; j > lbuf && !isspace((int)*(j - 1)); j--);
-          if (j != buf)
-            *j = toupper(*j);
-          i = "";
-          break;
-        /* uppercase next word */
-        case 'U':
-          uppercasenext = true;
-          i             = "";
-          break;
-        case '$':
-          i = "$";
-          break;
-        default:
-          return;
-          break;
-      }
-      for (; *i && buf < end; i++) { /* what doesn't fit is left off */
-        *buf = *i;
-        if (uppercasenext && !isspace((int)*buf)) {
-          *buf          = toupper(*buf);
-          uppercasenext = false;
-        }
-        buf++;
-      }
-      orig++;
-    } else if (!*orig) {
-      *(buf++) = '\0';
-      break;
-    } else if (buf >= end) { /* what doesn't fit is left off */
-      orig++;
-    } else {
-      *(buf++) = *(orig++);
-      if (uppercasenext && !isspace((int)*(buf - 1))) {
-        *(buf - 1)    = toupper(*(buf - 1));
-        uppercasenext = false;
-      }
+  /* Adds c, if there's room (what doesn't fit is left off), capitalised if it's the first that isn't a space since
+     a $U */
+  auto add = [&](char c) {
+    if (text.size() >= room)
+      return;
+    if (uppercasenext && !isspace((int)c)) {
+      c             = toupper(c);
+      uppercasenext = false;
     }
+    text += c;
+  };
+
+  for (; *orig; orig++) {
+    if (*orig != '$') {
+      add(*orig);
+      continue;
+    }
+    const char *i = nullptr;
+    switch (*++orig) {
+      case 'n':
+        i = char_pers(g, ch, to);
+        break;
+      case 'N':
+        i = vict_obj ? or_null(char_pers(g, (struct char_data *)const_cast<void *>(vict_obj), to)) : ACTNULL;
+        dg_victim = (const struct char_data *)vict_obj;
+        break;
+      case 'm':
+        i = char_hmhr(ch);
+        break;
+      case 'M':
+        i = vict_obj ? or_null(char_hmhr((const struct char_data *)vict_obj)) : ACTNULL;
+        dg_victim = (const struct char_data *)vict_obj;
+        break;
+      case 's':
+        i = char_hshr(ch);
+        break;
+      case 'S':
+        i = vict_obj ? or_null(char_hshr((const struct char_data *)vict_obj)) : ACTNULL;
+        dg_victim = (const struct char_data *)vict_obj;
+        break;
+      case 'e':
+        i = char_hssh(ch);
+        break;
+      case 'E':
+        i = vict_obj ? or_null(char_hssh((const struct char_data *)vict_obj)) : ACTNULL;
+        dg_victim = (const struct char_data *)vict_obj;
+        break;
+      case 'o':
+        i = obj ? or_null(obj_fname_for(g, obj, to)) : ACTNULL;
+        break;
+      case 'O':
+        i = vict_obj ? or_null(obj_fname_for(g, (const struct obj_data *)vict_obj, to)) : ACTNULL;
+        dg_target = (const struct obj_data *)vict_obj;
+        break;
+      case 'p':
+        i = obj ? or_null(obj_shortdesc_for(g, obj, to)) : ACTNULL;
+        break;
+      case 'P':
+        i = vict_obj ? or_null(obj_shortdesc_for(g, (const struct obj_data *)vict_obj, to)) : ACTNULL;
+        dg_target = (const struct obj_data *)vict_obj;
+        break;
+      case 'a':
+        i = obj ? or_null(obj_sana(obj)) : ACTNULL;
+        break;
+      case 'A':
+        i = vict_obj ? or_null(obj_sana((const struct obj_data *)vict_obj)) : ACTNULL;
+        dg_target = (const struct obj_data *)vict_obj;
+        break;
+      case 'T':
+        i = vict_obj ? or_null((const char *)vict_obj) : ACTNULL;
+        dg_arg = (const char *)vict_obj;
+        break;
+      case 't':
+        i = obj ? or_null((char *)obj) : ACTNULL;
+        break;
+      case 'F':
+        i = vict_obj ? or_null(fname((const char *)vict_obj)) : ACTNULL;
+        break;
+      /* uppercase previous word */
+      case 'u': {
+        size_t space = text.find_last_of(" \t\n\v\f\r"); /* isspace()'s */
+        size_t word  = space == std::string::npos ? 0 : space + 1;
+        if (word != text.size())
+          text[word] = toupper(text[word]);
+        i = "";
+        break;
+      }
+      /* uppercase next word */
+      case 'U':
+        uppercasenext = true;
+        i             = "";
+        break;
+      case '$':
+        i = "$";
+        break;
+      default:
+        return;
+        break;
+    }
+    for (; *i; i++)
+      add(*i);
   }
+  text += "\r\n";
 
-  *(--buf) = '\r';
-  *(++buf) = '\n';
-  *(++buf) = '\0';
-
+  /* capitalised only if it goes to a connection, though the trigger and last_act_message see it too (quirk) */
   if (char_get_desc(to))
-    write_to_output(g, char_get_desc(to), "{}", CAP(lbuf));
+    write_to_output(g, char_get_desc(to), "{}", CAP(text));
 
   if ((char_is_npc(to) && g->dg_act_check) && (to != ch))
-    act_mtrigger(g, to, lbuf, ch, dg_victim, obj, dg_target, dg_arg);
+    act_mtrigger(g, to, text, ch, dg_victim, obj, dg_target, dg_arg);
 
-  if (g->last_act_message)
-    free(g->last_act_message);
-  g->last_act_message = strdup(lbuf);
+  g->last_act_message = std::move(text);
 }
 
 /* act()/sub_write(): should ch receive this message? (to_sleeping: deliver even to sleeping characters) */
@@ -298,8 +290,15 @@ void act_triple_vict_last(GameWorld *g, const act_msgs &m, struct char_data *ch,
   act(g, m.to_vict, m.hide, ch, obj, vict, TO_VICT);
 }
 
-char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch,
-          struct obj_data *obj, const void *vict_obj, int type)
+/* The message the last act() made, which act() returns even when it sent nothing this time (quirk), or nullptr if
+   there has been none */
+static const char *last_act_message(const GameWorld *g)
+{
+  return g->last_act_message.empty() ? nullptr : g->last_act_message.c_str();
+}
+
+const char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch,
+                struct obj_data *obj, const void *vict_obj, int type)
 {
   int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
 
@@ -347,7 +346,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
   if (type == TO_CHAR) {
     if (ch && sendok(ch, to_sleeping) && (!resskill || (roll_skill(g, ch, resskill) >= dcval))) {
       perform_act(g, str, ch, obj, vict_obj, ch);
-      return g->last_act_message;
+      return last_act_message(g);
     }
     return nullptr;
   }
@@ -356,7 +355,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
     struct char_data *to = (struct char_data *)const_cast<void *>(vict_obj);
     if (to != nullptr && sendok(to, to_sleeping) && (!resskill || (roll_skill(g, to, resskill) >= dcval))) {
       perform_act(g, str, ch, obj, vict_obj, to);
-      return g->last_act_message;
+      return last_act_message(g);
     }
     return nullptr;
   }
@@ -375,7 +374,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
         add_history(g, i->character, buf2.c_str(), HIST_GOSSIP);
       }
     }
-    return g->last_act_message;
+    return last_act_message(g);
   }
 
   /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
@@ -434,7 +433,7 @@ char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *c
       continue;
     perform_act(g, str, ch, obj, vict_obj, to);
   }
-  return g->last_act_message;
+  return last_act_message(g);
 }
 
 /* Shows the first help entry with a keyword that starts with entry. */

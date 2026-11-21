@@ -349,7 +349,7 @@ const int siteok_everyone = true;
  * the SLOWNS command from within the MUD.
  *
  * No longer used: sites are always recorded as numeric addresses (see
- * new_descriptor() in comm.c), so logging in never waits on a nameserver.
+ * net::accept_from() in net/platform_posix.cpp), so logging in never waits on a nameserver.
  */
 
 const int nameserver_is_slow = false;

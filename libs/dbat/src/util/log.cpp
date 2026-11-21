@@ -25,17 +25,16 @@ void log_death_trap(GameWorld *g, struct char_data *ch)
  * previously written code but is very nice for new code.  */
 void mud_log(std::string_view text)
 {
-  time_t ct    = time(nullptr);
-  char *time_s = asctime(localtime(&ct));
+  time_t ct = time(nullptr);
 
   if (logfile == nullptr) {
     puts("SYSERR: Using log() before stream was initialized!");
     return;
   }
 
-  time_s[strlen(time_s) - 1] = '\0';
-
-  file_print(logfile, "{:<15.15} :: ", time_s + 4);
+  /* "Mon Jan  2 15:04:05 2006\n": the month, day and time */
+  std::string_view stamp = asctime(localtime(&ct));
+  file_print(logfile, "{:<15.15} :: ", stamp.substr(4));
   fwrite(text.data(), 1, text.size(), logfile);
   fputc('\n', logfile);
   fflush(logfile);
