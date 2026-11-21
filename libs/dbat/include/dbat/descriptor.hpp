@@ -14,12 +14,6 @@
 #include "dbat/obj_edit.hpp"
 #include "dbat/olc/session.hpp"
 
-struct txt_block {
-  char *text{};
-  int aliased{};
-  struct txt_block *next{};
-};
-
 /* A line of input waiting to be run */
 struct txt_line {
   std::string text;
@@ -31,9 +25,21 @@ struct txt_q {
   int typed{};                /* queued lines the player typed (alias expansions are not counted) */
 };
 
+/* What waits to be sent to a connection. It holds SMALL_BUFSIZE - 1 bytes until a text doesn't fit, then
+   LARGE_BUFSIZE - 1 until everything has been sent; full to that, it is in the overflow state, and takes nothing
+   more until it has been sent. */
+struct output_buffer {
+  std::string text;
+  bool large{}; /* grown past the small size */
+
+  /* Room left for more */
+  size_t space() const { return (large ? LARGE_BUFSIZE : SMALL_BUFSIZE) - 1 - text.size(); }
+  bool overflowed() const { return space() == 0; }
+};
+
 struct descriptor_data {
   net::socket sock;                    /* the connection */
-  char host[HOST_LENGTH + 1]{};        /* hostname				*/
+  std::string host;                    /* the address it came from, at most HOST_LENGTH long */
   int8_t bad_pws{};                    /* number of bad pw attemps this login	*/
   int8_t idle_tics{};                  /* tics idle at password prompt		*/
   int connected{};                     /* mode of 'connectedness'		*/
@@ -49,13 +55,9 @@ struct descriptor_data {
   net::readiness ready;                /* how the socket stood at this pulse's poll (game_loop) */
   char inbuf[MAX_RAW_INPUT_LENGTH]{};  /* buffer for raw input		*/
   char last_input[MAX_INPUT_LENGTH]{}; /* the last input			*/
-  char small_outbuf[SMALL_BUFSIZE]{};  /* standard output buffer		*/
-  char *output{};                      /* ptr to the current output buffer	*/
+  output_buffer out;                   /* what waits to be sent */
   std::string history[HISTORY_SIZE];   /* History of commands, for ! mostly.	*/
   int history_pos{};                   /* Circular array position.		*/
-  int bufptr{};                        /* ptr to end of current output		*/
-  int bufspace{};                      /* space left in the output buffer	*/
-  struct txt_block *large_outbuf{};    /* ptr to large buffer, if we need it */
   struct txt_q input{};                /* q of unprocessed input		*/
   struct char_data *character{};       /* linked to char			*/
   struct char_data *original{};        /* original char if switched		*/
@@ -77,7 +79,6 @@ struct descriptor_data {
   int drive{};
   int shipweap{};
   /*-----------------------------------------------------------------------*/
-  int user_freed{};
   std::string title;
 };
 

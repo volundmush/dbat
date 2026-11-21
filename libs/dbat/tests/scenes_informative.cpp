@@ -1,5 +1,17 @@
 /* Scenes for test_techniques: see scene_kit.hpp */
+#include <type_traits>
 #include "scene_kit.hpp"
+
+/* Empties a connection's host, whichever way it holds it (this file also builds against older trees; a template,
+   so that only the one that applies is compiled) */
+template <class Descriptor>
+static void clear_host(Descriptor *d)
+{
+  if constexpr (std::is_array_v<decltype(d->host)>)
+    d->host[0] = 0;
+  else
+    d->host.clear();
+}
 
 namespace {
   const scene list[] = {
@@ -61,7 +73,7 @@ namespace {
     {"master", "perfect kam 1", false, SETUP(char_set_skills_base(att, SKILL_KAMEHAMEHA, 100);), false, 1},
     {"implementor, with a snoop of another", "who", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); char_data *a = nullptr; char_data *b = nullptr; others(g, att, [&](char_data *c) { if (char_is_npc(c) || !char_get_desc(c)) return; if (!a) a = c; else if (!b) b = c; }); if (a && b && !char_get_desc(b)->snoop_by) { char_get_desc(a)->snooping = char_get_desc(b); char_get_desc(b)->snoop_by = char_get_desc(a); }), false, 1},
     {"holy, among the invisible", "who", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); char_prf_set(g, att, PRF_HOLYLIGHT, true); others(g, att, [&](char_data *c) { if (!char_is_npc(c)) char_aff_set(c, AFF_INVISIBLE, true); });), false, 1},
-    {"implementor, with a hostless one", "users", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); others(g, att, [&](char_data *c) { if (!char_is_npc(c) && char_get_desc(c)) char_get_desc(c)->host[0] = 0; });), false, 1},
+    {"implementor, with a hostless one", "users", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); others(g, att, [&](char_data *c) { if (!char_is_npc(c) && char_get_desc(c)) clear_host(char_get_desc(c)); });), false, 1},
     {"immortal, with others elsewhere", "where", false, SETUP(char_set_admlevel(att, ADMLVL_IMMORT); others(g, att, [&](char_data *c) { if (!char_is_npc(c)) { char_from_room(g, c); char_to_room(g, c, 5); } });), false, 1},
     {"immortal, with others away", "where namek", false, SETUP(char_set_admlevel(att, ADMLVL_IMMORT); char_from_room(g, victim); char_to_room(g, victim, 5);), false, 1},
     {"immortal", "where Blade", false, SETUP(char_set_admlevel(att, ADMLVL_IMMORT);), false, 1},

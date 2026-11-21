@@ -46,7 +46,6 @@ void game_world_free_contents(GameWorld *g)
 
   if (!g->scheck) {
     mud_log("Clearing other memory.");
-    free_bufpool(g);                        /* comm.c */
     free_player_index(g);                   /* players.c */
     g->mail.clear();
     clear_boards(g);                        /* boards.c */

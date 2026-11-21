@@ -291,7 +291,7 @@ ACMD(do_users)
       struct char_data *tch = player_of(d);
       if (!tch)
         continue;
-      if (!host_search.empty() && !strstr(d->host, host_search.c_str()))
+      if (!host_search.empty() && d->host.find(host_search) == std::string::npos)
         continue;
       if (!name_search.empty() && !str_eq_nocase(char_get_name(tch), name_search))
         continue;
@@ -318,7 +318,7 @@ ACMD(do_users)
                                                                         : "UNDEFINED";
     const char *user  = !d->acct.user.empty() ? d->acct.user.c_str() : "UNKNOWN";
     std::string line  = str_format("{:>3d} {:<20} {:<20} {:<14} {:<3} {:<8} {:>1} ", d->desc_num, alias, user, state, idletime, timeptr, "N");
-    if (*d->host)
+    if (!d->host.empty())
       line += str_format("\n{:>3d} [{} Site: {}]\r\n", d->desc_num, user, d->host);
     else
       line += str_format("\n{:>3d} [{} Site: Hostname unknown]\r\n", d->desc_num, user);

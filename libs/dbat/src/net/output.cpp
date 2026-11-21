@@ -29,7 +29,7 @@ static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size);
 size_t write_to_output(GameWorld *g, struct descriptor_data *t, std::string_view text)
 {
   /* if we're in the overflow state already, ignore this new output */
-  if (t->bufspace == 0)
+  if (t->out.overflowed())
     return (0);
 
   size_t n = std::min(text.size(), sizeof(pending_text) - 1); /* as much as fits; queue_output() marks the rest lost */
@@ -54,10 +54,11 @@ static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size)
   /*
    * If the text is too big to fit into even a large buffer, truncate
    * the new text to make it fit.  (This will switch to the overflow
-   * state automatically because t->bufspace will end up 0.)
+   * state automatically because there will be no space left.)
    */
-  if (size + t->bufptr + 1 > LARGE_BUFSIZE) {
-    size      = LARGE_BUFSIZE - t->bufptr - 1;
+  output_buffer &out = t->out;
+  if (size + out.text.size() + 1 > LARGE_BUFSIZE) {
+    size               = LARGE_BUFSIZE - out.text.size() - 1;
     pending_text[size] = '\0';
     if (t->character)
       char_set_overf(t->character, true);
@@ -65,54 +66,26 @@ static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size)
   }
 
   /*
-   * If we have enough space, just write to buffer and that's it! If the
-   * text just barely fits, then it's switched to a large buffer instead
-   * (unless it already is the large buffer: then it fills it, and we are in
-   * the overflow state).
+   * If the text just barely fits, then it's switched to a large buffer instead (unless it already is the large
+   * buffer: then it fills it, and we are in the overflow state).
    */
-  if (t->bufspace > size || (t->large_outbuf && t->bufspace == size)) {
-    strcpy(t->output + t->bufptr, pending_text); /* strcpy: OK (size checked above) */
-    t->bufspace -= size;
-    t->bufptr += size;
-    return (t->bufspace);
+  if (!(out.space() > (size_t)size || (out.large && out.space() == (size_t)size))) {
+    g->buf_switches++;
+    out.large = true;
+    /* the most connections that have had a large buffer at once (each kept the one it got from a pool) */
+    g->buf_largecount = std::max(g->buf_largecount, ++g->buf_large_in_use);
   }
+  out.text += pending_text;
 
-  g->buf_switches++;
-
-  /* if the pool has a buffer in it, grab it */
-  if (g->bufpool != nullptr) {
-    t->large_outbuf = g->bufpool;
-    g->bufpool         = g->bufpool->next;
-  } else { /* else create a new one */
-    t->large_outbuf       = new txt_block();
-    t->large_outbuf->text = str_alloc(LARGE_BUFSIZE);
-    g->buf_largecount++;
-  }
-
-  strcpy(t->large_outbuf->text, t->output); /* strcpy: OK (size checked previously) */
-  t->output = t->large_outbuf->text;        /* make big buffer primary */
-  strcat(t->output, pending_text);          /* strcat: OK (size checked) */
-
-  /* set the pointer for the next write */
-  t->bufptr = strlen(t->output);
-
-  /* calculate how much space is left in the buffer */
-  t->bufspace = LARGE_BUFSIZE - 1 - t->bufptr;
-
-  return (t->bufspace);
+  return (out.space());
 }
 
-void free_bufpool(GameWorld *g)
+void reset_output(GameWorld *g, struct output_buffer &out)
 {
-  struct txt_block *tmp;
-
-  while (g->bufpool) {
-    tmp = g->bufpool->next;
-    if (g->bufpool->text)
-      free(g->bufpool->text);
-    delete g->bufpool;
-    g->bufpool = tmp;
-  }
+  if (out.large)
+    g->buf_large_in_use--;
+  out.large = false;
+  out.text.clear();
 }
 
 /*
@@ -134,10 +107,10 @@ int process_output(GameWorld *g, struct descriptor_data *t)
   strcpy(i, "\r\n"); /* strcpy: OK (for 'MAX_SOCK_BUF >= 3') */
 
   /* now, append the 'real' output */
-  strcpy(osb, t->output); /* strcpy: OK (t->output:LARGE_BUFSIZE < osb:MAX_SOCK_BUF-2) */
+  strcpy(osb, t->out.text.c_str()); /* strcpy: OK (the output:LARGE_BUFSIZE < osb:MAX_SOCK_BUF-2) */
 
   /* if we're in the overflow state, notify the user */
-  if (t->bufspace == 0)
+  if (t->out.overflowed())
     strcat(osb, "**OVERFLOW**\r\n"); /* strcpy: OK (osb:MAX_SOCK_BUF-2 reserves space) */
 
   /* add the extra CRLF if the person isn't in compact mode */
@@ -171,43 +144,22 @@ int process_output(GameWorld *g, struct descriptor_data *t)
 
   /* Handle snooping: prepend "% " and send to snooper. */
   if (t->snoop_by)
-    write_to_output(g, t->snoop_by, "\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n{}\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n", t->output);
+    write_to_output(g, t->snoop_by, "\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n{}\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n", t->out.text);
   /* The common case: all saved output was handed off to the kernel buffer. */
-  if (result >= t->bufptr) {
-    /*
-     * if we were using a large buffer, put the large buffer on the buffer pool
-     * and switch back to the small one
-     */
-    if (t->large_outbuf) {
-      t->large_outbuf->next = g->bufpool;
-      g->bufpool               = t->large_outbuf;
-      t->large_outbuf       = nullptr;
-      t->output             = t->small_outbuf;
-    }
-    /* reset total bufspace back to that of a small buffer */
-    t->bufspace  = SMALL_BUFSIZE - 1;
-    t->bufptr    = 0;
-    *(t->output) = '\0';
+  if ((size_t)result >= t->out.text.size()) {
+    /* back to an empty small buffer (a large one goes back to the pool) */
+    reset_output(g, t->out);
 
     /*
-     * If the overflow message or prompt were partially written, try to save
-     * them. There will be enough space for them if this is true.  'result'
-     * is effectively unsigned here anyway.
+     * If the overflow message or prompt were partially written, save the rest, to go first next time. It fits:
+     * the prompt is never near the small buffer's size. (It once stepped the buffer's end back instead of on,
+     * so the next text went before the buffer, and the player never saw it.)
      */
-    if ((unsigned int)result < strlen(osb)) {
-      size_t savetextlen = strlen(osb + result);
-
-      strcat(t->output, osb + result);
-      t->bufptr -= savetextlen;
-      t->bufspace += savetextlen;
-    }
-
+    if ((unsigned int)result < strlen(osb))
+      t->out.text = osb + result;
   } else {
     /* Not all data in buffer sent.  result < output buffersize. */
-
-    memmove(t->output, t->output + result, strlen(t->output + result) + 1); /* overlapping, so not strcpy */
-    t->bufptr -= result;
-    t->bufspace += result;
+    t->out.text.erase(0, result);
   }
 
   return (result);

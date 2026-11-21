@@ -9,6 +9,7 @@
 ************************************************************************ */
 #include <cerrno>
 #include <cstdlib>
+#include <string>
 
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
@@ -45,21 +46,19 @@ void free_ban_list(GameWorld *g)
   }
 }
 
-int isbanned(GameWorld *g, char *hostname)
+int isbanned(GameWorld *g, std::string_view hostname)
 {
-  int i;
-  struct ban_list_element *banned_node;
-  char *nextchar;
+  int i = 0;
 
-  if (!hostname || !*hostname)
+  if (hostname.empty())
     return (0);
 
-  i = 0;
-  for (nextchar = hostname; *nextchar; nextchar++)
-    *nextchar = tolower(*nextchar);
+  std::string host(hostname);
+  for (char &c : host)
+    c = tolower(c);
 
-  for (banned_node = g->ban_list; banned_node; banned_node = banned_node->next)
-    if (strstr(hostname, banned_node->site)) /* if hostname is a substring */
+  for (struct ban_list_element *banned_node = g->ban_list; banned_node; banned_node = banned_node->next)
+    if (host.find(banned_node->site) != std::string::npos) /* if hostname is a substring */
       i = MAX(i, banned_node->type);
 
   return (i);

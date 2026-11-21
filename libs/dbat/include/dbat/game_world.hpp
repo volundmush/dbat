@@ -83,8 +83,8 @@ struct GameWorld {
 
   /* Connections and the server */
   id_table<descriptor_data> descriptors; /* every connection, by desc_num */
-  struct txt_block *bufpool{};
-  int buf_largecount{}, buf_overflows{}, buf_switches{};
+  int buf_large_in_use{};                                  /* connections with a large output buffer */
+  int buf_largecount{}, buf_overflows{}, buf_switches{}; /* the most at once, texts cut short, and growths */
   int max_players{};
   net::socket listener; /* where new connections come in */
   uint16_t port{};

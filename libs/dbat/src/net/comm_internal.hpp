@@ -27,6 +27,8 @@ bool get_from_q(struct txt_q *queue, char *dest, int *aliased);
 int process_input(GameWorld *g, struct descriptor_data *t);
 
 /* output.cpp */
+/* Empties out, back to the small size (returning a large buffer to the pool) */
+void reset_output(GameWorld *g, struct output_buffer &out);
 int process_output(GameWorld *g, struct descriptor_data *t);
 
 /* colour.cpp */

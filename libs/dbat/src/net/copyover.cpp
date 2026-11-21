@@ -87,7 +87,7 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
   init_descriptor(g, d, net::socket(desc)); /* set up various stuff */
   set_empty_account(d);        /* what a new connection has, for userLoad() to fill in */
 
-  snprintf(d->host, sizeof(d->host), "%s", host);
+  d->host = std::string_view(host).substr(0, HOST_LENGTH);
   g->descriptors.add(d->desc_num, d);
 
   d->connected = CON_CLOSE;
@@ -215,7 +215,7 @@ static bool write_copyover_file(GameWorld *g)
       room = char_get_in_room(player);
     else if (char_get_was_in_room(player) > 1)
       room = char_get_was_in_room(player);
-    out.print("{:d} {} {} {:d} {}\n", d->sock.handle(), char_get_name(player), *d->host ? d->host : "unknown", room,
+    out.print("{:d} {} {} {:d} {}\n", d->sock.handle(), char_get_name(player), !d->host.empty() ? d->host.c_str() : "unknown", room,
                !d->acct.user.empty() ? d->acct.user.c_str() : "Empty");
   }
 
@@ -279,8 +279,8 @@ void execute_copyover(GameWorld *g)
       close_socket(g, d); /* throw'em out */
       continue;
     }
-    if (d->output && *d->output)
-      write_to_descriptor(d->sock.handle(), d->output); /* whatever they haven't been sent yet */
+    if (!d->out.text.empty())
+      write_to_descriptor(d->sock.handle(), d->out.text.c_str()); /* whatever they haven't been sent yet */
     if (desc_get_connected(d) != CON_PLAYING)
       write_to_descriptor(d->sock.handle(), "\n\rWhatever you were editing has been lost.\n\r");
     Crash_rentsave(g, player, 0);

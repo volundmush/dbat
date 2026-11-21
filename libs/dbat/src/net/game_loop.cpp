@@ -318,7 +318,7 @@ static void game_loop(GameWorld *g)
 
     /* Send queued output out to the operating system (ultimately to user). */
     for (descriptor_data *d : each_desc(g)) {
-      if (*(d->output) && d->ready.writable) {
+      if (!d->out.text.empty() && d->ready.writable) {
         /* Output for this player is ready */
         if (process_output(g, d) < 0) {
           // commented out close_socket since process_output already does this, so having it here causes a double-free crash

@@ -678,10 +678,10 @@ void save_char(GameWorld *g, struct char_data *ch)
    * before saving.
    */
   if (char_get_desc(ch)) {
-    if (*char_get_desc(ch)->host) {
+    if (!char_get_desc(ch)->host.empty()) {
       if (!char_get_host(g, ch))
         char_set_host(g, ch, char_get_desc(ch)->host);
-      else if (char_get_host(g, ch) && !strcmp(char_get_host(g, ch), char_get_desc(ch)->host))
+      else if (char_get_host(g, ch) && char_get_host(g, ch) == char_get_desc(ch)->host)
         char_set_host(g, ch, char_get_desc(ch)->host);
     }
 

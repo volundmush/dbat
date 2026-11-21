@@ -46,12 +46,7 @@ int get_max_players(GameWorld *g)
 /* Empty the queues before closing connection */
 static void flush_queues(GameWorld *g, struct descriptor_data *d)
 {
-  if (d->large_outbuf) {
-    d->large_outbuf->next = g->bufpool;
-    g->bufpool               = d->large_outbuf;
-    d->large_outbuf       = nullptr;
-    d->output             = d->small_outbuf;
-  }
+  reset_output(g, d->out);
   flush_input_queue(d);
 }
 
@@ -64,8 +59,6 @@ void init_descriptor(GameWorld *g, struct descriptor_data *newd, net::socket soc
 {
 
   newd->sock       = std::move(sock);
-  newd->output     = newd->small_outbuf;
-  newd->bufspace   = SMALL_BUFSIZE - 1;
   newd->login_time = game_now(g);
   newd->has_prompt = 1; /* prompt is part of greetings */
   desc_set_connected(newd, CON_GET_USER);
@@ -80,36 +73,17 @@ void init_descriptor(GameWorld *g, struct descriptor_data *newd, net::socket soc
 struct descriptor_data *add_descriptor(GameWorld *g, net::native_handle socket, std::string_view host)
 {
   auto *d = new descriptor_data();
-  snprintf(d->host, sizeof(d->host), "%.*s", (int)host.size(), host.data());
+  d->host  = host.substr(0, HOST_LENGTH);
   init_descriptor(g, d, net::socket(socket));
   g->descriptors.add(d->desc_num, d);
   return d;
 }
 
-std::string_view desc_output(const struct descriptor_data *d) { return d->output ? d->output : ""; }
+std::string_view desc_output(const struct descriptor_data *d) { return d->out.text; }
 
-void desc_discard_output(GameWorld *g, struct descriptor_data *d)
-{
-  if (d->large_outbuf) {
-    d->large_outbuf->next = g->bufpool;
-    g->bufpool            = d->large_outbuf;
-    d->large_outbuf       = nullptr;
-  }
-  d->output   = d->small_outbuf;
-  d->bufspace = SMALL_BUFSIZE - 1;
-  d->bufptr   = 0;
-  *d->output  = '\0';
-}
+void desc_discard_output(GameWorld *g, struct descriptor_data *d) { reset_output(g, d->out); }
 
-void desc_rewrite_output(struct descriptor_data *d, std::string_view text)
-{
-  /* quirk: measured, as bufptr can be off (process_output() leaves it negative after saving an unsent prompt) */
-  const int shrunk = (int)(strlen(d->output) - text.size());
-  memcpy(d->output, text.data(), text.size());
-  d->output[text.size()] = '\0';
-  d->bufspace += shrunk;
-  d->bufptr -= shrunk;
-}
+void desc_rewrite_output(struct descriptor_data *d, std::string_view text) { d->out.text = text; }
 
 net::native_handle desc_socket(const struct descriptor_data *d) { return d->sock.handle(); }
 
@@ -167,11 +141,11 @@ int game_add_connection(GameWorld *g, net::native_handle desc, const char *host)
   /* create a new descriptor */
   newd = new descriptor_data();
 
-  snprintf(newd->host, sizeof(newd->host), "%s", host);
+  newd->host = std::string_view(host).substr(0, HOST_LENGTH);
 
   /* one host may not take all the slots */
   for (descriptor_data *other : each_desc(g))
-    if (!strcmp(other->host, newd->host))
+    if (other->host == newd->host)
       from_same_ip++;
   if (from_same_ip >= MAX_CONNECTIONS_PER_IP) {
     write_to_descriptor(desc, "Too many connections from your address. Please close some and try again.\r\n");
@@ -198,24 +172,6 @@ int game_add_connection(GameWorld *g, net::native_handle desc, const char *host)
   set_color(g, newd);
 
   return (0);
-}
-
-/* Frees the account strings: real ones after login, or the "Empty" placeholders set_color() made. */
-static void free_user(struct descriptor_data *d)
-{
-  if (d->user_freed == 1) {
-    return;
-  }
-  d->user_freed = 1;
-
-  if (!d->acct.user.empty() && strcasecmp(d->acct.user.c_str(), "Empty"))
-    mud_log("Freeing User: {}", d->acct.user);
-
-  for (auto &slot : d->acct.slots)
-    slot.clear();
-  d->acct.user.clear();
-  d->acct.pass.clear();
-  d->acct.email.clear();
 }
 
 void close_all_sockets(GameWorld *g)
@@ -265,7 +221,9 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
   if (d->original && char_get_desc(d->original))
     char_set_desc(d->original, nullptr);
 
-  free_user(d);
+  /* the account's strings go with d; only a real one (not set_color()'s "Empty") is worth a word */
+  if (!d->acct.user.empty() && strcasecmp(d->acct.user.c_str(), "Empty"))
+    mud_log("Freeing User: {}", d->acct.user);
 
   /*. Kill any OLC stuff (every editor, and character creation's stat points, keep theirs in d->olc) .*/
   leave_olc(g, d);

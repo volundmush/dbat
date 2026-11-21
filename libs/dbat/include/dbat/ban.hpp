@@ -1,4 +1,6 @@
 #pragma once
+#include <string_view>
+
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/io/load_error.hpp"
@@ -20,7 +22,7 @@ struct ban_list_element {
 
 
 void load_banned(GameWorld *g);
-int isbanned(GameWorld *g, char *hostname);
+int isbanned(GameWorld *g, std::string_view hostname);
 void Free_Invalid_List(GameWorld *g);
 void free_ban_list(GameWorld *g);
 bool Valid_Name(GameWorld *g, char *newname);
