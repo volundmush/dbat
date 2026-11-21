@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdlib>
+#include <array>
 #include <cstring>
 #include <deque>
 #include <memory>
@@ -53,10 +54,10 @@ struct descriptor_data {
   int32_t mail_to{};                   /* name for mail system			*/
   int has_prompt{};                    /* is the user at a prompt?             */
   net::readiness ready;                /* how the socket stood at this pulse's poll (game_loop) */
-  char inbuf[MAX_RAW_INPUT_LENGTH]{};  /* buffer for raw input		*/
-  char last_input[MAX_INPUT_LENGTH]{}; /* the last input			*/
+  std::string raw_input;               /* what has come since the last newline (MAX_RAW_INPUT_LENGTH - 1 at most) */
+  std::string last_input;              /* the last command, for ! and ^old^new */
   output_buffer out;                   /* what waits to be sent */
-  std::string history[HISTORY_SIZE];   /* History of commands, for ! mostly.	*/
+  std::array<std::string, HISTORY_SIZE> history; /* the commands typed, for !text */
   int history_pos{};                   /* Circular array position.		*/
   struct txt_q input{};                /* q of unprocessed input		*/
   struct char_data *character{};       /* linked to char			*/

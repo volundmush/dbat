@@ -140,9 +140,6 @@ int game_send_output(GameWorld *g, struct descriptor_data *d)
 
 void game_process_commands(GameWorld *g)
 {
-  char comm[MAX_INPUT_LENGTH];
-  int aliased;
-
   for (descriptor_data *d : each_desc(g)) {
 
     /*
@@ -160,8 +157,11 @@ void game_process_commands(GameWorld *g)
       }
     }
 
-    if (!get_from_q(&d->input, comm, &aliased))
+    std::optional<txt_line> next = get_from_q(&d->input);
+    if (!next)
       continue;
+    std::string comm = std::move(next->text);
+    int aliased      = next->aliased;
 
     if (d->character) {
       /* Reset the idle timer & pull char back from void if necessary */
@@ -184,8 +184,12 @@ void game_process_commands(GameWorld *g)
     else {                                           /* else: we're playing normally. */
       if (aliased)                                   /* To prevent recursive aliases. */
         d->has_prompt = true;                        /* To get newline before next cmd output. */
-      else if (perform_alias(g, d, comm, sizeof(comm))) /* Run it through aliasing system */
-        get_from_q(&d->input, comm, &aliased);
+      else if (perform_alias(g, d, comm)) { /* Run it through aliasing system */
+        if ((next = get_from_q(&d->input))) {
+          comm    = std::move(next->text);
+          aliased = next->aliased;
+        }
+      }
       command_interpreter(g, d->character, comm); /* Send it to interpreter */
     }
   }

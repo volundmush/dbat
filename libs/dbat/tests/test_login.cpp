@@ -364,6 +364,13 @@ namespace {
       made("network, odd input", {}, {"@raw say a$\\b\\bz\\r\\n", "@raw say x\\r\\nsay part", "@raw ial\\r\\n", "say first", "^ir^IR", "^first^", "@output 10 1000", "@leave"}),
       made("network, a full socket", {}, {"@sndbuf 2048", "@output 60 1000", "@stall 6", "@drain"}),
       made("network, the client stops sending", {}, {"@eof"}),
+      /* aliases, as the queue runs them: simple ones in place, complex ones ($1..$9, $*, ;, $$, a trailing $) onto the
+         front of the queue, an alias naming another, and expansions too long for a line */
+      made("network, aliases", {}, {"alias hi say hello there", "hi", "hi you", "alias two say one;say two", "two",
+                                    "alias args say [$1] [$2] [$*] [$9] [$0] [$x]", "args a  b c", "args",
+                                    "alias dollar say cost $$5 and $", "dollar", "alias nest hi", "nest",
+                                    "alias empty ;", "empty", "alias long say $*$*$*", "long xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                                    "alias many say $9 $8 $1", "many 1 2 3 4 5 6 7 8 9 10 11", "!", "^hello^bye", "alias", "@show"}),
       /* sent up to partway through the prompt: the rest goes first next time, then what came since (the next text once
          went before the buffer, lost); where the socket fills depends on the kernel, so several sizes */
       made("network, the rest of a prompt", {}, {"@sndbuf 2048", "@output 1 8600", "@stall 1", "say hi", "@show", "@output 1 8650", "@stall 1", "say hi", "@show", "@output 1 8700", "@stall 1", "say hi", "@show", "@output 1 8750", "@stall 1", "say hi", "@show", "@output 1 8800", "@stall 1", "say hi", "@show", "@output 1 8850", "@stall 1", "say hi", "@show", "@output 1 8900", "@stall 1", "say hi", "@show", "@output 1 8950", "@stall 1", "say hi", "@show", "@output 1 9000", "@stall 1", "say hi", "@show"}),

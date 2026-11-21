@@ -11,6 +11,10 @@
 
 #include <cerrno>
 #include <cstdlib>
+#include <algorithm>
+#include <string>
+#include <string_view>
+#include <vector>
 
 
 #include "dbat/args.hpp"
@@ -84,64 +88,59 @@ ACMD(do_alias)
  */
 constexpr int NUM_TOKENS = 9;
 
-/* Copies text to *write_point, stopping at end (the last byte of the buffer, kept for the NUL). */
-static void alias_append(char **write_point, char *end, const char *text)
-{
-  while (*text && *write_point < end)
-    *(*write_point)++ = *text++;
-}
+/* One line of a complex alias as it is built: at most MAX_RAW_INPUT_LENGTH - 1 long, then queued cut to a command's
+   length */
+struct alias_line {
+  std::string text;
 
-static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a)
+  void append(std::string_view more)
+  {
+    text.append(more.substr(0, std::min(more.size(), (size_t)MAX_RAW_INPUT_LENGTH - 1 - text.size())));
+  }
+  void queue(struct txt_q *q) const { write_to_q(std::string_view(text).substr(0, MAX_INPUT_LENGTH - 1), q, 1); }
+};
+
+static void perform_complex_alias(struct txt_q *input_q, std::string_view orig, struct alias_data *a)
 {
   struct txt_q temp_queue;
-  char *tokens[NUM_TOKENS], *temp, *write_point;
-  const char *rep;
-  char buf2[MAX_RAW_INPUT_LENGTH], buf[MAX_RAW_INPUT_LENGTH]; /* raw? */
-  char *end         = buf + sizeof(buf) - 1;                  /* $* and $1..$9 can expand past any buffer */
-  int num_of_tokens = 0, num;
+  std::vector<std::string_view> tokens;
+  alias_line line;
 
-  /* First, parse the original string */
-  copy_cstr(buf2, orig, sizeof(buf2));
-  temp = strtok(buf2, " ");
-  while (temp != nullptr && num_of_tokens < NUM_TOKENS) {
-    tokens[num_of_tokens++] = temp;
-    temp                    = strtok(nullptr, " ");
+  /* First, parse the original string: its words, split at spaces */
+  std::string_view words = orig.substr(0, std::min(orig.size(), (size_t)MAX_RAW_INPUT_LENGTH - 1));
+  for (size_t at = 0; tokens.size() < NUM_TOKENS;) {
+    at = words.find_first_not_of(' ', at);
+    if (at == std::string_view::npos)
+      break;
+    size_t end = std::min(words.find(' ', at), words.size());
+    tokens.push_back(words.substr(at, end - at));
+    at = end;
   }
-
-  /* initialize */
-  write_point = buf;
-  temp_queue  = txt_q{};
 
   /* now parse the alias */
-  for (rep = a->replacement.c_str(); *rep; rep++) {
-    if (*rep == ALIAS_SEP_CHAR) {
-      *write_point              = '\0';
-      buf[MAX_INPUT_LENGTH - 1] = '\0';
-      write_to_q(buf, &temp_queue, 1);
-      write_point = buf;
-    } else if (*rep == ALIAS_VAR_CHAR) {
-      rep++;
-      if (!*rep) { /* a '$' at the very end: keep it, and don't step past the string */
-        alias_append(&write_point, end, "$");
+  const std::string &rep = a->replacement;
+  for (size_t i = 0; i < rep.size(); i++) {
+    if (rep[i] == ALIAS_SEP_CHAR) {
+      line.queue(&temp_queue);
+      line.text.clear();
+    } else if (rep[i] == ALIAS_VAR_CHAR) {
+      if (++i == rep.size()) { /* a '$' at the very end: keep it */
+        line.append("$");
         break;
       }
-      if ((num = *rep - '1') < num_of_tokens && num >= 0)
-        alias_append(&write_point, end, tokens[num]);
-      else if (*rep == ALIAS_GLOB_CHAR)
-        alias_append(&write_point, end, orig);
+      if (rep[i] >= '1' && (size_t)(rep[i] - '1') < tokens.size())
+        line.append(tokens[rep[i] - '1']);
+      else if (rep[i] == ALIAS_GLOB_CHAR)
+        line.append(orig);
       else {
-        char literal[2] = {*rep, '\0'};
-        alias_append(&write_point, end, literal);
-        if (*rep == '$') /* redouble $ for act safety */
-          alias_append(&write_point, end, "$");
+        line.append(std::string_view(&rep[i], 1));
+        if (rep[i] == '$') /* redouble $ for act safety */
+          line.append("$");
       }
-    } else if (write_point < end)
-      *(write_point++) = *rep;
+    } else
+      line.append(std::string_view(&rep[i], 1));
   }
-
-  *write_point              = '\0';
-  buf[MAX_INPUT_LENGTH - 1] = '\0';
-  write_to_q(buf, &temp_queue, 1);
+  line.queue(&temp_queue);
 
   /* push our temp_queue on to the _front_ of the input queue */
   input_q->lines.insert(input_q->lines.begin(), temp_queue.lines.begin(), temp_queue.lines.end());
@@ -155,9 +154,8 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
  *   1: String was _not_ modified in place; rather, the expanded aliases
  *      have been placed at the front of the character's input queue.
  */
-bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t maxlen)
+bool perform_alias(GameWorld *g, struct descriptor_data *d, std::string &line)
 {
-  char first_arg[MAX_INPUT_LENGTH], *ptr;
   struct alias_data *a;
   std::list<alias_data> *aliases;
 
@@ -170,10 +168,11 @@ bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t m
     return false;
 
   /* find the alias we're supposed to match */
-  ptr = any_one_arg(orig, first_arg);
+  std::string_view rest = line;
+  std::string first_arg = take_word(rest);
 
   /* bail out if it's null */
-  if (!*first_arg)
+  if (first_arg.empty())
     return false;
 
   /* if the first arg is not an alias, return without doing anything */
@@ -181,9 +180,9 @@ bool perform_alias(GameWorld *g, struct descriptor_data *d, char *orig, size_t m
     return false;
 
   if (a->type == ALIAS_SIMPLE) {
-    copy_cstr(orig, a->replacement.c_str(), maxlen);
+    line = a->replacement.substr(0, MAX_INPUT_LENGTH - 1);
     return false;
   }
-  perform_complex_alias(&d->input, ptr, a);
+  perform_complex_alias(&d->input, rest, a);
   return true;
 }

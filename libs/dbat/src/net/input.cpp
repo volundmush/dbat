@@ -9,41 +9,38 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include <cstring>
+#include <algorithm>
+#include <cctype>
+#include <optional>
+#include <string>
+#include <string_view>
 
+#include "dbat/args.hpp"
+#include "dbat/stringutils.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
 
 #include "comm_internal.hpp"
 
-static bool perform_subst(GameWorld *g, struct descriptor_data *t, char *orig, char *subst);
-
-/*
- * NOTE: 'txt' must be at most MAX_INPUT_LENGTH big.
- */
-void write_to_q(const char *txt, struct txt_q *queue, int aliased)
+void write_to_q(std::string_view txt, struct txt_q *queue, int aliased)
 {
-  queue->lines.push_back({txt, aliased});
+  queue->lines.push_back({std::string(txt), aliased});
   if (!aliased)
     queue->typed++;
 }
 
-/*
- * NOTE: 'dest' must be at least MAX_INPUT_LENGTH big.
- */
-bool get_from_q(struct txt_q *queue, char *dest, int *aliased)
+std::optional<txt_line> get_from_q(struct txt_q *queue)
 {
   if (queue->lines.empty())
-    return false;
+    return std::nullopt;
 
-  const txt_line &line = queue->lines.front();
-  snprintf(dest, MAX_INPUT_LENGTH, "%s", line.text.c_str()); /* lines are queued at most this long */
-  *aliased = line.aliased;
-  if (!*aliased)
-    queue->typed--;
+  txt_line line = std::move(queue->lines.front());
   queue->lines.pop_front();
-
-  return true;
+  if (!line.aliased)
+    queue->typed--;
+  if (line.text.size() > MAX_INPUT_LENGTH - 1) /* lines are queued at most this long */
+    line.text.resize(MAX_INPUT_LENGTH - 1);
+  return line;
 }
 
 /* Throw away the commands a descriptor has typed but not yet run. */
@@ -53,224 +50,217 @@ void flush_input_queue(struct descriptor_data *d)
   d->input.typed = 0;
 }
 
-/*
- * ASSUMPTION: There will be no newlines in the raw input buffer when this
- * function is called.  We must maintain that before returning.
- *
- * Ever wonder why 'tmp' had '+8' on it?  The crusty old code could write
- * MAX_INPUT_LENGTH+1 bytes to 'tmp' if there was a '$' as the final
- * character in the input buffer.  This would also cause 'space_left' to
- * drop to -1, which wasn't very happy in an unsigned variable.  Argh.
- * So to fix the above, 'tmp' lost the '+8' since it doesn't need it
- * and the code has been changed to reserve space by accepting one less
- * character. (Do you really need 256 characters on a line?)
- * -gg 1/21/2000
- */
-int process_input(GameWorld *g, struct descriptor_data *t)
+namespace {
+
+/* Where the next newline in raw is, from from on; none if there is none before a NUL byte (quirk: the C string the
+   input was ended there) */
+std::optional<size_t> find_newline(const std::string &raw, size_t from)
 {
-  int buf_length, failed_subst;
-  size_t bytes_read;
-  size_t space_left;
-  char *ptr, *read_point, *write_point, *nl_pos = nullptr;
-  char tmp[MAX_INPUT_LENGTH];
+  for (size_t i = from; i < raw.size() && raw[i] != '\0'; i++)
+    if (ISNEWL(raw[i]))
+      return i;
+  return std::nullopt;
+}
 
-  /* first, find the point where we left off reading data */
-  buf_length = strlen(t->inbuf);
-  read_point = t->inbuf + buf_length;
-  space_left = MAX_RAW_INPUT_LENGTH - buf_length - 1;
+enum class read_outcome {
+  line,    /* there is a whole line to take */
+  waiting, /* not yet */
+  lost,    /* the connection is gone, or sent more than a line can be */
+};
 
-  do {
-    if (space_left <= 0) {
+/* Reads what has come for t onto its raw input, until there's a newline: where the first one is, in newline. Returns
+   after the first read with nothing in it, so a client that sends no newline never holds the game up. */
+read_outcome read_available(struct descriptor_data *t, size_t &newline)
+{
+  std::string &raw = t->raw_input;
+
+  /* quirk: what is kept of an unfinished line ends at a NUL byte in it, as the C string it was */
+  raw.resize(std::min(raw.size(), raw.find('\0')));
+  for (;;) {
+    size_t space_left = MAX_RAW_INPUT_LENGTH - 1 - raw.size();
+    if (space_left == 0) {
       mud_log("WARNING: process_input: about to close connection: input overflow");
-      return (-1);
+      return read_outcome::lost;
     }
 
-    net::io_result got = net::receive_some(t->sock.handle(), {read_point, space_left});
-
+    size_t start = raw.size();
+    raw.resize(start + space_left);
+    net::io_result got = net::receive_some(t->sock.handle(), {raw.data() + start, space_left});
+    raw.resize(start + (got.status == net::io_status::done ? got.bytes : 0));
     if (got.status == net::io_status::would_block) /* Just blocking, no problems. */
-      return (0);
+      return read_outcome::waiting;
     if (got.status != net::io_status::done) /* Error, disconnect them. */
-      return (-1);
-    bytes_read = got.bytes;
+      return read_outcome::lost;
 
-    /* check for compression response, if still expecting something */
-    /* note: this will bork if the user is giving lots of input when he first connects */
-    /* he shouldn't be doing this, and for the sake of efficiency, the read buffer isn't searched */
-    /* (ie. it assumes that read_point[0] will be IAC, etc.) */
-
-    *(read_point + bytes_read) = '\0'; /* terminate the string */
-
-    /* search for a newline in the data we just read */
-    for (ptr = read_point; *ptr && !nl_pos; ptr++)
-      if (ISNEWL(*ptr))
-        nl_pos = ptr;
-
-    read_point += bytes_read;
-    space_left -= bytes_read;
-
-    /*
- * on some systems such as AIX, POSIX-standard nonblocking I/O is broken,
- * causing the MUD to hang when it encounters input not terminated by a
- * newline.  This was causing hangs at the Password: prompt, for example.
- * I attempt to compensate by always returning after the _first_ read, instead
- * of looping forever until a read returns -1.  This simulates non-blocking
- * I/O because the result is we never call read unless we know from select()
- * that data is ready (process_input is only called if select indicates that
- * this descriptor is in the read set).  JE 2/23/95.
- */
-  } while (nl_pos == nullptr);
-
-  /*
-   * okay, at this point we have at least one newline in the string; now we
-   * can copy the formatted data to a new array for further processing.
-   */
-
-  read_point = t->inbuf;
-
-  while (nl_pos != nullptr) {
-    write_point = tmp;
-    space_left  = MAX_INPUT_LENGTH - 1;
-
-    /* The '> 1' reserves room for a '$ => $$' expansion. */
-    for (ptr = read_point; (space_left > 1) && (ptr < nl_pos); ptr++) {
-      if (*ptr == '\b' || *ptr == 127) { /* handle backspacing or delete key */
-        if (write_point > tmp) {
-          if (*(--write_point) == '$') {
-            write_point--;
-            space_left += 2;
-          } else
-            space_left++;
-        }
-      } else if (isascii(*ptr) && isprint(*ptr)) {
-        if ((*(write_point++) = *ptr) == '$') { /* copy one character */
-          *(write_point++) = '$';               /* if it's a $, double it */
-          space_left -= 2;
-        } else
-          space_left--;
-      }
+    /* only what just came is searched */
+    if (std::optional<size_t> found = find_newline(raw, start)) {
+      newline = *found;
+      return read_outcome::line;
     }
-
-    *write_point = '\0';
-
-    if ((space_left <= 0) && (ptr < nl_pos)) {
-      std::string buffer = str_format("Line too long.  Truncated to:\r\n{}\r\n", tmp);
-      if (write_to_descriptor(t->sock.handle(), buffer.c_str()) < 0)
-        return (-1);
-    }
-    if (t->snoop_by)
-      write_to_output(g, t->snoop_by, "% {}\r\n", tmp);
-    failed_subst = 0;
-
-    if (*tmp == '!' && !(*(tmp + 1))) /* Redo last command. */
-      strcpy(tmp, t->last_input);     /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-    else if (*tmp == '!' && *(tmp + 1)) {
-      char *commandln  = (tmp + 1);
-      int starting_pos = t->history_pos,
-          cnt          = (t->history_pos == 0 ? HISTORY_SIZE - 1 : t->history_pos - 1);
-
-      skip_spaces(&commandln);
-      for (; cnt != starting_pos; cnt--) {
-        if (!t->history[cnt].empty() && is_abbrev(commandln, t->history[cnt].c_str())) {
-          strcpy(tmp, t->history[cnt].c_str()); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-          strcpy(t->last_input, tmp);   /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-          write_to_output(g, t, "{}\r\n", tmp);
-          break;
-        }
-        if (cnt == 0) /* At top, loop to bottom. */
-          cnt = HISTORY_SIZE;
-      }
-    } else if (*tmp == '^') {
-      if (!(failed_subst = perform_subst(g, t, t->last_input, tmp)))
-        strcpy(t->last_input, tmp); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-    } else {
-      strcpy(t->last_input, tmp); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-      t->history[t->history_pos] = tmp;         /* Replace the old line. */
-      if (++t->history_pos >= HISTORY_SIZE)     /* Wrap to top. */
-        t->history_pos = 0;
-    }
-    /* the '--' command flushes the queue - Jamdog - 9th May 2007 */
-    if ((*tmp == '-') && (*(tmp + 1) == '-') && !(*(tmp + 2))) {
-      write_to_output(g, t, "All queued commands cancelled.\r\n");
-      flush_input_queue(t); /* only the commands: pending output stays */
-      failed_subst = 1;     /* and don't queue the -- itself */
-    }
-    if (!failed_subst) {
-      /* commands run at most one per pulse; a client sending far faster is flooding */
-      if (t->input.typed >= MAX_QUEUED_INPUT) {
-        write_to_descriptor(t->sock.handle(), "\r\nToo many commands waiting to run; disconnecting.\r\n");
-        mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Input flood from [{}]: more than {:d} commands queued; disconnecting.", t->host, MAX_QUEUED_INPUT);
-        return (-1);
-      }
-      write_to_q(tmp, &t->input, 0);
-    }
-
-    /* find the end of this line */
-    while (ISNEWL(*nl_pos))
-      nl_pos++;
-
-    /* see if there's another newline in the input buffer */
-    read_point = ptr = nl_pos;
-    for (nl_pos = nullptr; *ptr && !nl_pos; ptr++)
-      if (ISNEWL(*ptr))
-        nl_pos = ptr;
   }
+}
 
-  /* now move the rest of the buffer up to the beginning for the next pass */
-  write_point = t->inbuf;
-  while (*read_point)
-    *(write_point++) = *(read_point++);
-  *write_point = '\0';
+/* A line as typed, made fit to run */
+struct cleaned_line {
+  std::string text;
+  bool cut{}; /* "Line too long" */
+};
 
-  return (1);
+/* The line in raw: backspace and DEL rub out, only printable ASCII is kept, and each $ is doubled, all within
+   MAX_INPUT_LENGTH - 1. */
+cleaned_line clean_line(std::string_view raw)
+{
+  cleaned_line line;
+  size_t space_left = MAX_INPUT_LENGTH - 1;
+  size_t i          = 0;
+
+  /* The '> 1' reserves room for a '$ => $$' expansion. */
+  for (; space_left > 1 && i < raw.size(); i++) {
+    char c = raw[i];
+    if (c == '\b' || c == 127) { /* handle backspacing or delete key */
+      if (!line.text.empty()) {
+        bool dollar = line.text.back() == '$'; /* rubbing out a $ takes its double too */
+        line.text.pop_back();
+        if (dollar) {
+          line.text.pop_back();
+          space_left += 2;
+        } else
+          space_left++;
+      }
+    } else if (isascii(c) && isprint(c)) {
+      line.text += c;
+      if (c == '$') { /* if it's a $, double it */
+        line.text += '$';
+        space_left -= 2;
+      } else
+        space_left--;
+    }
+  }
+  /* quirk: only a $ doubled into the last of the room counts as too long; any other long line is just cut */
+  line.cut = space_left == 0 && i < raw.size();
+  return line;
 }
 
 /* perform substitution for the '^..^' csh-esque syntax orig is the
  * orig string, i.e. the one being modified.  subst contains the
- * substition string, i.e. "^telm^tell"
+ * substition string, i.e. "^telm^tell". True if it couldn't be done.
  */
-static bool perform_subst(GameWorld *g, struct descriptor_data *t, char *orig, char *subst)
+bool perform_subst(GameWorld *g, struct descriptor_data *t, const std::string &orig, std::string &subst)
 {
-  char newsub[MAX_INPUT_LENGTH + 5];
-
-  char *first, *second, *strpos;
-
-  /*
-   * first is the position of the beginning of the first string (the one
-   * to be replaced
-   */
-  first = subst + 1;
-
-  /* now find the second '^' */
-  if (!(second = strchr(first, '^'))) {
+  /* the text to replace runs from after the first '^' to the second */
+  size_t second = subst.find('^', 1);
+  if (second == std::string::npos) {
     write_to_output(g, t, "Invalid substitution.\r\n");
     return true;
   }
-  /* terminate "first" at the position of the '^' and make 'second' point
-   * to the beginning of the second string */
-  *(second++) = '\0';
+  std::string first = subst.substr(1, second - 1);
 
   /* now, see if the contents of the first string appear in the original */
-  if (!(strpos = strstr(orig, first))) {
+  size_t at = orig.find(first);
+  if (at == std::string::npos) {
     write_to_output(g, t, "Invalid substitution.\r\n");
     return true;
   }
-  /* now, we construct the new string for output. */
 
-  /* first, everything in the original, up to the string to be replaced */
-  strncpy(newsub, orig, strpos - orig); /* strncpy: OK (newsub:MAX_INPUT_LENGTH+5 > orig:MAX_INPUT_LENGTH) */
-  newsub[strpos - orig] = '\0';
-
-  /* now, the replacement string */
-  strncat(newsub, second, MAX_INPUT_LENGTH - strlen(newsub) - 1); /* strncpy: OK */
-
-  /* now, if there's anything left in the original after the string to
-   * replaced, copy that too. */
-  if (((strpos - orig) + strlen(first)) < strlen(orig))
-    strncat(newsub, strpos + strlen(first), MAX_INPUT_LENGTH - strlen(newsub) - 1); /* strncpy: OK */
-
-  /* terminate the string in case of an overflow from strncat */
-  newsub[MAX_INPUT_LENGTH - 1] = '\0';
-  strcpy(subst, newsub); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
-
+  /* everything in the original up to it, the replacement, then the rest of the original, within the line's length */
+  const size_t room = MAX_INPUT_LENGTH - 1;
+  std::string changed = orig.substr(0, at);
+  changed.append(subst, second + 1, room - changed.size());
+  if (at + first.size() < orig.size())
+    changed.append(orig, at + first.size(), room - changed.size());
+  subst = std::move(changed);
   return false;
+}
+
+/* What a typed line does before it is queued: '!' repeats the last command, '!text' the latest that starts with
+   text, '^old^new' the last with old changed to new, and '--' cancels what is queued. False if the connection is to
+   be closed. */
+bool handle_typed(GameWorld *g, struct descriptor_data *t, std::string tmp, bool cut)
+{
+  if (cut) {
+    std::string buffer = str_format("Line too long.  Truncated to:\r\n{}\r\n", tmp);
+    if (write_to_descriptor(t->sock.handle(), buffer.c_str()) < 0)
+      return false;
+  }
+  if (t->snoop_by)
+    write_to_output(g, t->snoop_by, "% {}\r\n", tmp);
+  bool failed_subst = false;
+
+  if (tmp == "!") /* Redo last command. */
+    tmp = t->last_input;
+  else if (tmp.starts_with('!')) {
+    std::string_view commandln = skip_spaces(std::string_view(tmp).substr(1));
+    int starting_pos = t->history_pos, cnt = (t->history_pos == 0 ? HISTORY_SIZE - 1 : t->history_pos - 1);
+
+    for (; cnt != starting_pos; cnt--) {
+      if (!t->history[cnt].empty() && is_abbrev(commandln, t->history[cnt])) {
+        tmp           = t->history[cnt];
+        t->last_input = tmp;
+        write_to_output(g, t, "{}\r\n", tmp);
+        break;
+      }
+      if (cnt == 0) /* At top, loop to bottom. */
+        cnt = HISTORY_SIZE;
+    }
+  } else if (tmp.starts_with('^')) {
+    if (!(failed_subst = perform_subst(g, t, t->last_input, tmp)))
+      t->last_input = tmp;
+  } else {
+    t->last_input              = tmp;
+    t->history[t->history_pos] = tmp;     /* Replace the old line. */
+    if (++t->history_pos >= HISTORY_SIZE) /* Wrap to top. */
+      t->history_pos = 0;
+  }
+  /* the '--' command flushes the queue - Jamdog - 9th May 2007 */
+  if (tmp == "--") {
+    write_to_output(g, t, "All queued commands cancelled.\r\n");
+    flush_input_queue(t); /* only the commands: pending output stays */
+    failed_subst = true;  /* and don't queue the -- itself */
+  }
+  if (!failed_subst) {
+    /* commands run at most one per pulse; a client sending far faster is flooding */
+    if (t->input.typed >= MAX_QUEUED_INPUT) {
+      write_to_descriptor(t->sock.handle(), "\r\nToo many commands waiting to run; disconnecting.\r\n");
+      mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Input flood from [{}]: more than {:d} commands queued; disconnecting.", t->host, MAX_QUEUED_INPUT);
+      return false;
+    }
+    write_to_q(tmp, &t->input, 0);
+  }
+  return true;
+}
+
+} // namespace
+
+/* Reads what t has sent, and queues each whole line in it: 1 if there were any, 0 if not yet, -1 if t is to be
+   closed. What follows the last newline waits for the next. */
+int process_input(GameWorld *g, struct descriptor_data *t)
+{
+  size_t newline = 0;
+
+  switch (read_available(t, newline)) {
+    case read_outcome::waiting:
+      return (0);
+    case read_outcome::lost:
+      return (-1);
+    case read_outcome::line:
+      break;
+  }
+
+  std::string &raw = t->raw_input;
+  size_t begin     = 0;
+  for (std::optional<size_t> line_end = newline; line_end;) {
+    cleaned_line line = clean_line(std::string_view(raw).substr(begin, *line_end - begin));
+    if (!handle_typed(g, t, std::move(line.text), line.cut))
+      return (-1);
+
+    /* past this line's newlines: \r\n, \n\r, or blank lines, which are skipped */
+    begin = *line_end;
+    while (begin < raw.size() && ISNEWL(raw[begin]))
+      begin++;
+    line_end = find_newline(raw, begin);
+  }
+
+  /* the rest waits for its newline (quirk: up to any NUL byte in it) */
+  raw = raw.substr(begin, std::min(raw.size(), raw.find('\0', begin)) - begin);
+  return (1);
 }

@@ -5,9 +5,11 @@
 #include <csignal>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <string>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/descriptor.hpp"
 #include "dbat/net/platform.hpp"
 
 #define COLOR_ON(g, ch) (COLOR_LEV(g, ch) > 0)
@@ -23,7 +25,8 @@ void set_empty_account(struct descriptor_data *d);
 
 /* input.cpp */
 void flush_input_queue(struct descriptor_data *d);
-bool get_from_q(struct txt_q *queue, char *dest, int *aliased);
+/* The next line queued, if there is one */
+std::optional<txt_line> get_from_q(struct txt_q *queue);
 int process_input(GameWorld *g, struct descriptor_data *t);
 
 /* output.cpp */
