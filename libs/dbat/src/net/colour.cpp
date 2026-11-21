@@ -9,49 +9,18 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include <cstring>
+#include <cctype>
+#include <cstdlib>
+#include <string>
+#include <string_view>
 
 #include "dbat/utils.hpp"
 #include "dbat/act.informative.hpp"
+#include "dbat/random.hpp"
 #include "dbat/screen.hpp"
 
 #include "comm_internal.hpp"
 
-/* Color replacement arrays. Orig. Renx -- 011100, now modified */
-static const char *const ANSI[] = {
-    "@",
-    AA_NORMAL,
-    AA_NORMAL ANSISEPSTR AF_BLACK,
-    AA_NORMAL ANSISEPSTR AF_BLUE,
-    AA_NORMAL ANSISEPSTR AF_GREEN,
-    AA_NORMAL ANSISEPSTR AF_CYAN,
-    AA_NORMAL ANSISEPSTR AF_RED,
-    AA_NORMAL ANSISEPSTR AF_MAGENTA,
-    AA_NORMAL ANSISEPSTR AF_YELLOW,
-    AA_NORMAL ANSISEPSTR AF_WHITE,
-    AA_BOLD ANSISEPSTR AF_BLACK,
-    AA_BOLD ANSISEPSTR AF_BLUE,
-    AA_BOLD ANSISEPSTR AF_GREEN,
-    AA_BOLD ANSISEPSTR AF_CYAN,
-    AA_BOLD ANSISEPSTR AF_RED,
-    AA_BOLD ANSISEPSTR AF_MAGENTA,
-    AA_BOLD ANSISEPSTR AF_YELLOW,
-    AA_BOLD ANSISEPSTR AF_WHITE,
-    AB_BLACK,
-    AB_BLUE,
-    AB_GREEN,
-    AB_CYAN,
-    AB_RED,
-    AB_MAGENTA,
-    AB_YELLOW,
-    AB_WHITE,
-    AA_BLINK,
-    AA_UNDERLINE,
-    AA_BOLD,
-    AA_REVERSE,
-    "!"};
-
-static const char CCODE[] = "@ndbgcrmywDBGCRMYW01234567luoex!";
 /*
   Codes are:      @n - normal
   @d - black      @D - gray           @0 - background black
@@ -68,117 +37,153 @@ Extra codes:      @l - blink          @o - bold
 
   @[num] - user color choice num, [] are required
 */
-static const char RANDOM_COLORS[] = "bgcrmywBGCRMWY";
+namespace {
 
-#define NEW_STRING_LENGTH (size_t)(dest_char - save_pos)
-size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, const std::string *choices)
+/* Each code and what it becomes: a replacement starting with a digit is the inside of an ANSI escape */
+struct colour_code {
+  char code;
+  const char *ansi;
+};
+constexpr colour_code CODES[] = {
+    {'@', "@"},
+    {'d', AA_NORMAL ANSISEPSTR AF_BLACK},
+    {'b', AA_NORMAL ANSISEPSTR AF_BLUE},
+    {'g', AA_NORMAL ANSISEPSTR AF_GREEN},
+    {'c', AA_NORMAL ANSISEPSTR AF_CYAN},
+    {'r', AA_NORMAL ANSISEPSTR AF_RED},
+    {'m', AA_NORMAL ANSISEPSTR AF_MAGENTA},
+    {'y', AA_NORMAL ANSISEPSTR AF_YELLOW},
+    {'w', AA_NORMAL ANSISEPSTR AF_WHITE},
+    {'D', AA_BOLD ANSISEPSTR AF_BLACK},
+    {'B', AA_BOLD ANSISEPSTR AF_BLUE},
+    {'G', AA_BOLD ANSISEPSTR AF_GREEN},
+    {'C', AA_BOLD ANSISEPSTR AF_CYAN},
+    {'R', AA_BOLD ANSISEPSTR AF_RED},
+    {'M', AA_BOLD ANSISEPSTR AF_MAGENTA},
+    {'Y', AA_BOLD ANSISEPSTR AF_YELLOW},
+    {'W', AA_BOLD ANSISEPSTR AF_WHITE},
+    {'0', AB_BLACK},
+    {'1', AB_BLUE},
+    {'2', AB_GREEN},
+    {'3', AB_CYAN},
+    {'4', AB_RED},
+    {'5', AB_MAGENTA},
+    {'6', AB_YELLOW},
+    {'7', AB_WHITE},
+    {'l', AA_BLINK},
+    {'u', AA_UNDERLINE},
+    {'o', AA_BOLD},
+    {'e', AA_REVERSE},
+};
+
+/* What @x picks from */
+constexpr std::string_view RANDOM_COLORS = "bgcrmywBGCRMWY";
+
+/* A user's colour choice i (@n is choice COLOR_NORMAL), or the default */
+const char *choice(const std::string *choices, int i)
 {
-  char *dest_char, *source_char, *save_pos;
-  const char *color_char, *replacement = nullptr;
-  int i, temp_color;
-  size_t wanted;
+  return choices && !choices[i].empty() ? choices[i].c_str() : default_color_choices[i];
+}
 
-  if (!txt || !strchr(txt, '@')) /* skip out if no color codes     */
-    return strlen(txt);
+/* The number atoi() reads at txt[at]: leading spaces, a sign, then digits */
+int number_at(std::string_view txt, size_t at)
+{
+  size_t end = at;
+  while (end < txt.size() && isspace(txt[end]))
+    end++;
+  if (end < txt.size() && (txt[end] == '+' || txt[end] == '-'))
+    end++;
+  while (end < txt.size() && isdigit(txt[end]))
+    end++;
+  return atoi(std::string(txt.substr(at, end - at)).c_str());
+}
 
-  source_char = txt;
-  dest_char   = str_alloc(maxlen);
-  save_pos = dest_char;
-  /* Leave room for the terminating NUL: every step below writes at most one byte, except a color substitution,
-   * which checks its own length. */
-  for (; *source_char && (NEW_STRING_LENGTH + 1 < maxlen);) {
+} // namespace
+
+colourized colourize(GameWorld *g, std::string_view txt, bool parse, const std::string *choices, size_t maxlen)
+{
+  if (txt.find('@') == std::string_view::npos) /* skip out if no color codes */
+    return {std::string(txt), txt.size()};
+
+  std::string out;
+  size_t at = 0;
+  /* Leave room for what was the terminating NUL: every step below writes at most one byte, except a color
+   * substitution, which checks its own length. */
+  while (at < txt.size() && out.size() + 1 < maxlen) {
     /* no color code - just copy */
-    if (*source_char != '@') {
-      *dest_char++ = *source_char++;
+    if (txt[at] != '@') {
+      out += txt[at++];
       continue;
     }
 
     /* if we get here we have a color code */
-
-    source_char++; /* source_char now points to the code */
+    char code = ++at < txt.size() ? txt[at] : '\0';
 
     /* look for a random color code picks a random number between 1 and 14 */
-    if (*source_char == 'x') {
-      temp_color   = rand_number(g, 0, 13);
-      *source_char = RANDOM_COLORS[temp_color];
-    }
+    if (code == 'x')
+      code = RANDOM_COLORS[rand_number(g, 0, 13)];
 
-    if (*source_char == '\0') { /* string was terminated with color code - just put it in */
-      *dest_char++ = '@';
-      /* source_char will now point to '\0' in the for() check */
+    if (code == '\0') { /* string was terminated with color code - just put it in */
+      out += '@';
       continue;
     }
 
+    /* the end of a @[num] code: past its digits, or at its last character if they end the text */
+    auto skip_digits = [&] {
+      while (at < txt.size() && isdigit(txt[at]))
+        at++;
+      if (at == txt.size())
+        at--;
+    };
+
     if (!parse) { /* not parsing, just skip the code, unless it's @@ */
-      if (*source_char == '@') {
-        *dest_char++ = '@';
+      if (code == '@')
+        out += '@';
+      if (code == '[') { /* Multi-character code */
+        at++;
+        skip_digits();
       }
-      if (*source_char == '[') { /* Multi-character code */
-        source_char++;
-        while (*source_char && isdigit(*source_char))
-          source_char++;
-        if (!*source_char)
-          source_char--;
-      }
-      source_char++; /* skip to next (non-colorcode) char */
+      at++; /* skip to next (non-colorcode) char */
       continue;
     }
 
     /* parse the color code */
-    if (*source_char == '[') { /* User configurable color */
-      source_char++;
-      if (*source_char) {
-        i = atoi(source_char);
-        if (i < 0 || i >= NUM_COLOR)
-          i = COLOR_NORMAL;
-        replacement = default_color_choices[i];
-        if (choices && !choices[i].empty())
-          replacement = choices[i].c_str();
-        while (*source_char && isdigit(*source_char))
-          source_char++;
-        if (!*source_char)
-          source_char--;
-      }
-    } else if (*source_char == 'n') {
-      replacement = default_color_choices[COLOR_NORMAL];
-      if (choices && !choices[COLOR_NORMAL].empty())
-        replacement = choices[COLOR_NORMAL].c_str();
+    const char *replacement = nullptr;
+    if (code == '[') { /* User configurable color */
+      if (++at == txt.size())
+        break; /* "@[" ending the text: nothing more (it once read on past the end, into what was there before) */
+      int i = number_at(txt, at); /* quirk: atoi()'s rules, leading spaces and a sign too */
+      if (i < 0 || i >= NUM_COLOR)
+        i = COLOR_NORMAL;
+      replacement = choice(choices, i);
+      skip_digits();
+    } else if (code == 'n') {
+      replacement = choice(choices, COLOR_NORMAL);
     } else {
-      for (i = 0; CCODE[i] != '!'; i++) { /* do we find it ? */
-        if ((*source_char) == CCODE[i]) { /* if so :*/
-          replacement = ANSI[i];
+      for (const colour_code &c : CODES) /* do we find it ? */
+        if (c.code == code) {
+          replacement = c.ansi;
           break;
         }
-      }
     }
     if (replacement) {
-      if (NEW_STRING_LENGTH + strlen(replacement) + strlen(ANSISTART) + 1 < maxlen) { /* only substitute if there's room for the whole code */
-        if (isdigit(replacement[0]))
-          for (color_char = ANSISTART; *color_char;)
-            *dest_char++ = *color_char++;
-        for (color_char = replacement; *color_char;)
-          *dest_char++ = *color_char++;
-        if (isdigit(replacement[0]))
-          *dest_char++ = ANSIEND;
+      std::string_view r = replacement;
+      if (out.size() + r.size() + std::string_view(ANSISTART).size() + 1 < maxlen) { /* only substitute if there's room for the whole code */
+        if (isdigit(r[0]))
+          out += ANSISTART;
+        out += r;
+        if (isdigit(r[0]))
+          out += (char)ANSIEND;
       }
-      replacement = nullptr;
     }
     /* If we couldn't find any correct color code, or we found it and
     * substituted above, let's just process the next character.
     * - Welcor
     */
-    source_char++;
+    at++;
+  }
 
-  } /* for loop */
-
-  /* make sure output is NULL - terminated */
-  *dest_char = '\0';
-
-  wanted = strlen(source_char); /* see if we wanted more space */
-  strncpy(txt, save_pos, maxlen - 1);
-  wanted += NEW_STRING_LENGTH;
-  free(save_pos); /* plug memory leak */
-
-  return wanted;
+  /* see if we wanted more space */
+  size_t wanted = out.size() + (txt.size() - std::min(at, txt.size()));
+  return {std::move(out), wanted};
 }
-#undef NEW_STRING_LENGTH

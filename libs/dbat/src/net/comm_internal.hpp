@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "dbat/consts/types.hpp"
 #include "dbat/descriptor.hpp"
@@ -35,7 +36,13 @@ void reset_output(GameWorld *g, struct output_buffer &out);
 int process_output(GameWorld *g, struct descriptor_data *t);
 
 /* colour.cpp */
-size_t proc_colors(GameWorld *g, char *txt, size_t maxlen, int parse, const std::string *choices);
+/* text with its colour codes made ANSI escapes (or taken out, unless parse), as much as fits in maxlen - 1, and how
+   long it would have been with room for all of it */
+struct colourized {
+  std::string text;
+  size_t wanted;
+};
+colourized colourize(GameWorld *g, std::string_view text, bool parse, const std::string *choices, size_t maxlen);
 
 /* prompt.cpp */
 std::string make_prompt(GameWorld *g, struct descriptor_data *d);

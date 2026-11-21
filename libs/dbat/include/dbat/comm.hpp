@@ -114,7 +114,7 @@ constexpr int TO_HIDERESIST  = (2 << 10); /* resisted hiding roll      */
 
 /* I/O functions */
 void write_to_q(std::string_view txt, struct txt_q *queue, int aliased);
-int write_to_descriptor(net::native_handle desc, const char *txt);
+int write_to_descriptor(net::native_handle desc, std::string_view txt);
 /* Queues text for d as it is */
 size_t write_to_output(GameWorld *g, struct descriptor_data *d, std::string_view text);
 /* Queues text for d, formatted as std::format does */

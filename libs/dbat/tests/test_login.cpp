@@ -364,6 +364,11 @@ namespace {
       made("network, odd input", {}, {"@raw say a$\\b\\bz\\r\\n", "@raw say x\\r\\nsay part", "@raw ial\\r\\n", "say first", "^ir^IR", "^first^", "@output 10 1000", "@leave"}),
       made("network, a full socket", {}, {"@sndbuf 2048", "@output 60 1000", "@stall 6", "@drain"}),
       made("network, the client stops sending", {}, {"@eof"}),
+      /* a text that ends in "@[" ends there (it once went on reading past its end, into the last longer text), and
+         codes that a player's "@@" leaves for the packet to colour, more than the packet can hold (its end was once
+         left without a terminator) */
+      made("network, colour codes at the end", {}, {"@text 1 0123456789abcdef", "@text 1 x@[", "@text 1 y@", "@text 1 z@[3", "@text 1 w@[ 2",
+                                                    "@text 40000 @@R", "look", "color off", "@text 1 0123456789abcdef", "@text 1 x@[", "color on"}),
       /* aliases, as the queue runs them: simple ones in place, complex ones ($1..$9, $*, ;, $$, a trailing $) onto the
          front of the queue, an alias naming another, and expansions too long for a line */
       made("network, aliases", {}, {"alias hi say hello there", "hi", "hi you", "alias two say one;say two", "two",
@@ -566,6 +571,14 @@ namespace {
       while (n-- > 0)
         write_to_output(g, c.d, std::string(length - 2, 'o') + "\r\n");
       file_print(stdout, "> {}\n{}", line, summary(received(g, c)));
+    } else if (!strncmp(line, "@text ", 6) && sscanf(line + 6, "%d %n", &n, &skip) == 1) {
+      /* one text of n copies of a piece, straight into the client's output */
+      std::string piece = unescape(line + 6 + skip), text;
+      while (n-- > 0)
+        text += piece;
+      write_to_output(g, c.d, text);
+      std::string got = received(g, c);
+      file_print(stdout, "> {}\n{}", line, got.size() > 400 ? summary(got) : got);
     } else if (!strncmp(line, "@colours ", 9)) {
       /* one text of n colour codes, which grows past the pending buffer when they are turned into ANSI */
       n = atoi(line + 9);

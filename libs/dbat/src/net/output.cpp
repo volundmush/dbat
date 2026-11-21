@@ -10,7 +10,8 @@
 ************************************************************************ */
 
 #include <algorithm>
-#include <cstring>
+#include <string>
+#include <string_view>
 
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
@@ -19,12 +20,7 @@
 
 #include "comm_internal.hpp"
 
-static const char *const text_overflow = "**OVERFLOW**\r\n";
-
-/* As big as a descriptor's whole output buffer, so one long text (help, lists) is never cut short here. */
-static char pending_text[LARGE_BUFSIZE];
-
-static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size);
+constexpr std::string_view text_overflow = "**OVERFLOW**\r\n";
 
 size_t write_to_output(GameWorld *g, struct descriptor_data *t, std::string_view text)
 {
@@ -32,24 +28,22 @@ size_t write_to_output(GameWorld *g, struct descriptor_data *t, std::string_view
   if (t->out.overflowed())
     return (0);
 
-  size_t n = std::min(text.size(), sizeof(pending_text) - 1); /* as much as fits; queue_output() marks the rest lost */
-  memcpy(pending_text, text.data(), n);
-  pending_text[n] = '\0';
-  return queue_output(g, t, (int)text.size());
-}
+  /* as much as a whole output buffer holds, so one long text (help, lists) is never cut short here; the rest is
+     marked lost below */
+  std::string pending(text.substr(0, LARGE_BUFSIZE - 1));
+  size_t wantsize = text.size();
 
-/* Queues pending_text, which holds the first sizeof(pending_text) - 1 chars of a text size long */
-static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size)
-{
-  size_t wantsize = size;
-
-  if (t->character)
-    wantsize = size = proc_colors(g, pending_text, sizeof(pending_text), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
-  /* If exceeding the size of the buffer, truncate it for the overflow message */
-  if (size < 0 || wantsize >= sizeof(pending_text)) {
-    size = sizeof(pending_text) - 1;
-    strcpy(pending_text + size - strlen(text_overflow), text_overflow); /* strcpy: OK */
+  if (t->character) {
+    colourized coloured = colourize(g, pending, COLOR_ON(g, t->character), COLOR_CHOICES(t->character), LARGE_BUFSIZE);
+    pending             = std::move(coloured.text);
+    wantsize            = coloured.wanted;
   }
+  /* If exceeding the size of the buffer, truncate it for the overflow message */
+  if (wantsize >= LARGE_BUFSIZE) {
+    pending.resize(std::min(pending.size(), LARGE_BUFSIZE - 1 - text_overflow.size()));
+    pending += text_overflow;
+  }
+  size_t size = pending.size();
 
   /*
    * If the text is too big to fit into even a large buffer, truncate
@@ -58,8 +52,8 @@ static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size)
    */
   output_buffer &out = t->out;
   if (size + out.text.size() + 1 > LARGE_BUFSIZE) {
-    size               = LARGE_BUFSIZE - out.text.size() - 1;
-    pending_text[size] = '\0';
+    size = LARGE_BUFSIZE - out.text.size() - 1;
+    pending.resize(size);
     if (t->character)
       char_set_overf(t->character, true);
     g->buf_overflows++;
@@ -69,13 +63,13 @@ static size_t queue_output(GameWorld *g, struct descriptor_data *t, int size)
    * If the text just barely fits, then it's switched to a large buffer instead (unless it already is the large
    * buffer: then it fills it, and we are in the overflow state).
    */
-  if (!(out.space() > (size_t)size || (out.large && out.space() == (size_t)size))) {
+  if (!(out.space() > size || (out.large && out.space() == size))) {
     g->buf_switches++;
     out.large = true;
     /* the most connections that have had a large buffer at once (each kept the one it got from a pool) */
     g->buf_largecount = std::max(g->buf_largecount, ++g->buf_large_in_use);
   }
-  out.text += pending_text;
+  out.text += pending;
 
   return (out.space());
 }
@@ -90,47 +84,37 @@ void reset_output(GameWorld *g, struct output_buffer &out)
 
 /*
  * Send all of the output that we've accumulated for a player out to
- * the player's descriptor.
- *
- * 32 int8_tGARBAGE_SPACE in MAX_SOCK_BUF used for:
- *	 2 bytes: prepended \r\n
- *	14 bytes: overflow message
- *	 2 bytes: extra \r\n for non-comapct
- *      14 bytes: unused
+ * the player's descriptor: the output, the overflow notice if it overflowed, a blank line for a player who
+ * isn't in compact mode, and the prompt, after a \r\n if it interrupts the last prompt. (GARBAGE_SPACE in
+ * MAX_SOCK_BUF leaves room for what goes around the output.)
  */
 int process_output(GameWorld *g, struct descriptor_data *t)
 {
-  char i[MAX_SOCK_BUF], *osb = i + 2;
-  int result;
-
   /* we may need this \r\n for later -- see below */
-  strcpy(i, "\r\n"); /* strcpy: OK (for 'MAX_SOCK_BUF >= 3') */
-
-  /* now, append the 'real' output */
-  strcpy(osb, t->out.text.c_str()); /* strcpy: OK (the output:LARGE_BUFSIZE < osb:MAX_SOCK_BUF-2) */
+  std::string packet = "\r\n" + t->out.text;
 
   /* if we're in the overflow state, notify the user */
   if (t->out.overflowed())
-    strcat(osb, "**OVERFLOW**\r\n"); /* strcpy: OK (osb:MAX_SOCK_BUF-2 reserves space) */
+    packet += "**OVERFLOW**\r\n";
 
   /* add the extra CRLF if the person isn't in compact mode */
   if (desc_get_connected(t) == CON_PLAYING && t->character && !char_is_npc(t->character) && !char_prf_flagged(g, t->character, PRF_COMPACT))
-    strcat(osb, "\r\n"); /* strcpy: OK (osb:MAX_SOCK_BUF-2 reserves space) */
+    packet += "\r\n";
 
   /* add a prompt */
-
-  strcat(i, make_prompt(g, t).c_str()); /* strcpy: OK (i:MAX_SOCK_BUF reserves space) */
-  if (desc_get_connected(t) == CON_PLAYING) {
-    proc_colors(g, i, sizeof(i), COLOR_ON(g, t->character), COLOR_CHOICES(t->character));
-  }
+  packet += make_prompt(g, t);
+  if (desc_get_connected(t) == CON_PLAYING)
+    packet = colourize(g, packet, COLOR_ON(g, t->character), COLOR_CHOICES(t->character), MAX_SOCK_BUF).text;
+  std::string_view osb = std::string_view(packet).substr(2); /* the packet without the \r\n */
 
   /*
    * now, send the output.  If this is an 'interruption', use the prepended
    * CRLF, otherwise send the straight output sans CRLF.
    */
+  int result;
   if (t->has_prompt) {
     t->has_prompt = false;
-    result        = write_to_descriptor(t->sock.handle(), i);
+    result        = write_to_descriptor(t->sock.handle(), packet);
     if (result >= 2)
       result -= 2;
   } else
@@ -155,8 +139,8 @@ int process_output(GameWorld *g, struct descriptor_data *t)
      * the prompt is never near the small buffer's size. (It once stepped the buffer's end back instead of on,
      * so the next text went before the buffer, and the player never saw it.)
      */
-    if ((unsigned int)result < strlen(osb))
-      t->out.text = osb + result;
+    if ((size_t)result < osb.size())
+      t->out.text = osb.substr(result);
   } else {
     /* Not all data in buffer sent.  result < output buffersize. */
     t->out.text.erase(0, result);
@@ -175,12 +159,12 @@ int process_output(GameWorld *g, struct descriptor_data *t)
  * >=0  If all is well and good.
  *  -1  If an error was encountered, so that the player should be cut off.
  */
-int write_to_descriptor(net::native_handle desc, const char *txt)
+int write_to_descriptor(net::native_handle desc, std::string_view txt)
 {
-  size_t total = strlen(txt), write_total = 0;
+  size_t write_total = 0;
 
-  while (total > 0) {
-    net::io_result sent = net::send_some(desc, {txt, total});
+  while (!txt.empty()) {
+    net::io_result sent = net::send_some(desc, txt);
 
     if (sent.status == net::io_status::would_block) /* Temporary failure -- socket buffer full. */
       return (write_total);
@@ -189,8 +173,7 @@ int write_to_descriptor(net::native_handle desc, const char *txt)
       net::report_error("SYSERR: Write to socket");
       return (-1);
     }
-    txt += sent.bytes;
-    total -= sent.bytes;
+    txt.remove_prefix(sent.bytes);
     write_total += sent.bytes;
   }
 
