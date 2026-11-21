@@ -13,7 +13,10 @@ enum log_level { LOG_OFF = 0,
                  LOG_CMP = 3 };
 
 void core_dump_real(const char *who, int line);
-void log_backtrace(void);
+/* Writes the call stack to the log, even from a signal handler */
+void log_backtrace();
+/* The log's file descriptor (stderr's until there is a log), for a signal handler to write to */
+int log_descriptor();
 #define core_dump() core_dump_real(__FILE__, __LINE__)
 
 #define CIRCLEMUD_VERSION(major, minor, patchlevel) \

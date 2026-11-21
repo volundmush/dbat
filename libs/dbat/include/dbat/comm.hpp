@@ -141,12 +141,14 @@ extern const char compress_offer[4];
 void init_game(GameWorld *g, uint16_t port);
 
 /* The parts of one game loop pass that need no sockets. */
-int game_add_connection(GameWorld *g, net::native_handle desc, const char *host);
+int game_add_connection(GameWorld *g, net::native_handle desc, std::string_view host);
 int game_read_input(GameWorld *g, struct descriptor_data *d);
 int game_send_output(GameWorld *g, struct descriptor_data *d);
 void game_process_commands(GameWorld *g);
 void game_finish_descriptors(GameWorld *g);
 void game_heartbeat(GameWorld *g, int heart_pulse);
 
-void setup_log(const char *filename, int fd, bool keep_old_log);
+/* Sends the log to filename (stderr reopened on it; appended to if keep_old_log, as after a copyover), or a default
+   file if that can't be opened, or stderr if filename is empty: exits if none of the files can be opened */
+void setup_log(std::string_view filename, bool keep_old_log);
 bool sendok(struct char_data *ch, int to_sleeping);

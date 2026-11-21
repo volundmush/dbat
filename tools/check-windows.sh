@@ -6,8 +6,7 @@ set -uo pipefail
 root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 cd "$root/libs/dbat" || exit 1
 
-# The files checked. Not yet: signals.cpp (signals and the deadlock timer); never: copyover.cpp, which only Linux
-# can do.
+# The files checked: all of the networking's but the POSIX layer. (copyover.cpp builds, and says it isn't available.)
 files='
 src/net/platform_win32.cpp
 src/net/connection.cpp
@@ -17,6 +16,8 @@ src/net/colour.cpp
 src/net/prompt.cpp
 src/net/messages.cpp
 src/net/game_loop.cpp
+src/net/signals.cpp
+src/net/copyover.cpp
 '
 
 if ! command -v zig > /dev/null; then

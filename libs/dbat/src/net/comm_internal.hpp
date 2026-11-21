@@ -2,7 +2,6 @@
 
 /* Shared by the files that were comm.c only: connection, input, output, colour, prompt, the game loop,
  * signals and copyover. */
-#include <csignal>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -51,8 +50,6 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d);
 void copyover_recover(GameWorld *g);
 
 /* signals.cpp */
-void signal_setup(void);
-extern int tics_passed;                       /* for extern checkpointing */
-extern volatile sig_atomic_t reread_wizlist;  /* signal: SIGUSR1 */
-extern volatile sig_atomic_t emergency_unban; /* signal: SIGUSR2 */
-extern volatile sig_atomic_t shutdown_signal; /* signal: SIGHUP, SIGINT or SIGTERM (its number) */
+void signal_setup();
+extern int tics_passed;                                /* passes of the game loop, for the deadlock timer */
+extern net::process::signal_flags signals_received; /* what the signals have asked for */

@@ -3,16 +3,23 @@
  */
 #ifndef _WIN32
 #include <cerrno>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
+#include <system_error>
 
 #include <arpa/inet.h>
+#include <execinfo.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "dbat/net/platform.hpp"
@@ -63,6 +70,36 @@ in_addr bind_address(std::string_view ip)
   else
     mud_log("Binding only to IP address {}", inet_ntoa(addr));
   return addr;
+}
+
+/* Where the signal handlers send what they're told: set once, by install_signals() and start_deadlock_timer() */
+net::process::signal_flags *flags;
+void (*on_crash)(int sig);
+void (*on_expiry)();
+
+void reread_wizlists(int) { flags->reread_wizlist = true; }
+
+void unrestrict_game(int) { flags->emergency_unban = true; }
+
+/* Only sets a flag: logging or exiting from inside a signal handler is not safe */
+void hupsig(int sig) { flags->shutdown = sig; }
+
+/* clean up our zombie kids to avoid defunct processes */
+void reap(int)
+{
+  while (waitpid(-1, nullptr, WNOHANG) > 0)
+    ;
+  signal(SIGCHLD, reap);
+}
+
+void deadlock(int) { on_expiry(); }
+
+/* Says what it can, then dies of sig, dumping core, as it would have */
+void fatal_signal(int sig)
+{
+  on_crash(sig);
+  signal(sig, SIG_DFL);
+  raise(sig);
 }
 
 } // namespace
@@ -228,6 +265,129 @@ std::optional<long long> raise_descriptor_limit()
     return std::nullopt;
   return static_cast<long long>(limit.rlim_max);
 }
+
+namespace process {
+
+/*
+ * signal() takes the same handlers that sigaction() would: on Linux it is sigaction() with SA_RESTART, so calls the
+ * game makes are restarted, except poll(), which never is (the loop's coma relies on that).
+ */
+void install_signals(signal_flags &to, void (*crash)(int sig))
+{
+  flags    = &to;
+  on_crash = crash;
+
+  /* user signal 1: reread wizlists.  Used by autowiz system. */
+  signal(SIGUSR1, reread_wizlists);
+  /* user signal 2: unrestrict game.  Used for emergencies if you lock yourself out of the MUD somehow. */
+  signal(SIGUSR2, unrestrict_game);
+
+  signal(SIGHUP, hupsig);
+  signal(SIGCHLD, reap);
+  signal(SIGINT, hupsig);
+  signal(SIGTERM, hupsig);
+  signal(SIGPIPE, SIG_IGN);
+  signal(SIGALRM, SIG_IGN);
+
+  /* crashes: say so, then die (and dump core) as before */
+  void *warm[1];
+  backtrace(warm, 1); /* load the unwinder now, so the handler doesn't have to allocate */
+  for (int sig : {SIGSEGV, SIGBUS, SIGFPE, SIGILL, SIGABRT})
+    signal(sig, fatal_signal);
+
+  /* allow core dumps up to the hard limit */
+  rlimit core;
+  if (getrlimit(RLIMIT_CORE, &core) == 0) {
+    core.rlim_cur = core.rlim_max;
+    setrlimit(RLIMIT_CORE, &core);
+  }
+}
+
+void start_deadlock_timer(int seconds, void (*expiry)())
+{
+  itimerval every{.it_interval = {.tv_sec = seconds, .tv_usec = 0}, .it_value = {.tv_sec = seconds, .tv_usec = 0}};
+
+  on_expiry = expiry;
+  setitimer(ITIMER_VIRTUAL, &every, nullptr);
+  signal(SIGVTALRM, deadlock);
+}
+
+void stop_deadlock_timer()
+{
+  itimerval none{};
+
+  signal(SIGVTALRM, SIG_IGN);
+  setitimer(ITIMER_VIRTUAL, &none, nullptr);
+}
+
+void write_raw(int fd, std::string_view text)
+{
+  if (::write(fd, text.data(), text.size()) < 0) { /* nothing else we can do */
+  }
+}
+
+void write_backtrace(int fd)
+{
+  void *frames[64];
+  int n = backtrace(frames, 64);
+
+  backtrace_symbols_fd(frames, n, fd);
+}
+
+std::expected<std::string, std::string> executable_path()
+{
+#ifdef __linux__
+  std::error_code error;
+  std::string exe = std::filesystem::read_symlink("/proc/self/exe", error).string();
+
+  if (error)
+    return std::unexpected(error.message());
+  /* what a binary rebuilt while running looks like: the new one is what we want */
+  constexpr std::string_view deleted = " (deleted)";
+  if (exe.size() > deleted.size() && exe.ends_with(deleted))
+    exe.resize(exe.size() - deleted.size());
+  if (access(exe.c_str(), X_OK) < 0)
+    return std::unexpected(std::strerror(errno));
+  return exe;
+#else
+  return std::unexpected("not available on this platform");
+#endif
+}
+
+bool is_socket(native_handle h)
+{
+  struct stat info;
+
+  return fstat(h, &info) == 0 && S_ISSOCK(info.st_mode);
+}
+
+std::vector<native_handle> open_sockets()
+{
+  std::vector<native_handle> found;
+  rlimit limit;
+  int highest = 1024;
+
+  if (getrlimit(RLIMIT_NOFILE, &limit) == 0 && limit.rlim_cur != RLIM_INFINITY)
+    highest = static_cast<int>(limit.rlim_cur);
+  for (int fd = STDERR_FILENO + 1; fd < highest; fd++)
+    if (is_socket(fd))
+      found.push_back(fd);
+  return found;
+}
+
+void replace_process(const std::string &exe, const std::vector<std::string> &args)
+{
+  std::vector<char *> argv;
+
+  for (const std::string &arg : args)
+    argv.push_back(const_cast<char *>(arg.c_str()));
+  argv.push_back(nullptr);
+  /* descriptors are inherited, but anything still buffered here would be lost */
+  std::fflush(nullptr);
+  execv(exe.c_str(), argv.data());
+}
+
+} // namespace process
 
 } // namespace net
 #endif

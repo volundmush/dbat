@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <cerrno>
 #include <chrono>
-#include <csignal>
 #include <cstring>
 #include <fstream>
 #include <span>
@@ -238,8 +237,8 @@ static void game_loop(GameWorld *g)
   while (!g->circle_shutdown) {
 
     /* SIGHUP/SIGINT/SIGTERM: leave the loop so init_game() saves everyone and closes down properly */
-    if (shutdown_signal) {
-      mud_log("Received signal {:d} (SIGHUP, SIGINT or SIGTERM).  Shutting down...", (int)shutdown_signal);
+    if (signals_received.shutdown) {
+      mud_log("Received signal {:d} (SIGHUP, SIGINT or SIGTERM).  Shutting down...", (int)signals_received.shutdown);
       g->circle_shutdown = 1;
       break;
     }
@@ -262,7 +261,7 @@ static void game_loop(GameWorld *g)
           break;
       }
       last_time = pulse_clock::now();
-      if (shutdown_signal)
+      if (signals_received.shutdown)
         continue;
     }
 
@@ -362,13 +361,13 @@ static void game_loop(GameWorld *g)
       game_heartbeat(g, ++g->pulse);
 
     /* Check for any signals we may have received. */
-    if (reread_wizlist) {
-      reread_wizlist = false;
+    if (signals_received.reread_wizlist) {
+      signals_received.reread_wizlist = false;
       mudlog(g, LOG_CMP, ADMLVL_IMMORT, true, "Signal received - rereading wizlists.");
       reboot_wizlists(g);
     }
-    if (emergency_unban) {
-      emergency_unban = false;
+    if (signals_received.emergency_unban) {
+      signals_received.emergency_unban = false;
       mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
       free_ban_list(g);
       g->circle_restrict = 0;

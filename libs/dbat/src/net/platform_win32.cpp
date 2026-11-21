@@ -3,11 +3,15 @@
  * The messages are those of the POSIX file, so the logs read the same.
  */
 #ifdef _WIN32
+#include <cerrno>
+#include <charconv>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <io.h>
 
 #include "dbat/net/platform.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -58,6 +62,23 @@ in_addr bind_address(std::string_view ip)
     mud_log("Binding only to IP address {}", text);
   }
   return addr;
+}
+
+net::process::signal_flags *flags;
+void (*on_crash)(int sig);
+
+/* Windows puts a signal back to its default once it is delivered, so the handler takes it again */
+void hupsig(int sig)
+{
+  flags->shutdown = sig;
+  std::signal(sig, hupsig);
+}
+
+void fatal_signal(int sig)
+{
+  on_crash(sig);
+  std::signal(sig, SIG_DFL);
+  std::raise(sig);
 }
 
 } // namespace
@@ -215,6 +236,57 @@ std::size_t poll_set::size() const { return entries_.size(); }
 
 /* Windows has no limit on sockets to raise: WSAPoll takes any number */
 std::optional<long long> raise_descriptor_limit() { return std::nullopt; }
+
+namespace process {
+
+/* Ctrl-C and Ctrl-Break come as SIGINT; there is no SIGHUP, SIGUSR1 or SIGUSR2 */
+void install_signals(signal_flags &to, void (*crash)(int sig))
+{
+  flags    = &to;
+  on_crash = crash;
+  std::signal(SIGINT, hupsig);
+  std::signal(SIGTERM, hupsig);
+  for (int sig : {SIGSEGV, SIGFPE, SIGILL, SIGABRT})
+    std::signal(sig, fatal_signal);
+}
+
+/* There is no timer of the process's own running time to set */
+void start_deadlock_timer(int, void (*)()) {}
+
+void stop_deadlock_timer() {}
+
+void write_raw(int fd, std::string_view text) { _write(fd, text.data(), static_cast<unsigned>(text.size())); }
+
+/* The frames' addresses, which tools/symbolize.sh can't resolve, but a debugger can */
+void write_backtrace(int fd)
+{
+  void *frames[62];
+  USHORT n = CaptureStackBackTrace(0, 62, frames, nullptr);
+
+  for (USHORT i = 0; i < n; i++) {
+    char line[24] = "0x";
+    char *end     = std::to_chars(line + 2, line + sizeof(line) - 1, reinterpret_cast<std::uintptr_t>(frames[i]), 16).ptr;
+    *end++        = '\n';
+    write_raw(fd, std::string_view(line, end));
+  }
+}
+
+std::expected<std::string, std::string> executable_path() { return std::unexpected("not available on this platform"); }
+
+bool is_socket(native_handle h)
+{
+  int type    = 0;
+  int size    = sizeof(type);
+
+  return getsockopt(static_cast<SOCKET>(h), SOL_SOCKET, SO_TYPE, reinterpret_cast<char *>(&type), &size) == 0;
+}
+
+/* A copyover can't happen here, so there is nothing brought across */
+std::vector<native_handle> open_sockets() { return {}; }
+
+void replace_process(const std::string &, const std::vector<std::string> &) { errno = ENOSYS; }
+
+} // namespace process
 
 } // namespace net
 #endif

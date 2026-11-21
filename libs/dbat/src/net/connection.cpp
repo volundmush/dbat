@@ -10,8 +10,9 @@
 ************************************************************************ */
 
 #include <algorithm>
-#include <cstring>
+#include <initializer_list>
 #include <optional>
+#include <string>
 #include <utility>
 
 #include "dbat/iterate.hpp"
@@ -22,17 +23,15 @@
 
 int get_max_players(GameWorld *g)
 {
-  int max_descs   = 0;
-  const char *how = "rlimit";
+  constexpr const char *how = "rlimit";
+  int max_descs             = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
 
   /* the most files the process may have open, raised as far as it goes */
   if (std::optional<long long> limit = net::raise_descriptor_limit())
-    max_descs = (int)std::min<long long>(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS, *limit);
-  else
-    max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
+    max_descs = (int)std::min<long long>(max_descs, *limit);
 
   /* now calculate max _players_ based on max descs */
-  max_descs = MIN(CONFIG_MAX_PLAYING, max_descs - NUM_RESERVED_DESCS);
+  max_descs = std::min(CONFIG_MAX_PLAYING, max_descs - NUM_RESERVED_DESCS);
 
   if (max_descs <= 0) {
     mud_log("SYSERR: Non-positive max player limit!  (Set at {:d} using {}).",
@@ -120,53 +119,44 @@ int new_descriptor(GameWorld *g)
   std::optional<net::accepted> peer = net::accept_from(g->listener);
   if (!peer)
     return (-1);
-  return game_add_connection(g, peer->sock.release(), peer->host.c_str());
+  return game_add_connection(g, peer->sock.release(), peer->host);
 }
 
 /* Takes on a connected socket, unless the game is full or the site isn't welcome. */
-int game_add_connection(GameWorld *g, net::native_handle desc, const char *host)
+int game_add_connection(GameWorld *g, net::native_handle desc, std::string_view host)
 {
   net::socket sock(desc); /* closed on the way out, unless the connection takes it */
-  int sockets_connected = 0, from_same_ip = 0;
-  struct descriptor_data *newd;
 
   /* make sure we have room for it */
-  sockets_connected += count_members(each_desc(g));
-
-  if (sockets_connected >= CONFIG_MAX_PLAYING) {
+  if ((int)count_members(each_desc(g)) >= CONFIG_MAX_PLAYING) {
     write_to_descriptor(desc, "Sorry, CircleMUD is full right now... please try again later!\r\n");
-    sock.close();
     return (0);
   }
-  /* create a new descriptor */
-  newd = new descriptor_data();
 
-  newd->host = std::string_view(host).substr(0, HOST_LENGTH);
+  std::string site(host.substr(0, HOST_LENGTH));
 
   /* one host may not take all the slots */
+  int from_same_ip = 0;
   for (descriptor_data *other : each_desc(g))
-    if (other->host == newd->host)
+    if (other->host == site)
       from_same_ip++;
   if (from_same_ip >= MAX_CONNECTIONS_PER_IP) {
     write_to_descriptor(desc, "Too many connections from your address. Please close some and try again.\r\n");
     sock.close();
-    mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection from [{}] refused: already {:d} connections from it", newd->host, from_same_ip);
-    delete newd;
+    mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection from [{}] refused: already {:d} connections from it", site, from_same_ip);
     return (0);
   }
 
   /* determine if the site is banned */
-  if (isbanned(g, newd->host) == BAN_ALL) {
+  if (isbanned(g, site) == BAN_ALL) {
     sock.close();
-    mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection attempt denied from [{}]", newd->host);
-    delete newd;
+    mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection attempt denied from [{}]", site);
     return (0);
   }
 
-  /* initialize descriptor data */
+  auto *newd = new descriptor_data();
+  newd->host = std::move(site);
   init_descriptor(g, newd, std::move(sock));
-
-  /* prepend to list */
   g->descriptors.add(newd->desc_num, newd);
 
   set_color(g, newd);
@@ -222,7 +212,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
     char_set_desc(d->original, nullptr);
 
   /* the account's strings go with d; only a real one (not set_color()'s "Empty") is worth a word */
-  if (!d->acct.user.empty() && strcasecmp(d->acct.user.c_str(), "Empty"))
+  if (!d->acct.user.empty() && !str_eq_nocase(d->acct.user, "Empty"))
     mud_log("Freeing User: {}", d->acct.user);
 
   /*. Kill any OLC stuff (every editor, and character creation's stat points, keep theirs in d->olc) .*/
@@ -231,14 +221,17 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
   delete d;
 }
 
-void check_idle_passwords(GameWorld *g)
+/* Connections idle in one of states: the first time they're found, they're given a tic's grace (and warning, if there
+   is one); the next, they're closed */
+static void time_out_idle(GameWorld *g, std::initializer_list<int> states, const char *warning)
 {
-
   for (descriptor_data *d : each_desc(g)) {
-    if (desc_get_connected(d) != CON_PASSWORD && desc_get_connected(d) != CON_GET_EMAIL && desc_get_connected(d) != CON_NEWPASSWD)
+    if (std::ranges::find(states, desc_get_connected(d)) == states.end())
       continue;
     if (!d->idle_tics) {
       d->idle_tics++;
+      if (warning)
+        write_to_output(g, d, warning);
       continue;
     }
     write_to_output(g, d, "\r\nTimed out... goodbye.\r\n");
@@ -246,18 +239,10 @@ void check_idle_passwords(GameWorld *g)
   }
 }
 
+void check_idle_passwords(GameWorld *g) { time_out_idle(g, {CON_PASSWORD, CON_GET_EMAIL, CON_NEWPASSWD}, nullptr); }
+
 void check_idle_menu(GameWorld *g)
 {
-
-  for (descriptor_data *d : each_desc(g)) {
-    if (desc_get_connected(d) != CON_MENU && desc_get_connected(d) != CON_GET_USER && desc_get_connected(d) != CON_UMENU)
-      continue;
-    if (!d->idle_tics) {
-      d->idle_tics++;
-      write_to_output(g, d, "\r\nYou are about to be disconnected due to inactivity in 60 seconds.\r\n");
-      continue;
-    }
-    write_to_output(g, d, "\r\nTimed out... goodbye.\r\n");
-    desc_set_connected(d, CON_CLOSE);
-  }
+  time_out_idle(g, {CON_MENU, CON_GET_USER, CON_UMENU},
+                "\r\nYou are about to be disconnected due to inactivity in 60 seconds.\r\n");
 }

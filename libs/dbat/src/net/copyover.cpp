@@ -10,12 +10,16 @@
 ************************************************************************ */
 
 #include <cerrno>
+#include <cstdio>
+#include <algorithm>
 #include <cstring>
-#include <unistd.h>
-#include <linux/limits.h>
-#include <sys/resource.h>
-#include <sys/time.h>
-#include <sys/stat.h>
+#include <expected>
+#include <filesystem>
+#include <optional>
+#include <ranges>
+#include <string>
+#include <system_error>
+#include <vector>
 
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
@@ -26,6 +30,7 @@
 #include "dbat/objsave.hpp"
 #include "dbat/genolc.hpp"
 
+#include "dbat/io/reader.hpp"
 #include "dbat/io/writer.hpp"
 #include "dbat/copyover.hpp"
 #include "comm_internal.hpp"
@@ -36,25 +41,19 @@
  */
 static void close_orphaned_sockets(GameWorld *g)
 {
-  struct rlimit limit;
-  int closed = 0, highest = 1024;
+  int closed = 0;
 
-  if (getrlimit(RLIMIT_NOFILE, &limit) == 0 && limit.rlim_cur != RLIM_INFINITY)
-    highest = limit.rlim_cur;
-  for (int fd = STDERR_FILENO + 1; fd < highest; fd++) {
-    struct stat info;
-    bool claimed = fd == g->listener.handle();
+  for (net::native_handle h : net::process::open_sockets()) {
+    bool claimed = h == g->listener.handle();
 
-    if (fstat(fd, &info) < 0 || !S_ISSOCK(info.st_mode))
-      continue;
     for (descriptor_data *d : each_desc(g)) {
       if (claimed)
         break;
-      claimed = d->sock.handle() == fd;
+      claimed = d->sock.handle() == h;
     }
     if (!claimed) {
-      write_to_descriptor(fd, "\n\rSomething went wrong during the folding. Please log back in.\n\r");
-      close(fd);
+      write_to_descriptor(h, "\n\rSomething went wrong during the folding. Please log back in.\n\r");
+      net::socket(h).close();
       closed++;
     }
   }
@@ -62,32 +61,39 @@ static void close_orphaned_sockets(GameWorld *g)
     mud_log("SYSERR: copyover_recover: closed {:d} connections that weren't in the copyover file.", closed);
 }
 
+/* One player to bring back, as a line of the copyover file has them */
+struct folded_player {
+  int socket;
+  std::string name, host;
+  room_vnum loadroom;
+  std::string user;
+};
+
 /* Brings one player back from a line of the copyover file. */
-static void copyover_recover_player(GameWorld *g, int desc, char *name, const char *host, room_vnum saved_loadroom, char *username)
+static void copyover_recover_player(GameWorld *g, const folded_player &p)
 {
   struct descriptor_data *d;
-  struct stat info;
   room_vnum set_loadroom;
   int player_i;
   bool fOld = true;
+  net::native_handle desc = p.socket;
 
-  if (fstat(desc, &info) < 0 || !S_ISSOCK(info.st_mode)) {
-    mud_log("SYSERR: copyover_recover: descriptor {:d} for {} isn't a connection.", desc, name);
+  if (!net::process::is_socket(desc)) {
+    mud_log("SYSERR: copyover_recover: descriptor {:d} for {} isn't a connection.", p.socket, p.name);
     return;
   }
+  net::socket sock(desc);
 
   /* Write something, and check if it goes error-free */
-  if (write_to_descriptor(desc, "\n\rFolding initiated...\n\r") < 0) {
-    close(desc); /* nope */
-    return;
-  }
+  if (write_to_descriptor(desc, "\n\rFolding initiated...\n\r") < 0)
+    return; /* nope: closed */
 
   /* create a new descriptor */
   d = new descriptor_data();
-  init_descriptor(g, d, net::socket(desc)); /* set up various stuff */
-  set_empty_account(d);        /* what a new connection has, for userLoad() to fill in */
+  init_descriptor(g, d, std::move(sock)); /* set up various stuff */
+  set_empty_account(d);                   /* what a new connection has, for userLoad() to fill in */
 
-  d->host = std::string_view(host).substr(0, HOST_LENGTH);
+  d->host = std::string_view(p.host).substr(0, HOST_LENGTH);
   g->descriptors.add(d->desc_num, d);
 
   d->connected = CON_CLOSE;
@@ -99,12 +105,12 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
   char_make_player_specials(d->character);
   char_set_desc(d->character, d);
 
-  if ((player_i = load_char(g, name, d->character)) >= 0 && !char_plr_flagged(d->character, PLR_DELETED)) {
+  if ((player_i = load_char(g, p.name.c_str(), d->character)) >= 0 && !char_plr_flagged(d->character, PLR_DELETED)) {
     char_set_pfilepos(d->character, player_i);
     char_plr_set(d->character, PLR_WRITING, false);
     char_plr_set(d->character, PLR_MAILING, false);
     char_plr_set(d->character, PLR_CRYO, false);
-    userLoad(d, username);
+    userLoad(d, p.user.c_str());
   } else
     fOld = false;
 
@@ -114,7 +120,7 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
   } else {
     write_to_descriptor(desc, "\n\rFolding complete.\n\r");
     set_loadroom = char_get_load_room(g, d->character);
-    char_set_load_room(g, d->character, saved_loadroom);
+    char_set_load_room(g, d->character, p.loadroom);
     enter_player_game(g, d);
     char_set_load_room(g, d->character, set_loadroom);
     d->connected = CON_PLAYING;
@@ -125,57 +131,53 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
   }
 }
 
+/* The restriction after the end marker's -1 (" restrict N"), if it has one, as sscanf("%*d restrict %d") reads it */
+static std::optional<int> marked_restriction(std::string_view rest)
+{
+  int level;
+
+  rest.remove_prefix(std::min(rest.find_first_not_of(" \t\n\v\f\r"), rest.size()));
+  if (rest.starts_with("restrict") && io::fields(rest.substr(8)).number(level))
+    return level;
+  return std::nullopt;
+}
+
 /* Reload players after a copyover */
 void copyover_recover(GameWorld *g)
 {
-  FILE *fp;
-  char line[512], name[128], host[128], username[100];
-  int desc, restrict_level;
-  room_vnum saved_loadroom;
-
   mud_log("Copyover recovery initiated");
   g->PCOUNTDAY = game_now(g) + 60;
-  fp        = fopen(COPYOVER_FILE, "r");
 
-  if (!fp) {
+  io::loaded<io::text_reader> file = io::text_reader::open(COPYOVER_FILE);
+  if (!file) {
     /* Carry on: anyone already connected gets told below, and everyone else can still log in. */
-    mud_log("SYSERR: copyover_recover: can't open {}: {}", COPYOVER_FILE, strerror(errno));
+    mud_log("SYSERR: copyover_recover: can't open {}: {}", COPYOVER_FILE, std::strerror(errno));
     close_orphaned_sockets(g);
     return;
   }
 
-  unlink(COPYOVER_FILE); /* In case it crashes - doesn't prevent reading */
-  while (fgets(line, sizeof(line), fp)) {
-    if (sscanf(line, "%d", &desc) == 1 && desc == -1) { /* the end marker */
-      if (sscanf(line, "%*d restrict %d", &restrict_level) == 1)
-        g->circle_restrict = restrict_level;
+  std::error_code ignored;
+  std::filesystem::remove(COPYOVER_FILE, ignored); /* In case it crashes - doesn't prevent reading */
+  /* Lines as fgets() read them into 512 bytes, which a longer one would have split (quirk, gone: the file never has
+     one) */
+  while (std::optional<std::string_view> line = file->raw_line()) {
+    io::fields marker(*line);
+    int desc;
+    if (marker.number(desc) && desc == -1) { /* the end marker */
+      if (std::optional<int> level = marked_restriction(marker.rest()))
+        g->circle_restrict = *level;
       break;
     }
-    if (sscanf(line, "%d %127s %127s %d %99s", &desc, name, host, &saved_loadroom, username) != 5) {
+    folded_player p;
+    io::fields f(*line);
+    f.number(p.socket) && f.word(p.name, 127) && f.word(p.host, 127) && f.number(p.loadroom) && f.word(p.user, 99);
+    if (f.count() != 5) {
       mud_log("SYSERR: copyover_recover: skipping a malformed line in {}.", COPYOVER_FILE);
       continue;
     }
-    copyover_recover_player(g, desc, name, host, saved_loadroom, username);
+    copyover_recover_player(g, p);
   }
-  fclose(fp);
   close_orphaned_sockets(g);
-}
-
-/* Path of the binary to re-exec on copyover: whatever file is now at the path this process was started
- * from (so a freshly rebuilt binary is picked up, whichever build system produced it). After a rebuild
- * replaces the file, the kernel reports the old path with a " (deleted)" suffix, which is stripped. */
-static bool copyover_exe_path(char *out, size_t size)
-{
-  ssize_t len = readlink("/proc/self/exe", out, size - 1);
-  if (len <= 0)
-    return false;
-  out[len]           = '\0';
-  /* what a binary rebuilt while running looks like: the new one is what we want */
-  const char *suffix = " (deleted)";
-  size_t slen        = strlen(suffix);
-  if ((size_t)len > slen && !strcmp(out + len - slen, suffix))
-    out[len - slen] = '\0';
-  return true;
 }
 
 void game_info(GameWorld *g, std::string_view text)
@@ -248,19 +250,13 @@ static void save_players_without_connections(GameWorld *g)
  */
 void execute_copyover(GameWorld *g)
 {
-  struct itimerval no_timer = {{0, 0}, {0, 0}};
-  char exe[PATH_MAX];
-  std::string fold;
-  std::string mother; /* lasts until the exec */
-  char **args;
-  int num_args = 0;
-
-  if (!copyover_exe_path(exe, sizeof(exe)) || access(exe, X_OK) < 0) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: Copyover aborted: can't run the server binary: {}", strerror(errno));
+  std::expected<std::string, std::string> exe = net::process::executable_path();
+  if (!exe) {
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: Copyover aborted: can't run the server binary: {}", exe.error());
     return;
   }
   if (!write_copyover_file(g)) {
-    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: Copyover aborted: can't write {}: {}", COPYOVER_FILE, strerror(errno));
+    mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: Copyover aborted: can't write {}: {}", COPYOVER_FILE, std::strerror(errno));
     return;
   }
 
@@ -270,7 +266,7 @@ void execute_copyover(GameWorld *g)
   House_save_all(g);
   save_players_without_connections(g);
 
-  fold = "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n";
+  constexpr std::string_view fold = "\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n";
   for (descriptor_data *d : each_desc(g)) {
     struct char_data *player = copyover_player(d);
 
@@ -280,35 +276,32 @@ void execute_copyover(GameWorld *g)
       continue;
     }
     if (!d->out.text.empty())
-      write_to_descriptor(d->sock.handle(), d->out.text.c_str()); /* whatever they haven't been sent yet */
+      write_to_descriptor(d->sock.handle(), d->out.text.c_str()); /* whatever they haven't been sent yet (to a '\0') */
     if (desc_get_connected(d) != CON_PLAYING)
       write_to_descriptor(d->sock.handle(), "\n\rWhatever you were editing has been lost.\n\r");
     Crash_rentsave(g, player, 0);
     save_char(g, player);
-    write_to_descriptor(d->sock.handle(), fold.c_str());
+    write_to_descriptor(d->sock.handle(), fold);
   }
 
   /* Everything the game was started with, so that it comes back the same, and in the same place. */
-  args = new char *[g->launch_argc + 2]();
-  mother           = str_format("-C{:d}", g->listener.handle());
-  args[num_args++] = g->launch_argv[0];
-  args[num_args++] = mother.data();
-  for (int i = 1; i < g->launch_argc; i++)
-    if (strncmp(g->launch_argv[i], "-C", 2))
-      args[num_args++] = g->launch_argv[i];
-  args[num_args] = nullptr;
-  if (chdir(g->launch_dir) < 0)
-    perror("do_copyover: chdir");
+  std::vector<std::string> args{g->launch_args[0], str_format("-C{:d}", g->listener.handle())};
+  for (const std::string &arg : g->launch_args | std::views::drop(1))
+    if (!arg.starts_with("-C"))
+      args.push_back(arg);
+  std::error_code error;
+  std::filesystem::current_path(g->launch_dir, error);
+  if (error)
+    file_print(stderr, "do_copyover: chdir: {}\n", error.message());
 
   /* The deadlock timer outlives exec, and would kill the new process if it ran out during boot. */
-  setitimer(ITIMER_VIRTUAL, &no_timer, nullptr);
+  net::process::stop_deadlock_timer();
 
-  /* exec - descriptors are inherited, but anything still buffered here would be lost */
-  fflush(nullptr);
-  execv(exe, args);
+  /* exec - the sockets are inherited */
+  net::process::replace_process(*exe, args);
   /* Failed - sucessful exec will not return */
 
-  perror("do_copyover: execv");
+  std::perror("do_copyover: execv");
   mud_log("SYSERR: Copyover failed after saving everyone. Rebooting.");
   exit(52); /* everything is saved, but objects have left the game: what autorun takes to mean reboot */
 }

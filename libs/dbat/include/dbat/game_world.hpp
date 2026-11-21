@@ -89,9 +89,8 @@ struct GameWorld {
   net::socket listener; /* where new connections come in */
   uint16_t port{};
   bool fCopyOver{};
-  int launch_argc{}; /* how and where this process started, for a copyover to do the same */
-  char **launch_argv{};
-  char *launch_dir{};
+  std::vector<std::string> launch_args; /* how and where this process started, for a copyover to do the same */
+  std::string launch_dir;
   int last_desc{};
   int circle_shutdown{}, circle_reboot{}, circle_restrict{};
   int copyover_timer{};

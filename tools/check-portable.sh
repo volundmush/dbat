@@ -13,8 +13,6 @@ allowed='
 io/platform.cpp       pushing a file out to the disk (fsync/_commit), which standard C++ has no call for
 net/platform_posix.cpp  the networking layer on POSIX
 net/platform_win32.cpp  the networking layer on Windows
-net/signals.cpp       signals, the deadlock timer and the crash backtrace, until they move to the layer
-net/copyover.cpp      the copyover exec and the sockets it brings across, which only Linux can do
 '
 
 headers='#include <(unistd\.h|dirent\.h|fcntl\.h|poll\.h|netdb\.h|execinfo\.h|winsock2?\.h|ws2tcpip\.h|windows\.h|sys/[a-z_]+\.h|linux/[a-z_]+\.h|netinet/[a-z_]+\.h|arpa/[a-z_]+\.h)>'

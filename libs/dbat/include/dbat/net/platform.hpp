@@ -1,11 +1,14 @@
 #pragma once
 /*
- * The little the networking needs from the operating system: sockets, polling them, and the process's limit on open
- * files. Everything else in src/net is standard C++. platform_posix.cpp and platform_win32.cpp are the only files that
+ * The little the networking needs from the operating system: sockets, polling them, the process's limit on open
+ * files, and the process itself (signals, the deadlock timer, a crash's backtrace, and what a copyover needs).
+ * Everything else in src/net is standard C++. platform_posix.cpp and platform_win32.cpp are the only files that
  * know which system they run on; each compiles to nothing on the other.
  */
+#include <csignal>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
@@ -123,5 +126,44 @@ private:
 /* Raises the process's limit on open files as far as it can go, as the most connections the game could hold need:
    the limit, or nothing if there is none. Exits the process if the limit can't be read or changed. */
 std::optional<long long> raise_descriptor_limit();
+
+namespace process {
+
+/* What the signals have asked of the game loop, which looks at (and clears) them between passes */
+struct signal_flags {
+  volatile std::sig_atomic_t reread_wizlist{};  /* SIGUSR1: the autowiz system has rewritten the wizlists */
+  volatile std::sig_atomic_t emergency_unban{}; /* SIGUSR2: someone locked themselves out */
+  volatile std::sig_atomic_t shutdown{};        /* SIGHUP, SIGINT or SIGTERM: its number */
+};
+
+/* Sets the handlers up: the requests above go to flags, and a crash (SIGSEGV, SIGBUS, SIGFPE, SIGILL, SIGABRT) calls
+   on_crash(sig) inside the handler, then dies of the signal (dumping core up to the hard limit) as it would have.
+   Children are reaped, and SIGPIPE and SIGALRM ignored. Windows has only SIGINT, SIGTERM and the crashes. */
+void install_signals(signal_flags &flags, void (*on_crash)(int sig));
+/* Calls on_expiry() from a signal handler every seconds of the process's own running time (POSIX ITIMER_VIRTUAL);
+   nothing on Windows */
+void start_deadlock_timer(int seconds, void (*on_expiry)());
+/* Stops it, and ignores it should it run out anyway: the timer outlives an exec, and would kill the new process if it
+   ran out during boot */
+void stop_deadlock_timer();
+
+/* Writes text to the file descriptor fd, safely from inside a signal handler */
+void write_raw(int fd, std::string_view text);
+/* Writes the call stack to the file descriptor fd, one frame a line, safely from inside a signal handler (once
+   install_signals() has run) */
+void write_backtrace(int fd);
+
+/* For a copyover. The program this process runs, as whatever file is now at the path it started from (a rebuilt
+   binary is picked up), if it can be run: or why not. Linux only; elsewhere, that it isn't available. */
+std::expected<std::string, std::string> executable_path();
+/* Whether h is a socket */
+bool is_socket(native_handle h);
+/* The sockets this process has open, after the standard streams, in order (none on Windows) */
+std::vector<native_handle> open_sockets();
+/* Runs exe with args in this process's place, keeping its sockets, having flushed every output stream. Returns only
+   if that failed, with errno saying why. */
+void replace_process(const std::string &exe, const std::vector<std::string> &args);
+
+} // namespace process
 
 } // namespace net

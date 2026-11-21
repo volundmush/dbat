@@ -1,5 +1,7 @@
-#include <execinfo.h>
-#include <unistd.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <string>
 
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
@@ -7,10 +9,11 @@
 #include "dbat/room_utils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/net/platform.hpp"
 
 FILE *logfile = nullptr; /* Where to send the log messages. */
 
-static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode);
+static bool open_logfile(const std::string &filename, FILE *stderr_fp, const char *mode);
 
 /* log a death trap hit */
 void log_death_trap(GameWorld *g, struct char_data *ch)
@@ -62,18 +65,16 @@ void mudlog(GameWorld *g, int type, int level, int file, std::string_view text)
   }
 }
 
+int log_descriptor() { return fileno(logfile ? logfile : stderr); }
+
 /* Write the current call stack to the log. Uses only the file descriptor, so it is also usable from a
  * signal handler. Only exported functions get names (the executable is linked with -rdynamic); static ones show
  * as offsets, which tools/symbolize.sh resolves against the same binary. */
-void log_backtrace(void)
+void log_backtrace()
 {
-  void *frames[64];
-  int n  = backtrace(frames, 64);
-  int fd = logfile ? fileno(logfile) : STDERR_FILENO;
-
   if (logfile)
     fflush(logfile);
-  backtrace_symbols_fd(frames, n, fd);
+  net::process::write_backtrace(log_descriptor());
 }
 
 /* core_dump(): an "impossible" state was reached. Log where, with a backtrace, and keep running. */
@@ -84,14 +85,12 @@ void core_dump_real(const char *who, int line)
 }
 
 /* Prefer the file over the descriptor. */
-void setup_log(const char *filename, int fd, bool keep_old_log)
+void setup_log(std::string_view filename, bool keep_old_log)
 {
   const char *mode = keep_old_log ? "a" : "w"; /* a copyover carries on the same log */
-  FILE *s_fp;
+  FILE *s_fp       = stderr;
 
-  s_fp = stderr;
-
-  if (filename == nullptr || *filename == '\0') {
+  if (filename.empty()) {
     /* No filename, set us up with the descriptor we just opened. */
     logfile = s_fp;
     puts("Using file descriptor for logging.");
@@ -99,7 +98,7 @@ void setup_log(const char *filename, int fd, bool keep_old_log)
   }
 
   /* We honor the default filename first. */
-  if (open_logfile(filename, s_fp, mode))
+  if (open_logfile(std::string(filename), s_fp, mode))
     return;
 
   /* Well, that failed but we want it logged to a file so try a default. */
@@ -115,12 +114,12 @@ void setup_log(const char *filename, int fd, bool keep_old_log)
   exit(1);
 }
 
-static bool open_logfile(const char *filename, FILE *stderr_fp, const char *mode)
+static bool open_logfile(const std::string &filename, FILE *stderr_fp, const char *mode)
 {
   if (stderr_fp) /* freopen() the descriptor. */
-    logfile = freopen(filename, mode, stderr_fp);
+    logfile = freopen(filename.c_str(), mode, stderr_fp);
   else
-    logfile = fopen(filename, mode);
+    logfile = fopen(filename.c_str(), mode);
 
   if (logfile) {
     file_print(stdout, "Using log file '{}'{}.\n",
