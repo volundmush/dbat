@@ -183,6 +183,34 @@ class Server:
         shutil.rmtree(self.home, ignore_errors=True)
 
 
+def scenario_plain_run():
+    """No copyover at all: the server listens, greets, logs a player in, runs commands, and shuts down on SIGTERM."""
+    server = Server("plain")
+    check("boots", server.start())
+    log = server.log()
+    check("listens on every interface", "Binding to all IP interfaces on this host." in log)
+    check("sets the player limit", "Setting player limit to" in log)
+    greeted = Client(server.port)
+    greeted.pump(0.6)
+    check("greets", "Welcome to Dragonball Advent Truth" in greeted.text() and "Enter Username" in greeted.text())
+    a = server.login(ACCOUNTS[0])
+    a.send("goto 301")
+    check("runs a command", "Training Yard" in a.ask("look"))
+    greeted.sock.close()  # a client that goes away at the first prompt
+    a.pump(0.5)
+    check("notices a client leaving", "EOF on socket read" in server.log())
+    server.process.send_signal(signal.SIGTERM)
+    try:
+        server.process.wait(20)
+    except subprocess.TimeoutExpired:
+        pass
+    log = server.log()
+    check("SIGTERM stops it", server.process.returncode == 0, server.process.returncode)
+    check("says why", "Received signal 15" in log)
+    check("saves and ends normally", "Normal termination of game." in log)
+    server.finish()
+
+
 def scenario_players_come_back():
     server = Server("basic")
     check("boots", server.start())

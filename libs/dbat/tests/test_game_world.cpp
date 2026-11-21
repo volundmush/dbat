@@ -377,7 +377,7 @@ static void check_rng(GameWorld *a, GameWorld *b)
 /* a random colour code rolls on the world's own generator, once */
 static void check_random_color(GameWorld *a, GameWorld *b)
 {
-  struct descriptor_data d = {0};
+  struct descriptor_data d{};
   struct char_data *mob    = read_mobile(a, 100);
   unsigned long second;
 
@@ -428,7 +428,7 @@ static EVENTFUNC(count_event)
 /* time, weather, connections and event queues are per world */
 static void check_other_state(GameWorld *a, GameWorld *b)
 {
-  struct descriptor_data d = {0};
+  struct descriptor_data d{};
   int ran                  = 0;
 
   a->time_info.hours            = 7;

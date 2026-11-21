@@ -9,9 +9,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include <cerrno>
 #include <cstring>
-#include <unistd.h>
 
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -56,46 +54,6 @@ void flush_input_queue(struct descriptor_data *d)
 }
 
 /*
- * Same information about perform_socket_write applies here. I like
- * standards, there are so many of them. -gg 6/30/98
- */
-static ssize_t perform_socket_read(int desc, char *read_point, size_t space_left)
-{
-  ssize_t ret;
-
-  ret = read(desc, read_point, space_left);
-
-  /* Read was successful. */
-  if (ret > 0)
-    return (ret);
-
-  /* read() returned 0, meaning we got an EOF. */
-  if (ret == 0) {
-    mud_log("WARNING: EOF on socket read (connection broken by peer)");
-    return (-1);
-  }
-
-  /*
-   * read returned a value < 0: there was an error
-   */
-
-  if (errno == EINTR)
-    return (0);
-
-  if (errno == EAGAIN) /* EWOULDBLOCK is the same value on Linux */
-    return (0);
-
-  if (errno == ECONNRESET)
-    return (-1);
-  /*
-   * We don't know what happened, cut them off. This qualifies for
-   * a SYSERR because we have no idea what happened at this point.
-   */
-  perror("SYSERR: perform_socket_read: about to lose connection");
-  return (-1);
-}
-
-/*
  * ASSUMPTION: There will be no newlines in the raw input buffer when this
  * function is called.  We must maintain that before returning.
  *
@@ -111,7 +69,7 @@ static ssize_t perform_socket_read(int desc, char *read_point, size_t space_left
 int process_input(GameWorld *g, struct descriptor_data *t)
 {
   int buf_length, failed_subst;
-  ssize_t bytes_read;
+  size_t bytes_read;
   size_t space_left;
   char *ptr, *read_point, *write_point, *nl_pos = nullptr;
   char tmp[MAX_INPUT_LENGTH];
@@ -127,12 +85,13 @@ int process_input(GameWorld *g, struct descriptor_data *t)
       return (-1);
     }
 
-    bytes_read = perform_socket_read(t->descriptor, read_point, space_left);
+    net::io_result got = net::receive_some(t->sock.handle(), {read_point, space_left});
 
-    if (bytes_read < 0) /* Error, disconnect them. */
-      return (-1);
-    else if (bytes_read == 0) /* Just blocking, no problems. */
+    if (got.status == net::io_status::would_block) /* Just blocking, no problems. */
       return (0);
+    if (got.status != net::io_status::done) /* Error, disconnect them. */
+      return (-1);
+    bytes_read = got.bytes;
 
     /* check for compression response, if still expecting something */
     /* note: this will bork if the user is giving lots of input when he first connects */
@@ -195,7 +154,7 @@ int process_input(GameWorld *g, struct descriptor_data *t)
 
     if ((space_left <= 0) && (ptr < nl_pos)) {
       std::string buffer = str_format("Line too long.  Truncated to:\r\n{}\r\n", tmp);
-      if (write_to_descriptor(t->descriptor, buffer.c_str()) < 0)
+      if (write_to_descriptor(t->sock.handle(), buffer.c_str()) < 0)
         return (-1);
     }
     if (t->snoop_by)
@@ -238,7 +197,7 @@ int process_input(GameWorld *g, struct descriptor_data *t)
     if (!failed_subst) {
       /* commands run at most one per pulse; a client sending far faster is flooding */
       if (t->input.typed >= MAX_QUEUED_INPUT) {
-        write_to_descriptor(t->descriptor, "\r\nToo many commands waiting to run; disconnecting.\r\n");
+        write_to_descriptor(t->sock.handle(), "\r\nToo many commands waiting to run; disconnecting.\r\n");
         mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Input flood from [{}]: more than {:d} commands queued; disconnecting.", t->host, MAX_QUEUED_INPUT);
         return (-1);
       }

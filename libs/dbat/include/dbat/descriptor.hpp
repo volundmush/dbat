@@ -5,13 +5,12 @@
 #include <memory>
 #include <string>
 
-#include <sys/socket.h>
-
 #include "dbat/account.hpp"
 #include "dbat/chargen_draft.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/constates.hpp"
+#include "dbat/net/platform.hpp"
 #include "dbat/obj_edit.hpp"
 #include "dbat/olc/session.hpp"
 
@@ -33,7 +32,7 @@ struct txt_q {
 };
 
 struct descriptor_data {
-  int descriptor{};                    /* file descriptor for socket		*/
+  net::socket sock;                    /* the connection */
   char host[HOST_LENGTH + 1]{};        /* hostname				*/
   int8_t bad_pws{};                    /* number of bad pw attemps this login	*/
   int8_t idle_tics{};                  /* tics idle at password prompt		*/
@@ -47,7 +46,7 @@ struct descriptor_data {
   size_t max_str{};                    /* maximum size of string in modify-str	*/
   int32_t mail_to{};                   /* name for mail system			*/
   int has_prompt{};                    /* is the user at a prompt?             */
-  short poll_revents{};                /* this pulse's poll() result (game_loop) */
+  net::readiness ready;                /* how the socket stood at this pulse's poll (game_loop) */
   char inbuf[MAX_RAW_INPUT_LENGTH]{};  /* buffer for raw input		*/
   char last_input[MAX_INPUT_LENGTH]{}; /* the last input			*/
   char small_outbuf[SMALL_BUFSIZE]{};  /* standard output buffer		*/

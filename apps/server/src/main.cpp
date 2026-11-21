@@ -89,7 +89,7 @@ int main(int argc, char **argv)
         break;
       case 'C': /* -C<socket number> - recover from copyover, this is the control socket */
         g->fCopyOver   = true;
-        g->mother_desc = atoi(argv[pos] + 2);
+        g->listener    = net::socket(atoi(argv[pos] + 2));
         break;
       case 'd':
         if (*(argv[pos] + 2))

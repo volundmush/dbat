@@ -9,7 +9,6 @@
 ************************************************************************ */
 #include <cstdlib>
 
-#include <unistd.h>
 
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"

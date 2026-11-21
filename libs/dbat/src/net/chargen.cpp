@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <cstdlib>
 
-#include <unistd.h>
 
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"

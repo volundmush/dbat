@@ -4,11 +4,10 @@
 #include <string>
 #include <string_view>
 
-#include <sys/socket.h>
-
 #include "dbat/consts/types.hpp"
 #include "dbat/format.hpp"
 #include "dbat/descriptor.hpp"
+#include "dbat/net/platform.hpp"
 
 /*
  * Note, most includes for all platforms are in sysdep.h.  The list of
@@ -115,7 +114,7 @@ constexpr int TO_HIDERESIST  = (2 << 10); /* resisted hiding roll      */
 
 /* I/O functions */
 void write_to_q(const char *txt, struct txt_q *queue, int aliased);
-int write_to_descriptor(int desc, const char *txt);
+int write_to_descriptor(net::native_handle desc, const char *txt);
 /* Queues text for d as it is */
 size_t write_to_output(GameWorld *g, struct descriptor_data *d, std::string_view text);
 /* Queues text for d, formatted as std::format does */
@@ -142,7 +141,7 @@ extern const char compress_offer[4];
 void init_game(GameWorld *g, uint16_t port);
 
 /* The parts of one game loop pass that need no sockets. */
-int game_add_connection(GameWorld *g, int desc, const char *host);
+int game_add_connection(GameWorld *g, net::native_handle desc, const char *host);
 int game_read_input(GameWorld *g, struct descriptor_data *d);
 int game_send_output(GameWorld *g, struct descriptor_data *d);
 void game_process_commands(GameWorld *g);

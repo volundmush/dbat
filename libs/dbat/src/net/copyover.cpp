@@ -43,14 +43,14 @@ static void close_orphaned_sockets(GameWorld *g)
     highest = limit.rlim_cur;
   for (int fd = STDERR_FILENO + 1; fd < highest; fd++) {
     struct stat info;
-    bool claimed = fd == g->mother_desc;
+    bool claimed = fd == g->listener.handle();
 
     if (fstat(fd, &info) < 0 || !S_ISSOCK(info.st_mode))
       continue;
     for (descriptor_data *d : each_desc(g)) {
       if (claimed)
         break;
-      claimed = d->descriptor == fd;
+      claimed = d->sock.handle() == fd;
     }
     if (!claimed) {
       write_to_descriptor(fd, "\n\rSomething went wrong during the folding. Please log back in.\n\r");
@@ -84,7 +84,7 @@ static void copyover_recover_player(GameWorld *g, int desc, char *name, const ch
 
   /* create a new descriptor */
   d = new descriptor_data();
-  init_descriptor(g, d, desc); /* set up various stuff */
+  init_descriptor(g, d, net::socket(desc)); /* set up various stuff */
   set_empty_account(d);        /* what a new connection has, for userLoad() to fill in */
 
   snprintf(d->host, sizeof(d->host), "%s", host);
@@ -215,7 +215,7 @@ static bool write_copyover_file(GameWorld *g)
       room = char_get_in_room(player);
     else if (char_get_was_in_room(player) > 1)
       room = char_get_was_in_room(player);
-    out.print("{:d} {} {} {:d} {}\n", d->descriptor, char_get_name(player), *d->host ? d->host : "unknown", room,
+    out.print("{:d} {} {} {:d} {}\n", d->sock.handle(), char_get_name(player), *d->host ? d->host : "unknown", room,
                !d->acct.user.empty() ? d->acct.user.c_str() : "Empty");
   }
 
@@ -275,22 +275,22 @@ void execute_copyover(GameWorld *g)
     struct char_data *player = copyover_player(d);
 
     if (!player) {
-      write_to_descriptor(d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
+      write_to_descriptor(d->sock.handle(), "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
       close_socket(g, d); /* throw'em out */
       continue;
     }
     if (d->output && *d->output)
-      write_to_descriptor(d->descriptor, d->output); /* whatever they haven't been sent yet */
+      write_to_descriptor(d->sock.handle(), d->output); /* whatever they haven't been sent yet */
     if (desc_get_connected(d) != CON_PLAYING)
-      write_to_descriptor(d->descriptor, "\n\rWhatever you were editing has been lost.\n\r");
+      write_to_descriptor(d->sock.handle(), "\n\rWhatever you were editing has been lost.\n\r");
     Crash_rentsave(g, player, 0);
     save_char(g, player);
-    write_to_descriptor(d->descriptor, fold.c_str());
+    write_to_descriptor(d->sock.handle(), fold.c_str());
   }
 
   /* Everything the game was started with, so that it comes back the same, and in the same place. */
   args = new char *[g->launch_argc + 2]();
-  mother           = str_format("-C{:d}", g->mother_desc);
+  mother           = str_format("-C{:d}", g->listener.handle());
   args[num_args++] = g->launch_argv[0];
   args[num_args++] = mother.data();
   for (int i = 1; i < g->launch_argc; i++)

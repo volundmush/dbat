@@ -8,6 +8,7 @@
 #include <string>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/net/platform.hpp"
 
 #define COLOR_ON(g, ch) (COLOR_LEV(g, ch) > 0)
 
@@ -15,9 +16,9 @@
 void check_idle_menu(GameWorld *g);
 void check_idle_passwords(GameWorld *g);
 int get_max_players(GameWorld *g);
-void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc);
-int init_socket(GameWorld *g, uint16_t cmport);
-int new_descriptor(GameWorld *g, int s);
+void init_descriptor(GameWorld *g, struct descriptor_data *newd, net::socket sock);
+/* Accepts the next connection waiting on the game's listener */
+int new_descriptor(GameWorld *g);
 void set_empty_account(struct descriptor_data *d);
 
 /* input.cpp */

@@ -12,8 +12,6 @@
 #include <cerrno>
 #include <csignal>
 #include <cstring>
-#include <unistd.h>
-#include <poll.h>
 #include <ctime>
 
 #include "dbat/iterate.hpp"
@@ -39,7 +37,7 @@
 
 #include "comm_internal.hpp"
 
-static void game_loop(GameWorld *g, int cmmother_desc);
+static void game_loop(GameWorld *g);
 static void record_usage(GameWorld *g);
 constexpr int64_t NS_PER_SEC = 1000000000;
 constexpr int64_t PULSE_NS   = OPT_USEC * 1000LL; /* one pass of the game loop */
@@ -59,12 +57,14 @@ void init_game(GameWorld *g, uint16_t cmport)
 
   circle_srandom(g, game_now(g));
 
+  net::startup();
+
   mud_log("Finding player limit.");
   g->max_players = get_max_players(g);
 
-  if (!g->fCopyOver) { /* If copyover mother_desc is already set up */
+  if (!g->fCopyOver) { /* After a copyover, the listener came across with the -C option */
     mud_log("Opening mother connection.");
-    g->mother_desc = init_socket(g, cmport);
+    g->listener = net::listen_on(CONFIG_DFLT_IP, cmport);
   }
 
   event_init(g);
@@ -105,14 +105,14 @@ void init_game(GameWorld *g, uint16_t cmport)
 
   mud_log("Entering game loop.");
 
-  game_loop(g, g->mother_desc);
+  game_loop(g);
 
   Crash_save_all(g);
 
   mud_log("Closing all sockets.");
   close_all_sockets(g);
 
-  close(g->mother_desc);
+  g->listener.close();
 
   if (g->circle_reboot != 2)
     save_all(g);
@@ -218,12 +218,11 @@ void game_finish_descriptors(GameWorld *g)
  * output and sending it out to players, and calling "heartbeat" functions
  * such as mobile_activity().
  */
-static void game_loop(GameWorld *g, int cmmother_desc)
+static void game_loop(GameWorld *g)
 {
   int64_t last_time, process_time, now; /* monotonic nanoseconds; last_time is when the last pulse was due */
   int missed_pulses;
-  struct pollfd *fds = nullptr; /* [0] is the mother socket, then one per descriptor, in list order */
-  size_t fds_alloc   = 0, nfds;
+  net::poll_set polled; /* [0] is the listener, then one per descriptor, in list order */
 
   last_time = monotonic_ns();
 
@@ -239,16 +238,21 @@ static void game_loop(GameWorld *g, int cmmother_desc)
 
     /* Sleep if we don't have any connections */
     if (g->descriptors.empty()) {
-      struct pollfd mother = {.fd = cmmother_desc, .events = POLLIN};
+      net::poll_set listener;
+      listener.add(g->listener.handle(), false);
 
       mud_log("No connections.  Going to sleep.");
-      if (poll(&mother, 1, -1) < 0) {
-        if (errno == EINTR)
+      switch (listener.wait(-1)) {
+        case net::poll_set::outcome::interrupted:
           mud_log("Waking up to process signal.");
-        else
-          perror("SYSERR: poll coma");
-      } else
-        mud_log("New connection.  Waking up.");
+          break;
+        case net::poll_set::outcome::failed:
+          net::report_error("SYSERR: poll coma");
+          break;
+        case net::poll_set::outcome::ready:
+          mud_log("New connection.  Waking up.");
+          break;
+      }
       last_time = monotonic_ns();
       if (shutdown_signal)
         continue;
@@ -276,43 +280,36 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     sleep_until(last_time);
 
     /* Poll (without blocking) for new connections, input, output and hangups */
-    nfds = 1 + count_members(each_desc(g));
-    if (nfds > fds_alloc) {
-      resize_array(fds, fds_alloc, nfds + 16);
-      fds_alloc = nfds + 16;
-    }
-    fds[0] = pollfd{.fd = cmmother_desc, .events = POLLIN};
-    nfds   = 1;
+    polled.clear();
+    polled.add(g->listener.handle(), false);
     for (descriptor_data *d : each_desc(g))
-      fds[nfds++] = pollfd{.fd = d->descriptor, .events = POLLIN | POLLOUT};
+      polled.add(d->sock.handle(), true);
 
-    while (poll(fds, nfds, 0) < 0) {
-      if (errno != EINTR) { /* a signal arriving here is no reason to stop */
-        perror("SYSERR: poll");
-        delete[] fds;
+    for (net::poll_set::outcome waited; (waited = polled.wait(0)) != net::poll_set::outcome::ready;) {
+      if (waited == net::poll_set::outcome::failed) { /* a signal arriving here is no reason to stop */
+        net::report_error("SYSERR: poll");
         return;
       }
     }
-    nfds = 1;
+    size_t polled_at = 1;
     for (descriptor_data *d : each_desc(g))
-      d->poll_revents = fds[nfds++].revents;
+      d->ready = polled.at(polled_at++);
 
     /* If there are new connections waiting, accept them. (They are polled from the next pulse on.) */
-    if (fds[0].revents & POLLIN)
-      new_descriptor(g, cmmother_desc);
+    if (polled.at(0).readable)
+      new_descriptor(g);
 
     /* Kick out sockets in an error state, and hung-up ones with nothing left to read */
     for (descriptor_data *d : each_desc(g)) {
-      if ((d->poll_revents & (POLLERR | POLLNVAL)) ||
-          ((d->poll_revents & POLLHUP) && !(d->poll_revents & POLLIN))) {
-        d->poll_revents = 0;
+      if (d->ready.failed || (d->ready.hung_up && !d->ready.readable)) {
+        d->ready = {};
         close_socket(g, d);
       }
     }
 
     /* Process descriptors with input pending */
     for (descriptor_data *d : each_desc(g)) {
-      if (d->poll_revents & POLLIN)
+      if (d->ready.readable)
         if (process_input(g, d) < 0)
           close_socket(g, d);
     }
@@ -321,7 +318,7 @@ static void game_loop(GameWorld *g, int cmmother_desc)
 
     /* Send queued output out to the operating system (ultimately to user). */
     for (descriptor_data *d : each_desc(g)) {
-      if (*(d->output) && (d->poll_revents & POLLOUT)) {
+      if (*(d->output) && d->ready.writable) {
         /* Output for this player is ready */
         if (process_output(g, d) < 0) {
           // commented out close_socket since process_output already does this, so having it here causes a double-free crash
@@ -373,7 +370,6 @@ static void game_loop(GameWorld *g, int cmmother_desc)
     /* Update tics for deadlock protection */
     tics_passed++;
   }
-  delete[] fds;
 }
 
 void game_heartbeat(GameWorld *g, int heart_pulse)

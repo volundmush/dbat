@@ -20,9 +20,9 @@ void desc_discard_output(GameWorld *g, struct descriptor_data *d);
 /* Replaces d's queued output with text, which may be no longer */
 void desc_rewrite_output(struct descriptor_data *d, std::string_view text);
 /* The socket d reads and writes, as the system numbers it */
-int desc_socket(const struct descriptor_data *d);
+net::native_handle desc_socket(const struct descriptor_data *d);
 /* A new connection on socket, from host, in the game's list: logging in, with nothing yet sent or typed */
-struct descriptor_data *add_descriptor(GameWorld *g, int socket, std::string_view host);
+struct descriptor_data *add_descriptor(GameWorld *g, net::native_handle socket, std::string_view host);
 
 void customCreate(struct descriptor_data *d);
 void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *name);

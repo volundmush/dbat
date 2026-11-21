@@ -23,6 +23,11 @@ set(DBAT_CXX_FLAGS
     CACHE INTERNAL "")
 target_compile_options(dbat PRIVATE ${DBAT_CXX_FLAGS})
 
+# The networking's platform layer: Winsock on Windows (src/net/platform_win32.cpp)
+if(WIN32)
+    target_link_libraries(dbat PUBLIC ws2_32)
+endif()
+
 target_include_directories(dbat
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

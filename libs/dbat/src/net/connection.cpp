@@ -1,6 +1,6 @@
 /*************************************************************************
 *   File: connection.cpp                                Part of CircleMUD *
-*  Usage: Sockets and connections: listening, accepting, closing        *
+*  Usage: Connections: the player limit, accepting, closing, idle checks *
 *         (formerly part of comm.c)                                      *
 *                                                                         *
 *  All rights reserved.  See license.doc for complete information.        *
@@ -9,14 +9,10 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include <cerrno>
+#include <algorithm>
 #include <cstring>
-#include <unistd.h>
-#include <sys/resource.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
+#include <optional>
+#include <utility>
 
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
@@ -24,94 +20,16 @@
 
 #include "comm_internal.hpp"
 
-static struct in_addr *get_bind_addr(GameWorld *g);
-static void nonblock(int s);
-static int set_sendbuf(int s);
-
-/*
- * init_socket sets up the mother descriptor - creates the socket, sets
- * its options up, binds it, and listens.
- */
-int init_socket(GameWorld *g, uint16_t cmport)
-{
-  int s;
-  struct sockaddr_in sa;
-  int opt;
-
-  if ((s = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-    perror("SYSERR: Error creating socket");
-    exit(1);
-  }
-
-  opt = 1;
-  if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0) {
-    perror("SYSERR: setsockopt REUSEADDR");
-    exit(1);
-  }
-
-  set_sendbuf(s);
-
-  {
-    struct linger ld;
-
-    ld.l_onoff  = 0;
-    ld.l_linger = 0;
-    if (setsockopt(s, SOL_SOCKET, SO_LINGER, (char *)&ld, sizeof(ld)) < 0)
-      perror("SYSERR: setsockopt SO_LINGER"); /* Not fatal I suppose. */
-  }
-
-  /* Clear the structure */
-  memset((char *)&sa, 0, sizeof(sa));
-
-  sa.sin_family = AF_INET;
-  sa.sin_port   = htons(cmport);
-  sa.sin_addr   = *(get_bind_addr(g));
-
-  if (bind(s, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
-    perror("SYSERR: bind");
-    close(s);
-    exit(1);
-  }
-  nonblock(s);
-  if (listen(s, SOMAXCONN) < 0) {
-    perror("SYSERR: listen");
-    close(s);
-    exit(1);
-  }
-  return (s);
-}
-
 int get_max_players(GameWorld *g)
 {
+  int max_descs   = 0;
+  const char *how = "rlimit";
 
-  int max_descs = 0;
-  const char *how;
-
-  /*
- * First, we'll try using getrlimit/setrlimit.  This will probably work
- * on most systems.  HAS_RLIMIT is defined in sysdep.h.
- */
-  {
-    struct rlimit limit;
-
-    /* find the limit of file descs */
-    how = "rlimit";
-    if (getrlimit(RLIMIT_NOFILE, &limit) < 0) {
-      perror("SYSERR: calling getrlimit");
-      exit(1);
-    }
-
-    /* set the current to the maximum */
-    limit.rlim_cur = limit.rlim_max;
-    if (setrlimit(RLIMIT_NOFILE, &limit) < 0) {
-      perror("SYSERR: calling setrlimit");
-      exit(1);
-    }
-    if (limit.rlim_max == RLIM_INFINITY)
-      max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
-    else
-      max_descs = (int)MIN((rlim_t)(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS), limit.rlim_max);
-  }
+  /* the most files the process may have open, raised as far as it goes */
+  if (std::optional<long long> limit = net::raise_descriptor_limit())
+    max_descs = (int)std::min<long long>(CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS, *limit);
+  else
+    max_descs = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
 
   /* now calculate max _players_ based on max descs */
   max_descs = MIN(CONFIG_MAX_PLAYING, max_descs - NUM_RESERVED_DESCS);
@@ -141,60 +59,11 @@ static void flush_queues(GameWorld *g, struct descriptor_data *d)
 *  socket handling                                                  *
 ****************************************************************** */
 
-/*
- * get_bind_addr: Return a struct in_addr that should be used in our
- * call to bind().  If the user has specified a desired binding
- * address, we try to bind to it; otherwise, we bind to INADDR_ANY.
- * Note that inet_aton() is preferred over inet_addr() so we use it if
- * we can.  If neither is available, we always bind to INADDR_ANY.
- */
-
-static struct in_addr *get_bind_addr(GameWorld *g)
-{
-  static struct in_addr bind_addr;
-
-  /* Clear the structure */
-  memset((char *)&bind_addr, 0, sizeof(bind_addr));
-
-  /* If DLFT_IP is unspecified, use INADDR_ANY */
-  if (CONFIG_DFLT_IP.empty()) {
-    bind_addr.s_addr = htonl(INADDR_ANY);
-  } else {
-    /* If the parsing fails, use INADDR_ANY */
-    if (!inet_aton(CONFIG_DFLT_IP.c_str(), &bind_addr)) {
-      mud_log("SYSERR: DFLT_IP of {} appears to be an invalid IP address",
-              CONFIG_DFLT_IP);
-      bind_addr.s_addr = htonl(INADDR_ANY);
-    }
-  }
-
-  /* Put the address that we've finally decided on into the logs */
-  if (bind_addr.s_addr == htonl(INADDR_ANY))
-    mud_log("Binding to all IP interfaces on this host.");
-  else
-    mud_log("Binding only to IP address {}", inet_ntoa(bind_addr));
-
-  return (&bind_addr);
-}
-
-/* Sets the kernel's send buffer size for the descriptor */
-static int set_sendbuf(int s)
-{
-  int opt = MAX_SOCK_BUF;
-
-  if (setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *)&opt, sizeof(opt)) < 0) {
-    perror("SYSERR: setsockopt SNDBUF");
-    return (-1);
-  }
-
-  return (0);
-}
-
 /* Initialize a descriptor */
-void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc)
+void init_descriptor(GameWorld *g, struct descriptor_data *newd, net::socket sock)
 {
 
-  newd->descriptor = desc;
+  newd->sock       = std::move(sock);
   newd->output     = newd->small_outbuf;
   newd->bufspace   = SMALL_BUFSIZE - 1;
   newd->login_time = game_now(g);
@@ -208,11 +77,11 @@ void init_descriptor(GameWorld *g, struct descriptor_data *newd, int desc)
   newd->desc_num = g->last_desc;
 }
 
-struct descriptor_data *add_descriptor(GameWorld *g, int socket, std::string_view host)
+struct descriptor_data *add_descriptor(GameWorld *g, net::native_handle socket, std::string_view host)
 {
   auto *d = new descriptor_data();
   snprintf(d->host, sizeof(d->host), "%.*s", (int)host.size(), host.data());
-  init_descriptor(g, d, socket);
+  init_descriptor(g, d, net::socket(socket));
   g->descriptors.add(d->desc_num, d);
   return d;
 }
@@ -242,7 +111,7 @@ void desc_rewrite_output(struct descriptor_data *d, std::string_view text)
   d->bufptr -= shrunk;
 }
 
-int desc_socket(const struct descriptor_data *d) { return d->descriptor; }
+net::native_handle desc_socket(const struct descriptor_data *d) { return d->sock.handle(); }
 
 /* What a connection holds before it has logged in to an account. */
 void set_empty_account(struct descriptor_data *d)
@@ -272,43 +141,18 @@ static void set_color(GameWorld *g, struct descriptor_data *d)
   return;
 }
 
-int new_descriptor(GameWorld *g, int s)
+int new_descriptor(GameWorld *g)
 {
-  int desc;
-  socklen_t i;
-  char host[HOST_LENGTH + 1];
-  struct sockaddr_in peer;
-  int keepalive = 1;
-
-  /* accept the new connection */
-  i = sizeof(peer);
-  if ((desc = accept(s, (struct sockaddr *)&peer, &i)) == INVALID_SOCKET) {
-    perror("SYSERR: accept");
+  std::optional<net::accepted> peer = net::accept_from(g->listener);
+  if (!peer)
     return (-1);
-  }
-  /* keep it from blocking */
-  nonblock(desc);
-
-  /* set the send buffer size */
-  if (set_sendbuf(desc) < 0) {
-    close(desc);
-    return (0);
-  }
-  /* notice connections that silently went away (NAT timeouts, crashed clients) */
-  if (setsockopt(desc, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive)) < 0)
-    perror("SYSERR: setsockopt SO_KEEPALIVE");
-
-  /* The site is the numeric address. No reverse DNS: the lookup blocks the whole game, and the name it
-     returns is chosen by whoever controls the address, so it is no basis for bans. */
-  if (!inet_ntop(AF_INET, &peer.sin_addr, host, sizeof(host)))
-    strcpy(host, "unknown");
-
-  return game_add_connection(g, desc, host);
+  return game_add_connection(g, peer->sock.release(), peer->host.c_str());
 }
 
 /* Takes on a connected socket, unless the game is full or the site isn't welcome. */
-int game_add_connection(GameWorld *g, int desc, const char *host)
+int game_add_connection(GameWorld *g, net::native_handle desc, const char *host)
 {
+  net::socket sock(desc); /* closed on the way out, unless the connection takes it */
   int sockets_connected = 0, from_same_ip = 0;
   struct descriptor_data *newd;
 
@@ -317,7 +161,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
 
   if (sockets_connected >= CONFIG_MAX_PLAYING) {
     write_to_descriptor(desc, "Sorry, CircleMUD is full right now... please try again later!\r\n");
-    close(desc);
+    sock.close();
     return (0);
   }
   /* create a new descriptor */
@@ -331,7 +175,7 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
       from_same_ip++;
   if (from_same_ip >= MAX_CONNECTIONS_PER_IP) {
     write_to_descriptor(desc, "Too many connections from your address. Please close some and try again.\r\n");
-    close(desc);
+    sock.close();
     mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection from [{}] refused: already {:d} connections from it", newd->host, from_same_ip);
     delete newd;
     return (0);
@@ -339,14 +183,14 @@ int game_add_connection(GameWorld *g, int desc, const char *host)
 
   /* determine if the site is banned */
   if (isbanned(g, newd->host) == BAN_ALL) {
-    close(desc);
+    sock.close();
     mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Connection attempt denied from [{}]", newd->host);
     delete newd;
     return (0);
   }
 
   /* initialize descriptor data */
-  init_descriptor(g, newd, desc);
+  init_descriptor(g, newd, std::move(sock));
 
   /* prepend to list */
   g->descriptors.add(newd->desc_num, newd);
@@ -383,7 +227,7 @@ void close_all_sockets(GameWorld *g)
 void close_socket(GameWorld *g, struct descriptor_data *d)
 {
   g->descriptors.remove(d->desc_num, d);
-  close(d->descriptor);
+  d->sock.close();
   flush_queues(g, d);
 
   /* Forget snooping */
@@ -457,25 +301,5 @@ void check_idle_menu(GameWorld *g)
     }
     write_to_output(g, d, "\r\nTimed out... goodbye.\r\n");
     desc_set_connected(d, CON_CLOSE);
-  }
-}
-
-/*
- * I tried to universally convert Circle over to POSIX compliance, but
- * alas, some systems are still straggling behind and don't have all the
- * appropriate defines.  In particular, NeXT 2.x defines O_NDELAY but not
- * O_NONBLOCK.  Krusty old NeXT machines!  (Thanks to Michael Jones for
- * this and various other NeXT fixes.)
- */
-
-static void nonblock(int s)
-{
-  int flags;
-
-  flags = fcntl(s, F_GETFL, 0);
-  flags |= O_NONBLOCK;
-  if (fcntl(s, F_SETFL, flags) < 0) {
-    perror("SYSERR: Fatal error executing nonblock (comm.c)");
-    exit(1);
   }
 }

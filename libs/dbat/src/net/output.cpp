@@ -10,9 +10,7 @@
 ************************************************************************ */
 
 #include <algorithm>
-#include <cerrno>
 #include <cstring>
-#include <unistd.h>
 
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
@@ -159,11 +157,11 @@ int process_output(GameWorld *g, struct descriptor_data *t)
    */
   if (t->has_prompt) {
     t->has_prompt = false;
-    result        = write_to_descriptor(t->descriptor, i);
+    result        = write_to_descriptor(t->sock.handle(), i);
     if (result >= 2)
       result -= 2;
   } else
-    result = write_to_descriptor(t->descriptor, osb);
+    result = write_to_descriptor(t->sock.handle(), osb);
 
   if (result < 0) { /* Oops, fatal error. Bye! */
     close_socket(g, t);
@@ -216,56 +214,6 @@ int process_output(GameWorld *g, struct descriptor_data *t)
 }
 
 /*
- * perform_socket_write: takes a descriptor, a pointer to text, and a
- * text length, and tries once to send that text to the OS.  This is
- * where we stuff all the platform-dependent stuff that used to be
- * ugly #ifdef's in write_to_descriptor().
- *
- * This function must return:
- *
- * -1  If a fatal error was encountered in writing to the descriptor.
- *  0  If a transient failure was encountered (e.g. socket buffer full).
- * >0  To indicate the number of bytes successfully written, possibly
- *     fewer than the number the caller requested be written.
- *
- * Right now there are two versions of this function: one for Windows,
- * and one for all other platforms.
- */
-
-/* perform_socket_write for all Non-Windows platforms */
-static ssize_t perform_socket_write(int desc, const char *txt, size_t length)
-{
-  ssize_t result = 0;
-
-  do
-    result = write(desc, txt, length);
-  while (result < 0 && errno == EINTR);
-
-  if (result > 0) {
-    /* Write was successful. */
-    return (result);
-  }
-
-  if (result == 0) {
-    /* This should never happen! */
-    mud_log("SYSERR: Huh??  write() returned 0???  Please report this!");
-    return (-1);
-  }
-
-  /*
-   * result < 0, so an error was encountered - is it transient?
-   * Unfortunately, different systems use different constants to
-   * indicate this.
-   */
-
-  if (errno == EAGAIN) /* EWOULDBLOCK is the same value on Linux */
-    return (0);
-
-  /* Looks like the error was fatal.  Too bad. */
-  return (-1);
-}
-
-/*
  * write_to_descriptor takes a descriptor, and text to write to the
  * descriptor.  It keeps calling the system-level write() until all
  * the text has been delivered to the OS, or until an error is
@@ -275,26 +223,23 @@ static ssize_t perform_socket_write(int desc, const char *txt, size_t length)
  * >=0  If all is well and good.
  *  -1  If an error was encountered, so that the player should be cut off.
  */
-int write_to_descriptor(int desc, const char *txt)
+int write_to_descriptor(net::native_handle desc, const char *txt)
 {
-  ssize_t bytes_written;
   size_t total = strlen(txt), write_total = 0;
 
   while (total > 0) {
-    bytes_written = perform_socket_write(desc, txt, total);
+    net::io_result sent = net::send_some(desc, {txt, total});
 
-    if (bytes_written < 0) {
+    if (sent.status == net::io_status::would_block) /* Temporary failure -- socket buffer full. */
+      return (write_total);
+    if (sent.status != net::io_status::done) {
       /* Fatal error.  Disconnect the player. */
-      perror("SYSERR: Write to socket");
+      net::report_error("SYSERR: Write to socket");
       return (-1);
     }
-    if (bytes_written == 0) {
-      /* Temporary failure -- socket buffer full. */
-      return (write_total);
-    }
-    txt += bytes_written;
-    total -= bytes_written;
-    write_total += bytes_written;
+    txt += sent.bytes;
+    total -= sent.bytes;
+    write_total += sent.bytes;
   }
 
   return (write_total);

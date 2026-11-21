@@ -20,6 +20,7 @@
 #include "dbat/house.hpp"
 #include "dbat/mail.hpp"
 #include "dbat/maputils.hpp"
+#include "dbat/net/platform.hpp"
 #include "dbat/context_help.hpp"
 #include "dbat/spells.hpp"
 #include "dbat/weather.hpp"
@@ -85,7 +86,7 @@ struct GameWorld {
   struct txt_block *bufpool{};
   int buf_largecount{}, buf_overflows{}, buf_switches{};
   int max_players{};
-  int mother_desc{};
+  net::socket listener; /* where new connections come in */
   uint16_t port{};
   bool fCopyOver{};
   int launch_argc{}; /* how and where this process started, for a copyover to do the same */
