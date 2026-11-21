@@ -13,7 +13,6 @@ allowed='
 io/platform.cpp       pushing a file out to the disk (fsync/_commit), which standard C++ has no call for
 net/platform_posix.cpp  the networking layer on POSIX
 net/platform_win32.cpp  the networking layer on Windows
-net/game_loop.cpp     the pulse clock (clock_nanosleep), until it moves to std::chrono
 net/signals.cpp       signals, the deadlock timer and the crash backtrace, until they move to the layer
 net/copyover.cpp      the copyover exec and the sockets it brings across, which only Linux can do
 '

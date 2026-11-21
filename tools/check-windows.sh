@@ -6,8 +6,8 @@ set -uo pipefail
 root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 cd "$root/libs/dbat" || exit 1
 
-# The files checked. Not yet: game_loop.cpp (the pulse clock), signals.cpp (signals and the deadlock timer); never:
-# copyover.cpp, which only Linux can do.
+# The files checked. Not yet: signals.cpp (signals and the deadlock timer); never: copyover.cpp, which only Linux
+# can do.
 files='
 src/net/platform_win32.cpp
 src/net/connection.cpp
@@ -16,6 +16,7 @@ src/net/output.cpp
 src/net/colour.cpp
 src/net/prompt.cpp
 src/net/messages.cpp
+src/net/game_loop.cpp
 '
 
 if ! command -v zig > /dev/null; then

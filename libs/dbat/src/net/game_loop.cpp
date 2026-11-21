@@ -9,10 +9,14 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <algorithm>
 #include <cerrno>
+#include <chrono>
 #include <csignal>
 #include <cstring>
-#include <ctime>
+#include <fstream>
+#include <span>
+#include <thread>
 
 #include "dbat/iterate.hpp"
 #include "dbat/arrays.hpp"
@@ -39,15 +43,31 @@
 
 static void game_loop(GameWorld *g);
 static void record_usage(GameWorld *g);
-constexpr int64_t NS_PER_SEC = 1000000000;
-constexpr int64_t PULSE_NS   = OPT_USEC * 1000LL; /* one pass of the game loop */
 
-static int64_t monotonic_ns(void);
-static void sleep_until(int64_t when);
+/* The pulses run by the monotonic clock, unaffected by changes to the system time */
+using pulse_clock                          = std::chrono::steady_clock;
+constexpr pulse_clock::duration PULSE_TIME = std::chrono::microseconds(OPT_USEC); /* one pass of the game loop */
 
 /***********************************************************************
 *  main game loop and related stuff                                    *
 ***********************************************************************/
+
+/* The map's room vnums, row by row: from the first that isn't a number on (or the end of the file), NOWHERE. (The
+   file is closed before the game runs, or a copyover would carry it into the next process.) */
+static void load_surface_map(GameWorld *g)
+{
+  std::ifstream mapfile("../data/surface.map");
+  if (!mapfile) {
+    mud_log("SYSERR: Unable to open ../data/surface.map: {}", strerror(errno));
+    exit(1);
+  }
+  for (auto &row : std::span(g->mapnums).first(MAP_ROWS + 1)) {
+    for (room_vnum &cell : std::span(row).first(MAP_COLS + 1)) {
+      room_vnum vnum_read;
+      cell = mapfile >> vnum_read && room_of(g, vnum_read) ? vnum_read : NOWHERE;
+    }
+  }
+}
 
 /* Init sockets, run game, and cleanup sockets */
 void init_game(GameWorld *g, uint16_t cmport)
@@ -71,28 +91,12 @@ void init_game(GameWorld *g, uint16_t cmport)
 
   boot_db(g);
 
-  FILE *mapfile;
-  int rowcounter, colcounter;
-  room_vnum vnum_read;
-
   mud_log("Signal trapping.");
   signal_setup();
 
   mud_log("Loading Space Map. ");
 
-  //Load the map vnums from a file into an array
-  if (!(mapfile = fopen("../data/surface.map", "r"))) {
-    mud_log("SYSERR: Unable to open ../data/surface.map: {}", strerror(errno));
-    exit(1);
-  }
-
-  for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
-    for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-      g->mapnums[rowcounter][colcounter] = fscanf(mapfile, "%d", &vnum_read) == 1 && room_of(g, vnum_read) ? vnum_read : NOWHERE;
-    }
-  }
-
-  fclose(mapfile);
+  load_surface_map(g);
 
   /* Load the toplist */
   topLoad(g);
@@ -224,11 +228,11 @@ void game_finish_descriptors(GameWorld *g)
  */
 static void game_loop(GameWorld *g)
 {
-  int64_t last_time, process_time, now; /* monotonic nanoseconds; last_time is when the last pulse was due */
+  pulse_clock::time_point last_time; /* when the last pulse was due */
   int missed_pulses;
   net::poll_set polled; /* [0] is the listener, then one per descriptor, in list order */
 
-  last_time = monotonic_ns();
+  last_time = pulse_clock::now();
 
   /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
   while (!g->circle_shutdown) {
@@ -257,7 +261,7 @@ static void game_loop(GameWorld *g)
           mud_log("New connection.  Waking up.");
           break;
       }
-      last_time = monotonic_ns();
+      last_time = pulse_clock::now();
       if (shutdown_signal)
         continue;
     }
@@ -269,19 +273,19 @@ static void game_loop(GameWorld *g)
      * calculate how long we took processing the previous iteration.
      */
 
-    now          = monotonic_ns();
-    process_time = MAX(now - last_time, 0);
+    pulse_clock::time_point now        = pulse_clock::now();
+    pulse_clock::duration process_time = std::max(now - last_time, pulse_clock::duration::zero());
 
     /*
      * If we were asleep for more than one pass, count missed pulses and sleep
      * until we're resynchronized with the next upcoming pulse.
      */
-    missed_pulses = process_time / PULSE_NS;
-    process_time %= PULSE_NS;
+    missed_pulses = process_time / PULSE_TIME;
+    process_time %= PULSE_TIME;
 
-    /* Sleep until the next pulse is due */
-    last_time = now - process_time + PULSE_NS;
-    sleep_until(last_time);
+    /* Sleep until the next pulse is due (through any signals) */
+    last_time = now - process_time + PULSE_TIME;
+    std::this_thread::sleep_until(last_time);
 
     /* Poll (without blocking) for new connections, input, output and hangups */
     polled.clear();
@@ -376,113 +380,65 @@ static void game_loop(GameWorld *g)
   }
 }
 
+namespace {
+
+/* What the heartbeat does, and every how many pulses, in the order it does them */
+struct beat {
+  int (*every)(GameWorld *g); /* some of the periods are the configuration's */
+  void (*run)(GameWorld *g);
+  bool (*on)(GameWorld *g) = nullptr; /* only when this is true, if there is one */
+};
+
+const beat HEARTBEAT[] = {
+    {[](GameWorld *g) { return 1; }, event_process},
+    {[](GameWorld *g) { return PULSE_DG_SCRIPT; }, script_trigger_check},
+    {[](GameWorld *g) { return PULSE_ZONE; }, zone_update},
+    {[](GameWorld *g) { return PULSE_IDLEPWD; }, check_idle_passwords}, /* 15 seconds */
+    {[](GameWorld *g) { return PULSE_1SEC * 60; }, check_idle_menu},
+    {[](GameWorld *g) { return PULSE_1SEC * 60 * 60; }, dg_log_uid_stats}, /* 1 hour */
+    {[](GameWorld *g) { return PULSE_2SEC; }, [](GameWorld *g) {
+       base_update(g);
+       fish_update(g);
+     }},
+    {[](GameWorld *g) { return PULSE_1SEC * 15; }, handle_songs},
+    {[](GameWorld *g) { return PULSE_1SEC; }, wishSYS},
+    {[](GameWorld *g) { return PULSE_MOBILE; }, mobile_activity},
+    {[](GameWorld *g) { return PULSE_AUCTION; }, check_auction},
+    {[](GameWorld *g) { return PULSE_IDLEPWD / 15; }, fight_stack}, /* 1 second */
+    {[](GameWorld *g) { return (PULSE_IDLEPWD / 15) * 2; }, [](GameWorld *g) {
+       if (rand_number(g, 1, 2) == 2)
+         homing_update(g);
+       huge_update(g);
+       broken_update(g);
+     }},
+    {[](GameWorld *g) { return 1 * PASSES_PER_SEC; }, copyover_check}, /* EVERY second */
+    {[](GameWorld *g) { return SECS_PER_MUD_HOUR * PASSES_PER_SEC; }, [](GameWorld *g) {
+       weather_and_time(g, 1);
+       check_time_triggers(g);
+       affect_update(g);
+     }},
+    {[](GameWorld *g) { return (SECS_PER_MUD_HOUR / 3) * PASSES_PER_SEC; }, point_update},
+    {[](GameWorld *g) { return PULSE_AUTOSAVE; }, [](GameWorld *g) { /* 1 minute */
+       if (++g->mins_since_crashsave >= CONFIG_AUTOSAVE_TIME) {
+         g->mins_since_crashsave = 0;
+         Crash_save_all(g);
+         House_save_all(g);
+       }
+     },
+     [](GameWorld *g) -> bool { return CONFIG_AUTO_SAVE; }},
+    {[](GameWorld *g) { return PULSE_USAGE; }, record_usage},
+    {[](GameWorld *g) { return PULSE_TIMESAVE; }, [](GameWorld *g) { save_mud_time(g, &g->time_info); }},
+    {[](GameWorld *g) { return 30 * PASSES_PER_SEC; }, [](GameWorld *g) { timed_dt(g, nullptr); }},
+    {[](GameWorld *g) { return 1; }, finish_extractions}, /* Every pulse! Don't want them to stink the place up... */
+};
+
+} // namespace
+
 void game_heartbeat(GameWorld *g, int heart_pulse)
 {
-
-  event_process(g);
-
-  if (!(heart_pulse % PULSE_DG_SCRIPT))
-    script_trigger_check(g);
-
-  if (!(heart_pulse % PULSE_ZONE))
-    zone_update(g);
-
-  if (!(heart_pulse % PULSE_IDLEPWD)) /* 15 seconds */
-    check_idle_passwords(g);
-
-  if (!(heart_pulse % (PULSE_1SEC * 60))) /* 15 seconds */
-    check_idle_menu(g);
-
-  if (!(heart_pulse % (PULSE_1SEC * 60 * 60))) /* 1 hour */
-    dg_log_uid_stats(g);
-
-  if (!(heart_pulse % (PULSE_IDLEPWD / 15))) { /* 1 second */
-    //dball_load();
-  }
-  if (!(heart_pulse % (PULSE_2SEC))) {
-    base_update(g);
-    fish_update(g);
-  }
-
-  if (!(heart_pulse % (PULSE_1SEC * 15))) {
-    handle_songs(g);
-  }
-
-  if (!(heart_pulse % (PULSE_1SEC)))
-    wishSYS(g);
-
-  if (!(heart_pulse % PULSE_MOBILE))
-    mobile_activity(g);
-
-  if (!(heart_pulse % PULSE_AUCTION))
-    check_auction(g);
-
-  if (!(heart_pulse % (PULSE_IDLEPWD / 15))) {
-    fight_stack(g);
-  }
-  if (!(heart_pulse % ((PULSE_IDLEPWD / 15) * 2))) {
-    if (rand_number(g, 1, 2) == 2) {
-      homing_update(g);
-    }
-    huge_update(g);
-    broken_update(g);
-    /*update_mob_absorb();*/
-  }
-
-  if (!(heart_pulse % (1 * PASSES_PER_SEC))) { /* EVERY second */
-    copyover_check(g);
-  }
-
-  if (!(heart_pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC))) {
-    weather_and_time(g, 1);
-    check_time_triggers(g);
-    affect_update(g);
-  }
-  if (!(heart_pulse % ((SECS_PER_MUD_HOUR / 3) * PASSES_PER_SEC))) {
-    point_update(g);
-  }
-
-  if (CONFIG_AUTO_SAVE && !(heart_pulse % PULSE_AUTOSAVE)) { /* 1 minute */
-    if (++g->mins_since_crashsave >= CONFIG_AUTOSAVE_TIME) {
-      g->mins_since_crashsave = 0;
-      Crash_save_all(g);
-      House_save_all(g);
-    }
-  }
-
-  if (!(heart_pulse % PULSE_USAGE))
-    record_usage(g);
-
-  if (!(heart_pulse % PULSE_TIMESAVE))
-    save_mud_time(g, &g->time_info);
-
-  if (!(heart_pulse % (30 * PASSES_PER_SEC))) {
-    timed_dt(g, nullptr);
-  }
-
-  /* Every pulse! Don't want them to stink the place up... */
-  finish_extractions(g);
-}
-
-/* ******************************************************************
-*  general utility stuff (for local use)                            *
-****************************************************************** */
-
-/* The monotonic clock in nanoseconds: unaffected by changes to the system time. */
-static int64_t monotonic_ns(void)
-{
-  struct timespec now;
-
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  return now.tv_sec * NS_PER_SEC + now.tv_nsec;
-}
-
-/* Sleeps until the monotonic clock reaches when (nanoseconds), through any signals. */
-static void sleep_until(int64_t when)
-{
-  struct timespec t = {.tv_sec = when / NS_PER_SEC, .tv_nsec = when % NS_PER_SEC};
-
-  while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &t, nullptr) == EINTR);
+  for (const beat &b : HEARTBEAT)
+    if ((!b.on || b.on(g)) && !(heart_pulse % b.every(g)))
+      b.run(g);
 }
 
 static void record_usage(GameWorld *g)
