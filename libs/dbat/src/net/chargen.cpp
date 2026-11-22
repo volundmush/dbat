@@ -19,6 +19,7 @@
 #include "dbat/interpreter.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/consts/create.hpp"
 
 #include "nanny_internal.hpp"
@@ -243,7 +244,7 @@ static void display_bonus_menu(GameWorld *g, struct char_data *ch, bool negative
 /* The trait a menu number names, or -1. A number in the negatives menu below 12 names a bonus. */
 static int trait_choice(const char *arg, bool negatives)
 {
-  int n = atoi(arg);
+  int n = static_cast<int>(io::c_atol(arg));
 
   if (n < 1 || n > 51)
     return -1;
@@ -1247,7 +1248,7 @@ static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "That is not an acceptable choice!\r\n");
     write_to_output(g, d, "\n@wChoose: ");
   } else {
-    int choice = atoi(arg);
+    int choice = static_cast<int>(io::c_atol(arg));
     if (choice < 1 || choice > 10) {
       write_to_output(g, d, "That is not an acceptable choice!\r\n");
       return;
@@ -1273,7 +1274,7 @@ static void bio_genome(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "\n@wChoose: ");
     return;
   }
-  select = atoi(arg);
+  select = static_cast<int>(io::c_atol(arg));
   if (select > 8 || select < 1) {
     show_genome_menu(g, d, "@RSelect two genomes to be your primary DNA strains.\n");
     write_to_output(g, d, "@RThat is not an acceptable selection. @WTry again:@n\n");

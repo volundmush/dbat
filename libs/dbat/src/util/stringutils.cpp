@@ -374,6 +374,10 @@ bool reserved_word(char *argument)
   return (search_block(argument, reserved, true) >= 0);
 }
 
+bool fill_word(std::string_view word) { return search_block(word, fill, true) >= 0; }
+
+bool reserved_word(std::string_view word) { return search_block(word, reserved, true) >= 0; }
+
 char *fname(const char *namelist)
 {
   static char holder[READ_SIZE];

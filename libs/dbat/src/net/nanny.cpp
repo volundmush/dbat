@@ -7,7 +7,13 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
+#include <array>
+#include <cctype>
 #include <cstdlib>
+#include <optional>
+#include <string>
+#include <string_view>
 
 
 #include "dbat/args.hpp"
@@ -35,6 +41,7 @@
 #include "dbat/hsedit.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/io/reader.hpp"
 
 #include "nanny_internal.hpp"
 
@@ -85,21 +92,17 @@ static void pay_player_count_rewards(GameWorld *g, int oldcount)
 *  Stuff for controlling the non-playing sockets (get name, pwd etc)       *
 ************************************************************************* */
 
-/* This function needs to die. */
-static bool _parse_name(const char *arg, char *name)
+/* The name typed, leading spaces passed over, if it's one or more letters and nothing else */
+static std::optional<std::string> parse_name(std::string_view typed)
 {
-  int i;
+  size_t start = 0;
 
-  while (isspace(*arg))
-    arg++;
-  for (i = 0; (*name = *arg); arg++, i++, name++)
-    if (!isalpha(*arg))
-      return true;
-
-  if (!i)
-    return true;
-
-  return false;
+  while (start < typed.size() && std::isspace(static_cast<unsigned char>(typed[start])))
+    start++;
+  typed.remove_prefix(start);
+  if (typed.empty() || !std::ranges::all_of(typed, [](unsigned char c) { return std::isalpha(c); }))
+    return std::nullopt;
+  return std::string(typed);
 }
 
 /* ---- Notices at login ------------------------------------------------- */
@@ -461,12 +464,15 @@ static void payout(GameWorld *g, int num)
 
 /* A character name: letters only, 2 to MAX_NAME_LENGTH of them, allowed, and not a fill or reserved word. The name
    is copied into name. */
-static bool acceptable_name(GameWorld *g, const char *typed, char *name)
+static bool acceptable_name(GameWorld *g, std::string_view typed, std::string &name)
 {
-  char buf[MAX_INPUT_LENGTH];
+  std::optional<std::string> parsed = parse_name(typed);
 
-  return !_parse_name(typed, name) && strlen(name) >= 2 && strlen(name) <= MAX_NAME_LENGTH && Valid_Name(g, name) &&
-         !fill_word(strcpy(buf, name)) && !reserved_word(buf); /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
+  if (!parsed)
+    return false;
+  name = std::move(*parsed);
+  return name.size() >= 2 && name.size() <= MAX_NAME_LENGTH && Valid_Name(g, name.data()) && !fill_word(name) &&
+         !reserved_word(name);
 }
 
 /* The account's slot names a character with no player file: empty it. */
@@ -555,7 +561,7 @@ static void log_in_character(GameWorld *g, struct descriptor_data *d)
 /* CON_GET_NAME: the name of a new character for an empty slot, or (after Return) the character in the slot chosen */
 static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
 {
-  char tmp_name[MAX_INPUT_LENGTH];
+  std::string tmp_name;
   int player_i;
 
   if (d->character) {
@@ -580,12 +586,12 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
 
-  player_i = load_char(g, tmp_name, d->character);
+  player_i = load_char(g, tmp_name.c_str(), d->character);
   if (player_i < 0) {
     if (d->writenew <= 0)
       character_missing(g, d);
     else /* player unknown -- make new character */
-      start_new_character(g, d, tmp_name);
+      start_new_character(g, d, tmp_name.data());
     return;
   }
   if (d->writenew > 0) {
@@ -596,7 +602,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
   }
   char_set_pfilepos(d->character, player_i);
   if (char_plr_flagged(d->character, PLR_DELETED))
-    remake_deleted_character(g, d, tmp_name);
+    remake_deleted_character(g, d, tmp_name.data());
   else
     log_in_character(g, d);
 }
@@ -938,7 +944,7 @@ static void state_umenu(GameWorld *g, struct descriptor_data *d, char *arg)
       option.choose(g, d);
       return;
     }
-  choose_slot(g, d, atoi(arg));
+  choose_slot(g, d, static_cast<int>(io::c_atol(arg)));
 }
 
 /* CON_RMOTD: read CR after printing motd */
@@ -1172,8 +1178,9 @@ void nanny(GameWorld *g, struct descriptor_data *d, std::string_view line)
 {
   /* the handlers take a C string, which they may change and lengthen (an email's @ becomes <AT>), as they could the
      input buffer it came from */
-  char arg[MAX_INPUT_LENGTH];
-  std::string_view text = skip_spaces(line).substr(0, sizeof(arg) - 1);
+  std::array<char, MAX_INPUT_LENGTH> buffer;
+  std::string_view text = skip_spaces(line).substr(0, buffer.size() - 1);
+  char *arg = buffer.data();
   text.copy(arg, text.size());
   arg[text.size()] = '\0';
 

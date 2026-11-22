@@ -11,10 +11,6 @@ cd "$root" || exit 1
 allowed='
 libs/dbat/src/net/platform_posix.cpp  the system calls on POSIX, which take and give C buffers
 libs/dbat/src/net/platform_win32.cpp  the system calls on Windows, likewise
-libs/dbat/src/net/nanny.cpp           the login and character creation, the nanny plan'"'"'s to rewrite
-libs/dbat/src/net/chargen.cpp         likewise
-libs/dbat/src/net/accounts.cpp        likewise
-libs/dbat/src/net/nanny_internal.hpp  likewise
 '
 
 calls='(^|[^_.>[:alnum:]])(std::)?(strn?cpy|strn?cat|v?s?n?printf|strdup|strndup|malloc|calloc|realloc|free|atoi|atol|atoll|sscanf|strtok)[[:space:]]*\('

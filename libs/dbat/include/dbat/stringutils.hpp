@@ -44,6 +44,9 @@ int search_block(std::string_view arg, const char *const *list, int exact);
 bool is_number(const char *str);
 bool is_number(std::string_view str);
 bool fill_word(char *argument);
+/* fill_word() and reserved_word() without lowercasing the word in place */
+bool fill_word(std::string_view word);
+bool reserved_word(std::string_view word);
 char *fname(const char *namelist);
 bool reserved_word(char *argument);
 void search_replace(char *string, const char *find, const char *replace);
