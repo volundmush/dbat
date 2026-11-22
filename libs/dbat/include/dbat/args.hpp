@@ -19,5 +19,8 @@ std::string take_quoted(std::string_view &args);
 /* args without its leading whitespace. */
 std::string_view skip_spaces(std::string_view args);
 
-/* True for the filler words take_arg() passes over. */
+/* True for the filler words take_arg() passes over, in any case. */
 bool is_fill_word(std::string_view word);
+
+/* True for the words a name can't be, since commands read them as something else ("all", "self", "room"...), in any case. */
+bool is_reserved_word(std::string_view word);

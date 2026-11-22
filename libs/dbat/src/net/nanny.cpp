@@ -471,8 +471,8 @@ static bool acceptable_name(GameWorld *g, std::string_view typed, std::string &n
   if (!parsed)
     return false;
   name = std::move(*parsed);
-  return name.size() >= 2 && name.size() <= MAX_NAME_LENGTH && Valid_Name(g, name.data()) && !fill_word(name) &&
-         !reserved_word(name);
+  return name.size() >= 2 && name.size() <= MAX_NAME_LENGTH && Valid_Name(g, name.data()) && !is_fill_word(name) &&
+         !is_reserved_word(name);
 }
 
 /* The account's slot names a character with no player file: empty it. */

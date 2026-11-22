@@ -5,6 +5,7 @@
  * test_bad_data         all of them
  * test_bad_data NAME    one of them, here
  */
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -845,6 +846,87 @@ static void check_saved_object_with_a_negative_unique_id(void)
 
 /* ------ parsing ------ */
 
+/* The old char * argument parsers, as they were before args.hpp replaced them: copied here to compare with. */
+static void old_skip_spaces(char **string)
+{
+  for (; **string && isspace(**string); (*string)++);
+}
+
+/* one of the fill words, which one_argument() passed over; a word starting with '!' never was one */
+static bool old_fill_word(const char *word)
+{
+  static const char *const fill[] = {"in", "into", "from", "with", "the", "on", "at", "to"};
+
+  if (*word == '!')
+    return false;
+  for (const char *f : fill)
+    if (!strcmp(word, f))
+      return true;
+  return false;
+}
+
+static char *old_one_argument(char *argument, char *first_arg)
+{
+  char *begin = first_arg;
+
+  do {
+    old_skip_spaces(&argument);
+    first_arg = begin;
+    while (*argument && !isspace(*argument)) {
+      *(first_arg++) = tolower(*argument);
+      argument++;
+    }
+    *first_arg = '\0';
+  } while (old_fill_word(begin));
+  return argument;
+}
+
+static char *old_one_word(char *argument, char *first_arg)
+{
+  old_skip_spaces(&argument);
+  if (*argument == '\"') {
+    argument++;
+    while (*argument && *argument != '\"') {
+      *(first_arg++) = tolower(*argument);
+      argument++;
+    }
+    if (*argument)
+      argument++;
+  } else {
+    while (*argument && !isspace(*argument)) {
+      *(first_arg++) = tolower(*argument);
+      argument++;
+    }
+  }
+  *first_arg = '\0';
+  return argument;
+}
+
+static char *old_any_one_arg(char *argument, char *first_arg)
+{
+  old_skip_spaces(&argument);
+  while (*argument && !isspace(*argument)) {
+    *(first_arg++) = tolower(*argument);
+    argument++;
+  }
+  *first_arg = '\0';
+  return argument;
+}
+
+static char *old_two_arguments(char *argument, char *first_arg, char *second_arg)
+{
+  return old_one_argument(old_one_argument(argument, first_arg), second_arg);
+}
+
+static void old_half_chop(char *string, char *arg1, char *arg2)
+{
+  char *temp = old_any_one_arg(string, arg1);
+
+  old_skip_spaces(&temp);
+  if (arg2 != temp)
+    memmove(arg2, temp, strlen(temp) + 1);
+}
+
 /* The words args.hpp takes off a line are the ones the old char * functions did, and so is what is left. */
 static void check_args_match_the_old_parsers(void)
 {
@@ -890,31 +972,42 @@ static void check_args_match_the_old_parsers(void)
     const char *rest;
 
     snprintf(buf, sizeof(buf), "%s", input.c_str());
-    rest = one_argument(buf, w1);
+    rest = old_one_argument(buf, w1);
     args = input;
     mismatches += take_arg(args) != w1 || args != rest;
 
     snprintf(buf, sizeof(buf), "%s", input.c_str());
-    rest = any_one_arg(buf, w1);
+    rest = old_any_one_arg(buf, w1);
     args = input;
     mismatches += take_word(args) != w1 || args != rest;
 
     snprintf(buf, sizeof(buf), "%s", input.c_str());
-    rest = one_word(buf, w1);
+    rest = old_one_word(buf, w1);
     args = input;
     mismatches += take_quoted(args) != w1 || args != rest;
 
     snprintf(buf, sizeof(buf), "%s", input.c_str());
-    rest = two_arguments(buf, w1, w2);
+    rest = old_two_arguments(buf, w1, w2);
     args = input;
     mismatches += take_arg(args) != w1 || take_arg(args) != w2 || args != rest;
 
     snprintf(buf, sizeof(buf), "%s", input.c_str());
-    half_chop(buf, w1, w2);
+    old_half_chop(buf, w1, w2);
     args = input;
     mismatches += take_word(args) != w1 || skip_spaces(args) != w2;
   }
   CHECK(mismatches == 0);
+}
+
+/* is_abbrev() as it was on C strings: copied here to compare with. */
+static bool old_is_abbrev(const char *arg1, const char *arg2)
+{
+  if (!*arg1)
+    return false;
+  for (; *arg1 && *arg2; arg1++, arg2++)
+    if (tolower(*arg1) != tolower(*arg2))
+      return false;
+  return !*arg1;
 }
 
 /* The name matching the lookups do, as it was before it took std::string_views: copied here to compare with. */
@@ -1021,7 +1114,7 @@ static void check_name_matching_matches_the_old_code(void)
     mismatches += isname(a, b) != old_isname(a.c_str(), b.c_str());
     mismatches += is_name(a, b) != old_is_name(a.c_str(), b.c_str());
     mismatches += isname(a.c_str(), nullptr) || isname(nullptr, b.c_str()) || is_name(a.c_str(), nullptr);
-    mismatches += is_abbrev(std::string_view(a), b) != is_abbrev(a.c_str(), b.c_str());
+    mismatches += is_abbrev(a, b) != old_is_abbrev(a.c_str(), b.c_str());
     mismatches += str_eq_nocase(a, b) != !strcasecmp(a.c_str(), b.c_str());
     mismatches += parse_int(a) != atoi(a.c_str());
     mismatches += is_number(std::string_view(a)) != is_number(a.c_str());

@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <cctype>
 
 #include "dbat/args.hpp"
+#include "dbat/stringutils.hpp"
 
 static bool is_space(char c)
 {
@@ -25,10 +27,14 @@ bool is_fill_word(std::string_view word)
 {
   static constexpr std::string_view fill[] = {"in", "into", "from", "with", "the", "on", "at", "to"};
 
-  for (std::string_view f : fill)
-    if (word == f)
-      return true;
-  return false;
+  return std::ranges::any_of(fill, [word](std::string_view f) { return str_eq_nocase(word, f); });
+}
+
+bool is_reserved_word(std::string_view word)
+{
+  static constexpr std::string_view reserved[] = {"a", "an", "self", "me", "all", "room", "someone", "something"};
+
+  return std::ranges::any_of(reserved, [word](std::string_view r) { return str_eq_nocase(word, r); });
 }
 
 std::string take_word(std::string_view &args)

@@ -76,10 +76,9 @@ void log_backtrace()
   net::process::write_backtrace(log_descriptor());
 }
 
-/* core_dump(): an "impossible" state was reached. Log where, with a backtrace, and keep running. */
-void core_dump_real(const char *who, int line)
+void core_dump(std::source_location where)
 {
-  mud_log("SYSERR: Assertion failed at {}:{:d}!", who, line);
+  mud_log("SYSERR: Assertion failed at {}:{:d}!", where.file_name(), where.line());
   log_backtrace();
 }
 

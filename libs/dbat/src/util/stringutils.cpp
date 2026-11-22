@@ -5,6 +5,8 @@
 #include <cstdlib>
 
 #include "dbat/stringutils.hpp"
+#include "dbat/args.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/log.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -115,16 +117,7 @@ char *CAP(char *txt)
   return (txt);
 }
 
-/* Strips \r\n from end of string.  */
 /* Removes the line endings from the end of txt. */
-void prune_crlf(char *txt)
-{
-  size_t n = strlen(txt);
-
-  while (n > 0 && (txt[n - 1] == '\n' || txt[n - 1] == '\r'))
-    txt[--n] = '\0';
-}
-
 void prune_crlf(std::string &txt)
 {
   while (!txt.empty() && (txt.back() == '\n' || txt.back() == '\r'))
@@ -150,37 +143,8 @@ char *one_argument(char *argument, char *first_arg)
     }
 
     *first_arg = '\0';
-  } while (fill_word(begin));
+  } while (is_fill_word(begin));
 
-  return (argument);
-}
-
-/*
- * one_word is like any_one_arg, except that words in quotes ("") are
- * considered one word.
- *
- * No longer ignores fill words.  -dak, 6 Jan 2003.
- */
-char *one_word(char *argument, char *first_arg)
-{
-  skip_spaces(&argument);
-
-  if (*argument == '\"') {
-    argument++;
-    while (*argument && *argument != '\"') {
-      *(first_arg++) = tolower(*argument);
-      argument++;
-    }
-    if (*argument) /* the closing quote, if the word has one */
-      argument++;
-  } else {
-    while (*argument && !isspace(*argument)) {
-      *(first_arg++) = tolower(*argument);
-      argument++;
-    }
-  }
-
-  *first_arg = '\0';
   return (argument);
 }
 
@@ -197,49 +161,6 @@ char *any_one_arg(char *argument, char *first_arg)
   *first_arg = '\0';
 
   return (argument);
-}
-
-/*
- * Same as one_argument except that it takes two args and returns the rest;
- * ignores fill words
- */
-char *two_arguments(char *argument, char *first_arg, char *second_arg)
-{
-  return (one_argument(one_argument(argument, first_arg), second_arg)); /* :-) */
-}
-
-/*
- * Same as two_arguments only, well you get the idea... - Iovan
- *
- */
-bool is_abbrev(const char *arg1, const char *arg2)
-{
-  if (!*arg1)
-    return false;
-
-  for (; *arg1 && *arg2; arg1++, arg2++)
-    if (tolower(*arg1) != tolower(*arg2))
-      return false;
-
-  if (!*arg1)
-    return true;
-  else
-    return false;
-}
-
-/*
- * Return first space-delimited token in arg1; remainder of string in arg2.
- *
- * NOTE: Requires sizeof(arg2) >= sizeof(string)
- */
-void half_chop(char *string, char *arg1, char *arg2)
-{
-  char *temp;
-
-  temp = any_one_arg(string, arg1);
-  skip_spaces(&temp);
-  if (arg2 != temp)
-    memmove(arg2, temp, strlen(temp) + 1); /* arg2 may overlap string (half_chop(buf, word, buf)) */
 }
 
 void skip_spaces(char **string)
@@ -269,27 +190,6 @@ void delete_doubledollar(std::string &s)
       i++; /* skip the second of 2 $'s in a row */
   }
   s = std::move(out);
-}
-
-char *delete_doubledollar(char *string)
-{
-  char *ddread, *ddwrite;
-
-  /* If the string has no dollar signs, return immediately */
-  if ((ddwrite = strchr(string, '$')) == nullptr)
-    return (string);
-
-  /* Start from the location of the first dollar sign */
-  ddread = ddwrite;
-
-  while (*ddread)                            /* Until we reach the end of the string... */
-    if ((*(ddwrite++) = *(ddread++)) == '$') /* copy one char */
-      if (*ddread == '$')
-        ddread++; /* skip if we saw 2 $'s in a row */
-
-  *ddwrite = '\0';
-
-  return (string);
 }
 
 /*
@@ -339,44 +239,6 @@ bool is_number(const char *str)
 
   return true;
 }
-
-static const char *const fill[] =
-    {
-        "in",
-        "into",
-        "from",
-        "with",
-        "the",
-        "on",
-        "at",
-        "to",
-        "\n"};
-
-bool fill_word(char *argument)
-{
-  return (search_block(argument, fill, true) >= 0);
-}
-
-static const char *const reserved[] =
-    {
-        "a",
-        "an",
-        "self",
-        "me",
-        "all",
-        "room",
-        "someone",
-        "something",
-        "\n"};
-
-bool reserved_word(char *argument)
-{
-  return (search_block(argument, reserved, true) >= 0);
-}
-
-bool fill_word(std::string_view word) { return search_block(word, fill, true) >= 0; }
-
-bool reserved_word(std::string_view word) { return search_block(word, reserved, true) >= 0; }
 
 char *fname(const char *namelist)
 {
@@ -430,16 +292,6 @@ char *str_alloc(size_t n)
   return s;
 }
 
-char *str_realloc(char *s, size_t n)
-{
-  char *grown = static_cast<char *>(realloc(s, n));
-  if (!grown) {
-    perror("SYSERR: str_realloc");
-    abort();
-  }
-  return grown;
-}
-
 std::string &CAP(std::string &txt)
 {
   size_t i = 0;
@@ -474,25 +326,7 @@ bool is_abbrev(std::string_view arg1, std::string_view arg2)
   return !arg1.empty() && arg1.size() <= arg2.size() && str_eq_nocase(arg1, arg2.substr(0, arg1.size()));
 }
 
-int parse_int(std::string_view s)
-{
-  size_t i = 0;
-  while (i < s.size() && isspace((unsigned char)s[i]))
-    i++;
-  bool neg = false;
-  if (i < s.size() && (s[i] == '+' || s[i] == '-'))
-    neg = s[i++] == '-';
-
-  /* strtol()'s reading: past the range it stops at LONG_MAX or LONG_MIN; atoi() then keeps the low bits */
-  const unsigned long limit = neg ? (unsigned long)LONG_MAX + 1 : (unsigned long)LONG_MAX;
-  unsigned long v           = 0;
-  for (; i < s.size() && isdigit((unsigned char)s[i]); i++) {
-    unsigned long d = s[i] - '0';
-    v               = v > (limit - d) / 10 ? limit : v * 10 + d;
-  }
-  long r = neg ? (v == limit ? LONG_MIN : -(long)v) : (long)v;
-  return (int)r;
-}
+int parse_int(std::string_view s) { return static_cast<int>(io::c_atol(s)); }
 
 int search_block(std::string_view arg, const char *const *list, int exact)
 {

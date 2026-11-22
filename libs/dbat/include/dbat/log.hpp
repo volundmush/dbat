@@ -1,6 +1,6 @@
 #pragma once
-#include <cstdarg>
 #include <cstdio>
+#include <source_location>
 #include <string_view>
 
 #include "dbat/format.hpp"
@@ -12,12 +12,12 @@ enum log_level { LOG_OFF = 0,
                  LOG_NRM = 2,
                  LOG_CMP = 3 };
 
-void core_dump_real(const char *who, int line);
+/* An "impossible" state was reached: log where it was called from, with a backtrace, and keep running */
+void core_dump(std::source_location where = std::source_location::current());
 /* Writes the call stack to the log, even from a signal handler */
 void log_backtrace();
 /* The log's file descriptor (stderr's until there is a log), for a signal handler to write to */
 int log_descriptor();
-#define core_dump() core_dump_real(__FILE__, __LINE__)
 
 #define CIRCLEMUD_VERSION(major, minor, patchlevel) \
   (((major) << 16) + ((minor) << 8) + (patchlevel))
