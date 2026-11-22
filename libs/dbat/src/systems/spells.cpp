@@ -484,7 +484,7 @@ ASPELL(art_abundant_step)
       j      = i;
       tc     = buf[i];
       buf[i] = 0;
-      for (i = 1; g->complete_cmd_info[i].command_pointer == do_move && strcmp(g->complete_cmd_info[i].sort_as, buf); i++);
+      for (i = 1; g->complete_cmd_info[i].command_pointer == do_move && g->complete_cmd_info[i].sort_as != buf; i++);
       if (g->complete_cmd_info[i].command_pointer == do_move) {
         i = g->complete_cmd_info[i].subcmd - 1;
       } else

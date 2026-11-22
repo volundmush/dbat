@@ -626,17 +626,17 @@ const struct command_info cmd_info[] = {
 }; /* this must be last */
 
 /* What a character can still do while held fast (petrified, frozen, paralysed or liquefied). */
-static bool allowed_while_restrained(const char *cmd, bool liquefied)
+static bool allowed_while_restrained(std::string_view cmd, bool liquefied)
 {
-  static const char *const always[]        = {"look", "score", "ooc", "osay", "emote", "smote", "status"};
-  static const char *const liquefied_too[] = {"liquefy", "ingest"};
-  auto is_cmd                              = [&](const char *c) { return !strcasecmp(cmd, c); };
+  static constexpr std::string_view always[]        = {"look", "score", "ooc", "osay", "emote", "smote", "status"};
+  static constexpr std::string_view liquefied_too[] = {"liquefy", "ingest"};
+  auto is_cmd                                       = [&](std::string_view c) { return str_eq_nocase(cmd, c); };
 
   return std::ranges::any_of(always, is_cmd) || (liquefied && std::ranges::any_of(liquefied_too, is_cmd));
 }
 
 /* False (after telling them why) if ch's condition stops them running cmd. */
-static bool command_pass(GameWorld *g, const char *cmd, struct char_data *ch)
+static bool command_pass(GameWorld *g, std::string_view cmd, struct char_data *ch)
 {
   bool liquefied = char_aff_flagged(ch, AFF_LIQUEFIED);
   const char *held = liquefied                                ? "liquefied"
@@ -763,14 +763,14 @@ void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view ar
     if (!cont && !char_is_dead(ch)) cont = command_otrigger(g, ch, arg, line); /* any object triggers ? */
     if (cont || char_is_dead(ch)) return; /* yes, command trigger took over, or forced them away */
   }
-  for (length = strlen(arg), cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++) {
-    if (!strncmp(g->complete_cmd_info[cmd].command, arg, length))
+  for (cmd = 0; g->complete_cmd_info[cmd].command != "\n"; cmd++) {
+    if (g->complete_cmd_info[cmd].command.starts_with(arg))
       if (char_get_level(ch) >= g->complete_cmd_info[cmd].minimum_level &&
           char_get_admlevel(ch) >= g->complete_cmd_info[cmd].minimum_admlevel)
         break;
   }
 
-  if (*g->complete_cmd_info[cmd].command == '\n') {
+  if (g->complete_cmd_info[cmd].command == "\n") {
     send_to_char(g, ch, "Huh!?!\r\n");
     return;
   }
@@ -808,11 +808,11 @@ struct alias_data *find_alias(std::list<alias_data> &aliases, std::string_view s
 }
 
 /* Used in specprocs, mostly.  (Exactly) matches "command" to cmd number */
-int find_command(GameWorld *g, const char *command)
+int find_command(GameWorld *g, std::string_view command)
 {
   int cmd;
-  for (cmd = 0; *g->complete_cmd_info[cmd].command != '\n'; cmd++)
-    if (!strcmp(g->complete_cmd_info[cmd].command, command))
+  for (cmd = 0; g->complete_cmd_info[cmd].command != "\n"; cmd++)
+    if (g->complete_cmd_info[cmd].command == command)
       return (cmd);
   return (-1);
 }

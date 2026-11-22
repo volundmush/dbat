@@ -77,13 +77,13 @@ io::loaded<void> Read_Invalid_List(GameWorld *g)
     return {};
   }
 
-  g->num_invalid = 0;
+  g->invalid_list.clear();
   while (std::optional<std::string_view> line = file->line()) {
-    if (g->num_invalid >= MAX_INVALID_NAMES)
+    if (g->invalid_list.size() >= MAX_INVALID_NAMES)
       return std::unexpected(file->fail("too many invalid names; change MAX_INVALID_NAMES in ban.hpp"));
-    g->invalid_list[g->num_invalid++] = strdup(std::string(*line).c_str());
+    g->invalid_list.emplace_back(*line);
   }
-  if (g->num_invalid >= MAX_INVALID_NAMES) /* quirk: a full list is too many, as the old reader found */
+  if (g->invalid_list.size() >= MAX_INVALID_NAMES) /* quirk: a full list is too many, as the old reader found */
     return std::unexpected(file->fail("too many invalid names; change MAX_INVALID_NAMES in ban.hpp"));
   return {};
 }

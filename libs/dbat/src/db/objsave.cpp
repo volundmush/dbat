@@ -252,7 +252,7 @@ bool Crash_delete_crashfile(struct char_data *ch)
   return true;
 }
 
-static bool Crash_clean_file(GameWorld *g, char *name)
+static bool Crash_clean_file(GameWorld *g, const char *name)
 {
   std::optional<io::text_reader> file = open_rent_file(name, "OPENING OBJECT FILE", 4);
   if (!file)
@@ -282,8 +282,8 @@ void update_obj_file(GameWorld *g)
   int i;
 
   for (i = 0; i <= g->top_of_p_table; i++)
-    if (*g->player_table[i].name)
-      Crash_clean_file(g, g->player_table[i].name);
+    if (!g->player_table[i].name.empty())
+      Crash_clean_file(g, g->player_table[i].name.c_str());
 }
 
 void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)

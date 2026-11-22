@@ -17,7 +17,6 @@
  */
 #include <algorithm>
 #include <cctype>
-#include <cstring>
 #include <optional>
 #include <span>
 #include <string>
@@ -36,7 +35,7 @@
 namespace {
 
 /* A social's messages in the order the file has them; the old form has the first 8 */
-constexpr char *social_messg::*messages[] = {
+constexpr social_message social_messg::*messages[] = {
     &social_messg::char_no_arg,     &social_messg::others_no_arg,     &social_messg::char_found,
     &social_messg::others_found,    &social_messg::vict_found,        &social_messg::not_found,
     &social_messg::char_auto,       &social_messg::others_auto,       &social_messg::char_body_found,
@@ -97,7 +96,7 @@ public:
   }
   /* A message by fread_action()'s rules: the rest of the line, or nothing for "#"; an error at the end of the
      file, or on its last line if that has no line end */
-  io::loaded<char *> message(int social)
+  io::loaded<social_message> message(int social)
   {
     std::string_view rest = this->rest();
     std::string_view piece = io::fgets_piece(rest, fgets_buffer);
@@ -105,8 +104,8 @@ public:
     if (piece.empty() || (piece.back() != '\n' && piece.size() < fgets_buffer - 1))
       return std::unexpected(fail(str_format("the file ends in social #{:d}'s messages", social)));
     if (piece.starts_with('#'))
-      return nullptr;
-    return strdup(std::string(io::chopped_piece(piece)).c_str());
+      return std::nullopt;
+    return std::string(io::chopped_piece(piece));
   }
 
   io::load_error fail(std::string message) const
@@ -161,14 +160,14 @@ io::loaded<void> read_socials(GameWorld *g)
       int *numbers[] = {&hide, &min_char_pos, &min_pos, &min_lvl};
       if (in.fields(&sort_as, numbers) != 5)
         return std::unexpected(in.fail(str_format("format error in the social near '{}'", word)));
-      social.command = strdup(word.c_str() + 1); /* quirk: whatever its first character is */
-      social.sort_as = strdup(sort_as.c_str());
+      social.command = std::string_view(word).substr(word.empty() ? 0 : 1); /* quirk: whatever its first character is */
+      social.sort_as = sort_as;
     } else {
       int *numbers[] = {&hide, &min_pos};
       if (in.fields(nullptr, numbers) != 2)
         return std::unexpected(in.fail(str_format("format error in the social near '{}'", word)));
-      social.command = strdup(word.c_str());
-      social.sort_as = strdup(word.c_str());
+      social.command = word;
+      social.sort_as = word;
     }
     social.hide                = hide;
     social.min_char_position   = min_char_pos;
@@ -176,16 +175,16 @@ io::loaded<void> read_socials(GameWorld *g)
     social.min_level_char      = min_lvl;
 
     curr_soc++;
-    g->soc_mess_list[curr_soc] = social;
+    g->soc_mess_list[curr_soc] = std::move(social);
     social_messg &stored       = g->soc_mess_list[curr_soc];
     int count                  = new_form ? static_cast<int>(std::size(messages)) : old_form_messages;
     for (int i = 0; i < count; i++) {
-      io::loaded<char *> message = in.message(curr_soc);
+      io::loaded<social_message> message = in.message(curr_soc);
       if (!message)
         return std::unexpected(message.error());
-      stored.*messages[i] = *message;
+      stored.*messages[i] = std::move(*message);
       /* the old form: with no message for a victim found, the rest are left out */
-      if (!new_form && messages[i] == &social_messg::char_found && !*message)
+      if (!new_form && messages[i] == &social_messg::char_found && !(stored.*messages[i]))
         break;
     }
   }
@@ -200,8 +199,8 @@ bool save_socials(GameWorld *g)
     const social_messg &social = g->soc_mess_list[i];
     out.print("~{} {} {:d} {:d} {:d} {:d}\n", social.command, social.sort_as, social.hide, social.min_char_position,
               social.min_victim_position, social.min_level_char);
-    for (char *social_messg::*message : messages)
-      out.print("{}\n", social.*message ? social.*message : "#");
+    for (social_message social_messg::*message : messages)
+      out.print("{}\n", (social.*message).value_or("#"));
     out.write("\n");
   }
   out.write("$\n");

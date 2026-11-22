@@ -32,10 +32,10 @@ void topLoad(GameWorld *g)
     io::fields f(*line);
     if (f.word(name, 49) && f.number(points))
       g->toppoint[x] = points;
-    g->topname[x] = strdup(name.c_str());
+    g->topname[x] = std::move(name);
   }
   for (; x < 25; x++)
-    g->topname[x] = strdup("");
+    g->topname[x].clear();
 }
 
 void save_toplist(GameWorld *g)

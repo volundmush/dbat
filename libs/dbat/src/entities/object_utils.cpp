@@ -628,12 +628,12 @@ void obj_set_curBidder(struct obj_data *obj, int32_t v)
   obj->curBidder = v;
 }
 
-char *obj_get_auctname(const struct obj_data *obj)
+std::string_view obj_get_auctname(const struct obj_data *obj)
 {
   return obj->auctname;
 }
 
-void obj_set_auctname(struct obj_data *obj, char *v)
+void obj_set_auctname(struct obj_data *obj, std::string_view v)
 {
   obj->auctname = v;
 }

@@ -97,25 +97,36 @@ ACMD(do_weather)
     send_to_char(g, ch, "You have no feeling about the weather at all.\r\n");
 }
 
-int search_help(GameWorld *g, const char *argument, int level)
+/* How argument compares with the start of keywords, ignoring case, as strncasecmp() over argument's length did */
+static int compare_start_nocase(std::string_view argument, std::string_view keywords)
 {
-  int chk, bot, top, mid, minlen;
+  for (size_t i = 0; i < argument.size(); i++) {
+    int a = tolower(static_cast<unsigned char>(argument[i]));
+    int k = i < keywords.size() ? tolower(static_cast<unsigned char>(keywords[i])) : 0;
+    if (a != k)
+      return a - k;
+  }
+  return 0;
+}
 
-  bot    = 0;
-  top    = (int)g->help_table.size() - 1;
-  minlen = strlen(argument);
+int search_help(GameWorld *g, std::string_view argument, int level)
+{
+  int chk, bot, top, mid;
+
+  bot = 0;
+  top = (int)g->help_table.size() - 1;
 
   while (bot <= top) {
     mid = (bot + top) / 2;
 
-    if (!(chk = strncasecmp(argument, g->help_table[mid].keywords.c_str(), minlen))) {
-      while ((mid > 0) && !strncasecmp(argument, g->help_table[mid - 1].keywords.c_str(), minlen))
+    if (!(chk = compare_start_nocase(argument, g->help_table[mid].keywords))) {
+      while ((mid > 0) && !compare_start_nocase(argument, g->help_table[mid - 1].keywords))
         mid--;
 
       while (level < g->help_table[mid].min_level && mid < (bot + top) / 2)
         mid++;
 
-      if (strncasecmp(argument, g->help_table[mid].keywords.c_str(), minlen))
+      if (compare_start_nocase(argument, g->help_table[mid].keywords))
         break;
 
       return mid;
@@ -314,15 +325,14 @@ ACMD(do_toggle)
 static int sort_commands_helper(const void *a, const void *b, void *world)
 {
   GameWorld *g = static_cast<GameWorld *>(world);
-  return strcmp(g->complete_cmd_info[*(const int *)a].sort_as,
-                g->complete_cmd_info[*(const int *)b].sort_as);
+  return g->complete_cmd_info[*(const int *)a].sort_as.compare(g->complete_cmd_info[*(const int *)b].sort_as);
 }
 
 void sort_commands(GameWorld *g)
 {
   int a, num_of_cmds = 0;
 
-  while (g->complete_cmd_info[num_of_cmds].command[0] != '\n')
+  while (g->complete_cmd_info[num_of_cmds].command != "\n")
     num_of_cmds++;
   num_of_cmds++; /* \n */
 

@@ -328,7 +328,7 @@ int main(int argc, char **argv)
   }
 
   for (int c = 1; g->complete_cmd_info[c].command[0] != '\n'; c++) {
-    const char *command = g->complete_cmd_info[c].command;
+    const char *command = th_text(g->complete_cmd_info[c].command);
 
     if (is_skipped(command) || !strcmp(command, "RESERVED") || (only && strcmp(only, command)) || c % shards != shard)
       continue;

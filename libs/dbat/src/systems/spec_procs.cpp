@@ -320,7 +320,7 @@ SPECIAL(auction)
           vict = new char_data();
           clear_char(vict);
           char_make_player_specials(vict);
-          std::string blam = str_format("{}", obj_get_auctname(obj2));
+          std::string blam(obj_get_auctname(obj2));
           if ((player_i = load_char(g, blam.c_str(), vict)) > -1) {
             is_file = true;
           } else {
@@ -379,14 +379,12 @@ SPECIAL(auction)
     obj_set_bid(obj2, value);
     obj_set_startbid(obj2, 0);
     obj_set_aucter(obj2, 0);
-    if (obj_get_auctname(obj2))
-      free(obj_get_auctname(obj2));
     obj_set_aucTime(obj2, 0);
 
     obj_set_bid(obj2, value);
     obj_set_startbid(obj2, obj_get_bid(obj2));
     obj_set_aucter(obj2, char_get_id(ch));
-    obj_set_auctname(obj2, strdup(char_get_name(ch)));
+    obj_set_auctname(obj2, char_get_name(ch));
     obj_set_aucTime(obj2, game_now(g));
     obj_set_curBidder(obj2, -1);
     obj_from_char(g, obj2);

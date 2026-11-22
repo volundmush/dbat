@@ -371,7 +371,7 @@ static void game_loop(GameWorld *g)
       mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "Received SIGUSR2 - completely unrestricting game (emergent)");
       free_ban_list(g);
       g->circle_restrict = 0;
-      g->num_invalid     = 0;
+      g->invalid_list.clear();
     }
 
     /* Update tics for deadlock protection */

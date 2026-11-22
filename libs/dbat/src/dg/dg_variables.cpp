@@ -146,9 +146,9 @@ const struct {
        return at > len || at < 1 ? std::string() : std::string(1, text[at - 1]);
      }},
     {"mudcommand", [](const std::string &text, const std::string &) { /* the command the text is the start of */
-       size_t length = strlen(text.c_str());
-       for (int cmd = 0; *cmd_info[cmd].command != '\n'; cmd++)
-         if (!strncmp(cmd_info[cmd].command, text.c_str(), length))
+       std::string_view start = text.c_str(); /* up to a '\0', as strncmp() read it */
+       for (int cmd = 0; cmd_info[cmd].command != "\n"; cmd++)
+         if (cmd_info[cmd].command.starts_with(start))
            return std::string(cmd_info[cmd].command);
        return std::string();
      }},

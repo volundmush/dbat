@@ -2,8 +2,10 @@
  * The functions below this point is handling the context sensitive help system
  * If you add more olc options, be sure to add a case for it here. - Welcor
  */
+#include <algorithm>
 #include <cstdlib>
 #include <cerrno>
+#include <string_view>
 
 #include "dbat/descriptor_utils.hpp"
 #include "dbat/context_help.hpp"
@@ -22,7 +24,7 @@
 #include "dbat/game_world.hpp"
 
 
-static const char NO_HELP[]        = "No help available (yet)!\r\n";
+constexpr std::string_view NO_HELP = "No help available (yet)!\r\n";
 constexpr int FIND_HELP_CHAR = '*';
 
 bool context_help(GameWorld *g, struct descriptor_data *d, std::string_view arg)
@@ -41,7 +43,7 @@ bool context_help(GameWorld *g, struct descriptor_data *d, std::string_view arg)
   if (topic.empty())
     context = d->olc ? d->olc->help_context(d) : NOTHING;
 
-  if (context != NOTHING && context < NUM_CONTEXTS && *g->context_help_list[context]) {
+  if (context != NOTHING && context < NUM_CONTEXTS && !g->context_help_list[context].empty()) {
     std::string_view help = g->context_help_list[context];
     if (help.front() == FIND_HELP_CHAR)
       do_help(g, d->character, help.substr(1, most), 0, 0);
@@ -57,8 +59,7 @@ bool context_help(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 void boot_context_help(GameWorld *g)
 {
   /* init to 'no help' string */
-  for (int i = 0; i < NUM_CONTEXTS; i++)
-    g->context_help_list[i] = const_cast<char *>(NO_HELP); /* never freed: see below */
+  std::ranges::fill(g->context_help_list, NO_HELP);
 
   io::loaded<io::text_reader> file = io::text_reader::open(CONTEXT_HELP_FILE);
   if (!file) {
@@ -77,17 +78,6 @@ void boot_context_help(GameWorld *g)
     /* an empty one is no help, as it was (it was a null, which showing it would crash on) */
     if (text->empty())
       continue;
-    if (g->context_help_list[num] != NO_HELP)
-      free(g->context_help_list[num]);
-    g->context_help_list[num] = strdup(text->c_str());
+    g->context_help_list[num] = std::move(*text);
   }
-}
-
-void free_context_help(GameWorld *g)
-{
-  int i;
-
-  for (i = 0; i < NUM_CONTEXTS; i++)
-    if (g->context_help_list[i] && g->context_help_list[i] != NO_HELP)
-      free(g->context_help_list[i]);
 }

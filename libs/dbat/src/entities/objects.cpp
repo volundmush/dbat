@@ -295,11 +295,6 @@ void free_obj(GameWorld *g, struct obj_data *obj)
   remove_unique_id(g, obj);
   /* its strings, extra descriptions and trigger list go with it */
 
-  /* Let's make sure that we free up this memory */
-  if (obj_get_auctname(obj)) {
-    free(obj_get_auctname(obj));
-  }
-
   /* free any assigned scripts */
   if (obj_get_script(obj))
     extract_script(g, obj);

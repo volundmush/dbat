@@ -4,8 +4,9 @@
  * Copyright 1996 Harvey Gilpin                                         *
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)             *
  ************************************************************************/
+#include <algorithm>
 #include <cstdlib>
-#include <cstring>
+#include <string_view>
 
 #include "dbat/aedit.hpp"
 #include "dbat/act.informative.hpp"
@@ -32,7 +33,7 @@ namespace {
     char key;
     const char *label;  /* as the menu shows it, before the ": " */
     const char *prompt; /* asking for a new one, before the old one is shown */
-    char *social_messg::*text;
+    social_message social_messg::*text;
   };
 
   constexpr message_row MESSAGES[] = {
@@ -52,10 +53,10 @@ namespace {
   };
 
   /* The command (other than a social) the text names, by abbreviating what it's sorted as or being it; -1 for none */
-  int find_named_command(GameWorld *g, const char *txt)
+  int find_named_command(GameWorld *g, std::string_view txt)
   {
-    for (int cmd = 1; *g->complete_cmd_info[cmd].command != '\n'; cmd++)
-      if (!strncmp(g->complete_cmd_info[cmd].sort_as, txt, strlen(txt)) || !strcmp(g->complete_cmd_info[cmd].command, txt))
+    for (int cmd = 1; g->complete_cmd_info[cmd].command != "\n"; cmd++)
+      if (g->complete_cmd_info[cmd].sort_as.starts_with(txt) || g->complete_cmd_info[cmd].command == txt)
         return cmd;
     return -1;
   }
@@ -66,8 +67,6 @@ namespace {
       remove_from_save_list(g, AEDIT_PERMISSION, SL_ACT);
   }
 
-  char *copy_or_null(const char *text) { return text ? strdup(text) : nullptr; }
-
   /* The social editor: one social, found by what it abbreviates or new */
   struct social_editor final : olc_session {
     enum class mode { confirm_save, confirm_edit, confirm_add, main_menu, name, sort_as, min_char_pos, min_vict_pos, min_level, message };
@@ -75,12 +74,11 @@ namespace {
     mode asking = mode::confirm_edit;
     std::string keyword;          /* what the builder asked to edit */
     int index = 0;                /* the social in g->soc_mess_list, or past its end for a new one */
-    social_messg action{};        /* the social as it's being edited, owning its strings */
+    social_messg action{};        /* the social as it's being edited */
     const message_row *message{}; /* the message being asked for */
     bool changed = false;
 
     explicit social_editor(std::string_view asked) : keyword(asked) {}
-    ~social_editor() override { free_action(&action); }
 
     void parse(GameWorld *g, struct descriptor_data *d, std::string_view line) override;
     void log_leaving(GameWorld *g, struct descriptor_data *d) const override
@@ -102,7 +100,7 @@ namespace {
   {
     std::string messages;
     for (const message_row &row : MESSAGES)
-      messages += str_format("@g{:c}@n) {}: @c{}\r\n", row.key, row.label, action.*row.text ? action.*row.text : "<Null>");
+      messages += str_format("@g{:c}@n) {}: @c{}\r\n", row.key, row.label, (action.*row.text).value_or("<Null>"));
     write_to_output(g, d,
                     "@n-- Action editor\r\n@gn@n) Command         : @y{:<15.15}@n @g1@n) Sort as Command  : @y{:<15.15}@n\r\n@g2@n) Min Position[CH]: @c{:<8.8}        @g3@n) Min Position [VT]: @c{:<8.8}\r\n@g4@n) Min Level   [CH]: @c{:<3d}             @g5@n) Show if Invisible: @c{}\r\n{}@gq@n) Quit\r\nEnter Choice:",
                     action.command, action.sort_as, position_types[action.min_char_position], position_types[action.min_victim_position],
@@ -114,7 +112,7 @@ namespace {
   bool social_editor::find_from(GameWorld *g, int first)
   {
     for (index = first; index <= g->top_of_socialt; index++)
-      if (is_abbrev(keyword.c_str(), g->soc_mess_list[index].command))
+      if (is_abbrev(keyword, g->soc_mess_list[index].command))
         return true;
     return false;
   }
@@ -133,40 +131,31 @@ namespace {
 
   void social_editor::setup_existing(GameWorld *g)
   {
-    const social_messg &from   = g->soc_mess_list[index];
-    action.command             = strdup(from.command);
-    action.sort_as             = strdup(from.sort_as);
-    action.hide                = from.hide;
-    action.min_victim_position = from.min_victim_position;
-    action.min_char_position   = from.min_char_position;
-    action.min_level_char      = from.min_level_char;
-    for (const message_row &row : MESSAGES)
-      action.*row.text = copy_or_null(from.*row.text);
+    action = g->soc_mess_list[index];
   }
 
   void social_editor::setup_new()
   {
-    action.command             = strdup(keyword.c_str());
-    action.sort_as             = strdup(keyword.c_str());
+    action.command             = keyword;
+    action.sort_as             = keyword;
     action.min_victim_position = POS_STANDING;
     action.min_char_position   = POS_STANDING;
-    action.char_no_arg         = strdup("This action is unfinished.");
-    action.others_no_arg       = strdup("This action is unfinished.");
+    action.char_no_arg         = "This action is unfinished.";
+    action.others_no_arg       = "This action is unfinished.";
   }
 
-  /* Puts the social into the table, which takes its strings, and writes the socials out */
+  /* Puts the social into the table and writes the socials out */
   void social_editor::save(GameWorld *g)
   {
     if (index > g->top_of_socialt) {
       auto *grown = new social_messg[g->top_of_socialt + 2]();
-      std::copy_n(g->soc_mess_list, g->top_of_socialt + 1, grown);
-      grown[++g->top_of_socialt] = action;
+      std::move(g->soc_mess_list, g->soc_mess_list + g->top_of_socialt + 1, grown);
+      grown[++g->top_of_socialt] = std::move(action);
       delete[] g->soc_mess_list;
       g->soc_mess_list = grown;
     } else {
-      action.act_nr = g->soc_mess_list[index].act_nr;
-      free_action(g->soc_mess_list + index);
-      g->soc_mess_list[index] = action;
+      action.act_nr           = g->soc_mess_list[index].act_nr;
+      g->soc_mess_list[index] = std::move(action);
     }
     action = {}; /* the table's now */
 
@@ -226,7 +215,7 @@ namespace {
             return;
           case 'n':
           case 'N':
-            if (!find_from(g, index + 1) && find_named_command(g, keyword.c_str()) != -1) {
+            if (!find_from(g, index + 1) && find_named_command(g, keyword) != -1) {
               leave_olc(g, d);
               return;
             }
@@ -291,7 +280,7 @@ namespace {
             return;
           default:
             if (auto row = std::ranges::find(MESSAGES, tolower(answer), &message_row::key); answer && row != std::end(MESSAGES)) {
-              write_to_output(g, d, "{}\r\n[OLD]: {}\r\n[NEW]: ", row->prompt, action.*row->text ? action.*row->text : "NULL");
+              write_to_output(g, d, "{}\r\n[OLD]: {}\r\n[NEW]: ", row->prompt, (action.*row->text).value_or("NULL"));
               message = row;
               asking  = mode::message;
               return;
@@ -307,11 +296,9 @@ namespace {
           return;
         }
         if (asking == mode::name) {
-          free(action.command);
-          action.command = strdup(text.c_str());
+          action.command = text;
         } else {
-          free(action.sort_as);
-          action.sort_as = strdup(text.c_str());
+          action.sort_as = text;
         }
         break;
 
@@ -337,12 +324,11 @@ namespace {
       }
 
       case mode::message:
-        free(action.*message->text);
         if (!text.empty()) {
           delete_doubledollar(text);
-          action.*message->text = strdup(text.c_str());
+          action.*message->text = text;
         } else
-          action.*message->text = nullptr;
+          (action.*message->text).reset();
         break;
     }
     changed = true;
@@ -389,7 +375,7 @@ ACMD(do_oasis_aedit)
   social_editor &editor = session_of<social_editor>(d);
 
   if (!editor.find_from(g, 0)) {
-    if (int i = find_named_command(g, arg.c_str()); i != -1) {
+    if (int i = find_named_command(g, arg); i != -1) {
       send_to_char(g, ch, "The '{}' command already exists ({}).\r\n", arg, g->complete_cmd_info[i].command);
       leave_olc(g, d);
       return;
@@ -423,7 +409,7 @@ ACMD(do_astat)
   const social_messg &social = g->soc_mess_list[i];
   std::string messages;
   for (const message_row &row : MESSAGES)
-    messages += str_format("{:c}) {}: @c{}@n\r\n", row.key, row.label, social.*row.text ? social.*row.text : "");
+    messages += str_format("{:c}) {}: @c{}@n\r\n", row.key, row.label, message_text(social.*row.text));
   send_to_char(g, ch,
                "n) Command         : @y{:<15.15}@n 1) Sort as Command : @y{:<15.15}@n\r\n2) Min Position[CH]: @c{:<8.8}@n        3) Min Position[VT]: @c{:<8.8}@n\r\n4) Min Level   [CH]: @c{:<3d}@n             5) Show if Invis   : @c{}@n\r\n{}",
                social.command, social.sort_as, position_types[social.min_char_position], position_types[social.min_victim_position],

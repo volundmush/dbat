@@ -213,7 +213,7 @@ bool Valid_Name(GameWorld *g, char *newname)
     return false;
 
   /* return valid if list doesn't exist */
-  if (g->num_invalid < 1)
+  if (g->invalid_list.empty())
     return true;
 
   /* change to lowercase */
@@ -222,21 +222,12 @@ bool Valid_Name(GameWorld *g, char *newname)
     tempname[i] = tolower(tempname[i]);
 
   /* Does the desired name contain a string in the invalid list? */
-  for (i = 0; i < g->num_invalid; i++)
-    if (strstr(tempname, g->invalid_list[i]))
-      return false;
-
-  return true;
+  return std::ranges::none_of(g->invalid_list, [&](const std::string &part) { return std::string_view(tempname).contains(part); });
 }
 
 /* What's with the wacky capitalization in here? */
 void Free_Invalid_List(GameWorld *g)
 {
-  int invl;
-
-  for (invl = 0; invl < g->num_invalid; invl++)
-    free(g->invalid_list[invl]);
-
-  g->num_invalid = 0;
+  g->invalid_list.clear();
 }
 

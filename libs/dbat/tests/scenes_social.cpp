@@ -13,16 +13,16 @@ namespace {
   /* ... nod made into a social of body parts too */
   void bodily(GameWorld *g)
   {
-    nod(g)->char_body_found   = strdup("You nod at $N's $t.");
-    nod(g)->others_body_found = strdup("$n nods at $N's $t.");
-    nod(g)->vict_body_found   = strdup("$n nods at your $t.");
+    th_set_text(nod(g)->char_body_found, "You nod at $N's $t.");
+    th_set_text(nod(g)->others_body_found, "$n nods at $N's $t.");
+    th_set_text(nod(g)->vict_body_found, "$n nods at your $t.");
   }
 
   /* ... nod with this message gone */
-  void without(GameWorld *g, char *social_messg::*text)
+  template <class T>
+  void without(GameWorld *g, T social_messg::*text)
   {
-    free(nod(g)->*text);
-    nod(g)->*text = nullptr;
+    th_set_text(nod(g)->*text, nullptr);
   }
 
   void sexes(struct char_data *att, struct char_data *victim, int a, int v)
@@ -55,7 +55,7 @@ namespace {
     {"", "gemote nod self", false, SETUP(), false, 1},
     {"", "gemote nod nobody", false, SETUP(), false, 1},
     {"by a sleeper", "gemote nod namek", false, SETUP(char_set_position(victim, POS_SLEEPING); nod(g)->min_victim_position = POS_STANDING;), false, 1},
-    {"without a nod to the room", "gemote nod", false, SETUP(free(nod(g)->others_no_arg); nod(g)->others_no_arg = strdup("");), false, 1},
+    {"without a nod to the room", "gemote nod", false, SETUP(th_set_text(nod(g)->others_no_arg, "");), false, 1},
     {"without a nod to oneself seen", "gemote nod self", false, SETUP(without(g, &social_messg::others_auto);), false, 1},
     {"without nods at anyone", "gemote nod namek", false, SETUP(without(g, &social_messg::char_found);), false, 1},
     {"in a soundproof room", "gemote nod", false, SETUP(room_set_flag(g, ARENA, ROOM_SOUNDPROOF, true); do_gmote(g, att, "nod", 0, 1);), false, 1},

@@ -40,11 +40,10 @@ namespace {
   };
   constexpr int TOPLIST_PLACES = 5 * static_cast<int>(std::size(toplist_sections));
 
-  void set_place(GameWorld *g, int x, int64_t points, const char *name)
+  void set_place(GameWorld *g, int x, int64_t points, std::string_view name)
   {
-    free(g->topname[x]);
     g->toppoint[x] = points;
-    g->topname[x]  = strdup(name);
+    g->topname[x]  = name;
   }
 } // namespace
 
@@ -89,12 +88,12 @@ void topWrite(GameWorld *g, struct char_data *ch)
         }
       } else if (location < finish) { /* They have placed: the rest move down */
         if (!str_eq_nocase(positions[location], name)) { /* This isn't their old spot */
-          set_place(g, x, points[location], positions[location].c_str());
+          set_place(g, x, points[location], positions[location]);
           location += 1;
         } else { /* This IS their old spot */
           progress = true;
           location += 1;
-          set_place(g, x, points[location], positions[location].c_str());
+          set_place(g, x, points[location], positions[location]);
           location += 1;
         }
       }

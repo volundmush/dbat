@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <string_view>
 #include <cstdint>
 #include <ctime>
 
@@ -62,8 +63,8 @@ int32_t obj_get_aucter(const struct obj_data *obj);
 void obj_set_aucter(struct obj_data *obj, int32_t v);
 int32_t obj_get_curBidder(const struct obj_data *obj);
 void obj_set_curBidder(struct obj_data *obj, int32_t v);
-char *obj_get_auctname(const struct obj_data *obj);
-void obj_set_auctname(struct obj_data *obj, char *v);
+std::string_view obj_get_auctname(const struct obj_data *obj);
+void obj_set_auctname(struct obj_data *obj, std::string_view v);
 time_t obj_get_aucTime(const struct obj_data *obj);
 void obj_set_aucTime(struct obj_data *obj, time_t v);
 int obj_get_bid(const struct obj_data *obj);

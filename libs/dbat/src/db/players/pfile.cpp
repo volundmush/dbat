@@ -462,7 +462,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
 
   if ((id = get_ptable_by_name(g, name)) < 0)
     return (-1);
-  std::optional<std::string> fname = player_path(PLR_FILE, g->player_table[id].name);
+  std::optional<std::string> fname = player_path(PLR_FILE, g->player_table[id].name.c_str());
   if (!fname)
     return (-1);
   io::loaded<io::text_reader> file = io::text_reader::open(*fname);

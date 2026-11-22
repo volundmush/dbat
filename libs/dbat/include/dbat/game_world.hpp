@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <deque>
 #include <string>
 #include <vector>
@@ -133,7 +134,7 @@ struct GameWorld {
   std::string background, credits, handbook, help, ihelp, immlist, imotd, info;
   std::string motd, news, policies, wizlist, GREETANSI, GREETINGS;
   std::vector<help_index_element> help_table; /* in keyword order */
-  char *context_help_list[NUM_CONTEXTS]{};
+  std::array<std::string, NUM_CONTEXTS> context_help_list; /* "" for none */
 
   /* Boards, mail, houses and bans */
   struct board_info *bboards{};
@@ -142,8 +143,7 @@ struct GameWorld {
   struct house_control_rec house_control[MAX_HOUSES]{};
   int num_of_houses{};
   struct ban_list_element *ban_list{};
-  char *invalid_list[MAX_INVALID_NAMES]{};
-  int num_invalid{};
+  std::vector<std::string> invalid_list; /* at most MAX_INVALID_NAMES - 1 */
   struct assembly_data *g_pAssemblyTable{};
   long g_lNumAssemblies{};
 
@@ -157,7 +157,7 @@ struct GameWorld {
   int ERAPLAYERS{}, HEDITS{}, HIGHPCOUNT{}, LASTNEWS{}, LASTPAYTYPE{}, MAJIN_ALLOWED{}, MOON_UP{}, PCOUNT{};
   int SAIYAN_ALLOWED{}, SELFISHMETER{}, TOPCOUNTDOWN{}, TOPLOADED{}, TOP_OF_NEWS{};
   time_t INTERESTTIME{}, LASTINTEREST{}, LASTPAYOUT{}, NEWSUPDATE{}, PCOUNTDATE{}, PCOUNTDAY{};
-  char *topname[25]{};
+  std::array<std::string, 25> topname;
   int64_t toppoint[25]{};
 
   /* Auctions */

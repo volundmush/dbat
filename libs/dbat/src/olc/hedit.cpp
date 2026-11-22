@@ -335,7 +335,7 @@ ACMD(do_helpcheck)
 
   send_to_char(g, ch, "Commands without help entries:\r\n");
 
-  for (int i = 1; *(g->complete_cmd_info[i].command) != '\n'; i++) {
+  for (int i = 1; g->complete_cmd_info[i].command != "\n"; i++) {
     if (g->complete_cmd_info[i].command_pointer != do_action && g->complete_cmd_info[i].minimum_level >= 0 &&
         search_help(g, g->complete_cmd_info[i].command, ADMLVL_IMPL) == NOWHERE)
       buf += str_format("{:<20.20}{}", g->complete_cmd_info[i].command, (++count % 3 ? "" : "\r\n"));

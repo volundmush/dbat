@@ -80,7 +80,7 @@ void build_player_index(GameWorld *g)
         f.number(p.ship) && f.number(p.shiproom) && f.number(played);
     p.last        = last;
     p.played      = played;
-    p.name        = strdup(name.c_str());
+    p.name        = name;
     p.flags       = io::ascii_flags(bits, 0, "asciiflag_conv");
     g->top_idnum  = MAX(g->top_idnum, p.id);
   }
@@ -104,16 +104,11 @@ int create_entry(GameWorld *g, const char *name)
 
     resize_array(g->player_table, i - 1, i);
     pos = g->top_of_p_table;
-  } else
-    free(g->player_table[pos].name);
+  }
 
   /* a reused slot still holds the old character's values */
-  g->player_table[pos] = player_index_element{};
-  g->player_table[pos].name = str_alloc(strlen(name) + 1);
-
-  /* copy lowercase equivalent of name to table field */
-  for (i = 0; (g->player_table[pos].name[i] = tolower(name[i])); i++)
-    /* Nothing */;
+  g->player_table[pos]      = player_index_element{};
+  g->player_table[pos].name = to_lower(name);
 
   return (pos);
 }
@@ -123,7 +118,7 @@ void save_player_index(GameWorld *g)
   io::text_writer out(str_format("{}{}", LIB_PLRFILES, INDEX_FILE), true);
   for (int i = 0; i <= g->top_of_p_table; i++) {
     const player_index_element &p = g->player_table[i];
-    if (!*p.name)
+    if (p.name.empty())
       continue;
     out.print("{:d} {} {:d} {} {:d} {:d} {:d} {:d} {:d}\n", p.id, p.name, p.level, flag_letters(p.flags),
               static_cast<long long>(p.last), p.admlevel, p.ship, p.shiproom, static_cast<long long>(p.played));
@@ -134,15 +129,8 @@ void save_player_index(GameWorld *g)
 
 void free_player_index(GameWorld *g)
 {
-  int tp;
-
   if (!g->player_table)
     return;
-
-  for (tp = 0; tp <= g->top_of_p_table; tp++) {
-    if (g->player_table[tp].name)
-      free(g->player_table[tp].name);
-  }
 
   delete[] g->player_table;
   g->player_table   = nullptr;
@@ -177,7 +165,7 @@ char *get_name_by_id(GameWorld *g, long id)
 
   for (i = 0; i <= g->top_of_p_table; i++)
     if (g->player_table[i].id == id)
-      return (g->player_table[i].name);
+      return g->player_table[i].name.data();
 
   return (nullptr);
 }
@@ -193,12 +181,12 @@ char *get_name_by_id(GameWorld *g, long id)
  */
 void remove_player(GameWorld *g, int pfilepos)
 {
-  if (!*g->player_table[pfilepos].name)
+  if (g->player_table[pfilepos].name.empty())
     return;
 
   /* every file the player has */
   for (int i = 0; i < MAX_FILES; i++)
-    if (std::optional<std::string> path = player_path(i, g->player_table[pfilepos].name)) {
+    if (std::optional<std::string> path = player_path(i, g->player_table[pfilepos].name.c_str())) {
       std::error_code ec;
       std::filesystem::remove(*path, ec);
     }
@@ -207,7 +195,7 @@ void remove_player(GameWorld *g, int pfilepos)
   if (!last.empty() && last.back() == '\n')
     last.pop_back();
   mud_log("PCLEAN: {} Lev: {:d} Last: {}", g->player_table[pfilepos].name, g->player_table[pfilepos].level, last);
-  g->player_table[pfilepos].name[0] = '\0';
+  g->player_table[pfilepos].name.clear();
   save_player_index(g);
 }
 
@@ -221,7 +209,7 @@ void clean_pfiles(GameWorld *g)
      * from deletion and hasn't already been deleted.
      */
     if (!IS_SET(g->player_table[i].flags, PINDEX_NODELETE) &&
-        *g->player_table[i].name) {
+        !g->player_table[i].name.empty()) {
       /*
        * If the player is already flagged for deletion, then go
        * ahead and get rid of him.

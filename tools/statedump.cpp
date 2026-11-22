@@ -5,6 +5,7 @@
  * rest), what the loaders work out or fix up (room gravity, mob stats, portal locks) and the state the zone resets
  * leave. Long texts are given by their length and a hash. */
 #include <cstdio>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -39,6 +40,7 @@ std::string text(std::string_view s)
 }
 std::string text(const char *s) { return s ? text(std::string_view(s)) : "(null)"; }
 std::string text(const std::string &s) { return text(std::string_view(s)); }
+std::string text(const std::optional<std::string> &s) { return s ? text(*s) : "(null)"; }
 
 template <size_t N>
 std::string bits(const bitvector_t (&flags)[N])
@@ -185,7 +187,7 @@ void help(GameWorld *g)
   for (const help_index_element &h : g->help_table)
     file_print(out, "help {} dup {:d} level {:d} {}\n", text(h.keywords), h.duplicate, h.min_level, text(h.entry));
   for (int i = 0; i < NUM_CONTEXTS; i++)
-    if (g->context_help_list[i])
+    if (!g->context_help_list[i].empty())
       file_print(out, "context {:d} {}\n", i, text(g->context_help_list[i]));
 }
 
@@ -195,10 +197,10 @@ void socials(GameWorld *g)
     const social_messg &s = g->soc_mess_list[i];
     file_print(out, "social {:d} {} as {} hide {:d} pos {:d}/{:d} level {:d}\n", s.act_nr, text(s.command),
                text(s.sort_as), s.hide, s.min_victim_position, s.min_char_position, s.min_level_char);
-    for (const char *m : {s.char_no_arg, s.others_no_arg, s.char_found, s.others_found, s.vict_found,
-                          s.char_body_found, s.others_body_found, s.vict_body_found, s.not_found, s.char_auto,
-                          s.others_auto, s.char_obj_found, s.others_obj_found})
-      file_print(out, "  {}\n", text(m));
+    for (const social_message *m : {&s.char_no_arg, &s.others_no_arg, &s.char_found, &s.others_found, &s.vict_found,
+                                    &s.char_body_found, &s.others_body_found, &s.vict_body_found, &s.not_found,
+                                    &s.char_auto, &s.others_auto, &s.char_obj_found, &s.others_obj_found})
+      file_print(out, "  {}\n", text(*m));
   }
 }
 
@@ -218,17 +220,17 @@ void tables(GameWorld *g)
 
   for (const ban_list_element *b = g->ban_list; b; b = b->next)
     file_print(out, "ban {} type {:d} date {:d} by {}\n", text(b->site), b->type, (long long)b->date, text(b->name));
-  for (int i = 0; i < g->num_invalid; i++)
-    file_print(out, "invalid {}\n", text(g->invalid_list[i]));
+  for (const std::string &name : g->invalid_list)
+    file_print(out, "invalid {}\n", text(name));
   for (const disabled_data *d = g->disabled_first; d; d = d->next)
-    file_print(out, "disabled {} sub {:d} by {} level {:d}\n", text(d->command ? d->command->command : nullptr),
+    file_print(out, "disabled {} sub {:d} by {} level {:d}\n", d->command ? text(d->command->command) : "(null)",
                d->subcmd, text(d->disabled_by), d->level);
   for (long i = 0; i < g->g_lNumAssemblies; i++) {
     const assembly_data &a = g->g_pAssemblyTable[i];
     file_print(out, "assembly {:d} type {:d} components {:d}\n", a.lVnum, a.uchAssemblyType, a.lNumComponents);
   }
   for (int i = 0; i < 25; i++)
-    if (g->topname[i])
+    if (!g->topname[i].empty()) /* none before the toplist loads, which is after the dump */
       file_print(out, "top {:d} {} {:d}\n", i, text(g->topname[i]), (long long)g->toppoint[i]);
   file_print(out, "time {:d} {:d} {:d} {:d} era {:d} selfish {:d} dballs {:d} dragons {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n",
              g->time_info.hours, g->time_info.day, g->time_info.month, g->time_info.year, g->ERAPLAYERS,

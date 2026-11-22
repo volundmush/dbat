@@ -84,7 +84,7 @@ struct obj_data {
   time_t aucTime{};
   int bid{};
   int startbid{};
-  char *auctname{};
+  std::string auctname;
 
   // notes and boards
   int posttype{};

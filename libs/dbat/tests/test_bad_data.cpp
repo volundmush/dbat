@@ -713,15 +713,14 @@ static void check_toplist_name_listed_twice_at_the_bottom(void)
 
   CHECK(user != nullptr && char_get_desc(ch) != nullptr);
   for (int x = 0; x < 25; x++) {
-    free(g->topname[x]);
-    g->topname[x]  = strdup(x < 20 ? "Nobody" : rpp[x - 20]);
+    th_set_text(g->topname[x], x < 20 ? "Nobody" : rpp[x - 20]);
     g->toppoint[x] = x < 20 ? 2000000000000LL : 100 - x;
   }
   g->TOPLOADED = true;
   char_set_trp(ch, 150);
   topWrite(g, ch);
-  CHECK(str_eq_nocase(g->topname[20], user) && g->toppoint[20] == 150);
-  CHECK(!strcmp(g->topname[21], "Aaa") && !strcmp(g->topname[24], "") && g->toppoint[24] == 0);
+  CHECK(str_eq_nocase(th_text(g->topname[20]), user) && g->toppoint[20] == 150);
+  CHECK(std::string_view(th_text(g->topname[21])) == "Aaa" && !*th_text(g->topname[24]) && g->toppoint[24] == 0);
   th_shutdown(g);
 }
 
@@ -1593,8 +1592,8 @@ static void check_empty_context_help(void)
   th_before_boot(empty_context_help);
   GameWorld *g = th_boot();
 
-  CHECK(g->context_help_list[0] && !strcmp(g->context_help_list[0], "No help available (yet)!\r\n"));
-  CHECK(g->context_help_list[1] && !strcmp(g->context_help_list[1], "Some help."));
+  CHECK(std::string_view(th_text(g->context_help_list[0])) == "No help available (yet)!\r\n");
+  CHECK(std::string_view(th_text(g->context_help_list[1])) == "Some help.");
   th_shutdown(g);
 }
 

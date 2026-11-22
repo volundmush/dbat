@@ -1,8 +1,10 @@
 #pragma once
+#include <string>
+
 #include "dbat/consts/types.hpp"
 
 struct player_index_element {
-  char *name{};
+  std::string name; /* lowercase; empty for a deleted character */
   long id{};
   int level{};
   int admlevel{};

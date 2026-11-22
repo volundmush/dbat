@@ -32,6 +32,7 @@
 #include "dbat/comm.hpp"
 #include "dbat/game_world.hpp"
 #include "dbat/descriptor_utils.hpp"
+#include "harness.hpp" /* th_text() and th_set_text() */
 
 static int failures = 0;
 
@@ -579,12 +580,10 @@ static void check_toplist_load(void)
   topLoad(g);
   CHECK(g->toppoint[0] == 100);
   CHECK(g->toppoint[24] == 2500);
-  CHECK(g->topname[24] && !strcmp(g->topname[24], "Name24"));
+  CHECK(std::string_view(th_text(g->topname[24])) == "Name24");
   CHECK(g->ch_selling_uid == 0 && g->ch_buying_uid == 0);
-  for (char *&name : g->topname) {
-    free(name);
-    name = nullptr;
-  }
+  for (auto &name : g->topname)
+    th_set_text(name, nullptr);
   free_world(g);
 
   CHECK(remove("intro/P-T/toplist.itr") == 0 && rmdir("intro/P-T") == 0 && rmdir("intro") == 0);

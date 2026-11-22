@@ -157,9 +157,6 @@ void destroy_db(GameWorld *g)
   /* Events */
   event_free_all(g);
 
-  /* context sensitive help system */
-  free_context_help(g);
-
   free_feats();
 
   free_obj_unique_hash(g);

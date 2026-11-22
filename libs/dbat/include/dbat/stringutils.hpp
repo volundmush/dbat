@@ -27,6 +27,8 @@ inline int count_color_chars(const char *text) { return text ? count_color_chars
 bool is_abbrev(std::string_view arg1, std::string_view arg2);
 /* Whether a and b are the same ignoring case, as strcasecmp() finds them */
 bool str_eq_nocase(std::string_view a, std::string_view b);
+/* Whether a sorts before b ignoring case, as strcasecmp() orders them */
+bool str_less_nocase(std::string_view a, std::string_view b);
 /* Copies src into dst, a buffer of size bytes, cut short to fit and always ended by a '\0', as strlcpy() did;
    nothing is written if size is 0 */
 void copy_cstr(char *dst, std::string_view src, size_t size);
@@ -43,11 +45,8 @@ std::string_view fname(std::string_view namelist);
 /* Replaces the first find in s, then searches again from the start, until none is left
  * (so replace must not contain find; an empty find changes nothing). */
 void search_replace(std::string &s, std::string_view find, std::string_view replace);
-/* s, a malloc'd string (null for none), as a std::string; s is freed */
-std::string take_string(char *s);
-/* A zero-filled buffer of n chars. Like strdup()'s strings, it is released with free(), so that a field can hold
- * either; both go when strings become std::string. */
-char *str_alloc(size_t n);
+/* s in lowercase, as tolower() makes each character */
+std::string to_lower(std::string_view s);
 
 /* A writable copy of s (null reads as ""), for a function that may change its argument: f(writable_copy(s).data()).
  * The copy lasts until the end of the statement. */

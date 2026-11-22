@@ -1406,7 +1406,7 @@ ACMD(do_plist)
 
     std::string time_str = asctime(localtime(&g->player_table[i].last));
     time_str.pop_back(); /* its newline */
-    std::string name = writable_copy(g->player_table[i].name);
+    std::string name = g->player_table[i].name;
 
     buf += str_format("[{:>3d}] ({:>2d}) {:<12} {}\r\n", g->player_table[i].id, g->player_table[i].level, CAP(name), time_str);
     count++;

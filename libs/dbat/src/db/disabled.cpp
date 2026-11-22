@@ -34,7 +34,7 @@ static void save_disabled(GameWorld *g);
 
 ACMD(do_disable)
 {
-  int i, length;
+  int i;
   DISABLED_DATA *p, *temp;
 
   if (char_is_npc(ch)) {
@@ -57,8 +57,8 @@ ACMD(do_disable)
   }
 
   /* command given - first check if it is one of the disabled commands */
-  for (length = text.size(), p = g->disabled_first; p; p = p->next)
-    if (!strncmp(text.c_str(), p->command->command, length))
+  for (p = g->disabled_first; p; p = p->next)
+    if (p->command->command.starts_with(text))
       break;
 
   if (p) { /* this command is disabled */
@@ -73,25 +73,24 @@ ACMD(do_disable)
     send_to_char(g, ch, "Command '{}' enabled.\r\n", p->command->command);
     mudlog(g, LOG_BRF, ADMLVL_IMMORT, true, "(GC) {} has enabled the command '{}'.",
            char_get_name(ch), p->command->command);
-    free(p->disabled_by);
     delete p;
     save_disabled(g); /* save to disk */
 
   } else { /* not a disabled command, check if the command exists */
 
-    for (length = text.size(), i = 0; *cmd_info[i].command != '\n'; i++)
-      if (!strncmp(cmd_info[i].command, text.c_str(), length))
+    for (i = 0; cmd_info[i].command != "\n"; i++)
+      if (cmd_info[i].command.starts_with(text))
         if (char_get_level(ch) >= cmd_info[i].minimum_level &&
             char_get_admlevel(ch) >= cmd_info[i].minimum_admlevel)
           break;
 
     /*  Found?     */
-    if (*cmd_info[i].command == '\n') {
+    if (cmd_info[i].command == "\n") {
       send_to_char(g, ch, "You don't know of any such command.\r\n");
       return;
     }
 
-    if (!strcmp(cmd_info[i].command, "disable")) {
+    if (cmd_info[i].command == "disable") {
       send_to_char(g, ch, "You cannot disable the disable command.\r\n");
       return;
     }
@@ -99,7 +98,7 @@ ACMD(do_disable)
     /* Disable the command */
     p                 = new disabled_data();
     p->command     = &cmd_info[i];
-    p->disabled_by = strdup(char_get_name(ch)); /* save name of disabler  */
+    p->disabled_by = char_get_name(ch);         /* save name of disabler  */
     p->level       = char_get_admlevel(ch);     /* save level of disabler */
     p->subcmd      = cmd_info[i].subcmd;        /* the subcommand if any  */
     p->next        = g->disabled_first;
@@ -146,13 +145,13 @@ void load_disabled(GameWorld *g)
       p->level = static_cast<int16_t>(level);
     f.word(by);
     int i = 0;
-    while (*cmd_info[i].command != '\n' && !str_eq_nocase(cmd_info[i].command, name))
+    while (cmd_info[i].command != "\n" && !str_eq_nocase(cmd_info[i].command, name))
       i++;
-    if (*cmd_info[i].command == '\n') { /* command does not exist? */
+    if (cmd_info[i].command == "\n") { /* command does not exist? */
       mud_log("WARNING: load_disabled(): Skipping unknown disabled command - '{}'!", name);
       delete p;
     } else { /* add new disabled command */
-      p->disabled_by    = strdup(by.c_str());
+      p->disabled_by    = by;
       p->command        = &cmd_info[i];
       p->next           = g->disabled_first;
       g->disabled_first = p;
@@ -185,7 +184,6 @@ void free_disabled(GameWorld *g)
   while (g->disabled_first) {
     p              = g->disabled_first;
     g->disabled_first = g->disabled_first->next;
-    free(p->disabled_by);
     delete p;
   }
 }

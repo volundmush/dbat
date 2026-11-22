@@ -153,5 +153,4 @@ constexpr int NUM_CONTEXTS = 140;
 /* "help" typed at an OLC prompt: the help for what it asks, or for the words after it. False for any other line. */
 bool context_help(GameWorld *g, struct descriptor_data *d, std::string_view arg);
 void boot_context_help(GameWorld *g);
-void free_context_help(GameWorld *g);
 

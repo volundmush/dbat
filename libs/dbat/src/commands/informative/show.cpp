@@ -1097,85 +1097,79 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       } else if (char_get_distfea(i) == DISTFEA_SKIN) {
         send_to_char(g, ch, "@wA {} skinned {} {}", skin_types[(int)char_get_skin(i)], char_mafe(i), juggleRaceName(i, false));
       } else if (char_get_distfea(i) == DISTFEA_HEIGHT) {
-        char *height;
+        std::string_view height;
         if (char_is_truffle(i)) {
           if (char_get_pc_height(g, i) > 70) {
-            height = strdup("very tall");
+            height = "very tall";
           } else if (char_get_pc_height(g, i) > 55) {
-            height = strdup("tall");
+            height = "tall";
           } else if (char_get_pc_height(g, i) > 35) {
-            height = strdup("average height");
+            height = "average height";
           } else {
-            height = strdup("short");
+            height = "short";
           }
         } else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
           if (char_get_pc_height(g, i) * 10 > 2000) {
-            height = strdup("very tall");
+            height = "very tall";
           } else if (char_get_pc_height(g, i) * 10 > 1800) {
-            height = strdup("tall");
+            height = "tall";
           } else if (char_get_pc_height(g, i) * 10 > 1500) {
-            height = strdup("average height");
+            height = "average height";
           } else {
-            height = strdup("short");
+            height = "short";
           }
         } else {
           if (char_get_pc_height(g, i) > 200) {
-            height = strdup("very tall");
+            height = "very tall";
           } else if (char_get_pc_height(g, i) > 180) {
-            height = strdup("tall");
+            height = "tall";
           } else if (char_get_pc_height(g, i) > 150) {
-            height = strdup("average height");
+            height = "average height";
           } else if (char_get_pc_height(g, i) > 120) {
-            height = strdup("short");
+            height = "short";
           } else {
-            height = strdup("very short");
+            height = "very short";
           }
         }
         send_to_char(g, ch, "@wA {} {} {}", height, char_mafe(i), juggleRaceName(i, false));
-        if (height) {
-          free(height);
-        }
       } else if (char_get_distfea(i) == DISTFEA_WEIGHT) {
-        char *height;
+        std::string_view height;
         if (char_is_truffle(i)) {
           if (char_get_pc_weight(g, i) > 35) {
-            height = strdup("very heavy");
+            height = "very heavy";
           } else if (char_get_pc_weight(g, i) > 25) {
-            height = strdup("heavy");
+            height = "heavy";
           } else if (char_get_pc_weight(g, i) > 15) {
-            height = strdup("average weight");
+            height = "average weight";
           } else {
-            height = strdup("welterweight");
+            height = "welterweight";
           }
         } else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
           if (char_get_pc_weight(g, i) * 50 > 6000) {
-            height = strdup("very heavy");
+            height = "very heavy";
           } else if (char_get_pc_weight(g, i) * 50 > 5000) {
-            height = strdup("heavy");
+            height = "heavy";
           } else if (char_get_pc_weight(g, i) * 50 > 4000) {
-            height = strdup("average weight");
+            height = "average weight";
           } else if (char_get_pc_weight(g, i) * 50 > 3000) {
-            height = strdup("lightweight");
+            height = "lightweight";
           } else {
-            height = strdup("welterweight");
+            height = "welterweight";
           }
         } else {
           if (char_get_pc_weight(g, i) > 120) {
-            height = strdup("very heavy");
+            height = "very heavy";
           } else if (char_get_pc_weight(g, i) > 100) {
-            height = strdup("heavy");
+            height = "heavy";
           } else if (char_get_pc_weight(g, i) > 80) {
-            height = strdup("average weight");
+            height = "average weight";
           } else if (char_get_pc_weight(g, i) > 60) {
-            height = strdup("lightweight");
+            height = "lightweight";
           } else {
-            height = strdup("welterweight");
+            height = "welterweight";
           }
         }
         send_to_char(g, ch, "@wA {} {} {}", height, char_mafe(i), juggleRaceName(i, false));
-        if (height) {
-          free(height);
-        }
       }
     } else {
       send_to_char(g, ch, "@wA disguised {} {}", char_mafe(i), juggleRaceName(i, false));

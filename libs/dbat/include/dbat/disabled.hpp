@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 #include "dbat/consts/types.hpp"
 
@@ -9,7 +10,7 @@ typedef struct disabled_data DISABLED_DATA;
 struct disabled_data {
   DISABLED_DATA *next{};                /* pointer to next node          */
   struct command_info const *command{}; /* pointer to the command struct */
-  char *disabled_by{};                  /* name of disabler              */
+  std::string disabled_by;              /* name of disabler              */
   int16_t level{};                      /* level of disabler             */
   int subcmd{};                         /* the subcmd, if any            */
 };

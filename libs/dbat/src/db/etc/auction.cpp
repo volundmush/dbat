@@ -23,7 +23,10 @@ void auc_save(GameWorld *g)
   io::text_writer out(AUCTION_FILE);
   for (obj_data *obj : room_contents(g, 80))
     if (obj)
-      out.print("{:d} {} {:d} {:d} {:d} {:d} {:d}\n", obj_get_unique_id(obj), obj_get_auctname(obj),
+      /* an object no one put up (an imm's, say) has "(null)" for its seller, as printf wrote the null: an empty
+         word would leave the line a field short */
+      out.print("{:d} {} {:d} {:d} {:d} {:d} {:d}\n", obj_get_unique_id(obj),
+                obj_get_auctname(obj).empty() ? "(null)" : obj_get_auctname(obj),
                 obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj),
                 static_cast<long long>(obj_get_aucTime(obj)));
   out.write("~END~\n");
@@ -50,7 +53,7 @@ void auc_load(struct obj_data *obj)
       have_id = true;
     f.word(seller, 49) && f.number(aID) && f.number(bID) && f.number(startc) && f.number(cost) && f.number(timer);
     if (have_id && obj_get_unique_id(obj) == id) {
-      obj_set_auctname(obj, strdup(seller.c_str()));
+      obj_set_auctname(obj, seller);
       obj_set_aucter(obj, aID);
       obj_set_curBidder(obj, bID);
       obj_set_startbid(obj, startc);

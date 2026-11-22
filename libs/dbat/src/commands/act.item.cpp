@@ -11,6 +11,7 @@
 #include <climits>
 #include <cstdlib>
 #include <iterator>
+#include <ranges>
 #include <span>
 
 #include "dbat/args.hpp"
@@ -2482,43 +2483,31 @@ void weight_change_object(GameWorld *g, struct obj_data *obj, int weight)
 
 void name_from_drinkcon(GameWorld *g, struct obj_data *obj)
 {
-  char *new_name;
-  const char *cur_name, *next;
-  const char *liqname;
-  int liqlen, cpylen;
-
   if (!obj || (obj_get_type_flag(obj) != ITEM_DRINKCON && obj_get_type_flag(obj) != ITEM_FOUNTAIN))
     return;
 
   if (obj_get_value(obj, VAL_DRINKCON_LIQUID) < 0 || obj_get_value(obj, VAL_DRINKCON_LIQUID) >= NUM_LIQ_TYPES)
     return;
-  liqname = drinknames[obj_get_value(obj, VAL_DRINKCON_LIQUID)];
-  if (!isname(liqname, obj_get_name(obj)))
+  std::string_view liquid = drinknames[obj_get_value(obj, VAL_DRINKCON_LIQUID)];
+  if (!isname(liquid, obj_get_name(obj)))
     return;
 
-  liqlen   = strlen(liqname);
-  new_name = str_alloc(strlen(obj_get_name(obj)) + 1); /* the name without one or more of its words */
-
-  for (cur_name = obj_get_name(obj); cur_name; cur_name = next) {
-    if (*cur_name == ' ')
-      cur_name++;
-
-    if ((next = strchr(cur_name, ' ')))
-      cpylen = next - cur_name;
-    else
-      cpylen = strlen(cur_name);
-
-    if (!strncasecmp(cur_name, liqname, liqlen))
+  /* The name without its words that start with the liquid's name (quirk: a longer word such as "waterskin" goes
+     too), a space between those kept; a space at the very start is passed over */
+  std::string_view name = obj_get_name(obj);
+  std::string kept;
+  for (auto word : name | std::views::split(' ')) {
+    auto at = static_cast<size_t>(word.begin() - name.begin());
+    if (at == 0 && name.starts_with(' '))
       continue;
-
-    if (*new_name)
-      strcat(new_name, " ");
-    size_t used = strlen(new_name);
-    memcpy(new_name + used, cur_name, cpylen);
-    new_name[used + cpylen] = '\0';
+    if (str_eq_nocase(name.substr(at, liquid.size()), liquid))
+      continue;
+    if (!kept.empty())
+      kept += ' ';
+    kept.append(word.begin(), word.end());
   }
 
-  obj_set_name(obj, take_string(new_name));
+  obj_set_name(obj, kept);
 }
 
 void name_to_drinkcon(GameWorld *g, struct obj_data *obj, int type)

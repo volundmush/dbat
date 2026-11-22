@@ -6,7 +6,7 @@
 #include "dbat/command.hpp"
 
 #define CMD_NAME         (g->complete_cmd_info[cmd].command)
-#define CMD_IS(g, cmd_name) (!strcmp(cmd_name, g->complete_cmd_info[cmd].command))
+#define CMD_IS(g, cmd_name) (g->complete_cmd_info[cmd].command == (cmd_name))
 #define IS_MOVE(g, cmdnum)  (g->complete_cmd_info[cmdnum].command_pointer == do_move)
 
 const char *trait_name(int i); /* a bonus or negative trait's name, by BONUS_* */

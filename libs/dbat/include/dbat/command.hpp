@@ -5,8 +5,8 @@
 #include "dbat/consts/types.hpp"
 
 struct command_info {
-  const char *command{};
-  const char *sort_as{};
+  std::string_view command; /* "\n" for the end of a table, until the tables have no end marker */
+  std::string_view sort_as;
   int8_t minimum_position{};
   void (*command_pointer)(GameWorld *g, struct char_data *ch, std::string_view argument, int cmd, int subcmd){};
   int16_t minimum_level{};
@@ -29,5 +29,5 @@ constexpr int ALIAS_GLOB_CHAR = '*';
 
 struct alias_data *find_alias(std::list<alias_data> &aliases, std::string_view str);
 
-int find_command(GameWorld *g, const char *command);
+int find_command(GameWorld *g, std::string_view command);
 

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <numeric>
 #include <vector>
+#include <cctype>
 #include <climits>
 #include <cstdarg>
 #include <cstdio>
@@ -135,21 +136,11 @@ void search_replace(std::string &s, std::string_view find, std::string_view repl
   }
 }
 
-std::string take_string(char *s)
+std::string to_lower(std::string_view s)
 {
-  std::string out = s ? s : "";
-  free(s);
+  std::string out(s);
+  std::ranges::transform(out, out.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return out;
-}
-
-char *str_alloc(size_t n)
-{
-  char *s = static_cast<char *>(calloc(n, 1));
-  if (!s) {
-    perror("SYSERR: str_alloc");
-    abort();
-  }
-  return s;
 }
 
 std::string &CAP(std::string &txt)
@@ -179,6 +170,12 @@ bool str_eq_nocase(std::string_view a, std::string_view b)
     if (tolower((unsigned char)a[i]) != tolower((unsigned char)b[i]))
       return false;
   return true;
+}
+
+bool str_less_nocase(std::string_view a, std::string_view b)
+{
+  auto lower = [](char c) { return std::tolower(static_cast<unsigned char>(c)); };
+  return std::ranges::lexicographical_compare(a, b, {}, lower, lower);
 }
 
 bool is_abbrev(std::string_view arg1, std::string_view arg2)

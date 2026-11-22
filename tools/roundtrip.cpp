@@ -41,7 +41,7 @@ extern "C" long roundtrip_dump(GameWorld *g)
     pc = new char_data();
     clear_char(pc);
     pc->player_specials.make();
-    int pos = load_char(g, g->player_table[i].name, pc);
+    int pos = load_char(g, g->player_table[i].name.c_str(), pc);
     if (pos < 0)
       continue;
     char_set_pfilepos(pc, pos); /* save_char() silently skips characters without a player-file position */

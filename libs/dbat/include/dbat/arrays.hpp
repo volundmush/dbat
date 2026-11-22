@@ -7,7 +7,7 @@
 template <typename T> void resize_array(T *&p, size_t old_n, size_t new_n)
 {
   T *resized = new T[new_n]();
-  std::copy_n(p, std::min(old_n, new_n), resized);
+  std::move(p, p + std::min(old_n, new_n), resized);
   delete[] p;
   p = resized;
 }
