@@ -25,6 +25,8 @@
 #include "dbat/consts/shadowdragons.hpp"
 #include "dbat/consts/skills.hpp"
 #include "dbat/db.hpp"
+#include "dbat/act.item.hpp"
+#include "dbat/players.hpp"
 #include "dbat/act.other.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/genobj.hpp"
@@ -927,6 +929,44 @@ static void old_half_chop(char *string, char *arg1, char *arg2)
     memmove(arg2, temp, strlen(temp) + 1);
 }
 
+/* The auction list names a lot's owner with a capital, but leaves the player table's lowercase name alone: it used
+   to capitalise the name in the table itself */
+static void check_auction_list_leaves_player_names_alone(void)
+{
+  GameWorld *g         = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  CHECK(g->top_of_p_table >= 0);
+  const player_index_element &owner = g->player_table[0];
+  std::string before                = owner.name;
+
+  equip_char(g, ch, read_object(g, 70), WEAR_EYE); /* any scouter will do */
+  struct obj_data *lot = read_object(g, 70);
+  obj_to_room(g, lot, 80); /* the auction house */
+  obj_set_aucter(lot, owner.id);
+  obj_set_curBidder(lot, -1);
+  obj_set_bid(lot, 100);
+  obj_set_aucTime(lot, game_now(g));
+  do_bid(g, ch, "list", 0, 0);
+
+  CHECK(std::string_view(owner.name) == before);
+  std::string capital = before;
+  CHECK(std::string_view(th_output(ch)).contains(CAP(capital)));
+  th_shutdown(g);
+}
+
+/* add_commas() groups the digits in threes, even for the longest numbers, which overflowed its buffer */
+static void check_add_commas(void)
+{
+  CHECK(std::string_view(add_commas(0)) == "0");
+  CHECK(std::string_view(add_commas(999)) == "999");
+  CHECK(std::string_view(add_commas(1000)) == "1,000");
+  CHECK(std::string_view(add_commas(-1000)) == "-1,000");
+  CHECK(std::string_view(add_commas(-100)) == "-100");
+  CHECK(std::string_view(add_commas(123456789)) == "123,456,789");
+  CHECK(std::string_view(add_commas(INT64_MAX)) == "9,223,372,036,854,775,807");
+  CHECK(std::string_view(add_commas(INT64_MIN)) == "-9,223,372,036,854,775,808");
+}
+
 /* The words args.hpp takes off a line are the ones the old char * functions did, and so is what is left. */
 static void check_args_match_the_old_parsers(void)
 {
@@ -1059,6 +1099,47 @@ static bool old_isname(const char *str, const char *namelist)
   return false;
 }
 
+/* is_number(), CAP() and search_block() as they were on C strings: copied here to compare with */
+static bool old_is_number(const char *str)
+{
+  while (*str)
+    if (!isdigit(*(str++)))
+      return false;
+  return true;
+}
+
+static char *old_CAP(char *txt)
+{
+  static constexpr std::string_view colour = "nbBcCgGmMrRyYwWkK0234567oeul";
+  int i;
+
+  for (i = 0; txt[i] != '\0' && txt[i] == '@' && txt[i + 1] && colour.contains(txt[i + 1]); i += 2);
+  txt[i] = toupper(txt[i]);
+  return txt;
+}
+
+static int old_search_block(char *arg, const char *const *list, int exact)
+{
+  int i, l;
+
+  if (*arg == '!')
+    return -1;
+  for (l = 0; arg[l]; l++)
+    arg[l] = tolower(arg[l]);
+  if (exact) {
+    for (i = 0; *list[i] != '\n'; i++)
+      if (!strcmp(arg, list[i]))
+        return i;
+  } else {
+    if (!l)
+      l = 1;
+    for (i = 0; *list[i] != '\n'; i++)
+      if (!strncmp(arg, list[i], l))
+        return i;
+  }
+  return -1;
+}
+
 static int old_get_number(char **name)
 {
   int i;
@@ -1109,7 +1190,7 @@ static void check_name_matching_matches_the_old_code(void)
 
   for (int i = 0; i < 20000; i++) {
     std::string a = text(), b = text();
-    char buf[MAX_INPUT_LENGTH], old_buf[MAX_INPUT_LENGTH];
+    char old_buf[MAX_INPUT_LENGTH];
 
     mismatches += isname(a, b) != old_isname(a.c_str(), b.c_str());
     mismatches += is_name(a, b) != old_is_name(a.c_str(), b.c_str());
@@ -1117,17 +1198,12 @@ static void check_name_matching_matches_the_old_code(void)
     mismatches += is_abbrev(a, b) != old_is_abbrev(a.c_str(), b.c_str());
     mismatches += str_eq_nocase(a, b) != !strcasecmp(a.c_str(), b.c_str());
     mismatches += parse_int(a) != atoi(a.c_str());
-    mismatches += is_number(std::string_view(a)) != is_number(a.c_str());
+    mismatches += is_number(a) != old_is_number(a.c_str());
 
     std::string name = a;
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
     char *old_p = old_buf;
     mismatches += get_number(name) != old_get_number(&old_p) || name != old_buf;
-    snprintf(buf, sizeof(buf), "%s", a.c_str());
-    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    char *p = buf;
-    old_p   = old_buf;
-    mismatches += get_number(&p) != old_get_number(&old_p) || strcmp(buf, old_buf);
 
     name = a;
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
@@ -1135,12 +1211,12 @@ static void check_name_matching_matches_the_old_code(void)
 
     name = a;
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += CAP(name) != CAP(old_buf);
+    mismatches += CAP(name) != old_CAP(old_buf);
 
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += search_block(std::string_view(a), words, false) != search_block(old_buf, words, false);
+    mismatches += search_block(a, words, false) != old_search_block(old_buf, words, false);
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += search_block(std::string_view(a), words, true) != search_block(old_buf, words, true);
+    mismatches += search_block(a, words, true) != old_search_block(old_buf, words, true);
   }
   CHECK(mismatches == 0);
 }
@@ -2757,6 +2833,8 @@ static const struct {
     {"wait_until_no_time",                          check_wait_until_no_time                         },
     {"message_ending_in_a_backslash",               check_message_ending_in_a_backslash              },
     {"text_field_of_self",                          check_text_field_of_self                         },
+    {"add_commas",                                  check_add_commas                                 },
+    {"auction_list_leaves_player_names_alone",      check_auction_list_leaves_player_names_alone     },
     {"args_match_the_old_parsers",                  check_args_match_the_old_parsers                 },
     {"name_matching_matches_the_old_code",          check_name_matching_matches_the_old_code         },
     {"spellbook_edit_can_be_abandoned",             check_spellbook_edit_can_be_abandoned            },

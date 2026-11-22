@@ -4843,9 +4843,9 @@ const char *obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const st
   return (char_can_see_obj(g, (vict), (obj)) ? obj_get_short_description(obj) : "something");
 }
 
-const char *obj_fname_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict)
+std::string_view obj_fname_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict)
 {
-  return (char_can_see_obj(g, (vict), (obj)) ? fname(obj_get_name(obj)) : "something");
+  return char_can_see_obj(g, vict, obj) ? fname(obj_get_name(obj)) : "something";
 }
 
 bool char_can_go(GameWorld *g, const struct char_data *ch, int door)

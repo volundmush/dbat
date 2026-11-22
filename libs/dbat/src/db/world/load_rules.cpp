@@ -50,11 +50,7 @@ void extra_description_ends_a_line(extra_descr_data &descr)
 
 void article_in_lowercase(std::string &text)
 {
-  /* the word is its leading letters, as fname() reads it */
-  size_t letters = 0;
-  while (letters < text.size() && isalpha(static_cast<unsigned char>(text[letters])))
-    letters++;
-  std::string_view word(text.data(), letters);
+  std::string_view word = fname(text);
   if (str_eq_nocase(word, "a") || str_eq_nocase(word, "an") || str_eq_nocase(word, "the"))
     text[0] = static_cast<char>(tolower(static_cast<unsigned char>(text[0])));
 }

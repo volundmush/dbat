@@ -306,7 +306,7 @@ ASPELL(art_abundant_step);
 
 /* basic magic calling functions */
 
-int find_skill_num(GameWorld *g, char *name, int sktype);
+int find_skill_num(GameWorld *g, std::string_view name, int sktype);
 
 int mag_damage(int level, struct char_data *ch, struct char_data *victim,
                int spellnum);

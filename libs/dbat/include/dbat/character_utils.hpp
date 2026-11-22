@@ -508,7 +508,7 @@ const char *char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict
 
 const char *obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
 
-const char *obj_fname_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
+std::string_view obj_fname_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
 
 struct room_direction_data *char_get_exit(GameWorld *g, const struct char_data *ch, int door);
 void char_set_exit(GameWorld *g, struct char_data *ch, int door, struct room_direction_data *v);

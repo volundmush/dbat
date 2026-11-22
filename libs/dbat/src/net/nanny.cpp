@@ -105,6 +105,15 @@ static std::optional<std::string> parse_name(std::string_view typed)
   return std::string(typed);
 }
 
+/* CAP() on the line the handlers share, which they change in place, as before; it goes when they take the line as a
+   std::string& */
+static char *cap_line(char *line)
+{
+  std::string text = line;
+  std::ranges::copy(CAP(text), line); /* the same length, so the '\0' stays where it was */
+  return line;
+}
+
 /* ---- Notices at login ------------------------------------------------- */
 
 /* Interest owed since the last payout, for one to three days. Reconnecting pays the bank's own rate; entering from the
@@ -486,10 +495,10 @@ static void character_missing(GameWorld *g, struct descriptor_data *d)
 }
 
 /* A new character in the empty slot chosen: on to creation. */
-static void start_new_character(GameWorld *g, struct descriptor_data *d, char *name)
+static void start_new_character(GameWorld *g, struct descriptor_data *d, std::string &name)
 {
   /* Check for multiple creations of a character. */
-  if (!Valid_Name(g, name)) {
+  if (!Valid_Name(g, name.data())) {
     write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
     return;
   }
@@ -503,16 +512,16 @@ static void start_new_character(GameWorld *g, struct descriptor_data *d, char *n
 
 /* A deleted character's name: its old files go, so the new character doesn't get its equipment, and creation starts
    over. */
-static void remake_deleted_character(GameWorld *g, struct descriptor_data *d, char *name)
+static void remake_deleted_character(GameWorld *g, struct descriptor_data *d, std::string &name)
 {
-  if (int player_i = get_ptable_by_name(g, name); player_i >= 0)
+  if (int player_i = get_ptable_by_name(g, name.c_str()); player_i >= 0)
     remove_player(g, player_i);
 
   /* We get a false positive from the original deleted character. */
   free_char(g, d->character);
   d->character = nullptr; /* Valid_Name looks at every connection's character */
   /* Check for multiple creations... */
-  if (!Valid_Name(g, name)) {
+  if (!Valid_Name(g, name.data())) {
     write_to_output(g, d, "@YInvalid name@n, please try @Canother.@n\r\nName: ");
     return;
   }
@@ -591,7 +600,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
     if (d->writenew <= 0)
       character_missing(g, d);
     else /* player unknown -- make new character */
-      start_new_character(g, d, tmp_name.data());
+      start_new_character(g, d, tmp_name);
     return;
   }
   if (d->writenew > 0) {
@@ -602,7 +611,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
   }
   char_set_pfilepos(d->character, player_i);
   if (char_plr_flagged(d->character, PLR_DELETED))
-    remake_deleted_character(g, d, tmp_name.data());
+    remake_deleted_character(g, d, tmp_name);
   else
     log_in_character(g, d);
 }
@@ -650,7 +659,7 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "Try again, username?\r\n");
     return;
   }
-  if (!Valid_Name(g, CAP(arg))) {
+  if (!Valid_Name(g, cap_line(arg))) {
     write_to_output(g, d, "Invalid name. Username?\r\n");
     return;
   }
@@ -672,7 +681,7 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
     if (g->circle_restrict == 101) {
       write_to_output(g, d, "The mud is locked for mortals at this time.\r\n");
       write_to_output(g, d, "Please check: www.advent-truth.com/forum for further details.\r\n");
-      send_to_imm(g, "{} rejected by wizlock", CAP(arg));
+      send_to_imm(g, "{} rejected by wizlock", cap_line(arg));
       desc_set_connected(d, CON_CLOSE);
     } else {
       d->acct.user = arg;
@@ -690,13 +699,13 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
         desc_set_connected(d, CON_CLOSE);
       } else {
         write_to_output(g, d, "Password: \r\n");
-        send_to_imm(g, "Username, {}, logging in.", CAP(arg));
+        send_to_imm(g, "Username, {}, logging in.", cap_line(arg));
         desc_set_connected(d, CON_PASSWORD);
       }
     } else {
       userLoad(d, arg);
       write_to_output(g, d, "Password: \r\n");
-      send_to_imm(g, "Username, {}, logging in.", CAP(arg));
+      send_to_imm(g, "Username, {}, logging in.", cap_line(arg));
       desc_set_connected(d, CON_PASSWORD);
     }
   }
@@ -714,7 +723,7 @@ static void state_user_conf(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "User Account, {}, created.\r\nEnter Email:\n", d->acct.user);
     write_to_output(g, d, "Remember your email must be valid and matching the example given.\n");
     write_to_output(g, d, "[Example: iovan@@advent-truth.com]\n");
-    send_to_imm(g, "Username, {}, creating.", CAP(d->acct.user.data()));
+    send_to_imm(g, "Username, {}, creating.", CAP(d->acct.user));
     desc_set_connected(d, CON_GET_EMAIL);
   } else if (!strcasecmp(arg, "no") || !strcasecmp(arg, "n")) {
     d->acct.user = "Empty";
@@ -753,18 +762,14 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
     write_to_output(g, d, "Emails can be at most {:d} characters, with no spaces, and can't start with '*'. Email?\r\n", MAX_EMAIL_LENGTH);
     return;
   } else if (readUserIndex(d->acct.user)) {
-    if (strstr(arg, "@")) {
-      search_replace(arg, "@", "<AT>");
-    }
     d->acct.email = arg;
+    search_replace(d->acct.email, "@", "<AT>");
     save_account(d);
     enter_state(g, d, CON_UMENU);
   } else {
-    if (strstr(arg, "@")) {
-      search_replace(arg, "@", "<AT>");
-    }
-    write_to_output(g, d, "Your email is: {}\n", arg);
     d->acct.email = arg;
+    search_replace(d->acct.email, "@", "<AT>");
+    write_to_output(g, d, "Your email is: {}\n", d->acct.email);
     write_to_output(g, d, "Password: \r\n");
     desc_set_connected(d, CON_NEWPASSWD);
   }
@@ -840,12 +845,12 @@ static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
     }
     enter_state(g, d, CON_UMENU);
   } else {
-    send_to_imm(g, "Username, {}, password failure!", CAP(d->acct.user.data()));
-    mud_log("{} BAD PASSWORD from [{}]", CAP(d->acct.user.data()), d->host);
+    send_to_imm(g, "Username, {}, password failure!", CAP(d->acct.user));
+    mud_log("{} BAD PASSWORD from [{}]", CAP(d->acct.user), d->host);
     /* counted per connection, so switching usernames does not reset it */
     if (++d->bad_pws >= CONFIG_MAX_BAD_PWS) {
       write_to_output(g, d, "Too many wrong passwords. Disconnecting.\r\n");
-      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Disconnecting [{}] after {:d} wrong passwords (last tried for {}).", d->host, d->bad_pws, CAP(d->acct.user.data()));
+      mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Disconnecting [{}] after {:d} wrong passwords (last tried for {}).", d->host, d->bad_pws, CAP(d->acct.user));
       desc_set_connected(d, CON_CLOSE);
       return;
     }

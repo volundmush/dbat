@@ -100,7 +100,7 @@ const field<obj_data> obj_fields[] = {
     {"itemflag", [](const field_query &q, obj_data *o) -> result {
        if (!q.has_arg())
          return "0";
-       int item = get_flag_by_name(extra_bits, q.arg());
+       int item = get_flag_by_name(extra_bits, q.subfield);
        return item != NOFLAG && obj_extra_flagged(o, item) ? "1" : "0";
      }},
     {"level", [](const field_query &, obj_data *o) -> result { return number(obj_get_level(o)); }},
@@ -131,7 +131,7 @@ const field<obj_data> obj_fields[] = {
      }},
     {"size", [](const field_query &q, obj_data *o) -> result {
        if (q.has_arg()) {
-         int ns = search_block(q.arg(), size_names, false);
+         int ns = search_block(q.subfield, size_names, false);
          if (ns > -1)
            obj_set_size(o, ns);
        }

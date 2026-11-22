@@ -200,9 +200,9 @@ namespace {
       mud_log("ERROR: {} found error direction {} at room {:d}", char_get_name(ch), DIR_SHOUTED[door], char_get_in_room(ch));
       return false;
     }
-    std::string argh = str_format("{} ", strcasecmp(fname(exit_keyword(exit)), "undefined") ? fname(exit_keyword(exit)) : "opening");
+    std::string argh = str_format("{} ", !str_eq_nocase(fname(exit_keyword(exit)), "undefined") ? fname(exit_keyword(exit)) : "opening");
     line += str_format("                    The {}{} {} {} {}{}.\r\n", IS_SET(exit->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(exit) && strcasecmp(fname(exit_keyword(exit)), "undefined")) ? fname(exit_keyword(exit)) : "opening",
+                       (exit_keyword(exit) && !str_eq_nocase(fname(exit_keyword(exit)), "undefined")) ? fname(exit_keyword(exit)) : "opening",
                        strstr(argh.c_str(), "s ") != nullptr ? "are" : "is", IS_SET(exit->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(exit->exit_info, EX_LOCKED) ? "and locked" : "and unlocked", IS_SET(exit->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
     return true;

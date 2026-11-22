@@ -1183,7 +1183,7 @@ namespace {
   constexpr char DEATH_TRAPS[] = "Death Traps\r\n-----------\r\n";
   constexpr char GODROOMS[]    = "Godrooms\r\n--------------------------\r\n";
 
-  void show_shops_of(GameWorld *g, struct char_data *ch, std::string &value) { show_shops(g, ch, value.data()); }
+  void show_shops_of(GameWorld *g, struct char_data *ch, std::string &value) { show_shops(g, ch, value); }
 
   void show_houses(GameWorld *g, struct char_data *ch, std::string &) { hcontrol_list_houses(g, ch); }
 

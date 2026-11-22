@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/genshp.hpp"
@@ -56,16 +57,16 @@ static void sort_keeper_objs(GameWorld *g, struct char_data *keeper, struct shop
 /* Local variables */
 
 /* local functions */
-static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
-static void shopping_value(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
-static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
-static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, char *name, struct char_data *keeper, struct shop_data *shop, int msg);
+static void shopping_list(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
+static void shopping_value(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
+static void shopping_sell(GameWorld *g, std::string &arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
+static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, std::string &name, struct char_data *keeper, struct shop_data *shop, int msg);
 static struct obj_data *slide_obj(GameWorld *g, struct obj_data *obj, struct char_data *keeper, struct shop_data *shop);
-static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
-static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
-static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, char *arg, struct char_data *keeper, struct shop_data *shop, int msg);
-static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, char *name, const id_list &list);
-static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, char *name, const id_list &list);
+static void shopping_buy(GameWorld *g, std::string &arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
+static void shopping_app(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
+static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, std::string_view arg, struct char_data *keeper, struct shop_data *shop, int msg);
+static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, std::string_view name, const id_list &list);
+static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, std::string_view name, const id_list &list);
 static std::string customer_string(GameWorld *g, struct shop_data *shop, int detailed);
 static void list_all_shops(GameWorld *g, struct char_data *ch);
 static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_data *shop);
@@ -82,8 +83,8 @@ static int evaluate_expression(struct obj_data *obj, const char *expr);
 static int trade_with(GameWorld *g, struct obj_data *item, struct shop_data *shop);
 static bool same_obj(struct obj_data *obj1, struct obj_data *obj2);
 
-static int transaction_amt(char *arg);
-static std::string times_message(struct obj_data *obj, const char *name, int num);
+static int transaction_amt(std::string &arg);
+static std::string times_message(struct obj_data *obj, std::string_view name, int num);
 static int buy_price(GameWorld *g, struct obj_data *obj, struct shop_data *shop, struct char_data *keeper, struct char_data *buyer);
 static int sell_price(GameWorld *g, struct obj_data *obj, struct shop_data *shop, struct char_data *keeper, struct char_data *seller);
 static std::string list_object(GameWorld *g, struct obj_data *obj, int cnt, int oindex, struct shop_data *shop, struct char_data *keeper, struct char_data *seller);
@@ -463,35 +464,31 @@ bool shop_producing(GameWorld *g, struct obj_data *item, struct shop_data *shop)
   return (false);
 }
 
-static int transaction_amt(char *arg)
+static int transaction_amt(std::string &arg)
 {
-  char buf[MAX_INPUT_LENGTH];
-
-  char *buywhat;
-
   /*
    * If we have two arguments, it means 'buy 5 3', or buy 5 of #3.
    * We don't do that if we only have one argument, like 'buy 5', buy #5.
    * Code from Andrey Fidrya <andrey@ALEX-UA.COM>
    */
-  buywhat = one_argument(arg, buf);
-  if (*buywhat && *buf && is_number(buf)) {
-    memmove(arg, arg + strlen(buf) + 1, strlen(arg + strlen(buf) + 1) + 1); /* overlapping, so not strcpy */
-    return (atoi(buf));
+  std::string_view rest = arg;
+  std::string amount    = take_arg(rest);
+  if (!rest.empty() && !amount.empty() && is_number(amount)) {
+    arg.erase(0, amount.size() + 1); /* quirk: that many from the start of the line, whatever came before the number */
+    return parse_int(amount);
   }
   return (1);
 }
 
-static std::string times_message(struct obj_data *obj, const char *name, int num)
+static std::string times_message(struct obj_data *obj, std::string_view name, int num)
 {
   std::string buf;
 
   if (obj)
     buf = str_format("{}", obj_get_short_description(obj));
   else {
-    const char *ptr = strchr(name, '.');
-    ptr             = ptr ? ptr + 1 : name;
-    buf             = str_format("{} {}", AN(ptr), ptr);
+    std::string_view what = name.substr(name.find('.') + 1); /* after a "2.", if there is one */
+    buf                   = str_format("{} {}", AN(what), what);
   }
 
   if (num > 1)
@@ -499,17 +496,14 @@ static std::string times_message(struct obj_data *obj, const char *name, int num
   return buf;
 }
 
-static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, char *name,
+static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, std::string_view name,
                                           const id_list &list)
 {
   struct obj_data *last_match = nullptr;
   int j, number;
-  char tmpname[MAX_INPUT_LENGTH];
-  char *tmp;
+  std::string tmp(name);
 
-  copy_cstr(tmpname, name, sizeof(tmpname));
-  tmp = tmpname;
-  if (!(number = get_number(&tmp)))
+  if (!(number = get_number(tmp)))
     return (nullptr);
 
   j = 1;
@@ -527,16 +521,16 @@ static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, ch
   return (nullptr);
 }
 
-static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, char *name,
+static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, std::string_view name,
                                          const id_list &list)
 {
   struct obj_data *last_obj = nullptr;
   int qindex;
 
   if (is_number(name))
-    qindex = atoi(name);
-  else if (is_number(name + 1))
-    qindex = atoi(name + 1);
+    qindex = parse_int(name);
+  else if (is_number(name.substr(1))) /* "#3" */
+    qindex = parse_int(name.substr(1));
   else
     return (nullptr);
 
@@ -550,15 +544,14 @@ static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, cha
   return (nullptr);
 }
 
-static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, char *arg,
+static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, std::string_view arg,
                                          struct char_data *keeper, struct shop_data *shop, int msg)
 {
-  char name[MAX_INPUT_LENGTH];
   struct obj_data *obj;
+  std::string name = take_arg(arg);
 
-  one_argument(arg, name);
   do {
-    if (*name == '#' || is_number(name))
+    if (name.starts_with('#') || is_number(name))
       obj = get_hash_obj_vis(g, ch, name, char_get_inventory(keeper));
     else
       obj = get_slide_obj_vis(g, ch, name, char_get_inventory(keeper));
@@ -676,7 +669,7 @@ static int sell_price(GameWorld *g, struct obj_data *obj, struct shop_data *shop
   return (int)((obj_get_cost(obj) * (sell_cost_modifier / 2)) * adjust);
 }
 
-static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
+static void shopping_app(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
 {
   struct obj_data *obj;
   int i, found = false;
@@ -688,7 +681,7 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
   if (shop_get_lastsort(shop) < char_get_carry_items(keeper))
     sort_keeper_objs(g, keeper, shop);
 
-  if (!*arg) {
+  if (arg.empty()) {
     buf = str_format("{} What do you want to appraise?", char_get_name(ch));
     do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
@@ -782,7 +775,7 @@ static void shopping_app(GameWorld *g, char *arg, struct char_data *ch, struct c
   send_to_char(g, ch, "\n@c---------------------------------------------------------------@n\n");
 }
 
-static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
+static void shopping_buy(GameWorld *g, std::string &arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
 {
   std::string tempstr;
   std::string tempbuf;
@@ -801,7 +794,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
     do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
-  if (!*arg || !buynum) {
+  if (arg.empty() || !buynum) {
     std::string buf = str_format("{} What do you want to buy?", char_get_name(ch));
     do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
@@ -881,7 +874,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
   if (!char_adm_flagged(ch, ADM_MONEY))
     char_set_gold(keeper, char_get_gold(keeper) + (goldamt));
 
-  tempstr = times_message(first_obj(g, char_get_inventory(ch)), nullptr, bought);
+  tempstr = times_message(first_obj(g, char_get_inventory(ch)), {}, bought);
 
   tempbuf = str_format("$n buys {}.", tempstr);
   act(g, tempbuf.c_str(), false, ch, obj, nullptr, TO_ROOM);
@@ -898,7 +891,7 @@ static void shopping_buy(GameWorld *g, char *arg, struct char_data *ch, struct c
     }
 }
 
-static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, char *name, struct char_data *keeper, struct shop_data *shop, int msg)
+static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, std::string &name, struct char_data *keeper, struct shop_data *shop, int msg)
 {
   std::string buf;
   struct obj_data *obj;
@@ -991,10 +984,9 @@ static void sort_keeper_objs(GameWorld *g, struct char_data *keeper, struct shop
   }
 }
 
-static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
+static void shopping_sell(GameWorld *g, std::string &arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
 {
   std::string tempstr;
-  char name[MAX_INPUT_LENGTH];
   std::string tempbuf;
   struct obj_data *obj;
   int sellnum, sold = 0, goldamt = 0;
@@ -1007,12 +999,13 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
     do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return;
   }
-  if (!*arg || !sellnum) {
+  if (arg.empty() || !sellnum) {
     std::string buf = str_format("{} What do you want to sell??", char_get_name(ch));
     do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
-  one_argument(arg, name);
+  std::string_view rest = arg;
+  std::string name      = take_arg(rest);
   if (!(obj = get_selling_obj(g, ch, name, keeper, shop, true)))
     return;
 
@@ -1078,21 +1071,20 @@ static void shopping_sell(GameWorld *g, char *arg, struct char_data *ch, struct 
   }
 }
 
-static void shopping_value(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
+static void shopping_value(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
 {
   std::string buf;
-  char name[MAX_INPUT_LENGTH];
   struct obj_data *obj;
 
   if (!is_ok(g, keeper, ch, shop))
     return;
 
-  if (!*arg) {
+  if (arg.empty()) {
     buf = str_format("{} What do you want me to evaluate??", char_get_name(ch));
     do_tell(g, keeper, buf, g->cmd_tell, 0);
     return;
   }
-  one_argument(arg, name);
+  std::string name = take_arg(arg);
   if (!(obj = get_selling_obj(g, ch, name, keeper, shop, true)))
     return;
 
@@ -1133,9 +1125,8 @@ static std::string list_object(GameWorld *g, struct obj_data *obj, int cnt, int 
                     add_commas(buy_price(g, obj, shop, keeper, ch)));
 }
 
-static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
+static void shopping_list(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop)
 {
-  char name[MAX_INPUT_LENGTH];
   std::string buf;
   struct obj_data *last_obj = nullptr;
   int cnt = 0, lindex = 0, found = false;
@@ -1147,7 +1138,7 @@ static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct 
   if (shop_get_lastsort(shop) < char_get_carry_items(keeper))
     sort_keeper_objs(g, keeper, shop);
 
-  one_argument(arg, name);
+  std::string name = take_arg(arg);
 
   buf = " ##   Available   Item                             Min. Lvl       Cost\r\n"
         "----------------------------------------------------------------------\r\n";
@@ -1161,7 +1152,7 @@ static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct 
           cnt++;
         else {
           lindex++;
-          if (!*name || isname(name, obj_get_name(last_obj))) {
+          if (name.empty() || isname(name, obj_get_name(last_obj))) {
             buf += list_object(g, last_obj, cnt, lindex, shop, keeper, ch);
             found = true;
           }
@@ -1172,10 +1163,10 @@ static void shopping_list(GameWorld *g, char *arg, struct char_data *ch, struct 
   lindex++;
   if (!last_obj) /* we actually have nothing in our list for sale, period */
     send_to_char(g, ch, "Currently, there is nothing for sale.\r\n");
-  else if (*name && !found) /* nothing the char was looking for was found */
+  else if (!name.empty() && !found) /* nothing the char was looking for was found */
     send_to_char(g, ch, "Presently, none of those are for sale.\r\n");
   else {
-    if (!*name || isname(name, obj_get_name(last_obj))) /* show last obj */
+    if (name.empty() || isname(name, obj_get_name(last_obj))) /* show last obj */
       buf += list_object(g, last_obj, cnt, lindex, shop, keeper, ch);
     buf += str_format("@W[@wYour Zenni@D: @Y{}@W]", add_commas(char_get_gold(ch)));
     send_to_char(g, ch, buf);
@@ -1225,25 +1216,25 @@ SPECIAL(shop_keeper)
     return (false);
   }
 
-  std::string line(argument); /* the shopping commands take the line apart in place */
+  std::string line(argument); /* buying and selling take the amount off its front */
   if (CMD_IS(g, "buy")) {
-    shopping_buy(g, line.data(), ch, keeper, shop);
+    shopping_buy(g, line, ch, keeper, shop);
     return (true);
   }
   if (CMD_IS(g, "sell")) {
-    shopping_sell(g, line.data(), ch, keeper, shop);
+    shopping_sell(g, line, ch, keeper, shop);
     return (true);
   }
   if (CMD_IS(g, "value")) {
-    shopping_value(g, line.data(), ch, keeper, shop);
+    shopping_value(g, line, ch, keeper, shop);
     return (true);
   }
   if (CMD_IS(g, "list")) {
-    shopping_list(g, line.data(), ch, keeper, shop);
+    shopping_list(g, line, ch, keeper, shop);
     return (true);
   }
   if (CMD_IS(g, "appraise")) {
-    shopping_app(g, line.data(), ch, keeper, shop);
+    shopping_app(g, line, ch, keeper, shop);
     return (true);
   }
   return (false);
@@ -1434,21 +1425,21 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
   }
 }
 
-void show_shops(GameWorld *g, struct char_data *ch, char *arg)
+void show_shops(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
   struct shop_data *shop;
 
-  if (!*arg)
+  if (arg.empty())
     list_all_shops(g, ch);
   else {
-    if (!strcasecmp(arg, ".")) {
+    if (arg == ".") {
       shop = find_first(g->shops.all(), [&](shop_data *s) { return ok_shop_room(g, s, char_get_in_room(ch)); });
       if (!shop) {
         send_to_char(g, ch, "This isn't a shop!\r\n");
         return;
       }
     } else if (is_number(arg)) {
-      int n = atoi(arg); /* the shop's place in the list */
+      int n = parse_int(arg); /* the shop's place in the list */
       shop  = find_first(g->shops.all(), [&](shop_data *) { return --n == 0; });
     } else
       shop = nullptr;

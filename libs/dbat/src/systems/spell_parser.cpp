@@ -68,31 +68,27 @@ const char *skill_name(GameWorld *g, int num)
     return ("UNDEFINED");
 }
 
-int find_skill_num(GameWorld *g, char *name, int sktype)
+int find_skill_num(GameWorld *g, std::string_view name, int sktype)
 {
-  int skindex, ok;
-  char *temp, *temp2;
-  char first[MAX_INPUT_LENGTH], first2[MAX_INPUT_LENGTH], tempbuf[256];
+  for (int skindex = 0; skindex < SKILL_TABLE_SIZE; skindex++) {
+    const spell_info_type &skill = g->spell_info[skindex];
+    if (!(skill.skilltype & sktype))
+      continue;
+    if (is_abbrev(name, skill.name))
+      return skindex;
 
-  for (skindex = 0; skindex < SKILL_TABLE_SIZE; skindex++) {
-    if (is_abbrev(name, g->spell_info[skindex].name) && (g->spell_info[skindex].skilltype & sktype)) {
-      return (skindex);
-    }
-
-    ok = true;
-    copy_cstr(tempbuf, g->spell_info[skindex].name, sizeof(tempbuf));
-    temp  = any_one_arg(tempbuf, first);
-    temp2 = any_one_arg(name, first2);
-    while (*first && *first2 && ok) {
+    /* each word of name abbreviating the matching word of the skill's */
+    bool ok                     = true;
+    std::string_view skill_rest = skill.name, name_rest = name;
+    std::string first = take_word(skill_rest), first2 = take_word(name_rest);
+    while (!first.empty() && !first2.empty() && ok) {
       if (!is_abbrev(first2, first))
         ok = false;
-      temp  = any_one_arg(temp, first);
-      temp2 = any_one_arg(temp2, first2);
+      first  = take_word(skill_rest);
+      first2 = take_word(name_rest);
     }
-
-    if (ok && !*first2 && (g->spell_info[skindex].skilltype & sktype)) {
-      return (skindex);
-    }
+    if (ok && first2.empty())
+      return skindex;
   }
 
   return (-1);

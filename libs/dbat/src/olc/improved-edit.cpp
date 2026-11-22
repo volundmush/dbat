@@ -153,7 +153,7 @@ namespace {
          */
         char temp;
         if (*flow && strchr("\n\r", *flow)) {
-          *flow = '\0'; /* ends the word; quirk: left there, so a later count_color_chars(start) reads on past it */
+          *flow = '\0'; /* ends the word, and is left there */
           flow++;
           if (*flow == '\n' && i++ >= high)
             pass_line = 1;
@@ -175,6 +175,7 @@ namespace {
           color_chars = count_color_chars(start);
         }
 
+        std::string word = start;
         if (!cap_next) {
           if (line_chars > 0) {
             formatted += " ";
@@ -182,11 +183,11 @@ namespace {
           }
         } else {
           cap_next = false;
-          CAP(start);
+          CAP(word);
         }
 
-        line_chars += strlen(start);
-        formatted += start;
+        line_chars += word.size();
+        formatted += word;
 
         *flow = temp;
       }

@@ -1014,7 +1014,7 @@ namespace {
       apply.specific = affect_checked_specific(apply.location, parse_int(line));
     else if (apply.location == APPLY_SKILL) {
       std::string name(line);
-      if (const int skill = find_skill_num(g, name.data(), SKTYPE_SKILL); skill > -1)
+      if (const int skill = find_skill_num(g, name, SKTYPE_SKILL); skill > -1)
         apply.specific = skill;
     } else if (apply.location == APPLY_FEAT) {
       if (const int feat = find_feat_num(g, line); feat > -1)

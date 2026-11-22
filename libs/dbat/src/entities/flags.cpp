@@ -61,11 +61,10 @@ std::string sprintbitarray(bitvector_t bitvector[], const char *const names[], i
   return flag_list(std::move(out));
 }
 
-int get_flag_by_name(const char *const flag_list[], char *flag_name)
+int get_flag_by_name(const char *const flag_list[], std::string_view flag_name)
 {
-  int i = 0;
-  for (; flag_list[i] && *flag_list[i] && strcmp(flag_list[i], "\n") != 0; i++)
-    if (!strcmp(flag_list[i], flag_name))
+  for (int i = 0; flag_list[i] && *flag_list[i] && std::string_view(flag_list[i]) != "\n"; i++)
+    if (flag_list[i] == flag_name)
       return (i);
   return (NOFLAG);
 }

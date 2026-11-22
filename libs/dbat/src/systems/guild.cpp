@@ -151,7 +151,7 @@ ACMD(do_teach)
     return;
   }
 
-  skill = find_skill_num(g, arg.data(), SKTYPE_SKILL);
+  skill = find_skill_num(g, arg, SKTYPE_SKILL);
 
   if (skill < 0 || skill >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
@@ -731,7 +731,7 @@ static void handle_forget(GameWorld *g, struct char_data *keeper, struct guild_d
     return;
   }
 
-  skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text, SKTYPE_SKILL);
 
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
@@ -780,7 +780,7 @@ static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_da
     return;
   }
 
-  skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text, SKTYPE_SKILL);
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
@@ -841,7 +841,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
     return;
   }
 
-  skill_num = find_skill_num(g, text.data(), SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text, SKTYPE_SKILL);
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;

@@ -96,38 +96,36 @@ void store_mail(GameWorld *g, long to, long from, char *message_pointer)
  *
  * Retrieves the first letter waiting for a player, which is then discarded.
  */
-static char *read_delete(GameWorld *g, long recipient, char **from)
+static std::string read_delete(GameWorld *g, long recipient)
 {
   if (recipient < 0) {
     mud_log("SYSERR: Mail system -- non-fatal error #6. (recipient: {:d})", recipient);
-    return (nullptr);
+    return {};
   }
   auto letter = std::ranges::find_if(g->mail, [&](const mail_letter &m) { return m.to == recipient; });
   if (letter == g->mail.end()) {
     mud_log("SYSERR: Mail system -- post office spec_proc error?  Error #7. (invalid character in index)");
-    return (nullptr);
+    return {};
   }
   mail_letter m = std::move(*letter);
   g->mail.erase(letter);
 
-  char *tmstr                  = asctime(localtime(&m.time));
-  *(tmstr + strlen(tmstr) - 1) = '\0';
+  std::string_view stamp = asctime(localtime(&m.time));
+  stamp.remove_suffix(1); /* its '\n' */
 
-  if (m.from != -1337) {
-    *from = get_name_by_id(g, m.from);
-  } else {
-    *from = strdup("Auctioneer");
-  }
-  char *to = get_name_by_id(g, recipient);
-
-  if (*from == nullptr) {
-    *from = strdup("Unknown");
-  }
+  /* a player's name capitalised, or what to call them if they're gone */
+  auto name_of = [g](long id, const char *otherwise) {
+    const char *name = get_name_by_id(g, id);
+    std::string text = name ? name : otherwise;
+    return CAP(text);
+  };
+  std::string from = m.from != -1337 ? name_of(m.from, "Unknown") : std::string("Auctioneer");
+  std::string to   = name_of(recipient, "Unknown");
 
   std::string buf = str_format(" @D* * * * @CGalactic Mail System @D* * * *\r\n@cDate@D:@w {}\r\n  @cTo@D:@G {}\r\n@cFrom@D:@R {}\r\n\r\n@w{}@n",
-                               tmstr, to ? CAP(to) : "Unknown", *from ? CAP(*from) : "Unknown", m.text);
+                               stamp, to, from, m.text);
   commit_mail(g);
-  return strdup(buf.c_str());
+  return buf;
 }
 
 /****************************************************************
@@ -221,7 +219,6 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
   std::string buf;
   struct obj_data *obj;
   int y;
-  char *from;
 
   if (!has_mail(g, char_get_idnum(ch)) && mailman != nullptr) {
     buf = "$n tells you, 'Sorry, you don't have any mail waiting.'";
@@ -240,7 +237,7 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
     obj_set_weight(obj, 1);
     obj_set_cost(obj, 30);
     obj_set_cost_per_day(obj, 10);
-    obj_set_action_description(obj, take_string(read_delete(g, char_get_idnum(ch), &from)));
+    obj_set_action_description(obj, read_delete(g, char_get_idnum(ch)));
     std::string bla;
     std::string blm;
     bla = "@WA piece of mail@n";

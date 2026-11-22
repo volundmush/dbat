@@ -88,27 +88,6 @@ int get_number(std::string &name)
   return parse_int(number);
 }
 
-/*
- * Runs find on name as a std::string, then writes back what it made of it, as the char * forms have always
- * changed the caller's name in place. It is never longer: an "N." gone, a letter capitalised.
- */
-template <class F>
-static auto in_place(char *name, F find)
-{
-  std::string text = name;
-  auto found       = find(text);
-  if (text != name) {
-    assert(text.size() <= strlen(name));
-    memcpy(name, text.c_str(), text.size() + 1);
-  }
-  return found;
-}
-
-int get_number(char **name)
-{
-  return in_place(*name, [](std::string &s) { return get_number(s); });
-}
-
 /* Search a given list for an object number, and return a ptr to that obj */
 struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, const id_list &list)
 {
@@ -413,21 +392,6 @@ int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &na
         return (j);
 
   return (-1);
-}
-
-struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, char *name, int *number)
-{
-  return in_place(name, [&](std::string &s) { return get_char_room_vis(g, ch, s, number); });
-}
-
-struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, char *name, int *number, const id_list &list)
-{
-  return in_place(name, [&](std::string &s) { return get_obj_in_list_vis(g, ch, s, number, list); });
-}
-
-struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, char *arg, int *number, struct obj_data *equipment[])
-{
-  return in_place(arg, [&](std::string &s) { return get_obj_in_equip_vis(g, ch, s, number, equipment); });
 }
 
 /* a function to scan for "all" or "all.x" */

@@ -7,6 +7,7 @@
 
 #include "dbat/descriptor_utils.hpp"
 #include "dbat/context_help.hpp"
+#include "dbat/args.hpp"
 #include "dbat/io/paths.hpp"
 #include "dbat/io/reader.hpp"
 #include "dbat/act.informative.hpp"
@@ -24,31 +25,31 @@
 static const char NO_HELP[]        = "No help available (yet)!\r\n";
 constexpr int FIND_HELP_CHAR = '*';
 
-bool context_help(GameWorld *g, struct descriptor_data *d, char *arg)
+bool context_help(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  int context = NOTHING;
-  char actbuf[MAX_INPUT_LENGTH], *tmp;
+  constexpr size_t most = MAX_INPUT_LENGTH - 1; /* of the topic, as the line it was read into held */
+  int context           = NOTHING;
+
   /* skip if context help isn't wanted */
-  if (strncmp(arg, CONTEXT_HELP_STRING, strlen(CONTEXT_HELP_STRING)))
+  if (!arg.starts_with(CONTEXT_HELP_STRING))
     return false;
 
-  tmp = one_argument(arg, actbuf); /* the totally useless 'help' string.. */
-  skip_spaces(&tmp);
+  std::string_view topic = arg;
+  take_arg(topic); /* the totally useless 'help' string.. */
+  topic = skip_spaces(topic);
 
-  if (!*tmp)
+  if (topic.empty())
     context = d->olc ? d->olc->help_context(d) : NOTHING;
 
   if (context != NOTHING && context < NUM_CONTEXTS && *g->context_help_list[context]) {
-    if (*g->context_help_list[context] == FIND_HELP_CHAR) {
-      copy_cstr(actbuf, g->context_help_list[context] + 1, sizeof(actbuf));
-      do_help(g, d->character, actbuf, 0, 0);
-    } else {
-      write_to_output(g, d, "\r\n{}\r\n>  ", g->context_help_list[context]);
-    }
+    std::string_view help = g->context_help_list[context];
+    if (help.front() == FIND_HELP_CHAR)
+      do_help(g, d->character, help.substr(1, most), 0, 0);
+    else
+      write_to_output(g, d, "\r\n{}\r\n>  ", help);
     return true;
   }
-  copy_cstr(actbuf, tmp, sizeof(actbuf));
-  do_help(g, d->character, actbuf, 0, 0);
+  do_help(g, d->character, topic.substr(0, most), 0, 0);
   return true;
 }
 

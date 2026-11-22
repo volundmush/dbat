@@ -56,7 +56,7 @@ result named_flag(const field_query &q, const char *const names[], auto &&flagge
 {
   if (!q.has_arg())
     return "0";
-  int flag = get_flag_by_name(names, q.arg());
+  int flag = get_flag_by_name(names, q.subfield);
   return yes_no(flag != NOFLAG && flagged(flag));
 }
 
@@ -251,7 +251,7 @@ const field<char_data> char_fields[] = {
     {"sex", [](const field_query &, char_data *c) -> result { return str_format("{}", genders[(int)char_get_sex(c)]); }},
     {"size", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg()) {
-         int ns = search_block(q.arg(), size_names, false);
+         int ns = search_block(q.subfield, size_names, false);
          if (ns > -1)
            char_set_size(c, ns);
        }
@@ -264,7 +264,7 @@ const field<char_data> char_fields[] = {
          std::string skillname = take_quoted(rest);
          rest                  = skip_spaces(rest);
          if (!rest.empty() && is_number(rest)) {
-           int skillnum = find_skill_num(q.g, skillname.data(), SKTYPE_SKILL);
+           int skillnum = find_skill_num(q.g, skillname, SKTYPE_SKILL);
            if (skillnum > 0)
              char_set_skills_base(c, skillnum, std::max(0, std::min(100, atoi(std::string(rest).c_str()))));
          }

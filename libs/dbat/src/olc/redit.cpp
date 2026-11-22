@@ -319,7 +319,7 @@ namespace {
 
       case mode::exit_skill: {
         std::string name(line);
-        exit().dcskill = std::max(find_skill_num(g, name.data(), SKTYPE_SKILL), 0);
+        exit().dcskill = std::max(find_skill_num(g, name, SKTYPE_SKILL), 0);
         exit_menu(g, d);
         return;
       }

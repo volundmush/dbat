@@ -552,15 +552,13 @@ static void check_objects_off_the_ground(void)
 
 static void check_get_number(void)
 {
-  char text[]  = "2.a long enough name to overlap";
-  char plain[] = "bread";
-  char *name   = text;
+  std::string name = "2.a long enough name to overlap";
 
-  CHECK(get_number(&name) == 2);
-  CHECK(!strcmp(name, "a long enough name to overlap"));
-  name = plain;
-  CHECK(get_number(&name) == 1);
-  CHECK(!strcmp(name, "bread"));
+  CHECK(get_number(name) == 2);
+  CHECK(name == "a long enough name to overlap");
+  name = "bread";
+  CHECK(get_number(name) == 1);
+  CHECK(name == "bread");
 }
 
 /* A toplist file of 25 places loads into the 25 places, and nothing past them. */

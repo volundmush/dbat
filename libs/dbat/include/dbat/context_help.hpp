@@ -5,7 +5,7 @@
 
 /* The help an OLC prompt gives for "help" alone: text/contexthelp has an entry for each of these, the number the
    editor's session gives for what it is asking (olc_session::help_context) */
-#define CONTEXT_HELP_STRING "help"
+constexpr std::string_view CONTEXT_HELP_STRING = "help";
 
 constexpr int CONTEXT_OEDIT_MAIN_MENU             = 1;
 constexpr int CONTEXT_OEDIT_EDIT_NAMELIST         = 2;
@@ -150,7 +150,8 @@ constexpr int CONTEXT_GEDIT_SELECT_LANGS          = 139;
 /* includes number 0 */
 constexpr int NUM_CONTEXTS = 140;
 
-bool context_help(GameWorld *g, struct descriptor_data *d, char *arg);
+/* "help" typed at an OLC prompt: the help for what it asks, or for the words after it. False for any other line. */
+bool context_help(GameWorld *g, struct descriptor_data *d, std::string_view arg);
 void boot_context_help(GameWorld *g);
 void free_context_help(GameWorld *g);
 

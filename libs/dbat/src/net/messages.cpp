@@ -144,7 +144,7 @@ void send_to_room(GameWorld *g, room_vnum room, std::string_view text)
 static const char *const ACTNULL = "<NULL>";
 
 /* what $N and the rest give: "<NULL>" for nothing */
-static const char *or_null(const char *text) { return text ? text : ACTNULL; }
+static std::string_view or_null(const char *text) { return text ? text : ACTNULL; }
 
 /* higher-level communication: the act() function */
 static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)
@@ -173,7 +173,7 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
       add(*orig);
       continue;
     }
-    const char *i = nullptr;
+    std::string_view i;
     switch (*++orig) {
       case 'n':
         i = char_pers(g, ch, to);
@@ -204,10 +204,10 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
         dg_victim = (const struct char_data *)vict_obj;
         break;
       case 'o':
-        i = obj ? or_null(obj_fname_for(g, obj, to)) : ACTNULL;
+        i = obj ? obj_fname_for(g, obj, to) : ACTNULL;
         break;
       case 'O':
-        i = vict_obj ? or_null(obj_fname_for(g, (const struct obj_data *)vict_obj, to)) : ACTNULL;
+        i = vict_obj ? obj_fname_for(g, (const struct obj_data *)vict_obj, to) : ACTNULL;
         dg_target = (const struct obj_data *)vict_obj;
         break;
       case 'p':
@@ -232,7 +232,7 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
         i = obj ? or_null((char *)obj) : ACTNULL;
         break;
       case 'F':
-        i = vict_obj ? or_null(fname((const char *)vict_obj)) : ACTNULL;
+        i = vict_obj ? fname((const char *)vict_obj) : ACTNULL;
         break;
       /* uppercase previous word */
       case 'u': {
@@ -255,8 +255,8 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
         return;
         break;
     }
-    for (; *i; i++)
-      add(*i);
+    for (char c : i)
+      add(c);
   }
   text += "\r\n";
 

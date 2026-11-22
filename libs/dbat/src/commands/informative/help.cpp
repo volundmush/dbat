@@ -159,7 +159,7 @@ ACMD(do_help)
     for (const auto &entry : g->help_table) {
       if (entry.min_level > char_get_admlevel(ch) || text[0] != *entry.keywords.c_str())
         continue;
-      if (levenshtein_distance(text.c_str(), entry.keywords.c_str()) > 2)
+      if (levenshtein_distance(text, entry.keywords) > 2)
         continue;
       if (!found)
         send_to_char(g, ch, "\r\nDid you mean:\r\n");

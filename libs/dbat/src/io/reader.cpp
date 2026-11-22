@@ -258,7 +258,7 @@ bool fields::literal(char c)
   return true;
 }
 
-bitvector_t ascii_flags(std::string_view word, int first_letter_bit, const char *who)
+bitvector_t ascii_flags(std::string_view word, int first_letter_bit, std::string_view who)
 {
   bitvector_t flags = 0;
   bool is_num = true, warned = false;

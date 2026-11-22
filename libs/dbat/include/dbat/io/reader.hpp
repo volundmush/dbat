@@ -63,7 +63,7 @@ long long c_atoll(std::string_view text);
 /* A flags word as asciiflag_conv() reads it: letters a-z for the bits from first_letter_bit (0, or 1 for the old
    affect flags) and A-F for bits 26-31, or a number if it is only digits and '-'. Other capitals are ignored, the
    first of them logged, naming what is read as who. */
-bitvector_t ascii_flags(std::string_view word, int first_letter_bit, const char *who);
+bitvector_t ascii_flags(std::string_view word, int first_letter_bit, std::string_view who);
 
 /* Reads a line's fields one at a time, as sscanf() reads its conversions: each passes over the spaces before it,
    and once one fails the rest fail too. count() is how many were read, as sscanf() returns it (but 0, not EOF, when

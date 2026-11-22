@@ -1059,9 +1059,12 @@ namespace {
   constexpr room_vnum AUCTION_HOUSE = 80;
   constexpr time_t BIDDING_TIME     = 86400;
 
-  const char *name_or_nobody(GameWorld *g, long id)
+  /* the player's name capitalised, leaving the player table's lowercase name alone, or "Nobody" */
+  std::string name_or_nobody(GameWorld *g, long id)
   {
-    return get_name_by_id(g, id) != nullptr ? CAP(get_name_by_id(g, id)) : "Nobody";
+    const char *name = get_name_by_id(g, id);
+    std::string text = name ? name : "Nobody";
+    return CAP(text);
   }
 
   bool on_auction(struct obj_data *obj) { return obj_get_aucter(obj) > 0; }
@@ -1088,7 +1091,7 @@ namespace {
       if (!on_auction(obj))
         continue;
       at++;
-      const char *owner = name_or_nobody(g, obj_get_aucter(obj));
+      std::string owner = name_or_nobody(g, obj_get_aucter(obj));
       std::string item  = printf_width(obj_get_short_description(obj), count_color_chars(obj_get_short_description(obj)) + 30, true);
       bool bid_on       = obj_get_curBidder(obj) > -1;
       std::string state;

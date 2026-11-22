@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <numeric>
+#include <vector>
 #include <climits>
 #include <cstdarg>
 #include <cstdio>
@@ -11,53 +13,33 @@
 #include "dbat/log.hpp"
 #include "dbat/consts/maximums.hpp"
 
-int levenshtein_distance(const char *s1, const char *s2)
+int levenshtein_distance(std::string_view s1, std::string_view s2)
 {
-  int s1_len = strlen(s1), s2_len = strlen(s2);
-  int **d, i, j;
+  /* the edit distances from s1's first i letters to each start of s2, a row at a time */
+  std::vector<int> above(s2.size() + 1), row(s2.size() + 1);
 
-  d = new int *[s1_len + 1]();
-  for (i = 0; i <= s1_len; i++) {
-    d[i]    = new int[s2_len + 1]();
-    d[i][0] = i;
+  std::ranges::iota(above, 0);
+  for (size_t i = 1; i <= s1.size(); i++) {
+    row[0] = static_cast<int>(i);
+    for (size_t j = 1; j <= s2.size(); j++)
+      row[j] = std::min({above[j] + 1, row[j - 1] + 1, above[j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : 1)});
+    std::swap(above, row);
   }
-
-  for (j = 0; j <= s2_len; j++)
-    d[0][j] = j;
-  for (i = 1; i <= s1_len; i++)
-    for (j = 1; j <= s2_len; j++)
-      d[i][j] = MIN(d[i - 1][j] + 1, MIN(d[i][j - 1] + 1,
-                                         d[i - 1][j - 1] + ((s1[i - 1] == s2[j - 1]) ? 0 : 1)));
-
-  i = d[s1_len][s2_len];
-
-  for (j = 0; j <= s1_len; j++)
-    delete[] d[j];
-  delete[] d;
-
-  return i;
+  return above[s2.size()];
 }
 
-int count_color_chars(const char *string)
+int count_color_chars(std::string_view text)
 {
-  int i, len;
   int num = 0;
 
-  if (!string || !*string)
-    return 0;
-
-  len = strlen(string);
-  for (i = 0; i < len; i++) {
-    while (string[i] == '@') {
-      if (string[i + 1] == '@') {
-        num++;
-      } else if (string[i + 1] == '[') {
-        num += 4;
-      } else {
-        num += 2;
-      }
-      i += 2;
+  for (size_t i = 0; i < text.size();) {
+    if (text[i] != '@') {
+      i++;
+      continue;
     }
+    char code = i + 1 < text.size() ? text[i + 1] : '\0';
+    num += code == '@' ? 1 : code == '[' ? 4 : 2;
+    i += 2;
   }
   return num;
 }
@@ -75,46 +57,25 @@ void trim(std::string &s)
   s.erase(0, start);
 }
 
-/* Turns number into string and adds commas to it. */
-char *add_commas(int64_t num)
+std::string add_commas(int64_t num)
 {
-  constexpr int DIGITS_PER_GROUP  = 3;
-  constexpr int BUFFER_COUNT      = 19;
-  constexpr int DIGITS_PER_BUFFER = 25;
+  std::string digits = str_format("{:d}", num);
+  size_t first       = num < 0; /* no comma straight after the sign */
+  std::string out;
 
-  int64_t i, j, len, negative = (num < 0);
-  static char comma_string[BUFFER_COUNT][DIGITS_PER_BUFFER];
-  static int64_t which = 0;
-
-  std::string num_string = str_format("{:d}", num);
-  len                    = static_cast<int64_t>(num_string.size());
-
-  for (i = j = 0; num_string[i]; ++i) {
-    if ((len - i) % DIGITS_PER_GROUP == 0 && i && i - negative)
-      comma_string[which][j++] = ',';
-    comma_string[which][j++] = num_string[i];
+  for (size_t i = 0; i < digits.size(); i++) {
+    if (i > first && (digits.size() - i) % 3 == 0)
+      out += ',';
+    out += digits[i];
   }
-  comma_string[which][j] = '\0';
-
-  i     = which;
-  which = (which + 1) % BUFFER_COUNT;
-
-  return comma_string[i];
+  return out;
 }
 
-#define IS_COLOR_CHAR(c) (c == 'n' || c == 'b' || c == 'B' || c == 'c' ||                         \
-                          c == 'C' || c == 'g' || c == 'G' || c == 'm' || c == 'M' || c == 'r' || \
-                          c == 'R' || c == 'y' || c == 'Y' || c == 'w' || c == 'W' || c == 'k' || \
-                          c == 'K' || c == '0' || c == '2' || c == '3' || c == '4' || c == '5' || \
-                          c == '6' || c == '7' || c == 'o' || c == 'e' || c == 'u' || c == 'l')
-
-char *CAP(char *txt)
+/* the letter of a colour code ("@r"), which CAP() passes over */
+static bool is_colour_letter(char c)
 {
-  int i;
-  for (i = 0; txt[i] != '\0' && (txt[i] == '@' && IS_COLOR_CHAR(txt[i + 1])); i += 2);
-
-  txt[i] = toupper(txt[i]);
-  return (txt);
+  static constexpr std::string_view letters = "nbBcCgGmMrRyYwWkK0234567oeul";
+  return c != '\0' && letters.contains(c);
 }
 
 /* Removes the line endings from the end of txt. */
@@ -122,50 +83,6 @@ void prune_crlf(std::string &txt)
 {
   while (!txt.empty() && (txt.back() == '\n' || txt.back() == '\r'))
     txt.pop_back();
-}
-
-char *one_argument(char *argument, char *first_arg)
-{
-  char *begin = first_arg;
-
-  if (!argument) {
-    *first_arg = '\0';
-    return (nullptr);
-  }
-
-  do {
-    skip_spaces(&argument);
-
-    first_arg = begin;
-    while (*argument && !isspace(*argument)) {
-      *(first_arg++) = tolower(*argument);
-      argument++;
-    }
-
-    *first_arg = '\0';
-  } while (is_fill_word(begin));
-
-  return (argument);
-}
-
-/* same as one_argument except that it doesn't ignore fill words */
-char *any_one_arg(char *argument, char *first_arg)
-{
-  skip_spaces(&argument);
-
-  while (*argument && !isspace(*argument)) {
-    *(first_arg++) = tolower(*argument);
-    argument++;
-  }
-
-  *first_arg = '\0';
-
-  return (argument);
-}
-
-void skip_spaces(char **string)
-{
-  for (; **string && isspace(**string); (*string)++);
 }
 
 /*
@@ -198,67 +115,10 @@ void delete_doubledollar(std::string &s)
  * it to be returned.  Returns -1 if not found; 0..n otherwise.  Array
  * must be terminated with a '\n' so it knows to stop searching.
  */
-int search_block(char *arg, const char *const *list, int exact)
+std::string_view fname(std::string_view namelist)
 {
-  int i, l;
-
-  /*  We used to have \r as the first character on certain array items to
-   *  prevent the explicit choice of that point.  It seems a bit silly to
-   *  dump control characters into arrays to prevent that, so we'll just
-   *  check in here to see if the first character of the argument is '!',
-   *  and if so, just blindly return a '-1' for not found. - ae.
-   */
-  if (*arg == '!')
-    return (-1);
-
-  /* Make into lower case, and get length of string */
-  for (l = 0; *(arg + l); l++)
-    *(arg + l) = tolower(*(arg + l));
-
-  if (exact) {
-    for (i = 0; **(list + i) != '\n'; i++)
-      if (!strcmp(arg, *(list + i)))
-        return (i);
-  } else {
-    if (!l)
-      l = 1; /* Avoid "" to match the first available
-				 * string */
-    for (i = 0; **(list + i) != '\n'; i++)
-      if (!strncmp(arg, *(list + i), l))
-        return (i);
-  }
-
-  return (-1);
-}
-
-bool is_number(const char *str)
-{
-  while (*str)
-    if (!isdigit(*(str++)))
-      return false;
-
-  return true;
-}
-
-char *fname(const char *namelist)
-{
-  static char holder[READ_SIZE];
-  char *point;
-
-  for (point = holder; isalpha(*namelist); namelist++, point++)
-    *point = *namelist;
-
-  *point = '\0';
-
-  return (holder);
-}
-
-void search_replace(char *string, const char *find, const char *replace)
-{
-  std::string text = string;
-
-  search_replace(text, find, replace);
-  strcpy(string, text.c_str()); /* the caller's buffer holds the result, as it always had to */
+  auto letters = std::ranges::find_if_not(namelist, [](unsigned char c) { return std::isalpha(c); });
+  return namelist.substr(0, static_cast<size_t>(letters - namelist.begin()));
 }
 
 void search_replace(std::string &s, std::string_view find, std::string_view replace)
@@ -295,7 +155,7 @@ char *str_alloc(size_t n)
 std::string &CAP(std::string &txt)
 {
   size_t i = 0;
-  while (i + 1 < txt.size() && txt[i] == '@' && IS_COLOR_CHAR(txt[i + 1]))
+  while (i + 1 < txt.size() && txt[i] == '@' && is_colour_letter(txt[i + 1]))
     i += 2;
   if (i < txt.size())
     txt[i] = toupper((unsigned char)txt[i]);

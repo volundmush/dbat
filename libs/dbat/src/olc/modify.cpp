@@ -260,7 +260,7 @@ ACMD(do_skillset)
   std::string skillname(rest.substr(1, close - 1));
   for (char &c : skillname)
     c = tolower(c);
-  if ((skill = find_skill_num(g, skillname.data(), SKTYPE_SKILL)) <= 0) {
+  if ((skill = find_skill_num(g, skillname, SKTYPE_SKILL)) <= 0) {
     send_to_char(g, ch, "Unrecognized skill.\r\n");
     return;
   }

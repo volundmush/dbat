@@ -97,7 +97,7 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
 
   /* spellnum = search_block(s, spells, 0); */
   std::string spell_name(*spell);
-  spellnum = find_skill_num(g, spell_name.data(), SKTYPE_SPELL);
+  spellnum = find_skill_num(g, spell_name, SKTYPE_SPELL);
   if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE || (!IS_SET(skill_type(g, spellnum), SKTYPE_SPELL)))) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_cast: invalid spell name ({})",
                trig->name, trig_get_vnum(g, trig), cmd);
@@ -360,7 +360,7 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, std::string_
       break;
     case 2: { /* flags       */
       std::string flags(value);
-      newexit->exit_info = (int16_t)io::ascii_flags(flags.data(), 0, "asciiflag_conv");
+      newexit->exit_info = (int16_t)io::ascii_flags(flags, 0, "asciiflag_conv");
       break;
     }
     case 3: /* key         */

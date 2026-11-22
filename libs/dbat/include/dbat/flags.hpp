@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <string_view>
 
 #include "dbat/consts/types.hpp"
 
@@ -11,7 +12,8 @@ std::string sprinttype(int type, const char *const names[]);
 /* sprintbit() for an array of maxar bitvectors, read up to the end of names; a set bit whose name is "" is left out */
 std::string sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar);
 
-int get_flag_by_name(const char *const flag_list[], char *flag_name);
+/* The place of flag_name in flag_list, exactly as it is there, or NOFLAG */
+int get_flag_by_name(const char *const flag_list[], std::string_view flag_name);
 
 #define Q_FIELD(x) ((x) / 32)
 #define Q_BIT(x)   (1U << ((x) % 32))

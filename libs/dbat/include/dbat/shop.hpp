@@ -194,7 +194,7 @@ bool shop_producing(GameWorld *g, struct obj_data *item, struct shop_data *shop)
 void assign_the_shopkeepers(GameWorld *g);
 bool ok_shop_room(GameWorld *g, struct shop_data *shop, room_vnum room);
 void destroy_shops(GameWorld *g);
-void show_shops(GameWorld *g, struct char_data *ch, char *arg);
+void show_shops(GameWorld *g, struct char_data *ch, std::string_view arg);
 int count_shops(GameWorld *g, shop_vnum low, shop_vnum high);
 
 // special

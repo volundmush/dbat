@@ -8,18 +8,21 @@
 
 #include "dbat/consts/types.hpp"
 
-int levenshtein_distance(const char *s1, const char *s2);
+/* How many letters must be added, removed or changed to turn s1 into s2 */
+int levenshtein_distance(std::string_view s1, std::string_view s2);
 /* s without the spaces and tabs at either end */
 void trim(std::string &s);
-char *add_commas(int64_t num);
-char *CAP(char *txt);
-/* txt with its first letter capitalised, passing over leading colour codes, as CAP(char *) does */
+/* num with a comma between each group of three digits: 1,234,567 */
+std::string add_commas(int64_t num);
+/* txt with its first letter capitalised, passing over leading colour codes */
 std::string &CAP(std::string &txt);
 void prune_crlf(std::string &txt);
 
-int count_color_chars(const char *string);
-char *any_one_arg(char *argument, char *first_arg);
-char *one_argument(char *argument, char *first_arg);
+/* How many of text's characters are colour codes, which take no room on the screen: 1 for "@@" (one "@" shows),
+   4 for "@[" and 2 for any other "@" code, a lone "@" at the end included */
+int count_color_chars(std::string_view text);
+/* count_color_chars() for a getter that gives null for no text, until they give std::string_views */
+inline int count_color_chars(const char *text) { return text ? count_color_chars(std::string_view(text)) : 0; }
 /* Whether arg1 is a non-empty start of arg2, ignoring case */
 bool is_abbrev(std::string_view arg1, std::string_view arg2);
 /* Whether a and b are the same ignoring case, as strcasecmp() finds them */
@@ -29,17 +32,15 @@ bool str_eq_nocase(std::string_view a, std::string_view b);
 void copy_cstr(char *dst, std::string_view src, size_t size);
 /* The number s starts with, read as atoi() reads it: leading whitespace and a sign allowed, the rest ignored */
 int parse_int(std::string_view s);
-void skip_spaces(char **string);
 /* s with each "$$" made "$" */
 void delete_doubledollar(std::string &s);
-int search_block(char *arg, const char *const *list, int exact);
-/* search_block() without lowercasing arg in place */
+/* The place of arg in list, a table ended by "\n", ignoring case: the whole entry if exact, else the first that
+   starts with arg. -1 if there is none, or if arg starts with '!'. */
 int search_block(std::string_view arg, const char *const *list, int exact);
-bool is_number(const char *str);
 bool is_number(std::string_view str);
-char *fname(const char *namelist);
-void search_replace(char *string, const char *find, const char *replace);
-/* Replaces the first find in s, then searches again from the start, until none is left, as the char * version does
+/* The first keyword of a name list: its leading letters */
+std::string_view fname(std::string_view namelist);
+/* Replaces the first find in s, then searches again from the start, until none is left
  * (so replace must not contain find; an empty find changes nothing). */
 void search_replace(std::string &s, std::string_view find, std::string_view replace);
 /* s, a malloc'd string (null for none), as a std::string; s is freed */
