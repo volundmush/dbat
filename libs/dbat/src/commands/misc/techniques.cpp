@@ -345,8 +345,8 @@ namespace {
       return; /* quirk: lastattack stays 500 */
     }
     decCurKI(g, ch, cost, 0);
-    act(g, str_format("@BUsing your ki you create a rush of water flooding away toward the @C{}@B!@n", dirs[dir]).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, str_format("@B$n@B uses $s ki to create a rush of water flooding away toward the @C{}@B!@n", dirs[dir]).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, str_format("@BUsing your ki you create a rush of water flooding away toward the @C{}@B!@n", dirs[dir]), true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, str_format("@B$n@B uses $s ki to create a rush of water flooding away toward the @C{}@B!@n", dirs[dir]), true, ch, nullptr, nullptr, TO_ROOM);
     for (char_data *vict : room_people(g, char_get_in_room(ch)))
       if (vict != ch)
         flood_over(g, ch, vict, dir, cost);

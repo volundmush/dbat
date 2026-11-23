@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 #include "dbat/consts/types.hpp"
 #include "dbat/format.hpp"
@@ -76,13 +77,20 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::format_
 {
   send_to_range(g, start, finish, str_format(fmt, std::forward<Args>(args)...));
 }
-const char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+/* Sends str, with its $ codes filled in, to those type names. Nothing is sent for an empty str. The message made,
+   or null if none has been made yet (it is the last one made, even when none was sent this time: a quirk). */
+const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+/* No char pointer for act()'s message, which could be null: a std::string, a view or a literal */
+template <class P>
+  requires(!std::is_array_v<std::remove_reference_t<P>> &&
+           (std::is_same_v<std::decay_t<P>, const char *> || std::is_same_v<std::decay_t<P>, char *>))
+void act(GameWorld *g, P &&str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type) = delete;
 /* The three messages of an act() at a victim: to the actor, to the victim and to everyone else, and act()'s
- * hide_invisible for them. A null one isn't sent. */
+ * hide_invisible for them. An empty one isn't sent. */
 struct act_msgs {
-  const char *to_char{};
-  const char *to_vict{};
-  const char *to_room{};
+  std::string_view to_char{};
+  std::string_view to_vict{};
+  std::string_view to_room{};
   bool hide{};
 };
 /* act() of each of m in turn: to ch, to vict, then to the rest of the room */

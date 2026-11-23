@@ -81,8 +81,8 @@ static void act_to_room(GameWorld *g, std::string_view str, room_data *room)
      * (just dont use $n or you might get strange results)
      */
   std::string text(str);
-  act(g, text.c_str(), false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_ROOM);
-  act(g, text.c_str(), false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_CHAR);
+  act(g, text, false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_ROOM);
+  act(g, text, false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_CHAR);
 }
 
 /* World commands */

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdlib>
 
+#include "dbat/io/reader.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/args.hpp"
@@ -34,7 +35,7 @@ std::string yes_no(bool b) { return b ? "1" : "0"; }
 result ability(const field_query &q, char_data *c, int8_t (*get)(const char_data *), void (*set)(char_data *, int8_t))
 {
   if (q.has_arg()) {
-    set(c, get(c) + atoi(q.arg()));
+    set(c, get(c) + parse_int(q.subfield));
     if (get(c) > 100)
       set(c, 100);
     if (get(c) < 3)
@@ -47,7 +48,7 @@ result ability(const field_query &q, char_data *c, int8_t (*get)(const char_data
 result condition(const field_query &q, char_data *c, int which)
 {
   if (q.has_arg())
-    char_set_conditions(q.g, c, which, std::max(-1, std::min(atoi(q.arg()), 24)));
+    char_set_conditions(q.g, c, which, std::max(-1, std::min(parse_int(q.subfield), 24)));
   return number(char_get_conditions(q.g, c, which));
 }
 
@@ -75,7 +76,7 @@ void change_points(const field_query &q, char_data *c, int64_t (*inc)(GameWorld 
               int64_t (*dec)(GameWorld *, char_data *, int64_t, int64_t))
 {
   if (q.has_arg()) {
-    int64_t addition = atoll(q.arg());
+    int64_t addition = io::c_atoll(q.subfield);
     if (addition > 0)
       inc(q.g, c, addition, true);
     else
@@ -87,7 +88,7 @@ void change_points(const field_query &q, char_data *c, int64_t (*inc)(GameWorld 
 std::string uid_or_none(const char_data *c) { return c ? uid_text(char_get_id(c)) : ""; }
 
 /* What a skill is at, by name */
-std::string skill_percent(GameWorld *g, char_data *ch, char *skill)
+std::string skill_percent(GameWorld *g, char_data *ch, std::string_view skill)
 {
   int skillnum = find_skill_num(g, skill, SKTYPE_SKILL);
   if (skillnum <= 0)
@@ -96,7 +97,7 @@ std::string skill_percent(GameWorld *g, char_data *ch, char *skill)
 }
 
 /* Whether ch has item, worn or carried, by UID, vnum or name, looking in containers too */
-bool char_has_item(GameWorld *g, const char *item, char_data *ch)
+bool char_has_item(GameWorld *g, std::string_view item, char_data *ch)
 {
   if (get_object_in_equip(g, ch, item) != nullptr)
     return true;
@@ -112,12 +113,12 @@ const field<char_data> char_fields[] = {
     {"alias", [](const field_query &, char_data *c) -> result { return str_format("{}", char_get_pc_name(c)); }},
     {"align", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg())
-         char_set_alignment(c, std::max(-1000, std::min(atoi(q.arg()), 1000)));
+         char_set_alignment(c, std::max(-1000, std::min(parse_int(q.subfield), 1000)));
        return number(char_get_alignment(c));
      }},
     {"bank", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg())
-         char_set_bank_gold(c, char_get_bank_gold(c) + atoi(q.arg()));
+         char_set_bank_gold(c, char_get_bank_gold(c) + parse_int(q.subfield));
        return number(char_get_gold(c)); /* quirk: what's on hand, not in the bank */
      }},
     {"canbeseen", [](const field_query &q, char_data *c) -> result {
@@ -152,7 +153,7 @@ const field<char_data> char_fields[] = {
      }},
     {"exp", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg())
-         gain_exp(q.g, c, std::min<int64_t>(atoll(q.arg()), 2100000000));
+         gain_exp(q.g, c, std::min<int64_t>(io::c_atoll(q.subfield), 2100000000));
        return number(char_get_exp(c));
      }},
     {"fighting", [](const field_query &q, char_data *c) -> result { return uid_or_none(char_get_fighting(q.g, c)); }},
@@ -168,11 +169,11 @@ const field<char_data> char_fields[] = {
      }},
     {"gold", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg())
-         char_set_gold(c, char_get_gold(c) + atoi(q.arg()));
+         char_set_gold(c, char_get_gold(c) + parse_int(q.subfield));
        return number(char_get_gold(c));
      }},
     {"has_item", [](const field_query &q, char_data *c) -> result {
-       return q.has_arg() ? number(char_has_item(q.g, q.arg(), c)) : "";
+       return q.has_arg() ? number(char_has_item(q.g, q.subfield, c)) : "";
      }},
     {"heshe", [](const field_query &, char_data *c) -> result { return str_format("{}", char_hssh(c)); }},
     {"himher", [](const field_query &, char_data *c) -> result { return str_format("{}", char_hmhr(c)); }},
@@ -190,7 +191,7 @@ const field<char_data> char_fields[] = {
        if (!q.has_arg()) /* the newest thing carried */
          return char_get_inventory(c) ? uid_text(char_get_inventory(c).newest()) : "";
        for (obj_data *obj : char_inventory(q.g, c))
-         if (obj_get_vnum(q.g, obj) == atoi(q.arg()))
+         if (obj_get_vnum(q.g, obj) == parse_int(q.subfield))
            return uid_text(obj_get_id(obj));
        return "";
      }},
@@ -219,7 +220,7 @@ const field<char_data> char_fields[] = {
     {"pos", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg()) /* sleeping, resting, sitting, fighting or standing, or the start of one */
          for (int i = POS_SLEEPING; i <= POS_STANDING; i++)
-           if (!strncasecmp(q.arg(), position_types[i], q.subfield.size())) {
+           if (!compare_nocase_n(q.subfield, position_types[i], q.subfield.size())) {
              char_set_position(c, i);
              break;
            }
@@ -229,9 +230,9 @@ const field<char_data> char_fields[] = {
        if (char_is_npc(c) && char_get_in_room(c) != NOWHERE)
          send_to_room(q.g, char_get_in_room(c), "Error!: Report this trigger error to the coding authorities!\r\n");
        if (q.has_arg()) {
-         int points = char_get_practice_points(q.g, c) + atoi(q.arg());
+         int points = char_get_practice_points(q.g, c) + parse_int(q.subfield);
          if (points >= 0) /* quirk: read again, as the MAX macro did, which an NPC logs a second time */
-           points = char_get_practice_points(q.g, c) + atoi(q.arg());
+           points = char_get_practice_points(q.g, c) + parse_int(q.subfield);
          char_set_practice_points(q.g, c, std::max(0, points));
        }
        return number(char_get_practice_points(q.g, c));
@@ -245,7 +246,7 @@ const field<char_data> char_fields[] = {
      }},
     {"rpp", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg())
-         char_set_rp(c, char_get_rp(c) + atoi(q.arg()));
+         char_set_rp(c, char_get_rp(c) + parse_int(q.subfield));
        return number(char_get_rp(c));
      }},
     {"sex", [](const field_query &, char_data *c) -> result { return str_format("{}", genders[(int)char_get_sex(c)]); }},
@@ -257,7 +258,7 @@ const field<char_data> char_fields[] = {
        }
        return sprinttype(get_size(c), size_names);
      }},
-    {"skill", [](const field_query &q, char_data *c) -> result { return skill_percent(q.g, c, q.arg()); }},
+    {"skill", [](const field_query &q, char_data *c) -> result { return skill_percent(q.g, c, q.subfield); }},
     {"skillset", [](const field_query &q, char_data *c) -> result { /* skillset("<skill name>" <amount>) */
        if (!char_is_npc(c) && q.has_arg()) {
          std::string_view rest = q.subfield;
@@ -279,7 +280,7 @@ const field<char_data> char_fields[] = {
      }},
     {"vnum", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg())
-         return number(char_is_npc(c) ? (int)(char_get_mob_vnum(q.g, c) == atoi(q.arg())) : -1);
+         return number(char_is_npc(c) ? (int)(char_get_mob_vnum(q.g, c) == parse_int(q.subfield)) : -1);
        /* -1 for a player, which is deprecated: %actor.is_pc% says so --Welcor 09/03 */
        return char_is_npc(c) ? number(char_get_mob_vnum(q.g, c)) : "-1";
      }},
@@ -287,7 +288,7 @@ const field<char_data> char_fields[] = {
     {"wis", [](const field_query &q, char_data *c) { return ability(q, c, char_get_aff_abils_wis, char_set_aff_abils_wis); }},
     {"zenni", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg())
-         char_set_gold(c, char_get_gold(c) + atoi(q.arg()));
+         char_set_gold(c, char_get_gold(c) + parse_int(q.subfield));
        return number(char_get_gold(c));
      }},
 };

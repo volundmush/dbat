@@ -1013,7 +1013,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
 
     if (char_get_listenroom(i) > 0) {
       std::string eaves = str_format("@w...$e is spying on everything to the @c{}@w.", dirs[char_get_eavesdir(i)]);
-      act(g, eaves.c_str(), true, i, nullptr, ch, TO_VICT);
+      act(g, eaves, true, i, nullptr, ch, TO_VICT);
     }
     if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
       act(g, "...$e is in the air!", false, i, nullptr, ch, TO_VICT);
@@ -1039,7 +1039,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       act(g, "@m...$e @mis outlined with purple fire!@m", false, i, nullptr, ch, TO_VICT);
     if (!char_get_feature(i).empty()) {
       std::string woo = str_format("@C{}@n", char_get_feature(i));
-      act(g, woo.c_str(), false, i, nullptr, ch, TO_VICT);
+      act(g, woo, false, i, nullptr, ch, TO_VICT);
     }
 
     return;
@@ -1314,7 +1314,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
 
   if (char_get_listenroom(i) > 0) {
     std::string eaves = str_format("@w...$e is spying on everything to the @c{}@w.", dirs[char_get_eavesdir(i)]);
-    act(g, eaves.c_str(), true, i, nullptr, ch, TO_VICT);
+    act(g, eaves, true, i, nullptr, ch, TO_VICT);
   }
   if (!char_is_npc(i)) {
     if (char_plr_flagged(i, PLR_FISHING)) {
@@ -1323,7 +1323,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   }
   if (char_plr_flagged(i, PLR_AURALIGHT)) {
     std::string bloom = str_format("...is surrounded by a bright {} aura.@n", aura_types[char_get_aura(i)]);
-    act(g, bloom.c_str(), true, i, nullptr, ch, TO_VICT);
+    act(g, bloom, true, i, nullptr, ch, TO_VICT);
   }
   if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
     act(g, "@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, TO_VICT);
@@ -1348,14 +1348,14 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   if (char_get_charge(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
     std::string aura;
     aura = str_format("@w...$e has a @Ybright@w {} aura around $s body!", aura_types[char_get_aura(i)]);
-    act(g, aura.c_str(), true, i, nullptr, ch, TO_VICT);
+    act(g, aura, true, i, nullptr, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act(g, "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
     std::string aura;
     aura = str_format("@w...$e has a @Ybright@w {} aura around $s body!", aura_types[char_get_aura(i)]);
-    act(g, aura.c_str(), true, i, nullptr, ch, TO_VICT);
+    act(g, aura, true, i, nullptr, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
@@ -1369,13 +1369,13 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     act(g, "@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
   if (!char_get_feature(i).empty()) {
     std::string woo = str_format("@C{}@n", char_get_feature(i));
-    act(g, woo.c_str(), false, i, nullptr, ch, TO_VICT);
+    act(g, woo, false, i, nullptr, ch, TO_VICT);
   }
 
   if (!char_get_rdisplay(i).empty()) {
     if (char_get_rdisplay(i) != "Empty") {
       std::string rdis = str_format("...{}", char_get_rdisplay(i));
-      act(g, rdis.c_str(), false, i, nullptr, ch, TO_VICT);
+      act(g, rdis, false, i, nullptr, ch, TO_VICT);
     }
   }
 }

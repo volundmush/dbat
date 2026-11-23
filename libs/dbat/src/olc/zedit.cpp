@@ -773,13 +773,12 @@ namespace {
 
   void new_zone(GameWorld *g, struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top)
   {
-    const char *error;
-    struct zone_data *result = create_new_zone(g, vzone_num, bottom, top, &error);
+    std::expected<zone_data *, std::string_view> result = create_new_zone(g, vzone_num, bottom, top);
     if (!result) {
-      write_to_output(g, char_get_desc(ch), "{}", error);
+      write_to_output(g, char_get_desc(ch), result.error());
       return;
     }
-    save_zone(g, result);
+    save_zone(g, *result);
     mudlog(g, LOG_BRF, MAX(ADMLVL_BUILDER, char_get_invis_level(g, ch)), true, "OLC: {} creates new zone #{:d}", char_get_name(ch), vzone_num);
     write_to_output(g, char_get_desc(ch), "Zone created successfully.\r\n");
   }

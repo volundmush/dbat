@@ -8,8 +8,6 @@ using social_message = std::optional<std::string>;
 
 /* m as text, empty for none */
 inline std::string_view message_text(const social_message &m) { return m ? std::string_view(*m) : std::string_view(); }
-/* m as act() takes it, null for none, until act() takes a view */
-inline const char *message_cstr(const social_message &m) { return m ? m->c_str() : nullptr; }
 
 /* used in the socials */
 struct social_messg {

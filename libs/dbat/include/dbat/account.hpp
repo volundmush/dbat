@@ -37,6 +37,6 @@ void each_account_field(Account &a, F &&f)
 /* Reads the account file at path over a, field by field; false if it can't be opened */
 bool read_account_file(const std::string &path, account &a);
 /* Writes a to name's account file; false, and logged, if it couldn't */
-bool write_account(const char *name, const account &a);
+bool write_account(std::string_view name, const account &a);
 /* True if name is on the lockout list (the "lockout" intro file) */
 bool lockRead(std::string_view name);

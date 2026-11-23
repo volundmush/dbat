@@ -287,7 +287,7 @@ ACMD(do_arena)
     for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING || !char_in_arena(g, d->character))
         continue;
-      act(g, str_format("@YFighter Number@D: @w{:d}, $N.@n", char_get_idnum(d->character)).c_str(), true, ch, nullptr, d->character, TO_CHAR);
+      act(g, str_format("@YFighter Number@D: @w{:d}, $N.@n", char_get_idnum(d->character)), true, ch, nullptr, d->character, TO_CHAR);
       found = true;
     }
     if (!found)

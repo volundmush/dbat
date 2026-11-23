@@ -688,7 +688,7 @@ static void shadow_dragons_live(GameWorld *g)
 }
 
 /* For announcing the sounds of battle to nearby rooms */
-void impact_sound(GameWorld *g, struct char_data *ch, const char *mssg)
+void impact_sound(GameWorld *g, struct char_data *ch, std::string_view mssg)
 {
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)

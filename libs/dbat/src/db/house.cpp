@@ -284,7 +284,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string
     send_to_char(g, ch, "{}", HCONTROL_FORMAT);
     return;
   }
-  if ((owner = get_id_by_name(g, arg1.c_str())) < 0) {
+  if ((owner = get_id_by_name(g, arg1)) < 0) {
     send_to_char(g, ch, "Unknown player '{}'.\r\n", arg1);
     return;
   }
@@ -406,7 +406,7 @@ ACMD(do_house)
     send_to_char(g, ch, "Only the primary owner can set guests.\r\n");
   else if (arg.empty())
     House_list_guests(g, ch, i, false);
-  else if ((id = get_id_by_name(g, arg.c_str())) < 0)
+  else if ((id = get_id_by_name(g, arg)) < 0)
     send_to_char(g, ch, "No such player.\r\n");
   else if (id == char_get_idnum(ch))
     send_to_char(g, ch, "It's your house!\r\n");

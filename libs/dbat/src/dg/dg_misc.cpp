@@ -139,7 +139,7 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
     return;
   }
 
-  char *arg = victim ? victim->data() : nullptr;
+  std::string_view arg = victim ? std::string_view(*victim) : std::string_view();
   if (!caster) {
     caster = read_mobile(g, DG_CASTER_PROXY);
     if (!caster) {

@@ -26,7 +26,7 @@
 #include "nanny_internal.hpp"
 
 /* Reads name's account over a, saying so in the log if its file can't be read. */
-static bool load_account(const char *name, account &a)
+static bool load_account(std::string_view name, account &a)
 {
   auto path = player_path(USER_FILE, name);
 
@@ -47,7 +47,7 @@ void empty_account_slots_named(struct descriptor_data *d, std::string_view name)
       slot = "Empty";
 }
 
-void userLoad(struct descriptor_data *d, const char *name)
+void userLoad(struct descriptor_data *d, std::string_view name)
 {
   load_account(name, d->acct);
 }
@@ -114,7 +114,7 @@ void reward_offline_user(GameWorld *g, const std::string &name, int amt)
 {
   account a;
 
-  if (!load_account(name.c_str(), a))
+  if (!load_account(name, a))
     return;
   bool canceled = amt != 0 && a.rpp + amt < 0;
   if (!canceled)

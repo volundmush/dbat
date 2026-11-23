@@ -4,7 +4,7 @@
 // functions
 void timed_dt(GameWorld *g, struct char_data *ch);
 void run_autowiz(GameWorld *g);
-void set_title(GameWorld *g, struct char_data *ch, const char *title);
+void set_title(GameWorld *g, struct char_data *ch, std::string_view title);
 void gain_level(GameWorld *g, struct char_data *ch, int whichclass);
 void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain);
 void gain_exp_regardless(GameWorld *g, struct char_data *ch, int64_t gain);

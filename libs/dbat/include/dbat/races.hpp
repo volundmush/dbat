@@ -24,7 +24,7 @@ bool race_exists(int r);
 std::string_view race_name(int r);
 bool race_valid_sex(int r, int sex);
 bool race_can_be_mimiced(int r);
-int race_find(const char *arg, int sex, bool pc_only);
+int race_find(std::string_view arg, int sex, bool pc_only);
 bool race_rpp_cost(int r);
 bool race_rpp_refund(int r);
 

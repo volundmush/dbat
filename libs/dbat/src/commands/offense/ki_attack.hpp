@@ -115,8 +115,8 @@ struct ki_attack {
   act_msgs miss_spent;    /* when the victim had no stamina left to avoid it */
   act_msgs hits[6];       /* by where it landed, 1-5 from roll_hitloc() (or 1-6 from locate) */
   const ki_spot *spots{}; /* what each of those is; null for roll_hitloc()'s body, head, body, arm, leg */
-  const char *obj_to_char{};
-  const char *obj_to_room{};
+  std::string_view obj_to_char{};
+  std::string_view obj_to_room{};
   bool obj_hide{}; /* act()'s hide_invisible for those two */
 
   /* each may be null */

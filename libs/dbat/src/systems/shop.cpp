@@ -877,7 +877,7 @@ static void shopping_buy(GameWorld *g, std::string &arg, struct char_data *ch, s
   tempstr = times_message(first_obj(g, char_get_inventory(ch)), {}, bought);
 
   tempbuf = str_format("$n buys {}.", tempstr);
-  act(g, tempbuf.c_str(), false, ch, obj, nullptr, TO_ROOM);
+  act(g, tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
   tempbuf = npc_message(shop->message_buy, char_get_name(ch), goldamt);
   do_tell(g, keeper, tempbuf.c_str(), g->cmd_tell, 0);
@@ -1049,7 +1049,7 @@ static void shopping_sell(GameWorld *g, std::string &arg, struct char_data *ch, 
   }
   tempstr = times_message(nullptr, name, sold);
   tempbuf = str_format("$n sells something to {}.\r\n", char_get_name(keeper));
-  act(g, tempbuf.c_str(), false, ch, obj, nullptr, TO_ROOM);
+  act(g, tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
   tempbuf = npc_message(shop->message_sell, char_get_name(ch), goldamt);
   do_tell(g, keeper, tempbuf.c_str(), g->cmd_tell, 0);
@@ -1207,8 +1207,8 @@ SPECIAL(shop_keeper)
 
     if (!shop_allows_steal(shop)) {
       argm = str_format("$N shouts '{}'", MSG_NO_STEAL_HERE);
-      act(g, argm.c_str(), false, ch, nullptr, keeper, TO_CHAR);
-      act(g, argm.c_str(), false, ch, nullptr, keeper, TO_ROOM);
+      act(g, argm, false, ch, nullptr, keeper, TO_CHAR);
+      act(g, argm, false, ch, nullptr, keeper, TO_ROOM);
       do_action(g, keeper, char_get_name(ch), g->cmd_slap, 0);
 
       return (true);

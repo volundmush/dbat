@@ -130,7 +130,7 @@ static std::string board_path(obj_vnum vnum)
 /* The memory[] bucket for a message. A deleted poster has id -1, which can make the sum negative. */
 static int memory_slot(GameWorld *g, const struct board_msg *msg)
 {
-  int slot = (msg->timestamp % BOARD_MEMORY_SLOTS + get_id_by_name(g, msg->name.c_str()) % BOARD_MEMORY_SLOTS) % BOARD_MEMORY_SLOTS;
+  int slot = (msg->timestamp % BOARD_MEMORY_SLOTS + get_id_by_name(g, msg->name) % BOARD_MEMORY_SLOTS) % BOARD_MEMORY_SLOTS;
 
   return slot < 0 ? slot + BOARD_MEMORY_SLOTS : slot;
 }
@@ -814,6 +814,6 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
   board->num_messages--;
   send_to_char(g, ch, "Message removed.\r\n");
   buf = str_format("$n just removed message {:d}.", arg);
-  act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, false, ch, nullptr, nullptr, TO_ROOM);
   save_board(g, board);
 }

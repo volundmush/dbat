@@ -390,7 +390,7 @@ void strain_broken_arm(GameWorld *g, struct char_data *ch)
 {
   static constexpr struct {
     int arm, other;
-    const char *strained, *to_char, *to_room;
+    std::string_view strained, to_char, to_room;
   } ARMS[] = {
       {0, 1, "Using your broken right arm has damaged it more!@n\r\n", "@RYour right arm has fallen apart!@n", "@r$n@R's right arm has fallen apart!@n"},
       {1, 0, "Using your broken left arm has damaged it more!@n\r\n", "@RYour left arm has fallen apart!@n", "@r$n@R's left arm has fallen apart!@n"},

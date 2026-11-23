@@ -36,7 +36,7 @@ ACMD(do_teach);
 std::string print_skills_by_type(GameWorld *g, struct char_data *ch, int sktype, std::string_view argument);
 int rpp_to_level(struct char_data *ch);
 int slot_count(struct char_data *ch);
-void show_guild(GameWorld *g, struct char_data *ch, char *arg);
+void show_guild(GameWorld *g, struct char_data *ch, std::string_view arg);
 void handle_ingest_learn(GameWorld *g, struct char_data *ch, struct char_data *vict);
 void list_skills(GameWorld *g, struct char_data *ch, std::string_view arg);
 int count_guilds(GameWorld *g, guild_vnum low, guild_vnum high);

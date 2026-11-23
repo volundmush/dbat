@@ -17,7 +17,7 @@ bool is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
 int find_feat_num(GameWorld *g, std::string_view name);
 void assign_feats(GameWorld *g);
 void sort_feats(GameWorld *g);
-bool feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);
+bool feat_is_available(struct char_data *ch, int featnum, int iarg);
 
 
 /* Feats defined below up to MAX_FEATS */

@@ -136,6 +136,6 @@ std::shared_ptr<const program> lex(std::string_view script, std::string_view if_
 void parse(program &p);
 
 /* Whether the wait command can read arg, the text after 'wait' */
-bool readable_wait(const char *arg);
+bool readable_wait(std::string_view arg);
 
 } // namespace dg

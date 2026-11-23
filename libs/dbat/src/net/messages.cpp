@@ -147,14 +147,13 @@ static const char *const ACTNULL = "<NULL>";
 static std::string_view or_null(const char *text) { return text ? text : ACTNULL; }
 
 /* higher-level communication: the act() function */
-static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)
+static void perform_act(GameWorld *g, std::string_view orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)
 {
   constexpr size_t room             = MAX_STRING_LENGTH - 3; /* the most of the message kept, before its "\r\n" */
   std::string text;
   bool uppercasenext                = false;
   const struct char_data *dg_victim = nullptr;
   const struct obj_data *dg_target  = nullptr;
-  const char *dg_arg                = nullptr;
 
   /* Adds c, if there's room (what doesn't fit is left off), capitalised if it's the first that isn't a space since
      a $U */
@@ -168,14 +167,14 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
     text += c;
   };
 
-  for (; *orig; orig++) {
-    if (*orig != '$') {
-      add(*orig);
+  for (size_t at = 0; at < orig.size(); at++) {
+    if (orig[at] != '$') {
+      add(orig[at]);
       continue;
     }
     std::string_view i;
     std::string held; /* what i views, when it is made here */
-    switch (*++orig) {
+    switch (++at < orig.size() ? orig[at] : '\0') { /* a '$' at the end is an unknown code, as its '\0' was */
       case 'n':
         i = held = char_pers(g, ch, to);
         break;
@@ -227,7 +226,6 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
         break;
       case 'T':
         i = vict_obj ? or_null((const char *)vict_obj) : ACTNULL;
-        dg_arg = (const char *)vict_obj;
         break;
       case 't':
         i = obj ? or_null((char *)obj) : ACTNULL;
@@ -266,7 +264,7 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
     write_to_output(g, char_get_desc(to), "{}", CAP(text));
 
   if ((char_is_npc(to) && g->dg_act_check) && (to != ch))
-    act_mtrigger(g, to, text, ch, dg_victim, obj, dg_target, dg_arg);
+    act_mtrigger(g, to, text, ch, dg_victim, obj, dg_target);
 
   g->last_act_message = std::move(text);
 }
@@ -293,17 +291,18 @@ void act_triple_vict_last(GameWorld *g, const act_msgs &m, struct char_data *ch,
 
 /* The message the last act() made, which act() returns even when it sent nothing this time (quirk), or nullptr if
    there has been none */
-static const char *last_act_message(const GameWorld *g)
+static const std::string *last_act_message(const GameWorld *g)
 {
-  return g->last_act_message.empty() ? nullptr : g->last_act_message.c_str();
+  return g->last_act_message.empty() ? nullptr : &g->last_act_message;
 }
 
-const char *act(GameWorld *g, const char *str, int hide_invisible, struct char_data *ch,
-                struct obj_data *obj, const void *vict_obj, int type)
+const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, struct char_data *ch,
+                       struct obj_data *obj, const void *vict_obj, int type)
 {
   int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
 
-  if (!str || !*str)
+  str = str.substr(0, str.find('\0')); /* the message ends at a '\0', as a C string did */
+  if (str.empty())
     return nullptr;
 
   /* Warning: the following TO_SLEEP code is a hack. I wanted to be able to tell
@@ -370,9 +369,9 @@ const char *act(GameWorld *g, const char *str, int hide_invisible, struct char_d
           !room_flagged(g, char_get_in_room(i->character), ROOM_SOUNDPROOF)) {
 
         buf = str_format("@y{}@n", str);
-        perform_act(g, buf.c_str(), ch, obj, vict_obj, i->character);
+        perform_act(g, buf, ch, obj, vict_obj, i->character);
         std::string buf2 = str_format("{}\r\n", buf);
-        add_history(g, i->character, buf2.c_str(), HIST_GOSSIP);
+        add_history(g, i->character, buf2, HIST_GOSSIP);
       }
     }
     return last_act_message(g);
@@ -401,7 +400,7 @@ const char *act(GameWorld *g, const char *str, int hide_invisible, struct char_d
             if (arena_watch(g, d->character) == char_get_in_room(ch)) {
               std::string buf3;
               buf3 = str_format("@c-----@CArena@c-----@n\r\n{}\r\n@c-----@CArena@c-----@n\r\n", str);
-              perform_act(g, buf3.c_str(), ch, obj, vict_obj, d->character);
+              perform_act(g, buf3, ch, obj, vict_obj, d->character);
             }
           }
         }
@@ -412,11 +411,11 @@ const char *act(GameWorld *g, const char *str, int hide_invisible, struct char_d
           if (ch != nullptr && char_get_listenroom(d->character) == char_get_in_room(ch) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
             std::string buf3;
             buf3 = str_format("-----Eavesdrop-----\r\n{}\r\n-----Eavesdrop-----\r\n", str);
-            perform_act(g, buf3.c_str(), ch, obj, vict_obj, d->character);
+            perform_act(g, buf3, ch, obj, vict_obj, d->character);
           } else if (obj != nullptr && char_get_listenroom(d->character) == obj_get_in_room(obj) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
             std::string buf3;
             buf3 = str_format("-----Eavesdrop-----\r\n{}\r\n-----Eavesdrop-----\r\n", str);
-            perform_act(g, buf3.c_str(), ch, obj, vict_obj, d->character);
+            perform_act(g, buf3, ch, obj, vict_obj, d->character);
           }
         }
       }

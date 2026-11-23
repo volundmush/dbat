@@ -15,7 +15,7 @@ void update_obj_file(GameWorld *g);
 void delete_inv_backup(struct char_data *ch);
 bool Crash_delete_file(std::string_view name);
 bool Crash_delete_crashfile(struct char_data *ch);
-void Crash_listrent(GameWorld *g, struct char_data *ch, char *name);
+void Crash_listrent(GameWorld *g, struct char_data *ch, std::string_view name);
 int Crash_load(GameWorld *g, struct char_data *ch);
 void Crash_crashsave(GameWorld *g, struct char_data *ch);
 void Crash_save_all(GameWorld *g);

@@ -78,7 +78,7 @@ void land(ki_shot &s)
   if (atk.aim)
     where = atk.aim(s, where);
   s.where = where;
-  if (where < 1 || where > 6 || !atk.hits[where - 1].to_char)
+  if (where < 1 || where > 6 || atk.hits[where - 1].to_char.empty())
     return;
   ki_act(s, atk.hits[where - 1]);
   if (atk.strike && atk.strike(s, where))
@@ -156,7 +156,7 @@ ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge,
         pay(s, ki_outcome::absorbed);
       return ki_outcome::absorbed;
     }
-    if (atk.parry.to_char && pry > rand_number(g, 1, 140) &&
+    if (!atk.parry.to_char.empty() && pry > rand_number(g, 1, 140) &&
         (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, MOB_DUMMY))) {
       ki_act(s, atk.parry);
       if (atk.on_parry) {

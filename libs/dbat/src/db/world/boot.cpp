@@ -149,7 +149,7 @@ void index_boot(GameWorld *g, int mode)
   }
 }
 
-io::loaded<void> read_records(io::text_reader &in, const char *label,
+io::loaded<void> read_records(io::text_reader &in, std::string_view label,
                               const std::function<io::loaded<void>(io::text_reader &, int)> &read)
 {
   int vnum = -1;

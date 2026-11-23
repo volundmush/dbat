@@ -222,7 +222,7 @@ io_result receive_some(native_handle h, std::span<char> into)
   return {io_status::failed};
 }
 
-void report_error(const char *what) { perror(what); }
+void report_error(std::string_view what) { perror(std::string(what).c_str()); }
 
 void poll_set::clear() { entries_.clear(); }
 

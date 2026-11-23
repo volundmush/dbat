@@ -231,7 +231,7 @@ static OCMD(do_osend)
 
       if (std::string_view who = char_get_name(ch); !who.empty()) /* empty for a mob with no short description */
         search_replace(text, who, "$n");
-      act(g, text.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, text, true, ch, nullptr, nullptr, TO_ROOM);
     }
   }
 

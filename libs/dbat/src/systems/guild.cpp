@@ -219,9 +219,9 @@ ACMD(do_teach)
     tochar  = str_format("@YYou instruct @y$N@Y in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
     tovict  = str_format("@y$n@Y instructs you in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
     toother = str_format("@y$n@Y instructs @y$N@Y in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
-    act(g, tochar.c_str(), true, ch, nullptr, vict, TO_CHAR);
-    act(g, tovict.c_str(), true, ch, nullptr, vict, TO_VICT);
-    act(g, toother.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
+    act(g, tochar, true, ch, nullptr, vict, TO_CHAR);
+    act(g, tovict, true, ch, nullptr, vict, TO_VICT);
+    act(g, toother, true, ch, nullptr, vict, TO_NOTVICT);
     char_set_skills_base(vict, skill, char_get_skills_base(vict, skill) + 1);
     if (free == false) {
       char_set_practice_points(g, vict, char_get_practice_points(g, vict) - (cost));
@@ -598,7 +598,7 @@ static void what_does_guild_know(GameWorld *g, struct guild_data *guild_nr, stru
 
   for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
     i = g->feat_sort_info[sortpos];
-    if (does_guild_know_feat(g, guild_nr, i) && feat_is_available(ch, i, 0, nullptr) && g->feat_list[i].in_game && g->feat_list[i].can_learn) {
+    if (does_guild_know_feat(g, guild_nr, i) && feat_is_available(ch, i, 0) && g->feat_list[i].in_game && g->feat_list[i].can_learn) {
       buf2 += str_format("@b{:<20}@n\r\n", g->feat_list[i].name);
     }
   }
@@ -1231,16 +1231,16 @@ static void list_detailed_guild(GameWorld *g, struct char_data *ch, struct guild
   send_to_char(g, ch, buf);
 }
 
-void show_guild(GameWorld *g, struct char_data *ch, char *arg)
+void show_guild(GameWorld *g, struct char_data *ch, std::string_view arg)
 {
   struct guild_data *gm_nr;
   room_vnum gm_num;
 
-  if (!*arg)
+  if (arg.empty())
     list_all_guilds(g, ch);
   else {
     if (is_number(arg))
-      gm_num = atoi(arg);
+      gm_num = parse_int(arg);
     else
       gm_num = -1;
 

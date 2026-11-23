@@ -19,31 +19,26 @@ static struct obj_data *find_obj_by_uid_in_lookup_table(GameWorld *g, long uid);
 
 /* Return pointer to first occurrence of string ct in */
 /* cs, or NULL if not present.  Case insensitive */
-const char *str_str(const char *cs, const char *ct)
+bool str_str(std::string_view cs, std::string_view ct)
 {
-  const char *s, *t;
+  if (ct.empty())
+    return false;
 
-  if (!cs || !ct || !*ct)
-    return nullptr;
-
-  while (*cs) {
-    t = ct;
-
-    while (*cs && (tolower(*cs) != tolower(*t)))
-      cs++;
-
-    s = cs;
-
-    while (*t && *cs && (tolower(*cs) == tolower(*t))) {
+  auto same = [](char a, char b) { return tolower(static_cast<unsigned char>(a)) == tolower(static_cast<unsigned char>(b)); };
+  size_t c = 0;
+  while (c < cs.size()) {
+    while (c < cs.size() && !same(cs[c], ct.front()))
+      c++;
+    /* quirk: after a partial match the search goes on from where it failed, not from the next character */
+    size_t t = 0;
+    while (t < ct.size() && c < cs.size() && same(cs[c], ct[t])) {
       t++;
-      cs++;
+      c++;
     }
-
-    if (!*t)
-      return s;
+    if (t == ct.size())
+      return true;
   }
-
-  return nullptr;
+  return false;
 }
 
 int trgvar_in_room(GameWorld *g, room_vnum vnum)
@@ -647,12 +642,12 @@ void dg_log_uid_stats(GameWorld *g)
           (long)(g->characters.size() + g->objects.size()));
 }
 
-int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *const namelist[])
+int check_flags_by_name_ar(bitvector_t *array, int numflags, std::string_view search, const char *const namelist[])
 {
   int i, item = -1;
 
   for (i = 0; i < numflags && item < 0; i++)
-    if (!strcmp(search, namelist[i]))
+    if (search == namelist[i])
       item = i;
 
   if (item < 0)

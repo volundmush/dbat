@@ -105,7 +105,7 @@ static void copyover_recover_player(GameWorld *g, const folded_player &p)
   char_make_player_specials(d->character);
   char_set_desc(d->character, d);
 
-  if ((player_i = load_char(g, p.name.c_str(), d->character)) >= 0 && !char_plr_flagged(d->character, PLR_DELETED)) {
+  if ((player_i = load_char(g, p.name, d->character)) >= 0 && !char_plr_flagged(d->character, PLR_DELETED)) {
     char_set_pfilepos(d->character, player_i);
     char_plr_set(d->character, PLR_WRITING, false);
     char_plr_set(d->character, PLR_MAILING, false);

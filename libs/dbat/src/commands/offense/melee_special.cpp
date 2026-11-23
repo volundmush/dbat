@@ -16,6 +16,7 @@
 #include "dbat/spells.hpp"
 #include "dbat/techniques.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/stringutils.hpp"
 #include "ki_attack.hpp"
 #include "strike.hpp"
 
@@ -80,14 +81,14 @@ int slam_cooldown(strike_shot &s)
 
 /* What the room shows of an impact: a null is nothing */
 struct scenery {
-  const char *to_char{};
-  const char *to_room{}; /* if not to_char */
+  std::string_view to_char{};
+  std::string_view to_room{}; /* if not to_char */
 };
 
 void show(const strike_shot &s, const scenery &sc)
 {
   act(s.g, sc.to_char, true, s.ch, nullptr, s.vict, TO_CHAR);
-  act(s.g, sc.to_room ? sc.to_room : sc.to_char, true, s.ch, nullptr, s.vict, TO_ROOM);
+  act(s.g, or_if_empty(sc.to_room, sc.to_char), true, s.ch, nullptr, s.vict, TO_ROOM);
 }
 
 /* A slam to the head throws the victim down, which can knock them out, and into the ground, which craters it */
@@ -327,7 +328,7 @@ void bite_victim(GameWorld *g, struct char_data *ch, struct char_data *vict, int
   if (prob < perc - 20) {
     if (getCurST(g, vict) <= 0) { /* quirk: the biter isn't told */
       act_triple(g,
-                 {nullptr, "@C$n@W moves to bite you, but misses!@n",
+                 {{}, "@C$n@W moves to bite you, but misses!@n",
                   "@c$n@W moves to bite @C$N@W, but somehow misses!@n", true},
                  ch, nullptr, vict);
       pcost(g, ch, 0, stcost / 2);

@@ -143,7 +143,7 @@ ACMD(do_osay)
   }
   std::string mine   = str_format("@WYou @D[@mOSAY@D] @W'@w{}@W'@n", argument);
   std::string theirs = str_format("@W{} @D[@mOSAY@D] @W'@w{}@W'@n", char_prf_flagged(g, ch, PRF_HIDE) ? "Anonymous" : public_name(ch), argument);
-  act_triple(g, {mine.c_str(), nullptr, theirs.c_str()}, ch, nullptr, nullptr);
+  act_triple(g, {mine.c_str(), {}, theirs.c_str()}, ch, nullptr, nullptr);
 }
 
 namespace {
@@ -209,10 +209,10 @@ ACMD(do_say)
   const char *verb      = say_verb(text);
   struct char_data *sch = addressed(g, ch, text);
   if (!sch) {
-    act(g, str_format("@w$n @W{}s, '@C{}@W'@n", verb, text).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, str_format("@w$n @W{}s, '@C{}@W'@n", verb, text), true, ch, nullptr, nullptr, TO_ROOM);
   } else {
-    act(g, str_format("@w$n @Wsays to @gyou@W, '@C{}@W'@n", text).c_str(), true, ch, nullptr, sch, TO_VICT);
-    act(g, str_format("@w$n @Wsays to @g$N@W, '@C{}@W'@n", text).c_str(), true, ch, nullptr, sch, TO_NOTVICT);
+    act(g, str_format("@w$n @Wsays to @gyou@W, '@C{}@W'@n", text), true, ch, nullptr, sch, TO_VICT);
+    act(g, str_format("@w$n @Wsays to @g$N@W, '@C{}@W'@n", text), true, ch, nullptr, sch, TO_NOTVICT);
   }
 
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
@@ -220,7 +220,7 @@ ACMD(do_say)
   } else {
     std::string said = str_format("@WYou {}, '@C{}@W'@n\r\n", verb, text);
     send_to_char(g, ch, said);
-    add_history(g, ch, said.c_str(), HIST_SAY);
+    add_history(g, ch, said, HIST_SAY);
     /* quirk: with norepeat on, Shenron doesn't hear wishes */
     if (!shenron_hears(g, ch, text))
       return;
@@ -240,7 +240,7 @@ namespace {
     if (!char_aff_flagged(who, AFF_GROUP) || who == ch || !char_is_awake(who))
       return;
     if (!CONFIG_ENABLE_LANGUAGES) {
-      act(g, as_act.c_str(), true, ch, nullptr, who, garbled ? TO_VICT | TO_SLEEP : TO_VICT);
+      act(g, as_act, true, ch, nullptr, who, garbled ? TO_VICT | TO_SLEEP : TO_VICT);
       return;
     }
     /* quirk: the garbling of what's said piles up, from each follower to the next */
@@ -297,7 +297,7 @@ namespace {
     send_to_char(g, vict, heard);
     /* a mob's tell is kept in the history only when languages are on */
     if (CONFIG_ENABLE_LANGUAGES || !char_is_npc(ch))
-      add_history(g, vict, heard.c_str(), HIST_TELL);
+      add_history(g, vict, heard, HIST_TELL);
 
     if (char_is_npc(ch) || char_prf_flagged(g, ch, PRF_NOREPEAT)) {
       send_to_char(g, ch, CONFIG_OK);
@@ -306,7 +306,7 @@ namespace {
       if (char_get_admlevel(ch) < 5 && char_get_admlevel(vict) < 5 && !char_is_npc(vict))
         send_to_imm(g, "@GTELL: @C{}@G tells @c{}, @W'@w{}@W'@n", public_name(ch), public_name(vict), arg);
       send_to_char(g, ch, told);
-      add_history(g, ch, told.c_str(), HIST_TELL);
+      add_history(g, ch, told, HIST_TELL);
     }
 
     if (!char_is_npc(vict) && !char_is_npc(ch))
@@ -422,7 +422,7 @@ ACMD(do_reply)
 namespace {
   struct quiet_talk {
     int subcmd;
-    const char *sing, *plur, *others;
+    std::string_view sing, plur, others;
   };
 
   constexpr quiet_talk QUIET_TALKS[] = {
@@ -455,7 +455,7 @@ namespace {
   /* By how far a listener's skill falls short of the roll, how much they hear */
   struct hearing {
     int short_by;
-    const char *how;
+    std::string_view how;
   };
 
   constexpr hearing HEARINGS[] = {
@@ -520,12 +520,12 @@ ACMD(do_spec_comm)
   } else {
     heard = str_format("@c$n @W{} you '@m{}@W'@n", how.plur, what);
   }
-  act(g, heard.c_str(), false, ch, nullptr, vict, TO_VICT);
+  act(g, heard, false, ch, nullptr, vict, TO_VICT);
 
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
     send_to_char(g, ch, CONFIG_OK);
   else
-    act(g, str_format("@WYou {} @C$N@W, '@m{}@W'@n\r\n", how.sing, what).c_str(), true, ch, nullptr, vict, TO_CHAR);
+    act(g, str_format("@WYou {} @C$N@W, '@m{}@W'@n\r\n", how.sing, what), true, ch, nullptr, vict, TO_CHAR);
 
   act(g, how.others, false, ch, nullptr, vict, TO_NOTVICT);
   if (subcmd == SCMD_WHISPER)
@@ -645,7 +645,7 @@ ACMD(do_page)
     }
     for (descriptor_data *d : each_desc(g))
       if (desc_get_connected(d) == CON_PLAYING && d->character)
-        act(g, buf.c_str(), false, ch, nullptr, d->character, TO_VICT);
+        act(g, buf, false, ch, nullptr, d->character, TO_VICT);
     return;
   }
   struct char_data *vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD);
@@ -653,11 +653,11 @@ ACMD(do_page)
     send_to_char(g, ch, "There is no such person in the game!\r\n");
     return;
   }
-  act(g, buf.c_str(), false, ch, nullptr, vict, TO_VICT);
+  act(g, buf, false, ch, nullptr, vict, TO_VICT);
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))
     send_to_char(g, ch, CONFIG_OK);
   else
-    act(g, buf.c_str(), false, ch, nullptr, vict, TO_CHAR);
+    act(g, buf, false, ch, nullptr, vict, TO_CHAR);
 }
 
 /**********************************************************************
@@ -781,14 +781,16 @@ ACMD(do_gen_comm)
   } else {
     std::string said = str_format("{}@WYou {}@W, '@w{}@W'{}@n\r\n", c.colour, c.name, text, c.colour);
     send_to_char(g, ch, said);
-    add_history(g, ch, said.c_str(), c.history);
+    add_history(g, ch, said, c.history);
   }
 
   for (descriptor_data *i : each_desc(g)) {
     if (!hears(g, ch, i, subcmd))
       continue;
     std::string heard = heard_as(g, ch, i->character, subcmd, text);
-    add_history(g, i->character, act(g, heard.c_str(), false, ch, nullptr, i->character, TO_VICT | TO_SLEEP), c.history);
+    /* hears() leaves only those act() sends to, so there is always a message */
+    if (const std::string *sent = act(g, heard, false, ch, nullptr, i->character, TO_VICT | TO_SLEEP))
+      add_history(g, i->character, *sent, c.history);
   }
   count_spam(g, ch);
 }

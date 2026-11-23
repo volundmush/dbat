@@ -253,10 +253,10 @@ ACMD(do_goto)
     return;
   }
 
-  act(g, str_format("$n {}", or_if_empty(char_get_poofout(g, ch), "disappears in a puff of smoke.")).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("$n {}", or_if_empty(char_get_poofout(g, ch), "disappears in a puff of smoke.")), true, ch, nullptr, nullptr, TO_ROOM);
   char_from_room(g, ch);
   char_to_room(g, ch, location);
-  act(g, str_format("$n {}", or_if_empty(char_get_poofin(g, ch), "appears with an ear-splitting bang.")).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("$n {}", or_if_empty(char_get_poofin(g, ch), "appears with an ear-splitting bang.")), true, ch, nullptr, nullptr, TO_ROOM);
   look_at_room(g, char_get_in_room(ch), ch, 0);
   enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
 }
@@ -602,7 +602,7 @@ ACMD(do_force)
       return;
     }
     send_to_char(g, ch, CONFIG_OK);
-    act(g, forced.c_str(), true, ch, nullptr, vict, TO_VICT);
+    act(g, forced, true, ch, nullptr, vict, TO_VICT);
     mudlog(g, LOG_NRM, log_level, true, "(GC) {} forced {} to {}", char_get_name(ch), char_get_name(vict), to_force);
     command_interpreter(g, vict, to_force);
     return;
@@ -614,7 +614,7 @@ ACMD(do_force)
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (!char_is_npc(tch) && char_get_admlevel(tch) >= char_get_admlevel(ch))
         continue;
-      act(g, forced.c_str(), true, ch, nullptr, tch, TO_VICT);
+      act(g, forced, true, ch, nullptr, tch, TO_VICT);
       command_interpreter(g, tch, to_force);
     }
     return;
@@ -624,7 +624,7 @@ ACMD(do_force)
     struct char_data *vict = i->character;
     if (desc_get_connected(i) != CON_PLAYING || !vict || (!char_is_npc(vict) && char_get_admlevel(vict) >= char_get_admlevel(ch)))
       continue;
-    act(g, forced.c_str(), true, ch, nullptr, vict, TO_VICT);
+    act(g, forced, true, ch, nullptr, vict, TO_VICT);
     command_interpreter(g, vict, to_force);
   }
 }

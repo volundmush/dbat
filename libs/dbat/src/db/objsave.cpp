@@ -286,7 +286,7 @@ void update_obj_file(GameWorld *g)
       Crash_clean_file(g, g->player_table[i].name.c_str());
 }
 
-void Crash_listrent(GameWorld *g, struct char_data *ch, char *name)
+void Crash_listrent(GameWorld *g, struct char_data *ch, std::string_view name)
 {
   std::string path;
   std::optional<io::text_reader> file = open_rent_file(name, nullptr, 0, &path);

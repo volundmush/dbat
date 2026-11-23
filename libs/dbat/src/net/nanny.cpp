@@ -595,7 +595,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
     return;
   }
 
-  player_i = load_char(g, tmp_name.c_str(), d->character);
+  player_i = load_char(g, tmp_name, d->character);
   if (player_i < 0) {
     if (d->writenew <= 0)
       character_missing(g, d);
@@ -923,7 +923,7 @@ static const struct {
      }},
     {"C", [](GameWorld *g, descriptor_data *d) {
        write_to_output(g, d, "\n");
-       customRead(g, d, 0, nullptr);
+       customRead(g, d, 0, ""); /* the name is only read for type 1 */
        write_to_output(g, d, "\r\n@n--Press Enter--\n@n");
      }},
     {"E", [](GameWorld *g, descriptor_data *d) {

@@ -537,9 +537,9 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
   int64_t totki = 0;
 
-  act(g, chbuf.c_str(), true, ch, nullptr, vict, TO_CHAR);
-  act(g, victbuf.c_str(), true, ch, nullptr, vict, TO_VICT);
-  act(g, rmbuf.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
+  act(g, chbuf, true, ch, nullptr, vict, TO_CHAR);
+  act(g, victbuf, true, ch, nullptr, vict, TO_VICT);
+  act(g, rmbuf, true, ch, nullptr, vict, TO_NOTVICT);
 
   if (char_get_charge(ch) >= getMaxKI(g, ch) * maxki) {
     totki += getMaxKI(g, ch) * maxki;
@@ -569,8 +569,8 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
     std::string folbuf2;
     folbuf  = str_format("@Y$n@W times and merges $s @B'@R{}@B'@W into the group attack!@n", attack_names_comp[char_get_combine(fol)]);
     folbuf2 = str_format("@WYou time and merge your @B'@R{}@B'@W into the group attack!@n", attack_names_comp[char_get_combine(fol)]);
-    act(g, folbuf.c_str(), true, fol, nullptr, nullptr, TO_ROOM);
-    act(g, folbuf2.c_str(), true, fol, nullptr, nullptr, TO_CHAR);
+    act(g, folbuf, true, fol, nullptr, nullptr, TO_ROOM);
+    act(g, folbuf2, true, fol, nullptr, nullptr, TO_CHAR);
   }
 
   totki += bonus;
@@ -2384,7 +2384,7 @@ void handle_defense(GameWorld *g, struct char_data *vict, int *pry, int *blk, in
   return;
 }
 
-void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_data *vict, const char *sname, int prob, int perc, int skill, int type)
+void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_data *vict, std::string_view sname, int prob, int perc, int skill, int type)
 {
   std::string buf;
   std::string buf2;
@@ -2406,18 +2406,18 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
         buf  = str_format("@C$N@W deflects your {}, sending it flying away!@n", sname);
         buf2 = str_format("@WYou deflect @C$n's@W {} sending it flying away!@n", sname);
         buf3 = str_format("@C$N@W deflects @c$n's@W {} sending it flying away!@n", sname);
-        act(g, buf.c_str(), true, ch, nullptr, tch, TO_CHAR);
-        act(g, buf2.c_str(), true, ch, nullptr, tch, TO_VICT);
-        act(g, buf3.c_str(), true, ch, nullptr, tch, TO_NOTVICT);
+        act(g, buf, true, ch, nullptr, tch, TO_CHAR);
+        act(g, buf2, true, ch, nullptr, tch, TO_VICT);
+        act(g, buf3, true, ch, nullptr, tch, TO_NOTVICT);
         foundv = false;
       } else {
         foundv = true;
         buf    = str_format("@WYou watch as the deflected {} slams into @C$N@W, exploding with a roar of blinding light!@n", sname);
         buf2   = str_format("@c$n@W watches as the deflected {} slams into you! The {} explodes with a roar of blinding light!@n", sname, sname);
         buf3   = str_format("@c$n@W watches as the deflected {} slams into @C$N@W! The {} explodes with a roar of blinding light!@n", sname, sname);
-        act(g, buf.c_str(), true, vict, nullptr, tch, TO_CHAR);
-        act(g, buf2.c_str(), true, vict, nullptr, tch, TO_VICT);
-        act(g, buf3.c_str(), true, vict, nullptr, tch, TO_NOTVICT);
+        act(g, buf, true, vict, nullptr, tch, TO_CHAR);
+        act(g, buf2, true, vict, nullptr, tch, TO_VICT);
+        act(g, buf3, true, vict, nullptr, tch, TO_NOTVICT);
         dmg = damtype(g, ch, type, skill, attperc);
         hurt(g, 0, 0, ch, tch, nullptr, dmg, 1);
         return;
@@ -2434,8 +2434,8 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
       foundo = true;
       buf    = str_format("@WYou watch as the deflected {} slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
       buf2   = str_format("@c$n@W watches as the deflected {} slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
-      act(g, buf.c_str(), true, vict, tob, nullptr, TO_CHAR);
-      act(g, buf2.c_str(), true, vict, tob, nullptr, TO_ROOM);
+      act(g, buf, true, vict, tob, nullptr, TO_CHAR);
+      act(g, buf2, true, vict, tob, nullptr, TO_ROOM);
       hurt(g, 0, 0, ch, nullptr, tob, 25, 1);
       return;
     }
@@ -2444,8 +2444,8 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
   if ((foundo == false || foundv == false) && !room_flagged(g, char_get_in_room(vict), ROOM_SPACE)) {
     buf  = str_format("@WYou watch as the deflected {} slams into the ground, exploding with a roar of blinding light!@n", sname);
     buf2 = str_format("@WThe deflected {} slams into the ground, exploding with a roar of blinding light!@n", sname);
-    act(g, buf.c_str(), true, vict, nullptr, nullptr, TO_CHAR);
-    act(g, buf2.c_str(), true, vict, nullptr, nullptr, TO_ROOM);
+    act(g, buf, true, vict, nullptr, nullptr, TO_CHAR);
+    act(g, buf2, true, vict, nullptr, nullptr, TO_ROOM);
     tech_impact_scenery(g, ch, vict, char_get_in_room(vict), 1);
     if (room_get_dmg(g, char_get_in_room(ch)) <= 95) {
       room_set_dmg(g, char_get_in_room(ch), room_get_dmg(g, char_get_in_room(ch)) + (5));
@@ -3802,7 +3802,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
       if (char_get_barrier(vict) - dmg > 0) {
         act(g, "@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_CHAR);
         std::string barr = str_format("@CYour barrier absorbs the damage! @D[@B{}@D]@n", add_commas(dmg));
-        act(g, barr.c_str(), true, ch, nullptr, vict, TO_VICT);
+        act(g, barr, true, ch, nullptr, vict, TO_VICT);
         act(g, "@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_set_barrier(vict, char_get_barrier(vict) - (dmg));
         dmg = 0;

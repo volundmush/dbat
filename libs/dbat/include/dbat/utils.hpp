@@ -24,7 +24,8 @@
 
 /* See also: ANA, SANA */
 /* "an" or "a" for s; an empty s gives "an", as the old macro's strchr() found the terminator. */
-inline const char *AN(std::string_view s) { return strchr("aeiouAEIOU", s.empty() ? '\0' : s[0]) ? "an" : "a"; }
+/* The article for s: "an" before a vowel; quirk: also "an" for an empty s, as strchr() found the '\0' */
+constexpr std::string_view AN(std::string_view s) { return s.empty() || s.front() == '\0' || std::string_view("aeiouAEIOU").contains(s.front()) ? "an" : "a"; }
 
 #define MIN(a, b)  ((a) < (b) ? (a) : (b))
 #define countof(a) (sizeof(a) / sizeof((a)[0])) /* elements in an array (C2y has it as countof) */

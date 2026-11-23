@@ -29,7 +29,7 @@ result has_flag(const field_query &q, bitvector_t *flags, int numflags, const ch
   if (!q.has_arg())
     return "0";
   /* quirk: the first flag of the list never counts as set, as check_flags_by_name_ar gives its index */
-  return check_flags_by_name_ar(flags, numflags, q.arg(), names) > 0 ? "1" : "0";
+  return check_flags_by_name_ar(flags, numflags, q.subfield, names) > 0 ? "1" : "0";
 }
 
 /* Turns the flag the argument names over, if it is set, giving "1"; otherwise it isn't a field after all */
@@ -38,7 +38,7 @@ result toggle_flag(const field_query &q, bitvector_t *flags, int numflags, const
 {
   if (!q.has_arg())
     return std::nullopt;
-  int ns = check_flags_by_name_ar(flags, numflags, q.arg(), names);
+  int ns = check_flags_by_name_ar(flags, numflags, q.subfield, names);
   if (ns <= 0)
     return std::nullopt;
   toggle(o, ns);
@@ -48,7 +48,7 @@ result toggle_flag(const field_query &q, bitvector_t *flags, int numflags, const
 /* The objects in a container: how many the argument names; "0" for what's no container */
 int count_in(const field_query &q, obj_data *o)
 {
-  return item_in_list(q.g, q.arg(), obj_get_contains(o));
+  return item_in_list(q.g, q.subfield, obj_get_contains(o));
 }
 
 /* value N of the object's values */
@@ -69,12 +69,12 @@ const field<obj_data> obj_fields[] = {
      }},
     {"cost", [](const field_query &q, obj_data *o) -> result {
        if (q.has_arg())
-         obj_set_cost(o, std::max(0, atoi(q.arg()) + obj_get_cost(o)));
+         obj_set_cost(o, std::max(0, parse_int(q.subfield) + obj_get_cost(o)));
        return number(obj_get_cost(o));
      }},
     {"cost_per_day", [](const field_query &q, obj_data *o) -> result {
        if (q.has_arg())
-         obj_set_cost_per_day(o, std::max(0, atoi(q.arg()) + obj_get_cost_per_day(o)));
+         obj_set_cost_per_day(o, std::max(0, parse_int(q.subfield) + obj_get_cost_per_day(o)));
        return number(obj_get_cost_per_day(o));
      }},
     {"count", [](const field_query &q, obj_data *o) -> result { /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
@@ -86,7 +86,7 @@ const field<obj_data> obj_fields[] = {
      }},
     {"health", [](const field_query &q, obj_data *o) -> result {
        if (q.has_arg()) {
-         obj_set_value(o, VAL_ALL_HEALTH, std::max(1, atoi(q.arg()) + obj_get_value(o, VAL_ALL_HEALTH)));
+         obj_set_value(o, VAL_ALL_HEALTH, std::max(1, parse_int(q.subfield) + obj_get_value(o, VAL_ALL_HEALTH)));
          if (obj_extra_flagged(o, ITEM_BROKEN) && obj_get_value(o, VAL_ALL_HEALTH) >= 100)
            obj_extra_set(o, ITEM_BROKEN, false);
        }
@@ -149,12 +149,12 @@ const field<obj_data> obj_fields[] = {
     {"val7", value_field<7>},
     {"vnum", [](const field_query &q, obj_data *o) -> result {
        if (q.has_arg())
-         return number((int)(obj_get_vnum(q.g, o) == atoi(q.arg())));
+         return number((int)(obj_get_vnum(q.g, o) == parse_int(q.subfield)));
        return number(obj_get_vnum(q.g, o));
      }},
     {"weight", [](const field_query &q, obj_data *o) -> result {
        if (q.has_arg()) {
-         int addition  = atoi(q.arg());
+         int addition  = parse_int(q.subfield);
          int64_t before = obj_get_weight(o);
          /* an argument of 0, or what isn't a number, makes it weigh nothing */
          obj_set_weight(o, addition ? std::max<int64_t>(0, addition + obj_get_weight(o)) : 0);

@@ -148,7 +148,7 @@ long get_ptable_by_name(GameWorld *g, std::string_view name)
   return (-1);
 }
 
-long get_id_by_name(GameWorld *g, const char *name)
+long get_id_by_name(GameWorld *g, std::string_view name)
 {
   int i;
 

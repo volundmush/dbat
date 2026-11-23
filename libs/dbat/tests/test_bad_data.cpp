@@ -2030,7 +2030,7 @@ static void check_naming_things_with_no_short_description(void)
   struct obj_data *obj = thing_with_no_short_description(g, ch);
 
   th_take_output(g, ch);
-  spell_locate_object(g, 30, ch, nullptr, obj, nullptr);
+  spell_locate_object(g, 30, ch, nullptr, obj, "");
   CHECK(saw(ch, " is in The Hall."));
   th_take_output(g, ch);
   sub_write(g, "You notice _thing12.", ch, TO_CHAR); /* a script's message naming it */

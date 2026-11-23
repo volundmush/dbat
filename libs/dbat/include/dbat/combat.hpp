@@ -8,7 +8,7 @@ int roll_accuracy(GameWorld *g, struct char_data *ch, int skill, bool kiatt);
 int handle_parry(GameWorld *g, struct char_data *ch);
 void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill, int first);
 void handle_cooldown(GameWorld *g, struct char_data *ch, int cooldown);
-void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_data *vict, const char *sname, int prob, int perc, int skill, int type);
+void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_data *vict, std::string_view sname, int prob, int perc, int skill, int type);
 void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2);
 
 void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type);

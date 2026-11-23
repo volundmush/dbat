@@ -528,7 +528,7 @@ ACMD(do_whois)
   struct char_data *victim = new char_data();
   clear_char(victim);
   char_make_player_specials(victim);
-  if (load_char(g, std::string(argument).c_str(), victim) < 0) {
+  if (load_char(g, argument, victim) < 0) {
     send_to_char(g, ch, "There is no such player.\r\n");
     free_char(g, victim);
     return;

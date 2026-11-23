@@ -25,6 +25,6 @@ net::native_handle desc_socket(const struct descriptor_data *d);
 struct descriptor_data *add_descriptor(GameWorld *g, net::native_handle socket, std::string_view host);
 
 void customCreate(struct descriptor_data *d);
-void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *name);
+void customRead(GameWorld *g, struct descriptor_data *d, int type, std::string_view name);
 void customWrite(struct char_data *ch, struct obj_data *obj);
 

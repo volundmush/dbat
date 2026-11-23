@@ -165,7 +165,7 @@ void focus_buff_on(GameWorld *g, struct char_data *ch, std::string &name, const 
       act_self(g, b.self_fail, ch);
     else if (b.vict_fail_unnamed) {
       act(g, b.vict_fail.to_char, true, ch, nullptr, nullptr, TO_CHAR);
-      act_triple(g, {nullptr, b.vict_fail.to_vict, b.vict_fail.to_room, true}, ch, nullptr, vict);
+      act_triple(g, {{}, b.vict_fail.to_vict, b.vict_fail.to_room, true}, ch, nullptr, vict);
     } else
       act_triple(g, b.vict_fail, ch, nullptr, vict);
     return;
@@ -266,10 +266,10 @@ constexpr focus_buff TOUGH = {
     .vict_has           = "They already have tough skin!\r\n",
     .self_no_ki         = "You do not have enough ki to infuse into your skin.\r\n",
     .vict_no_ki         = "You do not have enough ki to infuse into their skin.\r\n",
-    .self_fail          = {"You focus ki into your skin, but fail in making it tough!", nullptr, "$n focuses ki into $s skin, but fails in making it tough!", true},
+    .self_fail          = {"You focus ki into your skin, but fail in making it tough!", {}, "$n focuses ki into $s skin, but fails in making it tough!", true},
     .vict_fail          = {"You focus ki into $N's skin, but fail in making it tough!", "$n focuses ki into your skin, but fails in making it tough!", "$n focuses ki into $N's skin, but fails in making it tough!", true},
     .self_flat_duration = true,
-    .self_done          = {"You focus ki into your skin, making it tough!", nullptr, "$n focuses ki into $s skin, making it tough!", true},
+    .self_done          = {"You focus ki into your skin, making it tough!", {}, "$n focuses ki into $s skin, making it tough!", true},
     .vict_done          = {"You focus ki into $N's skin, making it tough!", "$n focuses ki into your skin, making it tough!", "$n focuses ki into $N's skin, making it tough!", true},
 };
 
@@ -285,12 +285,12 @@ constexpr focus_buff MIGHT = {
                         {BONUS_FRAIL, char_get_aff_abils_con, 2, "Their body is not able to withstand increasing its constitution beyond 70.\r\n"}}},
     .self_no_ki     = "You do not have enough ki to infuse into your muscles.\r\n",
     .vict_no_ki     = "You do not have enough ki to infuse into their muscles.\r\n",
-    .self_fail      = {"You focus ki into your muscles, but fail in making them mighty!", nullptr, "$n focuses ki into $s muscles, but fails in making them mighty!", true},
+    .self_fail      = {"You focus ki into your muscles, but fail in making them mighty!", {}, "$n focuses ki into $s muscles, but fails in making them mighty!", true},
     .vict_fail      = {"You focus ki into $N's muscles, but fail in making them mighty!", "$n focuses ki into your muscles, but fails in making them mighty!", "$n focuses ki into $N's muscles, but fails in making them mighty!", true},
     .pays_first     = true,
     .self_sets_flag = true,
     .mods           = {10, 2, 0, 0, 0, 0},
-    .self_done      = {"You focus ki into your muscles, making them mighty!", nullptr, "$n focuses ki into $s muscles, making them mighty!", true},
+    .self_done      = {"You focus ki into your muscles, making them mighty!", {}, "$n focuses ki into $s muscles, making them mighty!", true},
     .vict_done      = {"You focus ki into $N's muscles, making them mighty!", "$n focuses ki into your muscles, making them mighty!", "$n focuses ki into $N's muscles, making them mighty!", true},
 };
 
@@ -304,10 +304,10 @@ constexpr focus_buff ENLIGHTEN = {
     .vict_limits = {{{BONUS_FOOLISH, char_get_aff_abils_wis, 10, "They're not able to withstand increasing their wisdom beyond 70.\r\n"}}},
     .self_no_ki  = "You do not have enough ki to use this skill.\r\n",
     .vict_no_ki  = "You do not have enough ki to use this skill.\r\n",
-    .self_fail   = {"You focus ki into your mind, but fail in awakening it to cosmic wisdom!", nullptr, "$n focuses ki into $s mind, but fails in awakening it to cosmic wisdom!", true},
+    .self_fail   = {"You focus ki into your mind, but fail in awakening it to cosmic wisdom!", {}, "$n focuses ki into $s mind, but fails in awakening it to cosmic wisdom!", true},
     .vict_fail   = {"You focus ki into $N's mind, but fail in awakening it to cosmic wisdom!", "$n focuses ki into your mind, but fails in awakening it to cosmic wisdom!", "$n focuses ki into $N's mind, but fails in awakening it to cosmic wisdom!", true},
     .mods        = {0, 0, 0, 0, 10, 0},
-    .self_done   = {"You focus ki into your mind, awakening it to cosmic wisdom!", nullptr, "$n focuses ki into $s mind, awakening it to cosmic wisdom!", true},
+    .self_done   = {"You focus ki into your mind, awakening it to cosmic wisdom!", {}, "$n focuses ki into $s mind, awakening it to cosmic wisdom!", true},
     .vict_done   = {"You focus ki into $N's mind, awakening it to cosmic wisdom!", "$n focuses ki into your mind, awakening it to cosmic wisdom!", "$n focuses ki into $N's mind, awakening it to cosmic wisdom!", true},
     .after       = jinto_enlightens,
 };
@@ -322,10 +322,10 @@ constexpr focus_buff GENIUS = {
     .vict_limits = {{{BONUS_DULL, char_get_aff_abils_intel, 10, "They're not able to withstand increasing their intelligence beyond 70.\r\n"}}},
     .self_no_ki  = "You do not have enough ki to infuse into your mind.\r\n",
     .vict_no_ki  = "You do not have enough ki to infuse into their mind.\r\n",
-    .self_fail   = {"You focus ki into your mind, but fail in making it work faster!", nullptr, "$n focuses ki into $s muscles, but fails in making it work faster!", true},
+    .self_fail   = {"You focus ki into your mind, but fail in making it work faster!", {}, "$n focuses ki into $s muscles, but fails in making it work faster!", true},
     .vict_fail   = {"You focus ki into $N's mind, but fail in making it work faster!", "$n focuses ki into your mind, but fails in making it work faster!", "$n focuses ki into $N's mind, but fails in making it work faster!", true},
     .mods        = {0, 0, 10, 0, 0, 0},
-    .self_done   = {"You focus ki into your mind, making it work faster!", nullptr, "$n focuses ki into $s mind, making it work faster!", true},
+    .self_done   = {"You focus ki into your mind, making it work faster!", {}, "$n focuses ki into $s mind, making it work faster!", true},
     .vict_done   = {"You focus ki into $N's mind, making it work faster!", "$n focuses ki into your mind, making it work faster!", "$n focuses ki into $N's mind, making it work faster!", true},
     .after       = kai_learns_from_another,
 };
@@ -340,11 +340,11 @@ constexpr focus_buff FLEX = {
     .vict_limits = {{{BONUS_CLUMSY, char_get_aff_abils_dex, 3, "They're not able to withstand increasing their agility beyond 70.\r\n"}}}, /* quirk: 3, not 10 */
     .self_no_ki  = "You do not have enough ki to infuse into your limbs.\r\n",
     .vict_no_ki  = "You do not have enough ki to infuse into their limbs.\r\n",
-    .self_fail   = {"You focus ki into your limbs, but fail in making them more flexible!", nullptr, "$n focuses ki into $s muscles, but fails in making them more flexible!", true},
+    .self_fail   = {"You focus ki into your limbs, but fail in making them more flexible!", {}, "$n focuses ki into $s muscles, but fails in making them more flexible!", true},
     .vict_fail   = {"You focus ki into $N's limbs, but fail in making them more flexible!", "$n focuses ki into your limbs, but fails in making them more flexible!", "$n focuses ki into $N's limbs, but fails in making them more flexible!", true},
     .pays_first  = true,
     .mods        = {0, 0, 0, 10, 0, 0},
-    .self_done   = {"You focus ki into your limbs, making them more flexible!", nullptr, "$n focuses ki into $s limbs, making them more flexible!", true},
+    .self_done   = {"You focus ki into your limbs, making them more flexible!", {}, "$n focuses ki into $s limbs, making them more flexible!", true},
     .vict_done   = {"You focus ki into $N's limbs, making them more flexible!", "$n focuses ki into your limbs, making them more flexible!", "$n focuses ki into $N's limbs, making them more flexible!", true},
     .after       = kai_learns_from_another,
 };
@@ -357,11 +357,11 @@ constexpr focus_buff BLESS = {
     .vict_has          = "They already have been blessed!\r\n",
     .self_no_ki        = "You do not have enough ki to bless.\r\n",
     .vict_no_ki        = "You do not have enough ki to bless.\r\n",
-    .self_fail         = {"You focus ki while chanting spiritual words. Your blessing does nothing though, you must have messed up!", nullptr, "$n focuses ki while chanting spiritual words. $n seems disappointed.", true},
+    .self_fail         = {"You focus ki while chanting spiritual words. Your blessing does nothing though, you must have messed up!", {}, "$n focuses ki while chanting spiritual words. $n seems disappointed.", true},
     .vict_fail         = {"You focus ki while chanting spiritual words. Your blessing fails!", "$n focuses ki while chanting spiritual words. $n places a hand on your head, but nothing happens!", "$n focuses ki while chanting spiritual words. $n places a hand on $N's head, but nothing happens!", true},
     .vict_fail_unnamed = true,
     .duration_add      = 3,
-    .self_done         = {"You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!", nullptr, "$n focuses ki while chanting spiritual words. $n smiles after finishing $s chant.", true},
+    .self_done         = {"You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!", {}, "$n focuses ki while chanting spiritual words. $n smiles after finishing $s chant.", true},
     .vict_done         = {"You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", "$n focuses ki while chanting spiritual words. $n then places a hand on your head, blessing you!", "$n focuses ki while chanting spiritual words. $n then places a hand on $N's head, blessing them!", true},
     .before_msgs       = bless_level,
     .after             = blessed,
@@ -377,11 +377,11 @@ constexpr focus_buff CURSE = {
     .demon_immune      = true,
     .self_no_ki        = "You do not have enough ki to CURSE.\r\n",
     .vict_no_ki        = "You do not have enough ki to CURSE.\r\n",
-    .self_fail         = {"You focus ki while chanting demonic words. Your cursing does nothing though, you must have messed up!", nullptr, "$n focuses ki while chanting demonic words. $n seems disappointed.", true},
+    .self_fail         = {"You focus ki while chanting demonic words. Your cursing does nothing though, you must have messed up!", {}, "$n focuses ki while chanting demonic words. $n seems disappointed.", true},
     .vict_fail         = {"You focus ki while chanting demonic words. Your cursing fails!", "$n focuses ki while chanting demonic words. $n places a hand on your head, but nothing happens!", "$n focuses ki while chanting demonic words. $n places a hand on $N's head, but nothing happens!", true},
     .vict_fail_unnamed = true,
     .duration_add      = 3,
-    .self_done         = {"You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", nullptr, "$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", true},
+    .self_done         = {"You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", {}, "$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", true},
     .vict_done         = {"You focus ki while chanting demonic words. cursing $N with slower regeneration!", "$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", "$n focuses ki while chanting demonic words. $n then places a hand on $N's head, cursing them!", true},
     .after             = cursed,
 };
@@ -491,7 +491,7 @@ void vigor(GameWorld *g, struct char_data *ch, std::string &name)
     decCurKI(g, ch, getMaxKI(g, ch) / 10, 0);
     reveal_hiding(g, ch, 0);
     if (self)
-      act_self(g, {"You focus ki into your very cells, but fail at re-engerizing them!", nullptr, "$n focuses ki and glows green for a moment, $e then frowns."}, ch);
+      act_self(g, {"You focus ki into your very cells, but fail at re-engerizing them!", {}, "$n focuses ki and glows green for a moment, $e then frowns."}, ch);
     else
       act_triple(g, {"You focus ki into $N's very cells, and fail at re-energizing them!", "$n focuses ki into your very cells, but nothing happens!", "$n focuses ki and $N glows green for a moment, $N frowns.", true}, ch, nullptr, vict);
     char_set_wait(ch, PULSE_2SEC);
@@ -511,7 +511,7 @@ void vigor(GameWorld *g, struct char_data *ch, std::string &name)
   }
   reveal_hiding(g, ch, 0);
   if (self)
-    act_self(g, {"You focus ki into your very cells, and manage to re-energize them!", nullptr, "$n focuses ki and glows green for a moment, $e then smiles."}, ch);
+    act_self(g, {"You focus ki into your very cells, and manage to re-energize them!", {}, "$n focuses ki and glows green for a moment, $e then smiles."}, ch);
   else
     act_triple(g, {"You focus ki into $N's very cells, and manage to re-energize them!", "$n focuses ki into your very cells, and manages to re-energize them!", "$n focuses ki and $N glows green for a moment, $N smiles.", true}, ch, nullptr, vict);
   char_set_wait(ch, PULSE_2SEC);
@@ -536,7 +536,7 @@ void cure(GameWorld *g, struct char_data *ch, std::string &name)
     decCurKI(g, ch, focus_cost(g, ch), 0);
     reveal_hiding(g, ch, 0);
     if (self)
-      act_self(g, {"You focus ki and aim a pulsing light at your body. Nothing happens!", nullptr, "$n focuses ki and aims a pulsing light at $s body. Nothing seems to happen."}, ch);
+      act_self(g, {"You focus ki and aim a pulsing light at your body. Nothing happens!", {}, "$n focuses ki and aims a pulsing light at $s body. Nothing seems to happen."}, ch);
     else
       act_triple(g, {"You focus ki and aim a pulsing light at $N's body. Nothing happens.", "$n focuses ki and aims a pulsing light at your body. You are STILL poisoned!", "$n focuses ki and aims a pulsing light at $N's body. $N looks disappointed.", true}, ch, nullptr, vict);
     return;
@@ -545,7 +545,7 @@ void cure(GameWorld *g, struct char_data *ch, std::string &name)
   decCurKI(g, ch, focus_cost(g, ch), 0);
   reveal_hiding(g, ch, 0);
   if (self)
-    act_self(g, {"You focus ki and aim a pulsing light at your body. You feel the poison in your blood disappear!", nullptr, "$n focuses ki and aims a pulsing light at $s body. $n smiles."}, ch);
+    act_self(g, {"You focus ki and aim a pulsing light at your body. You feel the poison in your blood disappear!", {}, "$n focuses ki and aims a pulsing light at $s body. $n smiles."}, ch);
   else
     act_triple(g, {"You focus ki and aim a pulsing light at $N's body. $e is cured.", "$n focuses ki and aims a pulsing light at your body. You have been cured of your poison!", "$n focuses ki and aims a pulsing light at $N's body. $N smiles.", true}, ch, nullptr, vict);
   null_affect(g, target, AFF_POISON);

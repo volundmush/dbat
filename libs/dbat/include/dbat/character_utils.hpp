@@ -709,7 +709,7 @@ bool block_calc(GameWorld *g, struct char_data *ch);
 int64_t molt_threshold(struct char_data *ch);
 void handle_evolution(GameWorld *g, struct char_data *ch, int64_t dmg);
 void demon_refill_lf(GameWorld *g, struct char_data *ch, int64_t num);
-void mob_talk(GameWorld *g, struct char_data *ch, const char *speech);
+void mob_talk(GameWorld *g, struct char_data *ch, std::string_view speech);
 bool is_sparring(struct char_data *ch);
 std::string introd_calc(struct char_data *ch);
 int64_t gear_exp(GameWorld *g, struct char_data *ch, int64_t exp);

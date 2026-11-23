@@ -11,7 +11,7 @@ void death_cry(GameWorld *g, struct char_data *ch);
 int group_bonus(GameWorld *g, struct char_data *ch, int type);
 void die(GameWorld *g, struct char_data *ch, struct char_data *killer);
 void remove_limb(GameWorld *g, struct char_data *vict, int num);
-void impact_sound(GameWorld *g, struct char_data *ch, const char *mssg);
+void impact_sound(GameWorld *g, struct char_data *ch, std::string_view mssg);
 void fight_stack(GameWorld *g);
 void appear(GameWorld *g, struct char_data *ch);
 void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer);

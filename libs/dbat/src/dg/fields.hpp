@@ -29,7 +29,6 @@ struct field_query {
 
   bool has_arg() const { return !subfield.empty(); }
   /* The argument for the lookups that still take a char * */
-  char *arg() const { return subfield.data(); }
 };
 
 /*
@@ -64,6 +63,6 @@ std::string room_field(const field_query &q, room_data *r);
 std::string plain_variable(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, int type, const std::string &var);
 
 /* How many objects in list, and in the containers in it, item names: by UID, by vnum or by name */
-int item_in_list(GameWorld *g, const char *item, const id_list &list);
+int item_in_list(GameWorld *g, std::string_view item, const id_list &list);
 
 } // namespace dg

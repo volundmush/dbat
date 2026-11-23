@@ -15,8 +15,8 @@ void send_to_imm(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
 {
   send_to_imm(g, str_format(fmt, std::forward<Args>(args)...));
 }
-void fly_zone(GameWorld *g, struct zone_data *zone, const char *messg, struct char_data *ch);
-void send_to_scouter(GameWorld *g, const char *messg, struct char_data *ch, int num, int type);
-void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *ch);
+void fly_zone(GameWorld *g, struct zone_data *zone, std::string_view messg, struct char_data *ch);
+void send_to_scouter(GameWorld *g, std::string_view messg, struct char_data *ch, int num, int type);
+void send_to_sense(GameWorld *g, int type, std::string_view messg, struct char_data *ch);
 void send_to_worlds(GameWorld *g, struct char_data *ch);
 

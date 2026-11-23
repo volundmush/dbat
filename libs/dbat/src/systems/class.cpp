@@ -1660,7 +1660,7 @@ bool sensei_available_for_race(int s, int r)
   }
 }
 
-int sensei_find(const char *arg)
+int sensei_find(std::string_view arg)
 {
   for (int s = 0; s < NUM_CLASSES; s++) {
     if (sensei_exists(s) && str_eq_nocase(arg, sensei_name(s)))

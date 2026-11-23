@@ -458,7 +458,7 @@ static void write_pfile_tags(GameWorld *g, char_data *ch, io::text_writer &out, 
 }
 
 /* Load a char: its place in the player index if loaded, -1 if not */
-int load_char(GameWorld *g, const char *name, struct char_data *ch)
+int load_char(GameWorld *g, std::string_view name, struct char_data *ch)
 {
   int i, id;
 

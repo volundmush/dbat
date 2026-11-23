@@ -46,7 +46,7 @@ const field<room_data> room_fields[] = {
        if (!q.has_arg()) /* the newest thing there */
          return room_get_contents(r) ? uid_text(room_get_contents(r).newest()) : "";
        for (obj_data *obj : obj_list(q.g, room_get_contents(r)))
-         if (obj_get_vnum(q.g, obj) == atoi(q.arg()))
+         if (obj_get_vnum(q.g, obj) == parse_int(q.subfield))
            return uid_text(obj_get_id(obj));
        return "";
      }},
@@ -65,12 +65,12 @@ const field<room_data> room_fields[] = {
        if (!q.has_arg())
          return "0";
        /* quirk: the first flag never counts as set, as check_flags_by_name_ar gives its index */
-       return check_flags_by_name_ar(room_get_room_flags(q.g, room_get_number(r)), NUM_ROOM_FLAGS, q.arg(), room_bits) > 0 ? "1" : "0";
+       return check_flags_by_name_ar(room_get_room_flags(q.g, room_get_number(r)), NUM_ROOM_FLAGS, q.subfield, room_bits) > 0 ? "1" : "0";
      }},
     {"sector", [](const field_query &, room_data *r) -> result { return sprinttype(room_get_sector_type(r), sector_types); }},
     {"vnum", [](const field_query &q, room_data *r) -> result {
        if (q.has_arg())
-         return number((int)(room_get_number(r) == atoi(q.arg())));
+         return number((int)(room_get_number(r) == parse_int(q.subfield)));
        return number(room_get_number(r));
      }},
     {"weather", [](const field_query &q, room_data *r) -> result {

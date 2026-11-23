@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 
+#include "dbat/io/reader.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/dg_scripts.hpp"
@@ -54,17 +55,17 @@ void add_var(dg::var_store &vars, std::string_view name, std::string_view value,
 }
 
 /* sets trigger variable name to character c's UID, so the script can use %name% to refer to it */
-void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context)
+void add_char_uid_var(trig_data *trig, std::string_view name, const struct char_data *c, long context)
 {
   std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), char_get_id(c));
-  add_var(trig->var_list, name, buf.c_str(), context);
+  add_var(trig->var_list, name, buf, context);
 }
 
 /* sets trigger variable name to object o's UID, so the script can use %name% to refer to it */
-void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context)
+void add_obj_uid_var(trig_data *trig, std::string_view name, const struct obj_data *o, long context)
 {
   std::string buf = str_format("{:c}{:d}", as_char(UID_CHAR), obj_get_id(o));
-  add_var(trig->var_list, name, buf.c_str(), context);
+  add_var(trig->var_list, name, buf, context);
 }
 
 
@@ -84,19 +85,19 @@ std::string uid_text(long id)
    Now also searches by vnum -- Welcor
    Now returns the number of matching objects -- Welcor 02/04
 */
-int item_in_list(GameWorld *g, const char *item, const id_list &list)
+int item_in_list(GameWorld *g, std::string_view item, const id_list &list)
 {
   int count = 0;
 
-  if (!item || !*item)
+  if (item.empty())
     return 0;
 
   for (obj_data *i : obj_list(g, list)) {
-    if (*item == UID_CHAR) {
-      if (atol(item + 1) == obj_get_id(i))
+    if (item.front() == UID_CHAR) {
+      if (io::c_atol(item.substr(1)) == obj_get_id(i))
         count++;
     } else if (is_number(item)) { /* by vnum */
-      if (obj_get_vnum(g, i) == atoi(item))
+      if (obj_get_vnum(g, i) == parse_int(item))
         count++;
     } else if (isname(item, obj_get_name(i)))
       count++;
@@ -124,7 +125,7 @@ const struct {
        return start == std::string::npos ? std::string() : text.substr(start, text.find_last_not_of(space) + 1 - start);
      }},
     {"contains", [](const std::string &text, const std::string &arg) {
-       return std::string(str_str(text.c_str(), arg.c_str()) ? "1" : "0");
+       return std::string(str_str(text, arg) ? "1" : "0");
      }},
     {"car", [](const std::string &text, const std::string &) { /* the first word */
        const char *car = text.c_str();
@@ -302,7 +303,7 @@ const struct {
          script_log(q.g, "findmob.vnum(ovnum): No room with vnum {:d}", rrnum);
          return std::string("0");
        }
-       mob_vnum mvnum = atoi(q.arg());
+       mob_vnum mvnum = parse_int(q.subfield);
        int count      = 0;
        for (char_data *vict : room_people(q.g, rrnum))
          if (char_get_mob_vnum(q.g, vict) == mvnum)
@@ -320,7 +321,7 @@ const struct {
          return std::string("0");
        }
        /* item_in_list looks within containers as well. */
-       return number(dg::item_in_list(q.g, q.arg(), room_get_contents(q.g, rrnum)));
+       return number(dg::item_in_list(q.g, q.subfield, room_get_contents(q.g, rrnum)));
      }},
     {"random", [](const field_query &q) {
        if (str_eq_nocase(q.field, "char"))

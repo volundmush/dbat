@@ -414,7 +414,7 @@ ACMD(do_history)
     send_to_char(g, ch, line);
 }
 
-void add_history(GameWorld *g, struct char_data *ch, const char *str, int type)
+void add_history(GameWorld *g, struct char_data *ch, std::string_view str, int type)
 {
   char time_str[MAX_STRING_LENGTH];
   std::string buf;
@@ -429,7 +429,7 @@ void add_history(GameWorld *g, struct char_data *ch, const char *str, int type)
 
   buf = str_format("{}{}", time_str, str);
 
-  history->push_back(buf.c_str());
+  history->push_back(std::move(buf));
   while (history->size() > HIST_LENGTH)
     history->pop_front();
   /* add this history message to ALL */

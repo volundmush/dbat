@@ -34,7 +34,7 @@ bool scan_file(GameWorld *g);
 /* Writes every letter to etc/plrmail; with backup, what it held before is kept as etc/plrmail.bak */
 bool save_mail_file(GameWorld *g, bool backup = false);
 bool has_mail(GameWorld *g, long recipient);
-void store_mail(GameWorld *g, long to, long from, char *message_pointer);
+void store_mail(GameWorld *g, long to, long from, std::string message);
 
 void notify_if_playing(GameWorld *g, struct char_data *from, int recipient_id);
 

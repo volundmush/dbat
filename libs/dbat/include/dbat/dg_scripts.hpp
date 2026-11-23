@@ -120,7 +120,7 @@ ACMD(do_mrecho);
 
 /* function prototypes from dg_triggers.c */
 
-void act_mtrigger(GameWorld *g, const char_data *ch, std::string_view str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg);
+void act_mtrigger(GameWorld *g, const char_data *ch, std::string_view str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, std::string_view /* unused */ = {});
 void speech_mtrigger(GameWorld *g, char_data *actor, std::string_view str);
 void speech_wtrigger(GameWorld *g, char_data *actor, std::string_view str);
 void greet_memory_mtrigger(GameWorld *g, char_data *ch);
@@ -175,7 +175,7 @@ void time_otrigger(GameWorld *g, obj_data *obj);
 void time_wtrigger(GameWorld *g, room_data *room);
 
 /* function prototypes from dg_scripts.c */
-const char *str_str(const char *cs, const char *ct);
+bool str_str(std::string_view cs, std::string_view ct);
 int find_eq_pos_script(std::string_view arg);
 bool can_wear_on_pos(struct obj_data *obj, int pos);
 struct char_data *find_char(GameWorld *g, long n);
@@ -252,8 +252,8 @@ void assign_triggers(GameWorld *g, owner_ptr i);
 
 /* From dg_variables.c */
 void add_var(dg::var_store &vars, std::string_view name, std::string_view value, long id);
-void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context);
-void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context);
+void add_char_uid_var(trig_data *trig, std::string_view name, const struct char_data *c, long context);
+void add_obj_uid_var(trig_data *trig, std::string_view name, const struct obj_data *o, long context);
 /* text with its variables' values, compiled and substituted as a command line is */
 std::string var_subst(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view text);
 
@@ -281,7 +281,7 @@ void script_damage(GameWorld *g, char_data *vict, int dam);
 extern const char *const dg_door_fields[];
 bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, std::string_view value);
 
-int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *const namelist[]);
+int check_flags_by_name_ar(bitvector_t *array, int numflags, std::string_view search, const char *const namelist[]);
 
 /* from dg_objcmd.c */
 room_vnum obj_room(obj_data *obj);

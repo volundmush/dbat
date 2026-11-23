@@ -301,7 +301,7 @@ ACMD(do_mechoaround)
 
   if (std::string_view name = char_get_name(victim); !name.empty()) /* empty for a mob with no short description */
     search_replace(p, name, "$n");
-  act(g, p.c_str(), true, victim, nullptr, nullptr, TO_ROOM);
+  act(g, p, true, victim, nullptr, nullptr, TO_ROOM);
   /*sub_write(p, victim, TRUE, TO_ROOM);*/
 }
 

@@ -159,7 +159,7 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
 {
   if (char_plr_flagged(d->character, PLR_MAILING)) {
     if (action == STRINGADD_SAVE && !d->edit_text.empty()) {
-      store_mail(g, d->mail_to, char_get_idnum(d->character), d->edit_text.data());
+      store_mail(g, d->mail_to, char_get_idnum(d->character), d->edit_text);
       write_to_output(g, d, "Message sent!\r\n");
       notify_if_playing(g, d->character, d->mail_to);
     } else {

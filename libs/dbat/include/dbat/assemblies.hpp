@@ -37,7 +37,7 @@ bool assemblyDestroy(GameWorld *g, obj_vnum lVnum);
 
 int assemblyGetType(GameWorld *g, obj_vnum lVnum);
 
-obj_vnum assemblyFindAssembly(GameWorld *g, const char *pszAssemblyName);
+obj_vnum assemblyFindAssembly(GameWorld *g, std::string_view pszAssemblyName);
 
 ASSEMBLY *assemblyGetAssemblyPtr(GameWorld *g, obj_vnum lVnum);
 

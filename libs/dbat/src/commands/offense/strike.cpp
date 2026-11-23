@@ -23,7 +23,7 @@ bool legs_ok(GameWorld *g, struct char_data *ch)
     return false;
   static constexpr struct {
     int limb, other;
-    const char *worse, *gone_char, *gone_room;
+    std::string_view worse, gone_char, gone_room;
   } legs[] = {
       {2, 3, "Using your broken right leg has damaged it more!@n\r\n", "@RYour right leg has fallen apart!@n", "@r$n@R's right leg has fallen apart!@n"},
       {3, 2, "Using your broken left leg has damaged it more!@n\r\n",  "@RYour left leg has fallen apart!@n",  "@r$n@R's left leg has fallen apart!@n" },

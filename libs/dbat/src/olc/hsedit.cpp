@@ -264,7 +264,7 @@ namespace {
 
       case mode::guest_add:
       case mode::guest_delete: {
-        long id = get_id_by_name(g, std::string(line).c_str());
+        long id = get_id_by_name(g, line);
         long *end = house.guests + house.num_of_guests;
         long *at  = std::find(house.guests, end, id);
         if (id < 0)
@@ -413,7 +413,7 @@ namespace {
 
       case mode::owner_name:
       case mode::owner_id: {
-        long id = asking == mode::owner_name ? get_id_by_name(g, std::string(line).c_str()) : number_given;
+        long id = asking == mode::owner_name ? get_id_by_name(g, line) : number_given;
         if (asking == mode::owner_name ? id < 0 : get_name_by_id(g, id) == nullptr) {
           send_to_char(g, d->character, "There is no such player.\r\n");
           owner_menu(g, d);

@@ -522,7 +522,7 @@ namespace {
     }
     obj_from_char(g, kit);
     extract_obj(g, kit);
-    act(g, str_format("@WYou install the circuits and upgrade your maximum {}.@n", u->name).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, str_format("@WYou install the circuits and upgrade your maximum {}.@n", u->name), true, ch, nullptr, nullptr, TO_CHAR);
     act(g, "@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
     u->gain(ch, gain, true);
     send_to_char(g, ch, "@gGain @D[@G+{}@D]\r\n", add_commas(gain));
@@ -724,7 +724,7 @@ ACMD(do_plant)
   auto obj = find_carried(g, ch, obj_name, "You don't have that to plant on them.\r\n");
   if (reject(g, ch, obj))
     return;
-  constexpr const char *TRIES_ON_YOU = "@C$n@w tries to plant $p@w on you!@n", *TRIES_ON_THEM = "@C$n@w tries to plant $p@w on @c$N@w!@n";
+  constexpr std::string_view TRIES_ON_YOU = "@C$n@w tries to plant $p@w on you!@n", TRIES_ON_THEM = "@C$n@w tries to plant $p@w on @c$N@w!@n";
   if (roll <= detect && roll <= fail) {
     reveal_hiding(g, ch, 0);
     act(g, TRIES_ON_YOU, true, ch, *obj, vict, TO_VICT);
@@ -901,7 +901,8 @@ ACMD(do_appraise)
   act(g, "@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, nullptr, TO_ROOM);
   improve_skill(g, ch, SKILL_APPRAISE, 1);
   /* what's said of it instead, either side of its name, and how ch looks */
-  const char *before = "", *after = nullptr, *look = nullptr;
+  const char *before = "", *after = nullptr;
+  std::string_view look;
   if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(g, -10)) {
     before = "You fail to perceive the worth of ";
     after  = "..";
@@ -1054,7 +1055,7 @@ ACMD(do_use)
   }
   struct obj_data *mag_item = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
   if (!mag_item) {
-    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg.c_str()), arg);
+    send_to_char(g, ch, "You don't seem to have {} {}.\r\n", AN(arg), arg);
     return;
   }
 
@@ -1154,7 +1155,7 @@ ACMD(do_compare)
     send_to_char(g, ch, "You do not have that item.\r\n");
     return;
   }
-  const char *msg;
+  std::string_view msg;
   if (obj1 == obj2)
     msg = "You compare $p to itself.  It looks about the same.";
   else if (obj_get_type_flag(obj1) != obj_get_type_flag(obj2) || (obj_get_type_flag(obj1) != ITEM_ARMOR && obj_get_type_flag(obj1) != ITEM_WEAPON))

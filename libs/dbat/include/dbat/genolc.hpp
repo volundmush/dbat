@@ -29,7 +29,7 @@ bool save_all(GameWorld *g);
 std::string text_or_undefined(std::string_view text);
 /* Reads a number typed for a float field as sscanf("%f") did: the field is left alone unless text starts with one */
 void scan_float(std::string_view text, float &field);
-void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);
+void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, std::string_view gap, int columns);
 /* bits as the world files write them: a letter for each bit set, a-z then A-F, or "0" for none */
 std::string flag_letters(bitvector_t bits);
 

@@ -288,7 +288,7 @@ struct attack_hit_type {
 
 #define ASPELL(spellname)                         \
   void spellname(GameWorld *g, int level, struct char_data *ch, \
-                 struct char_data *victim, struct obj_data *obj, const char *arg)
+                 struct char_data *victim, struct obj_data *obj, std::string_view arg)
 
 #define MANUAL_SPELL(g, spellname) spellname(g, level, caster, cvict, ovict, arg);
 
@@ -320,7 +320,6 @@ void mag_masses(GameWorld *g, int level, struct char_data *ch, int spellnum);
 
 void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum);
 
-void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg);
 
 void mag_points(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                 int spellnum);
@@ -337,7 +336,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
                   int spellnum);
 
 int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
-               struct obj_data *ovict, int spellnum, int level, int casttype, char *arg);
+               struct obj_data *ovict, int spellnum, int level, int casttype, std::string_view arg = {});
 
 void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::string_view argument);
 

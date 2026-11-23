@@ -51,7 +51,7 @@ ACMD(do_action)
 
   if (argument.empty()) {
     send_to_char(g, ch, "{}\r\n", message_text(action->char_no_arg));
-    act(g, message_cstr(action->others_no_arg), action->hide, ch, nullptr, nullptr, TO_ROOM);
+    act(g, message_text(action->others_no_arg), action->hide, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
 
@@ -73,8 +73,8 @@ ACMD(do_action)
       targ = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
       if (!targ) targ = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)));
       if (targ) {
-        act(g, message_cstr(action->char_obj_found), action->hide, ch, targ, nullptr, TO_CHAR);
-        act(g, message_cstr(action->others_obj_found), action->hide, ch, targ, nullptr, TO_ROOM);
+        act(g, message_text(action->char_obj_found), action->hide, ch, targ, nullptr, TO_CHAR);
+        act(g, message_text(action->others_obj_found), action->hide, ch, targ, nullptr, TO_ROOM);
         return;
       }
     }
@@ -90,7 +90,7 @@ ACMD(do_action)
       send_to_char(g, ch, "{}\r\n", message_text(action->char_auto));
     else
       send_to_char(g, ch, "Erm, no.\r\n");
-    act(g, message_cstr(action->others_auto), action->hide, ch, nullptr, nullptr, TO_ROOM);
+    act(g, message_text(action->others_auto), action->hide, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
 
@@ -101,9 +101,9 @@ ACMD(do_action)
   /* The body part, if one is named, which act() reads as $t text */
   bool to_part         = !part.empty();
   struct obj_data *as_t = to_part ? static_cast<struct obj_data *>(static_cast<void *>(part.data())) : nullptr;
-  act(g, message_cstr(to_part ? action->char_body_found : action->char_found), 0, ch, as_t, vict, TO_CHAR | TO_SLEEP);
-  act(g, message_cstr(to_part ? action->others_body_found : action->others_found), action->hide, ch, as_t, vict, TO_NOTVICT);
-  act(g, message_cstr(to_part ? action->vict_body_found : action->vict_found), action->hide, ch, as_t, vict, TO_VICT);
+  act(g, message_text(to_part ? action->char_body_found : action->char_found), 0, ch, as_t, vict, TO_CHAR | TO_SLEEP);
+  act(g, message_text(to_part ? action->others_body_found : action->others_found), action->hide, ch, as_t, vict, TO_NOTVICT);
+  act(g, message_text(to_part ? action->vict_body_found : action->vict_found), action->hide, ch, as_t, vict, TO_VICT);
 }
 
 namespace {
@@ -135,7 +135,7 @@ ACMD(do_insult)
   }
   send_to_char(g, ch, "You insult {}.\r\n", char_get_name(victim));
   int roll           = rand_number(g, 0, 2);
-  const char *insult = roll == 0   ? SEXED_INSULTS[char_get_sex(ch) == SEX_MALE][char_get_sex(victim) == SEX_MALE]
+  std::string_view insult = roll == 0   ? SEXED_INSULTS[char_get_sex(ch) == SEX_MALE][char_get_sex(victim) == SEX_MALE]
                        : roll == 1 ? "$n calls your mother a bitch!"
                                    : "$n tells you to get lost!";
   act(g, insult, false, ch, nullptr, victim, TO_VICT);
@@ -234,7 +234,7 @@ ACMD(do_gmote)
 
   if ((act_nr = find_action(g, cmd)) < 0) {
     out = str_format("@D[@BOOC@D: @g{} {}@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
-    act(g, out.c_str(), false, ch, nullptr, vict, TO_GMOTE);
+    act(g, out, false, ch, nullptr, vict, TO_GMOTE);
     return;
   }
 
@@ -270,5 +270,5 @@ ACMD(do_gmote)
   } else {
     seen = message_text(action->others_found);
   }
-  act(g, str_format("@D[@BOOC@D: @g{}@D]@n", seen).c_str(), false, ch, nullptr, vict, TO_GMOTE);
+  act(g, str_format("@D[@BOOC@D: @g{}@D]@n", seen), false, ch, nullptr, vict, TO_GMOTE);
 }

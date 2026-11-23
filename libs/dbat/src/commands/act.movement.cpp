@@ -50,14 +50,14 @@ static int check_swim(GameWorld *g, struct char_data *ch);
 
 namespace {
   /* A message to ch and one to the rest of the room */
-  void tell_both(GameWorld *g, struct char_data *ch, const char *to_char, const char *to_room)
+  void tell_both(GameWorld *g, struct char_data *ch, std::string_view to_char, std::string_view to_room)
   {
-    act_triple(g, {to_char, nullptr, to_room, true}, ch, nullptr, nullptr);
+    act_triple(g, {to_char, {}, to_room, true}, ch, nullptr, nullptr);
   }
 
-  void tell_both(GameWorld *g, struct char_data *ch, struct obj_data *obj, const char *to_char, const char *to_room)
+  void tell_both(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::string_view to_char, std::string_view to_room)
   {
-    act_triple(g, {to_char, nullptr, to_room, true}, ch, obj, nullptr);
+    act_triple(g, {to_char, {}, to_room, true}, ch, obj, nullptr);
   }
 
   /* The last of range that pick chooses */
@@ -112,7 +112,7 @@ void handle_teleport(GameWorld *g, struct char_data *ch, struct char_data *tar, 
 
   act(g, "@w$n@w appears in an instant out of nowhere!@n", true, ch, nullptr, nullptr, TO_ROOM);
   /* Players held come along; mobs are let go of */
-  auto follows = [&](struct char_data *held, const char *how) {
+  auto follows = [&](struct char_data *held, std::string_view how) {
     char_from_room(g, held);
     char_to_room(g, held, char_get_in_room(ch));
     act(g, how, true, held, nullptr, ch, TO_NOTVICT);
@@ -182,13 +182,13 @@ ACMD(do_carry)
     return;
   }
   if (char_get_pc_weight(g, vict) + char_get_carry_weight(vict) > getMaxCarryWeight(g, ch)) {
-    act_triple(g, {"@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n", nullptr,
+    act_triple(g, {"@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n", {},
                    "@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", true},
                ch, nullptr, vict);
     char_set_wait(ch, PULSE_1SEC);
     return;
   }
-  act_triple(g, {"@WYou pick up @C$N@W and put $M over your shoulder.@n", nullptr, "@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true}, ch, nullptr, vict);
+  act_triple(g, {"@WYou pick up @C$N@W and put $M over your shoulder.@n", {}, "@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true}, ch, nullptr, vict);
   if (struct obj_data *chair = char_get_sits(g, vict)) {
     obj_set_sitting(chair, nullptr);
     char_set_sits(vict, nullptr);
@@ -366,7 +366,7 @@ ACMD(do_land)
   std::string_view where = sense_location(g, ch);
   char_from_room(g, ch);
   char_to_room(g, ch, was_in);
-  act(g, str_format("@C$n@Y flies down through the atmosphere toward @G{}@Y!@n", where).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("@C$n@Y flies down through the atmosphere toward @G{}@Y!@n", where), true, ch, nullptr, nullptr, TO_ROOM);
   char_from_room(g, ch);
   char_to_room(g, ch, landing);
   if (struct zone_data *zone = find_zone_by_thing(g, char_get_in_room(ch)))
@@ -640,7 +640,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
     } else {
       send_to_char(g, ch, "@GYou learn the very basics of moving silently.@n\r\n");
       char_set_skills_base(ch, SKILL_MOVE_SILENTLY, rand_number(g, 5, 10));
-      act(g, buf2.c_str(), true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
+      act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
       if (char_get_aff_abils_dex(ch) < rand_number(g, 1, 30)) {
         char_set_wait(ch, PULSE_1SEC);
       }
@@ -649,11 +649,11 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
 
   if (!char_aff_flagged(ch, AFF_SNEAK) && !char_aff_flagged(ch, AFF_FLYING)) {
     buf2 = str_format("$n leaves {}.", dirs[dir]);
-    act(g, buf2.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM);
   }
   if (!char_aff_flagged(ch, AFF_SNEAK) && char_aff_flagged(ch, AFF_FLYING)) {
     buf2 = str_format("$n flies {}.", dirs[dir]);
-    act(g, buf2.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, buf2, true, ch, nullptr, nullptr, TO_ROOM);
   }
 
   was_in = char_get_in_room(ch);
@@ -1310,7 +1310,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
   const std::string_view keyword = obj ? std::string_view() : exit_keyword(char_get_exit(g, ch, door)); /* NUL-ended: a std::string field */
   buf += str_format("{}{}{}{}.", obj ? "" : "the ", obj ? "$p" : !keyword.empty() ? "$F" : "door", obj ? "" : " that leads ", dbuf);
   if (!obj || obj_get_in_room(obj) != NOWHERE)
-    act(g, buf.c_str(), false, ch, obj, keyword.empty() ? nullptr : keyword.data(), TO_ROOM);
+    act(g, buf, false, ch, obj, keyword.empty() ? nullptr : keyword.data(), TO_ROOM);
 
   /* Notify the other room */
   if (back && (scmd == SCMD_OPEN || scmd == SCMD_CLOSE))
@@ -1757,7 +1757,7 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
   send_to_scouter(g, buf3.c_str(), ch, 0, 0);
 
   if (char_get_desc(ch) != nullptr) {
-    act(g, obj_get_action_description(obj).data(), true, ch, obj, nullptr, TO_CHAR); /* NUL-ended: a std::string field; empty sends nothing */
+    act(g, obj_get_action_description(obj), true, ch, obj, nullptr, TO_CHAR); /* empty sends nothing */
     look_at_room(g, char_get_in_room(ch), ch, 0);
   }
 
@@ -1968,7 +1968,7 @@ namespace {
   }
 
   /* Taking off, to this altitude */
-  void take_off(GameWorld *g, struct char_data *ch, int altitude, const char *to_char, const char *to_room)
+  void take_off(GameWorld *g, struct char_data *ch, int altitude, std::string_view to_char, std::string_view to_room)
   {
     if (getCurKI(g, ch) < getMaxKI(g, ch) / 100 && !char_is_android(ch)) {
       send_to_char(g, ch, "You do not have the ki to fly.");
@@ -2054,7 +2054,7 @@ namespace {
         char_get_carry_weight(ch) + obj_get_weight(seat) <= getMaxCarryWeight(g, ch)) {
       obj_from_room(g, seat);
       obj_to_char(g, seat, ch);
-      act_triple(g, {"You pick up $p.", nullptr, "$n picks up $p.", true}, ch, seat, nullptr);
+      act_triple(g, {"You pick up $p.", {}, "$n picks up $p.", true}, ch, seat, nullptr);
     }
     obj_set_sitting(seat, nullptr);
     char_set_sits(ch, nullptr);
@@ -2187,7 +2187,7 @@ ACMD(do_sit)
     case POS_STANDING:
       reveal_hiding(g, ch, 0);
       if (chair) {
-        act_triple(g, {"You sit down on $p.", nullptr, "$n sits down on $p."}, ch, chair, nullptr);
+        act_triple(g, {"You sit down on $p.", {}, "$n sits down on $p."}, ch, chair, nullptr);
         sit_on(ch, chair, POS_SITTING);
       } else {
         send_to_char(g, ch, "You sit down.\r\n");
@@ -2381,7 +2381,7 @@ ACMD(do_sleep)
     case POS_STANDING:
       reveal_hiding(g, ch, 0);
       if (bed) {
-        act_triple(g, {"You lay down on $p and sleep.", nullptr, "$n lays down on $p and sleeps."}, ch, bed, nullptr);
+        act_triple(g, {"You lay down on $p and sleep.", {}, "$n lays down on $p and sleeps."}, ch, bed, nullptr);
         fury_subsides(g, ch);
         sit_on(ch, bed, POS_SLEEPING);
       } else {

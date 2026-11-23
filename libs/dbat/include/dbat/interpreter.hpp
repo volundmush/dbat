@@ -12,7 +12,7 @@
 std::string_view trait_name(int i); /* a bonus or negative trait's name, by BONUS_* */
 extern const struct command_info cmd_info[];
 
-void userLoad(struct descriptor_data *d, const char *name);
+void userLoad(struct descriptor_data *d, std::string_view name);
 /* Expands line if it starts with one of d's aliases: a simple one in place (false), a complex one onto the front of
    d's input queue (true) */
 bool perform_alias(GameWorld *g, struct descriptor_data *d, std::string &line);

@@ -115,7 +115,7 @@ void boot_db(GameWorld *g);
 void destroy_db(GameWorld *g);
 int create_entry(GameWorld *g, std::string_view name);
 void zone_update(GameWorld *g);
-long get_id_by_name(GameWorld *g, const char *name);
+long get_id_by_name(GameWorld *g, std::string_view name);
 /* The name (lowercase) of the player with id, or null if there is none */
 const std::string *get_name_by_id(GameWorld *g, long id);
 /* The name (lowercase) of the player with id, or otherwise if there is none */
@@ -132,7 +132,7 @@ void load_config(GameWorld *g);
 
 struct zone_data *find_zone(GameWorld *g, zone_vnum vnum);
 
-int load_char(GameWorld *g, const char *name, struct char_data *ch);
+int load_char(GameWorld *g, std::string_view name, struct char_data *ch);
 void save_char(GameWorld *g, struct char_data *ch);
 void init_char(GameWorld *g, struct char_data *ch);
 struct char_data *read_mobile(GameWorld *g, mob_vnum nr);

@@ -60,7 +60,7 @@ bool grouped_with(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
 namespace {
   constexpr const char *OUT_OF_KI  = "You no longer have the ki necessary to play your song.\r\n";
-  constexpr const char *STOPS      = "@c$n@C stops playing $s song.@n";
+  constexpr std::string_view STOPS = "@c$n@C stops playing $s song.@n";
   constexpr const char *NO_KI      = "@wYou do not have enough ki to power the instrument for that song!@n\r\n";
   constexpr const char *UNSKILLED  = "You do not posess the skill to play such a song!\r\n";
 
@@ -212,7 +212,7 @@ namespace {
       return;
     }
     act(g, "@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, str_format("@c$n@C continues playing @y'@Y{}@y'@C.@n", song_name(song)).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, str_format("@c$n@C continues playing @y'@Y{}@y'@C.@n", song_name(song)), true, ch, nullptr, nullptr, TO_ROOM);
 
     const destination *teleport = destination_of(song);
     for (char_data *vict : room_people(g, char_get_in_room(ch))) {
@@ -253,8 +253,7 @@ namespace {
     char_set_powerattack(ch, 0);
     act(g,
         str_format("@CFinally as the last of your comrades has been teleported you teleport yourself to {} and stop your song.@n",
-                   teleport->planet)
-            .c_str(),
+                   teleport->planet),
         true, ch, nullptr, nullptr, TO_CHAR);
   }
 
@@ -264,8 +263,8 @@ namespace {
     int cost;      /* times 1% of max ki */
     int min_skill; /* in mystic music */
     int song;      /* 0: the Teleportation Melody, which takes a destination */
-    const char *to_char;
-    const char *to_room;
+    std::string_view to_char;
+    std::string_view to_room;
   };
   constexpr tune TUNES[] = {
     {"shielding", 20, 99, SONG_SHIELDING,

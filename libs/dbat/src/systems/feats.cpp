@@ -186,7 +186,7 @@ void assign_feats(GameWorld *g)
 // The follwing function is used to check if the character satisfies the various prerequisite(s) (if any)
 // of a feat in order to learn it.
 
-bool feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
+bool feat_is_available(struct char_data *ch, int featnum, int iarg)
 {
   return false;
 }

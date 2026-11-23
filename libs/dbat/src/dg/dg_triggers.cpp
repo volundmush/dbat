@@ -395,7 +395,7 @@ void speech_mtrigger(GameWorld *g, char_data *actor, std::string_view str)
 
 /* str is what ch saw, ending in "\r\n"; arg is unused */
 void act_mtrigger(GameWorld *g, const char_data *ch, std::string_view str, char_data *actor, const char_data *victim, obj_data *object,
-                  const obj_data *target, const char * /* arg */)
+                  const obj_data *target, std::string_view /* unused, until the tests stop passing it */)
 {
   if (char_aff_flagged(ch, AFF_CHARM) || actor == ch)
     return;

@@ -35,5 +35,5 @@ io::loaded<void> read_trigger_file(GameWorld *g, io::text_reader &in);
 
 /* Reads the "#<vnum>" records of a file up to its "$" (or a #99999), calling read for each, with the reader just
    past the "#<vnum>" line. label names the kind in errors, as "trg". */
-io::loaded<void> read_records(io::text_reader &in, const char *label,
+io::loaded<void> read_records(io::text_reader &in, std::string_view label,
                               const std::function<io::loaded<void>(io::text_reader &, int)> &read);

@@ -431,8 +431,8 @@ namespace {
     const char *flash = effect.affect ? "" : " The rune flashes out of existence immediately!";
     decCurKI(g, ch, cost, 0);
     if (vict == ch) {
-      act(g, str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on your skin!{}@n", effect.name, flash).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on $s skin.{}@n", effect.name, flash).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on your skin!{}@n", effect.name, flash), true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on $s skin.{}@n", effect.name, flash), true, ch, nullptr, nullptr, TO_ROOM);
     } else {
       std::string to_char = str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on @b$N's@B skin!{}@n", effect.name, flash);
       std::string to_vict = str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on @RYOUR@B skin.{}@n", effect.name, flash);

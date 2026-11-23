@@ -166,14 +166,14 @@ ACMD(do_charge)
       send_to_char(g, ch, "Your {} colored aura flashes up around you as you instantly take control of the ki you needed!\r\n", aura_types[char_get_aura(ch)]);
       send_to_char(g, ch, "@D[@RCost@D: @r{}@D]@n\r\n", add_commas(spiritcost));
       std::string bloom = str_format("@wA {} aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
-      act(g, bloom.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, bloom, true, ch, nullptr, nullptr, TO_ROOM);
       char_set_charge(ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1) - diff);
       decCurKI(g, ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1) - diff + spiritcost, 0);
     } else {
       reveal_hiding(g, ch, 0);
       send_to_char(g, ch, "You begin to charge some energy, as a {} aura begins to burn around you!\r\n", aura_types[char_get_aura(ch)]);
       std::string bloom = str_format("@wA {} aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
-      act(g, bloom.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, bloom, true, ch, nullptr, nullptr, TO_ROOM);
       char_set_chargeto(ch, (((getMaxKI(g, ch) * 0.01) * amt) + 1));
       char_set_charge(ch, char_get_charge(ch) + (1));
       char_plr_set(ch, PLR_CHARGE, true);

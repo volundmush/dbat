@@ -80,7 +80,7 @@ namespace {
 
 /* What one does to train a stat, to themselves and to the room */
 struct drill {
-  const char *to_char, *to_room;
+  std::string_view to_char, to_room;
 };
 
 /* The stats one can train, in the order the status shows them */
@@ -434,7 +434,7 @@ struct gravity_tier {
   int gravity;
   int body_lo, body_hi;
   int mind_lo, mind_hi;
-  const char *to_char, *to_room; /* after "You do a situp" and "$n does a situp" */
+  std::string_view to_char, to_room; /* after "You do a situp" and "$n does a situp" */
 };
 constexpr gravity_tier GRAVITIES[] = {
     {0, 1, 1, 1, 1, ".", "."},
@@ -472,8 +472,8 @@ int body_workout(GameWorld *g, struct char_data *ch, int gravity, std::string_vi
     return 0;
 
   int bonus = roll(g, tier->body_lo, tier->body_hi);
-  act(g, str_format("@gYou do a {}{}@n", what, tier->to_char).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, str_format("@g$n does a {}{}@n", what, tier->to_room).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("@gYou do a {}{}@n", what, tier->to_char), true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, str_format("@g$n does a {}{}@n", what, tier->to_room), true, ch, nullptr, nullptr, TO_ROOM);
   return bonus;
 }
 
@@ -482,7 +482,7 @@ constexpr struct {
   int64_t share; /* of the most */
   bool at_least; /* or less than */
   int mult;      /* or, if negative, divide */
-  const char *how;
+  std::string_view how;
   bool ellipsis;
 } CHALLENGES[] = {
     {2, true, 10, "a great challenge for you!", false},

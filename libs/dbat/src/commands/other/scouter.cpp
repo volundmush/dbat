@@ -112,7 +112,7 @@ namespace {
     if (char_is_npc(ch))
       return;
     if (struct char_data *linked = char_get_mindlink(g, ch)) {
-      act_triple(g, {"@CYou remove the link your mind had with @w$N.@n", "@w$n@C removes the link $s mind had with yours.@n", nullptr, true}, ch, nullptr, linked);
+      act_triple(g, {"@CYou remove the link your mind had with @w$N.@n", "@w$n@C removes the link $s mind had with yours.@n", {}, true}, ch, nullptr, linked);
       char_set_mindlink(linked, nullptr);
       char_set_mindlink(ch, nullptr);
       char_set_linker(ch, 0);
@@ -142,7 +142,7 @@ namespace {
       act(g, "@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", false, ch, nullptr, vict, TO_CHAR);
       return;
     }
-    act_triple(g, {"@CYou link your mind with @w$N.@n", "@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", nullptr, true}, ch, nullptr, vict);
+    act_triple(g, {"@CYou link your mind with @w$N.@n", "@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", {}, true}, ch, nullptr, vict);
     send_to_char(g, vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
     char_set_mindlink(vict, ch);
     char_set_mindlink(ch, vict);
@@ -186,7 +186,7 @@ namespace {
     }
     if (char_get_skill(vict, SKILL_TELEPATHY) >= char_get_skill(ch, SKILL_TELEPATHY) && rand_number(g, 1, 2) == 2) {
       telepathy_cost(g, ch);
-      act_triple(g, {"@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", "@C$n@w attempts to read your mind, but you resist and force $m out!@n", nullptr, true}, ch, nullptr, vict);
+      act_triple(g, {"@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", "@C$n@w attempts to read your mind, but you resist and force $m out!@n", {}, true}, ch, nullptr, vict);
       improve_skill(g, ch, SKILL_TELEPATHY, 0);
       return;
     }
@@ -305,7 +305,7 @@ void check_eq(GameWorld *g, struct char_data *ch)
     struct obj_data *obj = char_get_equipment(ch, i);
     if (!obj)
       continue;
-    const char *to_char = nullptr, *to_room = nullptr;
+    std::string_view to_char, to_room;
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       to_char = "@W$p@W falls apart and you remove it.@n";
       to_room = "@W$p@W falls apart and @C$n@W remove it.@n";
@@ -430,7 +430,7 @@ ACMD(do_snet)
       std::string tag  = kind == BAND ? band : kind == BROADCAST ? broadcast : str_format("@D[@WCall to @R#@Y{:d}@D]", call);
       std::string hist = str_format("@C{} ({}) is heard, {} @G{}@n\r\n", voice, char_get_name(ch), tag, said());
       send_to_char(g, who, hist);
-      add_history(g, who, hist.c_str(), HIST_SNET);
+      add_history(g, who, hist, HIST_SNET);
       continue;
     }
     if (!snet_reaches(g, ch, d))
@@ -452,7 +452,7 @@ ACMD(do_snet)
       continue;
     std::string hist = str_format("@C{} is heard @W(@c{}@W), {} @G{}@n\r\n", voice, readIntro(who, ch) == 1 ? get_i_name(who, ch) : "Unknown", tag, said());
     send_to_char(g, who, "{}", hist);
-    add_history(g, who, hist.c_str(), HIST_SNET);
+    add_history(g, who, hist, HIST_SNET);
     if (has_scanner(g, who))
       send_to_char(g, who, "@WScanner@D: @Y{}@n\r\n", sense_location(g, ch));
   }
@@ -466,8 +466,8 @@ ACMD(do_snet)
   else
     hist = str_format("@CYou call @D[@R#@W{:d}@D] @G{}@n\r\n", call, CAP(arg2));
   send_to_char(g, ch, "{}", hist);
-  add_history(g, ch, hist.c_str(), HIST_SNET);
-  act(g, str_format("@C$n@W says into $s scouter, '@G@G{}@W'@n\r\n", said()).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  add_history(g, ch, hist, HIST_SNET);
+  act(g, str_format("@C$n@W says into $s scouter, '@G@G{}@W'@n\r\n", said()), true, ch, nullptr, nullptr, TO_ROOM);
   if (kind == CALL) {
     if (!reached)
       send_to_char(g, ch, "@mThe transmission didn't reach them.@n\r\n");
@@ -589,7 +589,7 @@ ACMD(do_scouter)
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
-  constexpr act_msgs POINTED{nullptr, "$n points $s scouter at you.", "$n points $s scouter at $N."};
+  constexpr act_msgs POINTED{{}, "$n points $s scouter at you.", "$n points $s scouter at $N."};
 
   if (char_is_android(vict)) {
     act_triple(g, POINTED, ch, nullptr, vict);

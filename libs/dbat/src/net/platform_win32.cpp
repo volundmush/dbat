@@ -201,13 +201,13 @@ io_result receive_some(native_handle h, std::span<char> into)
   return {io_status::failed};
 }
 
-void report_error(const char *what)
+void report_error(std::string_view what)
 {
   int err   = WSAGetLastError();
   char *msg = nullptr;
   FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr,
                  static_cast<DWORD>(err), 0, reinterpret_cast<LPSTR>(&msg), 0, nullptr);
-  std::fprintf(stderr, "%s: %s\n", what, msg ? msg : "unknown error");
+  std::fprintf(stderr, "%.*s: %s\n", static_cast<int>(what.size()), what.data(), msg ? msg : "unknown error");
   LocalFree(msg);
 }
 

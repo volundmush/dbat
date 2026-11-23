@@ -116,7 +116,7 @@ ACMD(do_mimic)
   decCurKI(g, ch, cost, 0);
   std::string buf = str_format("@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be {} @M{}!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
   send_to_char(g, ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be {} {}.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
-  act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
 }
 
 ACMD(do_kyodaika)
@@ -160,7 +160,7 @@ ACMD(do_table)
     return;
 
   std::string buf = str_format("$n looks at {} on {}.\r\n", obj_get_short_description(*card), obj_get_short_description(*table));
-  act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "{}", obj_get_action_description(*card));
 }
 
@@ -263,7 +263,7 @@ ACMD(do_hand)
       act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
       act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
     } else {
-      act(g, str_format("There are {:d} cards in the hand.", count).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, str_format("There are {:d} cards in the hand.", count), true, ch, nullptr, nullptr, TO_ROOM);
     }
   } else if (str_eq_nocase("show", arg)) {
     send_to_char(g, ch, "You show off your hand to the room.\r\n");
@@ -332,7 +332,7 @@ ACMD(do_post)
   }
   std::string buf = str_format("@C$n@W posts {}@W on {}@W.@n", obj_get_short_description(obj), obj_get_short_description(obj2));
   send_to_char(g, ch, "@WYou post {}@W on {}@W.@n\r\n", obj_get_short_description(obj), obj_get_short_description(obj2));
-  act(g, buf.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
   obj_from_char(g, obj);
   obj_to_room(g, obj, char_get_in_room(ch));
   obj_set_posttype(obj, 2);

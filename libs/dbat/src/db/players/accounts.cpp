@@ -99,7 +99,7 @@ bool read_account_file(const std::string &path, account &a)
   return true;
 }
 
-bool write_account(const char *name, const account &a)
+bool write_account(std::string_view name, const account &a)
 {
   std::optional<std::string> path = player_path(USER_FILE, name);
   if (!path)
@@ -191,9 +191,9 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
 
 /* Shows a customs file: name's, to d's character, for type 1, or d's own account's, without lines that repeat the
    one before */
-void customRead(GameWorld *g, struct descriptor_data *d, int type, const char *name)
+void customRead(GameWorld *g, struct descriptor_data *d, int type, std::string_view name)
 {
-  std::optional<std::string> path = player_path(CUSTOME_FILE, type == 1 ? name : d->acct.user.c_str());
+  std::optional<std::string> path = player_path(CUSTOME_FILE, type == 1 ? name : std::string_view(d->acct.user));
   if (!path) {
     mud_log("ERROR: Custom unable to be read from user file!");
     return;

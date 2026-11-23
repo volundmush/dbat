@@ -321,7 +321,7 @@ SPECIAL(auction)
           clear_char(vict);
           char_make_player_specials(vict);
           std::string blam(obj_get_auctname(obj2));
-          if ((player_i = load_char(g, blam.c_str(), vict)) > -1) {
+          if ((player_i = load_char(g, blam, vict)) > -1) {
             is_file = true;
           } else {
             free_char(g, vict);
@@ -948,7 +948,7 @@ SPECIAL(bank)
 
       name = rIntro(ch, arg2);
 
-      if ((player_i = load_char(g, name.c_str(), vict)) > -1) {
+      if ((player_i = load_char(g, name, vict)) > -1) {
         is_file = true;
       } else {
         free_char(g, vict);

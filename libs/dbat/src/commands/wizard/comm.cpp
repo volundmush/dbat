@@ -311,16 +311,16 @@ ACMD(do_echo)
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
     send_to_char(g, ch, CONFIG_OK);
   if (no_name)
-    act(g, str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch)).c_str(), false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch)), false, ch, nullptr, nullptr, TO_ROOM);
   if (!tch) {
-    act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_CHAR);
-    act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, buf, false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, buf, false, ch, nullptr, nullptr, TO_ROOM);
     return;
   }
-  act(g, buf.c_str(), false, ch, nullptr, tch, TO_CHAR);
-  act(g, buf.c_str(), false, ch, nullptr, tch, TO_NOTVICT);
+  act(g, buf, false, ch, nullptr, tch, TO_CHAR);
+  act(g, buf, false, ch, nullptr, tch, TO_NOTVICT);
   search_replace(buf, "$N", "you");
-  act(g, buf.c_str(), false, ch, nullptr, tch, TO_VICT);
+  act(g, buf, false, ch, nullptr, tch, TO_VICT);
 }
 
 ACMD(do_send)
@@ -458,7 +458,7 @@ ACMD(do_wiznet)
       continue;
     const std::string &line = char_can_see(g, d->character, ch) ? seen : unseen;
     send_to_char(g, d->character, line);
-    add_history(g, d->character, line.c_str(), HIST_WIZNET);
+    add_history(g, d->character, line, HIST_WIZNET);
   }
 
   if (char_prf_flagged(g, ch, PRF_NOREPEAT))

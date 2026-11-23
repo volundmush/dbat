@@ -180,10 +180,8 @@ ACMD(do_unban)
 
 
 
-bool Valid_Name(GameWorld *g, char *newname)
+bool Valid_Name(GameWorld *g, std::string_view newname)
 {
-  int i, wovels = 0;
-  char tempname[MAX_INPUT_LENGTH];
 
   /*
    * Make sure someone isn't trying to create this same name.  We want to
@@ -202,27 +200,17 @@ bool Valid_Name(GameWorld *g, char *newname)
       if (char_get_idnum(dt->character) == -1)
         return (desc_is_playing(dt));
 
-  /* count wovels */
-  for (i = 0; newname[i]; i++) {
-    if (strchr("aeiouyAEIOUY", newname[i]))
-      wovels++;
-  }
-
-  /* return invalid if no wovels */
-  if (!wovels)
+  /* invalid if it has no vowels */
+  if (newname.find_first_of("aeiouyAEIOUY") == std::string_view::npos)
     return false;
 
   /* return valid if list doesn't exist */
   if (g->invalid_list.empty())
     return true;
 
-  /* change to lowercase */
-  copy_cstr(tempname, newname, sizeof(tempname));
-  for (i = 0; tempname[i]; i++)
-    tempname[i] = tolower(tempname[i]);
-
-  /* Does the desired name contain a string in the invalid list? */
-  return std::ranges::none_of(g->invalid_list, [&](const std::string &part) { return std::string_view(tempname).contains(part); });
+  /* Does the desired name, in lower case (and as long as an input line), contain a string in the invalid list? */
+  std::string lower = to_lower(newname.substr(0, MAX_INPUT_LENGTH - 1));
+  return std::ranges::none_of(g->invalid_list, [&](const std::string &part) { return lower.contains(part); });
 }
 
 /* What's with the wacky capitalization in here? */

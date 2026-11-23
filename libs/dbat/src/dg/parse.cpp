@@ -5,20 +5,28 @@
 #include <cstdio>
 #include <strings.h>
 
+#include "dbat/args.hpp"
 #include "dbat/format.hpp"
+#include "dbat/stringutils.hpp"
 
 namespace dg {
 
-bool readable_wait(const char *arg)
+/* Whether s starts with a number, as sscanf()'s %ld reads one: whitespace, a sign, then a digit */
+static bool starts_with_number(std::string_view s)
 {
-  long a, b;
-  char c;
+  s = skip_spaces(s);
+  if (!s.empty() && (s.front() == '+' || s.front() == '-'))
+    s.remove_prefix(1);
+  return !s.empty() && isdigit(static_cast<unsigned char>(s.front()));
+}
 
-  if (!*arg)
+bool readable_wait(std::string_view arg)
+{
+  if (arg.empty())
     return false;
-  if (!strncasecmp(arg, "until ", 6))
-    return sscanf(arg, "until %ld:%ld", &a, &b) >= 1;
-  return sscanf(arg, "%ld %c", &a, &c) >= 1;
+  if (!compare_nocase_n(arg, "until ", 6))
+    return arg.starts_with("until") && starts_with_number(arg.substr(5)); /* quirk: "until" only in lower case */
+  return starts_with_number(arg);
 }
 
 namespace {
@@ -101,10 +109,7 @@ private:
     std::string_view s = l.body();
     if (s.size() < 5 || strncasecmp(s.data(), "wait ", 5) || s.find('%') != std::string_view::npos)
       return;
-    const char *arg = s.data() + 5;
-    while (isspace(static_cast<unsigned char>(*arg)))
-      arg++;
-    if (!readable_wait(arg))
+    if (!readable_wait(skip_spaces(s.substr(5))))
       error(at_, "'wait' needs a time it can read, such as 'wait 5 s' or 'wait until 14:30'");
   }
 

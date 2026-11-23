@@ -427,7 +427,7 @@ ACMD(do_drag)
     act(g, "@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", true, ch, nullptr, vict, TO_ROOM);
     return;
   }
-  act_triple(g, {"@wYou grab and start dragging @C$N@W.@n", nullptr, "@C$n@W grabs and starts dragging @c$N@W.@n", true}, ch, nullptr, vict);
+  act_triple(g, {"@wYou grab and start dragging @C$N@W.@n", {}, "@C$n@W grabs and starts dragging @c$N@W.@n", true}, ch, nullptr, vict);
   char_set_drag(ch, vict);
   char_set_dragged(vict, ch);
   /* quirk: the roll is never 0, so whoever isn't knocked out or magically asleep always feels it */

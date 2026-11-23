@@ -156,7 +156,7 @@ void zone_update(GameWorld *g)
   }
 }
 
-void log_zone_error(GameWorld *g, struct zone_data *zone, int cmd_no, const char *message)
+void log_zone_error(GameWorld *g, struct zone_data *zone, int cmd_no, std::string_view message)
 {
   mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: zone file: {}", message);
   mudlog(g, LOG_NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '{:c}' cmd in zone #{:d}, line {:d}",

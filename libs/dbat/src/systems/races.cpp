@@ -264,14 +264,14 @@ bool race_can_be_mimiced(int r)
   }
 }
 
-int race_find(const char *arg, int sex, bool pc_only)
+int race_find(std::string_view arg, int sex, bool pc_only)
 {
   for (int r = 0; r < NUM_RACES; r++) {
     if (pc_only && !race_is_playable(r))
       continue;
     if (!race_valid_sex(r, sex))
       continue;
-    if (!strcasecmp(arg, race_display_names[r]))
+    if (str_eq_nocase(arg, race_display_names[r]))
       return r;
   }
   return RACE_UNDEFINED;

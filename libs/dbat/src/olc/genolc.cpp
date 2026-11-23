@@ -96,7 +96,7 @@ std::string npc_message(std::string_view msg, std::string_view name, int amount)
 
 /* A numbered menu of names, `columns` to a line: "@g%2d@n) %-20.20s" then gap after each name.
    Numbering starts at first_number. */
-void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns)
+void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, std::string_view gap, int columns)
 {
   for (int i = 0; i < count; i++)
     write_to_output(g, d, "@g{:>2d}@n) {:<20.20}{}{}", i + first_number, names[i], gap, !((i + 1) % columns) ? "\r\n" : "");

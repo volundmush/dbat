@@ -57,7 +57,7 @@ static void cureStatusPoison(GameWorld *g, char_data *ch, bool announce);
 static double getCurPLPercent(GameWorld *g, char_data *ch);
 static int64_t getPercentOfMaxPL(GameWorld *g, char_data *ch, double amt);
 static bool isFullPL(char_data *ch);
-static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vict, const char *speech);
+static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vict, std::string_view speech);
 static void restoreLimbs(GameWorld *g, char_data *ch, bool announce);
 static void restoreStatus(GameWorld *g, char_data *ch, bool announce);
 static int sensei_grav_tolerance(int s_id);
@@ -2929,7 +2929,7 @@ void demon_refill_lf(GameWorld *g, struct char_data *ch, int64_t num)
   }
 }
 
-void mob_talk(GameWorld *g, struct char_data *ch, const char *speech)
+void mob_talk(GameWorld *g, struct char_data *ch, std::string_view speech)
 {
 
   struct char_data *vict = nullptr;
@@ -2956,11 +2956,11 @@ void mob_talk(GameWorld *g, struct char_data *ch, const char *speech)
   } /* End for loop */
 } /* End Mob Talk */
 
-static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vict, const char *speech)
+static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vict, std::string_view speech)
 {
   if (ch != nullptr && vict != nullptr) {
     if (!char_is_npc(ch) && char_is_npc(vict)) {
-      if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") || strstr(speech, "Greet")) && !char_get_fighting(g, vict)) {
+      if ((speech.contains("hello") || speech.contains("greet") || speech.contains("Hello") || speech.contains("Greet")) && !char_get_fighting(g, vict)) {
         send_to_room(g, char_get_in_room(vict), "\r\n");
         if (char_is_human(vict) || char_is_halfbreed(vict)) {
           switch (rand_number(g, 1, 4)) {
@@ -3101,7 +3101,7 @@ static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vi
         }
       } /* End Hello Section */
 
-      if ((strstr(speech, "spar") || strstr(speech, "Spar")) && !char_get_fighting(g, vict)) {
+      if ((speech.contains("spar") || speech.contains("Spar")) && !char_get_fighting(g, vict)) {
         send_to_room(g, char_get_in_room(vict), "\r\n");
 
         if (char_get_original(g, vict) == ch) {
@@ -3161,7 +3161,7 @@ static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vi
         act(g, "@w$n@W says, '@CSpar? I prefer not to thank you...@W'@n", true, vict, nullptr, ch, TO_ROOM);
         return true;
       } /* End challenge section */
-      if (strstr(speech, "goodbye") || strstr(speech, "Goodbye") || strstr(speech, "bye") || strstr(speech, "Bye")) {
+      if (speech.contains("goodbye") || speech.contains("Goodbye") || speech.contains("bye") || speech.contains("Bye")) {
         send_to_room(g, char_get_in_room(vict), "\r\n");
         if (char_get_alignment(vict) >= 0) {
           if (char_get_sex(vict) == SEX_MALE) {
@@ -3198,7 +3198,7 @@ static bool mob_respond(GameWorld *g, struct char_data *ch, struct char_data *vi
           }
         }
       } /* End goodbye If */
-      if (strstr(speech, "train") || strstr(speech, "Train") || strstr(speech, "exercise") || strstr(speech, "Exercise")) {
+      if (speech.contains("train") || speech.contains("Train") || speech.contains("exercise") || speech.contains("Exercise")) {
         send_to_room(g, char_get_in_room(vict), "\r\n");
         if (char_get_alignment(vict) >= 0 && !char_mob_flagged(vict, MOB_NOKILL)) {
           if (char_get_level(vict) > 4 && char_get_level(vict) < 10) {

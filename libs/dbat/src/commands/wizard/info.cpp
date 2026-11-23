@@ -862,7 +862,7 @@ namespace {
     struct char_data *victim = new char_data();
     clear_char(victim);
     char_make_player_specials(victim);
-    if (load_char(g, name.c_str(), victim) < 0) {
+    if (load_char(g, name, victim) < 0) {
       send_to_char(g, ch, "There is no such player.\r\n");
       free_char(g, victim);
       return;
@@ -1015,7 +1015,7 @@ ACMD(do_last)
   struct char_data *vict = new char_data();
   clear_char(vict);
   char_make_player_specials(vict);
-  if (load_char(g, arg.c_str(), vict) < 0) {
+  if (load_char(g, arg, vict) < 0) {
     send_to_char(g, ch, "There is no such player.\r\n");
   } else if (char_get_admlevel(vict) > char_get_admlevel(ch) && char_get_admlevel(ch) < ADMLVL_IMPL) {
     send_to_char(g, ch, "You are not sufficiently godly for that!\r\n");
@@ -1089,7 +1089,7 @@ namespace {
     struct char_data *vict = new char_data();
     clear_char(vict);
     char_make_player_specials(vict);
-    if (load_char(g, value.c_str(), vict) < 0) {
+    if (load_char(g, value, vict) < 0) {
       send_to_char(g, ch, "There is no such player.\r\n");
       free_char(g, vict);
       return;
@@ -1115,7 +1115,7 @@ namespace {
       send_to_char(g, ch, "A name would help.\r\n");
       return;
     }
-    Crash_listrent(g, ch, value.data());
+    Crash_listrent(g, ch, value);
   }
 
   void show_stats(GameWorld *g, struct char_data *ch, std::string &)
@@ -1201,7 +1201,7 @@ namespace {
 
   void show_assemblies(GameWorld *g, struct char_data *ch, std::string &) { assemblyListToChar(g, ch); }
 
-  void show_guilds(GameWorld *g, struct char_data *ch, std::string &value) { show_guild(g, ch, value.data()); }
+  void show_guilds(GameWorld *g, struct char_data *ch, std::string &value) { show_guild(g, ch, value); }
 
   void show_levels(GameWorld *g, struct char_data *ch, std::string &) { send_to_char(g, ch, "This is not used currently.\r\n"); }
 

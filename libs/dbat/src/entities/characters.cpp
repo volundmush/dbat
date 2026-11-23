@@ -827,7 +827,7 @@ void init_char(GameWorld *g, struct char_data *ch)
     char_set_basest(ch, 1000);
   }
 
-  set_title(g, ch, nullptr);
+  set_title(g, ch, "");
   char_set_sdesc(ch, "");
   char_set_ldesc(ch, "");
   char_set_ddesc(ch, "");

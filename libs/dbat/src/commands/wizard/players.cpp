@@ -1032,7 +1032,7 @@ ACMD(do_set)
     vict = new char_data();
     clear_char(vict);
     char_make_player_specials(vict);
-    if ((player_i = load_char(g, name.c_str(), vict)) < 0) {
+    if ((player_i = load_char(g, name, vict)) < 0) {
       free_char(g, vict);
       send_to_char(g, ch, "There is no such player.\r\n");
       return;

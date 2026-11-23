@@ -455,41 +455,42 @@ ASPELL(spell_portal)
 
 ASPELL(art_abundant_step)
 {
-  int steps, i = 0, j, rep, max;
-  room_vnum r, nextroom;
-  char buf[MAX_INPUT_LENGTH], tc;
-  const char *p;
+  int steps = 0, i = 0, rep;
+  room_vnum r = char_get_in_room(ch), nextroom;
+  int max     = 10 + char_get_class_ranks(ch, CLASS_KABITO) / 2;
+  std::string_view p = arg;
 
-  steps = 0;
-  r     = char_get_in_room(ch);
-  p     = arg;
-  max   = 10 + char_get_class_ranks(ch, CLASS_KABITO) / 2;
+  auto digit_next = [&] { return !p.empty() && isdigit(static_cast<unsigned char>(p.front())); };
+  auto alpha_next = [&] { return !p.empty() && isalpha(static_cast<unsigned char>(p.front())); };
+  auto skip_to_word = [&] {
+    while (!p.empty() && !digit_next() && !alpha_next())
+      p.remove_prefix(1);
+  };
 
-  while (p && *p && !isdigit(*p) && !isalpha(*p)) p++;
-
-  if (!p || !*p) {
+  skip_to_word();
+  if (p.empty()) {
     send_to_char(g, ch, "You must give directions from your current location. Examples:\r\n  w w nw n e\r\n  2w nw n e\r\n");
     return;
   }
 
-  while (*p) {
-    while (*p && !isdigit(*p) && !isalpha(*p)) p++;
-    if (isdigit(*p)) {
-      rep = atoi(p);
-      while (isdigit(*p)) p++;
+  while (!p.empty()) {
+    skip_to_word();
+    if (digit_next()) {
+      rep = parse_int(p);
+      while (digit_next())
+        p.remove_prefix(1);
     } else
       rep = 1;
-    if (isalpha(*p)) {
-      for (i = 0; isalpha(*p); i++, p++) buf[i] = tolower(*p);
-      j      = i;
-      tc     = buf[i];
-      buf[i] = 0;
-      for (i = 1; g->complete_cmd_info[i].command_pointer == do_move && g->complete_cmd_info[i].sort_as != buf; i++);
+    /* quirk: with no word left (something after the last one), i is the last direction, taken once more */
+    if (alpha_next()) {
+      std::string word;
+      for (; alpha_next(); p.remove_prefix(1))
+        word += static_cast<char>(tolower(static_cast<unsigned char>(p.front())));
+      for (i = 1; g->complete_cmd_info[i].command_pointer == do_move && g->complete_cmd_info[i].sort_as != word; i++);
       if (g->complete_cmd_info[i].command_pointer == do_move) {
         i = g->complete_cmd_info[i].subcmd - 1;
       } else
         i = -1;
-      buf[j] = tc;
     }
     if (i > -1)
       while (rep--) {

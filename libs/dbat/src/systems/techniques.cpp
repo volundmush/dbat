@@ -16,17 +16,17 @@
 #include "dbat/fight.hpp"
 #include "dbat/random.hpp"
 
-bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, const char *name)
+bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, std::string_view name)
 {
   if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
       (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
     if (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_ZANZOKEN) && char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, vict) + rand_number(g, 1, 5))) {
       std::string msg = str_format("@C$N@c disappears, avoiding your {} before reappearing!@n", name);
-      act(g, msg.c_str(), true, ch, nullptr, vict, TO_CHAR);
+      act(g, msg, true, ch, nullptr, vict, TO_CHAR);
       msg = str_format("@cYou disappear, avoiding @C$n's@c {} before reappearing!@n", name);
-      act(g, msg.c_str(), true, ch, nullptr, vict, TO_VICT);
+      act(g, msg, true, ch, nullptr, vict, TO_VICT);
       msg = str_format("@C$N@c disappears, avoiding @C$n's@c {} before reappearing!@n", name);
-      act(g, msg.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
+      act(g, msg, true, ch, nullptr, vict, TO_NOTVICT);
       if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
         char_aff_set(ch, AFF_ZANZOKEN, false);
       }
@@ -118,8 +118,8 @@ void tech_handle_burn(GameWorld *g, char_data *ch, char_data *vict, int face)
 void tech_impact_scenery(GameWorld *g, char_data *ch, char_data *vict, room_vnum where, int lava, bool water_too)
 {
   struct scenery {
-    const char *to_char{};
-    const char *to_room{}; /* if not to_char */
+    std::string_view to_char{};
+    std::string_view to_room{}; /* if not to_char */
   };
   /* a null is nothing; outdoors' second is lava, if the ground is quiet */
   static constexpr scenery outdoors[8]   = {{"Debris is thrown into the air and showers down thunderously!"},
@@ -143,10 +143,10 @@ void tech_impact_scenery(GameWorld *g, char_data *ch, char_data *vict, room_vnum
                                         {"The ground shatters apart from the stress of the impact!"},
                                         {"The walls of the surrounding room crack in the same instant!"}};
   auto show = [&](const scenery &sc) {
-    if (!sc.to_char)
+    if (sc.to_char.empty())
       return;
     act(g, sc.to_char, true, ch, nullptr, vict, TO_CHAR);
-    act(g, sc.to_room ? sc.to_room : sc.to_char, true, ch, nullptr, vict, TO_ROOM);
+    act(g, or_if_empty(sc.to_room, sc.to_char), true, ch, nullptr, vict, TO_ROOM);
   };
   int sect = room_sect(g, where);
 
@@ -171,17 +171,17 @@ void tech_impact_scenery(GameWorld *g, char_data *ch, char_data *vict, room_vnum
   }
 }
 
-void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, const char *part)
+void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, std::string_view part)
 {
 
   if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
-    const char *part_name = part ? part : "body";
+    std::string_view part_name = or_if_empty(part, "body");
     std::string msg       = str_format("@c$N's@W fireshield burns your {}!@n", part_name);
-    act(g, msg.c_str(), true, ch, nullptr, vict, TO_CHAR);
+    act(g, msg, true, ch, nullptr, vict, TO_CHAR);
     msg = str_format("@C$n's@W {} is burned by your fireshield!@n", part_name);
-    act(g, msg.c_str(), true, ch, nullptr, vict, TO_VICT);
+    act(g, msg, true, ch, nullptr, vict, TO_VICT);
     msg = str_format("@c$n's@W {} is burned by @C$N's@W fireshield!@n", part_name);
-    act(g, msg.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
+    act(g, msg, true, ch, nullptr, vict, TO_NOTVICT);
     int64_t dmg = getMaxKI(g, vict) * 0.02;
     char_set_lastattack(vict, char_get_lastattack(vict) + (1000));
     hurt(g, 0, 0, vict, ch, nullptr, dmg, 0);

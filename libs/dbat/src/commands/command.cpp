@@ -651,7 +651,7 @@ static bool command_pass(GameWorld *g, std::string_view cmd, struct char_data *c
   }
   /* paralysis can be overcome, by a roll against one's intelligence */
   if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(g, 1, 60) && !allowed_while_restrained(cmd, false)) {
-    act_triple(g, {"@yYou fail to overcome your paralysis!@n", nullptr, "@Y$n @ystruggles with $s paralysis!@n", true}, ch, nullptr, nullptr);
+    act_triple(g, {"@yYou fail to overcome your paralysis!@n", {}, "@Y$n @ystruggles with $s paralysis!@n", true}, ch, nullptr, nullptr);
     return false;
   }
   return true;

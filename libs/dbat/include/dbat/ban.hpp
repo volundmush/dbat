@@ -25,7 +25,7 @@ void load_banned(GameWorld *g);
 int isbanned(GameWorld *g, std::string_view hostname);
 void Free_Invalid_List(GameWorld *g);
 void free_ban_list(GameWorld *g);
-bool Valid_Name(GameWorld *g, char *newname);
+bool Valid_Name(GameWorld *g, std::string_view newname);
 /* Reads misc/xnames; an error if it holds too many */
 io::loaded<void> Read_Invalid_List(GameWorld *g);
 /* Writes the ban list to etc/badsites */

@@ -57,7 +57,7 @@ struct strike_attack {
   int avoid_die{};                    /* blocking and dodging it are rolled against rand_number(1, this), if not axion_dice(10) */
   int limb_hurt{};                    /* hurt()'s limb argument for a hit on an arm or a leg */
   int leg_flag{};                     /* hurt()'s first argument for a hit on a leg */
-  const char *fireshield{};           /* what of the user a fire shield burns when it hits */
+  std::string_view fireshield{};           /* what of the user a fire shield burns when it hits */
   bool spent_hurts_first{};           /* quirk: a miss of someone with no stamina left hurts them before the user pays */
   bool spent_free{};                  /* quirk: and the user then pays nothing */
 
@@ -68,8 +68,8 @@ struct strike_attack {
   act_msgs miss_spent;        /* when the victim had no stamina left to avoid it */
   act_msgs hits[5];           /* by where roll_hitloc() says it landed */
   const strike_spot *spots{}; /* what each of those is; null for body, head, body, arm, leg */
-  const char *obj_to_char{};
-  const char *obj_to_room{};
+  std::string_view obj_to_char{};
+  std::string_view obj_to_room{};
   bool obj_hide{}; /* act()'s hide_invisible for those two */
 
   /* each may be null */

@@ -96,7 +96,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 {
   struct affected_type af[MAX_SPELL_AFFECTS] = {};
   bool accum_affect = false, accum_duration = false;
-  const char *to_vict = nullptr, *to_room = nullptr;
+  std::string_view to_vict, to_room;
   int i;
 
   if (victim == nullptr || ch == nullptr)
@@ -365,9 +365,9 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
     if (af[i].bitvector || (af[i].location != APPLY_NONE))
       affect_join(g, victim, af + i, accum_duration, false, accum_affect, false);
 
-  if (to_vict != nullptr)
+  if (!to_vict.empty())
     act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
-  if (to_room != nullptr)
+  if (!to_room.empty())
     act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
 }
 
@@ -386,7 +386,7 @@ static void perform_mag_groups(GameWorld *g, int level, struct char_data *ch,
       mag_affects(g, level, ch, tch, SPELL_MAGE_ARMOR);
       break;
     case SPELL_GROUP_RECALL:
-      spell_recall(g, level, ch, tch, nullptr, nullptr);
+      spell_recall(g, level, ch, tch, nullptr, {});
       break;
   }
 }
@@ -458,7 +458,7 @@ void mag_masses(GameWorld *g, int level, struct char_data *ch, int spellnum)
  */
 void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
 {
-  const char *to_char = nullptr, *to_room = nullptr;
+  std::string_view to_char, to_room;
 
   if (ch == nullptr)
     return;
@@ -474,9 +474,9 @@ void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
       break;
   }
 
-  if (to_char != nullptr)
+  if (!to_char.empty())
     act(g, to_char, false, ch, nullptr, nullptr, TO_CHAR);
-  if (to_room != nullptr)
+  if (!to_room.empty())
     act(g, to_room, false, ch, nullptr, nullptr, TO_ROOM);
 
   for (char_data *tch : room_people(g, char_get_in_room(ch))) {
@@ -502,13 +502,6 @@ void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
   }
 }
 
-/*
- *  Every spell which summons/gates/conjours a mob comes through here.
- */
-
-void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg)
-{
-}
 
 void mag_points(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                 int spellnum)
@@ -561,7 +554,7 @@ void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_da
                    int spellnum)
 {
   int spell = 0, msg_not_affected = true;
-  const char *to_vict = nullptr, *to_room = nullptr;
+  std::string_view to_vict, to_room;
 
   if (victim == nullptr)
     return;
@@ -599,16 +592,16 @@ void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_da
   }
 
   affect_from_char(g, victim, spell);
-  if (to_vict != nullptr)
+  if (!to_vict.empty())
     act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
-  if (to_room != nullptr)
+  if (!to_room.empty())
     act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
 }
 
 void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_data *obj,
                     int spellnum)
 {
-  const char *to_char = nullptr, *to_room = nullptr;
+  std::string_view to_char, to_room;
 
   if (obj == nullptr)
     return;
@@ -655,14 +648,14 @@ void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_da
       break;
   }
 
-  if (to_char == nullptr)
+  if (to_char.empty())
     send_to_char(g, ch, CONFIG_NOEFFECT);
   else
     act(g, to_char, true, ch, obj, nullptr, TO_CHAR);
 
-  if (to_room != nullptr)
+  if (!to_room.empty())
     act(g, to_room, true, ch, obj, nullptr, TO_ROOM);
-  else if (to_char != nullptr)
+  else if (!to_char.empty())
     act(g, to_char, true, ch, obj, nullptr, TO_ROOM);
 }
 
@@ -702,7 +695,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
 {
   struct affected_type af[MAX_SPELL_AFFECTS] = {};
   bool accum_affect = false, accum_duration = false;
-  const char *to_vict = nullptr, *to_room = nullptr;
+  std::string_view to_vict, to_room;
   int i;
 
   if (victim == nullptr || ch == nullptr)
@@ -827,8 +820,8 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
     return;
   }
 
-  if (to_vict != nullptr)
+  if (!to_vict.empty())
     act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
-  if (to_room != nullptr)
+  if (!to_room.empty())
     act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
 }

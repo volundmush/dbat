@@ -26,5 +26,5 @@ bool sensei_exists(int s);
 std::string_view sensei_name(int s);
 bool sensei_is_pc_ok(int s);
 bool sensei_available_for_race(int s, int r);
-int sensei_find(const char *arg);
+int sensei_find(std::string_view arg);
 

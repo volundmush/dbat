@@ -768,7 +768,7 @@ static void update_flags(GameWorld *g, struct char_data *ch)
 }
 
 /* ki gain pr. game hour */
-void set_title(GameWorld *g, struct char_data *ch, const char *title)
+void set_title(GameWorld *g, struct char_data *ch, std::string_view title)
 {
   if (ch) {
     send_to_char(g, ch, "Title is disabled for the time being while Iovan works on a brand new and fancier title system.\r\n");

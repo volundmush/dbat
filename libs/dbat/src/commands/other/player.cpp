@@ -248,13 +248,13 @@ namespace {
       return false;
     }
     char_aff_set(vict, AFF_GROUP, true);
-    act_triple(g, {ch != vict ? "$N is now a member of your group." : nullptr, "You are now a member of $n's group.", "$N is now a member of $n's group."}, ch, nullptr, vict);
+    act_triple(g, {ch != vict ? "$N is now a member of your group." : "", "You are now a member of $n's group.", "$N is now a member of $n's group."}, ch, nullptr, vict);
     return true;
   }
 
   void kicked_out(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
-    act_triple(g, {ch != vict ? "$N is no longer a member of your group." : nullptr, "You have been kicked out of $n's group!", "$N has been kicked out of $n's group!"}, ch, nullptr, vict);
+    act_triple(g, {ch != vict ? "$N is no longer a member of your group." : "", "You have been kicked out of $n's group!", "$N has been kicked out of $n's group!"}, ch, nullptr, vict);
   }
 
   /* A member's line in the group list: L for the leader, F for a follower; red powerlevel when they're low */
@@ -280,7 +280,7 @@ namespace {
         buf = group_line(g, k, 'L', false);
       if (getCurPL(g, k) <= (getEffMaxPL(g, k) - getCurCarriedWeight(k)) / 10)
         buf = group_line(g, k, 'L', true);
-      act(g, buf.c_str(), false, ch, nullptr, k, TO_CHAR);
+      act(g, buf, false, ch, nullptr, k, TO_CHAR);
     }
     for (char_data *fol : char_followers(g, k)) {
       if (!char_aff_flagged(fol, AFF_GROUP))
@@ -288,7 +288,7 @@ namespace {
       send_to_char(g, ch, "@D----------------@n\r\n");
       bool low = getCurPL(g, fol) <= (getEffMaxPL(g, fol) - getCurCarriedWeight(fol)) / 10;
       buf      = group_line(g, fol, 'F', low);
-      act(g, buf.c_str(), false, ch, nullptr, fol, TO_CHAR);
+      act(g, buf, false, ch, nullptr, fol, TO_CHAR);
     }
     send_to_char(g, ch, "@D----------------@n\r\n");
   }

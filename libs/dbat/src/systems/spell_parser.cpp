@@ -102,7 +102,7 @@ int find_skill_num(GameWorld *g, std::string_view name, int sktype)
  * Spellnum 0 is legal but silently ignored here, to make callers simpler.
  */
 int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
-               struct obj_data *ovict, int spellnum, int level, int casttype, char *arg)
+               struct obj_data *ovict, int spellnum, int level, int casttype, std::string_view arg)
 {
   long ovict_id;
 
@@ -154,9 +154,6 @@ int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
 
   if (IS_SET(SINFO.routines, MAG_AREAS))
     mag_areas(g, level, caster, spellnum);
-
-  if (IS_SET(SINFO.routines, MAG_SUMMONS))
-    mag_summons(level, caster, ovict, spellnum, arg);
 
   if (IS_SET(SINFO.routines, MAG_CREATIONS))
     mag_creations(g, level, caster, spellnum);
@@ -210,7 +207,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
     case ITEM_STAFF:
       act(g, "You tap $p three times on the ground.", false, ch, obj, nullptr, TO_CHAR);
       if (!obj_get_action_description(obj).empty())
-        act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, nullptr, TO_ROOM);
+        act(g, obj_get_action_description(obj), false, ch, obj, nullptr, TO_ROOM);
       else
         act(g, "$n taps $p three times on the ground.", false, ch, obj, nullptr, TO_ROOM);
 
@@ -232,11 +229,11 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
         if (spell_has_routine(g, obj_get_value(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
           i = count_members(room_people(g, char_get_in_room(ch)));
           while (i-- > 0)
-            call_magic(g, ch, nullptr, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
+            call_magic(g, ch, nullptr, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF);
         } else {
           for (char_data *vict : room_people(g, char_get_in_room(ch))) {
             if (ch != vict)
-              call_magic(g, ch, vict, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
+              call_magic(g, ch, vict, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF);
           }
         }
       }
@@ -249,14 +246,14 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
         } else {
           act(g, "You point $p at $N.", false, ch, obj, tch, TO_CHAR);
           if (!obj_get_action_description(obj).empty())
-            act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, tch, TO_ROOM);
+            act(g, obj_get_action_description(obj), false, ch, obj, tch, TO_ROOM);
           else
             act(g, "$n points $p at $N.", true, ch, obj, tch, TO_ROOM);
         }
       } else if (tobj != nullptr) {
         act(g, "You point $p at $P.", false, ch, obj, tobj, TO_CHAR);
         if (!obj_get_action_description(obj).empty())
-          act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, tobj, TO_ROOM);
+          act(g, obj_get_action_description(obj), false, ch, obj, tobj, TO_ROOM);
         else
           act(g, "$n points $p at $P.", true, ch, obj, tobj, TO_ROOM);
       } else if (IS_SET(g->spell_info[obj_get_value(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
@@ -277,10 +274,10 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
       char_aff_set(ch, AFF_NEXTNOACTION, true);
       if (obj_get_value(obj, VAL_WAND_LEVEL))
         call_magic(g, ch, tch, tobj, obj_get_value(obj, VAL_WAND_SPELL),
-                   obj_get_value(obj, VAL_WAND_LEVEL), CAST_WAND, nullptr);
+                   obj_get_value(obj, VAL_WAND_LEVEL), CAST_WAND);
       else
         call_magic(g, ch, tch, tobj, obj_get_value(obj, VAL_WAND_SPELL),
-                   DEFAULT_WAND_LVL, CAST_WAND, nullptr);
+                   DEFAULT_WAND_LVL, CAST_WAND);
       break;
     case ITEM_SCROLL:
       if (!arg.empty()) {
@@ -294,14 +291,14 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
 
       act(g, "You recite $p which dissolves.", true, ch, obj, nullptr, TO_CHAR);
       if (!obj_get_action_description(obj).empty())
-        act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, tch, TO_ROOM);
+        act(g, obj_get_action_description(obj), false, ch, obj, tch, TO_ROOM);
       else
         act(g, "$n recites $p.", false, ch, obj, nullptr, TO_ROOM);
 
       char_aff_set(ch, AFF_NEXTNOACTION, true);
       for (i = 1; i <= 3; i++)
         if (call_magic(g, ch, tch, tobj, obj_get_value(obj, i),
-                       obj_get_value(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, nullptr) <= 0)
+                       obj_get_value(obj, VAL_SCROLL_LEVEL), CAST_SCROLL) <= 0)
           break;
 
       if (obj != nullptr)
@@ -315,14 +312,14 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
 
       act(g, "You swallow $p.", false, ch, obj, nullptr, TO_CHAR);
       if (!obj_get_action_description(obj).empty())
-        act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, nullptr, TO_ROOM);
+        act(g, obj_get_action_description(obj), false, ch, obj, nullptr, TO_ROOM);
       else
         act(g, "$n swallows $p.", true, ch, obj, nullptr, TO_ROOM);
 
       char_aff_set(ch, AFF_NEXTNOACTION, true);
       for (i = 1; i <= 3; i++)
         if (call_magic(g, ch, ch, nullptr, obj_get_value(obj, i),
-                       obj_get_value(obj, VAL_POTION_LEVEL), CAST_POTION, nullptr) <= 0)
+                       obj_get_value(obj, VAL_POTION_LEVEL), CAST_POTION) <= 0)
           break;
 
       if (obj != nullptr)

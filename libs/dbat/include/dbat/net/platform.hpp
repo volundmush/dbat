@@ -90,7 +90,7 @@ io_result send_some(native_handle h, std::string_view text);
 io_result receive_some(native_handle h, std::span<char> into);
 
 /* Prints what what was doing when the last call here failed, and why, as perror() does */
-void report_error(const char *what);
+void report_error(std::string_view what);
 
 /* How a socket stands after a poll */
 struct readiness {

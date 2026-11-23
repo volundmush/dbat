@@ -28,17 +28,15 @@ struct zone_data *find_zone_by_thing(GameWorld *g, room_vnum vznum)
   return nullptr;
 }
 
-struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
+std::expected<zone_data *, std::string_view> create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top)
 {
   struct zone_data *zone;
 
   if (vzone_num < 0) {
-    *error = "You can't make negative zones.\r\n";
-    return nullptr;
+    return std::unexpected("You can't make negative zones.\r\n");
   }
   if (bottom > top) {
-    *error = "Bottom room cannot be greater than top room.\r\n";
-    return nullptr;
+    return std::unexpected("Bottom room cannot be greater than top room.\r\n");
   }
 
   /*
@@ -48,8 +46,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
    * here.
    */
   if (vzone_num > 1000) {
-    *error = "1000 is the highest zone allowed.\r\n";
-    return nullptr;
+    return std::unexpected("1000 is the highest zone allowed.\r\n");
   }
 
   /*
@@ -58,8 +55,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   room_vnum room = vzone_num * 100; /* Old CircleMUD 100-zones. */
   for (struct zone_data *i : g->zones.all())
     if (genolc_zone_bottom(g, i) <= room && i->top >= room) {
-      *error = "A zone already covers that area.\r\n";
-      return nullptr;
+      return std::unexpected("A zone already covers that area.\r\n");
     }
 
   /*
@@ -67,7 +63,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
    */
   struct new_file {
     std::string path, text;
-    const char *log, *error;
+    std::string_view log, error;
   };
   const new_file files[] = {
     {str_format("{}{:d}.zon", ZON_PREFIX, vzone_num), str_format("#{:d}\nNew Zone~\n{:d} 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99),
@@ -84,8 +80,7 @@ struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum b
   for (const new_file &file : files)
     if (!io::replace_file(file.path, file.text, false)) {
       mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "{}", file.log);
-      *error = file.error;
-      return nullptr;
+      return std::unexpected(file.error);
     }
 
   /*

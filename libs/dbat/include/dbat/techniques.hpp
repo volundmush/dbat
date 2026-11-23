@@ -5,9 +5,9 @@
 #include "dbat/consts/types.hpp"
 
 bool tech_handle_android_absorb(GameWorld *g, char_data *ch, char_data *vict);
-bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, const char *name);
+bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, std::string_view name);
 void tech_handle_posmodifier(char_data *vict, int *pry, int *blk, int *dge, int *prob);
-void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, const char *part);
+void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, std::string_view part);
 /* ch's fire burns vict when rand_number(1, 4) rolls face, unless they are burned already, a demon or fireproof; if it
    doesn't, a fire-prone vict is burned all the same */
 void tech_handle_burn(GameWorld *g, char_data *ch, char_data *vict, int face);

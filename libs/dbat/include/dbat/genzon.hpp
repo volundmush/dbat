@@ -1,11 +1,14 @@
 #pragma once
+#include <expected>
+#include <string_view>
 #include <vector>
 
 #include "dbat/zones.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/db.hpp"
 
-struct zone_data *create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error);
+/* The new zone, with its files written, or why it couldn't be made, as the builder is told */
+std::expected<zone_data *, std::string_view> create_new_zone(GameWorld *g, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
 void remove_room_zone_commands(GameWorld *g, struct zone_data *zone, room_vnum room_num);
 bool save_zone(GameWorld *g, struct zone_data *zone_num);
 /* The commands in a list, not counting the 'S' that ends it */

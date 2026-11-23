@@ -363,14 +363,14 @@ int assemblyGetType(GameWorld *g, obj_vnum lVnum)
   return ((int)pAssembly->uchAssemblyType);
 }
 
-obj_vnum assemblyFindAssembly(GameWorld *g, const char *pszAssemblyName)
+obj_vnum assemblyFindAssembly(GameWorld *g, std::string_view pszAssemblyName)
 {
   long i         = 0;
   obj_vnum lRnum = NOTHING;
 
   if (g->g_pAssemblyTable == nullptr)
     return (-1);
-  else if (pszAssemblyName == nullptr || *pszAssemblyName == '\0')
+  else if (pszAssemblyName.empty())
     return (-1);
 
   for (i = 0; i < g->g_lNumAssemblies; i++) {

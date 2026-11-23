@@ -718,7 +718,7 @@ const std::string *find_exdesc(std::string_view word, const ex_desc_list &list)
 }
 
 namespace {
-  constexpr act_msgs LOOKS_AT = {nullptr, "$n looks at you.", "$n looks at $N.", true};
+  constexpr act_msgs LOOKS_AT = {{}, "$n looks at you.", "$n looks at $N.", true};
 
   /* What's told of a thing carried or worn, looked at by name: its sort, condition and make */
   void tell_of_item(GameWorld *g, struct char_data *ch, struct obj_data *obj, bool with_weight)
@@ -943,7 +943,7 @@ void look_out_window(GameWorld *g, struct char_data *ch, std::string_view arg)
     return;
   }
   if (!obj_get_action_description(viewport).empty())
-    act(g, obj_get_action_description(viewport).data(), true, ch, viewport, nullptr, TO_CHAR);
+    act(g, obj_get_action_description(viewport), true, ch, viewport, nullptr, TO_CHAR);
   else
     act(g, "$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "You look outside and see:\r\n");

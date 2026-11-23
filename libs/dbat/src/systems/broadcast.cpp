@@ -23,10 +23,10 @@
 #include "dbat/search.hpp"
 #include "dbat/game_world.hpp"
 
-void fly_zone(GameWorld *g, struct zone_data *zone, const char *messg, struct char_data *ch)
+void fly_zone(GameWorld *g, struct zone_data *zone, std::string_view messg, struct char_data *ch)
 {
 
-  if (!messg || !*messg)
+  if (messg.empty())
     return;
 
   for (descriptor_data *i : each_desc(g)) {
@@ -40,12 +40,12 @@ void fly_zone(GameWorld *g, struct zone_data *zone, const char *messg, struct ch
   }
 }
 
-void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *ch)
+void send_to_sense(GameWorld *g, int type, std::string_view messg, struct char_data *ch)
 {
   struct char_data *tch;
   struct obj_data *obj;
 
-  if (!messg || !*messg)
+  if (messg.empty())
     return;
 
   for (descriptor_data *i : each_desc(g)) {
@@ -135,7 +135,7 @@ void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *
       } else {
         align = ", with a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,";
       }
-      if (strstr(messg, "land"))
+      if (messg.contains("land"))
         write_to_output(g, i, "@YYou sense {}{}{} {}! They appear to have landed at...@G{}@n\r\n", readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, blah);
       else
         write_to_output(g, i, "@YYou sense {}{}{} {}!@n\r\n", readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg);
@@ -143,12 +143,12 @@ void send_to_sense(GameWorld *g, int type, const char *messg, struct char_data *
   }
 }
 
-void send_to_scouter(GameWorld *g, const char *messg, struct char_data *ch, int num, int type)
+void send_to_scouter(GameWorld *g, std::string_view messg, struct char_data *ch, int num, int type)
 {
   struct char_data *tch;
   struct obj_data *obj;
 
-  if (!messg || !*messg)
+  if (messg.empty())
     return;
 
   for (descriptor_data *i : each_desc(g)) {

@@ -276,7 +276,7 @@ ACMD(do_candy)
   decCurKI(g, ch, getMaxKI(g, ch) / 15, 0);
   reveal_hiding(g, ch, 0);
   if (dodged) {
-    act_triple(g, {"@cYou aim your forelock at @R$N@c and fire a beam of energy but it is dodged!@n", nullptr, "@C$n@c aims $s forelock at @R$N@c and fires a beam of energy but the beam is dodged!@n", true}, ch, nullptr, vict);
+    act_triple(g, {"@cYou aim your forelock at @R$N@c and fire a beam of energy but it is dodged!@n", {}, "@C$n@c aims $s forelock at @R$N@c and fires a beam of energy but the beam is dodged!@n", true}, ch, nullptr, vict);
     if (!char_get_fighting(g, ch))
       set_fighting(g, ch, vict);
     if (!char_get_fighting(g, vict))
@@ -284,7 +284,7 @@ ACMD(do_candy)
     char_set_wait(ch, PULSE_3SEC);
     return;
   }
-  act_triple(g, {"@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", nullptr, "@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", true}, ch, nullptr, vict);
+  act_triple(g, {"@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", {}, "@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", true}, ch, nullptr, vict);
   /* the better the candy, the stronger they were */
   obj_vnum candy = vict_max >= ch_max * 1.5 ? 95 : vict_max >= ch_max ? 94 : vict_max >= ch_max * (char_get_level(ch) < 100 ? .5 : .1) ? 93 : 53;
   send_to_char(g, ch, "You grab the candy as it falls.\r\n");
@@ -381,7 +381,7 @@ ACMD(do_suppress)
     return;
   }
   reveal_hiding(g, ch, 0);
-  act(g, char_get_suppression(ch) != 0 ? "@GYou alter your suppression level!@n" : "@GYou suppress your current powerlevel!@n", true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, std::string_view(char_get_suppression(ch) != 0 ? "@GYou alter your suppression level!@n" : "@GYou suppress your current powerlevel!@n"), true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "@G$n seems to concentrate for a moment.@n", true, ch, nullptr, nullptr, TO_ROOM);
   char_set_suppression(ch, num);
 }
@@ -457,8 +457,8 @@ ACMD(do_implant)
   if (vict != ch)
     act_triple(g, {str_format("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new {}!@n", implant->name).c_str(), str_format("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new {}!@n", implant->name).c_str(), str_format("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new {}!@n", implant->name).c_str(), true}, ch, limb, vict);
   else {
-    act(g, str_format("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new {}!@n", implant->name).c_str(), true, ch, limb, nullptr, TO_CHAR);
-    act(g, str_format("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new {}!@n", implant->name).c_str(), true, ch, limb, nullptr, TO_ROOM);
+    act(g, str_format("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new {}!@n", implant->name), true, ch, limb, nullptr, TO_CHAR);
+    act(g, str_format("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new {}!@n", implant->name), true, ch, limb, nullptr, TO_ROOM);
   }
   char_plr_set(vict, implant->flag, true);
   obj_from_char(g, limb);
@@ -751,7 +751,7 @@ namespace {
       char_set_wait(ch, PULSE_4SEC);
       return;
     }
-    act_triple(g, {"@WYou rush at @c$N@W and stab them with your tail! You quickly suck out all the bio extract you need and leave the empty husk behind!", nullptr, "@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n", true}, ch, nullptr, vict);
+    act_triple(g, {"@WYou rush at @c$N@W and stab them with your tail! You quickly suck out all the bio extract you need and leave the empty husk behind!", {}, "@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n", true}, ch, nullptr, vict);
     int64_t stam = getBaseST(vict) / 2000, ki = getBaseKI(vict) / 2000, pl = getBasePL(vict) / 2000;
     stam += rand_number(g, char_get_level(ch), char_get_level(ch) * 2);
     pl += rand_number(g, char_get_level(ch), char_get_level(ch) * 2);
@@ -837,7 +837,7 @@ namespace {
   /* How regeneration's healing looks, by how much it was: the first it's less than (in tenths of full) */
   constexpr struct {
     int64_t divisor;
-    const char *to_char, *to_room;
+    std::string_view to_char, to_room;
   } REGENERATIONS[] = {
       {10, "You concentrate your ki and regenerate your body a little.", "$n concentrates and regenerates $s body a little."},
       {5, "You concentrate your ki and regenerate your body some.", "$n concentrates and regenerates $s body some."},
@@ -862,11 +862,11 @@ namespace {
       if (set_first)
         char_set_limb_condition(ch, r.limb, 100);
       if (regrown) {
-        act(g, str_format("You regrow your {}!", r.name).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, str_format("$n regrows $s {}!", r.name).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, str_format("You regrow your {}!", r.name), true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, str_format("$n regrows $s {}!", r.name), true, ch, nullptr, nullptr, TO_ROOM);
       } else {
-        act(g, str_format("Your broken {} mends itself!", r.name).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, str_format("$n regenerates $s broken {}!", r.name).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, str_format("Your broken {} mends itself!", r.name), true, ch, nullptr, nullptr, TO_CHAR);
+        act(g, str_format("$n regenerates $s broken {}!", r.name), true, ch, nullptr, nullptr, TO_ROOM);
       }
       if (!set_first)
         char_set_limb_condition(ch, r.limb, 100);
@@ -1063,8 +1063,8 @@ ACMD(do_eyec)
     return;
   bool closed = char_plr_flagged(ch, PLR_EYEC);
   char_plr_set(ch, PLR_EYEC, !closed);
-  act(g, closed ? "@wYou open your eyes.@n" : "@wYou close your eyes.@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, closed ? "@C$n@w opens $s eyes.@n" : "@C$n@w closes $s eyes.@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, std::string_view(closed ? "@wYou open your eyes.@n" : "@wYou close your eyes.@n"), true, ch, nullptr, nullptr, TO_CHAR);
+  act(g, std::string_view(closed ? "@C$n@w opens $s eyes.@n" : "@C$n@w closes $s eyes.@n"), true, ch, nullptr, nullptr, TO_ROOM);
   char_set_wait(ch, PULSE_1SEC);
 }
 
@@ -1186,7 +1186,7 @@ ACMD(do_heal)
   prob += char_get_aff_abils_intel(ch) / 2 + char_get_aff_abils_wis(ch) / 3;
   if (prob < perc) {
     if (self)
-      act_triple(g, {"@WYou place your hands on your body, but fail to concentrate to heal yourself!@n", nullptr, "@C$n@W places $s hands on $s body, but nothing happens.", true}, ch, nullptr, vict);
+      act_triple(g, {"@WYou place your hands on your body, but fail to concentrate to heal yourself!@n", {}, "@C$n@W places $s hands on $s body, but nothing happens.", true}, ch, nullptr, vict);
     else
       act_triple(g, {"@WYou place your hands near @c$N@W, but fail to concentrate enough to heal them!@n", "@C$n@W places $s hands near you, but nothing happens!@n", "@C$n@W places $s hands near @c$N@W, but nothing happens.", true}, ch, nullptr, vict);
     decCurKI(g, ch, cost, 0);
@@ -1198,7 +1198,7 @@ ACMD(do_heal)
   if (char_get_bonuses(ch, BONUS_HEALER) > 0)
     heal += heal * .25;
   if (self)
-    act_triple(g, {"@WYou place your hands on your body and an orange glow surrounds you!@n", nullptr, "@C$n@W places $s hands on $s body and an orange glow surrounds $m.", true}, ch, nullptr, vict);
+    act_triple(g, {"@WYou place your hands on your body and an orange glow surrounds you!@n", {}, "@C$n@W places $s hands on $s body and an orange glow surrounds $m.", true}, ch, nullptr, vict);
   else
     act_triple(g, {"@WYou place your hands near @c$N@W and an orange glow surrounds $M!@n", "@C$n@W places $s hands near you and an orange glow surrounds you!@n", "@C$n@W places $s hands near @c$N@W and an orange glow surrounds $M.", true}, ch, nullptr, vict);
   decCurKI(g, ch, cost, 0);
@@ -1496,7 +1496,7 @@ namespace {
     obj_vnum vnum;
     int skill;      /* the first aid it takes */
     int difficulty; /* added to the roll against it */
-    const char *failed, *made, *made_seen;
+    std::string_view failed, made, made_seen;
   };
   constexpr medical_product MEDICAL_PRODUCTS[] = {
       {"adrenex", 381, 65, 15,
@@ -1650,6 +1650,6 @@ ACMD(do_aura)
   reveal_hiding(g, ch, 0);
   decCurKIPercent(g, ch, .12, 0);
   send_to_char(g, ch, "A bright {} aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[char_get_aura(ch)]);
-  act(g, str_format("@wA {} aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("@wA {} aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]), true, ch, nullptr, nullptr, TO_ROOM);
   char_plr_set(ch, PLR_AURALIGHT, true);
 }
