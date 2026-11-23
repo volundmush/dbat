@@ -34,6 +34,8 @@ int compare_nocase_n(std::string_view a, std::string_view b, size_t n);
 /* s with its first byte in upper case, colour codes and all (CAP skips those); empty stays empty */
 std::string upper_first(std::string_view s);
 
+/* The line's first character, or '\0' if it is empty, as *line read it when it was a C string */
+constexpr char first_char(std::string_view line) { return line.empty() ? '\0' : line.front(); }
 /* s, or otherwise when s is empty: the getters' "none" is empty, where it was null (x ? x : otherwise) */
 constexpr std::string_view or_if_empty(std::string_view s, std::string_view otherwise) { return s.empty() ? otherwise : s; }
 /* Copies src into dst, a buffer of size bytes, cut short to fit and always ended by a '\0', as strlcpy() did;

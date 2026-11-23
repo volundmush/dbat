@@ -89,7 +89,7 @@ void save_zone_files(GameWorld *g, struct char_data *ch, struct zone_data *zone,
   save(g, zone);
 }
 
-void olc_parse(GameWorld *g, struct descriptor_data *d, char *arg)
+void olc_parse(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   if (d->olc)
     d->olc->parse(g, d, arg);

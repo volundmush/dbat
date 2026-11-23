@@ -317,9 +317,8 @@ void start_restring(GameWorld *g, struct descriptor_data *d, struct obj_data *ob
   main_menu(g, d);
 }
 
-void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg)
+void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, std::string_view line)
 {
-  const std::string_view line = arg;
   pobj_order &order           = d->pobj;
   const bool restring         = order.what == pobj_order::kind::restring;
   if (!restring && order.what != pobj_order::kind::custom)

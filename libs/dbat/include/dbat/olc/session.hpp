@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/stringutils.hpp"
 
 /*
  * An editor's session: what a connection in one of the OLC states is editing, and how that editor answers a line.
@@ -46,10 +47,7 @@ void begin_editing(GameWorld *g, struct descriptor_data *d, int state);
 void leave_olc(GameWorld *g, struct descriptor_data *d);
 
 /* nanny()'s handler for every editor's state: hands the line to the connection's session. */
-void olc_parse(GameWorld *g, struct descriptor_data *d, char *arg);
-
-/* The first character of an answer, or '\0' for none: what the menus switch on */
-constexpr char first_char(std::string_view line) { return line.empty() ? '\0' : line.front(); }
+void olc_parse(GameWorld *g, struct descriptor_data *d, std::string_view arg);
 
 /* An answer to a yes-or-no question ("Do you wish to save your changes?"): y or n in either case, or neither */
 constexpr std::optional<bool> yes_or_no(std::string_view line)

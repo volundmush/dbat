@@ -1,19 +1,10 @@
 #!/usr/bin/env bash
 # check-olc.sh: OLC stays on its sessions and std::string. Fails if any of the old Oasis OLC machinery comes back:
 # the shared oasis_olc_data or oasis.hpp, the OLC_*() access macros, cleanup_olc(), str_udup(), or an OLC function
-# taking a C string to parse (char *arg). nanny()'s handlers are the exception: its table passes every state's line as
-# a char *, which they view at once.
+# taking a C string to parse (char *arg).
 set -uo pipefail
 root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 cd "$root/libs/dbat" || exit 1
-
-# <file> <function>: nanny()'s handlers for the OLC states
-allowed='
-src/olc/session.cpp olc_parse
-src/olc/obj_edit.cpp pobj_edit_parse
-include/dbat/olc/session.hpp olc_parse
-include/dbat/obj_edit.hpp pobj_edit_parse
-'
 
 fail=0
 report() {
@@ -32,7 +23,7 @@ done < <(grep -rnE --include='*.cpp' --include='*.hpp' '' src include tests |
 # C-string parsers in OLC
 while IFS=: read -r file line text; do
   func=$(sed -E 's/\(.*//; s/.*[ *&]//' <<< "$text")
-  grep -qE "^$file $func\$" <<< "$allowed" || report "OLC parses a C string: $file:$line ($func)"
+  report "OLC parses a C string: $file:$line ($func)"
 done < <(grep -rnE '\(.*\bchar \*(arg|argument|str|string)\b' src/olc src/dg/dg_olc.cpp include/dbat/olc include/dbat/obj_edit.hpp)
 
 [ $fail -eq 0 ] && echo "check-olc: OK"

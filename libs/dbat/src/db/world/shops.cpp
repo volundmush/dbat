@@ -160,11 +160,11 @@ io::loaded<std::string> read_message(io::text_reader &in, shop_vnum vnum, shop_m
   if (!text)
     return text;
   if (text->empty())
-    return shop_default_msgs[which];
+    return std::string(shop_default_msgs[which]);
   if (std::optional<std::string> problem =
           npc_msg_format_problem(text->c_str(), which == SHOP_MSG_BUY || which == SHOP_MSG_SELL)) {
     mud_log("SYSERR: Shop #{:d} message #{:d}: {}; using the default.", vnum, static_cast<int>(which), *problem);
-    return shop_default_msgs[which];
+    return std::string(shop_default_msgs[which]);
   }
   return text;
 }

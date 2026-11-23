@@ -41,7 +41,7 @@
 
 static bool shop_trade_flagged(const struct shop_data *rec, int flag);
 
-const char *const shop_default_msgs[NUM_SHOP_MSGS] = {
+const std::string_view shop_default_msgs[NUM_SHOP_MSGS] = {
     "%s Sorry, I don't stock that item.",  /* SHOP_MSG_NOITEM1 */
     "%s You don't seem to have that.",     /* SHOP_MSG_NOITEM2 */
     "%s I don't trade in such items.",     /* SHOP_MSG_NOBUY */
@@ -79,7 +79,7 @@ static int top(struct stack_data *stack);
 static int pop(struct stack_data *stack);
 static void evaluate_operation(struct stack_data *ops, struct stack_data *vals);
 static int find_oper_num(char token);
-static int evaluate_expression(struct obj_data *obj, const char *expr);
+static int evaluate_expression(struct obj_data *obj, std::string_view expr);
 static int trade_with(GameWorld *g, struct obj_data *item, struct shop_data *shop);
 static bool same_obj(struct obj_data *obj1, struct obj_data *obj2);
 
@@ -90,7 +90,7 @@ static int sell_price(GameWorld *g, struct obj_data *obj, struct shop_data *shop
 static std::string list_object(GameWorld *g, struct obj_data *obj, int cnt, int oindex, struct shop_data *shop, struct char_data *keeper, struct char_data *seller);
 
 /* config arrays */
-static const char *const operator_str[] = {
+static constexpr std::string_view operator_str[] = {
     "[({",
     "])}",
     "|+",
@@ -189,8 +189,7 @@ static bool is_ok_char(GameWorld *g, struct char_data *keeper, struct char_data 
   std::string buf;
 
   if (!char_can_see(g, keeper, ch)) {
-    char actbuf[MAX_INPUT_LENGTH] = MSG_NO_SEE_CHAR;
-    do_say(g, keeper, actbuf, g->cmd_say, 0);
+    do_say(g, keeper, MSG_NO_SEE_CHAR, g->cmd_say, 0);
     return (false);
   }
   if (char_adm_flagged(ch, ADM_ALLSHOPS))
@@ -340,35 +339,33 @@ static int find_oper_num(char token)
   int oindex;
 
   for (oindex = 0; oindex <= MAX_OPER; oindex++)
-    if (strchr(operator_str[oindex], token))
+    if (operator_str[oindex].contains(token))
       return (oindex);
   return (NOTHING);
 }
 
-static int evaluate_expression(struct obj_data *obj, const char *expr)
+static int evaluate_expression(struct obj_data *obj, std::string_view expr)
 {
   struct stack_data ops, vals;
-  const char *ptr, *end;
-  char name[MAX_STRING_LENGTH];
   int temp, eindex;
 
-  if (!expr || !*expr) /* Allows opening ( first. */
+  expr = expr.substr(0, expr.find('\0')); /* where the C string it was ended */
+  if (expr.empty()) /* Allows opening ( first. */
     return (true);
 
   ops.len = vals.len = 0;
-  ptr                = expr;
-  while (*ptr) {
-    if (isspace(*ptr))
-      ptr++;
+  size_t at          = 0;
+  while (at < expr.size()) {
+    if (isspace(expr[at]))
+      at++;
     else {
-      if ((temp = find_oper_num(*ptr)) == NOTHING) {
-        end = ptr;
-        while (*ptr && !isspace(*ptr) && find_oper_num(*ptr) == NOTHING)
-          ptr++;
-        strncpy(name, end, ptr - end); /* strncpy: OK (name/end:MAX_STRING_LENGTH) */
-        name[ptr - end] = '\0';
+      if ((temp = find_oper_num(expr[at])) == NOTHING) {
+        size_t start = at;
+        while (at < expr.size() && !isspace(expr[at]) && find_oper_num(expr[at]) == NOTHING)
+          at++;
+        std::string_view name = expr.substr(start, at - start);
         for (eindex = 0; *extra_bits[eindex] != '\n'; eindex++)
-          if (!strcasecmp(name, extra_bits[eindex])) {
+          if (str_eq_nocase(name, extra_bits[eindex])) {
             push(&vals, obj_extra_flagged(obj, eindex));
             break;
           }
@@ -386,7 +383,7 @@ static int evaluate_expression(struct obj_data *obj, const char *expr)
           }
         } else
           push(&ops, temp);
-        ptr++;
+        at++;
       }
     }
   }
@@ -414,7 +411,7 @@ static int trade_with(GameWorld *g, struct obj_data *item, struct shop_data *sho
           (obj_get_type_flag(item) == ITEM_WAND ||
            obj_get_type_flag(item) == ITEM_STAFF))
         return (OBJECT_DEAD);
-      else if (evaluate_expression(item, buy.keywords.c_str()))
+      else if (evaluate_expression(item, buy.keywords))
         return (OBJECT_OK);
     }
   return (OBJECT_NOTOK);
@@ -1277,10 +1274,8 @@ static std::string customer_string(GameWorld *g, struct shop_data *shop, int det
 /* END_OF inefficient */
 static void list_all_shops(GameWorld *g, struct char_data *ch)
 {
-  const char *list_all_shops_header =
-      " ##   Virtual   Where    Keeper    Buy   Sell   Customers\r\n"
-      "---------------------------------------------------------\r\n";
-  std::string buf = list_all_shops_header;
+  std::string buf = " ##   Virtual   Where    Keeper    Buy   Sell   Customers\r\n"
+                    "---------------------------------------------------------\r\n";
   std::string buf1;
 
   int number = 0;

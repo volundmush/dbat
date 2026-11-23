@@ -5,7 +5,6 @@
 2 libs/dbat/include/dbat/ban.hpp
 1 libs/dbat/include/dbat/comm.hpp
 2 libs/dbat/include/dbat/config.hpp
-1 libs/dbat/include/dbat/con_states.hpp
 1 libs/dbat/include/dbat/consts/admlevel.hpp
 1 libs/dbat/include/dbat/consts/affflags.hpp
 1 libs/dbat/include/dbat/consts/aligns.hpp
@@ -43,9 +42,7 @@
 1 libs/dbat/include/dbat/genolc.hpp
 2 libs/dbat/include/dbat/guild.hpp
 1 libs/dbat/include/dbat/index.hpp
-1 libs/dbat/include/dbat/obj_edit.hpp
-1 libs/dbat/include/dbat/olc/session.hpp
-4 libs/dbat/include/dbat/shop.hpp
+3 libs/dbat/include/dbat/shop.hpp
 1 libs/dbat/include/dbat/spell_parser.hpp
 4 libs/dbat/include/dbat/spells.hpp
 2 libs/dbat/include/dbat/stringutils.hpp
@@ -157,11 +154,9 @@
 3 libs/dbat/src/io/reader.cpp
 2 libs/dbat/src/io/writer.cpp
 1 libs/dbat/src/net/accounts.cpp
-44 libs/dbat/src/net/chargen.cpp
 3 libs/dbat/src/net/colour.cpp
 2 libs/dbat/src/net/connection.cpp
 5 libs/dbat/src/net/messages.cpp
-38 libs/dbat/src/net/nanny.cpp
 2 libs/dbat/src/net/prompt.cpp
 1 libs/dbat/src/net/signals.cpp
 6 libs/dbat/src/olc/aedit.cpp
@@ -173,8 +168,7 @@
 2 libs/dbat/src/olc/hedit.cpp
 5 libs/dbat/src/olc/hsedit.cpp
 12 libs/dbat/src/olc/improved-edit.cpp
-3 libs/dbat/src/olc/obj_edit.cpp
-1 libs/dbat/src/olc/session.cpp
+2 libs/dbat/src/olc/obj_edit.cpp
 1 libs/dbat/src/olc/statedit.cpp
 7 libs/dbat/src/olc/tedit.cpp
 15 libs/dbat/src/olc/zedit.cpp
@@ -184,7 +178,7 @@
 8 libs/dbat/src/systems/guild.cpp
 1 libs/dbat/src/systems/mobact.cpp
 2 libs/dbat/src/systems/races.cpp
-13 libs/dbat/src/systems/shop.cpp
+2 libs/dbat/src/systems/shop.cpp
 5 libs/dbat/src/systems/spell_parser.cpp
 3 libs/dbat/src/util/log.cpp
 4 libs/dbat/src/util/stringutils.cpp

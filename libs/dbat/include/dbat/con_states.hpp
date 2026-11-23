@@ -12,7 +12,7 @@
  */
 struct con_state {
   int state{};
-  void (*parse)(GameWorld *g, struct descriptor_data *d, char *arg){}; /* arg: the line, its leading spaces gone */
+  void (*parse)(GameWorld *g, struct descriptor_data *d, std::string_view arg){}; /* arg: the line, its leading spaces gone */
   void (*prompt)(GameWorld *g, struct descriptor_data *d){};           /* what's shown on entering it, if always the same */
   bool olc{};                                                           /* an editor's */
 };

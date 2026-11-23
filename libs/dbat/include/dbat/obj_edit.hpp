@@ -31,4 +31,4 @@ void start_custom_order(GameWorld *g, struct descriptor_data *d);
 void start_restring(GameWorld *g, struct descriptor_data *d, struct obj_data *obj);
 
 /* nanny()'s handler for CON_POBJ */
-void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, char *arg);
+void pobj_edit_parse(GameWorld *g, struct descriptor_data *d, std::string_view line);

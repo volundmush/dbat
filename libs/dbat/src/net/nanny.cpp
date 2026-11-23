@@ -105,15 +105,6 @@ static std::optional<std::string> parse_name(std::string_view typed)
   return std::string(typed);
 }
 
-/* CAP() on the line the handlers share, which they change in place, as before; it goes when they take the line as a
-   std::string& */
-static char *cap_line(char *line)
-{
-  std::string text = line;
-  std::ranges::copy(CAP(text), line); /* the same length, so the '\0' stays where it was */
-  return line;
-}
-
 /* ---- Notices at login ------------------------------------------------- */
 
 /* Interest owed since the last payout, for one to three days. Reconnecting pays the bank's own rate; entering from the
@@ -448,7 +439,7 @@ static room_vnum room_or_void(GameWorld *g, room_vnum vnum)
    for tying it, 3 for a new one. A payout lasts a day, unless a better one comes. */
 static void payout(GameWorld *g, int num)
 {
-  static const char *const why[] = {
+  static constexpr std::string_view why[] = {
       "@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n",
       "@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n",
       "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n",
@@ -568,7 +559,7 @@ static void log_in_character(GameWorld *g, struct descriptor_data *d)
 }
 
 /* CON_GET_NAME: the name of a new character for an empty slot, or (after Return) the character in the slot chosen */
-static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_get_name(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   std::string tmp_name;
   int player_i;
@@ -584,13 +575,13 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
     char_prf_set(g, d->character, PRF_COLOR, true);
   }
   if (d->writenew > 0) {
-    if (!*arg) {
+    if (arg.empty()) {
       write_to_output(g, d, "Enter name: ");
       return;
     }
     d->loadplay = arg;
   }
-  if (!acceptable_name(g, d->loadplay.c_str(), tmp_name)) {
+  if (!acceptable_name(g, d->loadplay, tmp_name)) {
     write_to_output(g, d, "Invalid name, please try another.\r\nName: ");
     return;
   }
@@ -617,9 +608,9 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_NAME_CNFRM: wait for conf. of new name */
-static void state_name_cnfrm(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_name_cnfrm(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  if (toupper(*arg) == 'Y') {
+  if (toupper(first_char(arg)) == 'Y') {
     if (isbanned(g, d->host) >= BAN_NEW) {
       mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Request for new char {} denied from [{}] (siteban)", char_get_pc_name(d->character), d->host);
       write_to_output(g, d, "Sorry, new characters are not allowed from your site!\r\n");
@@ -635,7 +626,7 @@ static void state_name_cnfrm(GameWorld *g, struct descriptor_data *d, char *arg)
     d->idle_tics = 0;
     write_to_output(g, d, "@MNew character.@n\r\nGive me a @gpassword@n for @C{}@n: ", char_get_pc_name(d->character));
     desc_set_connected(d, CON_NEWPASSWD);
-  } else if (*arg == 'n' || *arg == 'N') {
+  } else if (first_char(arg) == 'n' || first_char(arg) == 'N') {
     write_to_output(g, d, "Okay, what IS it, then? ");
     char_set_alias(d->character, "");
     desc_set_connected(d, CON_GET_NAME);
@@ -644,36 +635,37 @@ static void state_name_cnfrm(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_GET_USER */
-static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_get_user(GameWorld *g, struct descriptor_data *d, std::string_view typed)
 {
   if (isbanned(g, d->host)) {
     write_to_output(g, d, "You have been banned. Have a nice day.\r\n");
     desc_set_connected(d, CON_CLOSE);
     return;
   }
-  if (!*arg) {
+  if (typed.empty()) {
     write_to_output(g, d, "Enter your desired username or the username you have already made.\nUsername?\r\n");
     return;
   }
-  if (!strcasecmp(arg, "index")) {
+  if (str_eq_nocase(typed, "index")) {
     write_to_output(g, d, "Try again, username?\r\n");
     return;
   }
-  if (!Valid_Name(g, cap_line(arg))) {
+  std::string arg(typed);
+  CAP(arg); /* the name is capitalised from here on */
+  if (!Valid_Name(g, arg)) {
     write_to_output(g, d, "Invalid name. Username?\r\n");
     return;
   }
   /* the name becomes a file name under data/user, so letters only */
-  for (const char *p = arg; *p; p++)
-    if (!isalpha((unsigned char)*p)) {
-      write_to_output(g, d, "Letters only: no spaces, numbers or punctuation. Username?\r\n");
-      return;
-    }
-  if (strlen(arg) < 3) {
+  if (!std::ranges::all_of(arg, [](unsigned char c) { return std::isalpha(c); })) {
+    write_to_output(g, d, "Letters only: no spaces, numbers or punctuation. Username?\r\n");
+    return;
+  }
+  if (arg.size() < 3) {
     write_to_output(g, d, "Name must at least be 3 characters long, username?\r\n");
     return;
   }
-  if (strlen(arg) > 10) {
+  if (arg.size() > 10) {
     write_to_output(g, d, "Name must be at most 10 characters long, username?\r\n");
     return;
   }
@@ -681,7 +673,7 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
     if (g->circle_restrict == 101) {
       write_to_output(g, d, "The mud is locked for mortals at this time.\r\n");
       write_to_output(g, d, "Please check: www.advent-truth.com/forum for further details.\r\n");
-      send_to_imm(g, "{} rejected by wizlock", cap_line(arg));
+      send_to_imm(g, "{} rejected by wizlock", arg);
       desc_set_connected(d, CON_CLOSE);
     } else {
       d->acct.user = arg;
@@ -692,40 +684,40 @@ static void state_get_user(GameWorld *g, struct descriptor_data *d, char *arg)
   } else {
     if (g->circle_restrict == 101) {
       d->acct.user = arg;
-      userLoad(d, d->acct.user.c_str());
+      userLoad(d, d->acct.user);
       if (d->acct.level == 0) {
         write_to_output(g, d, "The mud is locked for mortals at this time.\r\n");
         send_to_imm(g, "{} rejected by wizlock", d->acct.user);
         desc_set_connected(d, CON_CLOSE);
       } else {
         write_to_output(g, d, "Password: \r\n");
-        send_to_imm(g, "Username, {}, logging in.", cap_line(arg));
+        send_to_imm(g, "Username, {}, logging in.", arg);
         desc_set_connected(d, CON_PASSWORD);
       }
     } else {
       userLoad(d, arg);
       write_to_output(g, d, "Password: \r\n");
-      send_to_imm(g, "Username, {}, logging in.", cap_line(arg));
+      send_to_imm(g, "Username, {}, logging in.", arg);
       desc_set_connected(d, CON_PASSWORD);
     }
   }
 }
 
 /* CON_USER_CONF */
-static void state_user_conf(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_user_conf(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  if (!*arg) {
+  if (arg.empty()) {
     write_to_output(g, d, "You want your user name to be, {}?\r\n", d->acct.user);
     write_to_output(g, d, "Yes or no: \n");
     return;
   }
-  if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "y")) {
+  if (str_eq_nocase(arg, "yes") || str_eq_nocase(arg, "y")) {
     write_to_output(g, d, "User Account, {}, created.\r\nEnter Email:\n", d->acct.user);
     write_to_output(g, d, "Remember your email must be valid and matching the example given.\n");
     write_to_output(g, d, "[Example: iovan@@advent-truth.com]\n");
     send_to_imm(g, "Username, {}, creating.", CAP(d->acct.user));
     desc_set_connected(d, CON_GET_EMAIL);
-  } else if (!strcasecmp(arg, "no") || !strcasecmp(arg, "n")) {
+  } else if (str_eq_nocase(arg, "no") || str_eq_nocase(arg, "n")) {
     d->acct.user = "Empty";
     write_to_output(g, d, "Enter Username: \n");
     desc_set_connected(d, CON_GET_USER);
@@ -737,25 +729,25 @@ static void state_user_conf(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* User files hold one value per line, read back as a single word; get_line() skips lines starting with '*'. */
-static bool fits_user_file(const char *value, size_t max_length)
+static bool fits_user_file(std::string_view value, size_t max_length)
 {
-  return *value != '*' && strlen(value) <= max_length && !strpbrk(value, " \t");
+  return !value.starts_with('*') && value.size() <= max_length && value.find_first_of(" \t") == std::string_view::npos;
 }
 
 /* CON_GET_EMAIL */
-static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_get_email(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  if (readUserIndex(d->acct.user) && !*arg) {
+  if (readUserIndex(d->acct.user) && arg.empty()) {
     write_to_output(g, d, "Email, or M for menu?\r\n");
     return;
   }
-  if (!*arg) {
+  if (arg.empty()) {
     write_to_output(g, d, "Email?\r\n");
     return;
   }
-  if (!strcasecmp(arg, "M") && readUserIndex(d->acct.user)) {
+  if (str_eq_nocase(arg, "M") && readUserIndex(d->acct.user)) {
     enter_state(g, d, CON_UMENU);
-  } else if (!strstr(arg, ".com") && !strstr(arg, ".net") && !strstr(arg, ".org")) {
+  } else if (!arg.contains(".com") && !arg.contains(".net") && !arg.contains(".org")) {
     write_to_output(g, d, "Improper email format missing '.com' or '.net' or '.org'. Email?\r\n");
     return;
   } else if (!fits_user_file(arg, MAX_EMAIL_LENGTH)) {
@@ -776,22 +768,22 @@ static void state_get_email(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_NEWPASSWD */
-static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_newpasswd(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  if (readUserIndex(d->acct.user) && !*arg) {
+  if (readUserIndex(d->acct.user) && arg.empty()) {
     write_to_output(g, d, "Password, or M for menu?\r\n");
     return;
   }
-  if (!*arg) {
+  if (arg.empty()) {
     write_to_output(g, d, "Password?\r\n");
     return;
   }
-  if (!strcasecmp(arg, "M") && readUserIndex(d->acct.user)) {
+  if (str_eq_nocase(arg, "M") && readUserIndex(d->acct.user)) {
     enter_state(g, d, CON_UMENU);
-  } else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->acct.user)) {
+  } else if (arg.size() > MAX_PWD_LENGTH && readUserIndex(d->acct.user)) {
     write_to_output(g, d, "Password is too long. Password, or M for menu?\r\n");
     return;
-  } else if (strlen(arg) > MAX_PWD_LENGTH) {
+  } else if (arg.size() > MAX_PWD_LENGTH) {
     write_to_output(g, d, "Password is too long. Password?\r\n");
     return;
   } else if (!fits_user_file(arg, MAX_PWD_LENGTH)) {
@@ -811,21 +803,21 @@ static void state_newpasswd(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_PASSWORD */
-static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_password(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
 
-  if (!*arg) {
+  if (arg.empty()) {
     write_to_output(g, d, "Enter Password or Return:\r\n");
     write_to_output(g, d, "(Return will ask for a different username)\r\n");
     return;
   }
-  if (!strcasecmp("return", arg)) {
+  if (str_eq_nocase("return", arg)) {
     d->acct.user = "Empty";
     write_to_output(g, d, "Username?\r\n");
     desc_set_connected(d, CON_GET_USER);
     return;
   }
-  if (!strcasecmp(d->acct.pass.c_str(), arg)) {
+  if (str_eq_nocase(d->acct.pass, arg)) {
     for (descriptor_data *k : each_desc(g)) {
       if (k == d)
         continue;
@@ -833,7 +825,7 @@ static void state_password(GameWorld *g, struct descriptor_data *d, char *arg)
         continue;
       if (d->acct.user.empty())
         continue;
-      if (!strcasecmp(k->acct.user.c_str(), d->acct.user.c_str())) {
+      if (str_eq_nocase(k->acct.user, d->acct.user)) {
         if (desc_get_connected(k) == CON_PLAYING) {
           desc_set_connected(k, CON_DISCONNECT);
           write_to_output(g, k, "Your account has been usurped by someone who knows its password!@n");
@@ -881,8 +873,6 @@ static void buy_slot(GameWorld *g, struct descriptor_data *d)
 /* Account menu 1-5: create a character in an empty slot, or load the one in it. */
 static void choose_slot(GameWorld *g, struct descriptor_data *d, int n)
 {
-  const char *name;
-
   if (n < 1 || n > MAX_ACCOUNT_SLOTS) {
     userRead(g, d);
     write_to_output(g, d, "That is not an option.\n");
@@ -893,8 +883,8 @@ static void choose_slot(GameWorld *g, struct descriptor_data *d, int n)
     write_to_output(g, d, "You only have {:d} character slots avaialable!\r\n", d->acct.total);
     return;
   }
-  name = d->acct.slots[n - 1].c_str();
-  if (!strcasecmp(name, "Empty")) {
+  const std::string &name = d->acct.slots[n - 1];
+  if (str_eq_nocase(name, "Empty")) {
     write_to_output(g, d, "Enter New Character Name: \n");
     d->writenew = n;
     desc_set_connected(d, CON_GET_NAME);
@@ -910,7 +900,7 @@ static void choose_slot(GameWorld *g, struct descriptor_data *d, int n)
 
 /* The account menu's options other than the slots, each a letter in either case. */
 static const struct {
-  const char *key;
+  std::string_view key;
   void (*choose)(GameWorld *g, struct descriptor_data *d);
 } account_options[] = {
     {"Q", [](GameWorld *g, descriptor_data *d) {
@@ -938,14 +928,14 @@ static const struct {
 };
 
 /* CON_UMENU */
-static void state_umenu(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_umenu(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  if (!*arg) {
+  if (arg.empty()) {
     userRead(g, d);
     return;
   }
   for (const auto &option : account_options)
-    if (!strcasecmp(arg, option.key)) {
+    if (str_eq_nocase(arg, option.key)) {
       option.choose(g, d);
       return;
     }
@@ -953,7 +943,7 @@ static void state_umenu(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_RMOTD: read CR after printing motd */
-static void state_rmotd(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_rmotd(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   write_to_output(g, d, CONFIG_MENU);
   desc_set_connected(d, CON_MENU);
@@ -1015,9 +1005,9 @@ static void enter_game(GameWorld *g, struct descriptor_data *d)
 }
 
 /* CON_MENU: get selection from main menu */
-static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_menu(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  switch (*arg) {
+  switch (first_char(arg)) {
     case '0':
       write_to_output(g, d, "Goodbye.\r\n");
       desc_set_connected(d, CON_CLOSE);
@@ -1053,13 +1043,13 @@ static void state_menu(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_DELCNF1 */
-static void state_delcnf1(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_delcnf1(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  if (!strcmp(arg, "yes") || !strcmp(arg, "YES")) {
+  if (arg == "yes" || arg == "YES") {
     write_to_output(g, d, "Your user and character files have been deleted. Good bye.\n");
     userDelete(g, d);
     desc_set_connected(d, CON_CLOSE);
-  } else if (!strcmp(arg, "no") || !strcmp(arg, "NO")) {
+  } else if (arg == "no" || arg == "NO") {
     enter_state(g, d, CON_UMENU);
     write_to_output(g, d, "Nothing was deleted. Phew.\n");
   } else {
@@ -1091,11 +1081,11 @@ static void refund_deleted_character(GameWorld *g, struct descriptor_data *d)
 }
 
 /* CON_DELCNF2 */
-static void state_delcnf2(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_delcnf2(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   int player_i;
 
-  if (!strcmp(arg, "yes") || !strcmp(arg, "YES")) {
+  if (arg == "yes" || arg == "YES") {
     if (char_plr_flagged(d->character, PLR_FROZEN)) {
       write_to_output(g, d, "You try to kill yourself, but the ice stops you.\r\nCharacter not deleted.\r\n\r\n");
       desc_set_connected(d, CON_CLOSE);
@@ -1181,13 +1171,9 @@ void enter_state(GameWorld *g, struct descriptor_data *d, int state)
 
 void nanny(GameWorld *g, struct descriptor_data *d, std::string_view line)
 {
-  /* the handlers take a C string, which they may change and lengthen (an email's @ becomes <AT>), as they could the
-     input buffer it came from */
-  std::array<char, MAX_INPUT_LENGTH> buffer;
-  std::string_view text = skip_spaces(line).substr(0, buffer.size() - 1);
-  char *arg = buffer.data();
-  text.copy(arg, text.size());
-  arg[text.size()] = '\0';
+  /* as long as the input buffer it once went through holds, and up to a '\0', where the C string it was ended */
+  std::string_view arg = skip_spaces(line).substr(0, MAX_INPUT_LENGTH - 1);
+  arg                  = arg.substr(0, arg.find('\0'));
 
   if (d->character == nullptr) {
     d->character = new char_data();

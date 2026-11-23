@@ -90,16 +90,16 @@ enum class bar_kind { none, taken, android, demon };
 struct trait_bar {
   bar_kind when{};
   int other{};          /* the trait, for taken */
-  const char *says{};   /* what to say instead of the usual */
+  std::string_view says{}; /* what to say instead of the usual, if anything */
 };
 
-static constexpr trait_bar excludes(int other, const char *says = nullptr) { return {bar_kind::taken, other, says}; }
-static constexpr trait_bar not_android(const char *says = nullptr) { return {bar_kind::android, 0, says}; }
-static constexpr trait_bar not_demon(const char *says) { return {bar_kind::demon, 0, says}; }
+static constexpr trait_bar excludes(int other, std::string_view says = {}) { return {bar_kind::taken, other, says}; }
+static constexpr trait_bar not_android(std::string_view says = {}) { return {bar_kind::android, 0, says}; }
+static constexpr trait_bar not_demon(std::string_view says) { return {bar_kind::demon, 0, says}; }
 
 struct trait {
-  const char *name{};  /* as the status commands show it */
-  const char *line{};  /* its line in the menu, the cost included */
+  std::string_view name{}; /* as the status commands show it */
+  std::string_view line{}; /* its line in the menu, the cost included */
   int cost{};          /* negative for a bonus (points spent), positive for a negative (points gained) */
   trait_bar bars[2]{}; /* checked in order */
 };
@@ -242,7 +242,7 @@ static void display_bonus_menu(GameWorld *g, struct char_data *ch, bool negative
 }
 
 /* The trait a menu number names, or -1. A number in the negatives menu below 12 names a bonus. */
-static int trait_choice(const char *arg, bool negatives)
+static int trait_choice(std::string_view arg, bool negatives)
 {
   int n = static_cast<int>(io::c_atol(arg));
 
@@ -262,7 +262,7 @@ static bool trait_barred(GameWorld *g, struct char_data *ch, int value, bool neg
     if (!applies)
       continue;
     display_bonus_menu(g, ch, negatives);
-    if (bar.says)
+    if (!bar.says.empty())
       send_to_char(g, ch, "{}", bar.says);
     else if (bar.when == bar_kind::taken)
       send_to_char(g, ch, "@R{} and {} are mutually exclusive.\n\n", traits[bar.other].name, traits[value].name);
@@ -340,14 +340,12 @@ static void exchange_ccpoints(GameWorld *g, struct char_data *ch, int value)
 /* ---- Menu helpers ---------------------------------------------------- */
 
 /* The position of the answer's first character in keys (letters in either case), or -1. */
-static int menu_choice(const char *arg, const char *keys)
+static int menu_choice(std::string_view arg, std::string_view keys)
 {
-  const char *key;
-
-  if (!*arg)
+  if (arg.empty())
     return -1;
-  key = strchr(keys, tolower((unsigned char)*arg));
-  return key ? (int)(key - keys) : -1;
+  size_t key = keys.find(static_cast<char>(tolower(static_cast<unsigned char>(arg.front()))));
+  return key == std::string_view::npos ? -1 : static_cast<int>(key);
 }
 
 static void reject_option(GameWorld *g, struct descriptor_data *d)
@@ -394,7 +392,7 @@ static void show_sex_prompt(GameWorld *g, struct descriptor_data *d)
 static void show_length_menu(GameWorld *g, struct descriptor_data *d)
 {
   struct char_data *ch = d->character;
-  const char *part, *shortest;
+  std::string_view part, shortest;
 
   if (has_hair(ch)) {
     part = "Hair", shortest = "Bald";
@@ -579,7 +577,7 @@ static void show_skills_prompt(GameWorld *g, struct descriptor_data *d)
 }
 
 /* rubbery_less picks between the two wordings the original menus used. */
-static void show_mutation_menu(GameWorld *g, struct descriptor_data *d, const char *heading, bool rubbery_less)
+static void show_mutation_menu(GameWorld *g, struct descriptor_data *d, std::string_view heading, bool rubbery_less)
 {
   write_to_output(g, d, "{}", heading);
   write_to_output(g, d, "@D--------------------------------------------------------@n\n");
@@ -598,7 +596,7 @@ static void show_mutation_menu(GameWorld *g, struct descriptor_data *d, const ch
   write_to_output(g, d, "@B10@w) @CNatural Energy      @c-Get 5{} of your ki damage refunded back into your current ki total.@n\n", "%");
 }
 
-static void show_genome_menu(GameWorld *g, struct descriptor_data *d, const char *heading)
+static void show_genome_menu(GameWorld *g, struct descriptor_data *d, std::string_view heading)
 {
   write_to_output(g, d, "{}", heading);
   write_to_output(g, d, "@D--------------------------------------------------------@n\n");
@@ -612,7 +610,7 @@ static void show_genome_menu(GameWorld *g, struct descriptor_data *d, const char
   write_to_output(g, d, "@B8@w) @CKonatsu @c- @C40{} higher chance to multihit on physical attacks.\r\n", "%");
 }
 
-static const char *const mutation_names[] = {
+static constexpr std::string_view mutation_names[] = {
     "Unselected",           /* 0 */
     "Extreme Speed",        /* 1 */
     "Increased Cell Regen", /* 2 */
@@ -626,7 +624,7 @@ static const char *const mutation_names[] = {
     "Natural Energy"        /* 10 */
 };
 
-static const char *const genome_names[] = {
+static constexpr std::string_view genome_names[] = {
     "Unselected", /* 0 */
     "Human",      /* 1 */
     "Saiyan",     /* 2 */
@@ -644,7 +642,7 @@ static void show_chosen_genomes(GameWorld *g, struct descriptor_data *d)
 }
 
 /* The traits menu that follows skills, mutations or genomes. */
-static void ask_bonuses(GameWorld *g, struct descriptor_data *d, const char *choose)
+static void ask_bonuses(GameWorld *g, struct descriptor_data *d, std::string_view choose)
 {
   display_bonus_menu(g, d->character, false);
   write_to_output(g, d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
@@ -694,15 +692,15 @@ static void finish_creation(GameWorld *g, struct descriptor_data *d)
 static void next_step(GameWorld *g, struct descriptor_data *d);
 
 /* CON_QRACE / CON_RACE_HELP */
-static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_qrace(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   int chosen_race;
 
-  if (!*arg || (strlen(arg) == 1 && toupper(*arg) != 'T')) {
+  if (arg.empty() || (arg.size() == 1 && toupper(arg.front()) != 'T')) {
     write_to_output(g, d, "\r\nThat's not a race.\r\nRace: ");
     return;
   }
-  if (strlen(arg) == 1) { /* T: toggle between the selection and help menus */
+  if (arg.size() == 1) { /* T: toggle between the selection and help menus */
     enter_state(g, d, desc_get_connected(d) == CON_QRACE ? CON_RACE_HELP : CON_QRACE);
     return;
   }
@@ -724,7 +722,7 @@ static void state_qrace(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_RACIAL */
-static void state_racial(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_racial(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   int choice = menu_choice(arg, char_is_halfbreed(d->character) ? "12" : "123");
 
@@ -737,7 +735,7 @@ static void state_racial(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_QSEX: query sex of new user (Nameks aren't asked) */
-static void state_qsex(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_qsex(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   static const int sexes[] = {SEX_MALE, SEX_FEMALE, SEX_NEUTRAL};
   int choice               = menu_choice(arg, "mfn");
@@ -765,7 +763,7 @@ static const int eyes[]         = {EYE_BLUE, EYE_BLACK, EYE_GREEN, EYE_BROWN, EY
 /* An appearance question: the keys answering it, and what each sets (or, with no values, the key's position). */
 struct appearance {
   int state{};
-  const char *keys{};
+  std::string_view keys{};
   std::span<const int> values{};
   void (*set)(struct char_data *ch, int value){};
 };
@@ -781,7 +779,7 @@ static const appearance appearances[] = {
 };
 
 /* CON_HAIRL, CON_HAIRC, CON_HAIRS, CON_SKIN, CON_EYE, CON_DISTFEA, CON_AURA */
-static void state_appearance(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_appearance(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   const appearance *a = std::ranges::find(appearances, desc_get_connected(d), &appearance::state);
   int choice          = menu_choice(arg, a->keys);
@@ -795,7 +793,7 @@ static void state_appearance(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_HW */
-static void state_hw(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_hw(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   std::span<const size_range> sizes = size_ranges(d->character);
   int choice                        = menu_choice(arg, "123456");
@@ -811,12 +809,12 @@ static void state_hw(GameWorld *g, struct descriptor_data *d, char *arg)
 /* ---- Sensei ----------------------------------------------------------- */
 
 /* CON_QCLASS / CON_CLASS_HELP */
-static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_qclass(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   int chosen_sensei;
 
-  if (strlen(arg) == 1) {
-    if (toupper(*arg) != 'T') /* T: toggle between the selection and help menus */
+  if (arg.size() == 1) {
+    if (toupper(arg.front()) != 'T') /* T: toggle between the selection and help menus */
       write_to_output(g, d, "\r\nThat's not a sensei.\r\nSensei: ");
     else
       enter_state(g, d, desc_get_connected(d) == CON_CLASS_HELP ? CON_QCLASS : CON_CLASS_HELP);
@@ -846,9 +844,9 @@ static void state_qclass(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_ANDROID */
-static void state_android(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_android(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  switch (*arg) {
+  switch (first_char(arg)) {
     case '1':
       char_plr_set(d->character, PLR_ABSORB, true);
       write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your liking.\r\n\r\n");
@@ -980,7 +978,7 @@ static int64_t gained(GameWorld *g, struct char_data *ch, gain how)
 
 /* An answer, and what it does, in this order. */
 struct answer {
-  const char *text{};
+  std::string_view text{}; /* empty past the last */
   int alignment{};    /* added */
   int gold_add{};
   int gold_set{-1};   /* or left alone */
@@ -993,7 +991,7 @@ struct answer {
 struct question {
   int state{};
   bool gap{};          /* a blank line before "Answer the following question" */
-  const char *ask{};
+  std::string_view ask{};
   answer answers[5]{}; /* or none, and choices shows them */
   void (*choices)(GameWorld *g, struct descriptor_data *d){};
 };
@@ -1083,7 +1081,7 @@ static const question &question_for(int state)
 
 static int answer_count(const question &q)
 {
-  return (int)std::ranges::count_if(q.answers, [](const answer &a) { return a.text != nullptr; });
+  return (int)std::ranges::count_if(q.answers, [](const answer &a) { return !a.text.empty(); });
 }
 
 /* CON_Q1 to CON_QX. Question 1's heading is its caller's. */
@@ -1138,15 +1136,16 @@ static int answers_alignment(const struct descriptor_data *d)
 }
 
 /* CON_Q1 to CON_Q9 */
-static void state_question(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_question(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   const question &q = question_for(desc_get_connected(d));
+  char c            = first_char(arg);
 
-  if (*arg < '1' || *arg >= '1' + answer_count(q)) {
+  if (c < '1' || c >= '1' + answer_count(q)) {
     reject_option(g, d);
     return;
   }
-  d->chargen.answers[&q - questions] = *arg - '1';
+  d->chargen.answers[&q - questions] = c - '1';
   next_step(g, d);
 }
 
@@ -1168,7 +1167,7 @@ static int age_chosen(const struct char_data *ch, int choice)
 }
 
 /* CON_QX: starting age */
-static void state_qx(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_qx(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   int choice = menu_choice(arg, "123456789abcdefghi");
 
@@ -1184,7 +1183,7 @@ static void state_qx(GameWorld *g, struct descriptor_data *d, char *arg)
 /* CON_ALIGN: keep the questionnaire's alignment, or pick one at a cost */
 static const int alignments[] = {1000, 799, 599, 299, 0, -299, -599, -799, -1000}; /* CON_ALIGN's, from 1 */
 
-static void state_align(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_align(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   int choice = menu_choice(arg, "k123456789");
 
@@ -1201,11 +1200,11 @@ static void state_align(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_SKILLS: keep the sensei/race skills, or forget them for 200 practice sessions */
-static void state_skills(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_skills(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  bool forget = !strcasecmp(arg, "forget");
+  bool forget = str_eq_nocase(arg, "forget");
 
-  if (!forget && strcasecmp(arg, "keep")) {
+  if (!forget && !str_eq_nocase(arg, "keep")) {
     show_skills_prompt(g, d);
     return;
   }
@@ -1229,7 +1228,7 @@ static void ask_genomes(GameWorld *g, struct descriptor_data *d)
 /* ---- Genomes, traits and stats --------------------------------------- */
 
 /* Mutants pick one mutation; the next input rolls the second, and the one after moves on. */
-static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
+static void mutant_genome(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   struct char_data *ch = d->character;
 
@@ -1244,7 +1243,7 @@ static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
     char_set_genome(ch, 1, num);
   } else if (char_get_genome(ch, 1) > 0) {
     next_step(g, d);
-  } else if (!*arg) {
+  } else if (arg.empty()) {
     write_to_output(g, d, "That is not an acceptable choice!\r\n");
     write_to_output(g, d, "\n@wChoose: ");
   } else {
@@ -1259,7 +1258,7 @@ static void mutant_genome(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* Bios pick two different genomes; the input after the second moves on. */
-static void bio_genome(GameWorld *g, struct descriptor_data *d, char *arg)
+static void bio_genome(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   struct char_data *ch = d->character;
   int select;
@@ -1268,7 +1267,7 @@ static void bio_genome(GameWorld *g, struct descriptor_data *d, char *arg)
     next_step(g, d);
     return;
   }
-  if (!*arg) {
+  if (arg.empty()) {
     show_genome_menu(g, d, "@RSelect two genomes to be your primary DNA strains.\n");
     show_chosen_genomes(g, d);
     write_to_output(g, d, "\n@wChoose: ");
@@ -1294,7 +1293,7 @@ static void bio_genome(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_GENOME */
-static void state_genome(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_genome(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   if (char_is_mutant(d->character))
     mutant_genome(g, d, arg);
@@ -1403,23 +1402,23 @@ static void apply_draft(GameWorld *g, struct descriptor_data *d)
 }
 
 /* CON_BONUS / CON_NEGATIVE: buy bonus traits, or take negative ones for points */
-static void state_traits(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_traits(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   bool negatives = desc_get_connected(d) == CON_NEGATIVE;
   int value;
 
-  if (!*arg) {
+  if (arg.empty()) {
     display_bonus_menu(g, d->character, negatives);
     send_to_char(g, d->character, "@wChoose: ");
-  } else if (!strcasecmp(arg, negatives ? "n" : "b")) {
+  } else if (str_eq_nocase(arg, negatives ? "n" : "b")) {
     display_bonus_menu(g, d->character, negatives);
     send_to_char(g, d->character, "@RYou are already in that menu.\r\n");
     send_to_char(g, d->character, "@wChoose: ");
-  } else if (!strcasecmp(arg, negatives ? "b" : "n")) {
+  } else if (str_eq_nocase(arg, negatives ? "b" : "n")) {
     display_bonus_menu(g, d->character, !negatives);
     send_to_char(g, d->character, "@wChoose: ");
     desc_set_connected(d, negatives ? CON_BONUS : CON_NEGATIVE);
-  } else if (!strcasecmp(arg, "x")) {
+  } else if (str_eq_nocase(arg, "x")) {
     apply_draft(g, d);
     if (negatives) { /* negatives can take base stats to zero or below */
       if (getBasePL(d->character) <= 0) {
@@ -1444,11 +1443,11 @@ static void state_traits(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_QROLLSTATS: the configured way of setting base stats, then the end of creation */
-static void state_qrollstats(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_qrollstats(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   if (CONFIG_REROLL_PLAYER_CREATION &&
       (CONFIG_CREATION_METHOD == CEDIT_CREATION_METHOD_1)) {
-    if (toupper(*arg) != 'Y') {
+    if (toupper(first_char(arg)) != 'Y') {
       cedit_creation(g, d->character);
       show_rolled_stats(g, d);
       write_to_output(g, d, "\r\n\r\nKeep these stats? (y/N)");
@@ -1458,7 +1457,7 @@ static void state_qrollstats(GameWorld *g, struct descriptor_data *d, char *arg)
              CONFIG_CREATION_METHOD == CEDIT_CREATION_METHOD_3) {
     if (CONFIG_REROLL_PLAYER_CREATION &&
         (CONFIG_CREATION_METHOD == CEDIT_CREATION_METHOD_2)) {
-      if (toupper(*arg) != 'Y') {
+      if (toupper(first_char(arg)) != 'Y') {
         cedit_creation(g, d->character);
         show_rolled_stats(g, d);
         write_to_output(g, d, "Initial statistics, you may reassign individual numbers\r\n");
@@ -1480,7 +1479,7 @@ static void state_qrollstats(GameWorld *g, struct descriptor_data *d, char *arg)
 }
 
 /* CON_QSTATS: assigning points to stats (creation methods 2 and 3) */
-static void state_qstats(GameWorld *g, struct descriptor_data *d, char *arg)
+static void state_qstats(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
   int total;
 
