@@ -76,7 +76,7 @@ namespace {
     char_set_alias(clone, clone_name);
     char_set_sdesc(clone, clone_sdesc);
     char_set_ldesc(clone, clone_ldesc);
-    if (char_get_ddesc(ch))
+    if (!char_get_ddesc(ch).empty())
       char_set_ddesc(clone, char_get_ddesc(ch));
     char_set_race(clone, char_get_race(ch));
     char_set_class(clone, char_get_class(ch));
@@ -754,7 +754,7 @@ ACMD(do_scry)
 {
   constexpr int cost = 2000;
 
-  if (strcasecmp(char_get_name(ch), "Galeos")) {
+  if (!str_eq_nocase(char_get_name(ch), "Galeos")) {
     send_to_char(g, ch, "You do not know how to perform that technique.\r\n");
     return;
   }
@@ -1005,7 +1005,7 @@ ACMD(do_shimmer)
     char_set_arenawatch(ch, -1);
     send_to_char(g, ch, "You stop watching the arena action.\r\n");
   }
-  if (strcasecmp(char_get_name(ch), "Anubis")) {
+  if (!str_eq_nocase(char_get_name(ch), "Anubis")) {
     send_to_char(g, ch, "You do not even know how to perform that skill!\r\n");
     return;
   }
@@ -1182,7 +1182,7 @@ ACMD(do_kanso)
 {
   if (char_is_npc(ch))
     return;
-  if (strcasecmp(char_get_name(ch), "Levanthoth")) { /* NOT the right player */
+  if (!str_eq_nocase(char_get_name(ch), "Levanthoth")) { /* NOT the right player */
     send_to_char(g, ch, "You do not know how to perform that technique. \r\n");
     return;
   }

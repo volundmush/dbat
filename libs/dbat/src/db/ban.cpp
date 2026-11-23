@@ -198,7 +198,7 @@ bool Valid_Name(GameWorld *g, char *newname)
    * THIS SHOULD FIX THE 'invalid name' if disconnected from OLC-bug - WELCOR 9/00
    */
   for (descriptor_data *dt : each_desc(g))
-    if (dt->character && char_get_name(dt->character) && str_eq_nocase(char_get_name(dt->character), newname))
+    if (dt->character && !char_get_name(dt->character).empty() && str_eq_nocase(char_get_name(dt->character), newname))
       if (char_get_idnum(dt->character) == -1)
         return (desc_is_playing(dt));
 

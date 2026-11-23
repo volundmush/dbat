@@ -1063,8 +1063,7 @@ namespace {
   /* the player's name capitalised, leaving the player table's lowercase name alone, or "Nobody" */
   std::string name_or_nobody(GameWorld *g, long id)
   {
-    const char *name = get_name_by_id(g, id);
-    std::string text = name ? name : "Nobody";
+    std::string text(player_name_or(g, id, "Nobody"));
     return CAP(text);
   }
 

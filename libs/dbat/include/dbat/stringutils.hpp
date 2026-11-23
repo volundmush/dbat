@@ -21,8 +21,6 @@ void prune_crlf(std::string &txt);
 /* How many of text's characters are colour codes, which take no room on the screen: 1 for "@@" (one "@" shows),
    4 for "@[" and 2 for any other "@" code, a lone "@" at the end included */
 int count_color_chars(std::string_view text);
-/* count_color_chars() for a getter that gives null for no text, until they give std::string_views */
-inline int count_color_chars(const char *text) { return text ? count_color_chars(std::string_view(text)) : 0; }
 /* Whether arg1 is a non-empty start of arg2, ignoring case */
 bool is_abbrev(std::string_view arg1, std::string_view arg2);
 /* Whether a and b are the same ignoring case, as strcasecmp() finds them */
@@ -32,8 +30,6 @@ bool str_less_nocase(std::string_view a, std::string_view b);
 /* How the first n characters of a and b compare ignoring case, as strncasecmp() finds them: the end of either
    reads as a '\0' */
 int compare_nocase_n(std::string_view a, std::string_view b, size_t n);
-/* s, or "(null)" as printf printed a null, for the getters that still give null for none (until they give views) */
-inline std::string_view null_as_printed(const char *s) { return s ? s : "(null)"; }
 
 /* s with its first byte in upper case, colour codes and all (CAP skips those); empty stays empty */
 std::string upper_first(std::string_view s);
@@ -58,11 +54,3 @@ std::string_view fname(std::string_view namelist);
 void search_replace(std::string &s, std::string_view find, std::string_view replace);
 /* s in lowercase, as tolower() makes each character */
 std::string to_lower(std::string_view s);
-
-/* A writable copy of s (null reads as ""), for a function that may change its argument: f(writable_copy(s).data()).
- * The copy lasts until the end of the statement. */
-inline std::string writable_copy(const char *s) { return s ? s : ""; }
-
-/* s as a C string, null when empty: how the getters of std::string fields read, since the files store an
- * empty string as none. The pointer lasts until s changes. */
-inline const char *c_str_or_null(const std::string &s) { return s.empty() ? nullptr : s.c_str(); }

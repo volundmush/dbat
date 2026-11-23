@@ -471,7 +471,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
       prompt += ">\n";
 
   } else if (desc_get_connected(d) == CON_PLAYING && char_is_npc(d->character)) {
-    std::string name = writable_copy(char_get_name(d->character));
+    std::string name(char_get_name(d->character));
     prompt           = str_format("{}>\n", CAP(name));
   }
 

@@ -218,7 +218,7 @@ inline void the_dead(GameWorld *g, struct char_data *att, const char *alive = ""
 {
   for (char_data *c : room_people(g, char_get_in_room(att)))
     if (!char_is_npc(c))
-      char_aff_set(c, AFF_SPIRIT, strcmp(char_get_name(c), alive) != 0);
+      char_aff_set(c, AFF_SPIRIT, char_get_name(c) != std::string_view(alive));
 }
 
 /* ... with the first other player there snooping them, and `then` done to that snooper */
@@ -309,7 +309,7 @@ inline void toplist_of(int places)
 inline struct char_data *player_named(GameWorld *g, struct char_data *att, const char *name)
 {
   for (char_data *c : room_people(g, char_get_in_room(att)))
-    if (!char_is_npc(c) && !strcmp(char_get_name(c), name))
+    if (!char_is_npc(c) && char_get_name(c) == std::string_view(name))
       return c;
   return nullptr;
 }

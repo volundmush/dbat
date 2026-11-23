@@ -791,7 +791,7 @@ static void check_remote_display_survives_a_load(void)
   char_set_rdisplay(ch, "stands here, waving");
   save_char(g, ch);
   copy = load_again(g, "tester");
-  CHECK(char_get_rdisplay(copy) && !strcmp(char_get_rdisplay(copy), "stands here, waving"));
+  CHECK(char_get_rdisplay(copy) == "stands here, waving");
   free_char(g, copy);
   th_shutdown(g);
 }
@@ -1194,7 +1194,7 @@ static void check_name_matching_matches_the_old_code(void)
 
     mismatches += isname(a, b) != old_isname(a.c_str(), b.c_str());
     mismatches += is_name(a, b) != old_is_name(a.c_str(), b.c_str());
-    mismatches += isname(a.c_str(), nullptr) || isname(nullptr, b.c_str()) || is_name(a.c_str(), nullptr);
+    mismatches += isname(a, "") || isname("", b) || is_name(a, ""); /* no text names nothing */
     mismatches += is_abbrev(a, b) != old_is_abbrev(a.c_str(), b.c_str());
     mismatches += str_eq_nocase(a, b) != !strcasecmp(a.c_str(), b.c_str());
     mismatches += parse_int(a) != atoi(a.c_str());
@@ -1916,7 +1916,8 @@ static void check_rent_listing_keeps_no_copies(void)
 
   save_path("plrobjs", "new", "tester", path, sizeof(path));
   write_file(path, "1 0 0 0 0 1\n#-1\n0\nXAP\nthing~\na unique thing~\nA thing lies here.~\nIt does things.~\n0 0 0 0 7\n$~\n");
-  Crash_listrent(g, ch, writable_copy("tester").data());
+  std::string tester = "tester";
+  Crash_listrent(g, ch, tester.data());
   CHECK(saw(ch, "a unique thing"));
   CHECK_AUDIT(g);
   th_shutdown(g);
@@ -2059,6 +2060,22 @@ static void check_nameless_corpse_decaying(void)
   point_update(g);
   CHECK(count_members(room_contents(g, char_get_in_room(ch))) == 0); /* it decayed, as any corpse does */
   CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* A mob with no short description, sitting where it doesn't by default: the room's list named it by its first letter */
+static void check_looking_at_a_sitting_mob_with_no_short_description(void)
+{
+  GameWorld *g = th_boot();
+  struct char_data *ch  = th_player(g, "Tester", ADMLVL_NONE);
+  struct char_data *mob = read_mobile(g, 300);
+
+  char_to_room(g, mob, char_get_in_room(ch));
+  char_set_sdesc(mob, "");
+  char_set_position(mob, POS_SITTING);
+  th_take_output(g, ch);
+  th_type(g, ch, "look");
+  CHECK(saw(ch, "\r\n is sitting here."));
   th_shutdown(g);
 }
 
@@ -2961,6 +2978,7 @@ static const struct {
     {"looking_at_things_with_no_short_description", check_looking_at_things_with_no_short_description},
     {"naming_things_with_no_short_description",     check_naming_things_with_no_short_description    },
     {"nameless_corpse_decaying",                    check_nameless_corpse_decaying                   },
+    {"looking_at_a_sitting_mob_with_no_short_description", check_looking_at_a_sitting_mob_with_no_short_description},
     {"saying_something_to_someone",                 check_saying_something_to_someone                },
     {"defending_someone_else_lets_go_of_the_first", check_defending_someone_else_lets_go_of_the_first},
     {"mob_given_armor_with_no_wear_slot",           check_mob_given_armor_with_no_wear_slot          },

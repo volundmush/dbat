@@ -67,7 +67,7 @@ static rent_header read_rent_header(std::string_view line, int rentcode)
 
 /* The rent file of name, open; nothing, logging why with the message's number if it is there but can't be read
    (unless doing is null) */
-static std::optional<io::text_reader> open_rent_file(const char *name, const char *doing, int number,
+static std::optional<io::text_reader> open_rent_file(std::string_view name, const char *doing, int number,
                                                      std::string *path_out = nullptr)
 {
   std::optional<std::string> path = player_path(NEW_OBJ_FILES, name);
@@ -229,7 +229,7 @@ static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj,
     obj_to_char(g, obj, ch);
 }
 
-bool Crash_delete_file(const char *name)
+bool Crash_delete_file(std::string_view name)
 {
   std::string path;
   if (!open_rent_file(name, "deleting crash file", 1, &path))

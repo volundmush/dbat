@@ -120,7 +120,7 @@ bool readUserIndex(const std::string &name)
 }
 
 /* True if name is on the lockout list (the "lockout" intro file). */
-bool lockRead(const char *name)
+bool lockRead(std::string_view name)
 {
   std::optional<std::string> path = player_path(INTRO_FILE, "lockout");
   if (!path)

@@ -190,7 +190,8 @@ static const char *const HCONTROL_FORMAT =
 void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
 {
   int i;
-  char *timestr, *temp;
+  char *timestr;
+  const std::string *temp;
   std::string built_on;
   std::string last_pay;
   std::string own_name;
@@ -222,7 +223,7 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
       last_pay = "None"; /* strcpy: OK (for 'strlen("None") < 128') */
 
     /* Now we need a copy of the owner's name to capitalize. -gg 6/21/98 */
-    own_name = temp; /* strcpy: OK (names guaranteed <= MAX_NAME_LENGTH+1) */
+    own_name = *temp;
     send_to_char(g, ch, "{:>7d} {:<10}    {:>2d}    {:<12} {}\r\n",
                  g->house_control[i].vnum, built_on,
                  g->house_control[i].num_of_guests, CAP(own_name), last_pay);
@@ -469,7 +470,7 @@ bool House_can_enter(GameWorld *g, struct char_data *ch, room_vnum house)
 static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int quiet)
 {
   int j, num_printed;
-  char *temp;
+  const std::string *temp;
 
   if (g->house_control[i].num_of_guests == 0) {
     if (!quiet)
@@ -485,7 +486,7 @@ static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int qui
       continue;
 
     num_printed++;
-    send_to_char(g, ch, "{:c}{} ", as_char(toupper(*temp)), temp + 1);
+    send_to_char(g, ch, "{} ", upper_first(*temp));
   }
 
   if (num_printed == 0)

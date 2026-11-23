@@ -267,7 +267,7 @@ void extract_script_mem(struct script_memory *sc);
 /* Where thing keeps the vnums of the triggers it starts with */
 std::vector<trig_vnum> &proto_script_of(owner_ptr thing);
 void copy_proto_script(owner_ptr source, owner_ptr dest); /* of the same kind */
-void delete_variables(const char *charname);
+void delete_variables(std::string_view charname);
 
 /* from dg_comm.c */
 void sub_write(GameWorld *g, std::string_view arg, char_data *ch, int targets);

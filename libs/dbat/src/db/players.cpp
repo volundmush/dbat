@@ -92,7 +92,7 @@ void build_player_index(GameWorld *g)
  * If the name already exists, by overwriting a deleted character, then
  * we re-use the old position.
  */
-int create_entry(GameWorld *g, const char *name)
+int create_entry(GameWorld *g, std::string_view name)
 {
   int i, pos;
 
@@ -137,7 +137,7 @@ void free_player_index(GameWorld *g)
   g->top_of_p_table = 0;
 }
 
-long get_ptable_by_name(GameWorld *g, const char *name)
+long get_ptable_by_name(GameWorld *g, std::string_view name)
 {
   int i;
 
@@ -159,15 +159,18 @@ long get_id_by_name(GameWorld *g, const char *name)
   return (-1);
 }
 
-char *get_name_by_id(GameWorld *g, long id)
+const std::string *get_name_by_id(GameWorld *g, long id)
 {
-  int i;
-
-  for (i = 0; i <= g->top_of_p_table; i++)
+  for (int i = 0; i <= g->top_of_p_table; i++)
     if (g->player_table[i].id == id)
-      return g->player_table[i].name.data();
+      return &g->player_table[i].name;
+  return nullptr;
+}
 
-  return (nullptr);
+std::string_view player_name_or(GameWorld *g, long id, std::string_view otherwise)
+{
+  const std::string *name = get_name_by_id(g, id);
+  return name ? std::string_view(*name) : otherwise;
 }
 
 /*************************************************************************

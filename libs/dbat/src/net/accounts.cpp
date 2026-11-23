@@ -40,10 +40,10 @@ static bool load_account(const char *name, account &a)
 }
 
 /* Empties every slot holding name (used when a character is deleted or missing). */
-void empty_account_slots_named(struct descriptor_data *d, const char *name)
+void empty_account_slots_named(struct descriptor_data *d, std::string_view name)
 {
   for (auto &slot : d->acct.slots)
-    if (!strcasecmp(name, slot.c_str()))
+    if (str_eq_nocase(name, slot))
       slot = "Empty";
 }
 

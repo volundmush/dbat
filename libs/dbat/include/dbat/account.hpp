@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <string>
+#include <string_view>
 
 constexpr int MAX_ACCOUNT_SLOTS = 5; /* character slots per account */
 
@@ -38,4 +39,4 @@ bool read_account_file(const std::string &path, account &a);
 /* Writes a to name's account file; false, and logged, if it couldn't */
 bool write_account(const char *name, const account &a);
 /* True if name is on the lockout list (the "lockout" intro file) */
-bool lockRead(const char *name);
+bool lockRead(std::string_view name);

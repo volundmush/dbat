@@ -115,8 +115,7 @@ static std::string read_delete(GameWorld *g, long recipient)
 
   /* a player's name capitalised, or what to call them if they're gone */
   auto name_of = [g](long id, const char *otherwise) {
-    const char *name = get_name_by_id(g, id);
-    std::string text = name ? name : otherwise;
+    std::string text(player_name_or(g, id, otherwise));
     return CAP(text);
   };
   std::string from = m.from != -1337 ? name_of(m.from, "Unknown") : std::string("Auctioneer");

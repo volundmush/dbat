@@ -738,7 +738,7 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
   if (!char_get_desc(ch)) {
     return;
   }
-  if (char_get_ddesc(i)) {
+  if (!char_get_ddesc(i).empty()) {
     send_to_char(g, ch, "{}", char_get_ddesc(i));
   }
   if (!char_mob_flagged(i, MOB_JUSTDESC)) {
@@ -820,9 +820,9 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
       send_to_char(g, ch, "{} appears to be {} {} {}, ", get_i_name(ch, i), AN(char_mafe(i)), char_mafe(i), juggleRaceName(i, false));
   } else if (ch == i || char_is_npc(i)) {
     if (char_get_sex(i) == SEX_NEUTRAL)
-      send_to_char(g, ch, "{:c}{} appears to be {} {}, ", as_char(toupper(*char_get_name(i))), char_get_name(i) + 1, AN(juggleRaceName(i, true)), juggleRaceName(i, false));
+      send_to_char(g, ch, "{} appears to be {} {}, ", upper_first(char_get_name(i)), AN(juggleRaceName(i, true)), juggleRaceName(i, false));
     else
-      send_to_char(g, ch, "{:c}{} appears to be {} {} {}, ", as_char(toupper(*char_get_name(i))), char_get_name(i) + 1, AN(char_mafe(i)), char_mafe(i), juggleRaceName(i, false));
+      send_to_char(g, ch, "{} appears to be {} {} {}, ", upper_first(char_get_name(i)), AN(char_mafe(i)), char_mafe(i), juggleRaceName(i, false));
   } else {
     if (char_get_sex(i) == SEX_NEUTRAL)
       send_to_char(g, ch, "Appears to be {} {}, ", AN(juggleRaceName(i, true)), juggleRaceName(i, false));
@@ -983,7 +983,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS) && char_is_npc(i))
     send_to_char(g, ch, "@D[@G{:d}@D]@w {}", char_get_mob_vnum(g, i), char_get_script(i) ? "[TRIG] " : "");
 
-  if (char_is_npc(i) && char_get_ldesc(i) && char_get_position(i) == char_get_mob_specials_default_pos(i) && !char_get_fighting(g, i)) {
+  if (char_is_npc(i) && !char_get_ldesc(i).empty() && char_get_position(i) == char_get_mob_specials_default_pos(i) && !char_get_fighting(g, i)) {
     send_to_char(g, ch, "{}", char_get_ldesc(i));
 
     if (char_is_npc(i)) {
@@ -1037,7 +1037,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       act(g, "...$e is groping around blindly!", false, i, nullptr, ch, TO_VICT);
     if (affected_by_spell(i, SPELL_FAERIE_FIRE))
       act(g, "@m...$e @mis outlined with purple fire!@m", false, i, nullptr, ch, TO_VICT);
-    if (char_get_feature(i)) {
+    if (!char_get_feature(i).empty()) {
       std::string woo = str_format("@C{}@n", char_get_feature(i));
       act(g, woo.c_str(), false, i, nullptr, ch, TO_VICT);
     }
@@ -1046,29 +1046,29 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   }
 
   if (char_is_npc(i) && !char_get_fighting(g, i) && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(g, ch, "@w{:c}{}", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
+    send_to_char(g, ch, "@w{}", upper_first(char_get_sdesc(i)));
   else if (char_is_npc(i) && char_get_grappled(g, i) && char_get_grappled(g, i) == ch)
-    send_to_char(g, ch, "@w{:c}{} is being grappled with by YOU!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
+    send_to_char(g, ch, "@w{} is being grappled with by YOU!", upper_first(char_get_sdesc(i)));
   else if (char_is_npc(i) && char_get_grappled(g, i) && char_get_grappled(g, i) != ch)
-    send_to_char(g, ch, "@w{:c}{} is being absorbed from by {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, readIntro(ch, char_get_grappled(g, i)) == 1 ? get_i_name(ch, char_get_grappled(g, i)) : AN(juggleRaceName(char_get_grappled(g, i), true)));
+    send_to_char(g, ch, "@w{} is being absorbed from by {}!", upper_first(char_get_sdesc(i)), readIntro(ch, char_get_grappled(g, i)) == 1 ? get_i_name(ch, char_get_grappled(g, i)) : AN(juggleRaceName(char_get_grappled(g, i), true)));
   else if (char_is_npc(i) && char_get_absorbby(g, i) && char_get_absorbby(g, i) == ch)
-    send_to_char(g, ch, "@w{:c}{} is being absorbed from by YOU!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
+    send_to_char(g, ch, "@w{} is being absorbed from by YOU!", upper_first(char_get_sdesc(i)));
   else if (char_is_npc(i) && char_get_absorbby(g, i) && char_get_absorbby(g, i) != ch)
-    send_to_char(g, ch, "@w{:c}{} is being absorbed from by {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, readIntro(ch, char_get_absorbby(g, i)) == 1 ? get_i_name(ch, char_get_absorbby(g, i)) : AN(juggleRaceName(char_get_absorbby(g, i), true)));
+    send_to_char(g, ch, "@w{} is being absorbed from by {}!", upper_first(char_get_sdesc(i)), readIntro(ch, char_get_absorbby(g, i)) == 1 ? get_i_name(ch, char_get_absorbby(g, i)) : AN(juggleRaceName(char_get_absorbby(g, i), true)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_fighting(g, i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING && is_sparring(i))
-    send_to_char(g, ch, "@w{:c}{} is sparring with {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, char_get_admlevel(ch) ? null_as_printed(char_get_name(char_get_fighting(g, i))) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
+    send_to_char(g, ch, "@w{} is sparring with {}!", upper_first(char_get_sdesc(i)), char_get_admlevel(ch) ? char_get_name(char_get_fighting(g, i)) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && is_sparring(i) && char_get_fighting(g, i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(g, ch, "@w{:c}{} is sparring with you!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
+    send_to_char(g, ch, "@w{} is sparring with you!", upper_first(char_get_sdesc(i)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_fighting(g, i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(g, ch, "@w{:c}{} is fighting {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, char_get_admlevel(ch) ? null_as_printed(char_get_name(char_get_fighting(g, i))) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
+    send_to_char(g, ch, "@w{} is fighting {}!", upper_first(char_get_sdesc(i)), char_get_admlevel(ch) ? char_get_name(char_get_fighting(g, i)) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_fighting(g, i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(g, ch, "@w{:c}{} is fighting YOU!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
+    send_to_char(g, ch, "@w{} is fighting YOU!", upper_first(char_get_sdesc(i)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_position(i) == POS_SITTING)
-    send_to_char(g, ch, "@w{:c}{} is sitting here.", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
+    send_to_char(g, ch, "@w{} is sitting here.", upper_first(char_get_sdesc(i)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_position(i) == POS_SLEEPING)
-    send_to_char(g, ch, "@w{:c}{} is sleeping here.", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
+    send_to_char(g, ch, "@w{} is sleeping here.", upper_first(char_get_sdesc(i)));
   else if (char_is_npc(i))
-    send_to_char(g, ch, "@w{:c}{}", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
+    send_to_char(g, ch, "@w{}", upper_first(char_get_sdesc(i)));
   else if (!char_is_npc(i)) {
     if (char_is_majin(i) && char_aff_flagged(i, AFF_LIQUEFIED)) {
       send_to_char(g, ch, "@wSeveral blobs of {} colored goo spread out here.@n\n", skin_types[(int)char_get_skin(i)]);
@@ -1252,7 +1252,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
         count = true;
       } else {
         if (char_get_in_room(i) == char_get_in_room(char_get_fighting(g, i))) {
-          send_to_char(g, ch, "{}", char_get_admlevel(ch) ? null_as_printed(char_get_name(char_get_fighting(g, i))) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
+          send_to_char(g, ch, "{}", char_get_admlevel(ch) ? char_get_name(char_get_fighting(g, i)) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
           count = true;
         } else {
           send_to_char(g, ch, "someone who has already left!");
@@ -1291,7 +1291,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
         send_to_char(g, ch, "@rYOU@w!");
       else {
         if (char_get_in_room(i) == char_get_in_room(char_get_fighting(g, i)))
-          send_to_char(g, ch, "{}!", char_get_admlevel(ch) ? null_as_printed(char_get_name(char_get_fighting(g, i))) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
+          send_to_char(g, ch, "{}!", char_get_admlevel(ch) ? char_get_name(char_get_fighting(g, i)) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
         else
           send_to_char(g, ch, "someone who has already left!");
       }
@@ -1367,13 +1367,13 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
   if (char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act(g, "@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
-  if (char_get_feature(i)) {
+  if (!char_get_feature(i).empty()) {
     std::string woo = str_format("@C{}@n", char_get_feature(i));
     act(g, woo.c_str(), false, i, nullptr, ch, TO_VICT);
   }
 
-  if (char_get_rdisplay(i)) {
-    if (strcmp(char_get_rdisplay(i), "Empty")) {
+  if (!char_get_rdisplay(i).empty()) {
+    if (char_get_rdisplay(i) != "Empty") {
       std::string rdis = str_format("...{}", char_get_rdisplay(i));
       act(g, rdis.c_str(), false, i, nullptr, ch, TO_VICT);
     }
@@ -1398,7 +1398,7 @@ void list_char_to_char(GameWorld *g, const id_list &list, struct char_data *ch)
   for (char_data *i : char_list(g, list)) {
     /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
-    if ((ch == i) || (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_HOLYLIGHT) && char_is_npc(i) && char_get_ldesc(i) && *char_get_ldesc(i) == '.'))
+    if ((ch == i) || (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_HOLYLIGHT) && char_is_npc(i) && char_get_ldesc(i).starts_with('.')))
       continue;
     if (is_hidden(i))
       continue;
@@ -1416,7 +1416,7 @@ void list_char_to_char(GameWorld *g, const id_list &list, struct char_data *ch)
                  (char_get_affected_by(i)[3] == char_get_affected_by(j)[3]) &&
                  (!char_get_fighting(g, i) && !char_get_fighting(g, j)) &&
                  (getCurPL(g, i) == getEffMaxPL(g, i) && getCurPL(g, j) == getEffMaxPL(g, j)) &&
-                 !strcmp(char_get_name(i), char_get_name(j)) &&
+                 char_get_name(i) == char_get_name(j) &&
                  !is_hidden(j);
         };
         /* an earlier occurrence has already been shown, with the count */

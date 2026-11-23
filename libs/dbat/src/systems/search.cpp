@@ -45,7 +45,6 @@ bool is_name(std::string_view str, std::string_view namelist)
   }
 }
 
-bool is_name(const char *str, const char *namelist) { return is_name(std::string_view(str ? str : ""), namelist ? namelist : ""); }
 
 /* allow abbreviations */
 bool isname(std::string_view str, std::string_view namelist)
@@ -71,9 +70,7 @@ bool isname(std::string_view str, std::string_view namelist)
   }
 }
 
-bool isname(std::string_view str, const char *namelist) { return isname(str, std::string_view(namelist ? namelist : "")); }
 
-bool isname(const char *str, const char *namelist) { return isname(std::string_view(str ? str : ""), namelist); }
 
 int get_number(std::string &name)
 {
@@ -161,8 +158,7 @@ static bool goes_by(struct char_data *ch, struct char_data *i, std::string_view 
     }
   }
   if ((char_get_admlevel(ch) >= 1 || char_get_admlevel(i) >= 1 || char_is_npc(ch) || char_is_npc(i))) {
-    const char *alias = char_get_alias(i);
-    if (!named(alias ? alias : "")) {
+    if (!named(char_get_alias(i))) {
       if (!named(juggleRaceName(i, true))) {
         if (!char_is_npc(ch) && !char_is_npc(i) && readIntro(ch, i) == 1) {
           if (!named(get_i_name(ch, i)))

@@ -43,7 +43,7 @@ namespace {
   const char *const languages[] = {"common", "elven", "gnomish", "dwarven", "halfling", "orc", "druid", "draconic", "\n"};
 
   /* How ch is named on the channels and in tells: by name if an immortal, else by account */
-  std::string_view public_name(struct char_data *ch) { return char_get_admlevel(ch) > 0 ? null_as_printed(char_get_name(ch)) : char_get_user(ch); }
+  std::string_view public_name(struct char_data *ch) { return char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch); }
 
   /* ", in an unfamiliar tongue," unless the listener knows what ch speaks */
   const char *tongue(struct char_data *listener, struct char_data *ch)
@@ -95,7 +95,7 @@ ACMD(do_voice)
     send_to_char(g, ch, "You can not use colorcode in voice descriptions.\r\n");
     return;
   }
-  bool changing = char_get_voice(ch) != nullptr;
+  bool changing = !char_get_voice(ch).empty();
   if (changing && char_get_rp(ch) < 1) {
     send_to_char(g, ch, "Your voice has already been set. You will need at least 1 RPP to be able to change it.\r\n");
     return;
@@ -355,7 +355,7 @@ namespace {
       if (desc_get_connected(k) != CON_PLAYING || char_is_npc(k->character) || k->acct.user.empty())
         return false;
       return str_eq_nocase(k->acct.user, name) || strstr(k->acct.user.c_str(), name.c_str()) ||
-             ((str_eq_nocase(char_get_name(k->character), name) || strstr(char_get_name(k->character), name.c_str())) && char_get_admlevel(k->character) > 0);
+             ((str_eq_nocase(char_get_name(k->character), name) || char_get_name(k->character).contains(name)) && char_get_admlevel(k->character) > 0);
     });
     return d ? d->character : nullptr;
   }
@@ -713,7 +713,7 @@ namespace {
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && ch != who) {
       if (char_get_admlevel(who) < ADMLVL_IMMORT)
         return str_format("{}@WAnonymous Player {}s@W, '@w{}@W'@n{}", c.colour, c.name, text, c.colour);
-      return str_format("{}@W{}(H) {}s@W, '@w{}@W'@n{}", c.colour, char_get_admlevel(who) > 0 ? null_as_printed(char_get_name(ch)) : char_get_user(ch), c.name, text, c.colour);
+      return str_format("{}@W{}(H) {}s@W, '@w{}@W'@n{}", c.colour, char_get_admlevel(who) > 0 ? char_get_name(ch) : char_get_user(ch), c.name, text, c.colour);
     }
     if (char_get_admlevel(who) > 0)
       return str_format("{}@W{} ($n) {}s@W, '@w{}@W'@n{}", c.colour, char_get_user(ch), c.name, text, c.colour);

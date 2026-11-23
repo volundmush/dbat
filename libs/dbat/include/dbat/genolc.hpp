@@ -18,7 +18,7 @@ constexpr zone_vnum HEDIT_PERMISSION = 888; /* arbitrary number higher then max 
 std::optional<std::string> npc_msg_format_problem(std::string_view msg, bool allow_int);
 /* msg, a message npc_msg_format_problem() passed, as printf made it: its %s the customer's name (a null one
  * "(null)"), its %d the amount, and %% a % */
-std::string npc_message(std::string_view msg, const char *name, int amount = 0);
+std::string npc_message(std::string_view msg, std::string_view name, int amount = 0);
 
 bool remove_from_save_list(GameWorld *g, zone_vnum, int type);
 bool add_to_save_list(GameWorld *g, zone_vnum, int type);
@@ -27,7 +27,6 @@ void strip_cr(std::string &text);
 bool save_all(GameWorld *g);
 /* text, or "undefined" for none, as OLC stores a name or description left empty */
 std::string text_or_undefined(std::string_view text);
-std::string text_or_undefined(const char *text);
 /* Reads a number typed for a float field as sscanf("%f") did: the field is left alone unless text starts with one */
 void scan_float(std::string_view text, float &field);
 void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);

@@ -92,11 +92,11 @@ namespace {
     std::string list;
     int printed = 0;
     for (int j = 0; j < house.num_of_guests; j++) {
-      const char *name = get_name_by_id(g, house.guests[j]);
+      const std::string *name = get_name_by_id(g, house.guests[j]);
       if (!name) /* Avoid <UNDEF>. -gg 6/21/98 */
         continue;
       printed++;
-      list += str_format("{:c}{} ", as_char(toupper(*name)), name + 1);
+      list += str_format("{} ", upper_first(*name));
     }
     return printed ? list : "all dead";
   }
@@ -112,10 +112,9 @@ namespace {
   void house_editor::menu(GameWorld *g, struct descriptor_data *d)
   {
     clear_screen(g, d);
-    const char *owner = get_name_by_id(g, house.owner);
     send_to_char(g, d->character, "{}",
                  str_format("@D-- @RJamdog's House OLC Editor @D--\r\n@D--@g House number : @D[@c{:d}@D]     @gHouse zone: @D[@c{:d}@D]\r\n@g1@D)@g Owner       : @c{:d} -- {}\r\n@g2@D)@g Atrium      : @c{:d}\r\n@g3@D)@g Direction   : @c{}\r\n@g4@D)@g House Type  : @c{}\r\n@g5@D)@g Built on    : @c{}\r\n@g6@D)@g Payment     : @c{}\r\n@g7@D)@g Guests      : @c{}\r\n@g8@D)@g Flags       : @c{}\r\n@gX@D)@g Delete this house\r\n@gQ@D)@g Quit\r\n@gEnter choice : @n",
-                            number, zone->number, house.owner, owner ? owner : "(NOBODY)", house.atrium,
+                            number, zone->number, house.owner, player_name_or(g, house.owner, "(NOBODY)"), house.atrium,
                             house.exit_num >= 0 && house.exit_num <= 11 ? dirs[house.exit_num] : "NONE", house_types[house.mode],
                             menu_date(house.built_on, "Unknown"), menu_date(house.last_payment, "None"), list_guests(g, house),
                             sprintbit(house.bitvector, house_flags)));
@@ -124,9 +123,8 @@ namespace {
 
   void house_editor::owner_menu(GameWorld *g, struct descriptor_data *d)
   {
-    /* quirk: an owner with no name is shown as "(null)" */
     send_to_char(g, d->character, str_format("@g1@D)@g Owner Name : @c{}@n\r\n@g2@D)@g Owner ID   : @c{:d}\r\n@gQ@D)@g Back to main menu\r\n@gEnter choice : @n",
-                                             get_name_by_id(g, house.owner), house.owner));
+                                             player_name_or(g, house.owner, ""), house.owner)); /* no owner: "(null)", once */
     asking = mode::owner_menu;
   }
 
@@ -165,8 +163,7 @@ namespace {
   {
     std::string menu;
     for (int i = 0; i < MAX_GUESTS; i++) {
-      const char *name = get_name_by_id(g, house.guests[i]);
-      menu += str_format("{}@g{:d}@D)@c {} @D(@gID: @c{:d}@D)@n\r\n", i < 9 ? " " : "", i + 1, name ? name : "@D(@yNOT SET@D)@n",
+      menu += str_format("{}@g{:d}@D)@c {} @D(@gID: @c{:d}@D)@n\r\n", i < 9 ? " " : "", i + 1, player_name_or(g, house.guests[i], "@D(@yNOT SET@D)@n"),
                          house.guests[i] < 1 ? 0 : house.guests[i]);
     }
     menu += "\r\n@gA@D)@g Add a guest\r\n@gD@D)@g Delete a guest\r\n@gC@D)@g Clear guest list\r\n@gQ@D)@g Back to main menu\r\n@gEnter selection @D(@gA@D/@gD@D/@gC@D/@gQ@D)@n: ";

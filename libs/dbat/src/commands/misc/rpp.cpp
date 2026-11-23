@@ -162,7 +162,7 @@ void rpp_feature(GameWorld *g, struct char_data *ch, const std::string &arg)
     return;
   }
 
-  bool change      = char_get_feature(ch);
+  bool change      = !char_get_feature(ch).empty();
   const char *sex  = char_get_sex(ch) == SEX_FEMALE ? "She" : char_get_sex(ch) == SEX_MALE ? "He" : "It";
   std::string line = str_format("...{} has {}.", sex, arg);
   char_set_rbank(ch, char_get_rbank(ch) - cost);

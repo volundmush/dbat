@@ -91,12 +91,13 @@ struct pfile_writer {
     if (value != fallback)
       number(tag, value);
   }
-  void text(const char *tag, const char *s) /* none for null */
-  {
-    if (s)
-      out.print("{}: {}\n", tag, s);
-  }
   void text(const char *tag, std::string_view s) { out.print("{}: {}\n", tag, s); }
+  /* no line for an empty field, which reads back as empty all the same */
+  void text_unless_empty(const char *tag, std::string_view s)
+  {
+    if (!s.empty())
+      text(tag, s);
+  }
   void flags(const char *tag, const bitvector_t *bits)
   {
     out.print("{}: {} {} {} {}\n", tag, flag_letters(bits[0]), flag_letters(bits[1]), flag_letters(bits[2]), flag_letters(bits[3]));
@@ -104,12 +105,12 @@ struct pfile_writer {
 };
 
 /* "\r\r" as one "\r", as the old kill_ems() left a description */
-std::string kill_ems(const char *str)
+std::string kill_ems(std::string_view str)
 {
   std::string out;
-  for (size_t i = 0; str[i]; ++i) {
+  for (size_t i = 0; i < str.size(); ++i) {
     out += str[i];
-    if (str[i] == '\r' && str[i + 1] == '\r')
+    if (str[i] == '\r' && i + 1 < str.size() && str[i + 1] == '\r')
       ++i; /* "\r\r" keeps one */
   }
   return out;
@@ -191,10 +192,10 @@ constexpr bool ascii_save_poofs = true; /* quirk: ASCII_SAVE_POOFS was "false", 
 
 /* In the order they are written */
 constexpr pfile_tag pfile_tags[] = {
-    {"Name", [](R &r) { char_set_pc_name(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text(t, char_get_name(w.ch)); }},
+    {"Name", [](R &r) { char_set_pc_name(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_name(w.ch)); }},
     {"User", [](R &r) { char_set_loguser(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text(t, char_get_user(w.ch)); }},
-    {"Voic", [](R &r) { char_set_voice(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text(t, char_get_voice(w.ch)); }},
-    {"RPfe", [](R &r) { char_set_feature(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text(t, char_get_feature(w.ch)); }},
+    {"Voic", [](R &r) { char_set_voice(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_voice(w.ch)); }},
+    {"RPfe", [](R &r) { char_set_feature(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_feature(w.ch)); }},
     {"Trns", [](R &r) { char_set_ability_trains(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_ability_trains(w.g, w.ch), 0); }},
     {"Desc",
      [](R &r) {
@@ -205,11 +206,11 @@ constexpr pfile_tag pfile_tags[] = {
          char_set_ddesc(r.ch, *text);
      },
      [](W &w, const char *) {
-       if (char_get_ddesc(w.ch) && *char_get_ddesc(w.ch))
+       if (!char_get_ddesc(w.ch).empty())
          w.out.print("Desc:\n{}~\n", kill_ems(char_get_ddesc(w.ch)));
      }},
-    {"PfIn", [](R &r) { if (ascii_save_poofs) char_set_poofin(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { if (ascii_save_poofs) w.text(t, char_get_poofin(w.g, w.ch)); }},
-    {"PfOt", [](R &r) { if (ascii_save_poofs) char_set_poofout(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { if (ascii_save_poofs) w.text(t, char_get_poofout(w.g, w.ch)); }},
+    {"PfIn", [](R &r) { if (ascii_save_poofs) char_set_poofin(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { if (ascii_save_poofs) w.text_unless_empty(t, char_get_poofin(w.g, w.ch)); }},
+    {"PfOt", [](R &r) { if (ascii_save_poofs) char_set_poofout(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { if (ascii_save_poofs) w.text_unless_empty(t, char_get_poofout(w.g, w.ch)); }},
     {"Sex ", [](R &r) { char_set_sex(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_sex(w.ch), PFDEF_SEX); }},
     {"Size", [](R &r) { char_set_size(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_size(w.ch), PFDEF_SIZE); }},
     {"Clas", [](R &r) { char_set_class(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_class(w.ch), PFDEF_CLASS); }},
@@ -226,7 +227,7 @@ constexpr pfile_tag pfile_tags[] = {
     {"MxAg", [](R &r) { char_set_time_maxage(r.ch, r.atoll()); }, [](W &w, const char *t) { w.number(t, static_cast<long long>(char_get_time_maxage(w.ch))); }},
     {"Plyd", [](R &r) { char_set_time_played(r.ch, r.atoll()); }, [](W &w, const char *t) { w.number(t, static_cast<long long>(char_get_time_played(w.ch))); }},
     {"Last", [](R &r) { char_set_time_logon(r.ch, r.atoll()); }, [](W &w, const char *t) { w.number(t, static_cast<long long>(char_get_time_logon(w.ch))); }},
-    {"Host", [](R &r) { char_set_host(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text(t, char_get_host(w.g, w.ch)); }},
+    {"Host", [](R &r) { char_set_host(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_host(w.g, w.ch)); }},
     {"Hite", [](R &r) { char_set_height(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_height(w.ch), PFDEF_HEIGHT); }},
     {"Wate", [](R &r) { char_set_weight(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_weight(w.ch), PFDEF_HEIGHT); }}, /* quirk: the height's default */
     {"Alin", [](R &r) { char_set_alignment(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_alignment(w.ch), PFDEF_ALIGNMENT); }},
@@ -348,7 +349,7 @@ constexpr pfile_tag pfile_tags[] = {
     {"Mimi", [](R &r) { char_set_mimic(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_mimic(w.ch), 0); }},
     {"Slot", [](R &r) { char_set_skill_slots(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_skill_slots(w.ch), PFDEF_EYE); }},
     {"Tgro", [](R &r) { char_set_tail_growth(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_tail_growth(w.ch), PFDEF_EYE); }},
-    {"rDis", [](R &r) { char_set_rdisplay(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text(t, char_get_rdisplay(w.ch)); }},
+    {"rDis", [](R &r) { char_set_rdisplay(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_rdisplay(w.ch)); }},
     {"Rela", [](R &r) { char_set_relax_count(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_relax_count(w.ch), PFDEF_EYE); }},
     {"Skil", [](R &r) { read_skills(r, false); }, [](W &w, const char *t) { write_skills(w, t, false); }},
     {"Bonu",
@@ -680,9 +681,9 @@ void save_char(GameWorld *g, struct char_data *ch)
    */
   if (char_get_desc(ch)) {
     if (!char_get_desc(ch)->host.empty()) {
-      if (!char_get_host(g, ch))
+      if (char_get_host(g, ch).empty())
         char_set_host(g, ch, char_get_desc(ch)->host);
-      else if (char_get_host(g, ch) && char_get_host(g, ch) == char_get_desc(ch)->host)
+      else if (char_get_host(g, ch) == char_get_desc(ch)->host) /* quirk: sets what is there */
         char_set_host(g, ch, char_get_desc(ch)->host);
     }
 

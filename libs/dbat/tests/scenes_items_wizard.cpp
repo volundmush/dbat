@@ -346,7 +346,7 @@ namespace {
     {"implementor", "set me invis 3", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); ), false, 1},
     {"implementor", "set PLAYER Sayla zenni 5", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); ), false, 1},
     {"implementor", "set MOB dummy zenni 5", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); ), false, 1},
-    {"implementor, Sayla saved as one", "set file Sayla str 5", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); for (char_data *c : room_people(g, char_get_in_room(att))) if (!char_is_npc(c) && !strcmp(char_get_name(c), "Sayla")) { char_set_admlevel(c, ADMLVL_IMPL); save_char(g, c); }), false, 1},
+    {"implementor, Sayla saved as one", "set file Sayla str 5", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); for (char_data *c : room_people(g, char_get_in_room(att))) if (!char_is_npc(c) && char_get_name(c) == std::string_view("Sayla")) { char_set_admlevel(c, ADMLVL_IMPL); save_char(g, c); }), false, 1},
     {"god", "set Sayla ac 5", false, SETUP(char_set_admlevel(att, ADMLVL_GOD);), false, 1},
     {"vice", "set Sayla nohassle on", false, SETUP(char_set_admlevel(att, ADMLVL_VICE);), false, 1},
     {"vice", "set me nohassle on", false, SETUP(char_set_admlevel(att, ADMLVL_VICE);), false, 1},

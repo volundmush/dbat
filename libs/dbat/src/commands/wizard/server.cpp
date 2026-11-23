@@ -41,7 +41,7 @@ ACMD(do_lag)
 
   bool found = false;
   for (descriptor_data *d : each_desc(g)) {
-    if (!d->character || !char_get_name(d->character) || !str_eq_nocase(char_get_name(d->character), arg)) /* or still at the login menus */
+    if (!d->character || char_get_name(d->character).empty() || !str_eq_nocase(char_get_name(d->character), arg)) /* or still at the login menus */
       continue;
     if (char_get_admlevel(d->character) > char_get_admlevel(ch)) {
       send_to_char(g, ch, "Sorry, you've been outranked.\r\n");
@@ -218,7 +218,7 @@ ACMD(do_wizlock)
     return;
   }
   g->circle_restrict = value;
-  const char *name   = char_get_name(ch);
+  std::string_view name = char_get_name(ch);
   switch (value) {
     case 0:
       send_to_char(g, ch, "The game is now completely open.\r\n");

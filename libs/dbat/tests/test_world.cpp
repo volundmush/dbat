@@ -390,8 +390,8 @@ static void check_save_and_reload(GameWorld *g, struct char_data *ch)
   copy = new char_data();
   clear_char(copy);
   char_make_player_specials(copy);
-  CHECK(load_char(g, char_get_name(ch), copy) >= 0);
-  CHECK(!strcmp(char_get_name(copy), char_get_name(ch)));
+  CHECK(load_char(g, std::string(char_get_name(ch)).c_str(), copy) >= 0);
+  CHECK(char_get_name(copy) == char_get_name(ch));
   CHECK(char_get_gold(copy) == 4321);
   free_char(g, copy);
 }
@@ -620,7 +620,7 @@ static void check_awkward_commands(GameWorld *g, struct char_data *ch)
   th_pulses(g, 2);
   th_type(g, admin, "lag Tester 1");
   CHECK(char_get_wait(ch) > 0);
-  CHECK(!strcmp(char_get_name(admin), "Admin"));
+  CHECK(char_get_name(admin) == "Admin");
   char_set_wait(ch, 0);
   th_take_output(g, admin);
   CHECK_AUDIT(g);

@@ -1126,7 +1126,7 @@ namespace {
     {"to Shenron, all dead in room 0", "say I wish Hugo and Sayla would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att); for (char_data *c : room_people(g, char_get_in_room(att))) if (!char_is_npc(c)) char_set_droom(c, 0);), false, 1},
     {"to Shenron, all dead nowhere", "say I wish Hugo, Sayla and Icor would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att); for (char_data *c : room_people(g, char_get_in_room(att))) if (!char_is_npc(c)) char_set_droom(c, 19100);), false, 1},
     {"to Shenron, two dead nowhere", "say I wish Hugo and Sayla would revive", false, SETUP(before_shenron(g, att, victim); the_dead(g, att); for (char_data *c : room_people(g, char_get_in_room(att))) if (!char_is_npc(c)) char_set_droom(c, 19100);), false, 1},
-    {"to Shenron, Sayla at a menu", "say I wish Hugo and Sayla had money", false, SETUP(before_shenron(g, att, victim); for (char_data *c : room_people(g, char_get_in_room(att))) if (c != att && !strcmp(char_get_name(c), "Sayla") && char_get_desc(c)) desc_set_connected(char_get_desc(c), CON_POBJ);), false, 1},
+    {"to Shenron, Sayla at a menu", "say I wish Hugo and Sayla had money", false, SETUP(before_shenron(g, att, victim); for (char_data *c : room_people(g, char_get_in_room(att))) if (c != att && char_get_name(c) == std::string_view("Sayla") && char_get_desc(c)) desc_set_connected(char_get_desc(c), CON_POBJ);), false, 1},
     {"implementor", "game", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); ), false, 1},
     {"immortal", "game", false, SETUP(char_set_admlevel(att, ADMLVL_IMMORT); ), false, 1},
     {"implementor", "game zones", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); ), false, 1},

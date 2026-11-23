@@ -82,12 +82,6 @@ namespace {
     text.pop_back();
     return text;
   }
-
-  /* A string the getters give as null when empty, as "" */
-  const char *text_of(const char *s)
-  {
-    return s ? s : "";
-  }
 } // namespace
 
 /* do_finddoor, finds the door(s) that a key goes to */
@@ -583,16 +577,16 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   send_to_char(g, ch, "DROOM: [{:>5d}]\r\n", char_get_droom(k));
   if (char_is_mob(g, k)) {
     if (char_get_master_id(k) > -1)
-      buf = str_format(", Master: {}", get_name_by_id(g, char_get_master_id(k)));
+      buf = str_format(", Master: {}", player_name_or(g, char_get_master_id(k), "")); /* none: "(null)", once */
     else
       buf.clear();
     send_to_char(g, ch, "Keyword: {}, VNum: [{:>5d}], RNum: [{:>5d}]{}\r\n", char_get_alias(k),
                  char_get_mob_vnum(g, k), char_get_nr(k), buf);
   } else
 
-    send_to_char(g, ch, "Title: {}\r\n", char_get_raw_title(k) ? char_get_raw_title(k) : "<None>");
+    send_to_char(g, ch, "Title: {}\r\n", or_if_empty(char_get_raw_title(k), "<None>"));
 
-  send_to_char(g, ch, "L-Des: {}@n", char_get_ldesc(k) ? char_get_ldesc(k) : "<None>\r\n");
+  send_to_char(g, ch, "L-Des: {}@n", or_if_empty(char_get_ldesc(k), "<None>\r\n"));
   if (CONFIG_ALLOW_MULTICLASS) {
     buf = class_desc_str(k, 1, 0);
   } else {
@@ -1565,19 +1559,19 @@ ACMD(do_zcheck)
   for (mob_vnum mvnum : g->mob_proto.vnums()) {
     if (find_zone_by_thing(g, mob_index_of(g, mvnum)->vnum) == zrnum) { /*is mob in this zone?*/
       mob = mob_proto_of(g, mvnum);
-      if (!strcmp(text_of(char_get_alias(mob)), "mob unfinished") && (found = 1))
+      if (char_get_alias(mob) == "mob unfinished" && (found = 1))
         buf += "- Alias hasn't been set.\r\n";
 
-      if (!strcmp(text_of(char_get_sdesc(mob)), "the unfinished mob") && (found = 1))
+      if (char_get_sdesc(mob) == "the unfinished mob" && (found = 1))
         buf += "- Short description hasn't been set.\r\n";
 
-      if (!strncmp(text_of(char_get_ldesc(mob)), "An unfinished mob stands here.", 30) && (found = 1))
+      if (char_get_ldesc(mob).starts_with("An unfinished mob stands here.") && (found = 1))
         buf += "- Long description hasn't been set.\r\n";
 
-      if (char_get_ddesc(mob) && *char_get_ddesc(mob)) {
-        if (!strncmp(char_get_ddesc(mob), "It looks unfinished.", 20) && (found = 1))
+      if (!char_get_ddesc(mob).empty()) {
+        if (char_get_ddesc(mob).starts_with("It looks unfinished.") && (found = 1))
           buf += "- Description hasn't been set.\r\n";
-        else if (strncmp(char_get_ddesc(mob), "   ", 3) && (found = 1))
+        else if (!char_get_ddesc(mob).starts_with("   ") && (found = 1))
           buf += "- Description hasn't been formatted. (/fi)\r\n";
       }
 

@@ -487,7 +487,7 @@ namespace {
         asking = mode::description;
         send_editor_help(g, d);
         write_to_output(g, d, "Enter mob description:\r\n\r\n");
-        if (char_get_ddesc(mob.get()))
+        if (!char_get_ddesc(mob.get()).empty())
           write_to_output(g, d, "{}", char_get_ddesc(mob.get()));
         string_write(d, char_description_slot(mob.get()), MAX_MOB_DESC, 0);
         changed = true;

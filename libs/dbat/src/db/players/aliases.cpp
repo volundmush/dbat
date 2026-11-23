@@ -129,7 +129,7 @@ void read_aliases(GameWorld *g, struct char_data *ch)
     *aliases = std::move(loaded);
 }
 
-void delete_aliases(const char *charname)
+void delete_aliases(std::string_view charname)
 {
   std::optional<std::string> fn = player_path(ALIAS_FILE, charname);
   if (!fn)

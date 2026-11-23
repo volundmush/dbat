@@ -4555,9 +4555,11 @@ zone_vnum char_in_zone(GameWorld *g, const struct char_data *ch)
   return (((room_get_zone(g, (char_get_in_room(ch)))))->number);
 }
 
-const char *char_get_name(const struct char_data *ch)
+std::string_view char_get_name(const struct char_data *ch)
 {
-  return char_is_npc(ch) ? c_str_or_null(ch->short_descr) : char_get_pc_name(ch);
+  if (char_is_npc(ch))
+    return ch->short_descr;
+  return char_get_pc_name(ch);
 }
 
 std::string_view char_get_title(const struct char_data *ch)
@@ -4830,8 +4832,7 @@ std::string char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict
     return introd_calc(ch);
   if (!char_iswiz(ch, vict))
     return get_i_name(vict, ch);
-  const char *name = char_get_name(ch);
-  return name ? name : ""; /* a mob with no short description has no name */
+  return std::string(char_get_name(ch)); /* empty for a mob with no short description */
 }
 
 std::string_view obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict)
@@ -5305,9 +5306,9 @@ void char_set_was_in_room(struct char_data *ch, room_vnum v)
   ch->was_in_room = v;
 }
 
-const char *char_get_pc_name(const struct char_data *ch)
+std::string_view char_get_pc_name(const struct char_data *ch)
 {
-  return c_str_or_null(ch->name); /* null for none, as the files have it */
+  return ch->name; /* empty for none, as the files have it */
 }
 
 void char_set_pc_name(struct char_data *ch, std::string_view v)
@@ -5330,9 +5331,9 @@ int char_get_mimic(const struct char_data *ch)
   return ch->mimic;
 }
 
-const char *char_get_voice(const struct char_data *ch)
+std::string_view char_get_voice(const struct char_data *ch)
 {
-  return c_str_or_null(ch->voice); /* null for none, as the files have it */
+  return ch->voice; /* empty for none, as the files have it */
 }
 
 void char_set_voice(struct char_data *ch, std::string_view v)
@@ -5350,9 +5351,9 @@ void char_set_transclass(struct char_data *ch, int v)
   ch->transclass = v;
 }
 
-const char *char_get_feature(const struct char_data *ch)
+std::string_view char_get_feature(const struct char_data *ch)
 {
-  return c_str_or_null(ch->feature); /* null for none, as the files have it */
+  return ch->feature; /* empty for none, as the files have it */
 }
 
 void char_set_feature(struct char_data *ch, std::string_view v)
@@ -5360,9 +5361,9 @@ void char_set_feature(struct char_data *ch, std::string_view v)
   ch->feature = v;
 }
 
-const char *char_get_loguser(const struct char_data *ch)
+std::string_view char_get_loguser(const struct char_data *ch)
 {
-  return c_str_or_null(ch->loguser); /* null for none, as the files have it */
+  return ch->loguser; /* empty for none, as the files have it */
 }
 
 void char_set_loguser(struct char_data *ch, std::string_view v)
@@ -5574,9 +5575,9 @@ void char_set_suppressed(struct char_data *ch, int64_t v)
 {
 }
 
-const char *char_get_rdisplay(const struct char_data *ch)
+std::string_view char_get_rdisplay(const struct char_data *ch)
 {
-  return c_str_or_null(ch->rdisplay); /* null for none, as the files have it */
+  return ch->rdisplay; /* empty for none, as the files have it */
 }
 
 void char_set_rdisplay(struct char_data *ch, std::string_view v)
@@ -7077,10 +7078,12 @@ void char_set_bad_pws(GameWorld *g, struct char_data *ch, uint8_t v)
     ps->bad_pws = v;
 }
 
-const char *char_get_poofin(GameWorld *g, const struct char_data *ch)
+std::string_view char_get_poofin(GameWorld *g, const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(g, ch, "poofin");
-  return ps ? c_str_or_null(ps->poofin) : nullptr;
+  if (ps)
+    return ps->poofin;
+  return {};
 }
 
 void char_set_poofin(GameWorld *g, struct char_data *ch, std::string_view v)
@@ -7090,10 +7093,12 @@ void char_set_poofin(GameWorld *g, struct char_data *ch, std::string_view v)
     ps->poofin = v;
 }
 
-const char *char_get_poofout(GameWorld *g, const struct char_data *ch)
+std::string_view char_get_poofout(GameWorld *g, const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(g, ch, "poofout");
-  return ps ? c_str_or_null(ps->poofout) : nullptr;
+  if (ps)
+    return ps->poofout;
+  return {};
 }
 
 void char_set_poofout(GameWorld *g, struct char_data *ch, std::string_view v)
@@ -7135,10 +7140,12 @@ void char_set_last_tell(GameWorld *g, struct char_data *ch, int32_t v)
     ps->last_tell = v;
 }
 
-const char *char_get_host(GameWorld *g, const struct char_data *ch)
+std::string_view char_get_host(GameWorld *g, const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(g, ch, "host");
-  return ps ? c_str_or_null(ps->host) : nullptr;
+  if (ps)
+    return ps->host;
+  return {};
 }
 
 void char_set_host(GameWorld *g, struct char_data *ch, std::string_view v)
@@ -7220,9 +7227,9 @@ std::string_view char_race_abbr(const struct char_data *ch)
   return race_abbrevs[ch->race];
 }
 
-const char *char_get_alias(const struct char_data *ch)
+std::string_view char_get_alias(const struct char_data *ch)
 {
-  return c_str_or_null(ch->name); /* null for none, as the files have it */
+  return ch->name; /* empty for none, as the files have it */
 }
 
 void char_set_alias(struct char_data *ch, std::string_view v)
@@ -7230,9 +7237,9 @@ void char_set_alias(struct char_data *ch, std::string_view v)
   ch->name = v;
 }
 
-const char *char_get_sdesc(const struct char_data *ch)
+std::string_view char_get_sdesc(const struct char_data *ch)
 {
-  return c_str_or_null(ch->short_descr); /* null for none, as the files have it */
+  return ch->short_descr; /* empty for none, as the files have it */
 }
 
 void char_set_sdesc(struct char_data *ch, std::string_view v)
@@ -7240,9 +7247,9 @@ void char_set_sdesc(struct char_data *ch, std::string_view v)
   ch->short_descr = v;
 }
 
-const char *char_get_ldesc(const struct char_data *ch)
+std::string_view char_get_ldesc(const struct char_data *ch)
 {
-  return c_str_or_null(ch->long_descr); /* null for none, as the files have it */
+  return ch->long_descr; /* empty for none, as the files have it */
 }
 
 void char_set_ldesc(struct char_data *ch, std::string_view v)
@@ -7250,9 +7257,9 @@ void char_set_ldesc(struct char_data *ch, std::string_view v)
   ch->long_descr = v;
 }
 
-const char *char_get_ddesc(const struct char_data *ch)
+std::string_view char_get_ddesc(const struct char_data *ch)
 {
-  return c_str_or_null(ch->description); /* null for none, as the files have it */
+  return ch->description; /* empty for none, as the files have it */
 }
 
 void char_set_ddesc(struct char_data *ch, std::string_view v)
@@ -7612,9 +7619,9 @@ void char_set_stamina(struct char_data *ch, double v)
   ch->stamina = v;
 }
 
-const char *char_get_temp_prompt(const struct char_data *ch)
+std::string_view char_get_temp_prompt(const struct char_data *ch)
 {
-  return c_str_or_null(ch->temp_prompt);
+  return ch->temp_prompt;
 }
 
 int char_get_throws(const struct char_data *ch)
@@ -7687,9 +7694,9 @@ void char_set_timer(struct char_data *ch, int v)
   ch->timer = v;
 }
 
-const char *char_get_raw_title(const struct char_data *ch)
+std::string_view char_get_raw_title(const struct char_data *ch)
 {
-  return c_str_or_null(ch->title); /* null for none, as the files have it */
+  return ch->title; /* empty for none, as the files have it */
 }
 
 void char_set_raw_title(struct char_data *ch, std::string_view v)

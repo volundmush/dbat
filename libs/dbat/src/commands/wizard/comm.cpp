@@ -311,7 +311,7 @@ ACMD(do_echo)
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
     send_to_char(g, ch, CONFIG_OK);
   if (no_name)
-    act(g, str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? null_as_printed(char_get_name(ch)) : char_get_user(ch)).c_str(), false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch)).c_str(), false, ch, nullptr, nullptr, TO_ROOM);
   if (!tch) {
     act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_CHAR);
     act(g, buf.c_str(), false, ch, nullptr, nullptr, TO_ROOM);

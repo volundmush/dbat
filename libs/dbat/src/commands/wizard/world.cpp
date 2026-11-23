@@ -253,10 +253,10 @@ ACMD(do_goto)
     return;
   }
 
-  act(g, str_format("$n {}", char_get_poofout(g, ch) ? char_get_poofout(g, ch) : "disappears in a puff of smoke.").c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("$n {}", or_if_empty(char_get_poofout(g, ch), "disappears in a puff of smoke.")).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
   char_from_room(g, ch);
   char_to_room(g, ch, location);
-  act(g, str_format("$n {}", char_get_poofin(g, ch) ? char_get_poofin(g, ch) : "appears with an ear-splitting bang.").c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("$n {}", or_if_empty(char_get_poofin(g, ch), "appears with an ear-splitting bang.")).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
   look_at_room(g, char_get_in_room(ch), ch, 0);
   enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
 }

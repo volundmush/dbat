@@ -70,7 +70,7 @@ std::optional<std::string> npc_msg_format_problem(std::string_view msg, bool all
   return std::nullopt;
 }
 
-std::string npc_message(std::string_view msg, const char *name, int amount)
+std::string npc_message(std::string_view msg, std::string_view name, int amount)
 {
   std::string out;
 
@@ -81,7 +81,7 @@ std::string npc_message(std::string_view msg, const char *name, int amount)
     }
     switch (msg[++i]) {
       case 's':
-        out += name ? name : "(null)";
+        out += name;
         break;
       case 'd':
         out += std::to_string(amount);
@@ -104,7 +104,6 @@ void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const
 
 std::string text_or_undefined(std::string_view text) { return text.empty() ? "undefined" : std::string(text); }
 
-std::string text_or_undefined(const char *text) { return text_or_undefined(std::string_view(text ? text : "")); }
 
 void scan_float(std::string_view text, float &field) { sscanf(std::string(text).c_str(), "%f", &field); }
 

@@ -296,9 +296,9 @@ void write_mob(GameWorld *g, io::text_writer &out, mob_vnum vnum, char_data *mob
 {
   check_mobile_strings(g, mob);
 
-  std::string ldesc = char_get_ldesc(mob);
+  std::string ldesc(char_get_ldesc(mob));
   strip_cr(ldesc);
-  std::string ddesc = char_get_ddesc(mob);
+  std::string ddesc(char_get_ddesc(mob));
   strip_cr(ddesc);
   out.print("#{:d}\n{}~\n{}~\n{}~\n{}~\n", vnum, char_get_alias(mob), char_get_sdesc(mob), ldesc, ddesc);
 

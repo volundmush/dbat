@@ -141,7 +141,7 @@ void copy_proto_script(owner_ptr source, owner_ptr dest)
   proto_script_of(dest) = proto_script_of(source);
 }
 
-void delete_variables(const char *charname)
+void delete_variables(std::string_view charname)
 {
   std::optional<std::string> path = player_path(SCRIPT_VARS_FILE, charname);
   if (!path)

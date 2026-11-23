@@ -1087,8 +1087,8 @@ ACMD(do_move)
     }
   }
   perform_move(g, ch, subcmd - 1, 0);
-  if (char_get_rdisplay(ch)) {
-    if (strcmp(char_get_rdisplay(ch), "Empty")) {
+  if (!char_get_rdisplay(ch).empty()) {
+    if (char_get_rdisplay(ch) != "Empty") {
       char_set_rdisplay(ch, "Empty");
     }
   }

@@ -498,7 +498,7 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     return 0;
 
   while (std::optional<std::string_view> line = file->line()) {
-    if (sscanf(std::string(*line).c_str(), "%49s", filler) == 1 && !strcasecmp(char_get_name(vict), filler)) {
+    if (sscanf(std::string(*line).c_str(), "%49s", filler) == 1 && str_eq_nocase(char_get_name(vict), filler)) {
       known = true;
     }
   }
@@ -538,7 +538,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, std::string
   io::text_writer out(*path, true);
   for (size_t x = 0; x < known.size(); x++) {
     if (x == 0 || strcasecmp(known[x - 1].first.c_str(), known[x].first.c_str())) {
-      if (strcasecmp(known[x].first.c_str(), char_get_name(vict))) {
+      if (!str_eq_nocase(known[x].first, char_get_name(vict))) {
         out.print("{} {}\n", known[x].first, known[x].second);
       }
     }

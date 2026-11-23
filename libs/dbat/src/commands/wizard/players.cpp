@@ -99,10 +99,10 @@ namespace {
   }
 
   /* Locks name out, or lets them back in if they were */
-  void lockWrite(GameWorld *g, struct char_data *ch, const char *name)
+  void lockWrite(GameWorld *g, struct char_data *ch, std::string_view name)
   {
     char filler[50] = "";
-    std::string capped = name;
+    std::string capped(name);
     CAP(capped);
 
     std::optional<std::string> path = player_path(INTRO_FILE, "lockout");
@@ -305,7 +305,7 @@ ACMD(do_hell)
 
   struct char_data *vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD);
   if (!vict) {
-    lockWrite(g, ch, arg.c_str());
+    lockWrite(g, ch, arg);
     return;
   }
   struct descriptor_data *d = char_get_desc(vict);

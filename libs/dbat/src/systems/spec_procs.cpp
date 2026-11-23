@@ -959,7 +959,7 @@ SPECIAL(bank)
         send_to_char(g, ch, "There is an error. Report to Iovan.");
         return (true);
       }
-      if (std::ranges::any_of(char_get_desc(ch)->acct.slots, [&](const std::string &slot) { return !strcasecmp(char_get_name(vict), slot.c_str()); })) {
+      if (std::ranges::any_of(char_get_desc(ch)->acct.slots, [&](const std::string &slot) { return str_eq_nocase(char_get_name(vict), slot); })) {
         send_to_char(g, ch, "You can not transfer money to your own offline characters...");
         if (is_file == true)
           free_char(g, vict);

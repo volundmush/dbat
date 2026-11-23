@@ -807,7 +807,7 @@ static void shopping_buy(GameWorld *g, std::string &arg, struct char_data *ch, s
 
     switch (shop_get_temper(shop)) {
       case 0:
-        do_action(g, keeper, writable_copy(char_get_name(ch)), g->cmd_puke, 0);
+        do_action(g, keeper, char_get_name(ch), g->cmd_puke, 0);
         return;
       case 1:
         do_echo(g, keeper, "smokes on his joint.", g->cmd_emote, SCMD_EMOTE);
@@ -1209,7 +1209,7 @@ SPECIAL(shop_keeper)
       argm = str_format("$N shouts '{}'", MSG_NO_STEAL_HERE);
       act(g, argm.c_str(), false, ch, nullptr, keeper, TO_CHAR);
       act(g, argm.c_str(), false, ch, nullptr, keeper, TO_ROOM);
-      do_action(g, keeper, writable_copy(char_get_name(ch)), g->cmd_slap, 0);
+      do_action(g, keeper, char_get_name(ch), g->cmd_slap, 0);
 
       return (true);
     }

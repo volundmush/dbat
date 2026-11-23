@@ -229,7 +229,7 @@ namespace {
     }
     send_to_char(g, ch, "@WYou tell @c{}@W telepathically, @w'@C{}@w'@n\r\n", char_get_name(vict), message);
     send_to_char(g, vict, "@c{}@W talks to you telepathically, @w'@C{}@w'@n\r\n", char_get_name(ch), message);
-    send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? null_as_printed(char_get_name(ch)) : char_get_user(ch), char_get_admlevel(vict) > 0 ? null_as_printed(char_get_name(vict)) : char_get_user(vict), message);
+    send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), message);
     telepathy_cost(g, ch);
   }
 } // namespace
@@ -414,7 +414,7 @@ ACMD(do_snet)
   /* said on the scouter's frequency, broadcast to all of them ("*"), or a call to one scouter by its number */
   enum { BAND, BROADCAST, CALL } kind = call > -1 ? CALL : str_eq_nocase(arg, "*") ? BROADCAST : BAND;
   int freq                            = obj_get_scoutfreq(obj);
-  std::string voice                   = char_get_voice(ch) ? char_get_voice(ch) : "A generic voice";
+  std::string voice(or_if_empty(char_get_voice(ch), "A generic voice"));
   /* quirk: CAP() capitalises arg itself, so on a band ch's own echo below is capitalised only if someone heard it */
   auto said = [&]() -> std::string { return kind == BAND ? str_format("{} {}", CAP(arg), arg2) : CAP(arg2); };
   std::string band      = str_format("@D[@WSNET FREQ@D: @Y{:d}@D]", freq);

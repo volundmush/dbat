@@ -538,7 +538,7 @@ void info_status(GameWorld *g, struct char_data *ch)
     send_to_char(g, ch, "         Check your mail at the nearest postmaster.\r\n");
   if (char_prf_flagged(g, ch, PRF_HIDE))
     send_to_char(g, ch, "         You are hidden from who and ooc.\r\n");
-  if (char_get_voice(ch) != nullptr)
+  if (!char_get_voice(ch).empty())
     send_to_char(g, ch, "         Your voice desc: '{}'\r\n", char_get_voice(ch));
 
   int feature = char_get_distfea(ch);
@@ -595,9 +595,9 @@ void info_status(GameWorld *g, struct char_data *ch)
     else
       send_to_char(g, ch, "         @YYou can backstab.@n\r\n");
   }
-  if (char_get_feature(ch))
+  if (!char_get_feature(ch).empty())
     send_to_char(g, ch, "         Extra Feature: @C{}@n\r\n", char_get_feature(ch));
-  if (char_get_rdisplay(ch) && strcmp(char_get_rdisplay(ch), "Empty"))
+  if (!char_get_rdisplay(ch).empty() && char_get_rdisplay(ch) != "Empty")
     send_to_char(g, ch, "         Room Display: @C...{}@n\r\n", char_get_rdisplay(ch));
 }
 

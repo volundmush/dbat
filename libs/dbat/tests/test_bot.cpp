@@ -346,9 +346,13 @@ static void check_log(void)
 
 static time_t clock_jumps = 0;
 
+/* Whether a getter gave any text: empty, or null from one that still gives null for none */
+[[maybe_unused]] static bool has_text(std::string_view s) { return !s.empty(); }
+[[maybe_unused]] static bool has_text(const char *s) { return s && *s; }
+
 static bool player_in_game(GameWorld *g, const char *name)
 {
-  return find_first(each_char(g), [&](char_data *ch) { return !char_is_npc(ch) && !strcasecmp(char_get_name(ch), name); });
+  return find_first(each_char(g), [&](char_data *ch) { return !char_is_npc(ch) && str_eq_nocase(char_get_name(ch), name); });
 }
 
 static void add_connection(const char *label, struct descriptor_data *d, int peer)
@@ -449,7 +453,7 @@ static const char *first_keyword(std::string_view keywords)
   return word;
 }
 
-static const char *first_keyword(const char *keywords)
+[[maybe_unused]] static const char *first_keyword(const char *keywords) /* for the getters that still give one */
 {
   return first_keyword(std::string_view(keywords ? keywords : ""));
 }
@@ -590,7 +594,7 @@ static void compose_typing(GameWorld *g, const struct descriptor_data *d, char *
   int num_commands = 0;
 
   if (desc_get_connected(d) != CON_PLAYING || d->str) {
-    if (!d->character || !char_get_name(d->character) || desc_get_connected(d) == CON_MENU)
+    if (!d->character || !has_text(char_get_name(d->character)) || desc_get_connected(d) == CON_MENU)
       compose_for_login(text, size);
     else
       compose_for_editor(g, text, size);
@@ -625,7 +629,7 @@ static void compose_typing(GameWorld *g, const struct descriptor_data *d, char *
 /* Only a connection still at the login menus has a nameless character, or none in the game. */
 static bool at_login_menu(const struct descriptor_data *d)
 {
-  return !d->character || !char_get_name(d->character);
+  return !d->character || !has_text(char_get_name(d->character));
 }
 
 /* Only a real world has players worth logging in as: the fixture's are other bots. */

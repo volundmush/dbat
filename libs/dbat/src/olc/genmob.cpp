@@ -146,15 +146,15 @@ mob_vnum delete_mobile(GameWorld *g, mob_vnum refpt)
 
 static bool update_mobile_strings(struct char_data *t, struct char_data *f)
 {
-  if (char_get_alias(f))
+  if (!char_get_alias(f).empty())
     char_set_alias(t, char_get_alias(f));
-  if (char_get_raw_title(f))
+  if (!char_get_raw_title(f).empty())
     char_set_raw_title(t, char_get_raw_title(f));
-  if (char_get_sdesc(f))
+  if (!char_get_sdesc(f).empty())
     char_set_sdesc(t, char_get_sdesc(f));
-  if (char_get_ldesc(f))
+  if (!char_get_ldesc(f).empty())
     char_set_ldesc(t, char_get_ldesc(f));
-  if (char_get_ddesc(f))
+  if (!char_get_ddesc(f).empty())
     char_set_ddesc(t, char_get_ddesc(f));
   return true;
 }

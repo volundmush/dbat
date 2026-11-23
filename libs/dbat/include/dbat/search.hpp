@@ -9,10 +9,6 @@
 bool isname(std::string_view str, std::string_view namelist);
 /* Whether str is one of the words of namelist, ignoring case */
 bool is_name(std::string_view str, std::string_view namelist);
-/* The same, reading a null string as "" (the getters give null for an empty name) */
-bool isname(std::string_view str, const char *namelist);
-bool isname(const char *str, const char *namelist);
-bool is_name(const char *str, const char *namelist);
 
 /* The N of an "N.name" argument, taking "N." off name: 1 with no dot, 0 if N isn't a number */
 int get_number(std::string &name);

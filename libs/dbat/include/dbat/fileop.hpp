@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "dbat/consts/types.hpp"
 
@@ -20,7 +21,7 @@ constexpr int MAX_FILES        = 12;
 
 /* The file of kind mode for the player or account name, as io::player_file() gives it; nothing, and logged, for no
    name */
-std::optional<std::string> player_path(int mode, const char *name);
+std::optional<std::string> player_path(int mode, std::string_view name);
 void topLoad(GameWorld *g);
 void topWrite(GameWorld *g, struct char_data *ch);
 /* Writes the toplist as it stands */

@@ -236,7 +236,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
         arg3    = cmd->arg3;
         arg4    = cmd->arg4;
         arg5    = cmd->arg5;
-        comment = null_as_printed(char_get_sdesc(mob_proto_of(g, cmd->arg1)));
+        comment = char_get_sdesc(mob_proto_of(g, cmd->arg1));
         break;
       case 'O':
         arg1    = obj_index_of(g, cmd->arg1)->vnum;

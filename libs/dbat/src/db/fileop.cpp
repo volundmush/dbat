@@ -13,11 +13,11 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-std::optional<std::string> player_path(int mode, const char *name)
+std::optional<std::string> player_path(int mode, std::string_view name)
 {
-  if (name == nullptr || *name == '\0') {
+  if (name.empty()) {
     static const char buffer = 0; /* stands for the buffer get_filename() was given, which the log line names */
-    mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), {} or {}.", as_pointer(name),
+    mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), {} or {}.", as_pointer(name.data()), /* (nil) only for a null view */
             as_pointer(&buffer));
     return std::nullopt;
   }
@@ -69,7 +69,7 @@ void topWrite(GameWorld *g, struct char_data *ch)
   bool writeEm = false;
   for (size_t section = 0; section < std::size(toplist_sections); section++) {
     const toplist_section &listed = toplist_sections[section];
-    std::string_view name         = listed.by_account ? char_get_user(ch) : null_as_printed(char_get_name(ch));
+    std::string_view name         = listed.by_account ? char_get_user(ch) : char_get_name(ch);
     int start = static_cast<int>(section) * 5, finish = start + 5, location = -1;
     bool placed = false, progress = false;
 

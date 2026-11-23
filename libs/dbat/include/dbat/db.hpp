@@ -113,10 +113,13 @@ bool is_empty(GameWorld *g, struct zone_data *zone_nr);
 void index_boot(GameWorld *g, int mode);
 void boot_db(GameWorld *g);
 void destroy_db(GameWorld *g);
-int create_entry(GameWorld *g, const char *name);
+int create_entry(GameWorld *g, std::string_view name);
 void zone_update(GameWorld *g);
 long get_id_by_name(GameWorld *g, const char *name);
-char *get_name_by_id(GameWorld *g, long id);
+/* The name (lowercase) of the player with id, or null if there is none */
+const std::string *get_name_by_id(GameWorld *g, long id);
+/* The name (lowercase) of the player with id, or otherwise if there is none */
+std::string_view player_name_or(GameWorld *g, long id, std::string_view otherwise);
 void save_mud_time(GameWorld *g, struct time_info_data *when);
 /* Reads etc/time: the beginning of the game's time, and the dates and counters kept on g */
 void read_time_file(GameWorld *g, time_t &beginning);
@@ -140,7 +143,7 @@ void mob_stats(GameWorld *g, struct char_data *mob);
 void reset_char(GameWorld *g, struct char_data *ch);
 void free_char(GameWorld *g, struct char_data *ch);
 void save_player_index(GameWorld *g);
-long get_ptable_by_name(GameWorld *g, const char *name);
+long get_ptable_by_name(GameWorld *g, std::string_view name);
 
 struct obj_data *create_obj(GameWorld *g);
 void clear_object(struct obj_data *obj);
