@@ -211,13 +211,13 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
     if (!room)
       continue;
 
-    std::string description = room_get_description(room) ? room_get_description(room) : "Empty room.";
+    std::string description(or_if_empty(room_get_description(room), "Empty room."));
     strip_cr(description);
     out.print("#{:d}\n"
               "{}{:c}\n"
               "{}{:c}\n"
               "{:d} {} {} {} {} {:d}\n",
-              room_get_number(room), room_get_name(room) ? room_get_name(room) : "Untitled",
+              room_get_number(room), or_if_empty(room_get_name(room), "Untitled"),
               as_char(STRING_TERMINATOR), description, as_char(STRING_TERMINATOR), room_get_zone(room)->number,
               flag_letters(room_get_room_flags(room)[0]), flag_letters(room_get_room_flags(room)[1]),
               flag_letters(room_get_room_flags(room)[2]), flag_letters(room_get_room_flags(room)[3]), room_get_sector_type(room));
@@ -226,13 +226,13 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
       room_direction_data *exit = room_get_dir_option(room, j);
       if (!exit)
         continue;
-      std::string exit_text = exit_description(exit) ? exit_description(exit) : "";
+      std::string exit_text(exit_description(exit));
       strip_cr(exit_text);
       out.print("D{:d}\n"
                 "{}~\n"
                 "{}~\n"
                 "{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n",
-                j, exit_text, exit_keyword(exit) ? exit_keyword(exit) : "", door_number(exit->exit_info),
+                j, exit_text, exit_keyword(exit), door_number(exit->exit_info),
                 exit->key != NOTHING ? exit->key : -1, exit->to_room != NOWHERE ? exit->to_room : -1, exit->dclock,
                 exit->dchide, exit->dcskill, exit->dcmove, exit->failsavetype, exit->dcfailsave, exit->failroom,
                 exit->totalfailroom);

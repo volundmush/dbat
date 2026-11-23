@@ -391,7 +391,7 @@ ACMD(do_attach)
 
     send_to_char(g, ch, "Trigger {:d} ({}) attached to {} [{:d}].\r\n",
                  tn, trig->name,
-                 (obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object)),
+                 or_if_empty(obj_get_short_description(object), obj_get_name(object)),
                  obj_get_vnum(g, object));
   }
 
@@ -591,7 +591,7 @@ ACMD(do_detach)
         return;
       } else
         detach_from(g, ch, object, trigger,
-                    obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object));
+                    or_if_empty(obj_get_short_description(object), obj_get_name(object)));
     }
   }
 }

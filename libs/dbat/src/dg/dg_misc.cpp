@@ -148,8 +148,7 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
     }
     /* set the caster's name to that of the object, or the gods.... */
     if (auto *obj = std::get_if<obj_data *>(&go)) {
-      const char *sdesc = obj_get_short_description(*obj); /* null for none */
-      char_set_sdesc(caster, sdesc ? sdesc : "");
+      char_set_sdesc(caster, obj_get_short_description(*obj));
     } else if (std::holds_alternative<room_data *>(go))
       char_set_sdesc(caster, "The gods");
     caster_room->people.add(char_get_id(caster)); /* there, without char_to_room()'s side effects */

@@ -209,8 +209,8 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
   switch (obj_get_type_flag(obj)) {
     case ITEM_STAFF:
       act(g, "You tap $p three times on the ground.", false, ch, obj, nullptr, TO_CHAR);
-      if (obj_get_action_description(obj))
-        act(g, obj_get_action_description(obj), false, ch, obj, nullptr, TO_ROOM);
+      if (!obj_get_action_description(obj).empty())
+        act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, nullptr, TO_ROOM);
       else
         act(g, "$n taps $p three times on the ground.", false, ch, obj, nullptr, TO_ROOM);
 
@@ -248,15 +248,15 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
           act(g, "$n points $p at $mself.", false, ch, obj, nullptr, TO_ROOM);
         } else {
           act(g, "You point $p at $N.", false, ch, obj, tch, TO_CHAR);
-          if (obj_get_action_description(obj))
-            act(g, obj_get_action_description(obj), false, ch, obj, tch, TO_ROOM);
+          if (!obj_get_action_description(obj).empty())
+            act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, tch, TO_ROOM);
           else
             act(g, "$n points $p at $N.", true, ch, obj, tch, TO_ROOM);
         }
       } else if (tobj != nullptr) {
         act(g, "You point $p at $P.", false, ch, obj, tobj, TO_CHAR);
-        if (obj_get_action_description(obj))
-          act(g, obj_get_action_description(obj), false, ch, obj, tobj, TO_ROOM);
+        if (!obj_get_action_description(obj).empty())
+          act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, tobj, TO_ROOM);
         else
           act(g, "$n points $p at $P.", true, ch, obj, tobj, TO_ROOM);
       } else if (IS_SET(g->spell_info[obj_get_value(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
@@ -293,8 +293,8 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
         tch = ch;
 
       act(g, "You recite $p which dissolves.", true, ch, obj, nullptr, TO_CHAR);
-      if (obj_get_action_description(obj))
-        act(g, obj_get_action_description(obj), false, ch, obj, tch, TO_ROOM);
+      if (!obj_get_action_description(obj).empty())
+        act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, tch, TO_ROOM);
       else
         act(g, "$n recites $p.", false, ch, obj, nullptr, TO_ROOM);
 
@@ -314,8 +314,8 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
         return;
 
       act(g, "You swallow $p.", false, ch, obj, nullptr, TO_CHAR);
-      if (obj_get_action_description(obj))
-        act(g, obj_get_action_description(obj), false, ch, obj, nullptr, TO_ROOM);
+      if (!obj_get_action_description(obj).empty())
+        act(g, obj_get_action_description(obj).data(), /* NUL-ended: a std::string field */ false, ch, obj, nullptr, TO_ROOM);
       else
         act(g, "$n swallows $p.", true, ch, obj, nullptr, TO_ROOM);
 

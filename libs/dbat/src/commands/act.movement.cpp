@@ -794,7 +794,7 @@ bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials
   else if ((!char_get_exit(g, ch, dir) && !buildwalk(g, ch, dir)) || char_get_exit(g, ch, dir)->to_room == NOWHERE || (room_exit_flagged(char_get_exit(g, ch, dir), EX_SECRET) && (room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED))))
     send_to_char(g, ch, "Alas, you cannot go that way...\r\n");
   else if (room_exit_flagged(char_get_exit(g, ch, dir), EX_CLOSED)) {
-    if (exit_keyword(char_get_exit(g, ch, dir)))
+    if (!exit_keyword(char_get_exit(g, ch, dir)).empty())
       send_to_char(g, ch, "The {} seems to be closed.\r\n", fname(exit_keyword(char_get_exit(g, ch, dir))));
     else
       send_to_char(g, ch, "It seems to be closed.\r\n");
@@ -1105,7 +1105,7 @@ static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::
       return (-1);
     }
     if (char_get_exit(g, ch, door)) { /* Braces added according to indent. -gg */
-      if (exit_keyword(char_get_exit(g, ch, door))) {
+      if (!exit_keyword(char_get_exit(g, ch, door)).empty()) {
         if (is_name(type, exit_keyword(char_get_exit(g, ch, door))))
           return (door);
         else {
@@ -1125,7 +1125,7 @@ static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::
     }
     for (door = 0; door < NUM_OF_DIRS; door++)
       if (char_get_exit(g, ch, door))
-        if (exit_keyword(char_get_exit(g, ch, door)))
+        if (!exit_keyword(char_get_exit(g, ch, door)).empty())
           if (is_name(type, exit_keyword(char_get_exit(g, ch, door))))
             return (door);
 
@@ -1221,7 +1221,7 @@ namespace {
 
   void send_to_room_of(GameWorld *g, room_vnum room, const char *fmt, struct obj_data *about)
   {
-    const char *desc = obj_get_short_description(about);
+    std::string_view desc = obj_get_short_description(about);
     send_to_room(g, room, std::vformat(fmt, std::make_format_args(desc)));
   }
 } // namespace
@@ -1300,24 +1300,25 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
     if (back)
       change_door(g, other_room, obj, rev_dir[door], d.how, d.cont_bit, d.ex_bit);
     if (!obj)
-      send_to_char(g, ch, "You {} the {} that leads {}.\r\n", cmd_door[scmd], exit_keyword(char_get_exit(g, ch, door)) ? exit_keyword(char_get_exit(g, ch, door)) : "door", dirs[door]);
+      send_to_char(g, ch, "You {} the {} that leads {}.\r\n", cmd_door[scmd], or_if_empty(exit_keyword(char_get_exit(g, ch, door)), "door"), dirs[door]);
     else if (d.always_say_obj || (obj_get_type_flag(obj) != ITEM_VEHICLE && obj_get_type_flag(obj) != ITEM_HATCH))
       send_to_char(g, ch, "You {} {}.\r\n", cmd_door[scmd], obj_get_short_description(obj));
   }
 
   /* Notify the room. */
   std::string dbuf = obj ? "" : dirs[door];
-  buf += str_format("{}{}{}{}.", obj ? "" : "the ", obj ? "$p" : exit_keyword(char_get_exit(g, ch, door)) ? "$F" : "door", obj ? "" : " that leads ", dbuf);
+  const std::string_view keyword = obj ? std::string_view() : exit_keyword(char_get_exit(g, ch, door)); /* NUL-ended: a std::string field */
+  buf += str_format("{}{}{}{}.", obj ? "" : "the ", obj ? "$p" : !keyword.empty() ? "$F" : "door", obj ? "" : " that leads ", dbuf);
   if (!obj || obj_get_in_room(obj) != NOWHERE)
-    act(g, buf.c_str(), false, ch, obj, obj ? nullptr : exit_keyword(char_get_exit(g, ch, door)), TO_ROOM);
+    act(g, buf.c_str(), false, ch, obj, keyword.empty() ? nullptr : keyword.data(), TO_ROOM);
 
   /* Notify the other room */
   if (back && (scmd == SCMD_OPEN || scmd == SCMD_CLOSE))
     send_to_room(g, char_get_exit(g, ch, door)->to_room, "The {} that leads {} is {}{} from the other side.\r\n",
-                 exit_keyword(back) ? fname(exit_keyword(back)) : "door", dbuf, cmd_door[scmd], scmd == SCMD_CLOSE ? "d" : "ed");
+                 exit_keyword(back).empty() ? "door" : fname(exit_keyword(back)), dbuf, cmd_door[scmd], scmd == SCMD_CLOSE ? "d" : "ed");
   else if (back && (scmd == SCMD_LOCK || scmd == SCMD_UNLOCK))
     send_to_room(g, char_get_exit(g, ch, door)->to_room, "The {} that leads {} is {}ed from the other side.\r\n",
-                 exit_keyword(back) ? fname(exit_keyword(back)) : "door", dbuf, cmd_door[scmd]);
+                 exit_keyword(back).empty() ? "door" : fname(exit_keyword(back)), dbuf, cmd_door[scmd]);
 }
 
 static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
@@ -1630,7 +1631,7 @@ ACMD(do_enter)
     else {
       for (door = 0; door < NUM_OF_DIRS; door++)
         if (char_get_exit(g, ch, door))
-          if (exit_keyword(char_get_exit(g, ch, door)))
+          if (!exit_keyword(char_get_exit(g, ch, door)).empty())
             if (isname(buf, exit_keyword(char_get_exit(g, ch, door))))
               move_dir = door;
       /* Did we find what they wanted to enter. */
@@ -1756,7 +1757,7 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
   send_to_scouter(g, buf3.c_str(), ch, 0, 0);
 
   if (char_get_desc(ch) != nullptr) {
-    act(g, obj_get_action_description(obj), true, ch, obj, nullptr, TO_CHAR);
+    act(g, obj_get_action_description(obj).data(), true, ch, obj, nullptr, TO_CHAR); /* NUL-ended: a std::string field; empty sends nothing */
     look_at_room(g, char_get_in_room(ch), ch, 0);
   }
 

@@ -436,13 +436,22 @@ static void do_action(GameWorld *g, char *line)
 }
 
 /* The first word of a keyword list, which is how a player would name the thing. */
-static const char *first_keyword(const char *keywords)
+/* The first word of keywords, or "something" for none: empty, or null from a getter that still gives null */
+static const char *first_keyword(std::string_view keywords)
 {
   static char word[64];
 
-  snprintf(word, sizeof(word), "%s", keywords ? keywords : "something");
-  word[strcspn(word, " ")] = '\0';
+  if (keywords.empty())
+    keywords = "something";
+  keywords = keywords.substr(0, std::min(keywords.find(' '), sizeof(word) - 1));
+  keywords.copy(word, keywords.size());
+  word[keywords.size()] = '\0';
   return word;
+}
+
+static const char *first_keyword(const char *keywords)
+{
+  return first_keyword(std::string_view(keywords ? keywords : ""));
 }
 
 /* Something this bot could sensibly mean: what's around it, what it holds, or a number from the world. */

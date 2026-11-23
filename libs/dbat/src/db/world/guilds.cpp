@@ -208,8 +208,8 @@ bool save_guilds(GameWorld *g, struct zone_data *zone)
       if (guild_get_feat(guild, i))
         out.print("{:d} 2\n", i);
     out.print("-1\n{:>1.2f}\n", guild_get_charge(guild));
-    out.print("{}~\n{}~\n", guild_get_no_such_skill(guild) ? guild_get_no_such_skill(guild) : "%s ERROR",
-              guild_get_not_enough_gold(guild) ? guild_get_not_enough_gold(guild) : "%s ERROR");
+    out.print("{}~\n{}~\n", or_if_empty(guild_get_no_such_skill(guild), "%s ERROR"),
+              or_if_empty(guild_get_not_enough_gold(guild), "%s ERROR"));
     out.print("{:d}\n{:d}\n{:d}\n{:d}\n{:d}\n", guild_get_minlvl(guild),
               guild_get_gm(guild) == NOBODY ? -1 : mob_index_of(g, guild_get_gm(guild))->vnum,
               static_cast<int>(guild_get_with_who(guild)[0]), /* as signed, as always */

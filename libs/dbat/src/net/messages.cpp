@@ -212,10 +212,10 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
         dg_target = (const struct obj_data *)vict_obj;
         break;
       case 'p':
-        i = obj ? or_null(obj_shortdesc_for(g, obj, to)) : ACTNULL;
+        i = obj ? obj_shortdesc_for(g, obj, to) : ACTNULL;
         break;
       case 'P':
-        i = vict_obj ? or_null(obj_shortdesc_for(g, (const struct obj_data *)vict_obj, to)) : ACTNULL;
+        i = vict_obj ? obj_shortdesc_for(g, (const struct obj_data *)vict_obj, to) : ACTNULL;
         dg_target = (const struct obj_data *)vict_obj;
         break;
       case 'a':

@@ -328,7 +328,7 @@ namespace {
   {
     send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
     send_to_char(g, ch, "          {}{}{}: {} {}\n\r", CCCYN(g, ch, C_NRM), far, direction,
-                 room_get_name(g, room) ? room_get_name(g, room) : "You don't think you saw what you just saw.", CCNRM(g, ch, C_NRM));
+                 or_if_empty(room_get_name(g, room), "You don't think you saw what you just saw."), CCNRM(g, ch, C_NRM));
     send_to_char(g, ch, "@W          -----------------          @n\r\n");
     list_obj_to_char(g, room_get_contents(g, room), ch, SHOW_OBJ_LONG, false);
     list_char_to_char(g, room_get_people(g, room), ch);
@@ -400,11 +400,11 @@ void search_in_direction(GameWorld *g, struct char_data *ch, int dir)
 
   if (!exit)
     send_to_char(g, ch, "There is no exit there.\r\n");
-  else if (exit_description(exit) && !room_exit_flagged(exit, EX_SECRET))
+  else if (!exit_description(exit).empty() && !room_exit_flagged(exit, EX_SECRET))
     send_to_char(g, ch, "{}", exit_description(exit));
   else if (!room_exit_flagged(exit, EX_SECRET))
     send_to_char(g, ch, "There is a normal exit there.\r\n");
-  else if (room_exit_flagged(exit, EX_ISDOOR) && exit_keyword(exit) && check)
+  else if (room_exit_flagged(exit, EX_ISDOOR) && !exit_keyword(exit).empty() && check)
     send_to_char(g, ch, "There is a hidden door keyword: '{}' {}there.\r\n", fname(exit_keyword(exit)), room_exit_flagged(exit, EX_CLOSED) ? "" : "open ");
   else
     send_to_char(g, ch, "There is no exit there.\r\n");

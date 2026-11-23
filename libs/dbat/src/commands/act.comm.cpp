@@ -613,7 +613,7 @@ ACMD(do_write)
     return;
   }
   /* Something on it, display it as that's in input buffer. */
-  if (obj_get_action_description(paper)) {
+  if (!obj_get_action_description(paper).empty()) {
     send_to_char(g, ch, "There's something written on it already:\r\n");
     send_to_char(g, ch, "{}", obj_get_action_description(paper));
   }

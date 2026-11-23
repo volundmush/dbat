@@ -153,7 +153,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
      * hide objects starting with . from non-holylighted people 
      * Idea from Elaseth of TBA 
      */
-      if (*obj_get_description(obj) == '.' && (char_is_npc(ch) || !char_prf_flagged(g, ch, PRF_HOLYLIGHT)))
+      if (obj_get_description(obj).starts_with('.') && (char_is_npc(ch) || !char_prf_flagged(g, ch, PRF_HOLYLIGHT)))
         return;
       if (obj_get_type_flag(obj) == ITEM_VEHICLE && char_get_in_room(ch) == obj_get_value(obj, 0)) {
         return;
@@ -353,7 +353,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
     case SHOW_OBJ_ACTION:
       switch (obj_get_type_flag(obj)) {
         case ITEM_NOTE:
-          if (obj_get_action_description(obj)) {
+          if (!obj_get_action_description(obj).empty()) {
             std::string notebuf = str_format("There is something written on it:\r\n\r\n{}", obj_get_action_description(obj));
             send_to_char(g, ch, notebuf);
           } else
@@ -442,7 +442,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
           break;
 
         case ITEM_WINDOW:
-          look_out_window(g, ch, writable_copy(obj_get_name(obj)));
+          look_out_window(g, ch, obj_get_name(obj));
           return;
           break;
 
@@ -632,15 +632,15 @@ void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, i
 
   /* Loop through all objects in the list */
   for (obj_data *i : obj_list(g, list)) {
-    if (obj_get_description(i) == nullptr)
+    if (obj_get_description(i).empty())
       continue;
-    if (strcasecmp(obj_get_description(i), "undefined") == 0)
+    if (str_eq_nocase(obj_get_description(i), "undefined"))
       continue;
     num = 0;
     d   = i;
     if (CONFIG_STACK_OBJS) {
       auto stacks = [&](obj_data *j) {
-        return ((!strcasecmp(obj_get_short_description(j), obj_get_short_description(i)) && !strcasecmp(obj_get_description(j), obj_get_description(i))) && (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN)))) &&
+        return ((str_eq_nocase(obj_get_short_description(j), obj_get_short_description(i)) && str_eq_nocase(obj_get_description(j), obj_get_description(i))) && (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN)))) &&
                ((!obj_get_sitting(g, j) && !obj_get_sitting(g, i))) &&
                (obj_get_value(j, 6) == obj_get_value(i, 6)) &&
                ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL))) &&
@@ -659,7 +659,7 @@ void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, i
             d = j;
         }
     }
-    if ((char_can_see_obj(g, ch, d) && ((*obj_get_description(d) != '.' && *obj_get_short_description(d) != '.') || char_prf_flagged(g, ch, PRF_HOLYLIGHT))) || (obj_get_type_flag(d) == ITEM_LIGHT)) {
+    if ((char_can_see_obj(g, ch, d) && ((!obj_get_description(d).starts_with('.') && !obj_get_short_description(d).starts_with('.')) || char_prf_flagged(g, ch, PRF_HOLYLIGHT))) || (obj_get_type_flag(d) == ITEM_LIGHT)) {
       if (num > 1)
         send_to_char(g, ch, "@D(@Rx@Y{:>2d}@D)@n ", num);
       show_obj_to_char(g, d, ch, mode);
@@ -686,7 +686,7 @@ void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch)
       {-1,  "is in need of repair."                    },
   };
   int percent, ar_index;
-  const char *objs = obj_shortdesc_for(g, obj, ch);
+  std::string_view objs = obj_shortdesc_for(g, obj, ch);
 
   if (obj_get_value(obj, VAL_ALL_MAXHEALTH) > 0)
     percent = (100 * obj_get_value(obj, VAL_ALL_HEALTH)) / obj_get_value(obj, VAL_ALL_MAXHEALTH);
@@ -697,7 +697,7 @@ void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch)
     if (percent >= diagnosis[ar_index].percent)
       break;
 
-  send_to_char(g, ch, "\r\n{:c}{} {}\r\n", as_char(toupper(*objs)), objs + 1, diagnosis[ar_index].text);
+  send_to_char(g, ch, "\r\n{} {}\r\n", upper_first(objs), diagnosis[ar_index].text);
 }
 
 void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch)

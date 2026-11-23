@@ -253,7 +253,7 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
     obj_set_value(obj, VAL_NOTE_HEALTH, 100);
     obj_set_value(obj, VAL_NOTE_MAXHEALTH, 100);
 
-    if (obj_get_action_description(obj) == nullptr)
+    if (obj_get_action_description(obj).empty())
       obj_set_action_description(obj, "Mail system error - please report.  Error #11.\r\n");
 
     /* so it saves */

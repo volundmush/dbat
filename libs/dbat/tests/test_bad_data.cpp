@@ -60,6 +60,7 @@
 #include "dbat/room_utils.hpp"
 #include "dbat/shop.hpp"
 #include "dbat/world_audit.hpp"
+#include "dbat/local_limits.hpp"
 
 #include "harness.hpp"
 #include "../src/dg/dg_internal.hpp"
@@ -1442,7 +1443,8 @@ static void check_editor_saves_and_aborts(void)
   th_type(g, ch, "/a");
   th_type(g, ch, "q");
   th_type(g, ch, "y");
-  CHECK(room_get_description(g, 301) && !strcmp(room_get_description(g, 301), "An inserted line.\r\nA fresh line.\r\n"));
+  std::string_view description = room_get_description(g, 301);
+  CHECK(description == "An inserted line.\r\nA fresh line.\r\n");
   th_shutdown(g);
 }
 
@@ -1707,7 +1709,7 @@ static void check_mjunk_by_name(void)
   auto count = [&](const char *name) {
     int n = 0;
     for (obj_data *obj : char_inventory(g, mob))
-      if (!strcmp(obj_get_name(obj), name))
+      if (obj_get_name(obj) == name)
         n++;
     return n;
   };
@@ -1980,12 +1982,83 @@ static void check_message_about_an_object_with_no_description(void)
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
   struct obj_data *obj = read_object(g, 350);
-  std::string description = obj_get_short_description(obj); /* a copy: clearing the field invalidates the pointer */
+  std::string description(obj_get_short_description(obj)); /* a copy: clearing the field invalidates the view */
 
   obj_set_short_description(obj, "");
   act(g, "You look at $p.", false, ch, obj, nullptr, TO_CHAR);
   CHECK(saw(ch, "You look at"));
   obj_set_short_description(obj, description);
+  th_shutdown(g);
+}
+
+/* Thing number 12 with no short description, in ch's room: each of these read through the null it gave */
+static struct obj_data *thing_with_no_short_description(GameWorld *g, struct char_data *ch)
+{
+  struct obj_data *obj = read_object(g, 350);
+  obj_set_short_description(obj, "");
+  obj_to_room(g, obj, char_get_in_room(ch));
+  return obj;
+}
+
+static void check_looking_at_things_with_no_short_description(void)
+{
+  GameWorld *g = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+
+  thing_with_no_short_description(g, ch);
+  struct obj_data *obj = thing_with_no_short_description(g, ch); /* two, so the room's list compares them to stack them */
+  th_take_output(g, ch);
+  th_type(g, ch, "look");
+  CHECK(saw(ch, "(x 2) Thing number 12 lies here."));
+
+  extra_descr_data look;
+  look.keyword     = "thing12";
+  look.description = "A twelfth thing.\r\n";
+  obj_ex_description_slot(obj)->push_back(look); /* looked at by it, then told of its condition by its short description */
+  th_take_output(g, ch);
+  th_type(g, ch, "look thing12");
+  CHECK(saw(ch, "A twelfth thing."));
+  CHECK(saw(ch, "\r\n is in"));
+  th_shutdown(g);
+}
+
+static void check_naming_things_with_no_short_description(void)
+{
+  GameWorld *g = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  struct obj_data *obj = thing_with_no_short_description(g, ch);
+
+  th_take_output(g, ch);
+  spell_locate_object(g, 30, ch, nullptr, obj, nullptr);
+  CHECK(saw(ch, " is in The Hall."));
+  th_take_output(g, ch);
+  sub_write(g, "You notice _thing12.", ch, TO_CHAR); /* a script's message naming it */
+  CHECK(saw(ch, "You notice ."));
+  obj_from_room(g, obj);
+  obj_to_char(g, obj, ch);
+  th_take_output(g, ch);
+  th_type(g, ch, "nickname thing12 Bob");
+  CHECK(saw(ch, "You nickname  as 'bob'."));
+  obj_set_name(obj, "");
+  th_take_output(g, ch);
+  act(g, "You hold $o.", false, ch, obj, nullptr, TO_CHAR); /* $o: the first of its keywords */
+  CHECK(saw(ch, "You hold ."));
+  th_shutdown(g);
+}
+
+static void check_nameless_corpse_decaying(void)
+{
+  GameWorld *g = th_boot();
+  struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
+  struct obj_data *corpse = thing_with_no_short_description(g, ch);
+
+  obj_set_name(corpse, ""); /* the decay checks its keywords for "android" */
+  obj_set_type_flag(corpse, ITEM_CONTAINER);
+  obj_set_value(corpse, VAL_CONTAINER_CORPSE, 1);
+  obj_set_timer(corpse, 1);
+  point_update(g);
+  CHECK(count_members(room_contents(g, char_get_in_room(ch))) == 0); /* it decayed, as any corpse does */
+  CHECK_AUDIT(g);
   th_shutdown(g);
 }
 
@@ -2079,9 +2152,9 @@ static void check_letter_reaches_its_reader(void)
   th_type(g, rd, "receive");
   int sent = 0, aborted = 0;
   for (struct obj_data *obj : char_inventory(g, rd)) {
-    const char *text = obj_get_action_description(obj);
-    sent += text && strstr(text, "Dear Reader.");
-    aborted += text && strstr(text, "Never mind.");
+    std::string_view text = obj_get_action_description(obj);
+    sent += text.contains("Dear Reader.");
+    aborted += text.contains("Never mind.");
   }
   CHECK(sent == 1 && aborted == 0);
   CHECK_AUDIT(g);
@@ -2885,6 +2958,9 @@ static const struct {
     {"help_keyword_with_an_unfinished_quote",       check_help_keyword_with_an_unfinished_quote      },
     {"more_affects_than_a_save_holds",              check_more_affects_than_a_save_holds             },
     {"message_about_an_object_with_no_description", check_message_about_an_object_with_no_description},
+    {"looking_at_things_with_no_short_description", check_looking_at_things_with_no_short_description},
+    {"naming_things_with_no_short_description",     check_naming_things_with_no_short_description    },
+    {"nameless_corpse_decaying",                    check_nameless_corpse_decaying                   },
     {"saying_something_to_someone",                 check_saying_something_to_someone                },
     {"defending_someone_else_lets_go_of_the_first", check_defending_someone_else_lets_go_of_the_first},
     {"mob_given_armor_with_no_wear_slot",           check_mob_given_armor_with_no_wear_slot          },

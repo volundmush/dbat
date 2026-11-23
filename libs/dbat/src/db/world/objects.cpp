@@ -286,11 +286,10 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
 
 void write_object(GameWorld *g, io::text_writer &out, obj_data *obj)
 {
-  std::string action = obj_get_action_description(obj) ? obj_get_action_description(obj) : "";
+  std::string action(obj_get_action_description(obj));
   strip_cr(action);
-  auto or_undefined = [](const char *s) { return s && *s ? s : "undefined"; };
-  out.print("#{:d}\n{}~\n{}~\n{}~\n{}~\n", obj_get_vnum(g, obj), or_undefined(obj_get_name(obj)),
-            or_undefined(obj_get_short_description(obj)), or_undefined(obj_get_description(obj)), action);
+  out.print("#{:d}\n{}~\n{}~\n{}~\n{}~\n", obj_get_vnum(g, obj), or_if_empty(obj_get_name(obj), "undefined"),
+            or_if_empty(obj_get_short_description(obj), "undefined"), or_if_empty(obj_get_description(obj), "undefined"), action);
 
   std::string flags[12];
   for (int i = 0; i < 4; i++) {

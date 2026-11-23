@@ -423,11 +423,11 @@ ACMD(do_nickname)
   }
 
   struct obj_data *obj = *item;
-  if (strstr(obj_get_short_description(obj), "nicknamed")) {
+  if (obj_get_short_description(obj).contains("nicknamed")) {
     send_to_char(g, ch, "{}@w has already been nicknamed.@n\r\n", obj_get_short_description(obj));
     return;
   }
-  if (strstr(obj_get_name(obj), "corpse")) {
+  if (obj_get_name(obj).contains("corpse")) {
     send_to_char(g, ch, "{}@w is a corpse!@n\r\n", obj_get_short_description(obj));
     return;
   }

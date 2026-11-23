@@ -2272,7 +2272,7 @@ ACMD(do_drop)
 /* give */
 
 namespace {
-  void log_imm_give(GameWorld *g, struct char_data *ch, struct char_data *vict, const char *what)
+  void log_imm_give(GameWorld *g, struct char_data *ch, struct char_data *vict, std::string_view what)
   {
     if (char_get_admlevel(ch) <= 0 || char_is_npc(vict))
       return;
@@ -2391,7 +2391,7 @@ namespace {
       if (!(vict = give_find_vict(g, ch, arg)))
         return;
       perform_give_gold(g, ch, vict, amount);
-      log_imm_give(g, ch, vict, str_format("{} zenni", add_commas(amount)).c_str());
+      log_imm_give(g, ch, vict, str_format("{} zenni", add_commas(amount)));
       return;
     }
     if (arg.empty()) {
@@ -2651,8 +2651,8 @@ ACMD(do_drink)
   if (subcmd == SCMD_DRINK) {
     act(g, str_format("$n drinks {} from $p.", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]).c_str(), true, ch, temp, nullptr, TO_ROOM);
     send_to_char(g, ch, "You drink the {}.\r\n", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
-    if (obj_get_action_description(temp))
-      act(g, obj_get_action_description(temp), true, ch, temp, nullptr, TO_CHAR);
+    if (!obj_get_action_description(temp).empty())
+      act(g, obj_get_action_description(temp).data(), true, ch, temp, nullptr, TO_CHAR);
     amount = 4;
   } else {
     act(g, "$n sips from $p.", true, ch, temp, nullptr, TO_ROOM);
@@ -2821,8 +2821,8 @@ ACMD(do_eat)
   }
   if (subcmd == SCMD_EAT) {
     act(g, "You eat some of $p.", false, ch, food, nullptr, TO_CHAR);
-    if (obj_get_action_description(food))
-      act(g, obj_get_action_description(food), false, ch, food, nullptr, TO_CHAR);
+    if (!obj_get_action_description(food).empty())
+      act(g, obj_get_action_description(food).data(), false, ch, food, nullptr, TO_CHAR);
     act(g, "$n eats some of $p.", true, ch, food, nullptr, TO_ROOM);
   } else {
     tell_both(g, ch, food, "You nibble a little bit of $p.", "$n tastes a little bit of $p.");

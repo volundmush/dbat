@@ -192,7 +192,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
 {
   int arg4 = -1, arg5 = -1;
   IDXTYPE arg1 = -1, arg2 = -1, arg3 = -1;
-  const char *comment = nullptr;
+  std::string_view comment; /* the comment printed after the command: empty for none */
 
   if (!zone_num) {
     mud_log("SYSERR: no zone given.");
@@ -236,7 +236,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
         arg3    = cmd->arg3;
         arg4    = cmd->arg4;
         arg5    = cmd->arg5;
-        comment = char_get_sdesc(mob_proto_of(g, cmd->arg1));
+        comment = null_as_printed(char_get_sdesc(mob_proto_of(g, cmd->arg1)));
         break;
       case 'O':
         arg1    = obj_index_of(g, cmd->arg1)->vnum;
@@ -288,7 +288,7 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
         arg3    = cmd->arg3; /* room num */
         arg4    = -1;
         arg5    = cmd->arg5;
-        comment = find_trigger(g, arg2)->proto->name.c_str();
+        comment = find_trigger(g, arg2)->proto->name;
         break;
       case 'V':
         arg1 = cmd->arg1; /* trigger type */

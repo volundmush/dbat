@@ -196,14 +196,14 @@ void room_set_dir_option(struct room_data *room, int i, struct room_direction_da
   room->dir_option[i].adopt(v);
 }
 
-const char *exit_keyword(const struct room_direction_data *exit)
+std::string_view exit_keyword(const struct room_direction_data *exit)
 {
-  return exit->keyword.empty() ? nullptr : exit->keyword.c_str();
+  return exit->keyword;
 }
 
-const char *exit_description(const struct room_direction_data *exit)
+std::string_view exit_description(const struct room_direction_data *exit)
 {
-  return exit->general_description.empty() ? nullptr : exit->general_description.c_str();
+  return exit->general_description;
 }
 
 /* Room flag setters and toggles, on the room or on its vnum. */
@@ -252,9 +252,9 @@ const id_list &room_get_contents(GameWorld *g, room_vnum room)
   return none;
 }
 
-const char *room_get_description(const struct room_data *room)
+std::string_view room_get_description(const struct room_data *room)
 {
-  return room->description.empty() ? nullptr : room->description.c_str(); /* null for none, as the files have it */
+  return room->description; /* empty for none, as the files have it */
 }
 
 void room_set_description(struct room_data *room, std::string_view v)
@@ -262,11 +262,11 @@ void room_set_description(struct room_data *room, std::string_view v)
   room->description = v;
 }
 
-const char *room_get_description(GameWorld *g, room_vnum room)
+std::string_view room_get_description(GameWorld *g, room_vnum room)
 {
   if (struct room_data *r = room_of(g, room))
     return room_get_description(r);
-  return nullptr;
+  return {}; /* no such room reads as no description */
 }
 
 void room_set_description(GameWorld *g, room_vnum room, std::string_view v)
@@ -327,9 +327,9 @@ void room_set_light(GameWorld *g, room_vnum room, int8_t v)
     r->light = v;
 }
 
-const char *room_get_name(const struct room_data *room)
+std::string_view room_get_name(const struct room_data *room)
 {
-  return room->name.empty() ? nullptr : room->name.c_str(); /* null for none, as the files have it */
+  return room->name; /* empty for none, as the files have it */
 }
 
 void room_set_name(struct room_data *room, std::string_view v)
@@ -337,11 +337,11 @@ void room_set_name(struct room_data *room, std::string_view v)
   room->name = v;
 }
 
-const char *room_get_name(GameWorld *g, room_vnum room)
+std::string_view room_get_name(GameWorld *g, room_vnum room)
 {
   if (struct room_data *r = room_of(g, room))
     return room_get_name(r);
-  return nullptr;
+  return {}; /* no such room reads as no name */
 }
 
 void room_set_name(GameWorld *g, room_vnum room, std::string_view v)

@@ -143,6 +143,14 @@ std::string to_lower(std::string_view s)
   return out;
 }
 
+std::string upper_first(std::string_view s)
+{
+  std::string out(s);
+  if (!out.empty())
+    out.front() = static_cast<char>(toupper(static_cast<unsigned char>(out.front())));
+  return out;
+}
+
 std::string &CAP(std::string &txt)
 {
   size_t i = 0;

@@ -322,13 +322,12 @@ bool save_shops(GameWorld *g, struct zone_data *zone)
       out.print("{:d}{}\n", buy.type, buy.keywords);
     out.write("-1\n");
 
-    auto or_default = [](const char *s, const char *otherwise) { return s ? s : otherwise; };
     out.print("{}~\n{}~\n{}~\n{}~\n{}~\n{}~\n{}~\n{:d}\n{:d}\n{:d}\n",
-              or_default(shop_get_no_such_item1(shop), "%s Ke?!"), or_default(shop_get_no_such_item2(shop), "%s Ke?!"),
-              or_default(shop_get_do_not_buy(shop), "%s Ke?!"), or_default(shop_get_missing_cash1(shop), "%s Ke?!"),
-              or_default(shop_get_missing_cash2(shop), "%s Ke?!"),
-              or_default(shop_get_message_buy(shop), "%s Ke?! %d?"),
-              or_default(shop_get_message_sell(shop), "%s Ke?! %d?"), shop_get_temper(shop),
+              or_if_empty(shop_get_no_such_item1(shop), "%s Ke?!"), or_if_empty(shop_get_no_such_item2(shop), "%s Ke?!"),
+              or_if_empty(shop_get_do_not_buy(shop), "%s Ke?!"), or_if_empty(shop_get_missing_cash1(shop), "%s Ke?!"),
+              or_if_empty(shop_get_missing_cash2(shop), "%s Ke?!"),
+              or_if_empty(shop_get_message_buy(shop), "%s Ke?! %d?"),
+              or_if_empty(shop_get_message_sell(shop), "%s Ke?! %d?"), shop_get_temper(shop),
               static_cast<int>(shop_get_bitvector(shop)), /* as signed, as always */
               shop_get_keeper(shop) == NOBODY ? -1 : mob_index_of(g, shop_get_keeper(shop))->vnum);
     for (int i = 0; i < SW_ARRAY_MAX; i++)

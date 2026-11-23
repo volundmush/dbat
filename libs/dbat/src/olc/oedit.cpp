@@ -72,7 +72,7 @@ namespace {
   struct text_field {
     char key;
     std::string_view prompt;
-    const char *(*get)(const struct obj_data *obj);
+    std::string_view (*get)(const struct obj_data *obj);
     void (*set)(struct obj_data *obj, const std::string &text);
     int context;
   };
@@ -506,10 +506,10 @@ namespace {
     clear_screen(g, d);
     write_to_output(g, d,
                     "-- Item number : [@c{:d}@n]\r\n@g1@n) Namelist : @y{}@n\r\n@g2@n) S-Desc   : @y{}@n\r\n@g3@n) L-Desc   :-\r\n@y{}@n\r\n@g4@n) A-Desc   :-\r\n@y{}@n@g5@n) Type        : @c{}@n\r\n@g6@n) Extra flags : @c{}@n\r\n",
-                    vnum, (obj_get_name(&obj) && *obj_get_name(&obj)) ? obj_get_name(&obj) : "undefined",
-                    (obj_get_short_description(&obj) && *obj_get_short_description(&obj)) ? obj_get_short_description(&obj) : "undefined",
-                    (obj_get_description(&obj) && *obj_get_description(&obj)) ? obj_get_description(&obj) : "undefined",
-                    (obj_get_action_description(&obj) && *obj_get_action_description(&obj)) ? obj_get_action_description(&obj) : "Not Set.\r\n",
+                    vnum, or_if_empty(obj_get_name(&obj), "undefined"),
+                    or_if_empty(obj_get_short_description(&obj), "undefined"),
+                    or_if_empty(obj_get_description(&obj), "undefined"),
+                    or_if_empty(obj_get_action_description(&obj), "Not Set.\r\n"),
                     sprinttype(obj_get_type_flag(&obj), item_types), sprintbitarray(obj_get_extra_flags(&obj), extra_bits, EF_ARRAY_MAX));
 
     std::string values;
@@ -574,7 +574,7 @@ namespace {
       case mode::text: {
         std::string typed(line);
         smash_tilde(typed);
-        if (text->get(&obj)) /* quirk: a text left empty can't be given one */
+        if (!text->get(&obj).empty()) /* quirk: a text left empty can't be given one */
           text->set(&obj, text_or_undefined(typed));
         done(g, d);
         return;
@@ -821,7 +821,7 @@ namespace {
         asking = mode::action_desc;
         send_editor_help(g, d);
         write_to_output(g, d, "Enter action description:\r\n\r\n");
-        if (obj_get_action_description(&obj))
+        if (!obj_get_action_description(&obj).empty())
           write_to_output(g, d, "{}", obj_get_action_description(&obj));
         string_write(d, obj_action_description_slot(&obj), MAX_MESSAGE_LENGTH, 0);
         changed = true;

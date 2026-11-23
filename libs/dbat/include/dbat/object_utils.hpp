@@ -100,7 +100,7 @@ spec_proc_func obj_get_spec(GameWorld *g, const struct obj_data *obj);
 bool obj_is_corpse(const struct obj_data *obj);
 
 bool obj_wear_flagged(const struct obj_data *obj, int part);
-const char *obj_get_short_description(const struct obj_data *obj);
+std::string_view obj_get_short_description(const struct obj_data *obj);
 
 std::string_view obj_sana(const struct obj_data *obj);
 room_vnum obj_get_room_loaded(const struct obj_data *obj);
@@ -115,7 +115,7 @@ void obj_set_id(struct obj_data *obj, int32_t v);
 room_vnum obj_get_in_room(const struct obj_data *obj);
 void obj_set_in_room(struct obj_data *obj, room_vnum v);
 struct room_direction_data *obj_get_exit(GameWorld *g, const struct obj_data *obj, int door);
-const char *money_desc(int amount);
+std::string_view money_desc(int amount);
 struct obj_data *create_money(GameWorld *g, int amount);
 
 /* A field's address, for code that fills the field in later or unlinks through it */
@@ -127,20 +127,20 @@ std::string *obj_action_description_slot(struct obj_data *obj);
 struct obj_spellbook_spell *obj_make_sbinfo(struct obj_data *obj);
 
 /* Field accessors */
-const char *obj_get_action_description(const struct obj_data *obj);
+std::string_view obj_get_action_description(const struct obj_data *obj);
 void obj_set_action_description(struct obj_data *obj, std::string_view v);
 struct obj_affected_type *obj_get_affected(struct obj_data *obj);
 struct char_data *obj_get_carried_by(const struct obj_data *obj);
 void obj_set_carried_by(struct obj_data *obj, struct char_data *v);
 const id_list &obj_get_contains(const struct obj_data *obj);
-const char *obj_get_description(const struct obj_data *obj);
+std::string_view obj_get_description(const struct obj_data *obj);
 void obj_set_description(struct obj_data *obj, std::string_view v);
 const ex_desc_list &obj_get_ex_description(const struct obj_data *obj);
 time_t obj_get_generation(const struct obj_data *obj);
 void obj_set_generation(struct obj_data *obj, time_t v);
 struct obj_data *obj_get_in_obj(const struct obj_data *obj);
 void obj_set_in_obj(struct obj_data *obj, struct obj_data *v);
-const char *obj_get_name(const struct obj_data *obj);
+std::string_view obj_get_name(const struct obj_data *obj);
 void obj_set_name(struct obj_data *obj, std::string_view v);
 const std::vector<trig_vnum> &obj_get_proto_script(const struct obj_data *obj);
 std::vector<trig_vnum> &obj_proto_script(struct obj_data *obj);

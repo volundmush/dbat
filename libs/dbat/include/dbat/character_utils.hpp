@@ -498,7 +498,7 @@ bool char_can_get_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 
 std::string char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict);
 
-const char *obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
+std::string_view obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
 
 std::string_view obj_fname_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
 

@@ -195,14 +195,14 @@ namespace {
     if (!IS_SET(exit->exit_info, EX_ISDOOR) && !IS_SET(exit->exit_info, EX_SECRET))
       return true;
     /* This exit has a door - tell all about it, if it has a keyword to name it by */
-    if (exit_keyword(exit) == nullptr) {
+    if (exit_keyword(exit).empty()) {
       send_to_char(g, ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION {}@n\r\n", DIR_SHOUTED[door]);
       mud_log("ERROR: {} found error direction {} at room {:d}", char_get_name(ch), DIR_SHOUTED[door], char_get_in_room(ch));
       return false;
     }
     std::string argh = str_format("{} ", !str_eq_nocase(fname(exit_keyword(exit)), "undefined") ? fname(exit_keyword(exit)) : "opening");
     line += str_format("                    The {}{} {} {} {}{}.\r\n", IS_SET(exit->exit_info, EX_SECRET) ? "@rsecret@w " : "",
-                       (exit_keyword(exit) && !str_eq_nocase(fname(exit_keyword(exit)), "undefined")) ? fname(exit_keyword(exit)) : "opening",
+                       (!exit_keyword(exit).empty() && !str_eq_nocase(fname(exit_keyword(exit)), "undefined")) ? fname(exit_keyword(exit)) : "opening",
                        strstr(argh.c_str(), "s ") != nullptr ? "are" : "is", IS_SET(exit->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(exit->exit_info, EX_LOCKED) ? "and locked" : "and unlocked", IS_SET(exit->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
     return true;
@@ -215,7 +215,7 @@ namespace {
       return str_format("@c{:<9} @D-@w {}\r\n", dir,
                         room_is_dark(g, exit->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, exit->to_room));
     if (CONFIG_DISP_CLOSED_DOORS && !IS_SET(exit->exit_info, EX_SECRET))
-      return str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", dir, exit_keyword(exit) ? fname(exit_keyword(exit)) : "opening");
+      return str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", dir, exit_keyword(exit).empty() ? "opening" : fname(exit_keyword(exit)));
     return {};
   }
 
@@ -577,14 +577,14 @@ static void look_in_direction(GameWorld *g, struct char_data *ch, int dir)
     send_to_char(g, ch, "Nothing special there...\r\n");
     return;
   }
-  if (exit_description(exit)) {
+  if (!exit_description(exit).empty()) {
     send_to_char(g, ch, "{}", exit_description(exit));
   } else if (!find_first(char_inventory(g, ch), [&](obj_data *o) { return obj_get_vnum(g, o) == 17; })) {
     send_to_char(g, ch, "You were unable to discern anything about that direction. Try looking again...\r\n");
     obj_to_char(g, read_object(g, 17), ch);
   }
 
-  if (room_exit_flagged(exit, EX_ISDOOR) && exit_keyword(exit)) {
+  if (room_exit_flagged(exit, EX_ISDOOR) && !exit_keyword(exit).empty()) {
     if (!room_exit_flagged(exit, EX_SECRET) && room_exit_flagged(exit, EX_CLOSED))
       send_to_char(g, ch, "The {} is closed.\r\n", fname(exit_keyword(exit)));
     else if (!room_exit_flagged(exit, EX_CLOSED))
@@ -705,13 +705,16 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, const std::string &a
     send_to_char(g, ch, "There's nothing inside that!\r\n");
 }
 
-const char *find_exdesc(std::string_view word, const ex_desc_list &list)
+const std::string *find_exdesc(std::string_view word, const ex_desc_list &list)
 {
-  for (const extra_descr_data &i : list)
-    if (i.keyword[0] == '.' ? isname(word, i.keyword.c_str() + 1) : isname(word, i.keyword.c_str()))
-      return i.description.c_str();
-
-  return (nullptr);
+  auto named = [&](const extra_descr_data &e) {
+    std::string_view keywords = e.keyword;
+    if (keywords.starts_with('.'))
+      keywords.remove_prefix(1);
+    return isname(word, keywords);
+  };
+  auto found = std::ranges::find_if(list, named);
+  return found == list.end() ? nullptr : &found->description;
 }
 
 namespace {
@@ -750,7 +753,7 @@ namespace {
     else if (obj_get_type_flag(thing) == ITEM_HATCH)
       hatch_syntax(g, ch, "@YSyntax@D: @CLeave@n\r\n");
     else if (obj_get_type_flag(thing) == ITEM_WINDOW)
-      look_out_window(g, ch, writable_copy(obj_get_name(thing)));
+      look_out_window(g, ch, obj_get_name(thing));
 
     if (obj_get_type_flag(thing) == ITEM_CONTROL) {
       int fuel = obj_get_value(thing, 2);
@@ -833,9 +836,9 @@ static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg,
 
   /* The fnum-th extra description by that name: the room's, then what ch wears, carries and sees around */
   int i            = 0;
-  const char *desc = nullptr;
+  const std::string *desc = nullptr;
   if ((desc = find_exdesc(arg, room_get_ex_description(g, char_get_in_room(ch)))) != nullptr && ++i == fnum) {
-    send_to_char(g, ch, "{}", desc);
+    send_to_char(g, ch, "{}", *desc);
     return;
   }
 
@@ -844,7 +847,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg,
     struct obj_data *eq = char_get_equipment(ch, j);
     if (!eq || !char_can_see_obj(g, ch, eq) || (desc = find_exdesc(arg, obj_get_ex_description(eq))) == nullptr || ++i != fnum)
       continue;
-    send_to_char(g, ch, "{}", desc);
+    send_to_char(g, ch, "{}", *desc);
     if (isname(arg, obj_get_name(eq)))
       tell_of_item(g, ch, eq, false);
     found = true;
@@ -857,7 +860,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg,
     if (obj_get_type_flag(item) == ITEM_BOARD) {
       show_board(g, obj_get_vnum(g, item), ch);
     } else {
-      send_to_char(g, ch, "{}", desc);
+      send_to_char(g, ch, "{}", *desc);
       if (isname(arg, obj_get_name(item)))
         tell_of_item(g, ch, item, true);
     }
@@ -871,7 +874,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg,
     if (obj_get_type_flag(thing) == ITEM_BOARD) {
       show_board(g, obj_get_vnum(g, thing), ch);
     } else {
-      send_to_char(g, ch, "{}", desc);
+      send_to_char(g, ch, "{}", *desc);
       tell_of_thing(g, ch, thing);
     }
     found = true;
@@ -939,8 +942,8 @@ void look_out_window(GameWorld *g, struct char_data *ch, std::string_view arg)
     send_to_char(g, ch, "You don't seem to be able to see outside.\r\n");
     return;
   }
-  if (obj_get_action_description(viewport))
-    act(g, obj_get_action_description(viewport), true, ch, viewport, nullptr, TO_CHAR);
+  if (!obj_get_action_description(viewport).empty())
+    act(g, obj_get_action_description(viewport).data(), true, ch, viewport, nullptr, TO_CHAR);
   else
     act(g, "$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
   send_to_char(g, ch, "You look outside and see:\r\n");

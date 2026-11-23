@@ -1397,7 +1397,7 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
     std::string buf1 = str_format("{} (#{:d}) [{}]",
                                   item_types[shop_buy_types(shop)[sindex].type],
                                   shop_buy_types(shop)[sindex].type,
-                                  shop_buy_get_keywords(&shop_buy_types(shop)[sindex]) ? shop_buy_get_keywords(&shop_buy_types(shop)[sindex]) : "all");
+                                  or_if_empty(shop_buy_get_keywords(&shop_buy_types(shop)[sindex]), "all"));
     size_t linelen   = buf1.size();
 
     /* Implementing word-wrapping: assumes screen-size == 80 */

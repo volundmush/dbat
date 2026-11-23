@@ -1563,7 +1563,7 @@ static void point_update_objects(GameWorld *g)
       /* timer count down */
       if (obj_get_timer(j) > 0)
         obj_set_timer(j, obj_get_timer(j) - 1);
-      if (!strstr(obj_get_name(j), "android") && !strstr(obj_get_name(j), "Android") && !obj_extra_flagged(j, ITEM_BURIED)) {
+      if (!obj_get_name(j).contains("android") && !obj_get_name(j).contains("Android") && !obj_extra_flagged(j, ITEM_BURIED)) {
         if (obj_get_timer(j) == 5) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
             act(g, "@DFlies start to gather around $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
@@ -1592,7 +1592,7 @@ static void point_update_objects(GameWorld *g)
       if (!obj_get_timer(j)) {
 
         if (obj_get_carried_by(j)) {
-          if (!strstr(obj_get_name(j), "android")) {
+          if (!obj_get_name(j).contains("android")) {
             act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, TO_CHAR);
             if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
               act(g, "A quivering horde of maggots consumes $p.",

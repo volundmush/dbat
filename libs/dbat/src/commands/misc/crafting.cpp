@@ -1196,7 +1196,7 @@ ACMD(do_spoil)
   struct obj_data *head = create_obj(g);
   obj_set_item_number(head, NOTHING);
   obj_set_in_room(head, NOWHERE);
-  std::string part = obj_get_name(obj);
+  std::string part(obj_get_name(obj));
   for (const char *word : {"headless", "corpse", "half", "burnt", "chunks", "beaten", "bloody"})
     search_replace(part, word, "");
   trim(part);

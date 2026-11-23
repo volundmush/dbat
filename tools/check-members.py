@@ -66,6 +66,15 @@ def scan(path):
     return [(path, *row) for row in found]
 
 
+def workers():
+    """JOBS (default: one per core), but no more than fit in the memory available: each worker holds a clang JSON
+    dump of about a GB, parsed into about 6 GB, so 7 GB apiece"""
+    wanted = int(os.environ.get('JOBS', 0)) or os.cpu_count() or 1
+    with open('/proc/meminfo') as f:
+        available_kb = next((int(line.split()[1]) for line in f if line.startswith('MemAvailable:')), 0)
+    return max(1, min(wanted, available_kb // (7 * 1024 * 1024))) if available_kb else min(wanted, 2)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--enforce', nargs='*', default=[], choices=sorted(OWNERS))
@@ -73,8 +82,7 @@ def main():
     args = parser.parse_args()
 
     files = sorted(os.path.relpath(p, LIB) for p in glob.glob(os.path.join(LIB, 'src', '**', '*.cpp'), recursive=True))
-    # each worker holds a clang JSON dump of about a GB, parsed into about 6 GB, so only two at once
-    with multiprocessing.get_context("fork").Pool(min(os.cpu_count() or 1, 2)) as pool:
+    with multiprocessing.get_context("fork").Pool(workers()) as pool:
         rows = [row for result in pool.imap_unordered(scan, files, chunksize=2) for row in result]
 
     totals = collections.Counter(row[1] for row in rows)

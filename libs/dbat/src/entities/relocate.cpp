@@ -59,23 +59,21 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
         if (room_of(g, obj_get_value(object, 3))) {
           vehicle = read_object(g, obj_get_value(object, 0));
           obj_to_room(g, vehicle, obj_get_value(object, 3));
-          if (obj_get_action_description(object)) {
-            if (strlen(obj_get_action_description(object))) {
-              std::string nick;
-              std::string nick2;
-              std::string nick3;
-              if (obj_get_vnum(g, vehicle) <= 46099 && obj_get_vnum(g, vehicle) >= 46000) {
-                nick  = str_format("Saiyan Pod {}", obj_get_action_description(object));
-                nick2 = str_format("@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C{}@D)@w", obj_get_action_description(object));
-              } else if (obj_get_vnum(g, vehicle) >= 46100 && obj_get_vnum(g, vehicle) <= 46199) {
-                nick  = str_format("EDI Xenofighter MK. II {}", obj_get_action_description(object));
-                nick2 = str_format("@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C{}@D)@w", obj_get_action_description(object));
-              }
-              nick3 = str_format("{} is resting here@w", nick2);
-              obj_set_name(vehicle, nick);
-              obj_set_short_description(vehicle, nick2);
-              obj_set_description(vehicle, nick3);
+          if (!obj_get_action_description(object).empty()) {
+            std::string nick;
+            std::string nick2;
+            std::string nick3;
+            if (obj_get_vnum(g, vehicle) <= 46099 && obj_get_vnum(g, vehicle) >= 46000) {
+              nick  = str_format("Saiyan Pod {}", obj_get_action_description(object));
+              nick2 = str_format("@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C{}@D)@w", obj_get_action_description(object));
+            } else if (obj_get_vnum(g, vehicle) >= 46100 && obj_get_vnum(g, vehicle) <= 46199) {
+              nick  = str_format("EDI Xenofighter MK. II {}", obj_get_action_description(object));
+              nick2 = str_format("@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C{}@D)@w", obj_get_action_description(object));
             }
+            nick3 = str_format("{} is resting here@w", nick2);
+            obj_set_name(vehicle, nick);
+            obj_set_short_description(vehicle, nick2);
+            obj_set_description(vehicle, nick3);
           }
           obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));
           obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_LOCKED));

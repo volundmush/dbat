@@ -169,9 +169,9 @@ const std::vector<shop_buy_data> &shop_buy_types(const struct shop_data *shop)
   return shop->type;
 }
 
-const char *shop_get_no_such_item1(const struct shop_data *shop)
+std::string_view shop_get_no_such_item1(const struct shop_data *shop)
 {
-  return c_str_or_null(shop->no_such_item1);
+  return shop->no_such_item1;
 }
 
 void shop_set_no_such_item1(struct shop_data *shop, std::string_view v)
@@ -179,9 +179,9 @@ void shop_set_no_such_item1(struct shop_data *shop, std::string_view v)
   shop->no_such_item1 = v;
 }
 
-const char *shop_get_no_such_item2(const struct shop_data *shop)
+std::string_view shop_get_no_such_item2(const struct shop_data *shop)
 {
-  return c_str_or_null(shop->no_such_item2);
+  return shop->no_such_item2;
 }
 
 void shop_set_no_such_item2(struct shop_data *shop, std::string_view v)
@@ -189,9 +189,9 @@ void shop_set_no_such_item2(struct shop_data *shop, std::string_view v)
   shop->no_such_item2 = v;
 }
 
-const char *shop_get_missing_cash1(const struct shop_data *shop)
+std::string_view shop_get_missing_cash1(const struct shop_data *shop)
 {
-  return c_str_or_null(shop->missing_cash1);
+  return shop->missing_cash1;
 }
 
 void shop_set_missing_cash1(struct shop_data *shop, std::string_view v)
@@ -199,9 +199,9 @@ void shop_set_missing_cash1(struct shop_data *shop, std::string_view v)
   shop->missing_cash1 = v;
 }
 
-const char *shop_get_missing_cash2(const struct shop_data *shop)
+std::string_view shop_get_missing_cash2(const struct shop_data *shop)
 {
-  return c_str_or_null(shop->missing_cash2);
+  return shop->missing_cash2;
 }
 
 void shop_set_missing_cash2(struct shop_data *shop, std::string_view v)
@@ -209,9 +209,9 @@ void shop_set_missing_cash2(struct shop_data *shop, std::string_view v)
   shop->missing_cash2 = v;
 }
 
-const char *shop_get_do_not_buy(const struct shop_data *shop)
+std::string_view shop_get_do_not_buy(const struct shop_data *shop)
 {
-  return c_str_or_null(shop->do_not_buy);
+  return shop->do_not_buy;
 }
 
 void shop_set_do_not_buy(struct shop_data *shop, std::string_view v)
@@ -219,9 +219,9 @@ void shop_set_do_not_buy(struct shop_data *shop, std::string_view v)
   shop->do_not_buy = v;
 }
 
-const char *shop_get_message_buy(const struct shop_data *shop)
+std::string_view shop_get_message_buy(const struct shop_data *shop)
 {
-  return c_str_or_null(shop->message_buy);
+  return shop->message_buy;
 }
 
 void shop_set_message_buy(struct shop_data *shop, std::string_view v)
@@ -229,9 +229,9 @@ void shop_set_message_buy(struct shop_data *shop, std::string_view v)
   shop->message_buy = v;
 }
 
-const char *shop_get_message_sell(const struct shop_data *shop)
+std::string_view shop_get_message_sell(const struct shop_data *shop)
 {
-  return c_str_or_null(shop->message_sell);
+  return shop->message_sell;
 }
 
 void shop_set_message_sell(struct shop_data *shop, std::string_view v)
@@ -249,9 +249,9 @@ void shop_buy_set_type(struct shop_buy_data *buy, int v)
   buy->type = v;
 }
 
-const char *shop_buy_get_keywords(const struct shop_buy_data *buy)
+std::string_view shop_buy_get_keywords(const struct shop_buy_data *buy)
 {
-  return c_str_or_null(buy->keywords);
+  return buy->keywords;
 }
 
 void shop_buy_set_keywords(struct shop_buy_data *buy, std::string_view v)

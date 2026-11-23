@@ -178,7 +178,7 @@ ASPELL(spell_locate_object)
     if (!isname(name.c_str(), obj_get_name(i)))
       continue;
 
-    send_to_char(g, ch, "{:c}{}", as_char(toupper(*obj_get_short_description(i))), (obj_get_short_description(i)) + 1);
+    send_to_char(g, ch, "{}", upper_first(obj_get_short_description(i)));
 
     if (obj_get_carried_by(i))
       send_to_char(g, ch, " is being carried by {}.\r\n", char_pers(g, obj_get_carried_by(i), ch));

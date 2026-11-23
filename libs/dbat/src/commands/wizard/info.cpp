@@ -301,7 +301,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
   send_to_char(g, ch, "Room Damage: {:d}, Room Effect: {:d}\r\n", room_get_dmg(rm), room_get_geffect(rm));
   send_to_char(g, ch, "SpecProc: {}, Flags: {}\r\n", room_get_func(rm) == nullptr ? "None" : "Exists", buf2);
 
-  send_to_char(g, ch, "Description:\r\n{}", room_get_description(rm) ? room_get_description(rm) : "  None.\r\n");
+  send_to_char(g, ch, "Description:\r\n{}", or_if_empty(room_get_description(rm), "  None.\r\n"));
 
   if (!room_get_ex_description(rm).empty()) {
     send_to_char(g, ch, "Extra descs:");
@@ -361,10 +361,10 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
     send_to_char(g, ch, "Exit @c{:<5}@n:  To: [{}], Key: [{:>5d}], Keywrd: {}, Type: {}\r\n  DC Lock: [{:>2d}], DC Hide: [{:>2d}], DC Skill: [{:>4}], DC Move: [{:>2d}]\r\n{}",
                  dirs[i], buf1,
                  room_get_dir_option(rm, i)->key == NOTHING ? -1 : room_get_dir_option(rm, i)->key,
-                 exit_keyword(room_get_dir_option(rm, i)) ? exit_keyword(room_get_dir_option(rm, i)) : "None", buf2,
+                 or_if_empty(exit_keyword(room_get_dir_option(rm, i)), "None"), buf2,
                  room_get_dir_option(rm, i)->dclock, room_get_dir_option(rm, i)->dchide,
                  room_get_dir_option(rm, i)->dcskill == 0 ? "None" : g->spell_info[room_get_dir_option(rm, i)->dcskill].name, room_get_dir_option(rm, i)->dcmove,
-                 exit_description(room_get_dir_option(rm, i)) ? exit_description(room_get_dir_option(rm, i)) : "  No exit description.\r\n");
+                 or_if_empty(exit_description(room_get_dir_option(rm, i)), "  No exit description.\r\n"));
   }
 
   /* check the room for a script */
@@ -387,7 +387,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
     send_to_char(g, ch, "Healing Tank Charge Level: [{:d}]\r\n", obj_get_healcharge(j));
   }
   send_to_char(g, ch, "Name: '{}', Keywords: {}, Size: {}\r\n",
-               obj_get_short_description(j) ? obj_get_short_description(j) : "<None>", obj_get_name(j),
+               or_if_empty(obj_get_short_description(j), "<None>"), obj_get_name(j),
                size_names[obj_get_size(j)]);
 
   buf = sprinttype(obj_get_type_flag(j), item_types);
@@ -1163,7 +1163,7 @@ namespace {
           continue;
         if (exit->to_room == 0)
           buf += str_format("{:>2d}: (void   ) [{:>5d}] {}{} ({})\r\n", ++k, r, printf_width(room_get_name(g, r), count_color_chars(room_get_name(g, r)) + 40, true), QNRM, dirs[dir]);
-        if (exit->to_room == NOWHERE && !exit_description(exit))
+        if (exit->to_room == NOWHERE && exit_description(exit).empty())
           buf += str_format("{:>2d}: (Nowhere) [{:>5d}] {}{} ({})\r\n", ++k, r, printf_width(room_get_name(g, r), count_color_chars(room_get_name(g, r)) + 40, true), QNRM, dirs[dir]);
       }
     send_to_char(g, ch, buf);
@@ -1692,7 +1692,7 @@ ACMD(do_zcheck)
         buf += str_format("- has min level set to {:d} (max {:d}).\r\n",
                           obj_get_level(obj), ADMLVL_IMMORT - 1);
 
-      if (obj_get_action_description(obj) && *obj_get_action_description(obj) &&
+      if (!obj_get_action_description(obj).empty() &&
           obj_get_type_flag(obj) != ITEM_STAFF &&
           obj_get_type_flag(obj) != ITEM_WAND &&
           obj_get_type_flag(obj) != ITEM_SCROLL &&
@@ -1779,15 +1779,16 @@ ACMD(do_zcheck)
                           room_flagged(g, i, ROOM_OLC) ? "OLC" : "",
                           room_flagged(g, i, ROOM_BFS_MARK) ? "*" : "");
 
-      if ((MIN_ROOM_DESC_LENGTH) && strlen(text_of(room_get_description(g, i))) < MIN_ROOM_DESC_LENGTH && (found = 1))
+      const std::string_view description = room_get_description(g, i);
+      if ((MIN_ROOM_DESC_LENGTH) && description.size() < MIN_ROOM_DESC_LENGTH && (found = 1))
         buf += str_format("- Room description is too short. ({:>4} of min. {:d} characters).\r\n",
-                          printf_digits(as_unsigned(strlen(text_of(room_get_description(g, i)))), 4), MIN_ROOM_DESC_LENGTH);
+                          printf_digits(as_unsigned(description.size()), 4), MIN_ROOM_DESC_LENGTH);
 
-      if (strncmp(text_of(room_get_description(g, i)), "   ", 3) && (found = 1))
+      if (!description.starts_with("   ") && (found = 1))
         buf += "- Room description not formatted with indent (/fi in the editor).\r\n";
 
-      /* strcspan = size of text in first arg before any character in second arg */
-      if ((strcspn(text_of(room_get_description(g, i)), "\r\n") > MAX_COLOUMN_WIDTH) && (found = 1))
+      /* the length of the first line */
+      if ((std::min(description.find_first_of("\r\n"), description.size()) > MAX_COLOUMN_WIDTH) && (found = 1))
         buf += str_format("- Room description not wrapped at {:d} chars (/fi in the editor).\r\n",
                           MAX_COLOUMN_WIDTH);
 
@@ -1801,7 +1802,7 @@ ACMD(do_zcheck)
 
       if (found) {
         send_to_char(g, ch, "[{:>5d}] {:<30}: \r\n{}",
-                     i, room_get_name(g, i) ? room_get_name(g, i) : "An unnamed room", buf);
+                     i, or_if_empty(room_get_name(g, i), "An unnamed room"), buf);
         buf.clear();
         found = 0;
       }

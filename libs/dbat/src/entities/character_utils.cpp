@@ -4834,9 +4834,9 @@ std::string char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict
   return name ? name : ""; /* a mob with no short description has no name */
 }
 
-const char *obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict)
+std::string_view obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict)
 {
-  return (char_can_see_obj(g, (vict), (obj)) ? obj_get_short_description(obj) : "something");
+  return char_can_see_obj(g, vict, obj) ? obj_get_short_description(obj) : "something";
 }
 
 std::string_view obj_fname_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict)

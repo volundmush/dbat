@@ -27,6 +27,7 @@
 #include "dbat/log.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/relocate.hpp"
+#include "dbat/stringutils.hpp"
 
 io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_kind kind,
                                      const std::function<void(obj_data *, int)> &loaded)
@@ -213,11 +214,11 @@ void write_object_record(GameWorld *g, io::text_writer &out, obj_data *obj, int 
   out.write("\n");
 
   /* every object saves its XAP data (an early return for most once sat here, but its condition was never true) */
-  std::string action = obj_get_action_description(obj) ? obj_get_action_description(obj) : "";
+  std::string action(obj_get_action_description(obj));
   strip_cr(action);
-  out.print("XAP\n{}~\n{}~\n{}~\n{}~\n", obj_get_name(obj) ? obj_get_name(obj) : "undefined",
-            obj_get_short_description(obj) ? obj_get_short_description(obj) : "undefined",
-            obj_get_description(obj) ? obj_get_description(obj) : "undefined", action);
+  out.print("XAP\n{}~\n{}~\n{}~\n{}~\n", or_if_empty(obj_get_name(obj), "undefined"),
+            or_if_empty(obj_get_short_description(obj), "undefined"),
+            or_if_empty(obj_get_description(obj), "undefined"), action);
   out.print("{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n", obj_get_type_flag(obj),
             static_cast<int>(obj_get_wear_flags(obj)[0]), /* as signed, as always */
             static_cast<int>(obj_get_wear_flags(obj)[1]), static_cast<int>(obj_get_wear_flags(obj)[2]),

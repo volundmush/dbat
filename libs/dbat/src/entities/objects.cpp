@@ -8,6 +8,7 @@
 #include "dbat/iterate.hpp"
 #include "dbat/search.hpp"
 #include "dbat/random.hpp"
+#include "dbat/stringutils.hpp"
 
 /* You can define this to anything you want; 1 would work but it would
    be very inefficient. I would recommend that it actually be close to
@@ -170,7 +171,7 @@ void obj_retire(GameWorld *g, struct obj_data *obj)
 static void log_dupe_objects(GameWorld *g, struct obj_data *obj1, struct obj_data *obj2)
 {
   mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: {} [{:d}] [{:d}:{:d}]",
-         obj_get_short_description(obj1) ? obj_get_short_description(obj1) : "<No name>",
+         or_if_empty(obj_get_short_description(obj1), "<No name>"),
          obj_get_vnum(g, obj1), (long long)obj_get_generation(obj1), obj_get_unique_id(obj1));
   mudlog(g, LOG_BRF, ADMLVL_GOD, true, "DUPE: First: In room: {:d} ({}), In object: {}, Carried by: {}, Worn by: {}",
          obj_get_in_room(obj1),
@@ -226,7 +227,7 @@ std::string sprintuniques(GameWorld *g, obj_vnum low, obj_vnum high)
         }
         str += str_format("| |- [@g{:>6d}@n] - [@y{:>10d}:{:<19d}@n] - {}\r\n",
                           obj_get_vnum(g, q->obj), (long long)q->generation, q->unique_id,
-                          obj_get_short_description(q->obj) ? obj_get_short_description(q->obj) : "<Unknown>");
+                          or_if_empty(obj_get_short_description(q->obj), "<Unknown>"));
       }
   }
   return str;

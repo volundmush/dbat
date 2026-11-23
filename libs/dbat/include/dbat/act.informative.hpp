@@ -20,7 +20,8 @@ constexpr int HIST_LENGTH = 100;
 int readIntro(struct char_data *ch, struct char_data *vict);
 void introCreate(struct char_data *ch);
 void sort_commands(GameWorld *g);
-const char *find_exdesc(std::string_view word, const ex_desc_list &list);
+/* the description of the first of list with word among its keywords (a leading . hides the keywords from lists), or null */
+const std::string *find_exdesc(std::string_view word, const ex_desc_list &list);
 void add_history(GameWorld *g, struct char_data *ch, const char *str, int type);
 void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int ignore_brief);
 bool perf_skill(int skill);

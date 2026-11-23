@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <cstring>
 
@@ -313,13 +315,13 @@ void randomize_eq(GameWorld *g, struct obj_data *obj)
   }
 }
 
-const char *money_desc(int amount)
+std::string_view money_desc(int amount)
 {
-  int cnt;
-  struct {
-    int limit{};
-    const char *description{};
-  } money_table[] = {
+  struct pile {
+    int limit;
+    std::string_view description;
+  };
+  static constexpr std::array<pile, 14> piles{{
       {1,     "a single zenni"               },
       {10,    "a tiny pile of zenni"         },
       {20,    "a handful of zenni"           },
@@ -334,19 +336,14 @@ const char *money_desc(int amount)
       {20000, "a mountain of zenni"          },
       {25000, "a huge mountain of zenni"     },
       {50000, "an enormous mountain of zenni"},
-      {0,     nullptr                        },
-  };
+  }};
 
   if (amount <= 0) {
     mud_log("SYSERR: Try to create negative or 0 money ({:d}).", amount);
-    return (nullptr);
+    return {}; /* every caller has checked amount > 0 already */
   }
-
-  for (cnt = 0; money_table[cnt].limit; cnt++)
-    if (amount <= money_table[cnt].limit)
-      return (money_table[cnt].description);
-
-  return ("an absolutely colossal mountain of zenni");
+  auto found = std::ranges::find_if(piles, [amount](const pile &p) { return amount <= p.limit; });
+  return found == piles.end() ? "an absolutely colossal mountain of zenni" : found->description;
 }
 
 struct obj_data *create_money(GameWorld *g, int amount)
@@ -778,9 +775,9 @@ void obj_set_item_number(struct obj_data *obj, obj_vnum v)
   obj->item_number = v;
 }
 
-const char *obj_get_short_description(const struct obj_data *obj)
+std::string_view obj_get_short_description(const struct obj_data *obj)
 {
-  return obj->short_description.empty() ? nullptr : obj->short_description.c_str(); /* null for none, as the files have it */
+  return obj->short_description; /* empty for none, as the files have it */
 }
 
 room_vnum obj_get_room_loaded(const struct obj_data *obj)
@@ -890,9 +887,9 @@ struct obj_spellbook_spell *obj_make_sbinfo(struct obj_data *obj)
   return obj->sbinfo->data();
 }
 
-const char *obj_get_action_description(const struct obj_data *obj)
+std::string_view obj_get_action_description(const struct obj_data *obj)
 {
-  return obj->action_description.empty() ? nullptr : obj->action_description.c_str(); /* null for none, as the files have it */
+  return obj->action_description; /* empty for none, as the files have it */
 }
 
 void obj_set_action_description(struct obj_data *obj, std::string_view v)
@@ -920,9 +917,9 @@ const id_list &obj_get_contains(const struct obj_data *obj)
   return obj->contains;
 }
 
-const char *obj_get_description(const struct obj_data *obj)
+std::string_view obj_get_description(const struct obj_data *obj)
 {
-  return obj->description.empty() ? nullptr : obj->description.c_str(); /* null for none, as the files have it */
+  return obj->description; /* empty for none, as the files have it */
 }
 
 void obj_set_description(struct obj_data *obj, std::string_view v)
@@ -955,9 +952,9 @@ void obj_set_in_obj(struct obj_data *obj, struct obj_data *v)
   obj->in_obj = v;
 }
 
-const char *obj_get_name(const struct obj_data *obj)
+std::string_view obj_get_name(const struct obj_data *obj)
 {
-  return obj->name.empty() ? nullptr : obj->name.c_str(); /* null for none, as the files have it */
+  return obj->name; /* empty for none, as the files have it */
 }
 
 void obj_set_name(struct obj_data *obj, std::string_view v)

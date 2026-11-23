@@ -459,10 +459,10 @@ static void check_iedit(GameWorld *g)
   th_type(g, builder, "2");
   th_type(g, builder, "a renamed sword");
   th_type(g, builder, "q");
-  CHECK(!strcmp(obj_get_short_description(sword), "a renamed sword"));
+  CHECK(obj_get_short_description(sword) == "a renamed sword");
   CHECK(obj_get_in_obj(sword) == chest);
   CHECK(obj_get_carried_by(sword) == nullptr);
-  CHECK(!strcmp(obj_get_short_description(obj_proto_of(g, 301)), "a plain sword"));
+  CHECK(obj_get_short_description(obj_proto_of(g, 301)) == "a plain sword");
   CHECK(count_objects(g) == objects);
   CHECK_AUDIT(g);
 
@@ -516,7 +516,11 @@ static void check_new_guilds(GameWorld *g)
     char message[32];
 
     snprintf(message, sizeof(message), "guild %d", v);
-    CHECK(find_guild(g, v) && !strcmp(guild_get_no_such_skill(find_guild(g, v)), message));
+    CHECK(find_guild(g, v));
+    if (find_guild(g, v)) {
+      std::string_view no_such_skill = guild_get_no_such_skill(find_guild(g, v));
+      CHECK(no_such_skill == message);
+    }
   }
   CHECK(guild_get_vnum(*g->guilds.all().begin()) == 300);
   CHECK(count_guilds(g, 0, 99999) == 4);
@@ -535,7 +539,7 @@ static void check_deferred_free(GameWorld *g, struct char_data *ch)
   extract_obj(g, sword);
   CHECK(obj_by_id(g, id) == nullptr);
   CHECK(!find_first(char_inventory(g, ch), [&](struct obj_data *o) { return o == sword; }));
-  CHECK(!strcmp(obj_get_short_description(sword), "a plain sword"));
+  CHECK(obj_get_short_description(sword) == "a plain sword");
   CHECK_AUDIT(g);
 
   edit = new obj_data();
@@ -544,7 +548,7 @@ static void check_deferred_free(GameWorld *g, struct char_data *ch)
   for (struct obj_data *waiting : g->extracted_objects)
     CHECK(obj_get_item_number(waiting) != 301);
   delete edit;
-  CHECK(!strcmp(obj_get_short_description(obj_proto_of(g, 301)), "a plain sword"));
+  CHECK(obj_get_short_description(obj_proto_of(g, 301)) == "a plain sword");
 
   finish_extractions(g);
   CHECK(g->extracted_objects.empty());
