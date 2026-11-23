@@ -30,7 +30,7 @@
 
 /* local functions */
 
-static const char *const ban_types[] = {
+static constexpr std::string_view ban_types[] = {
     "no",
     "new",
     "select",
@@ -67,9 +67,7 @@ int isbanned(GameWorld *g, std::string_view hostname)
 #define BAN_LIST_FORMAT "{:<40.40}  {:<8.8}  {:<10.10}  {:<16.16}\r\n"
 ACMD(do_ban)
 {
-  char *nextchar;
   std::string flag, site;
-  char timestr[16];
   int i;
   struct ban_list_element *ban_node;
 
@@ -90,11 +88,8 @@ ACMD(do_ban)
                  "---------------------------------");
 
     for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
-      if (ban_node->date) {
-        copy_cstr(timestr, asctime(localtime(&(ban_node->date))), 10);
-        timestr[10] = '\0';
-      } else
-        strcpy(timestr, "Unknown"); /* strcpy: OK (strlen("Unknown") < 16) */
+      /* quirk: nine characters of the date, as a ten-byte copy of it held */
+      std::string timestr = ban_node->date ? asctime_text(ban_node->date).substr(0, 9) : "Unknown";
 
       send_to_char(g, ch, BAN_LIST_FORMAT, ban_node->site, ban_types[ban_node->type], timestr, ban_node->name);
     }
@@ -113,17 +108,15 @@ ACMD(do_ban)
     return;
   }
   for (ban_node = g->ban_list; ban_node; ban_node = ban_node->next) {
-    if (str_eq_nocase(ban_node->site, site.c_str())) {
+    if (str_eq_nocase(ban_node->site, until_nul(site))) {
       send_to_char(g, ch, "That site has already been banned -- unban it to change the ban type.\r\n");
       return;
     }
   }
 
   ban_node = new ban_list_element();
-  copy_cstr(ban_node->site, site.c_str(), sizeof(ban_node->site));
-  for (nextchar = ban_node->site; *nextchar; nextchar++)
-    *nextchar = tolower(*nextchar);
-  copy_cstr(ban_node->name, char_get_name(ch), sizeof(ban_node->name));
+  ban_node->site = to_lower(until_nul(site).substr(0, BANNED_SITE_LENGTH));
+  ban_node->name = until_nul(char_get_name(ch)).substr(0, MAX_NAME_LENGTH);
   ban_node->date = game_now(g);
 
   for (i = BAN_NEW; i <= BAN_ALL; i++)
@@ -154,7 +147,7 @@ ACMD(do_unban)
   }
   ban_node = g->ban_list;
   while (ban_node && !found) {
-    if (str_eq_nocase(ban_node->site, site.c_str()))
+    if (str_eq_nocase(ban_node->site, until_nul(site)))
       found = 1;
     else
       ban_node = ban_node->next;

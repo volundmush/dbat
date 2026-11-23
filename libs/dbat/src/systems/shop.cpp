@@ -1271,7 +1271,6 @@ static std::string customer_string(GameWorld *g, struct shop_data *shop, int det
   return buf;
 }
 
-/* END_OF inefficient */
 static void list_all_shops(GameWorld *g, struct char_data *ch)
 {
   std::string buf = " ##   Virtual   Where    Keeper    Buy   Sell   Customers\r\n"

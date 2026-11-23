@@ -1582,9 +1582,6 @@ static void make_pcorpse(GameWorld *g, struct char_data *ch)
 static void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch)
 {
 
-  char buf2[MAX_NAME_LENGTH + 128];
-  char descBuf[512];
-
   obj_set_value(corpse, VAL_CORPSE_HEAD, 1);
   obj_set_value(corpse, VAL_CORPSE_RARM, 1);
   obj_set_value(corpse, VAL_CORPSE_LARM, 1);
@@ -1593,53 +1590,39 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
   switch (char_get_death_type(ch)) {
     case DTYPE_HEAD:
-      *buf2        = '\0';
       obj_set_name(corpse, str_format("headless corpse {}", char_get_name(ch)));
 
-      *descBuf            = '\0';
       obj_set_description(corpse, str_format("The headless corpse of {} is lying here", char_get_name(ch)));
 
-      *descBuf                  = '\0';
       obj_set_short_description(corpse, str_format("The headless remains of {}'s corpse", char_get_name(ch)));
       obj_set_value(corpse, VAL_CORPSE_HEAD, 0);
       break;
     case DTYPE_HALF:
-      *buf2        = '\0';
       obj_set_name(corpse, str_format("half corpse {}", char_get_name(ch)));
 
-      *descBuf            = '\0';
       obj_set_description(corpse, str_format("Half of {}'s corpse is lying here", char_get_name(ch)));
 
-      *descBuf                  = '\0';
       obj_set_short_description(corpse, str_format("Half of {}'s corpse", char_get_name(ch)));
       break;
     case DTYPE_VAPOR:
-      *buf2        = '\0';
       obj_set_name(corpse, str_format("burnt chunks corpse {}", char_get_name(ch)));
 
-      *descBuf            = '\0';
       obj_set_description(corpse, str_format("The burnt chunks of {}'s corpse are scattered here", char_get_name(ch)));
 
-      *descBuf                  = '\0';
       obj_set_short_description(corpse, str_format("The burnt chunks of {}'s corpse", char_get_name(ch)));
       break;
     case DTYPE_PULP:
-      *buf2        = '\0';
       obj_set_name(corpse, str_format("beaten bloody corpse {}", char_get_name(ch)));
 
-      *descBuf            = '\0';
       obj_set_description(corpse, str_format("The bloody and beaten corpse of {} is lying here", char_get_name(ch)));
 
-      *descBuf                  = '\0';
       obj_set_short_description(corpse, str_format("The bloody and beaten remains of {}'s corpse", char_get_name(ch)));
       break;
     default:
       obj_set_name(corpse, str_format("corpse {}", char_get_name(ch)));
 
-      *descBuf            = '\0';
       obj_set_description(corpse, str_format("The corpse of {} is lying here", char_get_name(ch)));
 
-      *descBuf                  = '\0';
       obj_set_short_description(corpse, str_format("the remains of {}'s corpse", char_get_name(ch)));
       break;
   }

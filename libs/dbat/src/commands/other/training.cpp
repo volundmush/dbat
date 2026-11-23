@@ -167,7 +167,7 @@ constexpr struct {
 /* How hard the training is (its weight against the trainee's power level), from the easiest that counts */
 constexpr struct {
   int gain;
-  const char *feel;
+  std::string_view feel{};
   int wait;
 } GAINS[] = {
     {5, "slight improvement.", PULSE_3SEC},
@@ -350,7 +350,7 @@ ACMD(do_potential)
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
-  const char *refusal    = nullptr;
+  std::string_view refusal    {};
   if (char_is_npc(vict))
     refusal = "Why would you waste your time releasing their potential?\r\n";
   else if (vict == ch)
@@ -365,7 +365,7 @@ ACMD(do_potential)
     refusal = "They are already majinized and have no potential to release.\r\n";
   else if (char_is_majin(vict))
     refusal = "They have no potential to release...\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -777,7 +777,7 @@ ACMD(do_meditate)
     return;
   }
 
-  constexpr const char *syntax = "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n";
+  constexpr std::string_view syntax = "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n";
   if (arg.empty()) {
     send_to_char(g, ch, syntax);
     return;

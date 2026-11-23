@@ -57,9 +57,9 @@
 #include "other_internal.hpp"
 
 namespace {
-  constexpr const char *SENSELESS  = "Oh that makes a lot of sense...\r\n";
-  constexpr const char *ARTIFICIAL = "You can't touch the mind of such an artificial being.\r\n";
-  constexpr const char *MINDLESS   = "You can't touch the mind of such a thing.\r\n";
+  constexpr std::string_view SENSELESS  = "Oh that makes a lot of sense...\r\n";
+  constexpr std::string_view ARTIFICIAL = "You can't touch the mind of such an artificial being.\r\n";
+  constexpr std::string_view MINDLESS   = "You can't touch the mind of such a thing.\r\n";
 
   /* What any use of telepathy costs */
   void telepathy_cost(GameWorld *g, struct char_data *ch)
@@ -76,7 +76,7 @@ namespace {
     if (reject(g, ch, found))
       return;
     struct char_data *vict = *found;
-    const char *refusal    = nullptr;
+    std::string_view refusal    {};
     if (vict == ch)
       refusal = SENSELESS;
     else if (char_is_npc(vict))
@@ -95,7 +95,7 @@ namespace {
       refusal = "They are blind!\r\n";
     else if (char_plr_flagged(vict, PLR_EYEC))
       refusal = "Their eyes are closed!\r\n";
-    if (refusal) {
+    if (!refusal.empty()) {
       send_to_char(g, ch, refusal);
       return;
     }
@@ -122,7 +122,7 @@ namespace {
     if (reject(g, ch, found))
       return;
     struct char_data *vict = *found;
-    const char *refusal    = nullptr;
+    std::string_view refusal    {};
     if (vict == ch)
       refusal = SENSELESS;
     else if (char_is_npc(vict))
@@ -133,7 +133,7 @@ namespace {
       refusal = "Kinda pointless when you are both telepathic huh?\r\n";
     else if (char_get_mindlink(g, vict))
       refusal = "Someone else is already telepathically linked with them.\r\n";
-    if (refusal) {
+    if (!refusal.empty()) {
       send_to_char(g, ch, refusal);
       return;
     }
@@ -152,7 +152,7 @@ namespace {
   /* The word for an alignment: the first whose bound it is above */
   constexpr struct {
     int above;
-    const char *word;
+    std::string_view word{};
   } ALIGNMENTS[] = {
       {999, "Saint         "}, {750, "Extremely Good"}, {500, "Really Good   "}, {250, "Good          "},
       {100, "Pretty Good   "}, {50, "Sorta Good    "}, {-50, "Neutral       "}, {-100, "Sorta Evil    "},
@@ -331,7 +331,7 @@ namespace {
   }
 
   /* Where a scouter's message can't come from */
-  const char *snet_blocked(GameWorld *g, struct char_data *ch)
+  std::string_view snet_blocked(GameWorld *g, struct char_data *ch)
   {
     room_vnum room = char_get_in_room(ch);
     if (room_flagged(g, room, ROOM_HBTC))
@@ -344,7 +344,7 @@ namespace {
       return "The fire eats your transmission!\r\n";
     if (room >= 19800 && room <= 19899)
       return "Your signal will not be able to escape the walls of the pocket dimension.\r\n";
-    return nullptr;
+    return {};
   }
 
   /* Whether a mortal with a scouter is where ch's message can reach them */
@@ -370,7 +370,7 @@ ACMD(do_snet)
   std::string arg       = take_word(rest);
   std::string arg2(skip_spaces(rest));
 
-  if (const char *blocked = snet_blocked(g, ch)) {
+  if (std::string_view blocked = snet_blocked(g, ch); !blocked.empty()) {
     send_to_char(g, ch, blocked);
     return;
   }
@@ -488,11 +488,11 @@ namespace {
   }
 
   /* The lines of a scouter's reading */
-  constexpr const char *READING_EDGE  = "@D|@1                                  @n@D|@n\r\n";
-  constexpr const char *READING_PL    = "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:";
-  constexpr const char *READING_KI    = "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:";
-  constexpr const char *READING_ST    = "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:";
-  constexpr const char *READING_EXTRA = "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:";
+  constexpr std::string_view READING_EDGE  = "@D|@1                                  @n@D|@n\r\n";
+  constexpr std::string_view READING_PL    = "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:";
+  constexpr std::string_view READING_KI    = "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:";
+  constexpr std::string_view READING_ST    = "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:";
+  constexpr std::string_view READING_EXTRA = "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:";
 
   void reading_top(GameWorld *g, struct char_data *ch)
   {
@@ -502,12 +502,12 @@ namespace {
     send_to_char(g, ch, READING_EDGE);
   }
 
-  void reading_line(GameWorld *g, struct char_data *ch, const char *label, std::string_view value)
+  void reading_line(GameWorld *g, struct char_data *ch, std::string_view label, std::string_view value)
   {
     send_to_char(g, ch, "{} @Y{:>21}@n@D|@n\r\n", label, value);
   }
 
-  void reading_error(GameWorld *g, struct char_data *ch, const char *label)
+  void reading_error(GameWorld *g, struct char_data *ch, std::string_view label)
   {
     send_to_char(g, ch, "{}                 @RERROR@n@D|@n\r\n", label);
   }
@@ -515,13 +515,13 @@ namespace {
   /* How tired a stamina, in percent, looks: the first it's below */
   constexpr struct {
     long double below;
-    const char *word;
+    std::string_view word{};
   } STAMINAS[] = {{10, "Exhausted"}, {25, "Extremely Tired"}, {50, "Very Tired"}, {75, "Tired"}, {90, "Winded"}, {100, "Untired"}};
 
   /* What a scouter notices about someone beyond their numbers */
   constexpr struct {
     int aff; /* or -1 for the PLR_SELFD flag */
-    const char *what;
+    std::string_view what{};
   } NOTICED[] = {{AFF_ZANZOKEN, "Zanzoken Prepared"}, {AFF_HASS, "Accelerated Arms"}, {AFF_HEALGLOW, "Healing Glow Prepared"}, {AFF_POISON, "Poisoned"}, {-1, "Explosive Energy"}};
 
   /* scouter scan: everyone on ch's planet, and the way to them or where they are */

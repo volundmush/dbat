@@ -181,7 +181,7 @@ io::loaded<void> House_boot(GameWorld *g)
 
 /* "House Control" functions */
 
-static const char *const HCONTROL_FORMAT =
+static constexpr std::string_view HCONTROL_FORMAT =
     "Usage: hcontrol build <house vnum> <exit direction> <player name>\r\n"
     "       hcontrol destroy <house vnum>\r\n"
     "       hcontrol pay <house vnum>\r\n"
@@ -190,7 +190,6 @@ static const char *const HCONTROL_FORMAT =
 void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
 {
   int i;
-  char *timestr;
   const std::string *temp;
   std::string built_on;
   std::string last_pay;
@@ -208,18 +207,14 @@ void hcontrol_list_houses(GameWorld *g, struct char_data *ch)
     if ((temp = get_name_by_id(g, g->house_control[i].owner)) == nullptr)
       continue;
 
-    if (g->house_control[i].built_on) {
-      timestr         = asctime(localtime(&(g->house_control[i].built_on)));
-      *(timestr + 10) = '\0';
-      built_on        = timestr;
-    } else
+    if (g->house_control[i].built_on)
+      built_on = asctime_text(g->house_control[i].built_on).substr(0, 10);
+    else
       built_on = "Unknown"; /* strcpy: OK (for 'strlen("Unknown") < 128') */
 
-    if (g->house_control[i].last_payment) {
-      timestr         = asctime(localtime(&(g->house_control[i].last_payment)));
-      *(timestr + 10) = '\0';
-      last_pay        = timestr;
-    } else
+    if (g->house_control[i].last_payment)
+      last_pay = asctime_text(g->house_control[i].last_payment).substr(0, 10);
+    else
       last_pay = "None"; /* strcpy: OK (for 'strlen("None") < 128') */
 
     /* Now we need a copy of the owner's name to capitalize. -gg 6/21/98 */

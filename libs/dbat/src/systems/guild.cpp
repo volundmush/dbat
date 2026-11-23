@@ -33,8 +33,8 @@
 
 static bool guild_trade_flagged(const struct guild_data *rec, int flag);
 
-const char *const guild_default_no_skill = "%s Sorry, but I don't know that one.";
-const char *const guild_default_no_gold  = "%s Sorry, but I'm gonna need more zenni first.";
+const std::string_view guild_default_no_skill = "%s Sorry, but I don't know that one.";
+const std::string_view guild_default_no_gold  = "%s Sorry, but I'm gonna need more zenni first.";
 
 /* Local variables */
 
@@ -241,7 +241,7 @@ static int compare_spells(const void *x, const void *y, void *world)
   int a = *(const int *)x,
       b = *(const int *)y;
 
-  return strcmp(g->spell_info[a].name, g->spell_info[b].name);
+  return g->spell_info[a].name.compare(g->spell_info[b].name);
 }
 
 std::string print_skills_by_type(GameWorld *g, struct char_data *ch, int sktype, std::string_view argument)
@@ -259,7 +259,7 @@ std::string print_skills_by_type(GameWorld *g, struct char_data *ch, int sktype,
 
     known = char_get_skill(ch, i);
     if (!arg.empty()) {
-      if (parse_int(arg) <= 0 && !strstr(g->spell_info[i].name, arg.c_str())) {
+      if (parse_int(arg) <= 0 && !g->spell_info[i].name.contains(until_nul(arg))) {
         known = 0;
       } else if (parse_int(arg) > char_get_skill(ch, i)) {
         known = 0;
@@ -847,7 +847,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
     return;
   }
 
-  if (strstr(sensei_style[char_get_class(ch)], text.c_str())) {
+  if (std::string_view(sensei_style[char_get_class(ch)]).contains(until_nul(text))) {
     skill_num = 539;
   }
 
@@ -1104,12 +1104,11 @@ static void handle_study(GameWorld *g, struct char_data *keeper, struct guild_da
 
 SPECIAL(guild)
 {
-  char arg[MAX_INPUT_LENGTH];
   struct guild_data *guild_nr;
   int i;
   struct char_data *keeper = (struct char_data *)me;
   struct {
-    const char *cmd{};
+    std::string_view cmd{};
     void (*func)(GameWorld *, struct char_data *, struct guild_data *, struct char_data *, std::string_view){};
   } guild_cmd_tab[] = {
       {"practice", handle_practice},
@@ -1117,7 +1116,7 @@ SPECIAL(guild)
       {"forget",   handle_forget  },
       {"study",    handle_study   },
       {"grand",    handle_grand   },
-      {nullptr,    nullptr        }
+      {{},         nullptr        }
   };
 
   guild_nr = find_first(g->guilds.all(), [&](guild_data *gd) { return guild_get_gm(gd) == char_get_nr(keeper); });
@@ -1125,18 +1124,18 @@ SPECIAL(guild)
     return (false);
 
   if (guild_get_func(guild_nr))
-    if ((guild_get_func(guild_nr))(g, ch, me, cmd, arg))
+    if ((guild_get_func(guild_nr))(g, ch, me, cmd, argument)) /* the mob's own special: it was given a buffer never filled */
       return (true);
 
   /*** Is the GM able to train?    ****/
   if (!char_is_awake(keeper))
     return (false);
 
-  for (i = 0; guild_cmd_tab[i].cmd; i++)
+  for (i = 0; !guild_cmd_tab[i].cmd.empty(); i++)
     if (CMD_IS(g, guild_cmd_tab[i].cmd))
       break;
 
-  if (!guild_cmd_tab[i].cmd)
+  if (guild_cmd_tab[i].cmd.empty())
     return (false);
 
   if (!(is_guild_ok(g, keeper, ch, guild_nr)))
@@ -1179,10 +1178,8 @@ static std::string guild_customer_string(GameWorld *g, struct guild_data *guild_
 
 static void list_all_guilds(GameWorld *g, struct char_data *ch)
 {
-  const char *list_all_guilds_header =
-      "Virtual   G.Master	Charge   Members\r\n"
-      "----------------------------------------------------------------------\r\n";
-  std::string buf = list_all_guilds_header;
+  std::string buf = "Virtual   G.Master	Charge   Members\r\n"
+                    "----------------------------------------------------------------------\r\n";
   std::string buf1;
 
   for (struct guild_data *gm_nr : g->guilds.all()) {

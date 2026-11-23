@@ -639,11 +639,11 @@ static bool allowed_while_restrained(std::string_view cmd, bool liquefied)
 static bool command_pass(GameWorld *g, std::string_view cmd, struct char_data *ch)
 {
   bool liquefied = char_aff_flagged(ch, AFF_LIQUEFIED);
-  const char *held = liquefied                                ? "liquefied"
+  std::string_view held = liquefied                                ? "liquefied"
                      : char_is_affected(ch, AFF_PARALYZE) ? "petrified"
                      : char_is_affected(ch, AFF_FROZEN)   ? "a frozen block of ice"
-                                                          : nullptr;
-  if (held) {
+                                                          : std::string_view();
+  if (!held.empty()) {
     if (allowed_while_restrained(cmd, liquefied))
       return true;
     send_to_char(g, ch, "You are not capable of performing that action while {}!\r\n", held);
@@ -658,7 +658,7 @@ static bool command_pass(GameWorld *g, std::string_view cmd, struct char_data *c
 }
 
 /* By position, what one too low for a command is told */
-static const char *const TOO_LOW[] = {
+static constexpr std::string_view TOO_LOW[] = {
     "Lie still; you are DEAD!!! :-(\r\n",
     "You are in a pretty bad shape, unable to do anything!\r\n",
     "You are in a pretty bad shape, unable to do anything!\r\n",
@@ -717,7 +717,7 @@ void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view ar
 {
   int cmd, length;
   std::string_view line;
-  char arg[MAX_INPUT_LENGTH];
+  std::string arg; /* the command word, as far as a '\0', where the buffer it was once in ended it */
 
   switch (char_get_position(ch)) {
     case POS_DEAD:
@@ -739,17 +739,16 @@ void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view ar
    * Patch sent by Eric Green and Stefan Wasilewski.
    */
   if (!isalpha((unsigned char)argument[0])) {
-    arg[0] = argument[0];
-    arg[1] = '\0';
-    line   = argument.substr(1);
+    arg  = until_nul(argument.substr(0, 1));
+    line = argument.substr(1);
   } else { /* the command word, lowercased; forced and scripted lines can be longer than typed ones */
-    for (length = 0; length < (int)argument.size() && !isspace((unsigned char)argument[length]) && length < (int)sizeof(arg) - 1; length++)
-      arg[length] = tolower((unsigned char)argument[length]);
-    arg[length] = '\0';
+    for (length = 0; length < (int)argument.size() && !isspace((unsigned char)argument[length]) && length < MAX_INPUT_LENGTH - 1; length++)
+      arg += static_cast<char>(tolower((unsigned char)argument[length]));
+    arg.resize(until_nul(arg).size());
     for (line = argument.substr(length); !line.empty() && !isspace((unsigned char)line[0]); line.remove_prefix(1)); /* any part of an over-long word that didn't fit is dropped */
   }
 
-  if (!strcasecmp(arg, "-")) {
+  if (arg == "-") {
     return;
   }
   /* Since all command triggers check for valid_dg_target before acting, the levelcheck

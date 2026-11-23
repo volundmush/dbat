@@ -50,7 +50,7 @@ static int sort_commands_helper(const void *a, const void *b, void *world);
 
 namespace {
   /* 1st, 2nd, 3rd, 4th ... 11th, 12th, 13th ... 21st */
-  const char *ordinal_suffix(int n)
+  std::string_view ordinal_suffix(int n)
   {
     if ((n % 100) / 10 == 1)
       return "th";
@@ -82,7 +82,7 @@ ACMD(do_time)
 
 ACMD(do_weather)
 {
-  static constexpr const char *sky_look[] = {"cloudless", "cloudy", "rainy", "lit by flashes of lightning"};
+  static constexpr std::string_view sky_look[] = {"cloudless", "cloudy", "rainy", "lit by flashes of lightning"};
 
   if (char_is_outside(g, ch)) {
     send_to_char(g, ch, "The sky is {} and {}.\r\n", sky_look[g->weather_info.sky],
@@ -416,7 +416,6 @@ ACMD(do_history)
 
 void add_history(GameWorld *g, struct char_data *ch, std::string_view str, int type)
 {
-  char time_str[MAX_STRING_LENGTH];
   std::string buf;
   std::deque<std::string> *history;
   time_t ct;
@@ -424,10 +423,9 @@ void add_history(GameWorld *g, struct char_data *ch, std::string_view str, int t
   if (char_is_npc(ch) || !(history = char_comm_hist(g, ch, type)))
     return;
 
-  ct = game_now(g);
-  strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
-
-  buf = str_format("{}{}", time_str, str);
+  ct                 = game_now(g);
+  const std::tm *now = localtime(&ct);
+  buf                = str_format("{:02d}:{:02d} {}", now->tm_hour, now->tm_min, str);
 
   history->push_back(std::move(buf));
   while (history->size() > HIST_LENGTH)

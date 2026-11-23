@@ -32,7 +32,7 @@
 io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_kind kind,
                                      const std::function<void(obj_data *, int)> &loaded)
 {
-  const char *file_kind = kind == record_kind::rent ? "rent" : "house";
+  std::string_view file_kind = kind == record_kind::rent ? "rent" : "house";
   int t[30]             = {}; /* a damaged line leaves some of these unread */
   std::string f[4];
 

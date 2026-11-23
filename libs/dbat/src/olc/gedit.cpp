@@ -42,7 +42,7 @@ namespace {
   struct field {
     char key;
     mode asks;
-    const char *prompt;
+    std::string_view prompt{};
   };
 
   constexpr field FIELDS[] = {
@@ -96,7 +96,7 @@ namespace {
   bool listed(GameWorld *g, int skill, mode which)
   {
     const auto &info = g->spell_info[skill];
-    if (!strcmp(info.name, "!UNUSED!"))
+    if (info.name == "!UNUSED!")
       return false;
     return which == mode::skills ? info.skilltype == SKTYPE_SKILL : IS_SET(info.skilltype, SKTYPE_LANG);
   }
@@ -126,7 +126,7 @@ namespace {
     clear_screen(g, d);
     write_to_output(g, d, which == mode::feats ? "Feats known:\r\n" : "Skills known:\r\n");
     int shown = 0;
-    auto show = [&](int i, int taught, const char *name) {
+    auto show = [&](int i, int taught, std::string_view name) {
       write_to_output(g, d, "@n[@c{:<3}@n] {:<3d} {:<20.20}  ", YESNO(taught), i, name);
       if (++shown % 3 == 0)
         write_to_output(g, d, "\r\n");

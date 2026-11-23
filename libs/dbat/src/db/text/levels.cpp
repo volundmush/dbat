@@ -93,8 +93,7 @@ int load_levels(GameWorld *g)
         mud_log("SYSERR: Suntzu {} config files are not compatible with rasputin", LEVEL_CONFIG);
         return -1;
       }
-      line.copy(g->level_version, sizeof(g->level_version) - 1);
-      g->level_version[std::min(line.size(), sizeof(g->level_version) - 1)] = '\0';
+      g->level_version = until_nul(line).substr(0, READ_SIZE - 1);
     } else if (sect_type == CONFIG_LEVEL_VERNUM) {
       g->level_vernum = as_atoi(line);
     } else if (sect_type == CONFIG_LEVEL_EXPERIENCE) {

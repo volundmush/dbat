@@ -114,7 +114,7 @@ int find_eq_pos_script(std::string_view arg)
 {
   int i;
   struct eq_pos_list {
-    const char *pos{};
+    std::string_view pos{};
     int where{};
   } eq_pos[] = {
       {"hold",      WEAR_WIELD2  },
@@ -500,7 +500,7 @@ obj_data *get_obj_by_room(GameWorld *g, room_data *room, std::string_view name)
 /* find_char() helpers */
 
 
-static const char *uid_range_name(long uid)
+static std::string_view uid_range_name(long uid)
 {
   if (uid < 0)
     return "invalid";
@@ -516,10 +516,10 @@ static const char *uid_range_name(long uid)
 }
 
 /* found_other: the uid belongs to an entity of the other kind */
-static void log_lookup_miss(GameWorld *g, const char *what, long uid, bool found_other)
+static void log_lookup_miss(GameWorld *g, std::string_view what, long uid, bool found_other)
 {
   std::string ctx = dg_context(g);
-  bool is_obj     = !strcmp(what, "find_obj");
+  bool is_obj     = what == "find_obj";
 
   if (found_other)
     mud_log("{}: uid {:d} ({} range) belongs to a {}, not a {}{}",
@@ -598,7 +598,7 @@ void obj_unregister(GameWorld *g, struct obj_data *obj)
  * ever exhausted we wrap and skip UIDs that are still in use rather than
  * spilling into the next entity type's range.
  */
-static long next_uid(GameWorld *g, long *counter, long base, long max, const char *what)
+static long next_uid(GameWorld *g, long *counter, long base, long max, std::string_view what)
 {
   bool *warned = (base == MOB_ID_BASE) ? &g->warned_mob_lookup : &g->warned_obj_lookup;
   long tries;

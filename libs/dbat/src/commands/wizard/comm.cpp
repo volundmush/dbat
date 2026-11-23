@@ -60,13 +60,31 @@
 #include "dbat/game_world.hpp"
 
 namespace {
-  constexpr const char *NEWS_SYNTAX = "Syntax: news (number | list)\r\n";
+  constexpr std::string_view NEWS_SYNTAX = "Syntax: news (number | list)\r\n";
+
+  /* An entry's heading, "#<number> <title>", read as sscanf()'s "#%d %50[0-9a-zA-Z,.!' ]" read it: whether it has a
+     number; the title, if it has one, is up to 50 letters, digits, spaces and ",.!'", and is left as it was if not */
+  bool news_heading(std::string_view line, int &nr, std::string *title = nullptr)
+  {
+    if (!line.starts_with('#'))
+      return false;
+    io::fields heading(line.substr(1));
+    if (!heading.number(nr))
+      return false;
+    std::string_view rest = skip_spaces(heading.rest());
+    size_t length         = 0;
+    while (length < rest.size() && length < 50 && (isalnum(static_cast<unsigned char>(rest[length])) || std::string_view(",.!' ").contains(rest[length])))
+      length++;
+    if (title && length > 0)
+      *title = rest.substr(0, length);
+    return true;
+  }
 
   /* The entry numbered lookup in the news file, as shown: its heading, then its text with repeated lines left out.
    * Returns whether it was found. */
   bool read_news_entry(io::text_reader &file, int lookup, std::string &buf)
   {
-    char title[256] = "";
+    std::string title;
     io::line_cursor lines(file);
     const std::string &line = lines.line();
     std::string lastline;
@@ -75,9 +93,8 @@ namespace {
 
     while (!lines.eof() && !done) {
       lines.next();
-      if (line[0] != '#' || sscanf(line.c_str(), "#%d", &nr) != 1 || nr != lookup)
+      if (!news_heading(line, nr, &title) || nr != lookup)
         continue;
-      sscanf(line.c_str(), "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
       buf   = str_format("@w--------------------------------------------------------------\n@cNum@W: @D(@G{:>3d}@D)                @cTitle@W: @g{:<50}@n\n", nr, title);
       found = true;
       while (!lines.eof() && !done) {
@@ -88,7 +105,7 @@ namespace {
           first = false;
           buf += str_format("{}\n@w--------------------------------------------------------------\n", line);
           lastline = line;
-        } else if (strcasecmp(line.c_str(), lastline.c_str())) {
+        } else if (!str_eq_nocase(line, lastline)) {
           buf += str_format("{}\n", line);
           lastline = line;
         }
@@ -100,7 +117,7 @@ namespace {
   /* The headings of the news file's entries; returns how many there are */
   int list_news(io::text_reader &file, std::string &buf)
   {
-    char title[256] = "";
+    std::string title;
     io::line_cursor lines(file);
     const std::string &line = lines.line();
     int nr, entries = 0;
@@ -110,9 +127,8 @@ namespace {
       if (line[0] != '#')
         continue;
       entries++;
-      if (sscanf(line.c_str(), "#%d", &nr) != 1)
+      if (!news_heading(line, nr, &title))
         continue;
-      sscanf(line.c_str(), "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
       if (buf.empty())
         buf = "@wNews Entries (Newest at the bottom, to read an entry use 'news (number)')\n";
       buf += str_format("@D[@cNum@W: @D(@G{:>3d}@D) @cTitle@W: @g{:<50}@D]@n\n", nr, title);
@@ -132,7 +148,7 @@ namespace {
       if (line[0] != '#')
         continue;
       entries++;
-      if (sscanf(line.c_str(), "#%d", &nr) == 1)
+      if (news_heading(line, nr))
         lastentry = nr;
     }
     if (lastentry)
@@ -169,7 +185,7 @@ namespace {
   }
 
   /* text to everyone playing, between before and after, and to ch unless they don't want it repeated */
-  void announce(GameWorld *g, struct char_data *ch, std::string_view argument, const char *before, const char *after)
+  void announce(GameWorld *g, struct char_data *ch, std::string_view argument, std::string_view before, std::string_view after)
   {
     std::string text(skip_spaces(argument));
     delete_doubledollar(text);

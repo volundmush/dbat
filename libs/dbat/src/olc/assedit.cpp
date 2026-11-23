@@ -51,7 +51,7 @@ namespace {
   }
 
   /* A component's number in the menu, if the line is one: from 1 */
-  int component_number(std::string_view line) { return isdigit(first_char(line)) ? atoi(std::string(line).c_str()) : 0; }
+  int component_number(std::string_view line) { return isdigit(first_char(line)) ? parse_int(line) : 0; }
 
   void assembly_editor::menu(GameWorld *g, struct descriptor_data *d)
   {
@@ -191,7 +191,7 @@ ACMD(do_assedit)
   struct descriptor_data *d = char_get_desc(ch);
 
   if (buf.empty() || !isdigit(buf[0])) {
-    if (strncasecmp("new", buf.c_str(), 3) == 0 && !buf.empty()) {
+    if (compare_nocase_n("new", buf, 3) == 0 && !buf.empty()) {
       if (!isdigit(buf2[0]))
         usage(g, d);
       else if (!obj_proto_of(g, parse_int(buf2)))
@@ -201,7 +201,7 @@ ACMD(do_assedit)
         send_to_char(g, d->character, "Assembly Created.\r\n");
         assemblySaveAssemblies(g);
       }
-    } else if (strncasecmp("delete", buf.c_str(), 6) == 0 && !buf.empty() && isdigit(buf2[0])) {
+    } else if (compare_nocase_n("delete", buf, 6) == 0 && !buf.empty() && isdigit(buf2[0])) {
       assemblyDestroy(g, parse_int(buf2));
       send_to_char(g, d->character, "Assembly Deleted.\r\n");
       assemblySaveAssemblies(g);

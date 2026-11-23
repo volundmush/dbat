@@ -267,7 +267,7 @@ const field<char_data> char_fields[] = {
          if (!rest.empty() && is_number(rest)) {
            int skillnum = find_skill_num(q.g, skillname, SKTYPE_SKILL);
            if (skillnum > 0)
-             char_set_skills_base(c, skillnum, std::max(0, std::min(100, atoi(std::string(rest).c_str()))));
+             char_set_skills_base(c, skillnum, std::max(0, std::min(100, parse_int(rest))));
          }
        }
        return ""; /* a field, which gives nothing */

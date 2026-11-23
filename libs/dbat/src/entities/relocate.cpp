@@ -12,7 +12,7 @@
 #include "dbat/game_world.hpp"
 
 /* Containers list their members by id, so only a registered entity can be found in one. */
-static void check_registered(GameWorld *g, const struct obj_data *obj, const char *where)
+static void check_registered(GameWorld *g, const struct obj_data *obj, std::string_view where)
 {
   if (obj_by_id(g, obj_get_id(obj)) != obj)
     mud_log("SYSERR: {}: object {:d} (id {:d}) isn't registered, so it can't be listed there.", where,

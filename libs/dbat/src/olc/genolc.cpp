@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <ranges>
 
+#include "dbat/io/reader.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/gengld.hpp"
 #include "dbat/cedit.hpp"
@@ -29,7 +30,7 @@
 static struct {
   int save_type;
   bool (*func)(GameWorld *g, struct zone_data *zone);
-  const char *message;
+  std::string_view message{};
 } save_types[] = {
     {SL_MOB, save_mobiles, "mobile"},
     {SL_OBJ, save_objects, "object"},
@@ -40,7 +41,7 @@ static struct {
     {SL_GLD, save_guilds,  "guild" },
     {SL_ACT, nullptr,      "social"},
     {SL_HLP, nullptr,      "help"  },
-    {-1,     nullptr,      nullptr },
+    {-1,     nullptr,      {}      },
 };
 
 std::optional<std::string> npc_msg_format_problem(std::string_view msg, bool allow_int)
@@ -105,7 +106,7 @@ void olc_list_columns(GameWorld *g, struct descriptor_data *d, const char *const
 std::string text_or_undefined(std::string_view text) { return text.empty() ? "undefined" : std::string(text); }
 
 
-void scan_float(std::string_view text, float &field) { sscanf(std::string(text).c_str(), "%f", &field); }
+void scan_float(std::string_view text, float &field) { io::scan_float(text, field); }
 
 /* Writes out everything listed as unsaved. Original use: to be called at shutdown time. */
 bool save_all(GameWorld *g)

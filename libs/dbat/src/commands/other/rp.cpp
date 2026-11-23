@@ -70,10 +70,7 @@ void log_imm_action(GameWorld *g, std::string_view text)
     return;
 
   time_t ct    = game_now(g);
-  char *time_s = asctime(localtime(&ct));
-
-  time_s[strlen(time_s) - 1] = '\0';
-  if (!io::append_file(REQUEST_FILE, str_format("{:<15.15} :: {}\n", time_s + 4, text)))
+  if (!io::append_file(REQUEST_FILE, str_format("{:<15.15} :: {}\n", asctime_text(ct).substr(4), text)))
     perror("SYSERR: log_imm_action");
 }
 
@@ -94,12 +91,12 @@ void log_custom(GameWorld *g, struct descriptor_data *d, struct obj_data *obj)
 }
 
 namespace {
-  const char *const SHORT_OF_RPP = "You do not have enough RPP for that selection.\r\n";
+  constexpr std::string_view SHORT_OF_RPP = "You do not have enough RPP for that selection.\r\n";
   /* quirk: the stat and aura choices say this too */
-  const char *const NOT_ACCEPTABLE = "That is not an acceptable option for changing alignment.\r\n";
+  constexpr std::string_view NOT_ACCEPTABLE = "That is not an acceptable option for changing alignment.\r\n";
 
   /* Sends `why` and returns true when ch can't pay. */
-  bool short_of(GameWorld *g, struct char_data *ch, int pay, const char *why = SHORT_OF_RPP)
+  bool short_of(GameWorld *g, struct char_data *ch, int pay, std::string_view why = SHORT_OF_RPP)
   {
     if (char_get_rp(ch) >= pay)
       return false;
@@ -160,8 +157,8 @@ namespace {
   }
 
   struct alignment_choice {
-    const char *word;
-    const char *says;
+    std::string_view word{};
+    std::string_view says{};
     int value;
   };
 
@@ -201,8 +198,8 @@ namespace {
   }
 
   struct raised_stat {
-    const char *word;
-    const char *name;
+    std::string_view word{};
+    std::string_view name{};
     int negative; /* the trait that caps it at 70 */
     int8_t (*real)(const struct char_data *ch);
     void (*set_real)(struct char_data *ch, int8_t v);
@@ -272,7 +269,7 @@ namespace {
   }
 
   /* An aura's number is its place here. */
-  constexpr const char *AURAS[] = {"white", "blue", "red", "green", "pink", "purple", "yellow", "black", "orange"};
+  static constexpr std::string_view AURAS[] = {"white", "blue", "red", "green", "pink", "purple", "yellow", "black", "orange"};
 
   int aura(GameWorld *g, struct char_data *ch, std::string &arg)
   {
@@ -282,7 +279,7 @@ namespace {
       send_to_char(g, ch, "Change your aura to what? (white, blue, red, green, pink, purple, yellow, black, orange)");
       return 0;
     }
-    auto it = std::ranges::find_if(AURAS, [&](const char *name) { return str_eq_nocase(arg, name); });
+    auto it = std::ranges::find_if(AURAS, [&](std::string_view name) { return str_eq_nocase(arg, name); });
     if (it == std::end(AURAS)) {
       send_to_char(g, ch, "{}", NOT_ACCEPTABLE);
       return 0;
@@ -451,14 +448,14 @@ ACMD(do_pose)
 {
   if (!know_skill(g, ch, SKILL_POSE))
     return;
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (getCurST(g, ch) < getMaxST(g, ch) / 40)
     refusal = "You do not have enough stamina to pull off such an exciting pose!\r\n";
   else if (is_affected(ch, AFF_SPECIAL_POSE))
     refusal = "You are already feeling good and confident from a previous pose.\r\n";
   else if (char_get_fighting(g, ch))
     refusal = "You are too busy to pose right now!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -467,7 +464,7 @@ ACMD(do_pose)
     refusal = "You can't handle having your strength increased beyond 70.\r\n";
   else if (char_get_real_abils_dex(ch) + 8 > 70 && char_get_bonuses(ch, BONUS_CLUMSY) > 0)
     refusal = "You can't handle having your agility increased beyond 70.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -491,7 +488,7 @@ ACMD(do_pose)
 }
 
 namespace {
-  constexpr const char *HINTS[] = {
+  static constexpr std::string_view HINTS[] = {
       "Remember to save often.",
       "Remember to eat or drink if you want to stay alive.",
       "It is a good idea to save up PS for learning skills instead of just practicing them.",
@@ -534,7 +531,7 @@ ACMD(do_think)
 
   if (char_is_npc(ch))
     return;
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (char_in_arena(g, ch))
     refusal = "Lol, no.\r\n";
   else if (char_get_skill(ch, SKILL_TELEPATHY))
@@ -543,7 +540,7 @@ ACMD(do_think)
     refusal = "No one has linked with your mind.\r\n";
   else if (argument.empty())
     refusal = "Syntax: think (message)\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }

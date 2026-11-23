@@ -221,7 +221,7 @@ void racial_body_parts(struct char_data *ch)
 
 /* Race behaviour. A race is identified by its RACE_* constant (ch->race). */
 
-static const char *const race_display_names[NUM_RACES] = {
+static constexpr std::string_view race_display_names[NUM_RACES] = {
     "Human", "Saiyan", "Icer", "Konatsu", "Namekian", "Mutant", "Kanassan", "Halfbreed",
     "BioAndroid", "Android", "Demon", "Majin", "Kai", "Truffle", "Hoshijin", "Animal",
     "Saiba", "Serpent", "Ogre", "Yardratian", "Arlian", "Dragon", "Mechanical", "Spirit"};
@@ -407,34 +407,34 @@ static int race_max_transform_tier(char_data *ch)
 
 /* Form names accepted by 'transform <form>', mapped to tiers. */
 struct form_name {
-  const char *name{};
+  std::string_view name{};
   int tier{};
 };
 
 static const struct form_name two_form_names[] = {
     {"first",  1},
     {"second", 2},
-    {nullptr,  0}
+    {{},  0}
 };
 static const struct form_name three_form_names[] = {
     {"first",  1},
     {"second", 2},
     {"third",  3},
-    {nullptr,  0}
+    {{},  0}
 };
 static const struct form_name four_form_names[] = {
     {"first",  1},
     {"second", 2},
     {"third",  3},
     {"fourth", 4},
-    {nullptr,  0}
+    {{},  0}
 };
 static const struct form_name bio_form_names[] = {
     {"mature",        1},
     {"semi-perfect",  2},
     {"perfect",       3},
     {"super-perfect", 4},
-    {nullptr,         0}
+    {{},       0}
 };
 static const struct form_name android_form_names[] = {
     {"1.0",   1},
@@ -443,13 +443,13 @@ static const struct form_name android_form_names[] = {
     {"4.0",   4},
     {"5.0",   5},
     {"6.0",   6},
-    {nullptr, 0}
+    {{},  0}
 };
 static const struct form_name majin_form_names[] = {
     {"affinity", 1},
     {"super",    2},
     {"true",     3},
-    {nullptr,    0}
+    {{},  0}
 };
 
 static const struct form_name *race_form_names(char_data *ch)
@@ -700,7 +700,7 @@ bool race_find_form(char_data *ch, std::string_view arg, transform_bonus *out)
   if (!names)
     return false;
   const transform_bonus *table = race_trans_table(ch);
-  for (; names->name; names++) {
+  for (; !names->name.empty(); names++) {
     if (str_eq_nocase(names->name, arg)) {
       if (table)
         *out = table[names->tier];

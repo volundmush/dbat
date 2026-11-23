@@ -82,8 +82,8 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::format_
 const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 /* No char pointer for act()'s message, which could be null: a std::string, a view or a literal */
 template <class P>
-  requires(!std::is_array_v<std::remove_reference_t<P>> &&
-           (std::is_same_v<std::decay_t<P>, const char *> || std::is_same_v<std::decay_t<P>, char *>))
+  requires(!std::is_array_v<std::remove_reference_t<P>> && std::is_pointer_v<std::decay_t<P>> &&
+           std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::decay_t<P>>>, char>)
 void act(GameWorld *g, P &&str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type) = delete;
 /* The three messages of an act() at a victim: to the actor, to the victim and to everyone else, and act()'s
  * hide_invisible for them. An empty one isn't sent. */

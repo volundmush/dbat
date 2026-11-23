@@ -71,7 +71,7 @@ namespace {
   /* A feature's word for each of its values, padded as it's shown. */
   struct feature_word {
     int value;
-    const char *word;
+    std::string_view word{};
   };
 
   constexpr feature_word HAIR_LENGTHS[] = {{HAIRL_LONG, "Long.         "}, {HAIRL_BALD, "Bald.         "}, {HAIRL_SHORT, "Short.        "},
@@ -101,13 +101,13 @@ namespace {
   constexpr feature_word FORELOCK_LENGTHS[] = {{HAIRL_BALD, "Tiny.         "}, {HAIRL_SHORT, "Short.        "}, {HAIRL_MEDIUM, "Medium.       "},
                                                {HAIRL_LONG, "Long.         "}, {HAIRL_RLONG, "R. Long.      "}};
 
-  void feature_line(GameWorld *g, struct char_data *ch, const char *label, const char *word)
+  void feature_line(GameWorld *g, struct char_data *ch, std::string_view label, std::string_view word)
   {
     send_to_char(g, ch, "            @D[@c{:<11} @D: @W{}@D]@n\r\n", label, word);
   }
 
   /* The line for value, if it has one. */
-  void feature_line(GameWorld *g, struct char_data *ch, const char *label, std::span<const feature_word> words, int value)
+  void feature_line(GameWorld *g, struct char_data *ch, std::string_view label, std::span<const feature_word> words, int value)
   {
     auto it = std::ranges::find(words, value, &feature_word::value);
     if (it != words.end())
@@ -185,7 +185,7 @@ void bringdesc(GameWorld *g, struct char_data *ch, struct char_data *tch)
 namespace {
   /* The order exits are listed in, and each direction's name in capitals, for the error about one. */
   constexpr int EXIT_ORDER[] = {NORTHWEST, NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, UP, DOWN, INDIR, OUTDIR};
-  constexpr const char *DIR_SHOUTED[NUM_OF_DIRS] = {"NORTH", "EAST", "SOUTH", "WEST", "UP", "DOWN", "NORTHWEST", "NORTHEAST", "SOUTHEAST", "SOUTHWEST", "INSIDE", "OUTSIDE"};
+  static constexpr std::string_view DIR_SHOUTED[NUM_OF_DIRS] = {"NORTH", "EAST", "SOUTH", "WEST", "UP", "DOWN", "NORTHWEST", "NORTHEAST", "SOUTHEAST", "SOUTHWEST", "INSIDE", "OUTSIDE"};
 
   /* What an immortal is told of an exit: where it goes, and of its door if it has one. False if its door has no
      keyword to name it by. */
@@ -203,7 +203,7 @@ namespace {
     std::string argh = str_format("{} ", !str_eq_nocase(fname(exit_keyword(exit)), "undefined") ? fname(exit_keyword(exit)) : "opening");
     line += str_format("                    The {}{} {} {} {}{}.\r\n", IS_SET(exit->exit_info, EX_SECRET) ? "@rsecret@w " : "",
                        (!exit_keyword(exit).empty() && !str_eq_nocase(fname(exit_keyword(exit)), "undefined")) ? fname(exit_keyword(exit)) : "opening",
-                       strstr(argh.c_str(), "s ") != nullptr ? "are" : "is", IS_SET(exit->exit_info, EX_CLOSED) ? "closed" : "open",
+                       until_nul(argh).contains("s ") ? "are" : "is", IS_SET(exit->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(exit->exit_info, EX_LOCKED) ? "and locked" : "and unlocked", IS_SET(exit->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
     return true;
   }
@@ -367,7 +367,7 @@ namespace {
 
   struct place_line {
     bool (*is)(GameWorld *g, room_vnum room);
-    const char *says;
+    std::string_view says{};
   };
 
   /* Where a room is, the first that it's in */
@@ -391,13 +391,13 @@ namespace {
   };
 
   /* The gravities a room is told to have; any other says nothing */
-  constexpr std::pair<int, const char *> GRAVITIES[] = {{10, "10x"},   {20, "20x"},   {30, "30x"},       {40, "40x"},       {50, "50x"},
+  constexpr std::pair<int, std::string_view> GRAVITIES[] = {{10, "10x"},   {20, "20x"},   {30, "30x"},       {40, "40x"},       {50, "50x"},
                                                         {100, "100x"}, {200, "200x"}, {300, "300x"},     {400, "400x"},     {500, "500x"},
                                                         {1000, "1,000x"}, {5000, "5,000x"}, {10000, "10,000x"}};
 
   /* How a room's damage shows, by its terrain: at most 2, 4, 6, 10, 20, 30, 50, 75 and 99, then anything more */
   constexpr int DAMAGE_STEPS[] = {2, 4, 6, 10, 20, 30, 50, 75, 99};
-  constexpr const char *FLOOR_DAMAGE[] = {
+  static constexpr std::string_view FLOOR_DAMAGE[] = {
       "@wA small hole with chunks of debris that can be seen scarring the floor.@n",
       "@wA couple small holes with chunks of debris that can be seen scarring the floor.@n",
       "@wA few small holes with chunks of debris that can be seen scarring the floor.@n",
@@ -409,7 +409,7 @@ namespace {
       "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n",
       "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n",
   };
-  constexpr const char *GROUND_DAMAGE[] = {
+  static constexpr std::string_view GROUND_DAMAGE[] = {
       "@wA small hole with chunks of debris that can be seen scarring the ground.@n",
       "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n",
       "@wA few small craters with chunks of debris that can be seen scarring the ground.@n",
@@ -421,7 +421,7 @@ namespace {
       "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n",
       "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n",
   };
-  constexpr const char *FOREST_DAMAGE[] = {
+  static constexpr std::string_view FOREST_DAMAGE[] = {
       "@wA small tree sits in a little crater here.@n",
       "@wTrees have been uprooted by craters in the ground.@n",
       "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n",
@@ -433,7 +433,7 @@ namespace {
       "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n",
       "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n",
   };
-  constexpr const char *MOUNTAIN_DAMAGE[] = {
+  static constexpr std::string_view MOUNTAIN_DAMAGE[] = {
       "@wA small crater has been burned into the side of this mountain.@n",
       "@wA couple craters have been burned into the side of this mountain.@n",
       "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n",
@@ -446,7 +446,7 @@ namespace {
       "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n",
   };
 
-  const char *const *damage_shown(int sect)
+  const std::string_view *damage_shown(int sect)
   {
     switch (sect) {
       case SECT_INSIDE:
@@ -495,7 +495,7 @@ namespace {
     int gravity = room_get_gravity(g, target_room);
     if (gravity <= 0)
       send_to_char(g, ch, "@wGravity: @WNormal@n\r\n");
-    else if (auto it = std::ranges::find(GRAVITIES, gravity, &std::pair<int, const char *>::first); it != std::end(GRAVITIES))
+    else if (auto it = std::ranges::find(GRAVITIES, gravity, &std::pair<int, std::string_view>::first); it != std::end(GRAVITIES))
       send_to_char(g, ch, "@wGravity: @W{}@n\r\n", it->second);
     if (room_flagged(g, target_room, ROOM_REGEN))
       send_to_char(g, ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
@@ -515,7 +515,7 @@ namespace {
       send_to_char(g, ch, "@w{}@n", room_get_description(g, target_room));
     if (dmg == 100 && (sect == SECT_WATER_SWIM || room_sunken(g, target_room) || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT))
       send_to_char(g, ch, "@w{}@n", room_get_description(g, target_room));
-    if (const char *const *shown = damage_shown(sect); shown && dmg > 0) {
+    if (const std::string_view *shown = damage_shown(sect); shown && dmg > 0) {
       auto step = std::ranges::find_if(DAMAGE_STEPS, [&](int most) { return dmg <= most; });
       send_to_char(g, ch, "\r\n");
       send_to_char(g, ch, shown[step - std::begin(DAMAGE_STEPS)]);
@@ -736,7 +736,7 @@ namespace {
       send_to_char(g, ch, "It appears to be made of {}", material_names[obj_get_value(obj, 7)]);
   }
 
-  void hatch_syntax(GameWorld *g, struct char_data *ch, const char *last)
+  void hatch_syntax(GameWorld *g, struct char_data *ch, std::string_view last)
   {
     send_to_char(g, ch, "@YSyntax@D: @CUnlock hatch\r\n");
     send_to_char(g, ch, "@YSyntax@D: @COpen hatch\r\n");

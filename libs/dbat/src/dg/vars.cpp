@@ -1,7 +1,7 @@
 /* Script variables: see dbat/dg/vars.hpp. */
 #include "dbat/dg/vars.hpp"
 
-#include <strings.h>
+#include "dbat/stringutils.hpp"
 
 namespace dg {
 
@@ -9,7 +9,7 @@ namespace {
 
 bool same_name(std::string_view a, const std::string &b)
 {
-  return a.size() == b.size() && strncasecmp(a.data(), b.data(), a.size()) == 0;
+  return a.size() == b.size() && compare_nocase_n(a, b, a.size()) == 0;
 }
 
 } // namespace

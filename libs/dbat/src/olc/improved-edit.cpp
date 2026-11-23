@@ -9,6 +9,7 @@ improved-edit.c		Routines specific to the improved editor.
 #include <cstring>
 #include <vector>
 
+#include "dbat/io/reader.hpp"
 #include "dbat/args.hpp"
 #include "dbat/improved-edit.hpp"
 #include "dbat/db.hpp"
@@ -30,8 +31,11 @@ namespace {
   /* Reads "<low>" or "<low> - <high>": 2, 1, or 0 when there is no number (sscanf's -1 included) */
   int scan_range(std::string_view arg, int &low, int &high)
   {
-    const int found = sscanf(std::string(arg).c_str(), " %d - %d ", &low, &high);
-    return found < 0 ? 0 : found;
+    io::fields first(arg);
+    if (!first.number(low))
+      return 0;
+    std::string_view rest = skip_spaces(first.rest());
+    return rest.starts_with('-') && io::fields(rest.substr(1)).number(high) ? 2 : 1;
   }
 
   /* Where line n (from 1) of text starts, or npos if it has fewer lines. A text ending in a newline has one more,
@@ -48,7 +52,7 @@ namespace {
   }
 
   /* "s " for a count that isn't one, " " for one: "1 line deleted", "2 lines deleted" */
-  const char *plural(unsigned count) { return count != 1 ? "s " : " "; }
+  std::string_view plural(unsigned count) { return count != 1 ? "s " : " "; }
 
   /* The letters right after the command ("/fi", "/ra"): does one of the first two match? */
   bool flagged(std::string_view args, char letter)
@@ -87,53 +91,57 @@ namespace {
       return false;
 
     std::string formatted;
-    std::string copy = text; /* written through a character at a time, as the walk below goes */
-    char *flow       = copy.data();
+    /* written through a character at a time as the walk below goes: a '\0' planted in it ends a word, and some are
+       left there (quirk), so what is read from a place is the text up to the next '\0' */
+    std::string copy = text;
+    size_t at        = 0;
+    auto from        = [&](size_t i) { return until_nul(std::string_view(copy).substr(i)); };
+    auto one_of      = [](std::string_view set, char c) { return c != '\0' && set.contains(c); };
 
     /* the lines before low, as they are; quirk: an empty one is passed over, and the line after it written twice */
     int i = 0;
     for (; i < low - 1; i++) {
-      std::string_view rest(flow);
-      size_t first = rest.find_first_not_of('\n');
-      char *newline = strchr(flow, '\n');
-      if (first == std::string_view::npos || !newline) {
+      std::string_view rest = from(at);
+      size_t first          = rest.find_first_not_of('\n');
+      size_t newline        = rest.find('\n');
+      if (first == std::string_view::npos || newline == std::string_view::npos) {
         write_to_output(g, d, "There aren't that many lines!\r\n");
         return false;
       }
       rest = rest.substr(first);
       formatted.append(rest.substr(0, rest.find('\n'))).append("\n");
-      flow = newline + 1;
+      at += newline + 1;
     }
 
     int line_chars = 0, color_chars = 0, pass_line = 0;
     bool cap_next = true, cap_next_next = false;
-    char *start = nullptr;
+    size_t start = 0;
     if (indent) {
       formatted += "   ";
       line_chars = 3;
     }
 
-    while (*flow && i < high) {
-      while (*flow && strchr("\n\r\f\t\v ", *flow)) {
-        if (*flow == '\n' && !pass_line)
+    while (copy[at] && i < high) {
+      while (one_of("\n\r\f\t\v ", copy[at])) {
+        if (copy[at] == '\n' && !pass_line)
           if (i++ >= high) {
             pass_line = 1;
             break;
           }
-        flow++;
+        at++;
       }
 
-      if (*flow) {
-        start = flow;
-        while (*flow && !strchr("\n\r\f\t\v .?!", *flow)) {
-          if (*flow == '@') {
-            if (*(flow + 1) == '@')
+      if (copy[at]) {
+        start = at;
+        while (copy[at] && !one_of("\n\r\f\t\v .?!", copy[at])) {
+          if (copy[at] == '@') {
+            if (copy[at + 1] == '@')
               color_chars++;
             else
               color_chars += 2;
-            flow++;
+            at++;
           }
-          flow++;
+          at++;
         }
 
         if (cap_next_next) {
@@ -142,40 +150,40 @@ namespace {
         }
 
         /* if we stopped on a sentence, move off its end */
-        while (*flow && strchr(".!?", *flow)) {
+        while (one_of(".!?", copy[at])) {
           cap_next_next = true;
-          flow++;
+          at++;
         }
 
         /*
-         * At the end of the last line, with a delimiter last, flow is on the newline after it: pass over the newlines,
+         * At the end of the last line, with a delimiter last, at is on the newline after it: pass over the newlines,
          * so no extra blank line is added. (Welcor 04/04)
          */
         char temp;
-        if (*flow && strchr("\n\r", *flow)) {
-          *flow = '\0'; /* ends the word, and is left there */
-          flow++;
-          if (*flow == '\n' && i++ >= high)
+        if (one_of("\n\r", copy[at])) {
+          copy[at] = '\0'; /* ends the word, and is left there */
+          at++;
+          if (copy[at] == '\n' && i++ >= high)
             pass_line = 1;
 
-          while (*flow && strchr("\n\r", *flow) && !pass_line) {
-            flow++;
-            if (*flow == '\n' && i++ >= high)
+          while (one_of("\n\r", copy[at]) && !pass_line) {
+            at++;
+            if (copy[at] == '\n' && i++ >= high)
               pass_line = 1;
           }
-          temp = *flow;
+          temp = copy[at];
         } else {
-          temp  = *flow;
-          *flow = '\0';
+          temp     = copy[at];
+          copy[at] = '\0';
         }
 
-        if (line_chars + strlen(start) + 1 - color_chars > PAGE_WIDTH) {
+        if (line_chars + from(start).size() + 1 - color_chars > PAGE_WIDTH) {
           formatted += "\r\n";
           line_chars  = 0;
-          color_chars = count_color_chars(start);
+          color_chars = count_color_chars(from(start));
         }
 
-        std::string word = start;
+        std::string word(from(start));
         if (!cap_next) {
           if (line_chars > 0) {
             formatted += " ";
@@ -189,18 +197,18 @@ namespace {
         line_chars += word.size();
         formatted += word;
 
-        *flow = temp;
+        copy[at] = temp;
       }
 
-      if (cap_next_next && *flow) {
+      if (cap_next_next && copy[at]) {
         if (line_chars + 3 - color_chars > PAGE_WIDTH) {
           formatted += "\r\n";
           line_chars  = 0;
-          color_chars = count_color_chars(start);
-        } else if (*flow == '\"' || *flow == '\'') {
-          formatted += *flow;
+          color_chars = count_color_chars(from(start));
+        } else if (copy[at] == '\"' || copy[at] == '\'') {
+          formatted += copy[at];
           formatted += ' ';
-          flow++;
+          at++;
           line_chars++;
         } else {
           formatted += " ";
@@ -208,10 +216,10 @@ namespace {
         }
       }
     }
-    if (*flow)
+    if (copy[at])
       formatted += "\r\n";
-    formatted += flow;
-    if (!*flow)
+    formatted += from(at);
+    if (!copy[at])
       formatted += "\r\n";
 
     if (formatted.size() >= maxlen)
@@ -297,7 +305,7 @@ namespace {
         pieces.push_back(args.substr(at, end - at));
       at = end + 1;
     }
-    static constexpr const char *MISSING[] = {"Invalid format.\r\n", "Target string must be enclosed in single quotes.\r\n",
+    static constexpr std::string_view MISSING[] = {"Invalid format.\r\n", "Target string must be enclosed in single quotes.\r\n",
                                               "No replacement string.\r\n", "Replacement string must be enclosed in single quotes.\r\n"};
     if (pieces.size() < 4) {
       write_to_output(g, d, MISSING[pieces.size()]);

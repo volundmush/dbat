@@ -74,7 +74,7 @@ struct help_entry {
 io::loaded<std::optional<help_entry>> read_entry(help_lines &lines, bool first, bool loading)
 {
   /* quirk: a file whose last line has no line end is an error, unless it is the first, as the old count found */
-  auto next = [&](const char *what) -> io::loaded<std::string_view> {
+  auto next = [&](std::string_view what) -> io::loaded<std::string_view> {
     std::optional<std::string_view> line = lines.next();
     if (!line)
       return std::unexpected(lines.fail(str_format("the file ends {}, before the '$' that should end it", what)));

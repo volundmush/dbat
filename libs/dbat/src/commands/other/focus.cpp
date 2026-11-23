@@ -47,7 +47,7 @@ int64_t focus_cost(GameWorld *g, struct char_data *ch)
   return getMaxKI(g, ch) / 20;
 }
 
-bool has_ki_for(GameWorld *g, struct char_data *ch, int64_t cost, const char *msg)
+bool has_ki_for(GameWorld *g, struct char_data *ch, int64_t cost, std::string_view msg)
 {
   if (getCurKI(g, ch) < cost) {
     send_to_char(g, ch, "{}", msg);
@@ -57,7 +57,7 @@ bool has_ki_for(GameWorld *g, struct char_data *ch, int64_t cost, const char *ms
 }
 
 /* Another to focus on, in the room: or no one, having been told why */
-struct char_data *focus_target(GameWorld *g, struct char_data *ch, std::string &name, const char *who, int kill_flag)
+struct char_data *focus_target(GameWorld *g, struct char_data *ch, std::string &name, std::string_view who, int kill_flag)
 {
   struct char_data *vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM);
 
@@ -84,21 +84,21 @@ struct focus_limit {
   int bonus{};
   int8_t (*stat)(const struct char_data *){};
   int rise{};
-  const char *msg{};
+  std::string_view msg{};
 };
 
 struct focus_buff {
   int skill{};
   int aff{};
   int kill_flag{2};              /* can_kill()'s, on another */
-  const char *who{};             /* when there is no one by that name */
-  const char *self_has{};        /* already has it */
-  const char *vict_has{};
+  std::string_view who{};             /* when there is no one by that name */
+  std::string_view self_has{};        /* already has it */
+  std::string_view vict_has{};
   std::array<focus_limit, 2> self_limits{};
   std::array<focus_limit, 2> vict_limits{};
   bool demon_immune{};
-  const char *self_no_ki{};
-  const char *vict_no_ki{};
+  std::string_view self_no_ki{};
+  std::string_view vict_no_ki{};
   act_msgs self_fail;            /* to_char and to_room */
   act_msgs vict_fail;
   bool vict_fail_unnamed{};      /* quirk: the user's message of a failure on another is act()ed without them */

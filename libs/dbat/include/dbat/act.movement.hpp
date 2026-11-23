@@ -1,9 +1,11 @@
 #pragma once
+#include <string_view>
+
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 
 // global variables
-extern const char *const cmd_door[NUM_DOOR_CMD];
+extern const std::string_view cmd_door[NUM_DOOR_CMD];
 
 // functions
 void handle_teleport(GameWorld *g, struct char_data *ch, struct char_data *tar, room_vnum location);

@@ -242,8 +242,8 @@ struct spell_info_type {
   int routines{};
   int8_t violent{};
   int targets{};              /* See below for use with TAR_XXX  */
-  const char *name{};         /* Input size not limited. Originates from string constants. */
-  const char *wear_off_msg{}; /* Input size not limited. Originates from string constants. */
+  std::string_view name{};         /* a string constant */
+  std::string_view wear_off_msg{}; /* a string constant, or empty for none */
   int race_can_learn[NUM_RACES]{};
   int skilltype{}; /* Is it a spell, skill, art, feat, or what? used as bitvector */
   int flags{};
@@ -282,8 +282,8 @@ constexpr int SPELL_TYPE_SCROLL = 4;
 /* Attacktypes with grammar */
 
 struct attack_hit_type {
-  const char *singular{};
-  const char *plural{};
+  std::string_view singular{};
+  std::string_view plural{};
 };
 
 #define ASPELL(spellname)                         \

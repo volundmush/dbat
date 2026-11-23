@@ -40,7 +40,7 @@ static void crash_report(int sig)
 {
   constexpr std::string_view says = "SYSERR: fatal signal ";
   std::array<char, 48> msg;
-  char *end = std::ranges::copy(says, msg.begin()).out;
+  auto end = std::ranges::copy(says, msg.begin()).out;
 
   end    = std::to_chars(end, msg.end() - 1, sig).ptr;
   *end++ = '\n';

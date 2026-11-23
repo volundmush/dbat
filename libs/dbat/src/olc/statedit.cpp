@@ -71,7 +71,7 @@ namespace {
     if (stat > 0)
       points += stat;
 
-    int wanted = atoi(std::string(line).c_str());
+    int wanted = parse_int(line);
     int value  = wanted > points ? points : wanted;
     if (value > 100)
       value = points < 100 ? points : 100;

@@ -69,8 +69,7 @@ void mobile_activity(GameWorld *g)
                 char_get_name(ch), char_get_mob_vnum(g, ch));
         char_mob_set(ch, MOB_SPEC, false);
       } else {
-        char actbuf[MAX_INPUT_LENGTH] = "";
-        if ((mob_index_of(g, char_get_nr(ch))->func)(g, ch, ch, 0, actbuf))
+        if ((mob_index_of(g, char_get_nr(ch))->func)(g, ch, ch, 0, ""))
           continue; /* go to next char */
       }
     }

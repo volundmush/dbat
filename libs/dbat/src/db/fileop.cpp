@@ -27,7 +27,7 @@ std::optional<std::string> player_path(int mode, std::string_view name)
 namespace {
   /* The toplist's sections, five places each, in the order g->topname and g->toppoint hold them */
   struct toplist_section {
-    const char *label;
+    std::string_view label{};
     int64_t (*value)(GameWorld *g, char_data *ch);
     bool by_account; /* listed by the account's name, not the character's */
   };

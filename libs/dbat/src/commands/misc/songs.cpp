@@ -59,15 +59,15 @@ bool grouped_with(GameWorld *g, struct char_data *ch, struct char_data *vict)
 }
 
 namespace {
-  constexpr const char *OUT_OF_KI  = "You no longer have the ki necessary to play your song.\r\n";
+  constexpr std::string_view OUT_OF_KI  = "You no longer have the ki necessary to play your song.\r\n";
   constexpr std::string_view STOPS = "@c$n@C stops playing $s song.@n";
-  constexpr const char *NO_KI      = "@wYou do not have enough ki to power the instrument for that song!@n\r\n";
-  constexpr const char *UNSKILLED  = "You do not posess the skill to play such a song!\r\n";
+  constexpr std::string_view NO_KI      = "@wYou do not have enough ki to power the instrument for that song!@n\r\n";
+  constexpr std::string_view UNSKILLED  = "You do not posess the skill to play such a song!\r\n";
 
   /* Where each Teleportation Melody takes its listeners */
   struct destination {
     int song;
-    const char *planet;
+    std::string_view planet{};
     room_vnum room;
   };
   constexpr destination DESTINATIONS[] = {
@@ -82,7 +82,7 @@ namespace {
     return found == std::end(DESTINATIONS) ? nullptr : &*found;
   }
 
-  const char *song_name(int song)
+  std::string_view song_name(int song)
   {
     switch (song) {
       case SONG_SAFETY:        return "Song of Safety";
@@ -117,7 +117,7 @@ namespace {
   struct limb_mend {
     int checked; /* the limb whose condition decides whether... */
     int mended;  /* ...this one mends */
-    const char *healed;
+    std::string_view healed{};
   };
   constexpr limb_mend LIMBS[] = {
     {0, 0, "Your right arm is no longer broken!@n\r\n"},
@@ -259,7 +259,7 @@ namespace {
 
   /* What song NAME plays */
   struct tune {
-    const char *name;
+    std::string_view name{};
     int cost;      /* times 1% of max ki */
     int min_skill; /* in mystic music */
     int song;      /* 0: the Teleportation Melody, which takes a destination */

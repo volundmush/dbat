@@ -63,7 +63,7 @@ static OCMD(do_osetval);
 static OCMD(do_oat);
 
 struct obj_command_info {
-  const char *command{};
+  std::string_view command{};
   void (*command_pointer)(GameWorld *g, obj_data *obj, std::string_view argument, int cmd, int subcmd){};
   int subcmd{};
 };
@@ -743,11 +743,11 @@ void obj_command_interpreter(GameWorld *g, obj_data *obj, std::string_view argum
   std::string arg       = take_word(line);
 
   /* find the command: the first whose name begins with the word */
-  for (cmd = 0; *obj_cmd_info[cmd].command != '\n'; cmd++)
-    if (std::string_view(obj_cmd_info[cmd].command).starts_with(arg))
+  for (cmd = 0; obj_cmd_info[cmd].command != "\n"; cmd++)
+    if (obj_cmd_info[cmd].command.starts_with(arg))
       break;
 
-  if (*obj_cmd_info[cmd].command == '\n')
+  if (obj_cmd_info[cmd].command == "\n")
     obj_log(g, obj, "Unknown object cmd: '{}'", argument);
   else
     ((*obj_cmd_info[cmd].command_pointer)(g, obj, line, cmd, obj_cmd_info[cmd].subcmd));

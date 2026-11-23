@@ -309,7 +309,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
       }
       if (!char_prf_flagged(g, d->character, PRF_DISPERC)) {
         if (char_prf_flagged(g, d->character, PRF_DISPHP)) {
-          const char *col      = "n";
+          std::string_view col      = "n";
           struct char_data *ch = d->character;
           if (getMaxPL(g, ch) > getMaxPLTrans(g, ch))
             col = "g";
@@ -328,7 +328,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
 
         struct char_data *ch = d->character;
         double perc          = ((double)getCurHealth(g, ch) / (double)getMaxPLTrans(g, ch)) * 100;
-        const char *col      = "n";
+        std::string_view col      = "n";
         if (perc > 100)
           col = "g";
         else if (perc >= 70)

@@ -11,6 +11,7 @@
  * every line the transcript has what the client was sent and the state its connection is in; at the end, the
  * account and player files the journey left, and who and what is in the fixture's rooms.
  */
+#include <type_traits>
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -145,7 +146,13 @@ namespace {
   void banned_address(GameWorld *g)
   {
     auto *ban = new ban_list_element();
-    strcpy(ban->site, "127.0.0.1");
+    /* a char array or a std::string, as cmdcompare builds this against trees with either */
+    [](auto &site) {
+      if constexpr (std::is_array_v<std::remove_reference_t<decltype(site)>>)
+        strcpy(site, "127.0.0.1");
+      else
+        site = "127.0.0.1";
+    }(ban->site);
     ban->type   = BAN_ALL;
     ban->next   = g->ban_list;
     g->ban_list = ban;

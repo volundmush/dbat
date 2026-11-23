@@ -123,9 +123,9 @@ const int pulse_current  = 10;
 const int load_into_inventory = false;
 
 /* "okay" etc. */
-const char *const OK       = "Okay.\r\n";
-const char *const NOPERSON = "No-one by that name here.\r\n";
-const char *const NOEFFECT = "Nothing seems to happen.\r\n";
+const std::string_view OK       = "Okay.\r\n";
+const std::string_view NOPERSON = "No-one by that name here.\r\n";
+const std::string_view NOEFFECT = "Nothing seems to happen.\r\n";
 
 /*
  * You can define or not define TRACK_THOUGH_DOORS, depending on whether
@@ -296,20 +296,20 @@ const uint16_t DFLT_PORT = 5001;
  * course, that IP address must be one of your host's interfaces, or it
  * won't work.)
  */
-const char *const DFLT_IP = nullptr; /* bind to all interfaces */
-/* const char *DFLT_IP = "192.168.1.1";  -- bind only to one interface */
+const std::string_view DFLT_IP = ""; /* bind to all interfaces */
+/* const std::string_view DFLT_IP = "192.168.1.1";  -- bind only to one interface */
 
 /* default directory to use as data directory */
-const char *const DFLT_DIR = "data";
+const std::string_view DFLT_DIR = "data";
 
 /*
- * What file to log messages to (ex: "log/syslog").  Setting this to NULL
+ * What file to log messages to (ex: "log/syslog").  Leaving this empty
  * means you want to log to stderr, which was the default in earlier
  * versions of Circle.  If you specify a file, you don't get messages to
  * the screen. (Hint: Try 'tail -f' if you have a UNIX machine.)
  */
-const char *const LOGNAME = nullptr;
-/* const char *LOGNAME = "log/syslog";  -- useful for Windows users */
+const std::string_view LOGNAME = "";
+/* const std::string_view LOGNAME = "log/syslog";  -- useful for Windows users */
 
 /* maximum number of players allowed before game starts to turn people away */
 const int max_playing = 300;
@@ -366,7 +366,7 @@ const int auto_save_olc = 1;
  */
 const int use_new_socials = 1;
 
-const char *const MENU =
+const std::string_view MENU =
     "\r\n"
     "@GWelcome to @YCircleMUD!@n\r\n"
     "@B0@W) @CExit from @YCircleMUD.@n\r\n"
@@ -378,12 +378,12 @@ const char *const MENU =
     "\r\n"
     "   @WMake your choice: @n";
 
-const char *const WELC_MESSG =
+const std::string_view WELC_MESSG =
     "\r\n"
     "Welcome to the land of CircleMUD!  May your visit here be... Interesting."
     "\r\n\r\n";
 
-const char *const START_MESSG =
+const std::string_view START_MESSG =
     "Welcome.  This is your new CircleMUD character!  You can now earn gold,\r\n"
     "gain experience, find weapons and equipment, and much more -- while\r\n"
     "meeting people from around the world!\r\n";

@@ -42,7 +42,7 @@ namespace {
   /* One kind of argument: how it's asked for, why a number won't do, and what of it is kept */
   struct arg_kind {
     void (*ask)(GameWorld *g, struct descriptor_data *d);
-    const char *(*refuse)(GameWorld *g, int n); /* null for none */
+    std::string_view (*refuse)(GameWorld *g, int n); /* none, or the refusal: empty for none */
     int (*keep)(int n);                         /* null to keep it as it is */
   };
 
@@ -50,15 +50,15 @@ namespace {
 
   constexpr arg_kind MOB_VNUM = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Input mob's vnum : "); },
-      [](GameWorld *g, int n) -> const char * { return mob_proto_of(g, n) ? nullptr : "That mobile does not exist, try again : "; },
+      [](GameWorld *g, int n) -> std::string_view { return mob_proto_of(g, n) ? std::string_view() : "That mobile does not exist, try again : "; },
       nullptr};
   constexpr arg_kind OBJ_VNUM = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Input object vnum : "); },
-      [](GameWorld *g, int n) -> const char * { return obj_proto_of(g, n) ? nullptr : "That object does not exist, try again : "; },
+      [](GameWorld *g, int n) -> std::string_view { return obj_proto_of(g, n) ? std::string_view() : "That object does not exist, try again : "; },
       nullptr};
   constexpr arg_kind TRIGGER_TYPE = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Input trigger type (0:mob, 1:obj, 2:room) :"); },
-      [](GameWorld *, int n) -> const char * { return n < MOB_TRIGGER || n > WLD_TRIGGER ? "Invalid input." : nullptr; },
+      [](GameWorld *, int n) -> std::string_view { return n < MOB_TRIGGER || n > WLD_TRIGGER ? "Invalid input." : std::string_view(); },
       nullptr};
   constexpr arg_kind MAX_LOADED = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Input the maximum number that can exist on the mud : "); },
@@ -70,15 +70,15 @@ namespace {
           write_to_output(g, d, "{:d}) Exit {}.\r\n", i, dirs[i]);
         say(g, d, "Enter exit number for door : ");
       },
-      [](GameWorld *, int n) -> const char * { return n < 0 || n > NUM_OF_DIRS ? "Try again : " : nullptr; }, /* quirk: one past the last */
+      [](GameWorld *, int n) -> std::string_view { return n < 0 || n > NUM_OF_DIRS ? "Try again : " : std::string_view(); }, /* quirk: one past the last */
       nullptr};
   constexpr arg_kind REMOVED_VNUM = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Input object's vnum : "); },
-      [](GameWorld *g, int n) -> const char * { return obj_proto_of(g, n) ? nullptr : "That object does not exist, try again : "; },
+      [](GameWorld *g, int n) -> std::string_view { return obj_proto_of(g, n) ? std::string_view() : "That object does not exist, try again : "; },
       nullptr};
   constexpr arg_kind TRIGGER_VNUM = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Enter the trigger VNum : "); },
-      [](GameWorld *g, int n) -> const char * { return find_trigger(g, n) ? nullptr : "That trigger does not exist, try again : "; },
+      [](GameWorld *g, int n) -> std::string_view { return find_trigger(g, n) ? std::string_view() : "That trigger does not exist, try again : "; },
       nullptr};
   constexpr arg_kind CONTEXT = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Global's context (0 for none) : "); },
@@ -94,20 +94,20 @@ namespace {
         }
         say(g, d, "Location to equip : ");
       },
-      [](GameWorld *, int n) -> const char * {
+      [](GameWorld *, int n) -> std::string_view {
         int count = 0;
         while (*equipment_types[count] != '\n')
           count++;
-        return n < 0 || n > count ? "Try again : " : nullptr; /* quirk: one past the last */
+        return n < 0 || n > count ? "Try again : " : std::string_view(); /* quirk: one past the last */
       },
       nullptr};
   constexpr arg_kind CONTAINER = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Virtual number of the container : "); },
-      [](GameWorld *g, int n) -> const char * { return obj_proto_of(g, n) ? nullptr : "That object does not exist, try again : "; },
+      [](GameWorld *g, int n) -> std::string_view { return obj_proto_of(g, n) ? std::string_view() : "That object does not exist, try again : "; },
       nullptr};
   constexpr arg_kind DOOR_STATE = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "0)  Door open\r\n1)  Door closed\r\n2)  Door locked\r\nEnter state of the door : "); },
-      [](GameWorld *, int n) -> const char * { return n < 0 || n > 2 ? "Try again : " : nullptr; },
+      [](GameWorld *, int n) -> std::string_view { return n < 0 || n > 2 ? "Try again : " : std::string_view(); },
       nullptr};
   constexpr arg_kind ROOM_MAX = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Input the max allowed to load from this room (Pressing enter == 0(ignore)) : "); },
@@ -115,7 +115,7 @@ namespace {
       [](int n) { return MIN(MAX_FROM_ROOM, n); }};
   constexpr arg_kind CHANCE = {
       [](GameWorld *g, descriptor_data *d) { say(g, d, "Input the percentage chance of the load NOT occurring : "); },
-      [](GameWorld *, int n) -> const char * { return n < 0 || n > 100 ? "Value must be from 0 to 100" : nullptr; },
+      [](GameWorld *, int n) -> std::string_view { return n < 0 || n > 100 ? "Value must be from 0 to 100" : std::string_view(); },
       nullptr};
 
   /* An argument a command asks for: which of its five, and of what kind */
@@ -158,7 +158,7 @@ namespace {
   int reset_com::*const ARGS[] = {nullptr, &reset_com::arg1, &reset_com::arg2, &reset_com::arg3, &reset_com::arg4, &reset_com::arg5};
 
   /* What a reset command's arg1 says the thing is: a mobile, object or room */
-  const char *attached_to(int type)
+  std::string_view attached_to(int type)
   {
     return type == MOB_TRIGGER ? "mobile" : type == OBJ_TRIGGER ? "object" : type == WLD_TRIGGER ? "room" : "????";
   }
@@ -166,7 +166,7 @@ namespace {
   /* One of the room's reset commands, as the menu lists it */
   void describe(GameWorld *g, struct descriptor_data *d, const reset_com &c)
   {
-    const char *then = c.if_flag ? " then " : "";
+    std::string_view then = c.if_flag ? " then " : "";
     switch (c.command) {
       case 'M':
         write_to_output(g, d, "{}Load {}@y [@c{:d}@y], Max : {:d}, MaxR {:d}, Chance {:d}", then, char_get_sdesc(mob_proto_of(g, c.arg1)),
@@ -403,7 +403,7 @@ namespace {
       return;
     }
     const int n = parse_int(line);
-    if (const char *refused = s.kind->refuse ? s.kind->refuse(g, n) : nullptr) {
+    if (std::string_view refused = s.kind->refuse ? s.kind->refuse(g, n) : std::string_view(); !refused.empty()) {
       write_to_output(g, d, refused);
       return;
     }
@@ -474,14 +474,14 @@ namespace {
     for (int vnum = genolc_zonep_bottom(zone); vnum <= zone->top; vnum++) {
       if (vnum >= bot && vnum <= top)
         continue;
-      const char *what = room_of(g, vnum)                ? "room"
+      std::string_view what = room_of(g, vnum)                ? "room"
                          : mob_proto_of(g, vnum)         ? "mob"
                          : obj_proto_of(g, vnum)         ? "object"
                          : find_trigger(g, vnum)         ? "trigger"
                          : find_shop(g, vnum)            ? "shop"
                          : find_guild(g, vnum)           ? "guild"
-                                                         : nullptr;
-      if (what) {
+                                                         : std::string_view();
+      if (!what.empty()) {
         write_to_output(g, d, "That would leave {} {:d} outside the zone, and the next save would destroy it. Range not changed.\r\n", what, vnum);
         return true;
       }

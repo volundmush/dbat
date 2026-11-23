@@ -18,7 +18,7 @@ namespace {
 
 struct file_kind {
   int mode;
-  const char *directory, *suffix;
+  std::string_view directory, suffix;
 };
 
 constexpr file_kind kinds[] = {
@@ -36,7 +36,7 @@ constexpr file_kind kinds[] = {
 };
 
 /* The directory players are kept in by the first letter of their name */
-const char *bucket(char first)
+std::string_view bucket(char first)
 {
   if (first >= 'a' && first <= 'e')
     return "A-E";

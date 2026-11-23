@@ -43,7 +43,7 @@ struct strike_shot {
 
 struct strike_attack {
   int skill{};                        /* SKILL_ */
-  const char *name{};                 /* as the zanzoken messages name it */
+  std::string_view name{};                 /* as the zanzoken messages name it */
   int damtype{};                      /* damtype()'s number for it */
   int cooldown{};                     /* handle_cooldown() */
   int stamina_share{};                /* the user needs a 1/this share of their max power level in stamina */

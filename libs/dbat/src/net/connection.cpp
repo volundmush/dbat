@@ -23,7 +23,7 @@
 
 int get_max_players(GameWorld *g)
 {
-  constexpr const char *how = "rlimit";
+  constexpr std::string_view how = "rlimit";
   int max_descs             = CONFIG_MAX_PLAYING + NUM_RESERVED_DESCS;
 
   /* the most files the process may have open, raised as far as it goes */
@@ -223,14 +223,14 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
 
 /* Connections idle in one of states: the first time they're found, they're given a tic's grace (and warning, if there
    is one); the next, they're closed */
-static void time_out_idle(GameWorld *g, std::initializer_list<int> states, const char *warning)
+static void time_out_idle(GameWorld *g, std::initializer_list<int> states, std::string_view warning)
 {
   for (descriptor_data *d : each_desc(g)) {
     if (std::ranges::find(states, desc_get_connected(d)) == states.end())
       continue;
     if (!d->idle_tics) {
       d->idle_tics++;
-      if (warning)
+      if (!warning.empty())
         write_to_output(g, d, warning);
       continue;
     }
@@ -239,7 +239,7 @@ static void time_out_idle(GameWorld *g, std::initializer_list<int> states, const
   }
 }
 
-void check_idle_passwords(GameWorld *g) { time_out_idle(g, {CON_PASSWORD, CON_GET_EMAIL, CON_NEWPASSWD}, nullptr); }
+void check_idle_passwords(GameWorld *g) { time_out_idle(g, {CON_PASSWORD, CON_GET_EMAIL, CON_NEWPASSWD}, {}); }
 
 void check_idle_menu(GameWorld *g)
 {

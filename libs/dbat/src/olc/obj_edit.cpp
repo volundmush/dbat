@@ -28,7 +28,7 @@ namespace {
   using step = pobj_order::step;
 
   /* What custom equipment is, by its type */
-  constexpr const char *CUSTOM_TYPES[17] = {"Error",      "Armor Slot", "Gi Slot",   "Wrist Slot", "Ear Slot",  "Finger Slot",
+  static constexpr std::string_view CUSTOM_TYPES[17] = {"Error",      "Armor Slot", "Gi Slot",   "Wrist Slot", "Ear Slot",  "Finger Slot",
                                             "Eye Slot",   "Hands Slot", "Feet Slot", "Belt Slot",  "Legs Slot", "Arms Slot",
                                             "Head Slot",  "Neck Slot",  "Back Slot", "Shoulder Slot", "Weapon"};
 
@@ -38,7 +38,7 @@ namespace {
                                    ITEM_WEAR_HEAD, ITEM_WEAR_NECK, ITEM_WEAR_PACK,  ITEM_WEAR_SH};
 
   /* A custom weapon's kind, and the damage it does */
-  constexpr const char *CUSTOM_WEAPONS[7] = {"Not A Weapon", "Sword", "Dagger", "Spear", "Club", "Gun", "Brawling"};
+  static constexpr std::string_view CUSTOM_WEAPONS[7] = {"Not A Weapon", "Sword", "Dagger", "Spear", "Club", "Gun", "Brawling"};
   constexpr int CUSTOM_DAMAGE[7]          = {0, TYPE_SLASH, TYPE_PIERCE, TYPE_STAB, TYPE_CRUSH, TYPE_BLAST, TYPE_POUND};
 
   constexpr obj_vnum CUSTOM_ARMOR  = 20099;

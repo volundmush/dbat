@@ -55,8 +55,8 @@ struct ki_shot {
 
 struct ki_attack {
   int skill{};                /* SKILL_ */
-  const char *name{};         /* as the zanzoken messages name it */
-  const char *parry_name{};   /* as parry_ki() names it, if not name */
+  std::string_view name{};         /* as the zanzoken messages name it */
+  std::string_view parry_name{};   /* as parry_ki() names it, if not name */
   int damtype{};              /* damtype()'s number for it */
   double attperc{};           /* the share of the charge it uses */
   double minimum{};           /* the least share it can be made with */
@@ -98,12 +98,12 @@ struct ki_attack {
   bool dodge_improves{true}; /* if it scatters, dodging it improves the victim's dodge */
   bool damages_eq{true};     /* a hit damages the equipment where it lands */
   bool limb_eq_first{};      /* quirk: a hit on an arm or a leg damages the equipment there before it hurts */
-  const char *no_objects{};  /* if not null, it can't be aimed at an object, and this says so */
+  std::string_view no_objects{};  /* if not empty, it can't be aimed at an object, and this says so */
   int obj_damtype{};         /* damtype()'s number for it at an object, if not damtype */
   bool multihit{};           /* handle_multihit() after a hit */
   bool needs_free_hand{};    /* not with both hands holding weapons */
   /* told to the room when it is dodged, if not null */
-  const char *dodge_explosion{"@wA bright explosion erupts from the impact!\r\n"};
+  std::string_view dodge_explosion{"@wA bright explosion erupts from the impact!\r\n"}; /* empty for none */
   /* more than one: the attacker pays on the last, or when one leaves the victim down; each after the first is a fifth
    * less likely to land, and only the first checks the victim is up */
   int shots{1};

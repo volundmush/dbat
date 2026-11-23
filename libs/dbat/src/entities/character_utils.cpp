@@ -573,7 +573,7 @@ int64_t incCurKIPercent(GameWorld *g, char_data *ch, double amt, bool limit_max)
 
 int64_t decCurKIPercent(GameWorld *g, char_data *ch, double amt, int64_t floor)
 {
-  if (!strcasecmp(ch->name.c_str(), "Wayland")) {
+  if (str_eq_nocase(until_nul(ch->name), "Wayland")) {
     send_to_char(g, ch, "decCurKIPercent called with: {:f}\r\n", amt);
   }
   double fl = 0.0;
@@ -817,8 +817,8 @@ static void cureStatusPoison(GameWorld *g, char_data *ch, bool announce)
   affect_from_char(g, ch, SPELL_POISON);
 }
 
-static const char *const limb_names[] = {
-    nullptr,
+static constexpr std::string_view limb_names[] = {
+    {},
     "right arm",
     "left arm",
     "right leg",
@@ -1037,13 +1037,13 @@ std::string_view report_party_health(GameWorld *g, struct char_data *ch)
   std::string result4;
   std::string result5;
 
-  const char *plcol[5] = {"@r",
+  static constexpr std::string_view plcol[5] = {"@r",
                           "@y",
                           "@Y",
                           "@G",
                           ""};
 
-  const char *exhaust[9] = {"Exhausted",   /* 0/7 */
+  static constexpr std::string_view exhaust[9] = {"Exhausted",   /* 0/7 */
                             "Strained",    /* 1/7 */
                             "Very Tired",  /* 2/7 */
                             "Tired",       /* 3/7 */
@@ -1053,7 +1053,7 @@ std::string_view report_party_health(GameWorld *g, struct char_data *ch)
                             "Energetic",   /* 7/7 */
                             "?????????"};
 
-  const char *excol[9] = {"@r", /* 0/7 */
+  static constexpr std::string_view excol[9] = {"@r", /* 0/7 */
                           "@R", /* 1/7 */
                           "@R", /* 2/7 */
                           "@M", /* 3/7 */
@@ -2139,7 +2139,7 @@ int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict
   io::line_cursor lines(*file);
   while (!lines.eof()) {
     lines.next();
-    sscanf(lines.line().c_str(), "%d\n", &idnums);
+    io::scan_ints(until_nul(lines.line()), std::span<int>(&idnums, 1));
     if (char_is_npc(vict)) {
       if (idnums == char_get_mob_vnum(g, vict)) {
         known = true;
@@ -2177,7 +2177,7 @@ void sense_memory_write(GameWorld *g, struct char_data *ch, struct char_data *vi
   io::line_cursor lines(*file);
   while (!lines.eof() || idnums.size() < 498) {
     lines.next();
-    sscanf(lines.line().c_str(), "%d\n", &id_sample);
+    io::scan_ints(until_nul(lines.line()), std::span<int>(&id_sample, 1));
     idnums.push_back(id_sample);
   }
 
@@ -2268,7 +2268,7 @@ bool roll_pursue(GameWorld *g, struct char_data *ch, struct char_data *vict)
 
 std::string_view sense_location(GameWorld *g, struct char_data *ch)
 {
-  const char *message = ""; /* a place none of the cases name */
+  std::string_view message = ""; /* a place none of the cases name */
   room_vnum roomnum = char_get_in_room(ch);
   int num           = zone_place(g, find_zone_by_thing(g, roomnum)); /* by place, as when zones were an array */
 
@@ -6809,7 +6809,7 @@ bool race_is_people(int r_id)
 }
 
 /* player_specials of a PC; for an NPC, log which field was wanted (with a backtrace) and return NULL. */
-static struct player_special_data *ps_of(GameWorld *g, const struct char_data *ch, const char *field)
+static struct player_special_data *ps_of(GameWorld *g, const struct char_data *ch, std::string_view field)
 {
   if (ch->player_specials)
     return ch->player_specials.get();
@@ -6823,7 +6823,7 @@ bitvector_t *char_get_pref(GameWorld *g, const struct char_data *ch)
   static bitvector_t none[PR_ARRAY_MAX]; /* NPCs: always reads as "no preferences" */
   struct player_special_data *ps = ps_of(g, ch, "pref");
   if (!ps) {
-    memset(none, 0, sizeof(none));
+    std::ranges::fill(none, 0);
     return none;
   }
   return ps->pref;

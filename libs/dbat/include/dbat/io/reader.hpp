@@ -50,6 +50,9 @@ bool read_raw_line(std::FILE *fl, std::string &raw);
    if the text ran out before the first, as sscanf() says. A number too big for a long is the largest long, as strtol
    gives it, then cut to an int (quirk). */
 int scan_ints(std::string_view text, std::span<int> out);
+/* A range, "<low>-<high>", as sscanf(text, "%d-%d", &low, &high) reads one, up to a '\0' in text: how many of the two
+   it read, setting each it read (0 if there was no number, -1 if there was only space) */
+int scan_range(std::string_view text, int &low, int &high);
 
 /* A number from text as sscanf(text, "%f") reads one into x: 1 if it read one, 0 if the text doesn't start with one,
    -1 (leaving x as it was) if there is only space */

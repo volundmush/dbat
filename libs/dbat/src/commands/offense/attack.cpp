@@ -376,7 +376,7 @@ void fireshield_burns(GameWorld *g, struct char_data *ch, struct char_data *vict
 }
 
 /* Learns skill (at 10 to 15) if it hasn't it, has a slot for it, and may; or else practises it */
-void learn_or_practise(GameWorld *g, struct char_data *ch, int skill, bool may, const char *learnt)
+void learn_or_practise(GameWorld *g, struct char_data *ch, int skill, bool may, std::string_view learnt)
 {
   if (!char_get_skill(ch, skill) && slot_count(ch) + 1 <= char_get_skill_slots(ch) && may) {
     char_set_skills_base(ch, skill, rand_number(g, 10, 15));

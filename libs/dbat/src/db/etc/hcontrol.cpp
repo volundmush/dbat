@@ -36,9 +36,9 @@ namespace {
 constexpr std::string_view hcontrol_header = "# dbat hcontrol 2";
 
 struct house_field {
-  const char *tag;
+  std::string_view tag{};
   bool (*read)(house_control_rec &h, io::fields &f);
-  void (*write)(const house_control_rec &h, io::text_writer &out, const char *tag);
+  void (*write)(const house_control_rec &h, io::text_writer &out, std::string_view tag);
 };
 
 template <class T> bool read_number(T &field, io::fields &f)
@@ -50,7 +50,7 @@ template <class T> bool read_number(T &field, io::fields &f)
   return true;
 }
 
-template <class T> void write_number(io::text_writer &out, const char *tag, T value)
+template <class T> void write_number(io::text_writer &out, std::string_view tag, T value)
 {
   out.print("{}: {:d}\n", tag, static_cast<long long>(value));
 }
@@ -62,14 +62,14 @@ long *spares(house_control_rec &h, int i)
 }
 
 const house_field house_fields[] = {
-    {"Atrium", [](house_control_rec &h, io::fields &f) { return read_number(h.atrium, f); }, [](const house_control_rec &h, io::text_writer &o, const char *t) { write_number(o, t, h.atrium); }},
-    {"Exit", [](house_control_rec &h, io::fields &f) { return read_number(h.exit_num, f); }, [](const house_control_rec &h, io::text_writer &o, const char *t) { write_number(o, t, h.exit_num); }},
-    {"Built", [](house_control_rec &h, io::fields &f) { return read_number(h.built_on, f); }, [](const house_control_rec &h, io::text_writer &o, const char *t) { write_number(o, t, h.built_on); }},
-    {"Mode", [](house_control_rec &h, io::fields &f) { return read_number(h.mode, f); }, [](const house_control_rec &h, io::text_writer &o, const char *t) { write_number(o, t, h.mode); }},
-    {"Owner", [](house_control_rec &h, io::fields &f) { return read_number(h.owner, f); }, [](const house_control_rec &h, io::text_writer &o, const char *t) { write_number(o, t, h.owner); }},
-    {"Paid", [](house_control_rec &h, io::fields &f) { return read_number(h.last_payment, f); }, [](const house_control_rec &h, io::text_writer &o, const char *t) { write_number(o, t, h.last_payment); }},
-    {"Bits", [](house_control_rec &h, io::fields &f) { return read_number(h.bitvector, f); }, [](const house_control_rec &h, io::text_writer &o, const char *t) { write_number(o, t, h.bitvector); }},
-    {"BuiltBy", [](house_control_rec &h, io::fields &f) { return read_number(h.builtby, f); }, [](const house_control_rec &h, io::text_writer &o, const char *t) { write_number(o, t, h.builtby); }},
+    {"Atrium", [](house_control_rec &h, io::fields &f) { return read_number(h.atrium, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.atrium); }},
+    {"Exit", [](house_control_rec &h, io::fields &f) { return read_number(h.exit_num, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.exit_num); }},
+    {"Built", [](house_control_rec &h, io::fields &f) { return read_number(h.built_on, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.built_on); }},
+    {"Mode", [](house_control_rec &h, io::fields &f) { return read_number(h.mode, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.mode); }},
+    {"Owner", [](house_control_rec &h, io::fields &f) { return read_number(h.owner, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.owner); }},
+    {"Paid", [](house_control_rec &h, io::fields &f) { return read_number(h.last_payment, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.last_payment); }},
+    {"Bits", [](house_control_rec &h, io::fields &f) { return read_number(h.bitvector, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.bitvector); }},
+    {"BuiltBy", [](house_control_rec &h, io::fields &f) { return read_number(h.builtby, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.builtby); }},
     {"Guests",
      [](house_control_rec &h, io::fields &f) {
        h.num_of_guests = 0;
@@ -80,7 +80,7 @@ const house_field house_fields[] = {
        }
        return f.rest().find_first_not_of(" \t") == std::string_view::npos;
      },
-     [](const house_control_rec &h, io::text_writer &o, const char *t) {
+     [](const house_control_rec &h, io::text_writer &o, std::string_view t) {
        o.print("{}:", t);
        for (int i = 0; i < h.num_of_guests; i++)
          o.print(" {:d}", h.guests[i]);
@@ -93,7 +93,7 @@ const house_field house_fields[] = {
            return false;
        return true;
      },
-     [](const house_control_rec &h, io::text_writer &o, const char *t) {
+     [](const house_control_rec &h, io::text_writer &o, std::string_view t) {
        house_control_rec copy = h;
        bool any               = false;
        for (int i = 0; i < 6; i++)

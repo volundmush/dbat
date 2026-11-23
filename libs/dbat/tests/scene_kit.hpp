@@ -1,5 +1,6 @@
 #pragma once
 /* What the scenes of test_techniques share: the helpers that set them up, and the scene itself. */
+#include <type_traits>
 #include <cstdio>
 #include <span>
 #include <vector>
@@ -192,11 +193,21 @@ inline struct obj_data *to_lift(GameWorld *g, struct char_data *att, int64_t wei
   return obj;
 }
 
+/* Whether a table's name is set: a pointer that isn't null, or a view that isn't empty (cmdcompare builds these tests
+   against trees with either) */
+template <class T> bool name_set(const T &name)
+{
+  if constexpr (std::is_pointer_v<T>)
+    return name != nullptr;
+  else
+    return !name.empty();
+}
+
 /* att is under a lasting effect of the skill of this name */
 inline void lasting(GameWorld *g, struct char_data *att, const char *skill)
 {
   for (int i = 0; i < SKILL_TABLE_SIZE; i++)
-    if (g->spell_info[i].name && str_eq_nocase(skill_name(g, i), skill)) {
+    if (name_set(g->spell_info[i].name) && str_eq_nocase(skill_name(g, i), skill)) {
       assign_affect(g, att, AFF_INFUSE, i, 5, 0, 0, 0, 0, 0, 0);
       return;
     }

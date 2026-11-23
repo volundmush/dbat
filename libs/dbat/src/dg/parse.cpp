@@ -107,7 +107,7 @@ private:
   void check_wait(const line &l)
   {
     std::string_view s = l.body();
-    if (s.size() < 5 || strncasecmp(s.data(), "wait ", 5) || s.find('%') != std::string_view::npos)
+    if (s.size() < 5 || compare_nocase_n(s, "wait ", 5) || s.find('%') != std::string_view::npos)
       return;
     if (!readable_wait(skip_spaces(s.substr(5))))
       error(at_, "'wait' needs a time it can read, such as 'wait 5 s' or 'wait until 14:30'");

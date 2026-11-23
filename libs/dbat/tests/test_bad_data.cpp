@@ -954,6 +954,30 @@ static void check_auction_list_leaves_player_names_alone(void)
   th_shutdown(g);
 }
 
+/* io::scan_range() reads "<low>-<high>" as sscanf("%d-%d") does: the count, and each number it read */
+static void check_scan_range(void)
+{
+  for (const char *text : {"", " ", "5", "5-", "5-9", " 5 - 9", "5 -9", "5- 9", "-5--9", "+5-+9", "-", "5x9", "x", "5-x",
+                           "99999999999-1", "1-99999999999", "7-8-9", "\t3-\n4"}) {
+    int low = 111, high = 222, old_low = 111, old_high = 222;
+    int read     = io::scan_range(text, low, high);
+    int expected = sscanf(text, "%d-%d", &old_low, &old_high);
+    CHECK(read == expected);
+    CHECK(low == old_low);
+    CHECK(high == old_high);
+  }
+}
+
+/* asctime_text() writes a time as asctime() did, less its newline: the day padded with a space, the rest with zeros */
+static void check_asctime_text(void)
+{
+  for (time_t when : std::initializer_list<time_t>{0, 86399, 951782400, 1700000000, 1798761599, 4102444800}) {
+    std::string expected = asctime(localtime(&when));
+    expected.pop_back();
+    CHECK(asctime_text(when) == expected);
+  }
+}
+
 /* add_commas() groups the digits in threes, even for the longest numbers, which overflowed its buffer */
 static void check_add_commas(void)
 {
@@ -1883,6 +1907,32 @@ static void check_guild_with_no_customers(void)
     SET_BIT_AR(guild_get_with_who(gild), i);
   th_type(g, ch, show.c_str());
   CHECK(saw(ch, "Whom will train: \r\n"));
+  CHECK_AUDIT(g);
+  th_shutdown(g);
+}
+
+/* A guildmaster's own special procedure is given what was typed, where it was given a buffer that was never filled */
+static std::string guildmaster_heard;
+static SPECIAL(record_argument)
+{
+  guildmaster_heard = argument;
+  return false;
+}
+
+static void check_guildmaster_special_hears_the_command(void)
+{
+  GameWorld *g            = th_boot();
+  struct char_data *ch    = th_player(g, "Pupil", ADMLVL_NONE);
+  struct guild_data *gild = find_first(g->guilds.all(), [&](guild_data *gd) { return mob_proto_of(g, guild_get_gm(gd)) != nullptr; });
+
+  CHECK(gild != nullptr);
+  struct char_data *gm = read_mobile(g, guild_get_gm(gild));
+  char_to_room(g, gm, char_get_in_room(ch));
+  mob_index_of(g, guild_get_gm(gild))->func = guild;
+  guild_set_func(gild, record_argument);
+  guildmaster_heard = "nothing yet";
+  th_type(g, ch, "say hello there");
+  CHECK(guildmaster_heard == " hello there"); /* the rest of the line, as every special is given it */
   CHECK_AUDIT(g);
   th_shutdown(g);
 }
@@ -2923,6 +2973,9 @@ static const struct {
     {"message_ending_in_a_backslash",               check_message_ending_in_a_backslash              },
     {"text_field_of_self",                          check_text_field_of_self                         },
     {"add_commas",                                  check_add_commas                                 },
+    {"asctime_text",                                check_asctime_text                               },
+    {"guildmaster_special_hears_the_command",       check_guildmaster_special_hears_the_command      },
+    {"scan_range",                                  check_scan_range                                 },
     {"auction_list_leaves_player_names_alone",      check_auction_list_leaves_player_names_alone     },
     {"args_match_the_old_parsers",                  check_args_match_the_old_parsers                 },
     {"name_matching_matches_the_old_code",          check_name_matching_matches_the_old_code         },

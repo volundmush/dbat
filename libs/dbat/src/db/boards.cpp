@@ -49,7 +49,7 @@ static const struct special_board {
   int lboard;                /* index into char lboard[] */
   time_t GameWorld::*newest; /* where in GameWorld the time of the newest post is kept */
   bool admin_only;           /* announce to admins only */
-  const char *label;
+  std::string_view label{};
 } special_boards[] = {
     {3092, 0, &GameWorld::BOARDNEWMORT, false, "Mortal"    },
     {3098, 1, &GameWorld::BOARDNEWIMM,  true,  "Immortal"  },
@@ -207,7 +207,7 @@ static struct board_msg *nth_message(struct board_info *board, int n, bool from_
   return msg;
 }
 
-static struct board_msg *new_message(GameWorld *g, struct char_data *ch, const char *subject)
+static struct board_msg *new_message(GameWorld *g, struct char_data *ch, std::string_view subject)
 {
   struct board_msg *msg;
 
@@ -216,15 +216,6 @@ static struct board_msg *new_message(GameWorld *g, struct char_data *ch, const c
   msg->timestamp = game_now(g);
   msg->subject   = subject;
   return msg;
-}
-
-/* asctime() without its trailing newline; points into asctime's static buffer. */
-static char *board_time_str(const time_t *when)
-{
-  char *str = asctime(localtime(when));
-
-  str[strlen(str) - 1] = '\0';
-  return str;
 }
 
 static bool has_read(GameWorld *g, struct board_info *board, const struct board_msg *msg, struct char_data *ch)
@@ -415,14 +406,9 @@ static io::loaded<struct board_info *> load_board(GameWorld *g, obj_vnum board_v
   return board;
 }
 
-static bool is_number_name(const char *name)
+static bool is_number_name(std::string_view name)
 {
-  if (!*name)
-    return false;
-  for (; *name; name++)
-    if (!isdigit((unsigned char)*name))
-      return false;
-  return true;
+  return !name.empty() && std::ranges::all_of(name, [](unsigned char c) { return isdigit(c) != 0; });
 }
 
 void init_boards(GameWorld *g)
@@ -440,9 +426,9 @@ void init_boards(GameWorld *g)
 
   /* board files are named by vnum; skip ".cvsignore" and anything else */
   for (const std::string &name : *names) {
-    if (!is_number_name(name.c_str()))
+    if (!is_number_name(until_nul(name)))
       continue;
-    io::loaded<struct board_info *> board = load_board(g, atoi(name.c_str()));
+    io::loaded<struct board_info *> board = load_board(g, parse_int(name));
     if (!board) {
       mud_log("SYSERR: {}", board.error().text());
       exit(1);
@@ -611,7 +597,7 @@ void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch)
 
   for (struct board_msg *msg = nth_message(board, 1, oldest_first); msg; msg = oldest_first ? msg->prev : msg->next) {
     name = msg->name;
-    send_to_char(g, ch, "@D[{}] (@C{:>2d}@D) : @W{:>6.10} @D(@G{:<10}@D) ::@w {:<45}\r\n", has_read(g, board, msg, ch) ? "@GX@D" : "@RX@D", ++count, board_time_str(&msg->timestamp), CAP(name), msg->subject);
+    send_to_char(g, ch, "@D[{}] (@C{:>2d}@D) : @W{:>6.10} @D(@G{:<10}@D) ::@w {:<45}\r\n", has_read(g, board, msg, ch) ? "@GX@D" : "@RX@D", ++count, asctime_text(msg->timestamp), CAP(name), msg->subject);
   }
   send_to_char(g, ch, "@rO@b============================================================================@rO@n\n");
 
@@ -660,7 +646,7 @@ void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, 
   name = msg->name;
   send_to_char(g, ch, "@r_____________________________________________________________________________@n\r\n\r\n@gMessage @W[@Y{:>2d}@W] @D: @c{:>6.10} @D(@C{}@D)\r\n@GTopic        @D: @w{}\r\n@r-------------------------------------------------------------------------@n\r\n\r\n{}\n@r_____________________________________________________________________________@n\r\n",
                arg,
-               board_time_str(&msg->timestamp),
+               asctime_text(msg->timestamp),
                CAP(name),
                msg->subject,
                !msg->data.empty() ? msg->data.c_str() : "Looks like this message is empty.");

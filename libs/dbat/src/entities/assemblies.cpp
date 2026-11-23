@@ -5,6 +5,7 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
+#include <algorithm>
 #include <cctype>
 #include <optional>
 #include <string>
@@ -295,10 +296,10 @@ bool assemblyCreate(GameWorld *g, obj_vnum lVnum, int iAssembledType)
     pNewAssemblyTable = new ASSEMBLY[g->g_lNumAssemblies + 1]();
 
     if (lMiddle > 0)
-      memmove(pNewAssemblyTable, g->g_pAssemblyTable, lMiddle * sizeof(ASSEMBLY));
+      std::copy_n(g->g_pAssemblyTable, lMiddle, pNewAssemblyTable);
 
     if (lMiddle <= g->g_lNumAssemblies - 1)
-      memmove(pNewAssemblyTable + lMiddle + 1, g->g_pAssemblyTable + lMiddle, (g->g_lNumAssemblies - lMiddle) * sizeof(ASSEMBLY));
+      std::copy_n(g->g_pAssemblyTable + lMiddle, g->g_lNumAssemblies - lMiddle, pNewAssemblyTable + lMiddle + 1);
 
     delete[] g->g_pAssemblyTable;
     g->g_pAssemblyTable = pNewAssemblyTable;
@@ -333,11 +334,11 @@ bool assemblyDestroy(GameWorld *g, obj_vnum lVnum)
 
     /* Copy all assemblies before the one removed into the new table. */
     if (lIndex > 0)
-      memmove(pNewAssemblyTable, g->g_pAssemblyTable, lIndex * sizeof(ASSEMBLY));
+      std::copy_n(g->g_pAssemblyTable, lIndex, pNewAssemblyTable);
 
     /* Copy all assemblies after the one removed into the new table. */
     if (lIndex < g->g_lNumAssemblies - 1) {
-      memmove(pNewAssemblyTable + lIndex, g->g_pAssemblyTable + lIndex + 1, (g->g_lNumAssemblies - lIndex - 1) * sizeof(ASSEMBLY));
+      std::copy_n(g->g_pAssemblyTable + lIndex + 1, g->g_lNumAssemblies - lIndex - 1, pNewAssemblyTable + lIndex);
     }
   }
 

@@ -478,7 +478,7 @@ ACMD(do_srepair)
 namespace {
   /* What upgrade and augment can raise */
   struct upgradable {
-    const char *name;
+    std::string_view name{};
     int cost;                 /* in upgrade points, per upgrade */
     std::array<int, 7> bonus; /* per upgrade, times the level, by UPGRADE_TIERS */
     int64_t (*gain)(char_data *, int64_t, bool);
@@ -589,7 +589,7 @@ ACMD(do_upgrade)
 
 namespace {
   /* Why a majin of ch's level and appetite can't ingest vict, if they can't */
-  const char *cannot_ingest(GameWorld *g, struct char_data *ch, struct char_data *vict)
+  std::string_view cannot_ingest(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
     int level = char_get_level(ch), absorbs = char_get_absorbs(ch);
     if (absorbs > 3)
@@ -602,7 +602,7 @@ namespace {
       return "You are too weak to ingest them into your body!\r\n";
     if (char_aff_flagged(vict, AFF_SANCTUARY))
       return "You can't ingest them, they have a barrier!\r\n";
-    return nullptr;
+    return {};
   }
 
   /* What ingesting vict changes about ch's looks: one thing, each in turn a one in three chance */
@@ -658,7 +658,7 @@ ACMD(do_ingest)
     send_to_char(g, ch, "{} is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
     return;
   }
-  if (const char *why = cannot_ingest(g, ch, vict)) {
+  if (std::string_view why = cannot_ingest(g, ch, vict); !why.empty()) {
     send_to_char(g, ch, why);
     return;
   }
@@ -752,7 +752,7 @@ ACMD(do_plant)
 
 namespace {
   /* Why obj can't be forged, if it can't */
-  const char *unforgeable(GameWorld *g, struct obj_data *obj)
+  std::string_view unforgeable(GameWorld *g, struct obj_data *obj)
   {
     obj_vnum vnum = obj_get_vnum(g, obj);
     if (vnum >= 60000 || vnum == 0)
@@ -761,7 +761,7 @@ namespace {
       return "You can not make a forgery of that!\r\n";
     if (obj_extra_flagged(obj, ITEM_PROTECTED))
       return "You don't know where to begin with this work of ART.\r\n";
-    return nullptr;
+    return {};
   }
 
   /* The first of ch's kits of this number that's neither broken nor fake */
@@ -802,7 +802,7 @@ ACMD(do_forgery)
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
-  if (const char *why = unforgeable(g, original)) {
+  if (std::string_view why = unforgeable(g, original); !why.empty()) {
     send_to_char(g, ch, why);
     return;
   }
@@ -841,7 +841,7 @@ ACMD(do_forgery)
 namespace {
   constexpr struct {
     int flag;
-    const char *line;
+    std::string_view line{};
   } WEAPON_LEVELS[] = {
       {ITEM_WEAPLVL1, "Weapon Level: 1\nDamage Bonus: 5%\r\n"},  {ITEM_WEAPLVL2, "Weapon Level: 2\nDamage Bonus: 10%\r\n"},
       {ITEM_WEAPLVL3, "Weapon Level: 3\nDamage Bonus: 20%\r\n"}, {ITEM_WEAPLVL4, "Weapon Level: 4\nDamage Bonus: 30%\r\n"},
@@ -849,14 +849,14 @@ namespace {
   };
 
   /* How full obj's token slots are, if it has any; quirk: two filled slots show nothing */
-  const char *token_slots(struct obj_data *obj)
+  std::string_view token_slots(struct obj_data *obj)
   {
     bool filled = obj_extra_flagged(obj, ITEM_SLOTS_FILLED);
     if (obj_extra_flagged(obj, ITEM_SLOT1))
       return filled ? "Token Slots  : @m1/1@n\n" : "Token Slots  : @m0/1@n\n";
     if (obj_extra_flagged(obj, ITEM_SLOT2) && !filled)
       return obj_extra_flagged(obj, ITEM_SLOT_ONE) ? "Token Slots  : @m1/2@n\n" : "Token Slots  : @m0/2@n\n";
-    return nullptr;
+    return {};
   }
 
   /* The bonuses obj gives, as appraise lists them after "Bonuses:" */
@@ -901,7 +901,7 @@ ACMD(do_appraise)
   act(g, "@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, nullptr, TO_ROOM);
   improve_skill(g, ch, SKILL_APPRAISE, 1);
   /* what's said of it instead, either side of its name, and how ch looks */
-  const char *before = "", *after = nullptr;
+  std::string_view before = "", after; /* after: none, if it is looked at as usual */
   std::string_view look;
   if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(g, -10)) {
     before = "You fail to perceive the worth of ";
@@ -914,7 +914,7 @@ ACMD(do_appraise)
     after = " is fake and worthless!";
     look  = "@c$n@w looks at $p with an angry face.@n";
   }
-  if (after) {
+  if (!after.empty()) {
     send_to_char(g, ch, "{}{}{}\r\n", before, obj_get_short_description(obj), after);
     act(g, look, true, ch, obj, nullptr, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
@@ -930,7 +930,7 @@ ACMD(do_appraise)
       send_to_char(g, ch, level->line);
   }
   send_to_char(g, ch, "Size: {}\r\n", size_names[obj_get_size(obj)]);
-  if (const char *slots = token_slots(obj))
+  if (std::string_view slots = token_slots(obj); !slots.empty())
     send_to_char(g, ch, slots);
   send_to_char(g, ch, "Bonuses:");
   act(g, "@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -1059,7 +1059,7 @@ ACMD(do_use)
     return;
   }
 
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (subcmd == SCMD_QUAFF) {
     if (obj_get_type_flag(mag_item) != ITEM_POTION)
       refusal = "You can only swallow beans.\r\n";
@@ -1080,7 +1080,7 @@ ACMD(do_use)
       return;
     }
   }
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -1194,7 +1194,7 @@ ACMD(do_break)
 
 namespace {
   /* Why obj can't be fixed, if it can't */
-  const char *unfixable(struct obj_data *obj)
+  std::string_view unfixable(struct obj_data *obj)
   {
     if (obj_get_value(obj, VAL_ALL_HEALTH) >= 100)
       return "But it isn't even damaged!\r\n";
@@ -1207,7 +1207,7 @@ namespace {
       case MATERIAL_LIQUID:
         return "You can't repair that.\r\n";
     }
-    return nullptr;
+    return {};
   }
 
   /* fix (obj), with a repair kit */
@@ -1296,7 +1296,7 @@ ACMD(do_fix)
       send_to_char(g, ch, "Can't seem to find what you want to fix!\r\n");
       return;
     }
-    if (const char *why = unfixable(obj)) {
+    if (std::string_view why = unfixable(obj); !why.empty()) {
       send_to_char(g, ch, why);
       return;
     }

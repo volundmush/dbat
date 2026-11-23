@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <vector>
 
 #include "dbat/config.hpp"
 #include "dbat/comm.hpp"
@@ -28,15 +29,10 @@
 
 namespace {
 
-void log_audit_problem(void *, const char *problem)
-{
-  mud_log("SYSERR: World audit: {}", problem);
-}
-
 /* What the options decide that isn't kept on the game */
 struct launch {
   GameWorld *g;
-  const char *program; /* as it was run, for -h */
+  std::string_view program; /* as it was run, for -h */
   std::string dir;     /* the data directory */
 };
 
@@ -48,11 +44,11 @@ struct option {
     value,    /* "-dlib" or "-d lib" */
     attached, /* only "-C5" */
   } takes;
-  const char *missing; /* what to say, before exiting, if a value it takes isn't there; nullptr carries on */
+  std::string_view missing; /* what to say, before exiting, if a value it takes isn't there; empty carries on */
   void (*apply)(launch &l, std::string_view value);
 };
 
-void print_usage(const char *program)
+void print_usage(std::string_view program)
 {
   /* From: Anil Mahajan <amahajan@proxicom.com> */
   file_print(stdout, "Usage: {} [-c] [-m] [-x] [-q] [-r] [-s] [-d pathname] [port #]\n"
@@ -72,52 +68,52 @@ void print_usage(const char *program)
 
 using arity = option::arity;
 const option OPTIONS[] = {
-    {'f', arity::value, nullptr, [](launch &, std::string_view) {}}, /* read before the configuration is loaded */
+    {'f', arity::value, {}, [](launch &, std::string_view) {}}, /* read before the configuration is loaded */
     {'o', arity::value, "SYSERR: File name to log to expected after option -o.",
      [](launch &l, std::string_view file) {
        GameWorld *g   = l.g; /* for CONFIG_LOGNAME */
        CONFIG_LOGNAME = file;
      }},
     /* recover from copyover: this is the control socket */
-    {'C', arity::attached, nullptr,
+    {'C', arity::attached, {},
      [](launch &l, std::string_view socket) {
        l.g->fCopyOver = true;
        l.g->listener  = net::socket(static_cast<int>(io::c_atol(socket)));
      }},
     {'d', arity::value, "SYSERR: Directory arg expected after option -d.", [](launch &l, std::string_view dir) { l.dir = dir; }},
-    {'m', arity::nothing, nullptr,
+    {'m', arity::nothing, {},
      [](launch &l, std::string_view) {
        l.g->mini_mud      = 1;
        l.g->no_rent_check = 1;
        std::puts("Running in minimized mode & with no rent check.");
      }},
-    {'c', arity::nothing, nullptr,
+    {'c', arity::nothing, {},
      [](launch &l, std::string_view) {
        l.g->scheck = 1;
        std::puts("Syntax check mode enabled.");
      }},
-    {'q', arity::nothing, nullptr,
+    {'q', arity::nothing, {},
      [](launch &l, std::string_view) {
        l.g->no_rent_check = 1;
        std::puts("Quick boot mode -- rent check supressed.");
      }},
-    {'r', arity::nothing, nullptr,
+    {'r', arity::nothing, {},
      [](launch &l, std::string_view) {
        l.g->circle_restrict = 1;
        std::puts("Restricting game -- no new players allowed.");
      }},
-    {'s', arity::nothing, nullptr,
+    {'s', arity::nothing, {},
      [](launch &l, std::string_view) {
        l.g->no_specials = 1;
        std::puts("Suppressing assignment of special routines.");
      }},
     /* before there's a log, so this says only that it can't be logged (quirk) */
-    {'x', arity::nothing, nullptr,
+    {'x', arity::nothing, {},
      [](launch &l, std::string_view) {
        l.g->xap_objs = 1;
        mud_log("Loading player objects from secondary (ascii) files.");
      }},
-    {'h', arity::nothing, nullptr,
+    {'h', arity::nothing, {},
      [](launch &l, std::string_view) {
        print_usage(l.program);
        std::exit(0);
@@ -137,7 +133,7 @@ const option *option_for(std::string_view arg)
 
 /* The value of the option at args[pos] ("-dlib", or "-d lib", moving pos on to "lib"), or nothing if it ends the
    arguments, which exits if the option says to */
-std::string_view value_of(std::span<char *> args, size_t &pos, const option &o)
+std::string_view value_of(std::span<const std::string_view> args, size_t &pos, const option &o)
 {
   std::string_view arg = args[pos];
 
@@ -145,8 +141,8 @@ std::string_view value_of(std::span<char *> args, size_t &pos, const option &o)
     return arg.substr(2);
   if (++pos < args.size())
     return args[pos];
-  if (o.missing) {
-    std::puts(o.missing);
+  if (!o.missing.empty()) {
+    file_print(stdout, "{}\n", o.missing); /* as puts() wrote it */
     std::exit(1);
   }
   return {};
@@ -161,7 +157,7 @@ bool is_option(std::string_view arg) { return arg.starts_with('-'); }
  * So -f is read first, from the options before the port. This pass knows no other option, so it takes the value of
  * one such as "-d lib" for the port and stops there (quirk): "-d lib -f my.cfg" uses the default configuration.
  */
-void read_config_option(GameWorld *g, std::span<char *> args)
+void read_config_option(GameWorld *g, std::span<const std::string_view> args)
 {
   for (size_t pos = 1; pos < args.size() && is_option(args[pos]); pos++) {
     std::string_view arg = args[pos];
@@ -180,7 +176,7 @@ void read_config_option(GameWorld *g, std::span<char *> args)
 }
 
 /* The options, then the port if there is one */
-void read_options(std::span<char *> args, launch &l)
+void read_options(std::span<const std::string_view> args, launch &l)
 {
   size_t pos = 1;
 
@@ -215,7 +211,7 @@ void read_options(std::span<char *> args, launch &l)
 
 int main(int argc, char **argv)
 {
-  std::span<char *> args(argv, argc);
+  const std::vector<std::string_view> args(argv, argv + argc); /* the C strings the system gives, as views */
   std::error_code error;
   GameWorld *g = game_world_create();
 
@@ -256,7 +252,7 @@ int main(int argc, char **argv)
 
   if (g->scheck) {
     boot_world(g);
-    world_audit(g, log_audit_problem, nullptr);
+    world_audit(g, [](std::string_view problem) { mud_log("SYSERR: World audit: {}", problem); });
   } else {
     mud_log("Running game on port {:d}.", g->port);
     init_game(g, g->port);

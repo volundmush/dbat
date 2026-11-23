@@ -165,7 +165,7 @@ ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge,
       }
       pcost(g, s.vict, 0, getEffMaxPL(g, s.vict) / 200);
       if (atk.parry_returns)
-        parry_ki(g, s.attperc, s.ch, s.vict, atk.parry_name ? atk.parry_name : atk.name, prob, perc, s.skill,
+        parry_ki(g, s.attperc, s.ch, s.vict, or_if_empty(atk.parry_name, atk.name), prob, perc, s.skill,
                  atk.damtype);
       pay_if(ki_outcome::blocked);
       if (atk.guided) {
@@ -191,7 +191,7 @@ ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge,
     if (avoids(dge)) {
       ki_act(s, atk.dodge);
       if (atk.dodge_scatters) {
-        if (atk.dodge_explosion)
+        if (!atk.dodge_explosion.empty())
           send_to_room(g, char_get_in_room(s.vict), atk.dodge_explosion);
         dodge_ki(g, s.ch, s.vict, atk.dodge_kind, dodge_damtype(atk), s.skill, atk.skill);
         room_vnum here = char_get_in_room(s.ch);
@@ -299,7 +299,7 @@ void at_object(ki_shot &s)
 {
   GameWorld *g = s.g;
 
-  if (s.attack->no_objects) {
+  if (!s.attack->no_objects.empty()) {
     send_to_char(g, s.ch, s.attack->no_objects);
     return;
   }

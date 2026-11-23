@@ -6,7 +6,6 @@ struct index_data {
   int number{};    /* number of existing units of this mob/obj	*/
   SPECIAL(*func){};
 
-  char *farg{};              /* string argument for special function     */
   struct trig_data *proto{}; /* for triggers... the trigger     */
 };
 

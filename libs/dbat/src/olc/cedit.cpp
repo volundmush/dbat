@@ -29,6 +29,7 @@
 #include "dbat/stringutils.hpp"
 #include "dbat/io/writer.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/olc/commands.hpp"
 
 /*
@@ -57,18 +58,18 @@ template <class T> using config_field = T &(*)(struct config_data &);
 using any_config_field                = std::variant<config_field<int>, config_field<uint16_t>, config_field<float>, config_field<std::string>>;
 
 struct cedit_option {
-  const char *key{};     /* config file key */
-  const char *comment{}; /* comment lines written before it in the file, or NULL */
+  std::string_view key{};     /* config file key */
+  std::string_view comment{}; /* comment lines written before it in the file, if any */
   enum cedit_type type{};
   any_config_field field; /* of the type its cedit_type says */
-  const char *section{};  /* starts this section of the file */
+  std::string_view section{};  /* starts this section of the file */
   unsigned flags{};
   int min{}, max{};      /* with CO_RANGE */
   char menu{}, choice{}; /* the submenu (its main menu key) and the key in it; 0 if not edited */
-  const char *label{};   /* menu text, padded, before the ": " */
-  const char *suffix{};  /* menu text after the value */
-  const char *prompt{};
-  const char *note{}; /* sent after it is toggled */
+  std::string_view label{};   /* menu text, padded, before the ": " */
+  std::string_view suffix{};  /* menu text after the value */
+  std::string_view prompt{};
+  std::string_view note{}; /* sent after it is toggled */
 
   /* The option in c, as the type it is */
   template <class T> T &in(struct config_data &c) const { return std::get<config_field<T>>(field)(c); }
@@ -193,9 +194,9 @@ static const struct cedit_option cedit_options[] = {
      "* donate. Use -1 for 'no such room'.\n",
      ROOM(room_nums.donation_room_1), .flags = CO_NOBLANK, MENU('R', '1', "Donation Room #1    "),
      .prompt = "Enter the vnum for donation room #1 : "},
-    {.key = "donation_room_2", .comment = nullptr, ROOM(room_nums.donation_room_2), .flags = CO_NOBLANK,
+    {.key = "donation_room_2", .comment = {}, ROOM(room_nums.donation_room_2), .flags = CO_NOBLANK,
      MENU('R', '2', "Donation Room #2    "), .prompt = "Enter the vnum for donation room #2 : "},
-    {.key = "donation_room_3", .comment = nullptr, ROOM(room_nums.donation_room_3),
+    {.key = "donation_room_3", .comment = {}, ROOM(room_nums.donation_room_3),
      MENU('R', '3', "Donation Room #3    "), .prompt = "Enter the vnum for donation room #3 : "},
 
     /* Game operation options: menu O */
@@ -314,7 +315,7 @@ io::loaded<void> config_load_option(GameWorld *g, std::string_view tag, std::str
 {
   const struct cedit_option *o = option_keyed(tag);
   if (!o) {
-    for (const char *old : {"auto_level", "immort_level_ok"})
+    for (std::string_view old : {"auto_level", "immort_level_ok"})
       if (str_eq_nocase(tag, old))
         mud_log("Ignoring obsolete config option {}", old);
     return {};
@@ -364,12 +365,12 @@ bool save_config(GameWorld *g, struct zone_data *)
   struct config_data &c = g->config_info;
   bool first            = true;
   for (const cedit_option &o : cedit_options) {
-    if (o.section)
+    if (!o.section.empty())
       out.print("{}* [ {} ]\n", first ? "" : "\n\n\n", o.section);
     first = false;
     if (o.is_string() && o.in<std::string>(c).empty())
       continue;
-    if (o.comment)
+    if (!o.comment.empty())
       out.write(o.comment);
 
     switch (o.type) {
@@ -481,7 +482,7 @@ namespace {
     if (o.type == CT_TEXT)
       write_to_output(g, d, "@W{:c}@B) @C{}: \r\n@n{}@n\r\n", as_char(o.choice), o.label, value);
     else /* a message ends in its own newline */
-      write_to_output(g, d, "@W{:c}@B) @C{}: @c{}{}{}", as_char(o.choice), o.label, value, o.suffix ? o.suffix : "",
+      write_to_output(g, d, "@W{:c}@B) @C{}: @c{}{}{}", as_char(o.choice), o.label, value, o.suffix,
                       o.type == CT_MSG ? "" : "\r\n");
   }
 
@@ -523,14 +524,22 @@ namespace {
   }
 
   /* An integer, with trailing spaces only */
-  std::optional<int> whole_number(const std::string &text)
+  std::optional<int> whole_number(const std::string &typed)
   {
-    char *end;
-    errno           = 0;
-    const long read = strtol(text.c_str(), &end, 10);
-    while (isspace(*end))
-      end++;
-    if (end == text.c_str() || *end || errno || read < INT_MIN || read > INT_MAX)
+    std::string_view text = until_nul(typed); /* as strtol() read it */
+    size_t at             = 0;
+    while (at < text.size() && isspace(static_cast<unsigned char>(text[at])))
+      at++;
+    size_t start = at;
+    if (at < text.size() && (text[at] == '+' || text[at] == '-'))
+      at++;
+    size_t digits = at;
+    while (at < text.size() && isdigit(static_cast<unsigned char>(text[at])))
+      at++;
+    if (at == digits || !std::ranges::all_of(text.substr(at), [](char c) { return isspace(c) != 0; }))
+      return std::nullopt;
+    const long long read = io::c_atoll(text.substr(start, at - start)); /* held to a long long's range, so past an int */
+    if (read < INT_MIN || read > INT_MAX)
       return std::nullopt;
     return static_cast<int>(read);
   }
@@ -624,7 +633,7 @@ namespace {
     }
     int &flag = found->in<int>(config);
     flag      = flag == 1 ? 0 : 1;
-    if (found->note)
+    if (!found->note.empty())
       send_to_char(g, d->character, "{}", found->note);
     show_submenu(g, d, submenu);
   }

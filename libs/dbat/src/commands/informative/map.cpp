@@ -48,8 +48,8 @@
 #include "informative_internal.hpp"
 
 static double terrain_bonus(GameWorld *g, struct char_data *ch);
-static void map_draw_room(GameWorld *g, char map[9][10], int x, int y, room_vnum rnum,
-                          struct char_data *ch);
+using area_map = std::array<std::string, 9>; /* nine rows of nine */
+static void map_draw_room(GameWorld *g, area_map &map, int x, int y, room_vnum rnum, struct char_data *ch);
 
 /* This is used to determine the terrain bonus for search_room - Iovan 12/16/2012*/
 static double terrain_bonus(GameWorld *g, struct char_data *ch)
@@ -189,22 +189,22 @@ namespace {
 } // namespace
 
 /* Draws the rooms around rnum, which is at x, y: a closed door ('8'), or the room it opens on. */
-static void map_draw_room(GameWorld *g, char map[9][10], int x, int y, room_vnum rnum, struct char_data *)
+static void map_draw_room(GameWorld *g, area_map &map, int x, int y, room_vnum rnum, struct char_data *)
 {
   for (int door = 0; door < NUM_OF_DIRS; door++) {
     struct room_direction_data *exit = room_get_dir_option(g, rnum, door);
     if (!exit || exit->to_room == NOWHERE || !MAP_STEPS[door])
       continue;
-    char *cell = &map[y + MAP_STEPS[door]->dy][x + MAP_STEPS[door]->dx];
+    int row = y + MAP_STEPS[door]->dy, column = x + MAP_STEPS[door]->dx;
     if (room_exit_flagged(exit, EX_CLOSED)) {
       if (!room_exit_flagged(exit, EX_SECRET))
-        *cell = '8';
+        map[row][column] = '8';
       continue;
     }
     char glyph = room_glyph(g, exit->to_room);
     if (door == WEST && glyph == '2' && room_sect(g, exit->to_room) == SECT_INSIDE)
-      cell = &map[y + 1][x]; /* quirk: lava inside, to the west, is drawn to the south */
-    *cell = glyph;
+      row = y + 1, column = x; /* quirk: lava inside, to the west, is drawn to the south */
+    map[row][column] = glyph;
   }
 }
 
@@ -215,7 +215,7 @@ ACMD(do_map)
 
 namespace {
   /* The map's glyphs as they are shown, in the order they are replaced. */
-  constexpr std::pair<const char *, const char *> GLYPH_COLOURS[] = {
+  constexpr std::pair<std::string_view, std::string_view> GLYPH_COLOURS[] = {
       {"x", "@RX"}, {"&", "@m$"}, {"*", "@m#"}, {"+", "@c~"}, {"s", "@CS"}, {"i", "@wI"}, {"(", "@WC"}, {"^", "@DM"},
       {"h", "@yH"}, {"`", "@BW"}, {"=", "@bU"}, {"p", "@GP"}, {"f", "@gF"}, {"!", "@YD"}, {"-", "@w:"},
       /* lava */
@@ -225,7 +225,7 @@ namespace {
   };
 
   /* The key beside each line of the small map */
-  constexpr const char *MAP_KEY[] = {
+  static constexpr std::string_view MAP_KEY[] = {
       "    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n",
       "    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n",
       "    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n",
@@ -240,7 +240,7 @@ namespace {
   }
 
   /* An exit's mark beside the small map: shut, open, or blank where there's none to see. */
-  const char *exit_mark(GameWorld *g, struct char_data *ch, int dir, const char *shut, const char *open, int shut_flag = EX_CLOSED)
+  std::string_view exit_mark(GameWorld *g, struct char_data *ch, int dir, std::string_view shut, std::string_view open, int shut_flag = EX_CLOSED)
   {
     if (!exit_visible(g, ch, dir))
       return "   ";
@@ -248,7 +248,7 @@ namespace {
   }
 
   /* The exits beside line i of the small map */
-  std::string exits_beside(GameWorld *g, struct char_data *ch, int i, const char *line)
+  std::string exits_beside(GameWorld *g, struct char_data *ch, int i, std::string_view line)
   {
     switch (i) {
       case 2:
@@ -257,7 +257,7 @@ namespace {
         return str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", exit_mark(g, ch, NORTHWEST, " @rNW", " @CNW"), exit_mark(g, ch, UP, " @yU ", " @YU "),
                           exit_mark(g, ch, NORTHEAST, "@rNE ", "@CNE ", EX_SECRET), line);
       case 4: {
-        const char *inside = exit_visible(g, ch, INDIR)    ? exit_mark(g, ch, INDIR, " @rI ", " @mI ")
+        std::string_view inside = exit_visible(g, ch, INDIR)    ? exit_mark(g, ch, INDIR, " @rI ", " @mI ")
                              : exit_visible(g, ch, OUTDIR) ? exit_mark(g, ch, OUTDIR, "@rOUT", "@mOUT")
                                                            : "@r{ }";
         return str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", exit_mark(g, ch, WEST, "  @rW", "  @CW"), inside, exit_mark(g, ch, EAST, "@rE  ", "@CE  "), line);
@@ -273,7 +273,7 @@ namespace {
 
 void gen_map(GameWorld *g, struct char_data *ch, int num)
 {
-  char map[9][10] = {{'-'}, {'-'}};
+  area_map map;
 
   if (num == 1) {
     /* Map Key */
@@ -294,8 +294,7 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
   }
 
   /* blank the map */
-  for (auto &row : map)
-    strcpy(row, "         ");
+  map.fill(std::string(9, ' '));
 
   /* the room ch is in, and the rooms its open exits lead to */
   map_draw_room(g, map, 4, 4, char_get_in_room(ch), ch);
@@ -324,7 +323,7 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
 
 namespace {
   /* What ch sees of a room scanned: its name, what's in it, and its lava. */
-  void scan_room(GameWorld *g, struct char_data *ch, room_vnum room, const char *far, const char *direction)
+  void scan_room(GameWorld *g, struct char_data *ch, room_vnum room, std::string_view far, std::string_view direction)
   {
     send_to_char(g, ch, "@w-----------------------------------------@n\r\n");
     send_to_char(g, ch, "          {}{}{}: {} {}\n\r", CCCYN(g, ch, C_NRM), far, direction,
@@ -341,7 +340,7 @@ namespace {
 
 ACMD(do_scan)
 {
-  static constexpr const char *dirnames[] = {"North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"};
+  static constexpr std::string_view dirnames[] = {"North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"};
 
   if (char_get_position(ch) < POS_SLEEPING) {
     send_to_char(g, ch, "You can't see anything but stars!\n\r");

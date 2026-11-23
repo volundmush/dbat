@@ -34,7 +34,7 @@ namespace {
   const char *const house_types[] = {"PLAYER_OWNED", "IMM_OWNED", "CLAN_OWNED", "UNOWNED", "\n"};
 
   /* The atrium directions' menu lines, in the order of the directions */
-  const char *const atrium_directions[] = {"North  ", "East   ", "South  ", "West   ", "Up     ", "Down   ",
+  static constexpr std::string_view atrium_directions[] = {"North  ", "East   ", "South  ", "West   ", "Up     ", "Down   ",
                                            "NorthW ", "NorthE ", "SouthE ", "SouthW ", "Inside ", "Outside"};
 
   /* The house editor: the house in one room, as the house control list has it, or new */
@@ -102,11 +102,11 @@ namespace {
   }
 
   /* A date as the menu shows it: the day, without the time */
-  std::string menu_date(time_t when, const char *never)
+  std::string menu_date(time_t when, std::string_view never)
   {
     if (!when)
-      return never;
-    return std::string(asctime(localtime(&when)), 10);
+      return std::string(never);
+    return asctime_text(when).substr(0, 10);
   }
 
   void house_editor::menu(GameWorld *g, struct descriptor_data *d)
@@ -316,7 +316,7 @@ namespace {
   void house_editor::parse(GameWorld *g, struct descriptor_data *d, std::string_view line)
   {
     const char answer = first_char(line);
-    const int number_given = atoi(std::string(line).c_str());
+    const int number_given = parse_int(line);
 
     mudlog(g, LOG_CMP, ADMLVL_BUILDER, false, "(LOG) hsedit_parse: OLC mode {:d}", (int)asking);
     switch (asking) {

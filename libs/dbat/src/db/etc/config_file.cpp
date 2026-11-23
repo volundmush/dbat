@@ -74,9 +74,9 @@ static void load_default_config(GameWorld *g)
   /****************************************************************************/
   CONFIG_DFLT_PORT = DFLT_PORT;
 
-  CONFIG_DFLT_IP  = DFLT_IP ? DFLT_IP : "";
+  CONFIG_DFLT_IP  = DFLT_IP;
   CONFIG_DFLT_DIR = DFLT_DIR;
-  CONFIG_LOGNAME  = LOGNAME ? LOGNAME : "";
+  CONFIG_LOGNAME  = LOGNAME;
 
   CONFIG_MAX_PLAYING    = max_playing;
   CONFIG_MAX_FILESIZE   = max_filesize;

@@ -57,9 +57,9 @@
 namespace {
   /* ---- fishing ---- */
 
-  constexpr const char *NO_POLE   = "You are not holding a fishing pole.\r\n";
-  constexpr const char *NOT_POLE  = "You do not have a fishing pole in your hand!\r\n";
-  constexpr const char *NOT_EVEN  = "You are not even fishing!\r\n";
+  constexpr std::string_view NO_POLE   = "You are not holding a fishing pole.\r\n";
+  constexpr std::string_view NOT_POLE  = "You do not have a fishing pole in your hand!\r\n";
+  constexpr std::string_view NOT_EVEN  = "You are not even fishing!\r\n";
 
   bool has_pole(struct char_data *ch)
   {
@@ -391,11 +391,11 @@ namespace {
 
   /* What a rune does to whoever wears it */
   struct rune_effect {
-    const char *name;
+    std::string_view name{};
     double per_skill; /* duration, per point of runic */
     int affect;       /* 0: Gebo, which teaches instead */
     int spell;
-    const char *gained;
+    std::string_view gained{};
   };
   constexpr rune_effect KENAZ   = {"Kenaz", 0.16, AFF_INFRAVISION, SKILL_RUNIC, "@GYou can now see in the dark!"};
   constexpr rune_effect ALGIZ   = {"Algiz", 0.05, AFF_EARMOR, SKILL_PUNCH, "@GYou now have Ethereal Armor!"};
@@ -403,32 +403,32 @@ namespace {
   constexpr rune_effect LAGUZ   = {"Laguz", 0.04, AFF_WATERBREATH, SKILL_SBC, "@GYou now have water breathing!"};
   constexpr rune_effect WUNJO   = {"Wunjo", 0.08, AFF_WUNJO, SKILL_SLAM, "@GYou are now blessed with a deeper understanding of things you experience!"};
   constexpr rune_effect PURISAZ = {"Purisaz", 0.06, AFF_POTENT, SKILL_HEELDROP, "@GYou feel as if your inner energy is more potent!"};
-  constexpr rune_effect GEBO    = {"Gebo", 0, 0, 0, nullptr};
+  constexpr rune_effect GEBO    = {"Gebo", 0, 0, 0, {}};
 
   struct rune {
-    const char *word;
+    std::string_view word{};
     int ink;
     bool ink_checked;              /* quirk: Kenaz is written without checking the ink */
     const rune_effect *on_self;
     const rune_effect *on_other;   /* quirk: Laguz writes Oagaz on others; null: Oagaz does nothing to others */
     bool practised;                /* quirk: Oagaz neither improves the skill nor takes time */
-    const char *room_name;         /* quirk: what the room sees written on someone else, if not the name */
+    std::string_view room_name{};         /* quirk: what the room sees written on someone else, if not the name */
     bool shows_unclamped;          /* quirk: Purisaz on others shows the duration before it's raised to 1 */
   };
   constexpr rune RUNES[] = {
-    {"kenaz", 1, false, &KENAZ, &KENAZ, true, nullptr, false},
-    {"algiz", 2, true, &ALGIZ, &ALGIZ, true, nullptr, false},
-    {"oagaz", 3, true, &OAGAZ, nullptr, false, nullptr, false},
-    {"laguz", 4, true, &LAGUZ, &OAGAZ, true, nullptr, false},
-    {"wunjo", 4, true, &WUNJO, &WUNJO, true, nullptr, false},
+    {"kenaz", 1, false, &KENAZ, &KENAZ, true, {}, false},
+    {"algiz", 2, true, &ALGIZ, &ALGIZ, true, {}, false},
+    {"oagaz", 3, true, &OAGAZ, nullptr, false, {}, false},
+    {"laguz", 4, true, &LAGUZ, &OAGAZ, true, {}, false},
+    {"wunjo", 4, true, &WUNJO, &WUNJO, true, {}, false},
     {"purisaz", 4, true, &PURISAZ, &PURISAZ, true, "PUrisaz", true},
-    {"gebo", 10, true, &GEBO, &GEBO, true, nullptr, false},
+    {"gebo", 10, true, &GEBO, &GEBO, true, {}, false},
   };
 
   void write_rune(GameWorld *g, struct char_data *ch, struct char_data *vict, const rune &r, const rune_effect &effect, struct obj_data *bottle,
                   int inkcost, int skill, int64_t cost)
   {
-    const char *flash = effect.affect ? "" : " The rune flashes out of existence immediately!";
+    std::string_view flash = effect.affect ? "" : " The rune flashes out of existence immediately!";
     decCurKI(g, ch, cost, 0);
     if (vict == ch) {
       act(g, str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on your skin!{}@n", effect.name, flash), true, ch, nullptr, nullptr, TO_CHAR);
@@ -436,7 +436,7 @@ namespace {
     } else {
       std::string to_char = str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on @b$N's@B skin!{}@n", effect.name, flash);
       std::string to_vict = str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on @RYOUR@B skin.{}@n", effect.name, flash);
-      std::string to_room = str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on @b$N's@B skin.{}@n", r.room_name ? r.room_name : effect.name, flash);
+      std::string to_room = str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on @b$N's@B skin.{}@n", or_if_empty(r.room_name, effect.name), flash);
       act_triple(g, {to_char.c_str(), to_vict.c_str(), to_room.c_str(), true}, ch, nullptr, vict);
     }
     send_to_char(g, ch, "@D[@B{:d}@b ink used.@D]@n\r\n", inkcost);
@@ -480,9 +480,9 @@ namespace {
 
   /* What can be woven, and the word that picks it up */
   struct silk_piece {
-    const char *name;
+    std::string_view name{};
     obj_vnum vnum;
-    const char *keyword;
+    std::string_view keyword{};
   };
   constexpr silk_piece SILK_PIECES[] = {
     {"head", 16705, "headsash"},
@@ -590,9 +590,9 @@ namespace {
 
   struct ingredient_kind {
     std::array<obj_vnum, 4> vnums; /* 0: none */
-    const char *name;              /* "You need N <name><plural><after> for this recipe." */
-    const char *plural;
-    const char *after;
+    std::string_view name{};              /* "You need N <name><plural><after> for this recipe." */
+    std::string_view plural{};
+    std::string_view after{};
   };
   constexpr ingredient_kind INGREDIENT_KINDS[INGREDIENTS] = {
     {{RCP_TOMATO}, "tomato", "es", ""},
@@ -1197,7 +1197,7 @@ ACMD(do_spoil)
   obj_set_item_number(head, NOTHING);
   obj_set_in_room(head, NOWHERE);
   std::string part(obj_get_name(obj));
-  for (const char *word : {"headless", "corpse", "half", "burnt", "chunks", "beaten", "bloody"})
+  for (std::string_view word : {"headless", "corpse", "half", "burnt", "chunks", "beaten", "bloody"})
     search_replace(part, word, "");
   trim(part);
   obj_set_name(head, str_format("bloody head {}", part));

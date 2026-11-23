@@ -27,12 +27,12 @@
 namespace {
 
 struct text_page {
-  const char *keyword; /* "reload <keyword>" */
-  const char *path;
+  std::string_view keyword{}; /* "reload <keyword>" */
+  std::string_view path{};
   std::string GameWorld::*text;
   bool prune;              /* the greetings, without their blank lines at the end */
-  const char *cant_read;   /* what "reload <keyword>" says if it can't be read */
-  const char *all_says;    /* what "reload all" says; "" for nothing, and null if it doesn't read it */
+  std::string_view cant_read{};   /* what "reload <keyword>" says if it can't be read */
+  std::string_view all_says{};    /* what "reload all" says; empty for nothing, or if it doesn't read it */
 };
 
 /* in the order they are read at boot */
@@ -48,13 +48,13 @@ constexpr text_page pages[] = {
     {"policy",     POLICIES_FILE,   &GameWorld::policies,   false, "Cannot read policy\r\n",            "Cannot read policies\r\n"        },
     {"handbook",   HANDBOOK_FILE,   &GameWorld::handbook,   false, "Cannot read handbook\r\n",          "Cannot read handbook\r\n"        },
     {"background", BACKGROUND_FILE, &GameWorld::background, false, "Cannot read background\r\n",        "Cannot read background\r\n"      },
-    {"ihelp",      IHELP_PAGE_FILE, &GameWorld::ihelp,      false, "Cannot read help front page\r\n",   nullptr                           },
+    {"ihelp",      IHELP_PAGE_FILE, &GameWorld::ihelp,      false, "Cannot read help front page\r\n",   {}                                },
     {"greetings",  GREETINGS_FILE,  &GameWorld::GREETINGS,  true,  "Cannot read greetings.\r\n",        ""                                },
     {"greetansi",  GREETANSI_FILE,  &GameWorld::GREETANSI,  true,  "Cannot read greetings.\r\n",        ""                                },
 };
 
 /* the order "reload all" reads them in, after the levels */
-constexpr const char *reload_all_order[] = {"greetings", "greetansi", "wizlist", "immlist",  "news",
+static constexpr std::string_view reload_all_order[] = {"greetings", "greetansi", "wizlist", "immlist",  "news",
                                             "credits",   "motd",      "imotd",   "help",     "info",
                                             "policy",    "handbook",  "background"};
 
@@ -64,7 +64,7 @@ const text_page &page_named(std::string_view keyword)
 }
 
 /* The page at path, or nothing if it can't be read or is too long, as logged */
-std::optional<std::string> read_page(const char *path)
+std::optional<std::string> read_page(std::string_view path)
 {
   io::loaded<io::text_reader> file = io::text_reader::open(path);
   if (!file) {
@@ -127,9 +127,9 @@ ACMD(do_reboot)
   if (str_eq_nocase(arg, "all") || arg[0] == '*') {
     if (load_levels(g) < 0)
       send_to_char(g, ch, "Cannot read level configurations\r\n");
-    for (const char *keyword : reload_all_order) {
+    for (std::string_view keyword : reload_all_order) {
       const text_page &page = page_named(keyword);
-      if (!reload_page(g, page) && *page.all_says)
+      if (!reload_page(g, page) && !page.all_says.empty())
         send_to_char(g, ch, "{}", page.all_says);
     }
     reload_help(g);

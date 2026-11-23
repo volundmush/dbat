@@ -51,6 +51,7 @@
 - In zedit, retyping a global variable command (V) and then quitting without saving no longer frees the name and value the zone itself was still using. The zone went on reading freed memory: it could show or set the unsaved name and value, show garbage, or crash at a reset or shutdown. [Volund]
 - Creating a zone with `zedit new` no longer moves the zone of another builder's open editor to the memory after it, when that zone happened to lie after the new one in memory: leftover renumbering from when zones were kept in an array, which could make the editor show garbage, or crash the game. [Volund]
 - Moving up the RPP top list when your account is listed twice in its bottom places no longer reads past the end of the list of places, which could crash the game; the last place is left empty. [Volund]
+- A guildmaster that also has a special procedure of its own is given what was typed to it, rather than whatever was left in memory, which it could misread or read past the end of. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]

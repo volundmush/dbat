@@ -242,7 +242,7 @@ extern const int idle_void, idle_rent_time, idle_max_level, dts_are_dumps, pulse
 extern const int pulse_zone, pulse_mobile, pulse_autosave, pulse_idlepwd, pulse_sanity, pulse_usage;
 extern const int pulse_timesave, pulse_current, load_into_inventory;
 
-extern const char *const OK, *const NOPERSON, *const NOEFFECT;
+extern const std::string_view OK, NOPERSON, NOEFFECT;
 
 extern const int track_through_doors, level_cap, show_obj_stacking, show_mob_stacking, mob_fighting;
 
@@ -258,7 +258,7 @@ extern const room_vnum donation_room_1, donation_room_2, donation_room_3;
 
 extern const uint16_t DFLT_PORT;
 
-extern const char *const DFLT_IP, *const DFLT_DIR, *const LOGNAME, *const MENU, *const WELC_MESSG, *const START_MESSG;
+extern const std::string_view DFLT_IP, DFLT_DIR, LOGNAME, MENU, WELC_MESSG, START_MESSG; /* DFLT_IP and LOGNAME: empty for none */
 
 extern const int max_playing, max_filesize, max_bad_pws, siteok_everyone, nameserver_is_slow;
 

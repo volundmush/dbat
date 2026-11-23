@@ -59,9 +59,6 @@ struct shop_data {
 #define VERSION3_TAG "v3.0"       /* The file has v3.0 shops in it!	*/
 constexpr int MAX_SHOP_OBJ = 100; /* "Soft" maximum for list maximums	*/
 
-/* Pretty general macros that could be used elsewhere */
-#define END_OF(buffer) ((buffer) + strlen((buffer)))
-
 /* Possible states for objects trying to be sold */
 constexpr int OBJECT_DEAD  = 0;
 constexpr int OBJECT_NOTOK = 1;

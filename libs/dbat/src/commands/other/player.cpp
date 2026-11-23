@@ -78,7 +78,7 @@ ACMD(do_spar)
 
 namespace {
   /* Why ch can't quit here, if they can't */
-  const char *cannot_quit(GameWorld *g, struct char_data *ch)
+  std::string_view cannot_quit(GameWorld *g, struct char_data *ch)
   {
     room_vnum room = char_get_in_room(ch);
     if (room_flagged(g, room, ROOM_PAST))
@@ -91,7 +91,7 @@ namespace {
       return "You can't quit in a pocket dimension!\r\n";
     if (room == 2069)
       return "You can't quit here!\r\n";
-    return nullptr;
+    return {};
   }
 
   /* Where ch loads back in next time, if not where they were: anywhere but the void, the past or a pocket dimension */
@@ -107,7 +107,7 @@ ACMD(do_quit)
 {
   if (char_is_npc(ch) || !char_get_desc(ch))
     return;
-  if (const char *why = cannot_quit(g, ch)) {
+  if (std::string_view why = cannot_quit(g, ch); !why.empty()) {
     send_to_char(g, ch, why);
     return;
   }
@@ -472,7 +472,7 @@ ACMD(do_display)
 
 namespace {
   /* Where bug, typo and idea (report) are filed */
-  const char *filed_in(int subcmd)
+  std::string_view filed_in(int subcmd)
   {
     switch (subcmd) {
       case SCMD_BUG:
@@ -482,17 +482,17 @@ namespace {
       case SCMD_IDEA:
         return IDEA_FILE;
     }
-    return nullptr;
+    return {};
   }
 } // namespace
 
 ACMD(do_gen_write)
 {
-  const char *filename = filed_in(subcmd);
-  if (!filename)
+  std::string_view filename = filed_in(subcmd);
+  if (filename.empty())
     return;
   time_t ct = game_now(g);
-  char *tmp = asctime(localtime(&ct));
+  std::string tmp = asctime_text(ct);
   if (char_is_npc(ch)) {
     send_to_char(g, ch, "Monsters can't have ideas - Go away.\r\n");
     return;
@@ -515,8 +515,8 @@ ACMD(do_gen_write)
     return;
   }
   std::string entry = str_format("@D[@WUser: @c{:<10}@D] [@WChar: @C{:<10}@D] [@WRoom: @G{:<4d}@D] [@WDate: @Y{:>6.6}@D]@b \n-----------@w\n{}\n@D-------------------------------@n\n",
-                                 char_get_user(ch), char_get_name(ch), char_get_in_room(ch), (tmp + 4), text);
-  if (!io::append_file(filename, entry)) {
+                                 char_get_user(ch), char_get_name(ch), char_get_in_room(ch), std::string_view(tmp).substr(4), text);
+  if (!io::append_file(std::string(filename), entry)) {
     perror("SYSERR: do_gen_write");
     send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");
     return;
@@ -531,8 +531,8 @@ namespace {
   struct gen_toggle {
     int subcmd;
     bool (*flip)(GameWorld *g, struct char_data *ch);
-    const char *off;
-    const char *on;
+    std::string_view off{};
+    std::string_view on{};
     bool (*before)(GameWorld *g, struct char_data *ch) = nullptr;
     void (*after)(GameWorld *g, struct char_data *ch)  = nullptr;
   };
@@ -697,9 +697,9 @@ ACMD(do_gen_tog)
 namespace {
   /* What file can show, to immortals of at least the level */
   constexpr struct {
-    const char *cmd;
+    std::string_view cmd{};
     int level;
-    const char *file;
+    std::string_view file{};
   } FILES[] = {
       {"none", 6, "Does Nothing"},
       {"bug", ADMLVL_IMMORT, "../data/misc/bugs"},

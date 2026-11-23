@@ -53,7 +53,7 @@ static WCMD(do_wat);
 static WCMD(do_weffect);
 
 struct wld_command_info {
-  const char *command{};
+  std::string_view command{};
   void (*command_pointer)(GameWorld *g, room_data *room, std::string_view argument, int cmd, int subcmd){};
   int subcmd{};
 };
@@ -590,11 +590,11 @@ void wld_command_interpreter(GameWorld *g, room_data *room, std::string_view arg
   std::string arg       = take_word(line);
 
   /* find the command: the first whose name begins with the word */
-  for (cmd = 0; *wld_cmd_info[cmd].command != '\n'; cmd++)
-    if (std::string_view(wld_cmd_info[cmd].command).starts_with(arg))
+  for (cmd = 0; wld_cmd_info[cmd].command != "\n"; cmd++)
+    if (wld_cmd_info[cmd].command.starts_with(arg))
       break;
 
-  if (*wld_cmd_info[cmd].command == '\n')
+  if (wld_cmd_info[cmd].command == "\n")
     wld_log(g, room, "Unknown world cmd: '{}'", argument);
   else
     ((*wld_cmd_info[cmd].command_pointer)(g, room, line, cmd, wld_cmd_info[cmd].subcmd));

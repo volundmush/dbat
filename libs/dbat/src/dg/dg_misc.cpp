@@ -199,7 +199,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
 
   /* find the property -- first search apply_types */
   i = 0;
-  while (strcasecmp(apply_types[i], "\n")) {
+  while (apply_types[i] != std::string_view("\n")) {
     if (str_eq_nocase(apply_types[i], property)) {
       type = APPLY_TYPE;
       break;
@@ -209,7 +209,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
 
   if (!type) { /* search affect_types now */
     i = 0;
-    while (strcasecmp(affected_bits[i], "\n")) {
+    while (affected_bits[i] != std::string_view("\n")) {
       if (str_eq_nocase(affected_bits[i], property)) {
         type = AFFECT_TYPE;
         break;

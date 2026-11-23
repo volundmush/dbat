@@ -34,7 +34,7 @@
 
 namespace {
 
-io::loaded<void> read_number(io::text_reader &in, guild_vnum vnum, int &n, const char *what)
+io::loaded<void> read_number(io::text_reader &in, guild_vnum vnum, int &n, std::string_view what)
 {
   std::optional<std::string_view> line = in.line();
   if (!line || io::scan_ints(*line, std::span(&n, 1)) == 0) /* quirk: a line of spaces leaves n as it was */
@@ -43,16 +43,16 @@ io::loaded<void> read_number(io::text_reader &in, guild_vnum vnum, int &n, const
 }
 
 /* A message, or its default if it is empty or would be an unsafe format for npc_message() */
-io::loaded<std::string> read_message(io::text_reader &in, guild_vnum vnum, const char *field, const char *fallback)
+io::loaded<std::string> read_message(io::text_reader &in, guild_vnum vnum, std::string_view field, std::string_view fallback)
 {
   io::loaded<std::string> text = in.tilde_string(str_format("guild #{:d}", vnum));
   if (!text)
     return text;
   if (text->empty())
-    return fallback;
+    return std::string(fallback);
   if (std::optional<std::string> problem = npc_msg_format_problem(text->c_str(), false)) {
     mud_log("SYSERR: Guild #{:d} {}: {}; using the default.", vnum, field, *problem);
-    return fallback;
+    return std::string(fallback);
   }
   return text;
 }

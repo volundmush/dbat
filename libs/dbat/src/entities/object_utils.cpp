@@ -475,7 +475,9 @@ bool obj_wear_flagged(const struct obj_data *obj, int part)
 
 std::string_view obj_sana(const struct obj_data *obj)
 {
-  return (strchr("aeiouAEIOU", *(obj)->name.c_str()) ? "an" : "a");
+  char first = first_char(obj->name);
+  return first == '\0' || std::string_view("aeiouAEIOU").contains(first) ? "an" : "a"; /* quirk: "an" for no name, where
+                                                                                            strchr() found its '\0' */
 }
 
 /* Field accessors (formerly accessor macros). */

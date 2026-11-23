@@ -221,7 +221,7 @@ void carry_drop(GameWorld *g, struct char_data *ch, int type)
 namespace {
   /* A place on a planet to land at, by name */
   struct landing {
-    const char *name;
+    std::string_view name{};
     room_vnum room;
   };
 
@@ -231,8 +231,8 @@ namespace {
     room_vnum above;
     std::span<const landing> places;
     room_vnum otherwise;
-    const char *unknown; /* quirk: some say "You", others "you" */
-    const char *shown;
+    std::string_view unknown{}; /* quirk: some say "You", others "you" */
+    std::string_view shown{};
   };
 
   constexpr landing EARTH[] = {
@@ -261,8 +261,8 @@ namespace {
   constexpr landing KANASSA[] = {{"Aquis City", 14904}, {"Yunkai Pirate Base", 15655}};
   constexpr landing ARLIA[]   = {{"Janacre", 16009}, {"Arlian Wasteland", 16544}, {"Arlia Mine", 16600}};
 
-  constexpr const char *YOU_GUESS = "You don't know where that made up place is, but decided to land anyway.";
-  constexpr const char *you_guess = "you don't know where that made up place is, but decided to land anyway.";
+  constexpr std::string_view YOU_GUESS = "You don't know where that made up place is, but decided to land anyway.";
+  constexpr std::string_view you_guess = "you don't know where that made up place is, but decided to land anyway.";
 
   const orbit ORBITS[] = {
       {50, EARTH, 300, YOU_GUESS,
@@ -906,7 +906,7 @@ namespace {
   }
 
   /* A limb worn by being used for walking, and maybe falling apart, as `falls` says */
-  void strain(GameWorld *g, struct char_data *ch, int limb, int falls, const char *name)
+  void strain(GameWorld *g, struct char_data *ch, int limb, int falls, std::string_view name)
   {
     if (char_get_limb_condition(ch, limb) >= 50)
       return;
@@ -1094,7 +1094,7 @@ ACMD(do_move)
   }
 }
 
-static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::string_view dir, const char *cmdname)
+static int find_door(GameWorld *g, struct char_data *ch, std::string_view type, std::string_view dir, std::string_view cmdname)
 {
   int door;
 
@@ -1119,7 +1119,7 @@ static int find_door(GameWorld *g, struct char_data *ch, const char *type, std::
       return (-1);
     }
   } else { /* try to locate the keyword */
-    if (!*type) {
+    if (type.empty()) {
       send_to_char(g, ch, "What is it you want to {}?\r\n", cmdname);
       return (-1);
     }
@@ -1159,7 +1159,7 @@ constexpr int NEED_CLOSED   = (1 << 1);
 constexpr int NEED_UNLOCKED = (1 << 2);
 constexpr int NEED_LOCKED   = (1 << 3);
 
-const char *const cmd_door[NUM_DOOR_CMD] =
+const std::string_view cmd_door[NUM_DOOR_CMD] =
     {
         "open",
         "close",
@@ -1202,8 +1202,8 @@ namespace {
     change how;
     int cont_bit, ex_bit;
     bool always_say_obj;
-    const char *inside_ship[3], *outside_ship[3];
-    const char *you, *they, *inside_heard, *outside_heard;
+    std::string_view inside_ship[3], outside_ship[3];
+    std::string_view you, they, inside_heard, outside_heard; /* you: none for a ship's hatch */
   };
 
   const door_change DOOR_CHANGES[] = {
@@ -1215,11 +1215,11 @@ namespace {
        {"@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n", "@wThe ship hatch slowly closes, sealing the ship.\r\n", "@wThe air stops getting sucked out into space as the hatch seals!\r\n"},
        {"@wThe ship hatch slowly closes, sealing the ship.\r\n", "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n", "@wAir stops getting sucked out into space as the hatch seals!\r\n"},
        "@wYou close @c$p@w.", "@C$n@w closes @c$p@w.", "@wThe door to {}@w is closed from the other side.\r\n", "@wThe door to {}@w is closed from the other side.\r\n"},
-      {change::clear, CONT_LOCKED, EX_LOCKED, true, {}, {}, nullptr, nullptr, nullptr, nullptr},
-      {change::set, CONT_LOCKED, EX_LOCKED, true, {}, {}, nullptr, nullptr, nullptr, nullptr},
+      {change::clear, CONT_LOCKED, EX_LOCKED, true, {}, {}, {}, {}, {}, {}},
+      {change::set, CONT_LOCKED, EX_LOCKED, true, {}, {}, {}, {}, {}, {}},
   };
 
-  void send_to_room_of(GameWorld *g, room_vnum room, const char *fmt, struct obj_data *about)
+  void send_to_room_of(GameWorld *g, room_vnum room, std::string_view fmt, struct obj_data *about)
   {
     std::string_view desc = obj_get_short_description(about);
     send_to_room(g, room, std::vformat(fmt, std::make_format_args(desc)));
@@ -1266,7 +1266,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
     auto to              = [&](room_vnum room, struct obj_data *o) { change_door(g, room, o, door, d.how, d.cont_bit, d.ex_bit); };
     if (obj && obj_get_type_flag(obj) == ITEM_HATCH && vehicle) {
       to(char_get_in_room(ch), vehicle);
-      if (!d.you) {
+      if (d.you.empty()) {
         /* locks are silent */
       } else if (obj_get_vnum(g, obj) > 19199) {
         send_to_room(g, char_get_in_room(ch), d.inside_ship[0]);
@@ -1283,7 +1283,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
       to(char_get_in_room(ch), hatch);
       char_from_room(g, ch);
       char_to_room(g, ch, num);
-      if (!d.you) {
+      if (d.you.empty()) {
         /* locks are silent */
       } else if (obj_get_vnum(g, obj) > 19199) {
         send_to_room(g, num, d.outside_ship[0]);
@@ -1384,17 +1384,17 @@ ACMD(do_gen_door)
 
   argument = skip_spaces(argument);
   if (argument.empty()) {
-    send_to_char(g, ch, "{:c}{} what?\r\n", as_char(toupper(*cmd_door[subcmd])), cmd_door[subcmd] + 1);
+    send_to_char(g, ch, "{:c}{} what?\r\n", as_char(toupper(cmd_door[subcmd].front())), cmd_door[subcmd].substr(1));
     return;
   }
   std::string_view rest = argument;
   std::string type      = take_arg(rest);
   std::string dir       = take_arg(rest);
   if (!generic_find(g, type, FIND_OBJ_INV | FIND_OBJ_ROOM, ch, &victim, &obj))
-    door = find_door(g, ch, type.c_str(), dir, cmd_door[subcmd]);
+    door = find_door(g, ch, type, dir, cmd_door[subcmd]);
   if (obj && obj_get_type_flag(obj) != ITEM_CONTAINER && obj_get_type_flag(obj) != ITEM_VEHICLE && obj_get_type_flag(obj) != ITEM_HATCH) {
     obj  = nullptr;
-    door = find_door(g, ch, type.c_str(), dir, cmd_door[subcmd]);
+    door = find_door(g, ch, type, dir, cmd_door[subcmd]);
   }
   if (!obj && door < 0)
     return;
@@ -1410,7 +1410,7 @@ ACMD(do_gen_door)
   int needs   = flags_door[subcmd];
 
   if (!door_openable(g, ch, obj, door))
-    act(g, "You can't $F that!", false, ch, nullptr, cmd_door[subcmd], TO_CHAR);
+    act(g, "You can't $F that!", false, ch, nullptr, cmd_door[subcmd].data(), TO_CHAR); /* a literal, ended by its '\0' */
   else if (closed && IS_SET(needs, NEED_OPEN))
     send_to_char(g, ch, "But it's already closed!\r\n");
   else if (!closed && IS_SET(needs, NEED_CLOSED))
@@ -2061,7 +2061,7 @@ namespace {
   }
 
   /* The seat named to sit, rest or sleep on, or null having said why not: a bed, or a chair too if allowed */
-  struct obj_data *seat_named(GameWorld *g, struct char_data *ch, std::string &arg, bool chairs_too, const char *not_that)
+  struct obj_data *seat_named(GameWorld *g, struct char_data *ch, std::string &arg, bool chairs_too, std::string_view not_that)
   {
     if (char_get_sits(g, ch)) {
       send_to_char(g, ch, "You are already on something!\r\n");

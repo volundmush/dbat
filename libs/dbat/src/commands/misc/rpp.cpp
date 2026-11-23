@@ -55,13 +55,13 @@
 #include "misc.hpp"
 
 namespace {
-  constexpr const char *INSTILL_SYNTAX = "Syntax: instill (token) (target)\r\n";
+  constexpr std::string_view INSTILL_SYNTAX = "Syntax: instill (token) (target)\r\n";
 
   /* The specializations a player may choose, once */
   struct specialization {
-    const char *name;
+    std::string_view name{};
     int preference;
-    const char *chosen;
+    std::string_view chosen{};
   };
   constexpr specialization SPECIALIZATIONS[] = {
     {"throw", PREFERENCE_THROWING, "You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n"},
@@ -163,7 +163,7 @@ void rpp_feature(GameWorld *g, struct char_data *ch, const std::string &arg)
   }
 
   bool change      = !char_get_feature(ch).empty();
-  const char *sex  = char_get_sex(ch) == SEX_FEMALE ? "She" : char_get_sex(ch) == SEX_MALE ? "He" : "It";
+  std::string_view sex  = char_get_sex(ch) == SEX_FEMALE ? "She" : char_get_sex(ch) == SEX_MALE ? "He" : "It";
   std::string line = str_format("...{} has {}.", sex, arg);
   char_set_rbank(ch, char_get_rbank(ch) - cost);
   send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. Enjoy!@n\r\n", cost);

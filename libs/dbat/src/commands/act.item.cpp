@@ -166,7 +166,7 @@ namespace {
   /* How much more a plant yields, by a measure of at least so much: the soil's, or the gardener's */
   struct bounty {
     int at_least, more;
-    const char *says;
+    std::string_view says{};
   };
 
   constexpr bounty SOIL_BOUNTY[] = {
@@ -272,7 +272,7 @@ namespace {
 
   struct soil_grade {
     int flag; /* the room's, or -1 for any */
-    const char *kind;
+    std::string_view kind{};
     int lo, hi; /* its quality */
   };
 
@@ -481,7 +481,7 @@ namespace {
   }
 
   struct garden_action {
-    const char *word;
+    std::string_view word{};
     void (*tend)(tending &t);
   };
 
@@ -829,7 +829,7 @@ ACMD(do_twohand)
 /* The auction, for which there's no command any more */
 
 namespace {
-  const char *const auctioneer[AUC_BID + 1] = {
+  static constexpr std::string_view auctioneer[AUC_BID + 1] = {
       "@D[@CAUCTION@c: @C$n@W puts $p@W up for sale at @Y{:d}@W zenni.@D]@n",
       "@D[@CAUCTION@c: @W$p@W at @Y{:d}@W zenni going once!@D]@n",
       "@D[@CAUCTION@c: @W$p@W at @Y{:d}@W zenni going twice!@D]@n",
@@ -1076,7 +1076,7 @@ namespace {
     return find_first(room_contents(g, AUCTION_HOUSE), [&](obj_data *obj) { return on_auction(obj) && ++at == n; });
   }
 
-  void bid_syntax(GameWorld *g, struct char_data *ch, const char *why)
+  void bid_syntax(GameWorld *g, struct char_data *ch, std::string_view why)
   {
     send_to_char(g, ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
     send_to_char(g, ch, why);
@@ -1109,7 +1109,7 @@ namespace {
     send_to_char(g, ch, "@c------------------------------------------------------------------------------@n\r\n");
   }
 
-  const char *condition_colour(int health)
+  std::string_view condition_colour(int health)
   {
     if (health >= 100)
       return "@C";
@@ -1836,12 +1836,12 @@ namespace {
       act(g, str_format("You can't seem to find any {}s in $p.", arg), false, ch, cont, nullptr, TO_CHAR);
   }
 
-  const char *find_exdesc_keywords(std::string_view word, const ex_desc_list &list)
+  std::string_view find_exdesc_keywords(std::string_view word, const ex_desc_list &list)
   {
     for (const extra_descr_data &i : list)
       if (isname(word, i.keyword.c_str()))
         return i.keyword.c_str();
-    return nullptr;
+    return {};
   }
 
   void get_from_room(GameWorld *g, struct char_data *ch, std::string arg, int howmany)
@@ -1856,7 +1856,7 @@ namespace {
     int dotmode = find_all_dots(arg);
 
     if (dotmode == FIND_INDIV) {
-      if (const char *descword = find_exdesc_keywords(arg, room_get_ex_description(g, here))) {
+      if (std::string_view descword = find_exdesc_keywords(arg, room_get_ex_description(g, here)); !descword.empty()) {
         send_to_char(g, ch, "{}: you can't take that!\r\n", fname(descword));
         return;
       }
@@ -2049,10 +2049,10 @@ namespace {
   }
 
   /* Whether a dragon ball may be let go of here, saying why not */
-  bool can_drop_dragon_ball(GameWorld *g, struct char_data *ch, struct obj_data *obj, int8_t mode, const char *sname)
+  bool can_drop_dragon_ball(GameWorld *g, struct char_data *ch, struct obj_data *obj, int8_t mode, std::string_view sname)
   {
     room_vnum here = char_get_in_room(ch);
-    auto refuse    = [&](const char *where) {
+    auto refuse    = [&](std::string_view where) {
       act(g, str_format("You can't {} $p {}!", sname, where), false, ch, obj, nullptr, TO_CHAR);
       return false;
     };
@@ -2077,7 +2077,7 @@ namespace {
     return true;
   }
 
-  void perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj, int8_t mode, const char *sname, room_vnum RDR)
+  void perform_drop(GameWorld *g, struct char_data *ch, struct obj_data *obj, int8_t mode, std::string_view sname, room_vnum RDR)
   {
     if (!drop_otrigger(g, obj, ch))
       return;
@@ -2146,7 +2146,7 @@ namespace {
     return false;
   }
 
-  constexpr const char *SAVE_ROOM_FULL = "Some of the items couldn't be dropped into this save room. It is too full. (150 max, containers half the count inside)\r\n";
+  constexpr std::string_view SAVE_ROOM_FULL = "Some of the items couldn't be dropped into this save room. It is too full. (150 max, containers half the count inside)\r\n";
 } // namespace
 
 ACMD(do_drop)
@@ -2162,7 +2162,7 @@ ACMD(do_drop)
 
   room_vnum RDR     = 0;
   int8_t mode       = SCMD_DROP;
-  const char *sname = "drop";
+  std::string_view sname = "drop";
   if (subcmd == SCMD_JUNK) {
     sname = "junk";
     mode  = SCMD_JUNK;
@@ -3061,7 +3061,7 @@ namespace {
       ITEM_WEAR_TAKE, ITEM_WEAR_TAKE, ITEM_WEAR_PACK, ITEM_WEAR_EAR,
       ITEM_WEAR_EAR, ITEM_WEAR_SH, ITEM_WEAR_EYE};
 
-  constexpr const char *ALREADY_WEARING[] = {
+  static constexpr std::string_view ALREADY_WEARING[] = {
       "You're already using a light.\r\n",
       "YOU SHOULD NEVER SEE THIS MESSAGE.  PLEASE REPORT.\r\n",
       "You're already wearing something on both of your ring fingers.\r\n",

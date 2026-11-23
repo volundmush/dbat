@@ -73,7 +73,7 @@ ACMD(do_finger)
 
 namespace {
   struct who_rank {
-    const char *heading;
+    std::string_view heading{};
     int min_level, max_level; /* admin levels */
   };
 
@@ -94,7 +94,7 @@ namespace {
 
   struct edit_tag {
     int connected;
-    const char *tag;
+    std::string_view tag{};
   };
 
   constexpr edit_tag EDIT_TAGS[] = {
@@ -113,7 +113,7 @@ namespace {
   struct who_flag {
     bool prf; /* a preference, or a player flag */
     int flag;
-    const char *tag;
+    std::string_view tag{};
     bool immortals_see_only = false;
   };
 
@@ -131,7 +131,7 @@ namespace {
 
   void who_line(GameWorld *g, struct char_data *ch, descriptor_data *d, struct char_data *tch)
   {
-    const char *line_color = "@w";
+    std::string_view line_color = "@w";
     std::string usr        = str_format("@W(@R{}@W){}", char_get_user(tch), char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
     send_to_char(g, ch, "{}               @D<@C{:<12}@D> {}@w{}", line_color,
                  char_get_admlevel(ch) > 0 || char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch),
@@ -169,8 +169,7 @@ namespace {
 /* Written by Rhade */
 ACMD(do_who)
 {
-  char *tmstr                  = asctime(localtime(&g->PCOUNTDATE));
-  *(tmstr + strlen(tmstr) - 1) = '\0';
+  std::string tmstr = asctime_text(g->PCOUNTDATE);
 
   auto in_view = [&](struct char_data *tch) {
     return char_can_see(g, ch, tch) && char_get_level(tch) >= 0 && char_get_level(tch) <= CONFIG_LEVEL_CAP;
@@ -261,7 +260,7 @@ ACMD(do_users)
         playing = true;
         arg     = take_word(rest);
         rest    = skip_spaces(rest);
-        sscanf(arg.c_str(), "%d-%d", &low, &high);
+        io::scan_range(arg, low, high);
         break;
       case 'n':
         playing     = true;
@@ -305,8 +304,7 @@ ACMD(do_users)
         continue;
     }
 
-    char *timeptr = asctime(localtime(&d->login_time)) + 11;
-    *(timeptr + 8) = '\0';
+    std::string timeptr = asctime_text(d->login_time).substr(11, 8); /* the time of day */
 
     std::string state = desc_get_connected(d) == CON_PLAYING && d->original ? "Switched" : connected_types[desc_get_connected(d)];
     std::string idletime;
@@ -316,7 +314,7 @@ ACMD(do_users)
     std::string_view alias = d->original && !char_get_alias(d->original).empty()     ? char_get_alias(d->original)
                              : d->character && !char_get_alias(d->character).empty() ? char_get_alias(d->character)
                                                                                      : "UNDEFINED";
-    const char *user  = !d->acct.user.empty() ? d->acct.user.c_str() : "UNKNOWN";
+    std::string_view user  = or_if_empty(d->acct.user, "UNKNOWN");
     std::string line  = str_format("{:>3d} {:<20} {:<20} {:<14} {:<3} {:<8} {:>1} ", d->desc_num, alias, user, state, idletime, timeptr, "N");
     if (!d->host.empty())
       line += str_format("\n{:>3d} [{} Site: {}]\r\n", d->desc_num, user, d->host);
@@ -391,7 +389,7 @@ namespace {
   template <int Flag> bool flagged(GameWorld *g, room_vnum room) { return room_flagged(g, room, Flag); }
 
   struct planet {
-    const char *name;
+    std::string_view name{};
     bool (*has)(GameWorld *g, room_vnum room);
   };
 
@@ -409,7 +407,7 @@ namespace {
       {"@cKanassa@n", flagged<ROOM_KANASSA>},
   };
 
-  const char *planet_name(GameWorld *g, room_vnum room)
+  std::string_view planet_name(GameWorld *g, room_vnum room)
   {
     auto it = std::ranges::find_if(PLANETS, [&](const planet &p) { return p.has(g, room); });
     return it == std::end(PLANETS) ? "@RUNKOWN@n" : it->name;
@@ -472,7 +470,7 @@ ACMD(do_where)
 
 namespace {
   /* The toplist file has five names for each, in this order; the last, roleplay points, isn't shown. */
-  constexpr const char *TOPLIST_SECTIONS[] = {
+  static constexpr std::string_view TOPLIST_SECTIONS[] = {
       "       @D-@RPowerlevel@D-@n\r\n",
       "       @D-@BKi        @D-@n\r\n",
       "       @D-@GStamina   @D-@n\r\n",
@@ -485,7 +483,6 @@ ACMD(do_toplist)
   if (char_is_npc(ch))
     return;
 
-  char filler[50];
   std::optional<std::string> path = player_path(INTRO_FILE, "toplist");
   io::loaded<io::text_reader> file = io::text_reader::open(path.value_or(""));
   if (!file) {
@@ -499,10 +496,7 @@ ACMD(do_toplist)
     std::optional<std::string_view> line = file->line();
     if (!line)
       break;
-    int64_t stats;
-    *filler = '\0';
-    sscanf(std::string(*line).c_str(), "%49s %" SCNd64 "\n", filler, &stats);
-    titles[count] = filler;
+    io::fields(until_nul(*line)).word(titles[count], 49); /* the name, before its number */
   }
 
   send_to_char(g, ch, "@D-=[@BDBAT Top Lists for @REra@C {:d}@D]=-@n\r\n", CURRENT_ERA);
@@ -515,7 +509,7 @@ ACMD(do_toplist)
 
 ACMD(do_whois)
 {
-  static constexpr const char *immlevels[ADMLVL_IMPL + 1] = {
+  static constexpr std::string_view immlevels[ADMLVL_IMPL + 1] = {
       "[Mortal]", "[Enforcer]", "[First Class Enforcer]", "[High Enforcer]", "[Vice Admin]", "[Administrator]", "[Implementor]",
   };
 

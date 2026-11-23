@@ -24,20 +24,14 @@
 
 void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator)
 {
-  const char *storage = NEWS_FILE;
-
-  if (!storage)
-    terminator = STRINGADD_ABORT;
+  std::string storage = NEWS_FILE;
 
   switch (terminator) {
     case STRINGADD_SAVE:
       if (d->draft.empty())
         mudlog(g, LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '{}'.", storage);
       else {
-        char *tmstr;
-        time_t mytime                = game_now(g);
-        tmstr                        = asctime(localtime(&mytime));
-        *(tmstr + strlen(tmstr) - 1) = '\0';
+        std::string tmstr = asctime_text(game_now(g));
 
         std::string draft = d->draft;
         strip_cr(draft);
@@ -83,7 +77,7 @@ namespace {
   struct text_file_editor final : olc_session {
     std::string file; /* where the text is written */
 
-    explicit text_file_editor(const char *path) : file(path) {}
+    explicit text_file_editor(std::string_view path) : file(path) {}
 
     void parse(GameWorld *, struct descriptor_data *, std::string_view) override {} /* the text editor has every line */
     void text_done(GameWorld *g, struct descriptor_data *d, int action) override;
@@ -153,11 +147,11 @@ ACMD(do_tedit)
   std::string field;
 
   struct {
-    const char *cmd{};
+    std::string_view cmd{};
     char level{};
     std::string *buffer{};
     int size{};
-    const char *filename{};
+    std::string_view filename{};
   } fields[] = {
       /* edit the lvls to your own needs */
       {"credits",    ADMLVL_IMPL,  &g->credits,    24000, CREDITS_FILE   },
@@ -170,7 +164,7 @@ ACMD(do_tedit)
       {"handbook",   ADMLVL_IMPL,  &g->handbook,   24000, HANDBOOK_FILE  },
       {"update",     ADMLVL_IMPL,  &g->policies,   24000, POLICIES_FILE  },
       {"ihelp",      ADMLVL_GRGOD, &g->ihelp,      24000, IHELP_PAGE_FILE},
-      {"\n",         0,            nullptr,     0,     nullptr        }
+      {"\n",         0,            nullptr,     0,     {}             }
   };
 
   if (char_get_desc(ch) == nullptr)
@@ -181,7 +175,7 @@ ACMD(do_tedit)
 
   if (field.empty()) {
     send_to_char(g, ch, "Files available to be edited:\r\n");
-    for (l = 0; *fields[l].cmd != '\n'; l++) {
+    for (l = 0; fields[l].cmd != "\n"; l++) {
       if (char_get_admlevel(ch) >= fields[l].level) {
         send_to_char(g, ch, "{:<11.11} ", fields[l].cmd);
         if (!(++i % 7))
@@ -194,11 +188,11 @@ ACMD(do_tedit)
       send_to_char(g, ch, "None.\r\n");
     return;
   }
-  for (l = 0; *(fields[l].cmd) != '\n'; l++)
-    if (!strncmp(field.c_str(), fields[l].cmd, field.size()))
+  for (l = 0; fields[l].cmd != "\n"; l++)
+    if (fields[l].cmd.starts_with(field))
       break;
 
-  if (*fields[l].cmd == '\n') {
+  if (fields[l].cmd == "\n") {
     send_to_char(g, ch, "Invalid text editor option.\r\n");
     return;
   }

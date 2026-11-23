@@ -17,7 +17,7 @@
 
 namespace {
 
-constexpr const char *ban_types[] = {"no", "new", "select", "all", "ERROR"};
+static constexpr std::string_view ban_types[] = {"no", "new", "select", "all", "ERROR"};
 
 void write_bans(io::text_writer &out, const ban_list_element *node)
 {
@@ -51,8 +51,8 @@ void load_banned(GameWorld *g)
     if (!(in.word(type, 99) && in.word(site, BANNED_SITE_LENGTH) && in.number(date) && in.word(name, 20)))
       break;
     auto *node = new ban_list_element();
-    site.copy(node->site, sizeof(node->site) - 1);
-    name.copy(node->name, sizeof(node->name) - 1);
+    node->site = std::move(site);
+    node->name = std::move(name);
     node->date = date;
     for (int i = BAN_NOT; i <= BAN_ALL; i++)
       if (type == ban_types[i])

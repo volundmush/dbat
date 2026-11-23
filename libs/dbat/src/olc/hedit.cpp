@@ -129,12 +129,12 @@ namespace {
     strip_cr(text);
     help.keywords = text.empty() ? "undefined" : text;
 
-    const char *refusal = nullptr;
+    std::string_view refusal;
     if (help.keywords.contains("undefined"))
       refusal = "@RYou must at least enter SOME keywords.@n\n";
     else if (help.keywords.contains("<<X<<") || help.keywords.contains("<<x<<"))
       refusal = "@RLet's not joke around with help files now.@n\n";
-    if (!refusal) {
+    if (refusal.empty()) {
       help.entry = help.keywords + "\r\n----------\r\n\r\n" + help.entry;
       return true;
     }
@@ -257,7 +257,7 @@ namespace {
         break;
 
       case mode::min_level:
-        if (int number = atoi(std::string(line).c_str()); number >= 0 && number <= ADMLVL_IMPL)
+        if (int number = parse_int(line); number >= 0 && number <= ADMLVL_IMPL)
           help.min_level = number;
         else {
           write_to_output(g, d, "That is not a valid choice!\r\nEnter min level:-\r\n] ");

@@ -41,7 +41,7 @@ namespace {
 
 /* A line read as sscanf("%d") reads it: an error if there is none, or it doesn't start with a number. quirk: a line of
    only spaces reads as nothing, leaving n as it was. */
-io::loaded<void> read_number(io::text_reader &in, shop_vnum vnum, int &n, const char *what)
+io::loaded<void> read_number(io::text_reader &in, shop_vnum vnum, int &n, std::string_view what)
 {
   std::optional<std::string_view> line = in.line();
   if (!line || io::scan_ints(*line, std::span(&n, 1)) == 0)
@@ -49,7 +49,7 @@ io::loaded<void> read_number(io::text_reader &in, shop_vnum vnum, int &n, const 
   return {};
 }
 
-io::loaded<void> read_real(io::text_reader &in, shop_vnum vnum, float &x, const char *what)
+io::loaded<void> read_real(io::text_reader &in, shop_vnum vnum, float &x, std::string_view what)
 {
   std::optional<std::string_view> line = in.line();
   if (!line || io::scan_float(*line, x) == 0)
@@ -85,7 +85,7 @@ void log_full_list(const std::vector<shop_buy_data> &list, int dropped)
 
 /* A list of numbers, one to a line, up to a negative one */
 io::loaded<std::vector<shop_buy_data>> read_list(GameWorld *g, io::text_reader &in, shop_vnum vnum, int type,
-                                                 const char *what)
+                                                 std::string_view what)
 {
   std::vector<shop_buy_data> list;
   int dropped = 0;

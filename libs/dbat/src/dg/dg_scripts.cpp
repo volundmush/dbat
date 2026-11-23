@@ -24,6 +24,8 @@
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/io/reader.hpp"
+#include "dbat/stringutils.hpp"
 
 #include "dg_internal.hpp"
 
@@ -200,27 +202,31 @@ static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, std::strin
 {
   const std::string &written = trig->run.prog->lines[at].text;
   long when, hr, min, ntime;
-  char c;
 
   take_word(cmd); /* "wait" */
-  std::string arg(skip_spaces(cmd));
+  std::string_view arg = skip_spaces(cmd);
 
   if (arg.empty()) {
     script_log(g, "Trigger: {}, VNum {:d}. wait w/o an arg: '{}'",
                trig->name, trig_get_vnum(g, trig), written);
     return false;
   }
-  if (!dg::readable_wait(arg.c_str())) {
+  arg = arg.substr(0, arg.find('\0')); /* where the C string it was ended */
+  if (!dg::readable_wait(arg)) {
     script_log(g, "Trigger: {}, VNum {:d}. wait without a time it can read: '{}'",
                trig->name, trig_get_vnum(g, trig), written);
     return false;
   }
 
-  if (!strncasecmp(arg.c_str(), "until ", 6)) {
+  if (!compare_nocase_n(arg, "until ", 6)) {
 
-    /* valid forms of time are 14:30 and 1430 */
-    if (sscanf(arg.c_str(), "until %ld:%ld", &hr, &min) == 2)
-      min = wait_mul(hr, 60) + min;
+    /* valid forms of time are 14:30 and 1430; readable_wait() has seen "until" and a number */
+    io::fields time(arg.substr(5));
+    long long hours = 0, minutes = 0;
+    time.number(hours) && time.literal(':') && time.number(minutes);
+    hr = static_cast<long>(hours);
+    if (time.count() == 2)
+      min = wait_mul(hr, 60) + static_cast<long>(minutes);
     else
       min = (hr % 100) + wait_mul(hr / 100, 60);
 
@@ -237,10 +243,16 @@ static bool process_wait(GameWorld *g, owner_ptr go, trig_data *trig, std::strin
       when = ntime - when;
   }
 
-  else if (sscanf(arg.c_str(), "%ld %c", &when, &c) == 2) {
-    if (c == 't')
+  else {
+    /* "<number> <unit>": readable_wait() has seen the number; with no unit, it is in pulses */
+    io::fields amount(arg);
+    long long pulses = 0;
+    amount.number(pulses);
+    when                  = static_cast<long>(pulses);
+    std::string_view unit = skip_spaces(amount.rest());
+    if (unit.starts_with('t'))
       when = wait_mul(when, PULSES_PER_MUD_HOUR);
-    else if (c == 's')
+    else if (unit.starts_with('s'))
       when = wait_mul(when, PASSES_PER_SEC);
   }
   schedule_wait(g, go, trig, std::clamp(when, -MAX_WAIT_PULSES, MAX_WAIT_PULSES));
@@ -701,7 +713,7 @@ static void process_context(GameWorld *g, struct script_data *sc, trig_data *tri
     return;
   }
 
-  sc->context = atol(std::string(var).c_str());
+  sc->context = io::c_atol(var);
 }
 
 /* extract <variable> <n> <text>: the variable gets the text's nth word, lowercased, or nothing */

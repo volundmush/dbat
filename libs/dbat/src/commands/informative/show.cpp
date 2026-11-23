@@ -91,7 +91,7 @@ static void see_plant(GameWorld *g, struct obj_data *obj, struct char_data *ch)
   }
 }
 
-static const char *const weapon_disp[6] = {
+static constexpr std::string_view weapon_disp[6] = {
     "Sword",
     "Dagger",
     "Spear",
@@ -674,7 +674,7 @@ void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 {
   struct {
     int percent{};
-    const char *text{};
+    std::string_view text{};
   } diagnosis[] = {
       {100, "is in excellent condition."               },
       {90,  "has a few scuffs."                        },
@@ -704,7 +704,7 @@ void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 {
   struct {
     int percent{};
-    const char *text{};
+    std::string_view text{};
   } diagnosis[] = {
       {100, "@wis in @Gexcellent@w condition."                  },
       {90,  "@whas a few @Rscratches@w."                        },
@@ -732,8 +732,7 @@ void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 
 void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 {
-  int j, found, clan = false;
-  char buf[100];
+  int j, found;
 
   if (!char_get_desc(ch)) {
     return;
@@ -802,9 +801,8 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
     }
   }
   send_to_char(g, ch, "\r\n");
-  clan = false;
-  if (!char_is_npc(i)) {
-    send_to_char(g, ch, "            @D[@mClan        @D: @W{:<20}@D]@n\r\n", clan ? buf : "None.");
+  if (!char_is_npc(i)) { /* clans are gone */
+    send_to_char(g, ch, "            @D[@mClan        @D: @W{:<20}@D]@n\r\n", "None.");
   }
   if (!char_is_npc(i)) {
     send_to_char(g, ch, "\r\n         @D----------------------------------------@n\r\n");
@@ -969,7 +967,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
 {
   struct obj_data *chair  = nullptr;
   int count               = false;
-  const char *positions[] = {
+  static constexpr std::string_view positions[] = {
       " is dead",
       " is mortally wounded",
       " is lying here, incapacitated",

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstring>
+#include <ctime>
 #include <string>
 #include <string_view>
 #include <cctype>
@@ -30,17 +31,19 @@ bool str_less_nocase(std::string_view a, std::string_view b);
 /* How the first n characters of a and b compare ignoring case, as strncasecmp() finds them: the end of either
    reads as a '\0' */
 int compare_nocase_n(std::string_view a, std::string_view b, size_t n);
+/* How a and b compare ignoring case, as strcasecmp() finds them: the difference of the first lowered characters that
+   differ, the end of either (or a '\0' in it) reading as a '\0' */
+inline int compare_nocase(std::string_view a, std::string_view b) { return compare_nocase_n(a, b, std::string_view::npos); }
 
 /* s with its first byte in upper case, colour codes and all (CAP skips those); empty stays empty */
 std::string upper_first(std::string_view s);
 
+/* s up to its first '\0', where a C string of it ended: for text read as c_str() was */
+constexpr std::string_view until_nul(std::string_view s) { return s.substr(0, s.find('\0')); }
 /* The line's first character, or '\0' if it is empty, as *line read it when it was a C string */
 constexpr char first_char(std::string_view line) { return line.empty() ? '\0' : line.front(); }
 /* s, or otherwise when s is empty: the getters' "none" is empty, where it was null (x ? x : otherwise) */
 constexpr std::string_view or_if_empty(std::string_view s, std::string_view otherwise) { return s.empty() ? otherwise : s; }
-/* Copies src into dst, a buffer of size bytes, cut short to fit and always ended by a '\0', as strlcpy() did;
-   nothing is written if size is 0 */
-void copy_cstr(char *dst, std::string_view src, size_t size);
 /* The number s starts with, read as atoi() reads it: leading whitespace and a sign allowed, the rest ignored */
 int parse_int(std::string_view s);
 /* s with each "$$" made "$" */
@@ -54,5 +57,7 @@ std::string_view fname(std::string_view namelist);
 /* Replaces the first find in s, then searches again from the start, until none is left
  * (so replace must not contain find; an empty find changes nothing). */
 void search_replace(std::string &s, std::string_view find, std::string_view replace);
+/* when, in local time, as asctime() writes it ("Mon Nov 23 09:43:00 2026") but without its newline */
+std::string asctime_text(time_t when);
 /* s in lowercase, as tolower() makes each character */
 std::string to_lower(std::string_view s);

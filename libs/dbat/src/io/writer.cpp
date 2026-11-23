@@ -13,12 +13,12 @@ namespace io {
 
 namespace {
 
-void log_failure(const char *operation, const std::string &filename, int error)
+void log_failure(std::string_view operation, const std::string &filename, int error)
 {
   mud_log("SYSERR: atomic save: {} failed for {}: {}", operation, filename, std::strerror(error));
 }
 
-void log_failure(const char *operation, const std::string &filename, const std::error_code &ec)
+void log_failure(std::string_view operation, const std::string &filename, const std::error_code &ec)
 {
   mud_log("SYSERR: atomic save: {} failed for {}: {}", operation, filename, ec.message());
 }

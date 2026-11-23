@@ -113,7 +113,7 @@ struct GameWorld {
   struct config_data config_info{};
   float exp_multiplier{};
   room_vnum r_mortal_start_room{}, r_immort_start_room{}, r_frozen_start_room{};
-  char level_version[READ_SIZE]{};
+  std::string level_version; /* up to READ_SIZE - 1 */
   int level_vernum{};
   int save_classes[SAVING_WILL + 1][NUM_CLASSES]{};
   int basehit_classes[NUM_CLASSES]{};

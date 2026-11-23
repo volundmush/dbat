@@ -68,7 +68,6 @@ namespace {
     if (char_is_npc(ch))
       return;
 
-    char filler[50] = "";
     std::optional<std::string> path = player_path(INTRO_FILE, "lockout");
     io::loaded<io::text_reader> file = io::text_reader::open(path.value_or(""));
     if (!file) {
@@ -81,8 +80,9 @@ namespace {
     bool first = true, odd = false;
     while (!lines.eof()) {
       lines.next();
-      sscanf(lines.line().c_str(), "%49s\n", filler);
-      if (first || !strstr(buf.c_str(), filler)) {
+      std::string filler; /* the line's first word, or "" */
+      io::fields(until_nul(lines.line())).word(filler, 49);
+      if (first || !buf.contains(filler)) {
         if (odd && !first)
           buf += str_format("{:<23}\n", filler);
         else
@@ -90,7 +90,6 @@ namespace {
         odd   = first || !odd;
         first = false;
       }
-      *filler = '\0';
     }
     if (odd)
       buf += "\n";
@@ -101,7 +100,6 @@ namespace {
   /* Locks name out, or lets them back in if they were */
   void lockWrite(GameWorld *g, struct char_data *ch, std::string_view name)
   {
-    char filler[50] = "";
     std::string capped(name);
     CAP(capped);
 
@@ -116,17 +114,17 @@ namespace {
     std::vector<std::string> names;
     while (!lines.eof() || names.size() < 498) {
       lines.next();
-      sscanf(lines.line().c_str(), "%49s\n", filler);
-      names.emplace_back(filler);
-      *filler = '\0';
+      std::string filler; /* the line's first word, or "" */
+      io::fields(until_nul(lines.line())).word(filler, 49);
+      names.push_back(std::move(filler));
     }
 
     io::text_writer out(*path);
     bool found = false;
     for (size_t x = 0; x < names.size(); x++) {
-      if (x > 0 && !strcasecmp(names[x - 1].c_str(), names[x].c_str()))
+      if (x > 0 && str_eq_nocase(names[x - 1], names[x]))
         continue;
-      if (strcasecmp(names[x].c_str(), capped.c_str()))
+      if (!str_eq_nocase(names[x], capped))
         out.print("{}\n", CAP(names[x]));
       else
         found = true;
@@ -158,7 +156,7 @@ namespace {
   }
 
   /* The senior immortals, whom no one can lock out */
-  constexpr const char *SENIOR_IMMORTALS[] = {"Iovan", "Fahl", "Xyron", "Samael"};
+  static constexpr std::string_view SENIOR_IMMORTALS[] = {"Iovan", "Fahl", "Xyron", "Samael"};
 } // namespace
 
 ACMD(do_approve)
@@ -273,10 +271,7 @@ ACMD(do_interest)
     return;
   }
   if (g->INTERESTTIME > 0) {
-    char *tmstr;
-    tmstr                        = asctime(localtime(&g->INTERESTTIME));
-    *(tmstr + strlen(tmstr) - 1) = '\0';
-    send_to_char(g, ch, "INTEREST TIME: [{}]\r\n", tmstr);
+    send_to_char(g, ch, "INTEREST TIME: [{}]\r\n", asctime_text(g->INTERESTTIME));
     return;
   }
   send_to_char(g, ch, "Interest time has been initiated!\r\n");
@@ -294,7 +289,7 @@ ACMD(do_hell)
     send_to_char(g, ch, "Syntax: lockout (character)\n        lockout list\r\n");
     return;
   }
-  if (std::ranges::any_of(SENIOR_IMMORTALS, [&](const char *name) { return str_eq_nocase(arg, name); })) {
+  if (std::ranges::any_of(SENIOR_IMMORTALS, [&](std::string_view name) { return str_eq_nocase(arg, name); })) {
     send_to_char(g, ch, "What are you smoking? You can't lockout senior imms.\r\n");
     return;
   }
@@ -523,14 +518,14 @@ namespace {
 
   bool freeze(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
-    const char *refusal = nullptr;
+    std::string_view refusal {};
     if (ch == vict)
       refusal = "Oh, yeah, THAT'S real smart...\r\n";
     else if (char_get_admlevel(ch) <= char_get_admlevel(vict))
       refusal = "Pfft...\r\n";
     else if (char_plr_flagged(vict, PLR_FROZEN))
       refusal = "Your victim is already pretty cold.\r\n";
-    if (refusal) {
+    if (!refusal.empty()) {
       send_to_char(g, ch, refusal);
       return false;
     }
@@ -633,20 +628,20 @@ namespace {
     struct char_data *ch;
     struct char_data *vict;
     const std::string &val; /* as typed */
-    const char *field;
+    std::string_view field{};
     int64_t value; /* a NUMBER field's */
     bool on;       /* a BINARY field's */
 
     int64_t clamp(int64_t lo, int64_t hi) { return value = std::max(lo, std::min(hi, value)); }
 
-    bool says(const char *text, bool done)
+    bool says(std::string_view text, bool done)
     {
       send_to_char(g, ch, "{}", text);
       return done;
     }
 
     /* Tells the immortals and the log, then works out the victim's stats again if asked to. */
-    bool logged(const char *what, bool totals = false)
+    bool logged(std::string_view what, bool totals = false)
     {
       mudlog(g, LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "SET: {} has set {} for {}.", char_get_name(ch), what, char_get_name(vict));
       log_imm_action(g, "SET: {} has set {} for {}.", char_get_name(ch), what, char_get_name(vict));
@@ -732,7 +727,7 @@ namespace {
   }
 
   struct set_field {
-    const char *name;
+    std::string_view name{};
     int level;
     int pcnpc;
     int type;
@@ -1074,14 +1069,14 @@ ACMD(do_chown)
   if (reject(g, ch, found))
     return;
   struct char_data *victim = *found;
-  const char *refusal      = nullptr;
+  std::string_view refusal      {};
   if (victim == ch)
     refusal = "Are you sure you're feeling ok?\r\n";
   else if (char_get_level(victim) >= char_get_level(ch))
     refusal = "That's really not such a good idea.\r\n";
   else if (buf3.empty())
     refusal = "Syntax: chown <object> <character>.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }

@@ -108,7 +108,7 @@ ACMD(do_action)
 
 namespace {
   /* The first of the insults, by whether the insulter is male, then the insulted */
-  constexpr const char *SEXED_INSULTS[2][2] = {
+  constexpr std::string_view SEXED_INSULTS[2][2] = {
       {"$n tells you that you'd lose a beauty contest against a troll.", "$n accuses you of having the smallest... (brain?)"},
       {"$n says that women can't fight.",                                 "$n accuses you of fighting like a woman!"        },
   };

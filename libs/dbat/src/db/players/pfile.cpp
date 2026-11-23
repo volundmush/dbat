@@ -47,8 +47,8 @@ struct pfile_reader {
   std::string flag_words[4]{};
   int num = 0, num2 = 0, num3 = 0;
 
-  int atoi() const { return static_cast<int>(io::c_atol(value)); }
-  long long atoll() const { return io::c_atoll(value); }
+  int as_int() const { return static_cast<int>(io::c_atol(value)); }
+  long long as_llong() const { return io::c_atoll(value); }
   /* sscanf("%lld"): 0 if there is no number */
   long long number64() const
   {
@@ -85,20 +85,20 @@ struct pfile_writer {
   io::text_writer &out;
   std::span<const affected_type> affects; /* as they were before they were taken off to save */
 
-  template <class V> void number(const char *tag, V value) { out.print("{}: {:d}\n", tag, value); }
-  template <class V, class D> void unless(const char *tag, V value, D fallback)
+  template <class V> void number(std::string_view tag, V value) { out.print("{}: {:d}\n", tag, value); }
+  template <class V, class D> void unless(std::string_view tag, V value, D fallback)
   {
     if (value != fallback)
       number(tag, value);
   }
-  void text(const char *tag, std::string_view s) { out.print("{}: {}\n", tag, s); }
+  void text(std::string_view tag, std::string_view s) { out.print("{}: {}\n", tag, s); }
   /* no line for an empty field, which reads back as empty all the same */
-  void text_unless_empty(const char *tag, std::string_view s)
+  void text_unless_empty(std::string_view tag, std::string_view s)
   {
     if (!s.empty())
       text(tag, s);
   }
-  void flags(const char *tag, const bitvector_t *bits)
+  void flags(std::string_view tag, const bitvector_t *bits)
   {
     out.print("{}: {} {} {} {}\n", tag, flag_letters(bits[0]), flag_letters(bits[1]), flag_letters(bits[2]), flag_letters(bits[3]));
   }
@@ -137,7 +137,7 @@ void read_skills(pfile_reader &r, bool mods)
   } while (num != 0);
 }
 
-void write_skills(pfile_writer &w, const char *tag, bool mods)
+void write_skills(pfile_writer &w, std::string_view tag, bool mods)
 {
   if (char_get_admlevel(w.ch) >= ADMLVL_IMMORT)
     return;
@@ -183,20 +183,20 @@ using R = pfile_reader;
 using W = pfile_writer;
 
 struct pfile_tag {
-  const char *tag;
+  std::string_view tag{};
   void (*read)(R &);
-  void (*write)(W &, const char *tag); /* null for tags only read, from older files */
+  void (*write)(W &, std::string_view tag); /* null for tags only read, from older files */
 };
 
 constexpr bool ascii_save_poofs = true; /* quirk: ASCII_SAVE_POOFS was "false", but tested with #ifdef */
 
 /* In the order they are written */
 constexpr pfile_tag pfile_tags[] = {
-    {"Name", [](R &r) { char_set_pc_name(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_name(w.ch)); }},
-    {"User", [](R &r) { char_set_loguser(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text(t, char_get_user(w.ch)); }},
-    {"Voic", [](R &r) { char_set_voice(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_voice(w.ch)); }},
-    {"RPfe", [](R &r) { char_set_feature(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_feature(w.ch)); }},
-    {"Trns", [](R &r) { char_set_ability_trains(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_ability_trains(w.g, w.ch), 0); }},
+    {"Name", [](R &r) { char_set_pc_name(r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text_unless_empty(t, char_get_name(w.ch)); }},
+    {"User", [](R &r) { char_set_loguser(r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text(t, char_get_user(w.ch)); }},
+    {"Voic", [](R &r) { char_set_voice(r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text_unless_empty(t, char_get_voice(w.ch)); }},
+    {"RPfe", [](R &r) { char_set_feature(r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text_unless_empty(t, char_get_feature(w.ch)); }},
+    {"Trns", [](R &r) { char_set_ability_trains(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_ability_trains(w.g, w.ch), 0); }},
     {"Desc",
      [](R &r) {
        io::loaded<std::string> text = r.in.tilde_string("its description");
@@ -205,50 +205,50 @@ constexpr pfile_tag pfile_tags[] = {
        else
          char_set_ddesc(r.ch, *text);
      },
-     [](W &w, const char *) {
+     [](W &w, std::string_view) {
        if (!char_get_ddesc(w.ch).empty())
          w.out.print("Desc:\n{}~\n", kill_ems(char_get_ddesc(w.ch)));
      }},
-    {"PfIn", [](R &r) { if (ascii_save_poofs) char_set_poofin(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { if (ascii_save_poofs) w.text_unless_empty(t, char_get_poofin(w.g, w.ch)); }},
-    {"PfOt", [](R &r) { if (ascii_save_poofs) char_set_poofout(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { if (ascii_save_poofs) w.text_unless_empty(t, char_get_poofout(w.g, w.ch)); }},
-    {"Sex ", [](R &r) { char_set_sex(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_sex(w.ch), PFDEF_SEX); }},
-    {"Size", [](R &r) { char_set_size(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_size(w.ch), PFDEF_SIZE); }},
-    {"Clas", [](R &r) { char_set_class(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_class(w.ch), PFDEF_CLASS); }},
-    {"Race", [](R &r) { char_set_race(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_race(w.ch), PFDEF_RACE); }},
-    {"Raci", [](R &r) { char_set_racial_pref(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_racial_pref(w.ch), PFDEF_BANK); }},
-    {"AdmL", [](R &r) { char_set_admlevel(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_admlevel(w.ch), PFDEF_LEVEL); }},
-    {"Levl", [](R &r) { char_set_class_level(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_class_level(w.ch), PFDEF_LEVEL); }},
-    {"HitD", [](R &r) { char_set_race_level(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_race_level(w.ch), PFDEF_LEVEL); }},
-    {"LvlA", [](R &r) { char_set_level_adj(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_level_adj(w.ch), PFDEF_LEVEL); }},
-    {"Home", [](R &r) { char_set_hometown(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_hometown(w.ch), PFDEF_HOMETOWN); }},
-    {"Id  ", [](R &r) { char_set_idnum(r.ch, static_cast<int32_t>(io::c_atol(r.value))); }, [](W &w, const char *t) { w.number(t, char_get_idnum(w.ch)); }},
-    {"Brth", [](R &r) { char_set_time_birth(r.ch, r.atoll()); }, [](W &w, const char *t) { w.number(t, static_cast<long long>(char_get_time_birth(w.ch))); }},
-    {"Crtd", [](R &r) { char_set_time_created(r.ch, r.atoll()); }, [](W &w, const char *t) { w.number(t, static_cast<long long>(char_get_time_created(w.ch))); }},
-    {"MxAg", [](R &r) { char_set_time_maxage(r.ch, r.atoll()); }, [](W &w, const char *t) { w.number(t, static_cast<long long>(char_get_time_maxage(w.ch))); }},
-    {"Plyd", [](R &r) { char_set_time_played(r.ch, r.atoll()); }, [](W &w, const char *t) { w.number(t, static_cast<long long>(char_get_time_played(w.ch))); }},
-    {"Last", [](R &r) { char_set_time_logon(r.ch, r.atoll()); }, [](W &w, const char *t) { w.number(t, static_cast<long long>(char_get_time_logon(w.ch))); }},
-    {"Host", [](R &r) { char_set_host(r.g, r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_host(w.g, w.ch)); }},
-    {"Hite", [](R &r) { char_set_height(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_height(w.ch), PFDEF_HEIGHT); }},
-    {"Wate", [](R &r) { char_set_weight(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_weight(w.ch), PFDEF_HEIGHT); }}, /* quirk: the height's default */
-    {"Alin", [](R &r) { char_set_alignment(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_alignment(w.ch), PFDEF_ALIGNMENT); }},
-    {"Aura", [](R &r) { char_set_aura(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_aura(w.ch), PFDEF_SKIN); }},
-    {"Act ", [](R &r) { r.flags(char_get_act(r.ch)); }, [](W &w, const char *t) { w.flags(t, char_get_act(w.ch)); }},
-    {"Aff ", [](R &r) { r.flags(char_get_affected_by(r.ch)); }, [](W &w, const char *t) { w.flags(t, char_get_affected_by(w.ch)); }},
-    {"Pref", [](R &r) { r.flags(char_get_pref(r.g, r.ch)); }, [](W &w, const char *t) { w.flags(t, char_get_pref(w.g, w.ch)); }},
-    {"AdmF", [](R &r) { r.flags(char_get_admflags(r.ch)); }, [](W &w, const char *t) { w.flags(t, char_get_admflags(w.ch)); }},
-    {"Wimp", [](R &r) { char_set_wimp_level(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_wimp_level(w.g, w.ch), PFDEF_WIMPLEV); }},
-    {"PwrA", [](R &r) { char_set_powerattack(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_powerattack(w.ch), PFDEF_POWERATT); }},
-    {"Frez", [](R &r) { char_set_freeze_level(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_freeze_level(w.g, w.ch), PFDEF_FREEZELEV); }},
-    {"Invs", [](R &r) { char_set_invis_level(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_invis_level(w.g, w.ch), PFDEF_INVISLEV); }},
-    {"Room", [](R &r) { char_set_load_room(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_load_room(w.g, w.ch), PFDEF_LOADROOM); }},
-    {"Badp", [](R &r) { char_set_bad_pws(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_bad_pws(w.g, w.ch), PFDEF_BADPWS); }},
+    {"PfIn", [](R &r) { if (ascii_save_poofs) char_set_poofin(r.g, r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { if (ascii_save_poofs) w.text_unless_empty(t, char_get_poofin(w.g, w.ch)); }},
+    {"PfOt", [](R &r) { if (ascii_save_poofs) char_set_poofout(r.g, r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { if (ascii_save_poofs) w.text_unless_empty(t, char_get_poofout(w.g, w.ch)); }},
+    {"Sex ", [](R &r) { char_set_sex(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_sex(w.ch), PFDEF_SEX); }},
+    {"Size", [](R &r) { char_set_size(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_size(w.ch), PFDEF_SIZE); }},
+    {"Clas", [](R &r) { char_set_class(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_class(w.ch), PFDEF_CLASS); }},
+    {"Race", [](R &r) { char_set_race(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_race(w.ch), PFDEF_RACE); }},
+    {"Raci", [](R &r) { char_set_racial_pref(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_racial_pref(w.ch), PFDEF_BANK); }},
+    {"AdmL", [](R &r) { char_set_admlevel(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_admlevel(w.ch), PFDEF_LEVEL); }},
+    {"Levl", [](R &r) { char_set_class_level(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_class_level(w.ch), PFDEF_LEVEL); }},
+    {"HitD", [](R &r) { char_set_race_level(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_race_level(w.ch), PFDEF_LEVEL); }},
+    {"LvlA", [](R &r) { char_set_level_adj(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_level_adj(w.ch), PFDEF_LEVEL); }},
+    {"Home", [](R &r) { char_set_hometown(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_hometown(w.ch), PFDEF_HOMETOWN); }},
+    {"Id  ", [](R &r) { char_set_idnum(r.ch, static_cast<int32_t>(io::c_atol(r.value))); }, [](W &w, std::string_view t) { w.number(t, char_get_idnum(w.ch)); }},
+    {"Brth", [](R &r) { char_set_time_birth(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.number(t, static_cast<long long>(char_get_time_birth(w.ch))); }},
+    {"Crtd", [](R &r) { char_set_time_created(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.number(t, static_cast<long long>(char_get_time_created(w.ch))); }},
+    {"MxAg", [](R &r) { char_set_time_maxage(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.number(t, static_cast<long long>(char_get_time_maxage(w.ch))); }},
+    {"Plyd", [](R &r) { char_set_time_played(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.number(t, static_cast<long long>(char_get_time_played(w.ch))); }},
+    {"Last", [](R &r) { char_set_time_logon(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.number(t, static_cast<long long>(char_get_time_logon(w.ch))); }},
+    {"Host", [](R &r) { char_set_host(r.g, r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text_unless_empty(t, char_get_host(w.g, w.ch)); }},
+    {"Hite", [](R &r) { char_set_height(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_height(w.ch), PFDEF_HEIGHT); }},
+    {"Wate", [](R &r) { char_set_weight(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_weight(w.ch), PFDEF_HEIGHT); }}, /* quirk: the height's default */
+    {"Alin", [](R &r) { char_set_alignment(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_alignment(w.ch), PFDEF_ALIGNMENT); }},
+    {"Aura", [](R &r) { char_set_aura(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_aura(w.ch), PFDEF_SKIN); }},
+    {"Act ", [](R &r) { r.flags(char_get_act(r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_act(w.ch)); }},
+    {"Aff ", [](R &r) { r.flags(char_get_affected_by(r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_affected_by(w.ch)); }},
+    {"Pref", [](R &r) { r.flags(char_get_pref(r.g, r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_pref(w.g, w.ch)); }},
+    {"AdmF", [](R &r) { r.flags(char_get_admflags(r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_admflags(w.ch)); }},
+    {"Wimp", [](R &r) { char_set_wimp_level(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_wimp_level(w.g, w.ch), PFDEF_WIMPLEV); }},
+    {"PwrA", [](R &r) { char_set_powerattack(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_powerattack(w.ch), PFDEF_POWERATT); }},
+    {"Frez", [](R &r) { char_set_freeze_level(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_freeze_level(w.g, w.ch), PFDEF_FREEZELEV); }},
+    {"Invs", [](R &r) { char_set_invis_level(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_invis_level(w.g, w.ch), PFDEF_INVISLEV); }},
+    {"Room", [](R &r) { char_set_load_room(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_load_room(w.g, w.ch), PFDEF_LOADROOM); }},
+    {"Badp", [](R &r) { char_set_bad_pws(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_bad_pws(w.g, w.ch), PFDEF_BADPWS); }},
     {"Tcos",
      [](R &r) {
        io::fields f(r.value);
        if (f.number(r.num2) && f.number(r.num3) && r.num2 >= 0 && r.num2 < 6)
          char_set_transcost(r.ch, r.num2, r.num3);
      },
-     [](W &w, const char *t) {
+     [](W &w, std::string_view t) {
        for (int i = 0; i < 6; i++)
          if (char_get_transcost(w.ch, i) != false)
            w.out.print("{}: {:d} {:d}\n", t, i, char_get_transcost(w.ch, i));
@@ -259,99 +259,99 @@ constexpr pfile_tag pfile_tags[] = {
        f.number(r.num2) && f.number(r.num3);
        char_set_practice_points(r.g, r.ch, r.num3);
      },
-     [](W &w, const char *t) {
+     [](W &w, std::string_view t) {
        for (int i = 0; i < NUM_CLASSES; i++)
          if (char_get_practice_points(w.g, w.ch) != PFDEF_PRACTICES)
            w.out.print("{}: {:d} {:d}\n", t, i, char_get_practice_points(w.g, w.ch));
      }},
-    {"Hung", [](R &r) { char_set_conditions(r.g, r.ch, HUNGER, r.atoi()); },
-     [](W &w, const char *t) { if (char_get_admlevel(w.ch) < ADMLVL_IMMORT) w.unless(t, char_get_conditions(w.g, w.ch, HUNGER), PFDEF_HUNGER); }},
-    {"Thir", [](R &r) { char_set_conditions(r.g, r.ch, THIRST, r.atoi()); },
-     [](W &w, const char *t) { if (char_get_admlevel(w.ch) < ADMLVL_IMMORT) w.unless(t, char_get_conditions(w.g, w.ch, THIRST), PFDEF_THIRST); }},
-    {"Drnk", [](R &r) { char_set_conditions(r.g, r.ch, DRUNK, r.atoi()); },
-     [](W &w, const char *t) { if (char_get_admlevel(w.ch) < ADMLVL_IMMORT) w.unless(t, char_get_conditions(w.g, w.ch, DRUNK), PFDEF_DRUNK); }},
-    {"Str ", [](R &r) { char_set_real_abils_str(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_aff_abils_str(w.ch), PFDEF_STR); }},
-    {"Int ", [](R &r) { char_set_real_abils_intel(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_aff_abils_intel(w.ch), PFDEF_INT); }},
-    {"Wis ", [](R &r) { char_set_real_abils_wis(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_aff_abils_wis(w.ch), PFDEF_WIS); }},
-    {"Dex ", [](R &r) { char_set_real_abils_dex(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_aff_abils_dex(w.ch), PFDEF_DEX); }},
-    {"Con ", [](R &r) { char_set_real_abils_con(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_aff_abils_con(w.ch), PFDEF_CON); }},
-    {"Cha ", [](R &r) { char_set_real_abils_cha(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_aff_abils_cha(w.ch), PFDEF_CHA); }},
-    {"Cool", [](R &r) { char_set_con_cooldown(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_con_cooldown(w.ch), PFDEF_BANK); }},
-    {"Scoo", [](R &r) { char_set_con_sdcooldown(r.ch, r.atoi()); },
-     [](W &w, const char *t) { if (char_get_con_cooldown(w.ch) != PFDEF_BANK) w.number(t, char_get_con_sdcooldown(w.ch)); }}, /* quirk: written when the other cooldown is set */
-    {"Ac  ", [](R &r) { char_set_armor(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_armor(w.ch), PFDEF_AC); }},
-    {"Abso", [](R &r) { char_set_absorbs(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_absorbs(w.ch), PFDEF_GOLD); }},
-    {"INGl", [](R &r) { char_set_ingestLearned(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_ingestLearned(w.ch), PFDEF_GOLD); }},
-    {"Upgr", [](R &r) { char_set_upgrade(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_upgrade(w.ch), PFDEF_GOLD); }},
-    {"Forg", [](R &r) { char_set_forgeting(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_forgeting(w.ch), PFDEF_BANK); }},
-    {"Forc", [](R &r) { char_set_forgetcount(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_forgetcount(w.ch), PFDEF_BANK); }},
-    {"Kaio", [](R &r) { char_set_kaioken(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_kaioken(w.ch), PFDEF_GOLD); }},
-    {"Gold", [](R &r) { char_set_gold(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_gold(w.ch), PFDEF_GOLD); }},
-    {"Bank", [](R &r) { char_set_bank_gold(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_bank_gold(w.ch), PFDEF_BANK); }},
-    {"Exp ", [](R &r) { char_set_exp(r.ch, r.atoll()); }, [](W &w, const char *t) { w.unless(t, char_get_exp(w.ch), PFDEF_EXP); }},
-    {"Tcla", [](R &r) { char_set_transclass(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_transclass(w.ch), PFDEF_EXP); }},
-    {"Mexp", [](R &r) { char_set_moltexp(r.ch, r.number64()); }, [](W &w, const char *t) { w.unless(t, char_get_moltexp(w.ch), PFDEF_EXP); }},
-    {"Majm", [](R &r) { char_set_majinizer(r.ch, r.number64()); }, [](W &w, const char *t) { w.unless(t, char_get_majinizer(w.ch), PFDEF_EXP); }},
-    {"Mlvl", [](R &r) { char_set_moltlevel(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_moltlevel(w.ch), PFDEF_EXP); }},
-    {"Fisd", [](R &r) { char_set_accuracy_mod(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_accuracy_mod(w.ch), PFDEF_ACCURACY); }},
-    {"Pole", [](R &r) { char_set_accuracy(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_accuracy(w.ch), PFDEF_ACCURACY); }},
-    {"Prff", [](R &r) { char_set_preference(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_preference(w.ch), PFDEF_EYE); }},
-    {"Spek", [](R &r) { char_set_speaking(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_speaking(w.ch), PFDEF_SPEAKING); }},
-    {"Olc ", [](R &r) { char_set_olc_zone(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_olc_zone(w.g, w.ch), PFDEF_OLC); }},
-    {"Gaun", [](R &r) { char_set_gauntlet(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_gauntlet(w.g, w.ch), PFDEF_GAUNTLET); }},
-    {"Geno", [](R &r) { char_set_genome(r.ch, 0, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_genome(w.ch, 0), PFDEF_EYE); }},
-    {"Gen1", [](R &r) { char_set_genome(r.ch, 1, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_genome(w.ch, 1), PFDEF_EYE); }},
-    {"Posi", [](R &r) { char_set_position(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_position(w.ch), POS_STANDING); }},
-    {"LFPC", [](R &r) { char_set_lifeperc(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_lifeperc(w.ch), PFDEF_WEIGHT); }},
-    {"Bpl ", [](R &r) { char_set_basepl(r.ch, r.number64()); }, [](W &w, const char *t) { w.unless(t, getBasePL(w.ch), PFDEF_BASEPL); }},
-    {"Bki ", [](R &r) { char_set_baseki(r.ch, r.number64()); }, [](W &w, const char *t) { w.unless(t, getBaseKI(w.ch), PFDEF_BASEKI); }},
-    {"Bst ", [](R &r) { char_set_basest(r.ch, r.number64()); }, [](W &w, const char *t) { w.unless(t, getBaseST(w.ch), PFDEF_BASEST); }},
-    {"Droo", [](R &r) { char_set_droom(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_droom(w.ch), PFDEF_DROOM); }},
-    {"Hrl ", [](R &r) { char_set_hairl(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_hairl(w.ch), PFDEF_HAIRL); }},
-    {"Hrs ", [](R &r) { char_set_hairs(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_hairs(w.ch), PFDEF_HAIRS); }},
-    {"Hrc ", [](R &r) { char_set_hairc(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_hairc(w.ch), PFDEF_HAIRC); }},
-    {"Skn ", [](R &r) { char_set_skin(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_skin(w.ch), PFDEF_SKIN); }},
-    {"Eye ", [](R &r) { char_set_eye(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_eye(w.ch), PFDEF_EYE); }},
-    {"Phas", [](R &r) { char_set_distfea(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_distfea(w.ch), PFDEF_DISTFEA); }},
-    {"Fury", [](R &r) { char_set_fury(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_fury(w.ch), PFDEF_HAIRL); }},
-    {"Rad1", [](R &r) { char_set_radar1(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_radar1(w.ch), PFDEF_RADAR1); }},
-    {"Rad2", [](R &r) { char_set_radar2(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_radar2(w.ch), PFDEF_RADAR2); }},
-    {"Rad3", [](R &r) { char_set_radar3(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_radar3(w.ch), PFDEF_RADAR3); }},
-    {"Lpla", [](R &r) { char_set_lastpl(r.ch, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_lastpl(w.ch)), PFDEF_LPLAY); }},
-    {"Lint", [](R &r) { char_set_lastint(r.ch, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_lastint(w.ch)), PFDEF_LPLAY); }},
-    {"Deat", [](R &r) { char_set_deathtime(r.ch, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_deathtime(w.ch)), PFDEF_LPLAY); }},
-    {"Rtim", [](R &r) { char_set_rewtime(r.ch, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_rewtime(w.ch)), PFDEF_LPLAY); }},
-    {"Boos", [](R &r) { char_set_boosts(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_boosts(w.ch), PFDEF_DISTFEA); }},
-    {"Maji", [](R &r) { char_set_majinize(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_majinize(w.ch), PFDEF_LPLAY); }},
-    {"Blss", [](R &r) { char_set_blesslvl(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_blesslvl(w.ch), PFDEF_HEIGHT); }},
-    {"Boam", [](R &r) { char_set_lboard(r.ch, 0, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 0)), PFDEF_BOARD); }},
-    {"Boai", [](R &r) { char_set_lboard(r.ch, 1, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 1)), PFDEF_BOARD); }},
-    {"Boac", [](R &r) { char_set_lboard(r.ch, 2, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 2)), PFDEF_BOARD); }},
-    {"Boad", [](R &r) { char_set_lboard(r.ch, 3, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 3)), PFDEF_BOARD); }},
-    {"Boab", [](R &r) { char_set_lboard(r.ch, 4, r.atoll()); }, [](W &w, const char *t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 4)), PFDEF_BOARD); }},
-    {"Lira", [](R &r) { char_set_limb_condition(r.ch, 0, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_limb_condition(w.ch, 0), PFDEF_BOARD); }},
-    {"Lila", [](R &r) { char_set_limb_condition(r.ch, 1, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_limb_condition(w.ch, 1), PFDEF_BOARD); }},
-    {"Lirl", [](R &r) { char_set_limb_condition(r.ch, 2, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_limb_condition(w.ch, 2), PFDEF_BOARD); }},
-    {"Lill", [](R &r) { char_set_limb_condition(r.ch, 3, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_limb_condition(w.ch, 3), PFDEF_BOARD); }},
-    {"RPP ", [](R &r) { char_set_rp(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_rp(w.ch), PFDEF_SKIN); }},
-    {"RBan", [](R &r) { char_set_rbank(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_rbank(w.ch), PFDEF_SKIN); }},
-    {"Supp", [](R &r) { char_set_suppression(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_suppression(w.ch), PFDEF_SKIN); }},
-    {"Sups", [](R &r) { char_set_suppressed(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_suppressed(w.ch), PFDEF_SKIN); }},
-    {"Trp ", [](R &r) { char_set_trp(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_trp(w.ch), PFDEF_SKIN); }},
-    {"Deac", [](R &r) { char_set_dcount(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_dcount(w.ch), PFDEF_EYE); }},
-    {"Trag", [](R &r) { char_set_trainagl(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_trainagl(w.g, w.ch), PFDEF_EYE); }},
-    {"Trco", [](R &r) { char_set_traincon(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_traincon(w.g, w.ch), PFDEF_EYE); }},
-    {"Trin", [](R &r) { char_set_trainint(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_trainint(w.g, w.ch), PFDEF_EYE); }},
-    {"Trsp", [](R &r) { char_set_trainspd(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_trainspd(w.g, w.ch), PFDEF_EYE); }},
-    {"Trst", [](R &r) { char_set_trainstr(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_trainstr(w.g, w.ch), PFDEF_EYE); }},
-    {"Trwi", [](R &r) { char_set_trainwis(r.g, r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_trainwis(w.g, w.ch), PFDEF_EYE); }},
-    {"Phse", [](R &r) { char_set_starphase(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_starphase(w.ch), PFDEF_EYE); }},
-    {"Mimi", [](R &r) { char_set_mimic(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_mimic(w.ch), 0); }},
-    {"Slot", [](R &r) { char_set_skill_slots(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_skill_slots(w.ch), PFDEF_EYE); }},
-    {"Tgro", [](R &r) { char_set_tail_growth(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_tail_growth(w.ch), PFDEF_EYE); }},
-    {"rDis", [](R &r) { char_set_rdisplay(r.ch, std::string(r.value)); }, [](W &w, const char *t) { w.text_unless_empty(t, char_get_rdisplay(w.ch)); }},
-    {"Rela", [](R &r) { char_set_relax_count(r.ch, r.atoi()); }, [](W &w, const char *t) { w.unless(t, char_get_relax_count(w.ch), PFDEF_EYE); }},
-    {"Skil", [](R &r) { read_skills(r, false); }, [](W &w, const char *t) { write_skills(w, t, false); }},
+    {"Hung", [](R &r) { char_set_conditions(r.g, r.ch, HUNGER, r.as_int()); },
+     [](W &w, std::string_view t) { if (char_get_admlevel(w.ch) < ADMLVL_IMMORT) w.unless(t, char_get_conditions(w.g, w.ch, HUNGER), PFDEF_HUNGER); }},
+    {"Thir", [](R &r) { char_set_conditions(r.g, r.ch, THIRST, r.as_int()); },
+     [](W &w, std::string_view t) { if (char_get_admlevel(w.ch) < ADMLVL_IMMORT) w.unless(t, char_get_conditions(w.g, w.ch, THIRST), PFDEF_THIRST); }},
+    {"Drnk", [](R &r) { char_set_conditions(r.g, r.ch, DRUNK, r.as_int()); },
+     [](W &w, std::string_view t) { if (char_get_admlevel(w.ch) < ADMLVL_IMMORT) w.unless(t, char_get_conditions(w.g, w.ch, DRUNK), PFDEF_DRUNK); }},
+    {"Str ", [](R &r) { char_set_real_abils_str(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_aff_abils_str(w.ch), PFDEF_STR); }},
+    {"Int ", [](R &r) { char_set_real_abils_intel(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_aff_abils_intel(w.ch), PFDEF_INT); }},
+    {"Wis ", [](R &r) { char_set_real_abils_wis(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_aff_abils_wis(w.ch), PFDEF_WIS); }},
+    {"Dex ", [](R &r) { char_set_real_abils_dex(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_aff_abils_dex(w.ch), PFDEF_DEX); }},
+    {"Con ", [](R &r) { char_set_real_abils_con(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_aff_abils_con(w.ch), PFDEF_CON); }},
+    {"Cha ", [](R &r) { char_set_real_abils_cha(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_aff_abils_cha(w.ch), PFDEF_CHA); }},
+    {"Cool", [](R &r) { char_set_con_cooldown(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_con_cooldown(w.ch), PFDEF_BANK); }},
+    {"Scoo", [](R &r) { char_set_con_sdcooldown(r.ch, r.as_int()); },
+     [](W &w, std::string_view t) { if (char_get_con_cooldown(w.ch) != PFDEF_BANK) w.number(t, char_get_con_sdcooldown(w.ch)); }}, /* quirk: written when the other cooldown is set */
+    {"Ac  ", [](R &r) { char_set_armor(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_armor(w.ch), PFDEF_AC); }},
+    {"Abso", [](R &r) { char_set_absorbs(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_absorbs(w.ch), PFDEF_GOLD); }},
+    {"INGl", [](R &r) { char_set_ingestLearned(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_ingestLearned(w.ch), PFDEF_GOLD); }},
+    {"Upgr", [](R &r) { char_set_upgrade(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_upgrade(w.ch), PFDEF_GOLD); }},
+    {"Forg", [](R &r) { char_set_forgeting(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_forgeting(w.ch), PFDEF_BANK); }},
+    {"Forc", [](R &r) { char_set_forgetcount(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_forgetcount(w.ch), PFDEF_BANK); }},
+    {"Kaio", [](R &r) { char_set_kaioken(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_kaioken(w.ch), PFDEF_GOLD); }},
+    {"Gold", [](R &r) { char_set_gold(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_gold(w.ch), PFDEF_GOLD); }},
+    {"Bank", [](R &r) { char_set_bank_gold(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_bank_gold(w.ch), PFDEF_BANK); }},
+    {"Exp ", [](R &r) { char_set_exp(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, char_get_exp(w.ch), PFDEF_EXP); }},
+    {"Tcla", [](R &r) { char_set_transclass(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_transclass(w.ch), PFDEF_EXP); }},
+    {"Mexp", [](R &r) { char_set_moltexp(r.ch, r.number64()); }, [](W &w, std::string_view t) { w.unless(t, char_get_moltexp(w.ch), PFDEF_EXP); }},
+    {"Majm", [](R &r) { char_set_majinizer(r.ch, r.number64()); }, [](W &w, std::string_view t) { w.unless(t, char_get_majinizer(w.ch), PFDEF_EXP); }},
+    {"Mlvl", [](R &r) { char_set_moltlevel(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_moltlevel(w.ch), PFDEF_EXP); }},
+    {"Fisd", [](R &r) { char_set_accuracy_mod(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_accuracy_mod(w.ch), PFDEF_ACCURACY); }},
+    {"Pole", [](R &r) { char_set_accuracy(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_accuracy(w.ch), PFDEF_ACCURACY); }},
+    {"Prff", [](R &r) { char_set_preference(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_preference(w.ch), PFDEF_EYE); }},
+    {"Spek", [](R &r) { char_set_speaking(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_speaking(w.ch), PFDEF_SPEAKING); }},
+    {"Olc ", [](R &r) { char_set_olc_zone(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_olc_zone(w.g, w.ch), PFDEF_OLC); }},
+    {"Gaun", [](R &r) { char_set_gauntlet(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_gauntlet(w.g, w.ch), PFDEF_GAUNTLET); }},
+    {"Geno", [](R &r) { char_set_genome(r.ch, 0, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_genome(w.ch, 0), PFDEF_EYE); }},
+    {"Gen1", [](R &r) { char_set_genome(r.ch, 1, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_genome(w.ch, 1), PFDEF_EYE); }},
+    {"Posi", [](R &r) { char_set_position(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_position(w.ch), POS_STANDING); }},
+    {"LFPC", [](R &r) { char_set_lifeperc(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_lifeperc(w.ch), PFDEF_WEIGHT); }},
+    {"Bpl ", [](R &r) { char_set_basepl(r.ch, r.number64()); }, [](W &w, std::string_view t) { w.unless(t, getBasePL(w.ch), PFDEF_BASEPL); }},
+    {"Bki ", [](R &r) { char_set_baseki(r.ch, r.number64()); }, [](W &w, std::string_view t) { w.unless(t, getBaseKI(w.ch), PFDEF_BASEKI); }},
+    {"Bst ", [](R &r) { char_set_basest(r.ch, r.number64()); }, [](W &w, std::string_view t) { w.unless(t, getBaseST(w.ch), PFDEF_BASEST); }},
+    {"Droo", [](R &r) { char_set_droom(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_droom(w.ch), PFDEF_DROOM); }},
+    {"Hrl ", [](R &r) { char_set_hairl(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_hairl(w.ch), PFDEF_HAIRL); }},
+    {"Hrs ", [](R &r) { char_set_hairs(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_hairs(w.ch), PFDEF_HAIRS); }},
+    {"Hrc ", [](R &r) { char_set_hairc(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_hairc(w.ch), PFDEF_HAIRC); }},
+    {"Skn ", [](R &r) { char_set_skin(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_skin(w.ch), PFDEF_SKIN); }},
+    {"Eye ", [](R &r) { char_set_eye(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_eye(w.ch), PFDEF_EYE); }},
+    {"Phas", [](R &r) { char_set_distfea(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_distfea(w.ch), PFDEF_DISTFEA); }},
+    {"Fury", [](R &r) { char_set_fury(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_fury(w.ch), PFDEF_HAIRL); }},
+    {"Rad1", [](R &r) { char_set_radar1(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_radar1(w.ch), PFDEF_RADAR1); }},
+    {"Rad2", [](R &r) { char_set_radar2(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_radar2(w.ch), PFDEF_RADAR2); }},
+    {"Rad3", [](R &r) { char_set_radar3(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_radar3(w.ch), PFDEF_RADAR3); }},
+    {"Lpla", [](R &r) { char_set_lastpl(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_lastpl(w.ch)), PFDEF_LPLAY); }},
+    {"Lint", [](R &r) { char_set_lastint(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_lastint(w.ch)), PFDEF_LPLAY); }},
+    {"Deat", [](R &r) { char_set_deathtime(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_deathtime(w.ch)), PFDEF_LPLAY); }},
+    {"Rtim", [](R &r) { char_set_rewtime(r.ch, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_rewtime(w.ch)), PFDEF_LPLAY); }},
+    {"Boos", [](R &r) { char_set_boosts(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_boosts(w.ch), PFDEF_DISTFEA); }},
+    {"Maji", [](R &r) { char_set_majinize(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_majinize(w.ch), PFDEF_LPLAY); }},
+    {"Blss", [](R &r) { char_set_blesslvl(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_blesslvl(w.ch), PFDEF_HEIGHT); }},
+    {"Boam", [](R &r) { char_set_lboard(r.ch, 0, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 0)), PFDEF_BOARD); }},
+    {"Boai", [](R &r) { char_set_lboard(r.ch, 1, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 1)), PFDEF_BOARD); }},
+    {"Boac", [](R &r) { char_set_lboard(r.ch, 2, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 2)), PFDEF_BOARD); }},
+    {"Boad", [](R &r) { char_set_lboard(r.ch, 3, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 3)), PFDEF_BOARD); }},
+    {"Boab", [](R &r) { char_set_lboard(r.ch, 4, r.as_llong()); }, [](W &w, std::string_view t) { w.unless(t, static_cast<long long>(char_get_lboard(w.ch, 4)), PFDEF_BOARD); }},
+    {"Lira", [](R &r) { char_set_limb_condition(r.ch, 0, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_limb_condition(w.ch, 0), PFDEF_BOARD); }},
+    {"Lila", [](R &r) { char_set_limb_condition(r.ch, 1, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_limb_condition(w.ch, 1), PFDEF_BOARD); }},
+    {"Lirl", [](R &r) { char_set_limb_condition(r.ch, 2, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_limb_condition(w.ch, 2), PFDEF_BOARD); }},
+    {"Lill", [](R &r) { char_set_limb_condition(r.ch, 3, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_limb_condition(w.ch, 3), PFDEF_BOARD); }},
+    {"RPP ", [](R &r) { char_set_rp(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_rp(w.ch), PFDEF_SKIN); }},
+    {"RBan", [](R &r) { char_set_rbank(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_rbank(w.ch), PFDEF_SKIN); }},
+    {"Supp", [](R &r) { char_set_suppression(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_suppression(w.ch), PFDEF_SKIN); }},
+    {"Sups", [](R &r) { char_set_suppressed(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_suppressed(w.ch), PFDEF_SKIN); }},
+    {"Trp ", [](R &r) { char_set_trp(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_trp(w.ch), PFDEF_SKIN); }},
+    {"Deac", [](R &r) { char_set_dcount(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_dcount(w.ch), PFDEF_EYE); }},
+    {"Trag", [](R &r) { char_set_trainagl(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_trainagl(w.g, w.ch), PFDEF_EYE); }},
+    {"Trco", [](R &r) { char_set_traincon(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_traincon(w.g, w.ch), PFDEF_EYE); }},
+    {"Trin", [](R &r) { char_set_trainint(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_trainint(w.g, w.ch), PFDEF_EYE); }},
+    {"Trsp", [](R &r) { char_set_trainspd(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_trainspd(w.g, w.ch), PFDEF_EYE); }},
+    {"Trst", [](R &r) { char_set_trainstr(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_trainstr(w.g, w.ch), PFDEF_EYE); }},
+    {"Trwi", [](R &r) { char_set_trainwis(r.g, r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_trainwis(w.g, w.ch), PFDEF_EYE); }},
+    {"Phse", [](R &r) { char_set_starphase(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_starphase(w.ch), PFDEF_EYE); }},
+    {"Mimi", [](R &r) { char_set_mimic(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_mimic(w.ch), 0); }},
+    {"Slot", [](R &r) { char_set_skill_slots(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_skill_slots(w.ch), PFDEF_EYE); }},
+    {"Tgro", [](R &r) { char_set_tail_growth(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_tail_growth(w.ch), PFDEF_EYE); }},
+    {"rDis", [](R &r) { char_set_rdisplay(r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text_unless_empty(t, char_get_rdisplay(w.ch)); }},
+    {"Rela", [](R &r) { char_set_relax_count(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_relax_count(w.ch), PFDEF_EYE); }},
+    {"Skil", [](R &r) { read_skills(r, false); }, [](W &w, std::string_view t) { write_skills(w, t, false); }},
     {"Bonu",
      [](R &r) {
        int num[52] = {};
@@ -365,15 +365,15 @@ constexpr pfile_tag pfile_tags[] = {
          if (num[i] > 0)
            char_set_bonuses(r.ch, i, num[i]);
      },
-     [](W &w, const char *t) {
+     [](W &w, std::string_view t) {
        w.out.print("{}:\n", t);
        for (int i = 0; i < 52; i++)
          w.out.print("{}{:d}", i ? " " : "", char_get_bonuses(w.ch, i));
        w.out.write("\n");
      }},
-    {"SklB", [](R &r) { read_skills(r, true); }, [](W &w, const char *t) { write_skills(w, t, true); }},
+    {"SklB", [](R &r) { read_skills(r, true); }, [](W &w, std::string_view t) { write_skills(w, t, true); }},
     {"Affs", [](R &r) { read_affects(r); },
-     [](W &w, const char *t) {
+     [](W &w, std::string_view t) {
        w.out.print("{}:\n", t);
        for (const affected_type &saved : w.affects)
          if (saved.type)
@@ -388,14 +388,14 @@ constexpr pfile_tag pfile_tags[] = {
        if (f.number(r.num) && f.word(colour, 127) && r.num >= 0 && r.num < NUM_COLOR)
          char_get_player_specials(r.ch)->color_choices[r.num] = colour;
      },
-     [](W &w, const char *t) {
+     [](W &w, std::string_view t) {
        for (int i = 0; i < NUM_COLOR; i++)
          if (!char_get_player_specials(w.ch)->color_choices[i].empty())
            w.out.print("{}: {:d} {}\r\n", t, i, char_get_player_specials(w.ch)->color_choices[i]); /* quirk: "\r\n" */
      }},
 
     /* read from older files, and no longer written */
-    {"Lern", [](R &r) { char_set_practice_points(r.g, r.ch, r.atoi()); }, nullptr},
+    {"Lern", [](R &r) { char_set_practice_points(r.g, r.ch, r.as_int()); }, nullptr},
     {"Hit ", [](R &r) { char_set_max_hit(r.ch, r.current_and_max()); }, nullptr},
     {"Mana", [](R &r) { char_set_max_mana(r.ch, r.current_and_max()); }, nullptr},
     {"Move", [](R &r) { char_set_max_move(r.ch, r.current_and_max()); }, nullptr},

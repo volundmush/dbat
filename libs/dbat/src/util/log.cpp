@@ -13,7 +13,7 @@
 
 FILE *logfile = nullptr; /* Where to send the log messages. */
 
-static bool open_logfile(const std::string &filename, FILE *stderr_fp, const char *mode);
+static bool open_logfile(const std::string &filename, FILE *stderr_fp, std::string_view mode);
 
 /* log a death trap hit */
 void log_death_trap(GameWorld *g, struct char_data *ch)
@@ -85,7 +85,7 @@ void core_dump(std::source_location where)
 /* Prefer the file over the descriptor. */
 void setup_log(std::string_view filename, bool keep_old_log)
 {
-  const char *mode = keep_old_log ? "a" : "w"; /* a copyover carries on the same log */
+  std::string_view mode = keep_old_log ? "a" : "w"; /* a copyover carries on the same log */
   FILE *s_fp       = stderr;
 
   if (filename.empty()) {
@@ -112,12 +112,12 @@ void setup_log(std::string_view filename, bool keep_old_log)
   exit(1);
 }
 
-static bool open_logfile(const std::string &filename, FILE *stderr_fp, const char *mode)
+static bool open_logfile(const std::string &filename, FILE *stderr_fp, std::string_view mode)
 {
   if (stderr_fp) /* freopen() the descriptor. */
-    logfile = freopen(filename.c_str(), mode, stderr_fp);
+    logfile = freopen(filename.c_str(), std::string(mode).c_str(), stderr_fp);
   else
-    logfile = fopen(filename.c_str(), mode);
+    logfile = fopen(filename.c_str(), std::string(mode).c_str());
 
   if (logfile) {
     file_print(stdout, "Using log file '{}'{}.\n",

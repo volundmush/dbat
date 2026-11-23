@@ -74,7 +74,7 @@ void sort_help(GameWorld *g)
 
 struct world_kind {
   int mode;
-  const char *prefix;
+  std::string_view prefix{};
   int (*count)(const io::text_reader &);
   void (*report)(GameWorld *, int count); /* logs the count; null for kinds that don't */
   bool may_be_empty;                      /* shops and guilds: a world needs none */

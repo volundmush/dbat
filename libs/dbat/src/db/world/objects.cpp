@@ -64,7 +64,7 @@ bool check_object_spell_number(GameWorld *g, obj_data *obj, int val)
     return error;
 
   std::string_view name = skill_name(g, spell);
-  if (name.data() == unused_spellname || str_eq_nocase("UNDEFINED", name)) { /* the table's own "!UNUSED!" */
+  if (name.data() == unused_spellname.data() || str_eq_nocase("UNDEFINED", name)) { /* the table's own "!UNUSED!" */
     error = true;
     mud_log("SYSERR: Object #{:d} ({}) uses '{}' spell #{:d}.", obj_get_vnum(g, obj), obj_get_short_description(obj),
             name, spell);
@@ -117,7 +117,7 @@ void check_object(GameWorld *g, obj_data *obj)
 
 /* The line after an A, S or Z: numbers, as many as out holds; at least `least` of them */
 io::loaded<void> read_after(io::text_reader &in, obj_vnum vnum, char field, std::span<int> out, int least,
-                            const char *expected)
+                            std::string_view expected)
 {
   std::optional<std::string_view> line = in.line();
   if (!line)

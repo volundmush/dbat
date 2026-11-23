@@ -8,14 +8,13 @@
 #include <utility>
 
 namespace dbat_format {
-/* A C string argument as a view; printf printed a null one as "(null)", where std::format would crash */
+/* A C string argument (a char pointer, or a buffer or literal) as a view, up to its '\0' as %s read it; it must not be
+   null, now that no getter gives a null one */
 template <class T> decltype(auto) arg(T &&v)
 {
   using D = std::decay_t<T>;
-  if constexpr (std::is_array_v<std::remove_reference_t<T>> && (std::is_same_v<D, const char *> || std::is_same_v<D, char *>))
-    return std::string_view(static_cast<const char *>(v)); /* a buffer or a literal, up to its '\0' as %s read it */
-  else if constexpr (std::is_same_v<D, const char *> || std::is_same_v<D, char *>)
-    return std::string_view(v ? v : "(null)");
+  if constexpr (std::is_pointer_v<D> && std::is_same_v<std::remove_cv_t<std::remove_pointer_t<D>>, char>)
+    return std::string_view(v);
   else
     return std::forward<T>(v);
 }

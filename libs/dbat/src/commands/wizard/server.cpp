@@ -57,17 +57,17 @@ ACMD(do_lag)
 namespace {
   /* What "shutdown <option>" announces and does */
   struct shutdown_mode {
-    const char *option; /* "" for none */
-    const char *logged; /* "(GC) <this> by <who>." */
-    const char *announced;
-    const char *touched; /* the file left for autorun, or null */
+    std::string_view option{}; /* "" for none */
+    std::string_view logged{}; /* "(GC) <this> by <who>." */
+    std::string_view announced{};
+    std::string_view touched{}; /* the file left for autorun, or empty */
     int reboot;
   };
   const shutdown_mode SHUTDOWN_MODES[] = {
-    {"", "Shutdown", "Shutting down.\r\n", nullptr, 0},
+    {"", "Shutdown", "Shutting down.\r\n", {}, 0},
     {"reboot", "Reboot", "Rebooting.. come back in a minute or two.\r\n", FASTBOOT_FILE, 1},
     {"die", "Shutdown", "Shutting down for maintenance.\r\n", KILLSCRIPT_FILE, 0},
-    {"now", "Shutdown NOW", "Rebooting.. come back in a minute or two.\r\n", nullptr, 2 /* do not autosave olc */},
+    {"now", "Shutdown NOW", "Rebooting.. come back in a minute or two.\r\n", {}, 2 /* do not autosave olc */},
     {"pause", "Shutdown", "Shutting down for maintenance.\r\n", PAUSE_FILE, 0},
   };
 } // namespace
@@ -81,14 +81,14 @@ ACMD(do_shutdown)
   std::string_view rest = argument;
   std::string arg       = take_arg(rest);
 
-  auto mode = std::ranges::find_if(SHUTDOWN_MODES, [&](const shutdown_mode &m) { return arg.empty() ? !*m.option : str_eq_nocase(arg, m.option); });
+  auto mode = std::ranges::find_if(SHUTDOWN_MODES, [&](const shutdown_mode &m) { return arg.empty() ? m.option.empty() : str_eq_nocase(arg, m.option); });
   if (mode == std::end(SHUTDOWN_MODES)) {
     send_to_char(g, ch, "Unknown shutdown option.\r\n");
     return;
   }
   mud_log("(GC) {} by {}.", mode->logged, char_get_name(ch));
   send_to_all(g, mode->announced);
-  if (mode->touched)
+  if (!mode->touched.empty())
     io::touch(mode->touched);
   g->circle_shutdown = 1;
   if (mode->reboot)

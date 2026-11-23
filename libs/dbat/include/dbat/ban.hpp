@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
@@ -13,10 +14,10 @@ constexpr int BAN_ALL    = 3;
 
 constexpr int BANNED_SITE_LENGTH = 50;
 struct ban_list_element {
-  char site[BANNED_SITE_LENGTH + 1]{};
+  std::string site; /* up to BANNED_SITE_LENGTH, in lowercase */
   int type{};
   time_t date{};
-  char name[MAX_NAME_LENGTH + 1]{};
+  std::string name; /* who banned it, up to MAX_NAME_LENGTH */
   struct ban_list_element *next{};
 };
 

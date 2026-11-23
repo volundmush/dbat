@@ -24,8 +24,7 @@ struct pointer_set {
 static bool held_by_a_connection(const GameWorld *g, const struct char_data *ch);
 
 struct audit {
-  world_audit_report *report{};
-  void *context{};
+  std::function<void(std::string_view)> report;
   int problems{};
   struct pointer_set characters{};
   struct pointer_set objects{};
@@ -36,8 +35,7 @@ static void problem(struct audit *a, std::string_view text)
 {
   if (a->problems++ >= MAX_REPORTED)
     return;
-  std::string line(text);
-  a->report(a->context, line.c_str());
+  a->report(until_nul(text)); /* as the C string it was reported as */
 }
 
 template <class... Args>
@@ -407,9 +405,9 @@ static bool held_by_a_connection(const GameWorld *g, const struct char_data *ch)
   return held;
 }
 
-int world_audit(GameWorld *g, world_audit_report *report, void *context)
+int world_audit(GameWorld *g, const std::function<void(std::string_view problem)> &report)
 {
-  struct audit a = {.report = report, .context = context};
+  struct audit a = {.report = report};
 
   collect(g, &a);
   audit_rooms(g, &a);

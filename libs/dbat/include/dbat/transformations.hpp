@@ -1,4 +1,5 @@
 #pragma once
+#include <string_view>
 #include "dbat/consts/types.hpp"
 
 struct transform_bonus {
@@ -7,9 +8,9 @@ struct transform_bonus {
   int flag{};
   int rpp_cost{};
   int64_t requires_pl{};
-  const char *name{};
-  const char *msg_transform_self{};
-  const char *msg_transform_others{};
+  std::string_view name{};
+  std::string_view msg_transform_self{};
+  std::string_view msg_transform_others{};
 };
 
 struct transforms_available {

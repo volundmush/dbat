@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <ctime>
+#include <format>
 #include <numeric>
 #include <vector>
 #include <cctype>
@@ -161,15 +163,6 @@ std::string &CAP(std::string &txt)
   return txt;
 }
 
-void copy_cstr(char *dst, std::string_view src, size_t size)
-{
-  if (size == 0)
-    return;
-  size_t n = std::min(src.size(), size - 1);
-  memcpy(dst, src.data(), n);
-  dst[n] = '\0';
-}
-
 bool str_eq_nocase(std::string_view a, std::string_view b)
 {
   if (a.size() != b.size())
@@ -228,4 +221,13 @@ bool is_number(std::string_view str)
     if (!isdigit((unsigned char)c))
       return false;
   return true;
+}
+
+std::string asctime_text(time_t when)
+{
+  static constexpr std::string_view DAYS[]   = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+  static constexpr std::string_view MONTHS[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+  const std::tm *t                           = std::localtime(&when);
+  return std::format("{} {}{:3d} {:02d}:{:02d}:{:02d} {:d}", DAYS[t->tm_wday], MONTHS[t->tm_mon], t->tm_mday, t->tm_hour, t->tm_min,
+                     t->tm_sec, 1900 + t->tm_year);
 }

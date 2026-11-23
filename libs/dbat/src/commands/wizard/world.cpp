@@ -315,14 +315,14 @@ ACMD(do_teleport)
   if (reject(g, ch, found))
     return;
   struct char_data *victim = *found;
-  const char *refusal      = nullptr;
+  std::string_view refusal      {};
   if (victim == ch)
     refusal = "Use 'goto' to teleport yourself.\r\n";
   else if (char_get_admlevel(victim) >= char_get_admlevel(ch))
     refusal = "Maybe you shouldn't do that.\r\n";
   else if (buf2.empty())
     refusal = "Where do you wish to send this person?\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -428,7 +428,7 @@ ACMD(do_switch)
   if (reject(g, ch, found))
     return;
   struct char_data *victim = *found;
-  const char *refusal      = nullptr;
+  std::string_view refusal      {};
   if (ch == victim)
     refusal = "Hee hee... we are jolly funny today, eh?\r\n";
   else if (char_get_desc(victim))
@@ -437,7 +437,7 @@ ACMD(do_switch)
     refusal = "You aren't holy enough to use a mortal's body.\r\n";
   else if (char_get_admlevel(ch) < ADMLVL_VICE && room_flagged(g, char_get_in_room(victim), ROOM_GODROOM))
     refusal = "You are not godly enough to use that room!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }

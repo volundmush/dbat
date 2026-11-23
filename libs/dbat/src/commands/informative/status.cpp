@@ -55,17 +55,17 @@ namespace {
   /* What an arlian's evolution points can be spent on, and its cost: the level, then shares of the molt threshold and
      of the base. */
   struct evolution {
-    const char *word, *abbr; /* abbr may be null */
-    const char *name;
+    std::string_view word, abbr; /* abbr may be empty */
+    std::string_view name{};
     double of_threshold, of_base;
     int64_t (*base)(char_data *ch);
     int64_t (*gain)(char_data *ch, int64_t amt, bool trans_mult);
-    const char *felt, *label;
+    std::string_view felt, label;
   };
 
   constexpr evolution EVOLUTIONS[] = {
       {"powerlevel", "pl", "powerlevel", 0.65, 0.15, getBasePL, gainBasePL, "your body has strengthened.", "@RPL"},
-      {"ki", nullptr, "ki", 0.50, 0.22, getBaseKI, gainBaseKI, "your spirit has strengthened.", "@CKi"},
+      {"ki", {}, "ki", 0.50, 0.22, getBaseKI, gainBaseKI, "your spirit has strengthened.", "@CKi"},
       {"stamina", "st", "stamina", 0.50, 0.15, getBaseST, gainBaseST, "your body has more stamina.", "@GST"},
   };
 
@@ -97,7 +97,7 @@ ACMD(do_evolve)
     return;
   }
 
-  auto it = std::ranges::find_if(EVOLUTIONS, [&](const evolution &e) { return str_eq_nocase(arg, e.word) || (e.abbr && str_eq_nocase(arg, e.abbr)); });
+  auto it = std::ranges::find_if(EVOLUTIONS, [&](const evolution &e) { return str_eq_nocase(arg, e.word) || (!e.abbr.empty() && str_eq_nocase(arg, e.abbr)); });
   if (it == std::end(EVOLUTIONS))
     return; /* quirk: says nothing */
   int64_t cost = evolution_cost(ch, *it);
@@ -131,7 +131,7 @@ namespace {
   }
 
   /* what perfecting a skill each way does, from type 1 */
-  constexpr const char *PERFECTIONS[] = {
+  static constexpr std::string_view PERFECTIONS[] = {
       "so that you can over charge it!",
       "so that you have supreme accuracy with it!",
       "so that you require a lower minimum charge for it!",
@@ -159,7 +159,7 @@ ACMD(do_perf)
   }
   /* the first skill whose name has arg in it */
   auto skills = std::views::iota(0, SKILL_TABLE_SIZE);
-  auto found  = std::ranges::find_if(skills, [&](int i) { return g->spell_info[i].skilltype == SKTYPE_SKILL && strstr(g->spell_info[i].name, arg.c_str()); });
+  auto found  = std::ranges::find_if(skills, [&](int i) { return g->spell_info[i].skilltype == SKTYPE_SKILL && std::string_view(g->spell_info[i].name).contains(until_nul(arg)); });
   if (found == skills.end()) {
     send_to_char(g, ch, "The skill {} doesn't exist.\r\n", arg);
     return;
@@ -204,7 +204,7 @@ ACMD(do_gold)
 namespace {
   struct by_flag {
     int flag;
-    const char *name;
+    std::string_view name{};
   };
 
   /* An android's model and version, the first flag it has; failing them all, the last. */
@@ -212,7 +212,7 @@ namespace {
   constexpr by_flag ANDROID_VERSIONS[] = {{PLR_TRANS1, "Beta 1.0"}, {PLR_TRANS2, "ANS 2.0"}, {PLR_TRANS3, "ANS 3.0"}, {PLR_TRANS4, "ANS 4.0"},
                                           {PLR_TRANS5, "ANS 5.0"},  {PLR_TRANS6, "ANS 6.0"}, {-1, "Alpha 0.5"}};
 
-  const char *first_flagged(struct char_data *ch, std::span<const by_flag> rows)
+  std::string_view first_flagged(struct char_data *ch, std::span<const by_flag> rows)
   {
     return std::ranges::find_if(rows, [&](const by_flag &r) { return r.flag < 0 || char_plr_flagged(ch, r.flag); })->name;
   }
@@ -300,7 +300,7 @@ namespace {
   struct transformation {
     int flag;
     int also;
-    const char *name;
+    std::string_view name{};
   };
 
   /* Rillao: transloc, add new transes here */
@@ -347,7 +347,7 @@ namespace {
 
   /* The form's name, with its colour; "@wNone" for none. Races are told apart in this order, a hoshijin's star
      phases first. */
-  const char *current_form(struct char_data *ch, struct char_data *vict)
+  std::string_view current_form(struct char_data *ch, struct char_data *vict)
   {
     if (char_is_hoshijin(vict)) {
       if (char_get_mimic(vict) != 0 && vict != ch)
@@ -372,7 +372,7 @@ namespace {
 /* What status says of the body, a section at a time, each line by the first row it fits */
 
 struct limb_row {
-  const char *label;
+  std::string_view label{};
   int index;
   int healthy_flag; /* a sound limb isn't cybernetic by this */
   int cyber_flag;
@@ -416,14 +416,14 @@ void appendages_status(GameWorld *g, struct char_data *ch)
 /* A ladder: the first row whose least the value reaches says it, or else the last word */
 struct rung {
   int least;
-  const char *says;
+  std::string_view says{};
 };
 
-void climb(GameWorld *g, struct char_data *ch, int value, std::span<const rung> rungs, const char *otherwise)
+void climb(GameWorld *g, struct char_data *ch, int value, std::span<const rung> rungs, std::string_view otherwise)
 {
   auto r = std::ranges::find_if(rungs, [value](const rung &x) { return value >= x.least; });
-  const char *says = r == rungs.end() ? otherwise : r->says;
-  if (says)
+  std::string_view says = r == rungs.end() ? otherwise : r->says;
+  if (!says.empty())
     send_to_char(g, ch, "{}", says);
 }
 
@@ -466,7 +466,7 @@ enum class flag_kind { plr, aff, prf, affected, spell };
 struct flag_line {
   flag_kind kind;
   int flag;
-  const char *says;
+  std::string_view says{};
 };
 
 bool has_flag(GameWorld *g, struct char_data *ch, const flag_line &f)
@@ -495,7 +495,7 @@ void say_flags(GameWorld *g, struct char_data *ch, std::span<const flag_line> li
 
 struct preference_line {
   int preference;
-  const char *says;
+  std::string_view says{};
 };
 constexpr preference_line PREFERENCES[] = {
     {0, "         You preferred a balanced form of fighting.\r\n"},
@@ -506,7 +506,7 @@ constexpr preference_line PREFERENCES[] = {
 };
 
 /* What one's "hair" is, by race */
-const char *hair_word(struct char_data *ch)
+std::string_view hair_word(struct char_data *ch)
 {
   if (char_is_demon(ch) || char_is_icer(ch))
     return "horns are";
@@ -602,13 +602,13 @@ void info_status(GameWorld *g, struct char_data *ch)
 }
 
 /* A mutant's mutations and a bio-android's genes, by genome (1 up) */
-constexpr const char *MUTATIONS[] = {
+static constexpr std::string_view MUTATIONS[] = {
     "Extreme Speed",  "Increased Cell Regeneration", "Extreme Reflexes", "Infravision",       "Natural Camo",
     "Limb Regen",     "Poisonous (you can use the bite attack)", "Rubbery Body", "Innate Telepathy", "Natural Energy",
 };
-constexpr const char *GENES[] = {"Human", "Saiyan", "Namek", "Icer", "Truffle", "Arlian", "Kai", "Konatsu"};
+static constexpr std::string_view GENES[] = {"Human", "Saiyan", "Namek", "Icer", "Truffle", "Arlian", "Kai", "Konatsu"};
 
-void genome_status(GameWorld *g, struct char_data *ch, const char *heading, std::span<const char *const> names, const char *suffix)
+void genome_status(GameWorld *g, struct char_data *ch, std::string_view heading, std::span<const std::string_view> names, std::string_view suffix)
 {
   send_to_char(g, ch, "{}", heading);
   for (int i : {0, 1}) {
@@ -654,8 +654,8 @@ constexpr flag_line AFFLICTION_LINES[] = {
 
 /* What lasting effects are told, by their skill's name */
 constexpr struct {
-  const char *skill;
-  const char *says; /* before " (n Mud Hours)" */
+  std::string_view skill{};
+  std::string_view says{}; /* before " (n Mud Hours)" */
 } AFFECT_LINES[] = {
     {"runic", "Your Kenaz rune is still in effect!"},
     {"punch", "Your Algiz rune is still in effect!"},
@@ -755,7 +755,7 @@ void condition_status(GameWorld *g, struct char_data *ch)
 {
   send_to_char(g, ch, "\r\n@D<@b-------------------------@D[@BCondition@D]@b--------------------------@D>@n\r\n");
   sleep_status(g, ch);
-  climb(g, ch, char_get_relax_count(ch), RELAX_RUNGS, nullptr);
+  climb(g, ch, char_get_relax_count(ch), RELAX_RUNGS, {});
 
   if (char_get_mimic(ch) > 0)
     send_to_char(g, ch, "You are mimicing the general appearance of {} {}\r\n", AN(juggleRaceName(ch, false)), juggleRaceName(ch, false));
@@ -775,7 +775,7 @@ void condition_status(GameWorld *g, struct char_data *ch)
   if (char_get_powerattack(ch) > 0)
     send_to_char(g, ch, "You are playing @y'@Y{}@y'@n.\r\n", song_types[char_get_powerattack(ch)]);
   say_flags(g, ch, READY_LINES);
-  climb(g, ch, char_get_conditions(g, ch, DRUNK), DRUNK_RUNGS, nullptr);
+  climb(g, ch, char_get_conditions(g, ch, DRUNK), DRUNK_RUNGS, {});
   affects_status(g, ch);
   say_flags(g, ch, AFFLICTION_LINES);
 
@@ -792,7 +792,7 @@ void condition_status(GameWorld *g, struct char_data *ch)
 }
 
 /* The traits, bonuses then negatives, by number */
-constexpr const char *TRAITS[] = {
+static constexpr std::string_view TRAITS[] = {
     "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost          ",
     "Prodigy     - +25% Experience Gained Until Level 80               ",
     "Quick Study - Character auto-trains skills faster                 ",
@@ -964,7 +964,7 @@ ACMD(do_levels)
 namespace {
   struct odds {
     int at_most; /* the victim's level less ch's */
-    const char *says;
+    std::string_view says{};
   };
 
   constexpr odds CONSIDERED[] = {
@@ -981,7 +981,7 @@ namespace {
       {25,  "Maybe if they are allergic to you, otherwise your last words will be 'Oh shit.'\r\n"},
   };
 
-  const char *pronoun(struct char_data *ch) { return char_get_sex(ch) == SEX_MALE ? "He " : (char_get_sex(ch) == SEX_FEMALE ? "She " : "It "); }
+  std::string_view pronoun(struct char_data *ch) { return char_get_sex(ch) == SEX_MALE ? "He " : (char_get_sex(ch) == SEX_FEMALE ? "She " : "It "); }
 } // namespace
 
 ACMD(do_consider)

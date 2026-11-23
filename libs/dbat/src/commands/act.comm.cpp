@@ -46,7 +46,7 @@ namespace {
   std::string_view public_name(struct char_data *ch) { return char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch); }
 
   /* ", in an unfamiliar tongue," unless the listener knows what ch speaks */
-  const char *tongue(struct char_data *listener, struct char_data *ch)
+  std::string_view tongue(struct char_data *listener, struct char_data *ch)
   {
     return char_get_skill(listener, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,";
   }
@@ -176,7 +176,7 @@ namespace {
     return to;
   }
 
-  const char *say_verb(const std::string &text)
+  std::string_view say_verb(const std::string &text)
   {
     switch (text.back()) {
       case '!':
@@ -206,7 +206,7 @@ ACMD(do_say)
     return;
   }
 
-  const char *verb      = say_verb(text);
+  std::string_view verb      = say_verb(text);
   struct char_data *sch = addressed(g, ch, text);
   if (!sch) {
     act(g, str_format("@w$n @W{}s, '@C{}@W'@n", verb, text), true, ch, nullptr, nullptr, TO_ROOM);
@@ -283,7 +283,7 @@ ACMD(do_gsay)
 }
 
 namespace {
-  void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *vict, const char *arg)
+  void perform_tell(GameWorld *g, struct char_data *ch, struct char_data *vict, std::string_view arg)
   {
     std::string heard;
     if (CONFIG_ENABLE_LANGUAGES)
@@ -354,7 +354,7 @@ namespace {
     descriptor_data *d = find_first(each_desc(g), [&](descriptor_data *k) {
       if (desc_get_connected(k) != CON_PLAYING || char_is_npc(k->character) || k->acct.user.empty())
         return false;
-      return str_eq_nocase(k->acct.user, name) || strstr(k->acct.user.c_str(), name.c_str()) ||
+      return str_eq_nocase(k->acct.user, name) || until_nul(k->acct.user).contains(until_nul(name)) ||
              ((str_eq_nocase(char_get_name(k->character), name) || char_get_name(k->character).contains(name)) && char_get_admlevel(k->character) > 0);
     });
     return d ? d->character : nullptr;
@@ -432,24 +432,24 @@ namespace {
   };
 
   /* The letters lost from a whisper overheard so well, any of three ways */
-  constexpr const char *MUFFLED[3][3] = {
+  constexpr std::string_view MUFFLED[3][3] = {
       {"ahemopyjkdw", "erkmopyjkdw", "srcqluizt"},
       {"bfgvjk",     "dymhst",      "arno"     },
       {"qoig",       "aeio",        "kmb"      },
   };
 
   /* What's overheard, to this level of 0 to 3; quirk: the whisper itself loses the letters, one listener after another */
-  const char *overhear(GameWorld *g, std::string &buf, int level)
+  std::string_view overhear(GameWorld *g, std::string &buf, int level)
   {
     if (level == 3)
-      return buf.c_str();
-    const char *const *ways = MUFFLED[level];
+      return until_nul(buf); /* as its c_str() was read */
+    const std::string_view *ways = MUFFLED[level];
     std::string_view lost   = rand_number(g, 1, 10) >= 5 ? ways[0] : rand_number(g, 1, 10) >= 5 ? ways[1] : ways[2];
     for (char c : lost) {
       search_replace(buf, std::string(1, c), "..");
       search_replace(buf, std::string(1, (char)toupper(c)), "..");
     }
-    return buf.c_str();
+    return until_nul(buf);
   }
 
   /* By how far a listener's skill falls short of the roll, how much they hear */
@@ -669,7 +669,7 @@ namespace {
      one who can't use it, its name and for one not on it, and its colour */
   struct channel {
     int off_flag, history;
-    const char *cant, *name, *not_on, *colour;
+    std::string_view cant, name, not_on, colour;
   };
 
   constexpr channel CHANNELS[] = {

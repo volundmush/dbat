@@ -127,6 +127,23 @@ long long c_atoll(std::string_view text)
   return read_signed<long long>(text, at);
 }
 
+int scan_range(std::string_view text, int &low, int &high)
+{
+  text = text.substr(0, text.find('\0'));
+  if (int read = scan_ints(text, std::span<int>(&low, 1)); read != 1)
+    return read;
+  size_t at = 0;
+  while (at < text.size() && is_space(text[at]))
+    at++;
+  if (at < text.size() && (text[at] == '+' || text[at] == '-'))
+    at++;
+  while (at < text.size() && is_digit(text[at]))
+    at++;
+  if (at >= text.size() || text[at] != '-')
+    return 1;
+  return scan_ints(text.substr(at + 1), std::span<int>(&high, 1)) == 1 ? 2 : 1;
+}
+
 int scan_ints(std::string_view text, std::span<int> out)
 {
   size_t at = 0;

@@ -62,6 +62,7 @@
 #include "dbat/spell_parser.hpp"
 #include "dbat/world_audit.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/io/reader.hpp"
 #include "dbat/olc/commands.hpp"
 #include "dbat/olc/limits.hpp"
 
@@ -73,16 +74,6 @@ static std::string zone_summary(GameWorld *g, struct zone_data *zone, int listal
 static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum);
 static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum);
 static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum);
-
-namespace {
-  /* when, as asctime() writes it but without its newline */
-  std::string clock_text(time_t when)
-  {
-    std::string text = asctime(localtime(&when));
-    text.pop_back();
-    return text;
-  }
-} // namespace
 
 /* do_finddoor, finds the door(s) that a key goes to */
 ACMD(do_finddoor)
@@ -139,9 +130,9 @@ ACMD(do_finddoor)
 namespace {
   /* What vnum lists, by the word for it: every kind the word abbreviates is listed */
   struct vnum_kind {
-    const char *name;
+    std::string_view name{};
     int (*list)(GameWorld *, std::string_view, struct char_data *);
-    const char *none;
+    std::string_view none{};
   };
   const vnum_kind VNUM_KINDS[] = {
     {"mob", vnum_mobile, "No mobiles by that name.\r\n"},
@@ -376,7 +367,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
 
   vnum = obj_get_vnum(g, j);
   if (obj_get_lload(j) > 0)
-    send_to_char(g, ch, "LOADED DROPPED: [{}]\r\n", clock_text(obj_get_lload(j)));
+    send_to_char(g, ch, "LOADED DROPPED: [{}]\r\n", asctime_text(obj_get_lload(j)));
   if (obj_get_vnum(g, j) == 65) {
     send_to_char(g, ch, "Healing Tank Charge Level: [{:d}]\r\n", obj_get_healcharge(j));
   }
@@ -390,7 +381,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
 
   time_t generation = obj_get_generation(j);
   send_to_char(g, ch, "Generation time: @g{}@nUnique ID: @g{:d}@n\r\n",
-               ctime(&generation), obj_get_unique_id(j));
+               asctime_text(generation) + "\n", obj_get_unique_id(j));
 
   send_to_char(g, ch, "Object Hit Points: [ @g{:>3d}@n/@g{:>3d}@n]\r\n",
                obj_get_value(j, VAL_ALL_HEALTH), obj_get_value(j, VAL_ALL_MAXHEALTH));
@@ -568,7 +559,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   struct affected_type *aff;
 
   if (char_is_npc(k))
-    send_to_char(g, ch, "LOADED AT: [{}]\r\n", clock_text(char_get_lastpl(k)));
+    send_to_char(g, ch, "LOADED AT: [{}]\r\n", asctime_text(char_get_lastpl(k)));
   buf = sprinttype(char_get_sex(k), genders);
   send_to_char(g, ch, "{} {} '{}'  IDNum: [{:>5d}], In room [{:>5d}], Loadroom : [{:>5d}]\r\n",
                buf, (!char_is_npc(k) ? "PC" : (!char_is_mob(g, k) ? "NPC" : "MOB")),
@@ -598,15 +589,10 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
                char_get_class_level(k), char_get_level_adj(k), char_get_exp(k));
 
   if (!char_is_npc(k)) {
-    char buf1[64], cmbuf2[64];
-    time_t created = char_get_time_created(k), logon = char_get_time_logon(k);
-
-    copy_cstr(buf1, asctime(localtime(&created)), sizeof(buf1));
-    copy_cstr(cmbuf2, asctime(localtime(&logon)), sizeof(cmbuf2));
-    buf1[10] = cmbuf2[10] = '\0';
+    std::string created = asctime_text(char_get_time_created(k)).substr(0, 10), logon = asctime_text(char_get_time_logon(k)).substr(0, 10);
 
     send_to_char(g, ch, "Created: [{}], Last Logon: [{}], Played [{:d}h {:d}m], Age [{:d}]\r\n",
-                 buf1, cmbuf2, (int)char_get_time_played(k) / 3600,
+                 created, logon, (int)char_get_time_played(k) / 3600,
                  (int)((char_get_time_played(k) % 3600) / 60), age(g, k)->year);
 
     if (char_get_desc(k) != nullptr) {
@@ -923,7 +909,7 @@ namespace {
   }
 
   struct stat_kind {
-    const char *name;
+    std::string_view name{};
     void (*stat)(GameWorld *, struct char_data *, std::string &);
   };
   constexpr stat_kind STAT_KINDS[] = {
@@ -995,12 +981,12 @@ ACMD(do_vstat)
 ACMD(do_date)
 {
   if (subcmd == SCMD_DATE) {
-    send_to_char(g, ch, "Current machine time: {}\r\n", clock_text(game_now(g)));
+    send_to_char(g, ch, "Current machine time: {}\r\n", asctime_text(game_now(g)));
     return;
   }
   time_t up = game_now(g) - g->boot_time;
   int d = up / 86400, h = (up / 3600) % 24, m = (up / 60) % 60;
-  send_to_char(g, ch, "Up since {}: {:d} day{}, {:d}:{:02d}\r\n", clock_text(g->boot_time), d, d == 1 ? "" : "s", h, m);
+  send_to_char(g, ch, "Up since {}: {:d} day{}, {:d}:{:02d}\r\n", asctime_text(g->boot_time), d, d == 1 ? "" : "s", h, m);
 }
 
 ACMD(do_last)
@@ -1101,10 +1087,8 @@ namespace {
     if (CONFIG_ALLOW_MULTICLASS)
       send_to_char(g, ch, "Class ranks: {}\r\n", class_desc_str(vict, 1, 0));
 
-    /* ctime() uses static buffer: do not combine. */
-    time_t created = char_get_time_created(vict), logon = char_get_time_logon(vict);
-    send_to_char(g, ch, "Started: {:<20.16}  ", ctime(&created));
-    send_to_char(g, ch, "Last: {:<20.16}  Played: {:>3d}h {:>2d}m\r\n", ctime(&logon),
+    send_to_char(g, ch, "Started: {:<20.16}  ", asctime_text(char_get_time_created(vict)));
+    send_to_char(g, ch, "Last: {:<20.16}  Played: {:>3d}h {:>2d}m\r\n", asctime_text(char_get_time_logon(vict)),
                  (int)(char_get_time_played(vict) / 3600), (int)(char_get_time_played(vict) / 60 % 60));
     free_char(g, vict);
   }
@@ -1163,10 +1147,10 @@ namespace {
     send_to_char(g, ch, buf);
   }
 
-  template <const char *Title, int Flag>
+  template <const std::string_view &Title, int Flag>
   void show_flagged_rooms(GameWorld *g, struct char_data *ch, std::string &)
   {
-    std::string buf = Title;
+    std::string buf(Title);
     int count       = 0;
     for (room_vnum r : g->rooms.vnums())
       if (room_flagged(g, r, Flag))
@@ -1174,8 +1158,8 @@ namespace {
     send_to_char(g, ch, buf);
   }
 
-  constexpr char DEATH_TRAPS[] = "Death Traps\r\n-----------\r\n";
-  constexpr char GODROOMS[]    = "Godrooms\r\n--------------------------\r\n";
+  constexpr std::string_view DEATH_TRAPS = "Death Traps\r\n-----------\r\n";
+  constexpr std::string_view GODROOMS    = "Godrooms\r\n--------------------------\r\n";
 
   void show_shops_of(GameWorld *g, struct char_data *ch, std::string &value) { show_shops(g, ch, value); }
 
@@ -1208,8 +1192,8 @@ namespace {
   void show_uniques(GameWorld *g, struct char_data *ch, std::string &value)
   {
     obj_vnum low = -1, high = 9999999;
-    if (!value.empty() && sscanf(value.c_str(), "%d-%d", &low, &high) != 2) {
-      if (sscanf(value.c_str(), "%d", &low) != 1) {
+    if (!value.empty() && io::scan_range(value, low, high) != 2) {
+      if (io::scan_ints(until_nul(value), std::span<int>(&low, 1)) != 1) {
         send_to_char(g, ch, "Usage: show uniques, show uniques [vnum], or show uniques [low-high]\r\n");
         return;
       }
@@ -1219,7 +1203,7 @@ namespace {
   }
 
   /* Everyone affected, newest first, or the one asked about; durations in `unit`. */
-  template <const char *Unit>
+  template <const std::string_view &Unit>
   void show_affects(GameWorld *g, struct char_data *ch, std::string &value)
   {
     std::vector<struct char_data *> victs;
@@ -1255,11 +1239,11 @@ namespace {
     send_to_char(g, ch, text);
   }
 
-  constexpr char HOURS[]  = "hr";
-  constexpr char ROUNDS[] = "rd";
+  constexpr std::string_view HOURS  = "hr";
+  constexpr std::string_view ROUNDS = "rd";
 
   struct show_field {
-    const char *name;
+    std::string_view name{};
     int level;
     void (*show)(GameWorld *g, struct char_data *ch, std::string &value);
   };
@@ -1333,7 +1317,7 @@ ACMD(do_plist)
     std::string arg = take_word(rest);
     rest            = skip_spaces(rest);
     if (isdigit(arg[0])) {
-      if (sscanf(arg.c_str(), "%d-%d", &low, &high) == 1)
+      if (io::scan_range(arg, low, high) == 1)
         high = low;
     } else if (arg[0] == '-') {
       mode = arg[1]; /* '\0' for a bare "-" */
@@ -1341,7 +1325,7 @@ ACMD(do_plist)
         case 'l':
           arg  = take_word(rest);
           rest = skip_spaces(rest);
-          sscanf(arg.c_str(), "%d-%d", &low, &high);
+          io::scan_range(arg, low, high);
           break;
         case 'n':
           name_search = take_word(rest);
@@ -1356,13 +1340,13 @@ ACMD(do_plist)
         case 'd':
           arg  = take_word(rest);
           rest = skip_spaces(rest);
-          if (sscanf(arg.c_str(), "%d-%d", &low_day, &high_day) == 1)
+          if (io::scan_range(arg, low_day, high_day) == 1)
             high_day = low_day;
           break;
         case 'h':
           arg  = take_word(rest);
           rest = skip_spaces(rest);
-          if (sscanf(arg.c_str(), "%d-%d", &low_hr, &high_hr) == 1)
+          if (io::scan_range(arg, low_hr, high_hr) == 1)
             high_hr = low_hr;
           break;
         default:
@@ -1398,8 +1382,7 @@ ACMD(do_plist)
     if (time_away.hours > high_hr || time_away.hours < low_hr)
       continue;
 
-    std::string time_str = asctime(localtime(&g->player_table[i].last));
-    time_str.pop_back(); /* its newline */
+    std::string time_str = asctime_text(g->player_table[i].last);
     std::string name = g->player_table[i].name;
 
     buf += str_format("[{:>3d}] ({:>2d}) {:<12} {}\r\n", g->player_table[i].id, g->player_table[i].level, CAP(name), time_str);
@@ -1435,7 +1418,7 @@ constexpr int TOTAL_WEAR_CHECKS = (NUM_ITEM_WEARS - 2); /*minus Wield and Take*/
 static const struct zcheck_armor {
   bitvector_t bitvector{}; /* from Structs.h                       */
   int ac_allowed{};        /* Max. AC allowed for this body part  */
-  const char *message{};   /* phrase for error message            */
+  std::string_view message{};   /* phrase for error message            */
 } zarmor[] = {
     {ITEM_WEAR_FINGER, 10, "Ring"         },
     {ITEM_WEAR_NECK,   10, "Necklace"     },
@@ -1466,7 +1449,7 @@ static const struct zcheck_affs {
   int aff_type{};        /*from Structs.h*/
   int min_aff{};         /*min. allowed value*/
   int max_aff{};         /*max. allowed value*/
-  const char *message{}; /*phrase for error message*/
+  std::string_view message{}; /*phrase for error message*/
 } zaffs[] = {
     {APPLY_NONE,        0,   -99, "unused0"         },
     {APPLY_STR,         -6,  6,   "strength"        },
@@ -1728,7 +1711,7 @@ ACMD(do_zcheck)
 
       bool unformatted = false;
       for (const extra_descr_data &ext : obj_get_ex_description(obj))
-        if (strncmp(ext.description.c_str(), "   ", 3))
+        if (!until_nul(ext.description).starts_with("   "))
           unformatted = true;
 
       if (unformatted && (found = 1))
@@ -1788,7 +1771,7 @@ ACMD(do_zcheck)
 
       bool unformatted = false;
       for (const extra_descr_data &ext : room_get_ex_description(g, i))
-        if (strncmp(ext.description.c_str(), "   ", 3))
+        if (!until_nul(ext.description).starts_with("   "))
           unformatted = true;
 
       if (unformatted && (found = 1))
@@ -2107,22 +2090,9 @@ ACMD(do_spells)
   return;
 }
 
-struct audit_reader {
-  GameWorld *g{};
-  struct char_data *ch{};
-};
-
-static void audit_report_to_char(void *context, const char *problem)
-{
-  struct audit_reader *reader = static_cast<struct audit_reader *>(context);
-
-  send_to_char(reader->g, reader->ch, "{}\r\n", problem);
-}
-
 ACMD(do_audit)
 {
-  struct audit_reader reader = {g, ch};
-  int problems               = world_audit(g, audit_report_to_char, &reader);
+  int problems = world_audit(g, [&](std::string_view problem) { send_to_char(g, ch, "{}\r\n", problem); });
 
   send_to_char(g, ch, "World audit: {:d} problem{} found.\r\n", problems, problems == 1 ? "" : "s");
 }

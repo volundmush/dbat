@@ -10,6 +10,7 @@
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
+#include "dbat/io/reader.hpp"
 
 #include "dg_internal.hpp"
 
@@ -20,7 +21,7 @@ static void find_actor(GameWorld *g, const trig_data *trig, struct dg_run_ctx &c
   if (!actor || actor->value.size() < 2 || actor->value[0] != UID_CHAR)
     return;
 
-  long uid = atol(actor->value.c_str() + 1);
+  long uid = io::c_atol(std::string_view(actor->value).substr(1));
   if (char_data *ch = char_by_id(g, uid))
     ctx.actor = char_get_name(ch);
   else if (obj_data *obj = obj_by_id(g, uid))
@@ -81,7 +82,7 @@ void dg_ctx_set_line(GameWorld *g, const dg::line &l)
 /* " [trig ... ]" describing the running trigger, or "" when none is. */
 std::string dg_context(GameWorld *g)
 {
-  static const char *owner_types[] = {"mob", "obj", "room"};
+  static constexpr std::string_view owner_types[] = {"mob", "obj", "room"};
   const struct dg_run_ctx &ctx     = g->dg_ctx;
 
   if (!ctx.active)

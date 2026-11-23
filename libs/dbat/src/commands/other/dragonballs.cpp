@@ -380,7 +380,7 @@ namespace {
     int count() const { return static_cast<int>(std::ranges::count_if(named, [](auto *c) { return c != nullptr; })); }
   };
 
-  const char *second_wish(GameWorld *g) { return g->WISH[0] ? "" : " Now make your second wish."; }
+  std::string_view second_wish(GameWorld *g) { return g->WISH[0] ? "" : " Now make your second wish."; }
 
   void shenron_says_no(GameWorld *g)
   {
@@ -389,9 +389,9 @@ namespace {
 
   /* A boon: one named player gains something, and the wish is granted. */
   struct boon {
-    const char *word;
-    const char *granted; /* "{name} ..." */
-    const char *logged;  /* "... has made {logged} on {name}." */
+    std::string_view word{};
+    std::string_view granted{}; /* "{name} ..." */
+    std::string_view logged{};  /* "... has made {logged} on {name}." */
     void (*bestow)(GameWorld *g, struct char_data *wch);
     bool saves;
   };
@@ -578,7 +578,7 @@ namespace {
   }
 
   struct wish {
-    const char *word;
+    std::string_view word{};
     bool (*grant)(wisher &w); /* true if granted */
   };
 

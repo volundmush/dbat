@@ -41,7 +41,7 @@
 #include "dbat/game_world.hpp"
 #include "dbat/consts/create.hpp"
 
-static const char *sensei_abbr(int s);
+static std::string_view sensei_abbr(int s);
 
 /* Names first */
 
@@ -1444,7 +1444,7 @@ std::string class_desc_str(struct char_data *ch, int howlong, int wantthe)
   std::string str;
   int i, rank, j;
   int rankorder[NUM_CLASSES];
-  const char *buf, *buf2, *buf3;
+  std::string_view buf, buf2, buf3;
 
   if (char_is_npc(ch)) {
     return str_format("{}{:d}", char_class_abbr(ch), char_get_level(ch));
@@ -1594,7 +1594,7 @@ std::string_view sensei_name(int s)
   }
 }
 
-static const char *sensei_abbr(int s)
+static std::string_view sensei_abbr(int s)
 {
   switch (s) {
     case CLASS_ROSHI:

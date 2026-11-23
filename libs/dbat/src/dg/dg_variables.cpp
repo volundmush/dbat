@@ -118,9 +118,9 @@ const struct {
   std::string_view name;
   std::string (*get)(const std::string &text, const std::string &arg);
 } text_fields[] = {
-    {"strlen", [](const std::string &text, const std::string &) { return str_format("{:d}", strlen(text.c_str())); }},
+    {"strlen", [](const std::string &text, const std::string &) { return str_format("{:d}", until_nul(text).size()); }},
     {"trim", [](const std::string &text, const std::string &) { /* without whitespace at either end */
-       const char *space = " \t\n\v\f\r";                   /* what isspace() finds */
+       constexpr std::string_view space = " \t\n\v\f\r"; /* what isspace() finds */
        size_t start      = text.find_first_not_of(space);
        return start == std::string::npos ? std::string() : text.substr(start, text.find_last_not_of(space) + 1 - start);
      }},
@@ -128,26 +128,22 @@ const struct {
        return std::string(str_str(text, arg) ? "1" : "0");
      }},
     {"car", [](const std::string &text, const std::string &) { /* the first word */
-       const char *car = text.c_str();
-       std::string word;
-       while (*car && !isspace(*car))
-         word += *car++;
-       return word;
+       std::string_view car = until_nul(text);
+       return std::string(car.substr(0, std::ranges::find_if(car, [](char c) { return isspace(c); }) - car.begin()));
      }},
     {"cdr", [](const std::string &text, const std::string &) { /* all but the first word */
-       const char *cdr = text.c_str();
-       while (*cdr && !isspace(*cdr))
-         cdr++;
-       while (*cdr && isspace(*cdr))
-         cdr++;
+       std::string_view cdr = until_nul(text);
+       auto space           = [](char c) { return isspace(c) != 0; };
+       cdr.remove_prefix(std::ranges::find_if(cdr, space) - cdr.begin());
+       cdr.remove_prefix(std::ranges::find_if_not(cdr, space) - cdr.begin());
        return std::string(cdr);
      }},
     {"charat", [](const std::string &text, const std::string &arg) { /* the character at a place, from 1 */
-       size_t len = strlen(text.c_str()), at = atoi(arg.c_str());
+       size_t len = until_nul(text).size(), at = parse_int(arg);
        return at > len || at < 1 ? std::string() : std::string(1, text[at - 1]);
      }},
     {"mudcommand", [](const std::string &text, const std::string &) { /* the command the text is the start of */
-       std::string_view start = text.c_str(); /* up to a '\0', as strncmp() read it */
+       std::string_view start = until_nul(text); /* as strncmp() read it */
        for (int cmd = 0; cmd_info[cmd].command != "\n"; cmd++)
          if (cmd_info[cmd].command.starts_with(start))
            return std::string(cmd_info[cmd].command);
@@ -158,7 +154,7 @@ const struct {
 /* The names %send%, %echo% and the rest stand for: the command of that name for each kind of owner */
 const struct {
   std::string_view name;
-  const char *per_kind[3]; /* for a mob, an object, a room */
+  std::string_view per_kind[3]; /* for a mob, an object, a room */
 } command_names[] = {
     {"door",       {"mdoor ", "odoor ", "wdoor "}                     },
     {"force",      {"mforce ", "oforce ", "wforce "}                  },
@@ -279,7 +275,7 @@ const struct {
        return vd ? vd->value : "";
      }},
     {"people", [](const field_query &q) {
-       room_vnum num = atoi(q.field.c_str());
+       room_vnum num = parse_int(q.field);
        return number(num > 0 ? trgvar_in_room(q.g, num) : 0);
      }},
     {"time", [](const field_query &q) {
@@ -298,7 +294,7 @@ const struct {
          script_log(q.g, "findmob.vnum(mvnum) - illegal syntax");
          return std::string("0");
        }
-       room_vnum rrnum = atoi(q.field.c_str());
+       room_vnum rrnum = parse_int(q.field);
        if (!room_of(q.g, rrnum)) {
          script_log(q.g, "findmob.vnum(ovnum): No room with vnum {:d}", rrnum);
          return std::string("0");
@@ -315,7 +311,7 @@ const struct {
          script_log(q.g, "findobj.vnum(ovnum) - illegal syntax");
          return std::string("0");
        }
-       room_vnum rrnum = atoi(q.field.c_str());
+       room_vnum rrnum = parse_int(q.field);
        if (!room_of(q.g, rrnum)) {
          script_log(q.g, "findobj.vnum(ovnum): No room with vnum {:d}", rrnum);
          return std::string("0");
@@ -328,7 +324,7 @@ const struct {
          return random_char(q.g, q.go);
        if (str_eq_nocase(q.field, "dir"))
          return random_dir(q.g, q.go);
-       int num = atoi(q.field.c_str());
+       int num = parse_int(q.field);
        return number(num > 0 ? rand_number(q.g, 1, num) : 0);
      }},
 };
@@ -336,7 +332,7 @@ const struct {
 /* What a script owned by go finds by name: as a mob would, as an object would, or as a room would */
 using found = std::variant<std::monostate, char_data *, obj_data *, room_data *>;
 
-found find_by_name(GameWorld *g, const owner_ptr &go, const char *name)
+found find_by_name(GameWorld *g, const owner_ptr &go, std::string_view name)
 {
   return std::visit(overloaded{
                         [&](char_data *ch) -> found {
@@ -391,7 +387,7 @@ std::string find_replacement(GameWorld *g, owner_ptr go, struct script_data *sc,
   found what;
 
   if (vd)
-    what = find_by_name(g, go, vd->value.c_str());
+    what = find_by_name(g, go, until_nul(vd->value));
   else if (str_eq_nocase(var, "self"))
     std::visit([&](auto *self) { what = self; }, go);
   else {
@@ -432,7 +428,7 @@ std::string dg::plain_variable(GameWorld *g, owner_ptr go, struct script_data *s
     return number((long long)game_now(g));
   for (const auto &command : command_names)
     if (str_eq_nocase(var, command.name))
-      return command.per_kind[type];
+      return std::string(command.per_kind[type]);
   return "";
 }
 

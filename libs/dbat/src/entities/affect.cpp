@@ -9,7 +9,7 @@
 #include "dbat/feats.hpp"
 #include "dbat/game_world.hpp"
 
-static void aff_apply_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, const char *msg)
+static void aff_apply_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, std::string_view msg)
 {
   switch (loc) {
     case APPLY_NONE:

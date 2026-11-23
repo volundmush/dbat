@@ -474,7 +474,6 @@ void introCreate(struct char_data *ch)
 
 int readIntro(struct char_data *ch, struct char_data *vict)
 {
-  char filler[50];
   int known = false;
 
   /* Read Introduction File */
@@ -498,7 +497,8 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     return 0;
 
   while (std::optional<std::string_view> line = file->line()) {
-    if (sscanf(std::string(*line).c_str(), "%49s", filler) == 1 && str_eq_nocase(char_get_name(vict), filler)) {
+    io::fields first(until_nul(*line));
+    if (std::string filler; first.word(filler, 49) && str_eq_nocase(char_get_name(vict), filler)) {
       known = true;
     }
   }
@@ -511,7 +511,6 @@ int readIntro(struct char_data *ch, struct char_data *vict)
 
 static void introWrite(struct char_data *ch, struct char_data *vict, std::string name)
 {
-  char filler[50], scrap[100];
   std::vector<std::pair<std::string, std::string>> known; /* each name, and what ch calls them */
 
   /* Read Introduction File */
@@ -528,8 +527,10 @@ static void introWrite(struct char_data *ch, struct char_data *vict, std::string
     std::optional<std::string_view> line = file->line();
     if (!line)
       break;
-    *filler = *scrap = '\0';
-    if (sscanf(std::string(*line).c_str(), "%49s %99s", filler, scrap) < 1)
+    std::string filler, scrap;
+    io::fields words(until_nul(*line));
+    words.word(filler, 49) && words.word(scrap, 99);
+    if (words.count() < 1)
       continue;
     known.emplace_back(filler, scrap);
   }
@@ -537,7 +538,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, std::string
   /* Write Introduction File */
   io::text_writer out(*path, true);
   for (size_t x = 0; x < known.size(); x++) {
-    if (x == 0 || strcasecmp(known[x - 1].first.c_str(), known[x].first.c_str())) {
+    if (x == 0 || !str_eq_nocase(known[x - 1].first, known[x].first)) {
       if (!str_eq_nocase(known[x].first, char_get_name(vict))) {
         out.print("{} {}\n", known[x].first, known[x].second);
       }

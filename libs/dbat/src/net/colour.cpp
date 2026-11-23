@@ -44,7 +44,7 @@ namespace {
 /* Each code and what it becomes: a replacement starting with a digit is the inside of an ANSI escape */
 struct colour_code {
   char code;
-  const char *ansi;
+  std::string_view ansi{};
 };
 constexpr colour_code CODES[] = {
     {'@', "@"},
@@ -82,9 +82,9 @@ constexpr colour_code CODES[] = {
 constexpr std::string_view RANDOM_COLORS = "bgcrmywBGCRMWY";
 
 /* A user's colour choice i (@n is choice COLOR_NORMAL), or the default */
-const char *choice(const std::string *choices, int i)
+std::string_view choice(const std::string *choices, int i)
 {
-  return choices && !choices[i].empty() ? choices[i].c_str() : default_color_choices[i];
+  return choices && !choices[i].empty() ? until_nul(choices[i]) : std::string_view(default_color_choices[i]);
 }
 
 /* The number atoi() reads at txt[at]: leading spaces, a sign, then digits (atoi() is strtol() cut to an int) */
@@ -140,7 +140,7 @@ colourized colourize(GameWorld *g, std::string_view txt, bool parse, const std::
     }
 
     /* parse the color code */
-    const char *replacement = nullptr;
+    std::string_view replacement; /* none, if empty: an empty one would add nothing */
     if (code == '[') { /* User configurable color */
       if (++at == txt.size())
         break; /* "@[" ending the text: nothing more (it once read on past the end, into what was there before) */
@@ -158,7 +158,7 @@ colourized colourize(GameWorld *g, std::string_view txt, bool parse, const std::
           break;
         }
     }
-    if (replacement) {
+    if (!replacement.empty()) {
       std::string_view r = replacement;
       if (out.size() + r.size() + std::string_view(ANSISTART).size() + 1 < maxlen) { /* only substitute if there's room for the whole code */
         if (isdigit(r[0]))

@@ -594,7 +594,7 @@ const area_attack STAR_NOVA = {
  * multihit. The user sees none of their messages.
  */
 struct beast_attack {
-  const char *name{};                                                       /* as the zanzoken messages name it */
+  std::string_view name{};                                                       /* as the zanzoken messages name it */
   int64_t stamina_share{};                                                  /* it costs a 1/this share of the user's max power level in stamina */
   int64_t needs_share{};                                                    /* and needs a 1/this share to be made */
   int cooldown{};                                                           /* handle_cooldown() */
@@ -935,7 +935,7 @@ ACMD(do_strike)
 
 namespace {
 
-void combine_syntax(GameWorld *g, struct char_data *ch, const char *cancel)
+void combine_syntax(GameWorld *g, struct char_data *ch, std::string_view cancel)
 {
   send_to_char(g, ch, "Follower Syntax: combine (attack)\r\n");
   send_to_char(g, ch, "Leader Syntax: combine (attack) (target)\r\n");
@@ -991,7 +991,7 @@ ACMD(do_combine)
   /* quirk: the attack is the first word with its name in it, so those of two words (twin slash and the
      renzokou energy dan, and with them the sword and Nail's student checks) are never found */
   std::span<const char *const> names(attack_names, 14);
-  auto named = std::ranges::find_if(names, [&](const char *name) { return arg.find(name) != std::string::npos; });
+  auto named = std::ranges::find_if(names, [&](std::string_view name) { return arg.find(name) != std::string::npos; });
   if (named == names.end()) {
     combine_syntax(g, ch, "Follower Cancel");
     return;

@@ -31,8 +31,8 @@ namespace {
   /* A social's messages, in the order the menu and astat list them */
   struct message_row {
     char key;
-    const char *label;  /* as the menu shows it, before the ": " */
-    const char *prompt; /* asking for a new one, before the old one is shown */
+    std::string_view label{};  /* as the menu shows it, before the ": " */
+    std::string_view prompt{}; /* asking for a new one, before the old one is shown */
     social_message social_messg::*text;
   };
 
@@ -93,7 +93,7 @@ namespace {
     void setup_existing(GameWorld *g);
     void setup_new();
     void save(GameWorld *g);
-    void ask_position(GameWorld *g, struct descriptor_data *d, const char *whose, mode next);
+    void ask_position(GameWorld *g, struct descriptor_data *d, std::string_view whose, mode next);
   };
 
   void social_editor::menu(GameWorld *g, struct descriptor_data *d)
@@ -166,7 +166,7 @@ namespace {
     save_to_disk(g); /* autosave by Rumble */
   }
 
-  void social_editor::ask_position(GameWorld *g, struct descriptor_data *d, const char *whose, mode next)
+  void social_editor::ask_position(GameWorld *g, struct descriptor_data *d, std::string_view whose, mode next)
   {
     write_to_output(g, d, "Enter the minimum position the {} has to be in to activate social:\r\n", whose);
     for (int i = POS_DEAD; i <= POS_STANDING; i++)
@@ -304,7 +304,7 @@ namespace {
 
       case mode::min_char_pos:
       case mode::min_vict_pos: {
-        int position = atoi(text.c_str());
+        int position = parse_int(text);
         if (text.empty() || position < POS_DEAD || position > POS_STANDING) {
           menu(g, d);
           return;
@@ -314,7 +314,7 @@ namespace {
       }
 
       case mode::min_level: {
-        int level = atoi(text.c_str());
+        int level = parse_int(text);
         if (text.empty() || level < 0) {
           menu(g, d);
           return;

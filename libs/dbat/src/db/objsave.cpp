@@ -66,8 +66,8 @@ static rent_header read_rent_header(std::string_view line, int rentcode)
 }
 
 /* The rent file of name, open; nothing, logging why with the message's number if it is there but can't be read
-   (unless doing is null) */
-static std::optional<io::text_reader> open_rent_file(std::string_view name, const char *doing, int number,
+   (unless doing is empty) */
+static std::optional<io::text_reader> open_rent_file(std::string_view name, std::string_view doing, int number,
                                                      std::string *path_out = nullptr)
 {
   std::optional<std::string> path = player_path(NEW_OBJ_FILES, name);
@@ -78,14 +78,14 @@ static std::optional<io::text_reader> open_rent_file(std::string_view name, cons
   io::loaded<io::text_reader> file = io::text_reader::open(*path);
   if (!file) {
     std::error_code ec;
-    if (doing && std::filesystem::exists(*path, ec))
+    if (!doing.empty() && std::filesystem::exists(*path, ec))
       mud_log("SYSERR: {} {} ({:d}): {}", doing, *path, number, io::why_unreadable(*path));
     return std::nullopt;
   }
   return std::move(*file);
 }
 
-static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentcode, int cost, const char *save_type)
+static bool Crash_write_safe_file(GameWorld *g, struct char_data *ch, int rentcode, int cost, std::string_view save_type)
 {
   std::optional<std::string> path = player_path(NEW_OBJ_FILES, char_get_name(ch));
   if (!path) {
@@ -252,7 +252,7 @@ bool Crash_delete_crashfile(struct char_data *ch)
   return true;
 }
 
-static bool Crash_clean_file(GameWorld *g, const char *name)
+static bool Crash_clean_file(GameWorld *g, std::string_view name)
 {
   std::optional<io::text_reader> file = open_rent_file(name, "OPENING OBJECT FILE", 4);
   if (!file)
@@ -264,7 +264,7 @@ static bool Crash_clean_file(GameWorld *g, const char *name)
   if (h.rentcode == RENT_CRASH || h.rentcode == RENT_FORCED || h.rentcode == RENT_TIMEDOUT) {
     if (h.timed < game_now(g) - (CONFIG_CRASH_TIMEOUT * SECS_PER_REAL_DAY)) {
       Crash_delete_file(name);
-      const char *filetype = h.rentcode == RENT_CRASH ? "crash" : h.rentcode == RENT_FORCED ? "forced rent" : "idlesave";
+      std::string_view filetype = h.rentcode == RENT_CRASH ? "crash" : h.rentcode == RENT_FORCED ? "forced rent" : "idlesave";
       mud_log("    Deleting {}'s {} file.", name, filetype);
       return true;
     }
@@ -289,7 +289,7 @@ void update_obj_file(GameWorld *g)
 void Crash_listrent(GameWorld *g, struct char_data *ch, std::string_view name)
 {
   std::string path;
-  std::optional<io::text_reader> file = open_rent_file(name, nullptr, 0, &path);
+  std::optional<io::text_reader> file = open_rent_file(name, {}, 0, &path);
   if (!file) {
     send_to_char(g, ch, "{} has no rent file.\r\n", name);
     return;

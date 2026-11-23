@@ -43,11 +43,11 @@ static void unused_spell(GameWorld *g, int spl);
  */
 
 struct syllable {
-  const char *org{};
-  const char *news{};
+  std::string_view org{};
+  std::string_view news{};
 };
 
-const char *const unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */
+const std::string_view unused_spellname = "!UNUSED!"; /* its data() marks an unused entry */
 
 static void mag_nextstrike(int level, struct char_data *caster, int spellnum)
 {
@@ -353,7 +353,7 @@ int skill_type(GameWorld *g, int snum)
 }
 
 /* Assign the spells on boot up */
-static void spello(GameWorld *g, int spl, const char *name, int max_mana, int min_mana, int mana_change, int minpos, int targets, int violent, int routines, int save_flags, int comp_flags, const char *wearoff, int cmspell_level, int school, int domain)
+static void spello(GameWorld *g, int spl, std::string_view name, int max_mana, int min_mana, int mana_change, int minpos, int targets, int violent, int routines, int save_flags, int comp_flags, std::string_view wearoff, int cmspell_level, int school, int domain)
 {
   int i;
 
@@ -412,9 +412,9 @@ static void unused_spell(GameWorld *g, int spl)
   g->spell_info[spl].domain       = 0;
 }
 
-static void skillo(GameWorld *g, int skill, const char *name, int flags)
+static void skillo(GameWorld *g, int skill, std::string_view name, int flags)
 {
-  spello(g, skill, name, 0, 0, 0, 0, 0, 0, 0, 0, 0, nullptr, 0, 0, 0);
+  spello(g, skill, name, 0, 0, 0, 0, 0, 0, 0, 0, 0, {}, 0, 0, 0);
   g->spell_info[skill].skilltype = SKTYPE_SKILL;
   g->spell_info[skill].flags     = flags;
 }
@@ -479,7 +479,7 @@ void mag_assign_spells(GameWorld *g)
   spello(g, SPELL_ANIMATE_DEAD, "animate dead", 35, 10, 3, POS_STANDING,
          TAR_OBJ_ROOM, false,
          MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          3, SCHOOL_NECROMANCY, DOMAIN_DEATH);
 
   spello(g, SPELL_MAGE_ARMOR, "mage armor", 30, 15, 3, POS_FIGHTING,
@@ -514,25 +514,25 @@ void mag_assign_spells(GameWorld *g)
   spello(g, SPELL_BURNING_HANDS, "burning hands", 30, 10, 3, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         nullptr,
+         {},
          1, SCHOOL_TRANSMUTATION, DOMAIN_FIRE);
 
   spello(g, SPELL_CALL_LIGHTNING, "call lightning", 40, 25, 3, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         nullptr,
+         {},
          3, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_INFLICT_CRITIC, "inflict critic", 30, 10, 2, POS_FIGHTING,
          TAR_CHAR_ROOM, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_HALF, 0,
-         nullptr,
+         {},
          4, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(g, SPELL_INFLICT_LIGHT, "inflict light", 30, 10, 2, POS_FIGHTING,
          TAR_CHAR_ROOM, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_HALF, 0,
-         nullptr,
+         {},
          1, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(g, SPELL_CHARM, "charm person", 75, 50, 2, POS_FIGHTING,
@@ -550,38 +550,38 @@ void mag_assign_spells(GameWorld *g)
   spello(g, SPELL_COLOR_SPRAY, "color spray", 30, 15, 3, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_NONE, 0,
-         nullptr,
+         {},
          1, SCHOOL_ILLUSION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_CONTROL_WEATHER, "control weather", 75, 25, 5, POS_STANDING,
          TAR_IGNORE, false,
          MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          7, SCHOOL_TRANSMUTATION, DOMAIN_AIR);
 
   spello(g, SPELL_CREATE_FOOD, "create food", 30, 5, 4, POS_STANDING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_CREATIONS, 0, 0,
-         nullptr,
+         {},
          3, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_CREATE_WATER, "create water", 30, 5, 4, POS_STANDING,
          TAR_OBJ_INV | TAR_OBJ_EQUIP, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_REMOVE_BLINDNESS, "remove blindness", 30, 5, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_UNAFFECTS, 0, 0,
-         nullptr,
+         {},
          3, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_CURE_CRITIC, "cure critic", 30, 10, 2, POS_FIGHTING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
-         nullptr,
+         {},
          4, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(g, SPELL_CURE_LIGHT, "cure light", 30, 10, 2, POS_FIGHTING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
-         nullptr,
+         {},
          1, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(g, SPELL_BESTOW_CURSE, "bestow curse", 80, 50, 2, POS_FIGHTING,
@@ -618,67 +618,67 @@ void mag_assign_spells(GameWorld *g)
 
   spello(g, SPELL_DISPEL_EVIL, "dispel evil", 40, 25, 3, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_NONE, 0,
-         nullptr,
+         {},
          5, SCHOOL_UNDEFINED, DOMAIN_GOOD);
 
   spello(g, SPELL_DISPEL_GOOD, "dispel good", 40, 25, 3, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_NONE, 0,
-         nullptr,
+         {},
          5, SCHOOL_UNDEFINED, DOMAIN_EVIL);
 
   spello(g, SPELL_EARTHQUAKE, "earthquake", 40, 25, 3, POS_FIGHTING,
          TAR_IGNORE, true, MAG_ACTION_FULL | MAG_AREAS, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         nullptr,
+         {},
          8, SCHOOL_UNDEFINED, DOMAIN_DESTRUCTION | DOMAIN_EARTH);
 
   spello(g, SPELL_ENCHANT_WEAPON, "enchant weapon", 150, 100, 10, POS_STANDING,
          TAR_OBJ_INV, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          9, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_ENERGY_DRAIN, "energy drain", 40, 25, 1, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
-         MAG_DAMAGE | MAG_MANUAL, MAGSAVE_FORT | MAGSAVE_NONE, 0, nullptr,
+         MAG_DAMAGE | MAG_MANUAL, MAGSAVE_FORT | MAGSAVE_NONE, 0, {},
          9, SCHOOL_NECROMANCY, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_GROUP_ARMOR, "group armor", 50, 30, 2, POS_STANDING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_GROUPS, 0, 0,
-         nullptr,
+         {},
          5, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_FAERIE_FIRE, "faerie fire", 20, 10, 2, POS_STANDING,
          TAR_CHAR_WORLD | TAR_NOT_SELF, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          1, SCHOOL_EVOCATION, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_FIREBALL, "fireball", 40, 30, 2, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         nullptr,
+         {},
          3, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_MASS_HEAL, "mass heal", 80, 60, 5, POS_STANDING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_GROUPS, 0, 0,
-         nullptr,
+         {},
          6, SCHOOL_CONJURATION, DOMAIN_HEALING);
 
   spello(g, SPELL_HARM, "harm", 75, 45, 3, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_FORT | MAGSAVE_NONE, 0,
-         nullptr,
+         {},
          6, SCHOOL_UNDEFINED, DOMAIN_DESTRUCTION);
 
   spello(g, SPELL_HEAL, "heal", 60, 40, 3, POS_FIGHTING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_POINTS | MAG_UNAFFECTS, 0, 0,
-         nullptr,
+         {},
          6, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(g, SPELL_SENSU, "sensu", 1, 0, 3, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
-         nullptr,
+         {},
          6, SCHOOL_DIVINATION, DOMAIN_HEALING);
 
   spello(g, SPELL_IDENTIFY, "identify", 50, 25, 5, POS_STANDING,
          TAR_OBJ_INV | TAR_OBJ_ROOM, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          2, SCHOOL_DIVINATION, DOMAIN_MAGIC);
 
   spello(g, SPELL_DARKVISION, "darkvision", 25, 10, 1, POS_STANDING,
@@ -693,17 +693,17 @@ void mag_assign_spells(GameWorld *g)
 
   spello(g, SPELL_LIGHTNING_BOLT, "lightning bolt", 30, 15, 1, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         nullptr,
+         {},
          3, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_LOCATE_OBJECT, "locate object", 25, 20, 1, POS_STANDING,
          TAR_OBJ_WORLD, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          3, SCHOOL_DIVINATION, DOMAIN_TRAVEL);
 
   spello(g, SPELL_MAGIC_MISSILE, "magic missile", 25, 10, 3, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, 0, 0,
-         nullptr,
+         {},
          1, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_PARALYZE, "stone", 25, 10, 1, POS_STANDING,
@@ -766,7 +766,7 @@ void mag_assign_spells(GameWorld *g)
 
   spello(g, SPELL_PORTAL, "portal", 75, 75, 0, POS_STANDING,
          TAR_CHAR_WORLD | TAR_NOT_SELF, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          7, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_PROT_FROM_EVIL, "protection from evil", 40, 10, 3, POS_STANDING,
@@ -777,12 +777,12 @@ void mag_assign_spells(GameWorld *g)
   spello(g, SPELL_REMOVE_CURSE, "remove curse", 45, 25, 5, POS_STANDING,
          TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_EQUIP, false,
          MAG_ACTION_FULL | MAG_UNAFFECTS | MAG_ALTER_OBJS, 0, 0,
-         nullptr,
+         {},
          3, SCHOOL_ABJURATION, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_NEUTRALIZE_POISON, "neutralize poison", 40, 8, 4, POS_STANDING,
          TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_ROOM, false, MAG_ACTION_FULL | MAG_UNAFFECTS | MAG_ALTER_OBJS, 0, 0,
-         nullptr,
+         {},
          4, SCHOOL_CONJURATION, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_SANCTUARY, "sanctuary", 110, 85, 5, POS_STANDING,
@@ -797,7 +797,7 @@ void mag_assign_spells(GameWorld *g)
 
   spello(g, SPELL_SHOCKING_GRASP, "shocking grasp", 30, 15, 3, POS_FIGHTING,
          TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, 0, 0,
-         nullptr,
+         {},
          1, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SLEEP, "sleep", 40, 25, 5, POS_FIGHTING,
@@ -822,12 +822,12 @@ void mag_assign_spells(GameWorld *g)
 
   spello(g, SPELL_SUMMON, "summon", 75, 50, 3, POS_STANDING,
          TAR_CHAR_WORLD | TAR_NOT_SELF, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          7, SCHOOL_CONJURATION, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_TELEPORT, "teleport", 75, 50, 3, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          5, SCHOOL_TRANSMUTATION, DOMAIN_TRAVEL);
 
   spello(g, SPELL_WATERWALK, "waterwalk", 40, 20, 2, POS_STANDING,
@@ -837,41 +837,41 @@ void mag_assign_spells(GameWorld *g)
 
   spello(g, SPELL_WORD_OF_RECALL, "word of recall", 20, 10, 2, POS_FIGHTING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         nullptr,
+         {},
          6, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(g, SPELL_RESISTANCE, "resistance", 40, 20, 0, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTSV,
          0, MAGCOMP_MATERIAL | MAGCOMP_SOMATIC | MAGCOMP_VERBAL | MAGCOMP_DIVINE_FOCUS,
-         nullptr, 0, SCHOOL_ABJURATION, DOMAIN_UNDEFINED);
+         {}, 0, SCHOOL_ABJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_ACID_SPLASH, "acid splash", 40, 20, 0, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS,
          0, MAGCOMP_SOMATIC | MAGCOMP_VERBAL,
-         nullptr,
+         {},
          0, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_DAZE, "daze", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTSV,
          MAGSAVE_WILL | MAGSAVE_NONE, MAGCOMP_MATERIAL | MAGCOMP_SOMATIC | MAGCOMP_VERBAL,
-         nullptr, 0, SCHOOL_ENCHANTMENT, DOMAIN_UNDEFINED);
+         {}, 0, SCHOOL_ENCHANTMENT, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_FLARE, "flare", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTSV,
          MAGSAVE_FORT | MAGSAVE_NONE, MAGCOMP_VERBAL,
-         nullptr,
+         {},
          0, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_RAY_OF_FROST, "ray of frost", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS,
          0, MAGCOMP_SOMATIC | MAGCOMP_VERBAL,
-         nullptr,
+         {},
          0, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_DISRUPT_UNDEAD, "disrupt undead", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS,
          0, MAGCOMP_SOMATIC | MAGCOMP_VERBAL,
-         nullptr,
+         {},
          0, SCHOOL_NECROMANCY, DOMAIN_UNDEFINED);
 
   /*spello(SPELL_LESSER_GLOBE_OF_INVUL, "lesser globe of invulnerability", 40, 20, 2, POS_STANDING,
@@ -887,102 +887,102 @@ void mag_assign_spells(GameWorld *g)
 
   spello(g, SPELL_SUMMON_MONSTER_I, "summon monster i", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          1, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SUMMON_MONSTER_II, "summon monster ii", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          2, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SUMMON_MONSTER_III, "summon monster iii", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          3, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SUMMON_MONSTER_IV, "summon monster iv", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          4, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SUMMON_MONSTER_V, "summon monster v", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          5, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SUMMON_MONSTER_VI, "summon monster vi", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          6, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SUMMON_MONSTER_VII, "summon monster vii", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          7, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SUMMON_MONSTER_VIII, "summon monster viii", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          8, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SUMMON_MONSTER_IX, "summon monster ix", 40, 20, 2, POS_FIGHTING,
          TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         nullptr,
+         {},
          9, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_FIRE_SHIELD, "fire shield", 40, 20, 2, POS_FIGHTING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTSV, 0, 0,
-         nullptr,
+         {},
          4, SCHOOL_EVOCATION, DOMAIN_FIRE);
 
   spello(g, SPELL_ICE_STORM, "ice storm", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_SHOUT, "shout", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_FEAR, "fear", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_CLOUDKILL, "cloudkill", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_MAJOR_CREATION, "major creation", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_HOLD_MONSTER, "hold monster", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_CONE_OF_COLD, "cone of cold", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_ANIMAL_GROWTH, "animal growth", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_BALEFUL_POLYMORPH, "baleful polymorph", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(g, SPELL_PASSWALL, "passwall", 40, 20, 2, POS_STANDING,
          TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         nullptr,
+         {},
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
   /*
    * These spells are currently not used, not implemented, and not castable.
@@ -991,33 +991,33 @@ void mag_assign_spells(GameWorld *g)
 
   spello(g, SPELL_FIRE_BREATH, "fire breath", 0, 0, 0, POS_SITTING,
          TAR_IGNORE, true, 0, 0, 0,
-         nullptr,
+         {},
          0, 0, 0);
 
   spello(g, SPELL_GAS_BREATH, "gas breath", 0, 0, 0, POS_SITTING,
          TAR_IGNORE, true, 0, 0, 0,
-         nullptr,
+         {},
          0, 0, 0);
 
   spello(g, SPELL_FROST_BREATH, "frost breath", 0, 0, 0, POS_SITTING,
          TAR_IGNORE, true, 0, 0, 0,
-         nullptr,
+         {},
          0, 0, 0);
 
   spello(g, SPELL_ACID_BREATH, "acid breath", 0, 0, 0, POS_SITTING,
          TAR_IGNORE, true, 0, 0, 0,
-         nullptr,
+         {},
          0, 0, 0);
 
   spello(g, SPELL_LIGHTNING_BREATH, "lightning breath", 0, 0, 0, POS_SITTING,
          TAR_IGNORE, true, 0, 0, 0,
-         nullptr,
+         {},
          0, 0, 0);
 
   /* you might want to name this one something more fitting to your theme -Welcor*/
   spello(g, SPELL_DG_AFFECT, "Script-inflicted", 0, 0, 0, POS_SITTING,
          TAR_IGNORE, true, 0, 0, 0,
-         nullptr,
+         {},
          0, 0, 0);
 
   /*

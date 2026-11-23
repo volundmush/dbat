@@ -43,7 +43,7 @@ namespace {
    it), and is null for a keyword that is accepted and ignored; write gives the value to save, or nothing to leave the
    line out, and is null for a keyword never written. */
 struct espec_field {
-  const char *keyword;
+  std::string_view keyword{};
   void (*read)(GameWorld *g, char_data *mob, std::string_view value, int number);
   std::optional<int> (*write)(char_data *mob);
 };
@@ -332,7 +332,7 @@ void write_mob(GameWorld *g, io::text_writer &out, mob_vnum vnum, char_data *mob
 void check_mobile_strings(GameWorld *g, struct char_data *mob)
 {
   mob_vnum vnum = mob_index_of(g, char_get_nr(mob))->vnum;
-  auto check    = [&](std::string *string, const char *what) {
+  auto check    = [&](std::string *string, std::string_view what) {
     if (string->empty()) {
       mudlog(g, LOG_BRF, ADMLVL_GOD, true, "GenOLC: Mob #{:d} has an invalid {}.", vnum, what);
       *string = "An undefined string.";

@@ -116,7 +116,7 @@ namespace {
 
   /* The holds grapple takes, by name */
   struct grapple_hold {
-    const char *name;
+    std::string_view name{};
     int grap;
     act_msgs msgs;
     bool revealed; /* whether ch comes out of hiding to do it */
@@ -151,7 +151,7 @@ namespace {
   }
 
   /* Why ch can't grapple at all just now, if they can't */
-  const char *cannot_grapple(GameWorld *g, struct char_data *ch)
+  std::string_view cannot_grapple(GameWorld *g, struct char_data *ch)
   {
     if (char_plr_flagged(ch, PLR_THANDW))
       return "Your are too busy wielding your weapon with two hands!\r\n";
@@ -159,7 +159,7 @@ namespace {
       return "You are currently absorbing from someone!\r\n";
     if (char_get_absorbby(g, ch))
       return "You are currently being absorbed by someone! Try 'escape'!\r\n";
-    return nullptr;
+    return {};
   }
 } // namespace
 
@@ -167,7 +167,7 @@ ACMD(do_grapple)
 {
   if (!know_skill(g, ch, SKILL_GRAPPLE) || playing_song(g, ch))
     return;
-  if (const char *why = cannot_grapple(g, ch)) {
+  if (std::string_view why = cannot_grapple(g, ch); !why.empty()) {
     send_to_char(g, ch, why);
     return;
   }
@@ -199,14 +199,14 @@ ACMD(do_grapple)
   }
   if (!can_kill(g, ch, vict, nullptr, 0))
     return;
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (char_aff_flagged(vict, AFF_KNOCKED))
     refusal = "They are unconcious. What would be the point?\r\n";
   else if (char_get_grappled(g, vict) || char_get_absorbby(g, vict))
     refusal = "They are currently in someone else's grasp!\r\n";
   else if (char_get_absorbing(g, vict))
     refusal = "They are currently absorbing from someone!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -286,14 +286,14 @@ ACMD(do_trip)
   }
   if (!can_kill(g, ch, vict, nullptr, 0))
     return;
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (char_aff_flagged(vict, AFF_FLYING))
     refusal = "They are flying and are not on their feet!\r\n";
   else if (char_get_position(vict) == POS_SITTING)
     refusal = "They are not on their feet!\r\n";
   else if (char_plr_flagged(vict, PLR_HEALT))
     refusal = "They are inside a healing tank!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -386,7 +386,7 @@ ACMD(do_drag)
     act(g, "@C$n@W stops dragging @c$N@W.@n", true, ch, nullptr, dragged, TO_ROOM);
     return;
   }
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (char_plr_flagged(ch, PLR_PILOTING))
     refusal = "You are busy piloting a ship!\r\n";
   else if (char_get_carrying(g, ch))
@@ -397,7 +397,7 @@ ACMD(do_drag)
     refusal = "You are a bit busy fighting right now!\r\n";
   else if (room_sect(g, char_get_in_room(ch)) == SECT_WATER_NOSWIM || room_sect(g, char_get_in_room(ch)) == SECT_WATER_SWIM)
     refusal = "You decide to not be a tugboat instead.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -411,7 +411,7 @@ ACMD(do_drag)
     refusal = "They are already being dragged!\r\n";
   else if (char_is_npc(vict) && char_mob_flagged(vict, MOB_NOKILL))
     refusal = "They are not to be touched!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -572,14 +572,14 @@ ACMD(do_block)
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
-  const char *refusal    = nullptr;
+  std::string_view refusal    {};
   if (blocking == vict)
     refusal = "They are already blocked by you!\r\n";
   else if (ch == vict)
     refusal = "You can't block yourself, are you mental?\r\n";
   else if (char_get_blocked(g, vict))
     refusal = "They are already blocked by someone else!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -593,9 +593,9 @@ ACMD(do_block)
 
 namespace {
   /* Why obj can't be stolen, if it can't; worn things are checked a little differently */
-  const char *unstealable(GameWorld *g, struct obj_data *obj, bool worn)
+  std::string_view unstealable(GameWorld *g, struct obj_data *obj, bool worn)
   {
-    constexpr const char *CANT = "You can't steal that!\r\n", *KEYS = "No stealing keys!\r\n";
+    constexpr std::string_view CANT = "You can't steal that!\r\n", KEYS = "No stealing keys!\r\n";
     obj_vnum vnum = obj_get_vnum(g, obj);
     /* quirk: only worn things are kept safe by these two ranges */
     if (vnum >= 20000 || (worn && ((vnum >= 18800 && vnum <= 18999) || (vnum >= 19100 && vnum <= 19199))))
@@ -607,21 +607,21 @@ namespace {
       return CANT;
     if (obj_get_type_flag(obj) == ITEM_KEY)
       return KEYS;
-    return nullptr;
+    return {};
   }
 
   /* Why ch can't take obj from vict, if they can't */
-  const char *cannot_take(GameWorld *g, struct char_data *ch, struct char_data *vict, struct obj_data *obj, bool worn)
+  std::string_view cannot_take(GameWorld *g, struct char_data *ch, struct char_data *vict, struct obj_data *obj, bool worn)
   {
     if (!give_otrigger(g, obj, vict, ch) || !receive_mtrigger(g, ch, vict, obj))
       return "Impossible!\r\n";
-    if (const char *why = unstealable(g, obj, worn))
+    if (std::string_view why = unstealable(g, obj, worn); !why.empty())
       return why;
     if (obj_get_weight(obj) + getCurCarriedWeight(ch) > getMaxCarryWeight(g, ch))
       return "You can't carry that much weight.\r\n";
     if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch))
       return "You don't have the room for it right now!\r\n";
-    return nullptr;
+    return {};
   }
 
   /* Caught at it: ch waits, an npc fights, and both learn from it */
@@ -696,7 +696,7 @@ namespace {
       send_to_char(g, ch, "Steal worn equipment from them while they are awake? That's a stupid idea...\r\n");
       return;
     }
-    if (const char *why = cannot_take(g, ch, vict, obj, true)) {
+    if (std::string_view why = cannot_take(g, ch, vict, obj, true); !why.empty()) {
       send_to_char(g, ch, why);
       return;
     }
@@ -722,7 +722,7 @@ namespace {
 
   void steal_carried(GameWorld *g, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int prob, int perc)
   {
-    if (const char *why = cannot_take(g, ch, vict, obj, false)) {
+    if (std::string_view why = cannot_take(g, ch, vict, obj, false); !why.empty()) {
       send_to_char(g, ch, why);
       return;
     }
@@ -781,14 +781,14 @@ ACMD(do_steal)
   }
   if (!can_kill(g, ch, vict, nullptr, 0))
     return;
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (char_get_level(ch) <= 8)
     refusal = "You are trapped inside the newbie shield until level 9 and can't piss off those bigger and better than you. Awww...\r\n";
   else if (char_mob_flagged(vict, MOB_NOKILL) && char_get_admlevel(ch) == ADMLVL_NONE)
     refusal = "That isn't such a good idea...\r\n";
   else if (getCurST(g, ch) < (getMaxST(g, ch) / 40) + char_get_carry_weight(ch))
     refusal = "You do not have enough stamina.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }

@@ -88,7 +88,7 @@ void userDelete(GameWorld *g, struct descriptor_data *d)
     return;
   }
   for (const auto &slot : d->acct.slots)
-    if (strcasecmp(slot.c_str(), "Empty") && (player_i = get_ptable_by_name(g, slot.c_str())) >= 0)
+    if (!str_eq_nocase(slot, "Empty") && (player_i = get_ptable_by_name(g, slot)) >= 0)
       remove_player(g, player_i);
   std::error_code ec;
   std::filesystem::remove(*path, ec);

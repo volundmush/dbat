@@ -445,11 +445,11 @@ bool remove_trigger(GameWorld *g, struct script_data *sc, std::string_view name)
   if (dot != std::string_view::npos || name.empty() || !isdigit(static_cast<unsigned char>(name[0]))) {
     by_name = true;
     if (dot != std::string_view::npos) {
-      num  = atoi(std::string(name.substr(0, dot)).c_str());
+      num  = parse_int(name.substr(0, dot));
       word = name.substr(dot + 1);
     }
   } else
-    num = atoi(word.c_str());
+    num = parse_int(word);
 
   trig_data *i, *j;
   int n;

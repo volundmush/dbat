@@ -42,7 +42,7 @@ void affect_update(GameWorld *g)
       else if (af->duration == 0) {
         if (af->type > 0)
           if (!next || (next->type != af->type) || (next->duration > 0)) {
-            if (g->spell_info[af->type].wear_off_msg)
+            if (!g->spell_info[af->type].wear_off_msg.empty())
               send_to_char(g, i, "{}\r\n", g->spell_info[af->type].wear_off_msg);
             if (char_get_speedboost(i) > 0 && af->type == SPELL_HAYASA) {
               char_set_speedboost(i, 0);

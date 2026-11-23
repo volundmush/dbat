@@ -173,14 +173,14 @@ ACMD(do_taisha)
 {
   if (char_is_npc(ch) || !know_skill(g, ch, SKILL_TAISHA))
     return;
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (room_flagged(g, char_get_in_room(ch), ROOM_AURA))
     refusal = "This area already has an aura of regeneration around it.\r\n";
   else if (room_get_gravity(g, char_get_in_room(ch)) > 0)
     refusal = "This area's gravity is too hostile to an aura.\r\n";
   else if (getCurKI(g, ch) < getMaxKI(g, ch) / 3)
     refusal = "You don't have enough ki.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -259,7 +259,7 @@ ACMD(do_candy)
   if (!can_kill(g, ch, vict, nullptr, 0))
     return;
   int64_t ch_max = getMaxPLTrans(g, ch), vict_max = getMaxPLTrans(g, vict);
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (!char_is_npc(vict))
     refusal = "You can't turn them into candy.\r\n";
   else if (vict_max > ch_max * 2)
@@ -268,7 +268,7 @@ ACMD(do_candy)
     refusal = "They are too weak.\r\n";
   else if (getCurKI(g, ch) < ch_max / 15)
     refusal = "You do not have enough ki.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -311,7 +311,7 @@ ACMD(do_future)
     return;
   struct char_data *vict = *found;
   bool self              = vict == ch;
-  const char *refusal    = nullptr;
+  std::string_view refusal    {};
   if (char_aff_flagged(vict, AFF_FUTURE))
     refusal = "They already can see the future.\r\n";
   else if (char_is_npc(vict))
@@ -324,7 +324,7 @@ ACMD(do_future)
     refusal = self ? "You can't handle having your speed increased beyond 70.\r\n" : "They can't handle having their speed increased beyond 70.\r\n";
   else if (char_get_real_abils_intel(vict) + 2 > 70 && char_get_bonuses(vict, BONUS_DULL) > 0)
     refusal = self ? "You can't handle having your intelligence increased beyond 70.\r\n" : "They can't handle having their intelligence increased beyond 70.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -349,7 +349,7 @@ ACMD(do_suppress)
 
   if (char_is_npc(ch))
     return;
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (char_is_android(ch))
     refusal = "You are unable to suppress your powerlevel.\r\n";
   else if (char_get_bonuses(ch, BONUS_ARROGANT) > 0)
@@ -360,7 +360,7 @@ ACMD(do_suppress)
     refusal = "You are currently concentrating on kaioken!\r\n";
   else if (arg.empty())
     refusal = "Suppress to what percent?\r\nSyntax: suppress (1 - 99 | release)\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -411,10 +411,10 @@ ACMD(do_hass)
 namespace {
   /* The limbs implant replaces: its word, the limb's index, the flag it gets, and what it's called */
   constexpr struct {
-    const char *word;
+    std::string_view word{};
     int limb;
     int flag;
-    const char *name;
+    std::string_view name{};
   } IMPLANTS[] = {{"rarm", 0, PLR_CRARM, "right arm"}, {"larm", 1, PLR_CLARM, "left arm"}, {"rleg", 2, PLR_CRLEG, "right leg"}, {"lleg", 3, PLR_CLLEG, "left leg"}};
 } // namespace
 
@@ -471,7 +471,7 @@ ACMD(do_fury)
   std::string_view rest = argument;
   std::string arg       = take_arg(rest);
 
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (!char_is_halfbreed(ch) || char_is_npc(ch))
     refusal = "You are furious, but you'll get over it.\r\n";
   else if (char_plr_flagged(ch, PLR_FURY))
@@ -480,7 +480,7 @@ ACMD(do_fury)
     refusal = "You do not have enough anger to release your fury upon your foes!\r\n";
   else if (!arg.empty() && !str_eq_nocase(arg, "attack"))
     refusal = "Syntax: fury (attack) <--- this will not use up your LF to restore PL.\n        fury <--- fury by itself will do both LF to PL restore and attack boost.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -522,7 +522,7 @@ ACMD(do_majinize)
   struct char_data *vict = *found;
   int alignmentTotal     = char_get_alignment(ch) - char_get_alignment(vict);
   bool ours              = char_get_majinize(vict) > 0 && char_get_majinize(vict) == char_get_id(ch);
-  const char *refusal    = nullptr;
+  std::string_view refusal    {};
   if (char_is_npc(vict))
     refusal = "Why would you waste your time majinizing them?\r\n";
   else if (vict == ch)
@@ -537,7 +537,7 @@ ACMD(do_majinize)
     refusal = "Their alignment is so opposed to your's that they resist your attempts to enslave them!\r\n";
   else if (getEffMaxPL(g, vict) > getEffMaxPL(g, ch) * 4)
     refusal = "Their powerlevel is so much higher than yours they resist your attempts to enslave them!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -653,14 +653,14 @@ namespace {
       send_to_char(g, ch, "{} is already absorbing from them!", char_get_name(char_get_absorbby(g, vict)));
       return;
     }
-    const char *refusal = nullptr;
+    std::string_view refusal {};
     if (getEffMaxPL(g, vict) > getEffMaxPL(g, ch) * 2)
       refusal = "They are too strong for you to absorb from.\r\n";
     else if (getEffMaxPL(g, vict) * 20 < getEffMaxPL(g, ch))
       refusal = "They are too weak for you to bother absorbing from.\r\n";
     else if (getCurST(g, vict) < getMaxST(g, vict) / 20 && getCurKI(g, vict) < getMaxKI(g, vict) / 20)
       refusal = "They have nothing to absorb right now, they are drained...\r\n";
-    if (refusal) {
+    if (!refusal.empty()) {
       send_to_char(g, ch, refusal);
       return;
     }
@@ -731,7 +731,7 @@ namespace {
     }
     if (!can_kill(g, ch, vict, nullptr, 0))
       return;
-    const char *refusal = nullptr;
+    std::string_view refusal {};
     if (getEffMaxPL(g, vict) >= getEffMaxPL(g, ch))
       refusal = "You are too weak to absorb them into your cellular structure!\r\n";
     else if (getEffMaxPL(g, vict) < getEffMaxPL(g, ch) / 5)
@@ -740,7 +740,7 @@ namespace {
       refusal = "You can't absorb their bio extract, you need to swallow them with your tail!\r\n";
     else if (is_soft_cap(ch, 0, 1.0))
       refusal = "You can not handle any more bio extract at your current level.\r\n";
-    if (refusal) {
+    if (!refusal.empty()) {
       send_to_char(g, ch, refusal);
       return;
     }
@@ -790,14 +790,14 @@ ACMD(do_absorb)
     send_to_imm(g, "ERROR: Absorb skill on {} when they are not a bio or android.", char_get_name(ch));
     return;
   }
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (char_get_fighting(g, ch) && !char_is_android(ch))
     refusal = "You are too busy fighting!\r\n";
   else if (char_get_grappled(g, ch))
     refusal = "You are currently being grappled with! Try 'escape'!\r\n";
   else if (char_get_grappling(g, ch))
     refusal = "You are currently grappling with someone!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -847,7 +847,7 @@ namespace {
   /* The limbs regeneration regrows or mends, in its order; quirk: some are set before they're told of, some after */
   constexpr struct {
     int limb;
-    const char *name;
+    std::string_view name{};
     bool regrown_first, mended_first; /* whether the limb is set before the messages */
   } REGROWN[] = {{0, "right arm", false, false}, {1, "left arm", true, false}, {3, "left leg", true, false}, {2, "right leg", true, true}};
 
@@ -965,14 +965,14 @@ ACMD(do_kaioken)
 
   if (!check_skill(g, ch, SKILL_KAIOKEN))
     return;
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (char_get_alignment(ch) <= -50)
     refusal = "Your heart is too corrupt to use that technique!\r\n";
   else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_HEALT))
     refusal = "You are inside a healing tank!\r\n";
   else if (arg.empty())
     refusal = "What level of kaioken do you want to try and achieve?\r\nSyntax: kaioken 1-20\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -1252,7 +1252,7 @@ ACMD(do_barrier)
   int prob        = ki_barrier ? init_skill(g, ch, SKILL_BARRIER) : char_get_skill(ch, SKILL_AQUA_BARRIER);
   int perc        = axion_dice(g, 0);
   int64_t cost    = (getMaxKI(g, ch) * 0.01) * (size * 0.5);
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (size > prob)
     refusal = "You can not create a barrier that is stronger than your skill in barrier.\r\n";
   else if (size < 1)
@@ -1261,7 +1261,7 @@ ACMD(do_barrier)
     refusal = "You can't control a barrier with more than 75 percent!\r\n";
   else if (char_get_charge(ch) < cost)
     refusal = "You do not have enough ki charged up!\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }
@@ -1290,14 +1290,14 @@ ACMD(do_barrier)
 namespace {
   /* Where instant transmission can take you without a target */
   constexpr struct {
-    const char *name;
+    std::string_view name{};
     room_vnum room;
   } PLANETS_BY_KI[] = {{"planet-earth", 300}, {"planet-namek", 10222}, {"planet-frigid", 4017}, {"planet-vegeta", 2200}, {"planet-konack", 8006}, {"planet-aether", 12024}};
 
-  constexpr const char *SELF_TRANSMISSION = "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n";
+  constexpr std::string_view SELF_TRANSMISSION = "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n";
 
   /* Why ch can't reach tar, if they can't */
-  const char *unreachable(GameWorld *g, struct char_data *ch, struct char_data *tar)
+  std::string_view unreachable(GameWorld *g, struct char_data *ch, struct char_data *tar)
   {
     if (tar == ch)
       return SELF_TRANSMISSION;
@@ -1313,11 +1313,11 @@ namespace {
       return "They are dead and can't be reached.\r\n";
     if (room_flagged(g, char_get_in_room(tar), ROOM_NOINSTANT))
       return "You can not go there as it is a protected area!\r\n";
-    return nullptr;
+    return {};
   }
 
   /* Why ch can't use instant transmission at all just now, if they can't */
-  const char *cannot_transmit(GameWorld *g, struct char_data *ch)
+  std::string_view cannot_transmit(GameWorld *g, struct char_data *ch)
   {
     room_vnum room = char_get_in_room(ch);
     if (!char_get_skill(ch, SKILL_SENSE) && !char_plr_flagged(ch, PLR_SENSEM))
@@ -1330,7 +1330,7 @@ namespace {
       return "@rYou are in a pocket dimension!@n\r\n";
     if (room_flagged(g, room, ROOM_RHELL) || room_flagged(g, room, ROOM_AL) || room_flagged(g, room, ROOM_HELL))
       return "You can not leave where you are at!\r\n";
-    return nullptr;
+    return {};
   }
 } // namespace
 
@@ -1346,11 +1346,11 @@ ACMD(do_instant)
   }
   if (!know_skill(g, ch, SKILL_INSTANTT))
     return;
-  if (const char *why = cannot_transmit(g, ch)) {
+  if (std::string_view why = cannot_transmit(g, ch); !why.empty()) {
     send_to_char(g, ch, why);
     return;
   }
-  constexpr const char *SYNTAX = "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\nExample: instant goku\nExample 2: instant planet-earth\r\n";
+  constexpr std::string_view SYNTAX = "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\nExample: instant goku\nExample 2: instant planet-earth\r\n";
   if (arg.empty()) {
     send_to_char(g, ch, SYNTAX);
     return;
@@ -1396,7 +1396,7 @@ ACMD(do_instant)
     improve_skill(g, ch, SKILL_INSTANTT, 2);
     return;
   }
-  if (const char *why = unreachable(g, ch, tar)) {
+  if (std::string_view why = unreachable(g, ch, tar); !why.empty()) {
     send_to_char(g, ch, why);
     return;
   }
@@ -1492,7 +1492,7 @@ ACMD(do_transform)
 namespace {
   /* What a TCX-Medical Equipment Construction Kit can make, by aid's word for it */
   struct medical_product {
-    const char *word;
+    std::string_view word{};
     obj_vnum vnum;
     int skill;      /* the first aid it takes */
     int difficulty; /* added to the roll against it */
@@ -1619,7 +1619,7 @@ ACMD(do_aura)
   std::string_view rest = argument;
   std::string arg       = take_arg(rest);
 
-  const char *refusal = nullptr;
+  std::string_view refusal {};
   if (arg.empty())
     refusal = "Syntax: aura light\r\n";
   else if (char_get_charge(ch))
@@ -1630,7 +1630,7 @@ ACMD(do_aura)
     return;
   else if (char_get_skill(ch, SKILL_FOCUS) < 75 || char_get_skill(ch, SKILL_CONCENTRATION) < 75)
     refusal = "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n";
-  if (refusal) {
+  if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
     return;
   }

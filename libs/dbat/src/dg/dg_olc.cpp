@@ -92,7 +92,7 @@ namespace {
 
   void trigger_editor::menu(GameWorld *g, struct descriptor_data *d)
   {
-    const char *attach = trig.attach_type == OBJ_TRIGGER ? "Objects" : trig.attach_type == WLD_TRIGGER ? "Rooms" : "Mobiles";
+    std::string_view attach = trig.attach_type == OBJ_TRIGGER ? "Objects" : trig.attach_type == WLD_TRIGGER ? "Rooms" : "Mobiles";
 
     clear_screen(g, d);
     write_to_output(g, d,
@@ -298,7 +298,7 @@ namespace {
   /* The start of a line of script, in either case */
   bool begins(std::string_view line, std::string_view word)
   {
-    return line.size() >= word.size() && strncasecmp(line.data(), word.data(), word.size()) == 0;
+    return line.size() >= word.size() && compare_nocase_n(line, word, word.size()) == 0;
   }
 } // namespace
 

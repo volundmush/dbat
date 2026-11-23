@@ -143,7 +143,7 @@ namespace {
     return (getMaxKI(g, ch) * .002) + 150;
   }
 
-  constexpr const char *LIQUEFY_SYNTAX = "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n";
+  constexpr std::string_view LIQUEFY_SYNTAX = "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n";
 
   void liquefy_fumble(GameWorld *g, struct char_data *ch)
   {
@@ -224,17 +224,17 @@ namespace {
     double ki_share;
     int timer;
     int thickness;
-    const char *aftershock;
+    std::string_view aftershock{};
   };
   constexpr ash_size ASH_SIZES[] = {
-    {20, 0.25, 1, 1, nullptr},
+    {20, 0.25, 1, 1, {}},
     {10, 0.10, 2, 2, "@WThe ashes ripple with a strong aftershock of power.@n\r\n"},
     {5, 0.05, 4, 3, "@WThe ashes ripple with an intense aftershock of power.@n\r\n"},
   };
 
   /* Where shimmer goes by name */
   struct shimmer_place {
-    const char *name;
+    std::string_view name{};
     room_vnum room;
   };
   constexpr shimmer_place SHIMMER_PLACES[] = {
@@ -248,9 +248,9 @@ namespace {
     send_to_char(g, ch, "Example: shimmer goku\nExample 2: shimmer planet-earth\r\n");
   }
 
-  constexpr const char *SHIMMER_SELF = "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n";
+  constexpr std::string_view SHIMMER_SELF = "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n";
 
-  void hydromancy_syntax(GameWorld *g, struct char_data *ch, const char *first)
+  void hydromancy_syntax(GameWorld *g, struct char_data *ch, std::string_view first)
   {
     send_to_char(g, ch, first);
     send_to_char(g, ch, "Example: hydromancy flood nw\r\n");
@@ -407,9 +407,9 @@ namespace {
 
   /* The seas warp pool reaches */
   struct warp_sea {
-    const char *planet;
+    std::string_view planet{};
     int flag; /* the rooms of that planet */
-    const char *already;
+    std::string_view already{};
     room_vnum room;
   };
   constexpr warp_sea WARP_SEAS[] = {
@@ -428,7 +428,7 @@ namespace {
 
   /* The directions a glacial wall can block, and the side of the wall seen from the other room */
   struct wall_side {
-    const char *name;
+    std::string_view name{};
     int dir;
     int opposite;
   };
@@ -890,7 +890,7 @@ ACMD(do_ashcloud)
   decCurKI(g, ch, cost, 0);
   act(g, "@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", true, ch, nullptr, nullptr, TO_ROOM);
-  if (size.aftershock)
+  if (!size.aftershock.empty())
     send_to_room(g, char_get_in_room(ch), size.aftershock);
   struct obj_data *cloud = read_object(g, 1306);
   obj_to_room(g, cloud, char_get_in_room(ch));

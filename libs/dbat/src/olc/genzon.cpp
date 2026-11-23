@@ -127,7 +127,7 @@ std::expected<zone_data *, std::string_view> create_new_zone(GameWorld *g, zone_
 
 void create_world_index(GameWorld *g, zone_vnum znum, std::string_view type)
 {
-  static constexpr std::pair<char, const char *> PREFIXES[] = {
+  static constexpr std::pair<char, std::string_view> PREFIXES[] = {
       {'z', ZON_PREFIX},
       {'w', WLD_PREFIX},
       {'o', OBJ_PREFIX},
@@ -136,7 +136,7 @@ void create_world_index(GameWorld *g, zone_vnum znum, std::string_view type)
       {'t', TRG_PREFIX},
       {'g', GLD_PREFIX},
   };
-  auto prefix = std::ranges::find(PREFIXES, type.empty() ? '\0' : type.front(), &std::pair<char, const char *>::first);
+  auto prefix = std::ranges::find(PREFIXES, type.empty() ? '\0' : type.front(), &std::pair<char, std::string_view>::first);
   if (prefix == std::end(PREFIXES))
     return; /* Caller messed up */
 
@@ -163,7 +163,7 @@ void create_world_index(GameWorld *g, zone_vnum znum, std::string_view type)
       break;
     }
     if (!found) {
-      sscanf(buf.c_str(), "%d", &num); /* a line that isn't a number keeps the last one's */
+      io::scan_ints(buf, std::span<int>(&num, 1)); /* a line that isn't a number keeps the last one's */
       if (num == znum) {
         found = true;
       } else if (num > znum) {
