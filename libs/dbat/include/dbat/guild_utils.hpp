@@ -1,4 +1,5 @@
 #pragma once
+#include <string_view>
 #include "dbat/consts/types.hpp"
 
 struct guild_data;
@@ -20,11 +21,10 @@ int guild_get_minlvl(const struct guild_data *guild);
 void guild_set_minlvl(struct guild_data *guild, int v);
 bitvector_t *guild_get_with_who(struct guild_data *guild);
 const char *guild_get_no_such_skill(const struct guild_data *guild);
-void guild_set_no_such_skill(struct guild_data *guild, const char *v);
+void guild_set_no_such_skill(struct guild_data *guild, std::string_view v);
 const char *guild_get_not_enough_gold(const struct guild_data *guild);
-void guild_set_not_enough_gold(struct guild_data *guild, const char *v);
+void guild_set_not_enough_gold(struct guild_data *guild, std::string_view v);
 int guild_get_skill(const struct guild_data *guild, int n);
 void guild_set_skill(struct guild_data *guild, int n, int v);
 int guild_get_feat(const struct guild_data *guild, int n);
 void guild_set_feat(struct guild_data *guild, int n, int v);
-

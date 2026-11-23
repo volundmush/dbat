@@ -686,8 +686,8 @@ void affects_status(GameWorld *g, struct char_data *ch)
 {
   int lasttype = 0;
   for (const affected_type &aff : char_affects(ch)) {
-    const char *name = skill_name(g, aff.type);
-    auto line        = std::ranges::find_if(AFFECT_LINES, [name](const auto &l) { return !strcasecmp(name, l.skill); });
+    std::string_view name = skill_name(g, aff.type);
+    auto line             = std::ranges::find_if(AFFECT_LINES, [name](const auto &l) { return str_eq_nocase(name, l.skill); });
     if (line != std::end(AFFECT_LINES) && aff.type != lasttype) {
       lasttype = aff.type;
       send_to_char(g, ch, "{} ({:>2d} Mud Hours)\r\n", line->says, aff.duration + 1);

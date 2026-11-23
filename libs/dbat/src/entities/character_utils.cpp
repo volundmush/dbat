@@ -65,7 +65,7 @@ static double speednar(GameWorld *g, struct char_data *ch);
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
-const char *juggleRaceName(char_data *ch, bool capitalized)
+std::string_view juggleRaceName(char_data *ch, bool capitalized)
 {
   int apparent = ch->race;
 
@@ -1018,7 +1018,7 @@ bool has_group(GameWorld *g, struct char_data *ch)
   return (false);
 }
 
-const char *report_party_health(GameWorld *g, struct char_data *ch)
+std::string_view report_party_health(GameWorld *g, struct char_data *ch)
 {
 
   if (!char_aff_flagged(ch, AFF_GROUP))
@@ -2070,7 +2070,7 @@ int trans_req(struct char_data *ch, int trans)
   return (requirement);
 }
 
-const char *align_name(int alignment)
+std::string_view align_name(int alignment)
 {
   int align;
 
@@ -2097,7 +2097,7 @@ const char *align_name(int alignment)
   return (alignments[align]);
 }
 
-const char *disp_align(struct char_data *ch)
+std::string_view disp_align(struct char_data *ch)
 {
   return align_name(char_get_alignment(ch));
 }
@@ -2266,7 +2266,7 @@ bool roll_pursue(GameWorld *g, struct char_data *ch, struct char_data *vict)
   return (false);
 }
 
-const char *sense_location(GameWorld *g, struct char_data *ch)
+std::string_view sense_location(GameWorld *g, struct char_data *ch)
 {
   const char *message = ""; /* a place none of the cases name */
   room_vnum roomnum = char_get_in_room(ch);
@@ -3253,10 +3253,9 @@ bool is_sparring(struct char_data *ch)
   return false;
 }
 
-const char *introd_calc(struct char_data *ch)
+std::string introd_calc(struct char_data *ch)
 {
-  static std::string intro; /* what is returned, until the next call */
-  const char *sex, *race;
+  std::string_view sex, race;
 
   if (char_is_npc(ch)) { /* How the hell... */
     return ("IAMERROR");
@@ -3277,8 +3276,7 @@ const char *introd_calc(struct char_data *ch)
     else if (char_get_racial_pref(ch) == 3)
       race = "robotic-humanoid";
   }
-  intro = str_format("{} {} {}", AN(sex), sex, race);
-  return intro.c_str();
+  return str_format("{} {} {}", AN(sex), sex, race);
 }
 
 static double speednar(GameWorld *g, struct char_data *ch)
@@ -3742,46 +3740,35 @@ int roll_stats(GameWorld *g, struct char_data *ch, int type, int bonus)
 }
 
 /* For Getting An Intro Name */
-const char *get_i_name(struct char_data *ch, struct char_data *vict)
+std::string get_i_name(struct char_data *ch, struct char_data *vict)
 {
-  char filler[50] = "", scrap[100] = "";
-  static char name[50];
-  int known = false;
-
   /* Read Introduction File */
-  if (vict == nullptr) {
-    return ("");
-  }
+  if (vict == nullptr || vict == ch)
+    return "";
 
-  if (char_is_npc(ch) || char_is_npc(vict)) {
-    return (juggleRaceName(vict, true));
-  }
-
-  if (vict == ch) {
-    return ("");
-  }
+  if (char_is_npc(ch) || char_is_npc(vict))
+    return std::string(juggleRaceName(vict, true));
 
   std::optional<std::string> path = player_path(INTRO_FILE, char_get_name(ch));
   if (!path)
-    return (juggleRaceName(vict, true));
+    return std::string(juggleRaceName(vict, true));
   io::loaded<io::text_reader> file = io::text_reader::open(*path);
   if (!file)
-    return (juggleRaceName(vict, true));
+    return std::string(juggleRaceName(vict, true));
 
+  /* "<name> <what ch knows them as>" a line; the last line naming vict wins (quirk: a line short of a word keeps
+     the last line's, as sscanf() left them) */
+  std::string filler, scrap;
+  std::optional<std::string> known;
   io::line_cursor lines(*file);
   while (!lines.eof()) {
     lines.next();
-    sscanf(lines.line().c_str(), "%49s %99s\n", filler, scrap);
-    if (!strcasecmp(char_get_name(vict), filler)) {
-      snprintf(name, sizeof(name), "%s", scrap);
-      known = true;
-    }
+    io::fields f(lines.line());
+    f.word(filler, 49) && f.word(scrap, 99);
+    if (str_eq_nocase(char_get_name(vict), filler))
+      known = scrap.substr(0, 49); /* as it fit in the name returned */
   }
-
-  if (known == true)
-    return (name);
-  else
-    return (juggleRaceName(vict, true));
+  return known ? *known : std::string(juggleRaceName(vict, true));
 }
 
 bool can_grav(GameWorld *g, struct char_data *ch)
@@ -4573,12 +4560,12 @@ const char *char_get_name(const struct char_data *ch)
   return char_is_npc(ch) ? c_str_or_null(ch->short_descr) : char_get_pc_name(ch);
 }
 
-const char *char_get_title(const struct char_data *ch)
+std::string_view char_get_title(const struct char_data *ch)
 {
   return ((ch)->desc ? (!(ch)->desc->title.empty() ? (ch)->desc->title.c_str() : "[Unset Title]") : "@D[@GNew User@D]");
 }
 
-const char *char_get_user(const struct char_data *ch)
+std::string_view char_get_user(const struct char_data *ch)
 {
   return ((ch)->desc ? (!(ch)->desc->acct.user.empty() ? (ch)->desc->acct.user.c_str() : "NOUSER") : "NOUSER");
 }
@@ -4833,9 +4820,18 @@ static bool char_iswiz(const struct char_data *ch, const struct char_data *vict)
   return (ch == vict || char_get_admlevel(ch) > 0 || char_get_admlevel(vict) > 0 || char_is_npc(vict) || char_is_npc(ch));
 }
 
-const char *char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict)
+std::string char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  return ((char_disg(ch, vict) ? (char_can_see(g, vict, ch) ? (char_introd(vict, ch) ? (char_iswiz(ch, vict) ? char_get_name(ch) : get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") : char_true_race_name(ch)));
+  if (!char_disg(ch, vict))
+    return std::string(char_true_race_name(ch));
+  if (!char_can_see(g, vict, ch))
+    return "Someone";
+  if (!char_introd(vict, ch))
+    return introd_calc(ch);
+  if (!char_iswiz(ch, vict))
+    return get_i_name(vict, ch);
+  const char *name = char_get_name(ch);
+  return name ? name : ""; /* a mob with no short description has no name */
 }
 
 const char *obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict)
@@ -5242,22 +5238,22 @@ static bool char_outside_secttype(GameWorld *g, const struct char_data *ch)
   return ((room_sect(g, char_get_in_room(ch)) != SECT_INSIDE) && (room_sect(g, char_get_in_room(ch)) != SECT_UNDERWATER) && (room_sect(g, char_get_in_room(ch)) != SECT_IMPORTANT) && (room_sect(g, char_get_in_room(ch)) != SECT_SHOP) && (room_sect(g, char_get_in_room(ch)) != SECT_SPACE));
 }
 
-const char *char_hshr(const struct char_data *ch)
+std::string_view char_hshr(const struct char_data *ch)
 {
   return (char_get_sex(ch) ? (char_get_sex(ch) == SEX_MALE ? "his" : "her") : "its");
 }
 
-const char *char_hssh(const struct char_data *ch)
+std::string_view char_hssh(const struct char_data *ch)
 {
   return (char_get_sex(ch) ? (char_get_sex(ch) == SEX_MALE ? "he" : "she") : "it");
 }
 
-const char *char_hmhr(const struct char_data *ch)
+std::string_view char_hmhr(const struct char_data *ch)
 {
   return (char_get_sex(ch) ? (char_get_sex(ch) == SEX_MALE ? "him" : "her") : "it");
 }
 
-const char *char_mafe(const struct char_data *ch)
+std::string_view char_mafe(const struct char_data *ch)
 {
   return (char_get_sex(ch) ? (char_get_sex(ch) == SEX_MALE ? "male" : "female") : "questionably gendered");
 }
@@ -5314,12 +5310,7 @@ const char *char_get_pc_name(const struct char_data *ch)
   return c_str_or_null(ch->name); /* null for none, as the files have it */
 }
 
-void char_set_pc_name(struct char_data *ch, const char *v)
-{
-  ch->name = v ? v : "";
-}
-
-void char_set_pc_name(struct char_data *ch, const std::string &v)
+void char_set_pc_name(struct char_data *ch, std::string_view v)
 {
   ch->name = v;
 }
@@ -5344,12 +5335,7 @@ const char *char_get_voice(const struct char_data *ch)
   return c_str_or_null(ch->voice); /* null for none, as the files have it */
 }
 
-void char_set_voice(struct char_data *ch, const char *v)
-{
-  ch->voice = v ? v : "";
-}
-
-void char_set_voice(struct char_data *ch, const std::string &v)
+void char_set_voice(struct char_data *ch, std::string_view v)
 {
   ch->voice = v;
 }
@@ -5369,12 +5355,7 @@ const char *char_get_feature(const struct char_data *ch)
   return c_str_or_null(ch->feature); /* null for none, as the files have it */
 }
 
-void char_set_feature(struct char_data *ch, const char *v)
-{
-  ch->feature = v ? v : "";
-}
-
-void char_set_feature(struct char_data *ch, const std::string &v)
+void char_set_feature(struct char_data *ch, std::string_view v)
 {
   ch->feature = v;
 }
@@ -5384,12 +5365,7 @@ const char *char_get_loguser(const struct char_data *ch)
   return c_str_or_null(ch->loguser); /* null for none, as the files have it */
 }
 
-void char_set_loguser(struct char_data *ch, const char *v)
-{
-  ch->loguser = v ? v : "";
-}
-
-void char_set_loguser(struct char_data *ch, const std::string &v)
+void char_set_loguser(struct char_data *ch, std::string_view v)
 {
   ch->loguser = v;
 }
@@ -5603,12 +5579,7 @@ const char *char_get_rdisplay(const struct char_data *ch)
   return c_str_or_null(ch->rdisplay); /* null for none, as the files have it */
 }
 
-void char_set_rdisplay(struct char_data *ch, const char *v)
-{
-  ch->rdisplay = v ? v : "";
-}
-
-void char_set_rdisplay(struct char_data *ch, const std::string &v)
+void char_set_rdisplay(struct char_data *ch, std::string_view v)
 {
   ch->rdisplay = v;
 }
@@ -7112,12 +7083,7 @@ const char *char_get_poofin(GameWorld *g, const struct char_data *ch)
   return ps ? c_str_or_null(ps->poofin) : nullptr;
 }
 
-void char_set_poofin(GameWorld *g, struct char_data *ch, const char *v)
-{
-  char_set_poofin(g, ch, std::string(v ? v : ""));
-}
-
-void char_set_poofin(GameWorld *g, struct char_data *ch, const std::string &v)
+void char_set_poofin(GameWorld *g, struct char_data *ch, std::string_view v)
 {
   struct player_special_data *ps = ps_of(g, ch, "poofin");
   if (ps)
@@ -7130,12 +7096,7 @@ const char *char_get_poofout(GameWorld *g, const struct char_data *ch)
   return ps ? c_str_or_null(ps->poofout) : nullptr;
 }
 
-void char_set_poofout(GameWorld *g, struct char_data *ch, const char *v)
-{
-  char_set_poofout(g, ch, std::string(v ? v : ""));
-}
-
-void char_set_poofout(GameWorld *g, struct char_data *ch, const std::string &v)
+void char_set_poofout(GameWorld *g, struct char_data *ch, std::string_view v)
 {
   struct player_special_data *ps = ps_of(g, ch, "poofout");
   if (ps)
@@ -7180,12 +7141,7 @@ const char *char_get_host(GameWorld *g, const struct char_data *ch)
   return ps ? c_str_or_null(ps->host) : nullptr;
 }
 
-void char_set_host(GameWorld *g, struct char_data *ch, const char *v)
-{
-  char_set_host(g, ch, std::string(v ? v : ""));
-}
-
-void char_set_host(GameWorld *g, struct char_data *ch, const std::string &v)
+void char_set_host(GameWorld *g, struct char_data *ch, std::string_view v)
 {
   struct player_special_data *ps = ps_of(g, ch, "host");
   if (ps)
@@ -7234,32 +7190,32 @@ int char_can_carry_n(const struct char_data *ch)
   return 50;
 }
 
-const char *char_true_race_name(const struct char_data *ch)
+std::string_view char_true_race_name(const struct char_data *ch)
 {
   return pc_race_types[ch->race];
 }
 
-const char *char_sensei_name(const struct char_data *ch)
+std::string_view char_sensei_name(const struct char_data *ch)
 {
   return pc_class_types[ch->chclass];
 }
 
-const char *char_sensei_name_lower(const struct char_data *ch)
+std::string_view char_sensei_name_lower(const struct char_data *ch)
 {
   return class_names[ch->chclass];
 }
 
-const char *char_sensei_style(const struct char_data *ch)
+std::string_view char_sensei_style(const struct char_data *ch)
 {
   return sensei_style[ch->chclass];
 }
 
-const char *char_class_abbr(const struct char_data *ch)
+std::string_view char_class_abbr(const struct char_data *ch)
 {
   return class_abbrevs[ch->chclass];
 }
 
-const char *char_race_abbr(const struct char_data *ch)
+std::string_view char_race_abbr(const struct char_data *ch)
 {
   return race_abbrevs[ch->race];
 }
@@ -7269,12 +7225,7 @@ const char *char_get_alias(const struct char_data *ch)
   return c_str_or_null(ch->name); /* null for none, as the files have it */
 }
 
-void char_set_alias(struct char_data *ch, const char *v)
-{
-  ch->name = v ? v : "";
-}
-
-void char_set_alias(struct char_data *ch, const std::string &v)
+void char_set_alias(struct char_data *ch, std::string_view v)
 {
   ch->name = v;
 }
@@ -7284,12 +7235,7 @@ const char *char_get_sdesc(const struct char_data *ch)
   return c_str_or_null(ch->short_descr); /* null for none, as the files have it */
 }
 
-void char_set_sdesc(struct char_data *ch, const char *v)
-{
-  ch->short_descr = v ? v : "";
-}
-
-void char_set_sdesc(struct char_data *ch, const std::string &v)
+void char_set_sdesc(struct char_data *ch, std::string_view v)
 {
   ch->short_descr = v;
 }
@@ -7299,12 +7245,7 @@ const char *char_get_ldesc(const struct char_data *ch)
   return c_str_or_null(ch->long_descr); /* null for none, as the files have it */
 }
 
-void char_set_ldesc(struct char_data *ch, const char *v)
-{
-  ch->long_descr = v ? v : "";
-}
-
-void char_set_ldesc(struct char_data *ch, const std::string &v)
+void char_set_ldesc(struct char_data *ch, std::string_view v)
 {
   ch->long_descr = v;
 }
@@ -7314,12 +7255,7 @@ const char *char_get_ddesc(const struct char_data *ch)
   return c_str_or_null(ch->description); /* null for none, as the files have it */
 }
 
-void char_set_ddesc(struct char_data *ch, const char *v)
-{
-  ch->description = v ? v : "";
-}
-
-void char_set_ddesc(struct char_data *ch, const std::string &v)
+void char_set_ddesc(struct char_data *ch, std::string_view v)
 {
   ch->description = v;
 }
@@ -7756,12 +7692,7 @@ const char *char_get_raw_title(const struct char_data *ch)
   return c_str_or_null(ch->title); /* null for none, as the files have it */
 }
 
-void char_set_raw_title(struct char_data *ch, const char *v)
-{
-  ch->title = v ? v : "";
-}
-
-void char_set_raw_title(struct char_data *ch, const std::string &v)
+void char_set_raw_title(struct char_data *ch, std::string_view v)
 {
   ch->title = v;
 }

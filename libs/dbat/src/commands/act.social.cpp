@@ -233,7 +233,7 @@ ACMD(do_gmote)
         break;
 
   if ((act_nr = find_action(g, cmd)) < 0) {
-    out = str_format("@D[@BOOC@D: @g{} {}@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
+    out = str_format("@D[@BOOC@D: @g{} {}@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : null_as_printed(char_get_name(ch)), argument);
     act(g, out.c_str(), false, ch, nullptr, vict, TO_GMOTE);
     return;
   }

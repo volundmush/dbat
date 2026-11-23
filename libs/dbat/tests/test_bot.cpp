@@ -602,7 +602,7 @@ static void compose_typing(GameWorld *g, const struct descriptor_data *d, char *
       while (g->complete_cmd_info[num_commands].command[0] != '\n')
         num_commands++;
       do {
-        command = th_text(g->complete_cmd_info[bot_dice(num_commands - 1) + 1].command);
+        command = g->complete_cmd_info[bot_dice(num_commands - 1) + 1].command.data(); /* names end at a '\0' */
       } while (!strcmp(command, "RESERVED"));
   }
   if (is_never_typed(command))
@@ -647,8 +647,8 @@ static void bot_step(GameWorld *g, int *next_name)
     if (use_real_players && g->top_of_p_table >= 0 && bot_dice(2)) {
       const struct player_index_element *player = &g->player_table[bot_dice(g->top_of_p_table + 1)];
 
-      if (*th_text(player->name)) {
-        snprintf(line, sizeof(line), "login Real%d %s", number, th_text(player->name));
+      if (!player->name.empty()) {
+        snprintf(line, sizeof(line), "login Real%d %s", number, player->name.c_str());
         journal_and_do(g);
         forget_closed_connections(g);
         continue;
@@ -821,7 +821,7 @@ static int return_all_players(GameWorld *g)
   int returned = 0;
 
   for (int i = 0; i <= g->top_of_p_table; i++) {
-    struct char_data *ch = th_existing_player(g, th_text(g->player_table[i].name));
+    struct char_data *ch = th_existing_player(g, g->player_table[i].name.c_str());
 
     if (ch) {
       Crash_crashsave(g, ch);
@@ -873,7 +873,7 @@ static GameWorld *restart_and_compare(GameWorld *g)
     pc = new char_data();
     clear_char(pc);
     char_make_player_specials(pc);
-    if ((position = load_char(g, th_text(g->player_table[i].name), pc)) >= 0) {
+    if ((position = load_char(g, g->player_table[i].name.c_str(), pc)) >= 0) {
       char_set_pfilepos(pc, position); /* save_char() skips characters without one */
       save_char(g, pc);
       players++;

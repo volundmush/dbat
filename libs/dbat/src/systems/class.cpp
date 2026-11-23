@@ -1556,7 +1556,7 @@ bool sensei_exists(int s)
   }
 }
 
-const char *sensei_name(int s)
+std::string_view sensei_name(int s)
 {
   switch (s) {
     case CLASS_ROSHI:
@@ -1663,7 +1663,7 @@ bool sensei_available_for_race(int s, int r)
 int sensei_find(const char *arg)
 {
   for (int s = 0; s < NUM_CLASSES; s++) {
-    if (sensei_exists(s) && !strcasecmp(arg, sensei_name(s)))
+    if (sensei_exists(s) && str_eq_nocase(arg, sensei_name(s)))
       return s;
   }
   return CLASS_UNDEFINED;

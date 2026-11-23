@@ -363,7 +363,7 @@ ACMD(do_land)
   /* Where it will be, as sensed from there, told to those it leaves */
   char_from_room(g, ch);
   char_to_room(g, ch, landing);
-  const char *where = sense_location(g, ch);
+  std::string_view where = sense_location(g, ch);
   char_from_room(g, ch);
   char_to_room(g, ch, was_in);
   act(g, str_format("@C$n@Y flies down through the atmosphere toward @G{}@Y!@n", where).c_str(), true, ch, nullptr, nullptr, TO_ROOM);

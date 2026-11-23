@@ -174,9 +174,9 @@ const char *shop_get_no_such_item1(const struct shop_data *shop)
   return c_str_or_null(shop->no_such_item1);
 }
 
-void shop_set_no_such_item1(struct shop_data *shop, const char *v)
+void shop_set_no_such_item1(struct shop_data *shop, std::string_view v)
 {
-  shop->no_such_item1 = v ? v : "";
+  shop->no_such_item1 = v;
 }
 
 const char *shop_get_no_such_item2(const struct shop_data *shop)
@@ -184,9 +184,9 @@ const char *shop_get_no_such_item2(const struct shop_data *shop)
   return c_str_or_null(shop->no_such_item2);
 }
 
-void shop_set_no_such_item2(struct shop_data *shop, const char *v)
+void shop_set_no_such_item2(struct shop_data *shop, std::string_view v)
 {
-  shop->no_such_item2 = v ? v : "";
+  shop->no_such_item2 = v;
 }
 
 const char *shop_get_missing_cash1(const struct shop_data *shop)
@@ -194,9 +194,9 @@ const char *shop_get_missing_cash1(const struct shop_data *shop)
   return c_str_or_null(shop->missing_cash1);
 }
 
-void shop_set_missing_cash1(struct shop_data *shop, const char *v)
+void shop_set_missing_cash1(struct shop_data *shop, std::string_view v)
 {
-  shop->missing_cash1 = v ? v : "";
+  shop->missing_cash1 = v;
 }
 
 const char *shop_get_missing_cash2(const struct shop_data *shop)
@@ -204,9 +204,9 @@ const char *shop_get_missing_cash2(const struct shop_data *shop)
   return c_str_or_null(shop->missing_cash2);
 }
 
-void shop_set_missing_cash2(struct shop_data *shop, const char *v)
+void shop_set_missing_cash2(struct shop_data *shop, std::string_view v)
 {
-  shop->missing_cash2 = v ? v : "";
+  shop->missing_cash2 = v;
 }
 
 const char *shop_get_do_not_buy(const struct shop_data *shop)
@@ -214,9 +214,9 @@ const char *shop_get_do_not_buy(const struct shop_data *shop)
   return c_str_or_null(shop->do_not_buy);
 }
 
-void shop_set_do_not_buy(struct shop_data *shop, const char *v)
+void shop_set_do_not_buy(struct shop_data *shop, std::string_view v)
 {
-  shop->do_not_buy = v ? v : "";
+  shop->do_not_buy = v;
 }
 
 const char *shop_get_message_buy(const struct shop_data *shop)
@@ -224,9 +224,9 @@ const char *shop_get_message_buy(const struct shop_data *shop)
   return c_str_or_null(shop->message_buy);
 }
 
-void shop_set_message_buy(struct shop_data *shop, const char *v)
+void shop_set_message_buy(struct shop_data *shop, std::string_view v)
 {
-  shop->message_buy = v ? v : "";
+  shop->message_buy = v;
 }
 
 const char *shop_get_message_sell(const struct shop_data *shop)
@@ -234,9 +234,9 @@ const char *shop_get_message_sell(const struct shop_data *shop)
   return c_str_or_null(shop->message_sell);
 }
 
-void shop_set_message_sell(struct shop_data *shop, const char *v)
+void shop_set_message_sell(struct shop_data *shop, std::string_view v)
 {
-  shop->message_sell = v ? v : "";
+  shop->message_sell = v;
 }
 
 int shop_buy_get_type(const struct shop_buy_data *buy)
@@ -254,9 +254,9 @@ const char *shop_buy_get_keywords(const struct shop_buy_data *buy)
   return c_str_or_null(buy->keywords);
 }
 
-void shop_buy_set_keywords(struct shop_buy_data *buy, const char *v)
+void shop_buy_set_keywords(struct shop_buy_data *buy, std::string_view v)
 {
-  buy->keywords = v ? v : "";
+  buy->keywords = v;
 }
 
 bool shop_uses_bank(const struct shop_data *shop)

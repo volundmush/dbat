@@ -29,6 +29,11 @@ bool is_abbrev(std::string_view arg1, std::string_view arg2);
 bool str_eq_nocase(std::string_view a, std::string_view b);
 /* Whether a sorts before b ignoring case, as strcasecmp() orders them */
 bool str_less_nocase(std::string_view a, std::string_view b);
+/* How the first n characters of a and b compare ignoring case, as strncasecmp() finds them: the end of either
+   reads as a '\0' */
+int compare_nocase_n(std::string_view a, std::string_view b, size_t n);
+/* s, or "(null)" as printf printed a null, for the getters that still give null for none (until they give views) */
+inline std::string_view null_as_printed(const char *s) { return s ? s : "(null)"; }
 /* Copies src into dst, a buffer of size bytes, cut short to fit and always ended by a '\0', as strlcpy() did;
    nothing is written if size is 0 */
 void copy_cstr(char *dst, std::string_view src, size_t size);

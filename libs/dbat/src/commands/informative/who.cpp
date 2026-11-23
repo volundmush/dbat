@@ -134,7 +134,7 @@ namespace {
     const char *line_color = "@w";
     std::string usr        = str_format("@W(@R{}@W){}", char_get_user(tch), char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
     send_to_char(g, ch, "{}               @D<@C{:<12}@D> {}@w{}", line_color,
-                 char_get_admlevel(ch) > 0 ? char_get_name(tch) : (char_get_admlevel(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")),
+                 char_get_admlevel(ch) > 0 || char_get_admlevel(tch) > 0 ? null_as_printed(char_get_name(tch)) : char_get_user(tch),
                  char_get_admlevel(ch) > 0 ? usr.c_str() : "", line_color);
 
     if (char_get_admlevel(tch))

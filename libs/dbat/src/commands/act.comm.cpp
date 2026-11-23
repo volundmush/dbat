@@ -43,7 +43,7 @@ namespace {
   const char *const languages[] = {"common", "elven", "gnomish", "dwarven", "halfling", "orc", "druid", "draconic", "\n"};
 
   /* How ch is named on the channels and in tells: by name if an immortal, else by account */
-  const char *public_name(struct char_data *ch) { return char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch); }
+  std::string_view public_name(struct char_data *ch) { return char_get_admlevel(ch) > 0 ? null_as_printed(char_get_name(ch)) : char_get_user(ch); }
 
   /* ", in an unfamiliar tongue," unless the listener knows what ch speaks */
   const char *tongue(struct char_data *listener, struct char_data *ch)
@@ -713,7 +713,7 @@ namespace {
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && ch != who) {
       if (char_get_admlevel(who) < ADMLVL_IMMORT)
         return str_format("{}@WAnonymous Player {}s@W, '@w{}@W'@n{}", c.colour, c.name, text, c.colour);
-      return str_format("{}@W{}(H) {}s@W, '@w{}@W'@n{}", c.colour, char_get_admlevel(who) > 0 ? char_get_name(ch) : char_get_user(ch), c.name, text, c.colour);
+      return str_format("{}@W{}(H) {}s@W, '@w{}@W'@n{}", c.colour, char_get_admlevel(who) > 0 ? null_as_printed(char_get_name(ch)) : char_get_user(ch), c.name, text, c.colour);
     }
     if (char_get_admlevel(who) > 0)
       return str_format("{}@W{} ($n) {}s@W, '@w{}@W'@n{}", c.colour, char_get_user(ch), c.name, text, c.colour);

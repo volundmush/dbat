@@ -172,6 +172,19 @@ bool str_eq_nocase(std::string_view a, std::string_view b)
   return true;
 }
 
+int compare_nocase_n(std::string_view a, std::string_view b, size_t n)
+{
+  for (size_t i = 0; i < n; i++) {
+    int ca = i < a.size() ? std::tolower(static_cast<unsigned char>(a[i])) : 0;
+    int cb = i < b.size() ? std::tolower(static_cast<unsigned char>(b[i])) : 0;
+    if (ca != cb)
+      return ca - cb;
+    if (ca == 0)
+      return 0;
+  }
+  return 0;
+}
+
 bool str_less_nocase(std::string_view a, std::string_view b)
 {
   auto lower = [](char c) { return std::tolower(static_cast<unsigned char>(c)); };

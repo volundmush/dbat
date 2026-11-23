@@ -102,7 +102,7 @@ bool obj_is_corpse(const struct obj_data *obj);
 bool obj_wear_flagged(const struct obj_data *obj, int part);
 const char *obj_get_short_description(const struct obj_data *obj);
 
-const char *obj_sana(const struct obj_data *obj);
+std::string_view obj_sana(const struct obj_data *obj);
 room_vnum obj_get_room_loaded(const struct obj_data *obj);
 void obj_set_room_loaded(struct obj_data *obj, room_vnum v);
 
@@ -128,35 +128,30 @@ struct obj_spellbook_spell *obj_make_sbinfo(struct obj_data *obj);
 
 /* Field accessors */
 const char *obj_get_action_description(const struct obj_data *obj);
-void obj_set_action_description(struct obj_data *obj, const char *v);
-void obj_set_action_description(struct obj_data *obj, const std::string &v);
+void obj_set_action_description(struct obj_data *obj, std::string_view v);
 struct obj_affected_type *obj_get_affected(struct obj_data *obj);
 struct char_data *obj_get_carried_by(const struct obj_data *obj);
 void obj_set_carried_by(struct obj_data *obj, struct char_data *v);
 const id_list &obj_get_contains(const struct obj_data *obj);
 const char *obj_get_description(const struct obj_data *obj);
-void obj_set_description(struct obj_data *obj, const char *v);
-void obj_set_description(struct obj_data *obj, const std::string &v);
+void obj_set_description(struct obj_data *obj, std::string_view v);
 const ex_desc_list &obj_get_ex_description(const struct obj_data *obj);
 time_t obj_get_generation(const struct obj_data *obj);
 void obj_set_generation(struct obj_data *obj, time_t v);
 struct obj_data *obj_get_in_obj(const struct obj_data *obj);
 void obj_set_in_obj(struct obj_data *obj, struct obj_data *v);
 const char *obj_get_name(const struct obj_data *obj);
-void obj_set_name(struct obj_data *obj, const char *v);
-void obj_set_name(struct obj_data *obj, const std::string &v);
+void obj_set_name(struct obj_data *obj, std::string_view v);
 const std::vector<trig_vnum> &obj_get_proto_script(const struct obj_data *obj);
 std::vector<trig_vnum> &obj_proto_script(struct obj_data *obj);
 void obj_set_proto_script(struct obj_data *obj, std::vector<trig_vnum> v);
 struct obj_spellbook_spell *obj_get_sbinfo(const struct obj_data *obj);
 struct script_data *obj_get_script(const struct obj_data *obj);
 void obj_set_script(struct obj_data *obj, struct script_data *v);
-void obj_set_short_description(struct obj_data *obj, const char *v);
-void obj_set_short_description(struct obj_data *obj, const std::string &v);
+void obj_set_short_description(struct obj_data *obj, std::string_view v);
 int64_t obj_get_unique_id(const struct obj_data *obj);
 void obj_set_unique_id(struct obj_data *obj, int64_t v);
 struct char_data *obj_get_worn_by(const struct obj_data *obj);
 void obj_set_worn_by(struct obj_data *obj, struct char_data *v);
 int16_t obj_get_worn_on(const struct obj_data *obj);
 void obj_set_worn_on(struct obj_data *obj, int16_t v);
-

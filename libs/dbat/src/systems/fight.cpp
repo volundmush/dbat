@@ -757,14 +757,14 @@ void remove_limb(GameWorld *g, struct char_data *vict, int num)
       break;
   }
 
-  obj_set_name(body_part, buf.c_str());
+  obj_set_name(body_part, buf);
   if (num > 0) {
     buf2 = str_format("@wA {} is lying here@n", part);
   } else {
     buf2 = str_format("{}@w is lying here@n", part);
   }
-  obj_set_description(body_part, buf2.c_str());
-  obj_set_short_description(body_part, part.c_str());
+  obj_set_description(body_part, buf2);
+  obj_set_short_description(body_part, part);
 
   obj_set_type_flag(body_part, ITEM_OTHER);
   obj_wear_set(body_part, ITEM_WEAR_TAKE, true);
@@ -1721,9 +1721,9 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
         nick  = str_format("@RRaw {}@R Steak@n", char_get_name(ch));
         nick2 = str_format("Raw {} Steak", char_get_alias(ch));
         nick3 = str_format("@wA @Rraw {}@R steak@w is lying here@n", char_get_name(ch));
-        obj_set_short_description(meat, nick.c_str());
-        obj_set_name(meat, nick2.c_str());
-        obj_set_description(meat, nick3.c_str());
+        obj_set_short_description(meat, nick);
+        obj_set_name(meat, nick2);
+        obj_set_description(meat, nick3);
         obj_set_value(meat, 7, 14);
       }
     }

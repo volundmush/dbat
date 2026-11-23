@@ -63,8 +63,8 @@ bool check_object_spell_number(GameWorld *g, obj_data *obj, int val)
   if (g->scheck) /* spell names don't exist in syntax check mode */
     return error;
 
-  const char *name = skill_name(g, spell);
-  if (name == unused_spellname || str_eq_nocase("UNDEFINED", name)) {
+  std::string_view name = skill_name(g, spell);
+  if (name.data() == unused_spellname || str_eq_nocase("UNDEFINED", name)) { /* the table's own "!UNUSED!" */
     error = true;
     mud_log("SYSERR: Object #{:d} ({}) uses '{}' spell #{:d}.", obj_get_vnum(g, obj), obj_get_short_description(obj),
             name, spell);

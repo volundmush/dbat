@@ -121,7 +121,7 @@ void string_edit_begin(struct descriptor_data *d, std::string *target, size_t le
 
 constexpr int PAGE_WIDTH = 79; /* column at which the text editor wraps lines */
 
-void show_help(GameWorld *g, struct descriptor_data *t, const char *entry);
+void show_help(GameWorld *g, struct descriptor_data *t, std::string_view entry);
 
 /* variables */
 extern FILE *logfile;

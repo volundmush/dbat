@@ -242,8 +242,8 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
     std::string blm;
     bla = "@WA piece of mail@n";
     blm = "@WSomeone has left a piece of mail here@n";
-    obj_set_short_description(obj, bla.c_str());
-    obj_set_description(obj, blm.c_str());
+    obj_set_short_description(obj, bla);
+    obj_set_description(obj, blm);
     obj_set_name(obj, "mail paper letter");
     bla.clear();
     blm.clear();

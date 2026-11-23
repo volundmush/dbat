@@ -1056,11 +1056,11 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   else if (char_is_npc(i) && char_get_absorbby(g, i) && char_get_absorbby(g, i) != ch)
     send_to_char(g, ch, "@w{:c}{} is being absorbed from by {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, readIntro(ch, char_get_absorbby(g, i)) == 1 ? get_i_name(ch, char_get_absorbby(g, i)) : AN(juggleRaceName(char_get_absorbby(g, i), true)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_fighting(g, i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING && is_sparring(i))
-    send_to_char(g, ch, "@w{:c}{} is sparring with {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(g, i)) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
+    send_to_char(g, ch, "@w{:c}{} is sparring with {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, char_get_admlevel(ch) ? null_as_printed(char_get_name(char_get_fighting(g, i))) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && is_sparring(i) && char_get_fighting(g, i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
     send_to_char(g, ch, "@w{:c}{} is sparring with you!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_fighting(g, i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(g, ch, "@w{:c}{} is fighting {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(g, i)) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
+    send_to_char(g, ch, "@w{:c}{} is fighting {}!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1, char_get_admlevel(ch) ? null_as_printed(char_get_name(char_get_fighting(g, i))) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_fighting(g, i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
     send_to_char(g, ch, "@w{:c}{} is fighting YOU!", as_char(toupper(*char_get_sdesc(i))), char_get_sdesc(i) + 1);
   else if (char_is_npc(i) && char_get_fighting(g, i) && char_get_position(i) == POS_SITTING)
@@ -1252,7 +1252,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
         count = true;
       } else {
         if (char_get_in_room(i) == char_get_in_room(char_get_fighting(g, i))) {
-          send_to_char(g, ch, "{}", char_get_admlevel(ch) ? char_get_name(char_get_fighting(g, i)) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
+          send_to_char(g, ch, "{}", char_get_admlevel(ch) ? null_as_printed(char_get_name(char_get_fighting(g, i))) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
           count = true;
         } else {
           send_to_char(g, ch, "someone who has already left!");
@@ -1291,7 +1291,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
         send_to_char(g, ch, "@rYOU@w!");
       else {
         if (char_get_in_room(i) == char_get_in_room(char_get_fighting(g, i)))
-          send_to_char(g, ch, "{}!", char_get_admlevel(ch) ? char_get_name(char_get_fighting(g, i)) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
+          send_to_char(g, ch, "{}!", char_get_admlevel(ch) ? null_as_printed(char_get_name(char_get_fighting(g, i))) : (readIntro(ch, char_get_fighting(g, i)) == 1 ? get_i_name(ch, char_get_fighting(g, i)) : juggleRaceName(char_get_fighting(g, i), false)));
         else
           send_to_char(g, ch, "someone who has already left!");
       }

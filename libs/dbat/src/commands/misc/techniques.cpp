@@ -73,9 +73,9 @@ namespace {
     std::string clone_ldesc = str_format("{}'s @CClone@w is standing here.@n\n", char_get_alias(ch));
 
     char_data *clone = read_mobile(g, CLONE);
-    char_set_alias(clone, clone_name.c_str());
-    char_set_sdesc(clone, clone_sdesc.c_str());
-    char_set_ldesc(clone, clone_ldesc.c_str());
+    char_set_alias(clone, clone_name);
+    char_set_sdesc(clone, clone_sdesc);
+    char_set_ldesc(clone, clone_ldesc);
     if (char_get_ddesc(ch))
       char_set_ddesc(clone, char_get_ddesc(ch));
     char_set_race(clone, char_get_race(ch));

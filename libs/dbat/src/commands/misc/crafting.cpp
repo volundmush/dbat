@@ -1200,9 +1200,9 @@ ACMD(do_spoil)
   for (const char *word : {"headless", "corpse", "half", "burnt", "chunks", "beaten", "bloody"})
     search_replace(part, word, "");
   trim(part);
-  obj_set_name(head, str_format("bloody head {}", part).c_str());
-  obj_set_description(head, str_format("@wThe bloody head of {}@w is lying here@n", part).c_str());
-  obj_set_short_description(head, str_format("@wThe bloody head of {}@w@n", part).c_str());
+  obj_set_name(head, str_format("bloody head {}", part));
+  obj_set_description(head, str_format("@wThe bloody head of {}@w is lying here@n", part));
+  obj_set_short_description(head, str_format("@wThe bloody head of {}@w@n", part));
 
   obj_set_type_flag(head, ITEM_OTHER);
   obj_wear_set(head, ITEM_WEAR_TAKE, true);

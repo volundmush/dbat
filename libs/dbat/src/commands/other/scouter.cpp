@@ -229,7 +229,7 @@ namespace {
     }
     send_to_char(g, ch, "@WYou tell @c{}@W telepathically, @w'@C{}@w'@n\r\n", char_get_name(vict), message);
     send_to_char(g, vict, "@c{}@W talks to you telepathically, @w'@C{}@w'@n\r\n", char_get_name(ch), message);
-    send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), message);
+    send_to_imm(g, "@GTELEPATHY: @C{}@G telepaths @c{}, @W'@w{}@W'@n", char_get_admlevel(ch) > 0 ? null_as_printed(char_get_name(ch)) : char_get_user(ch), char_get_admlevel(vict) > 0 ? null_as_printed(char_get_name(vict)) : char_get_user(vict), message);
     telepathy_cost(g, ch);
   }
 } // namespace
@@ -548,7 +548,7 @@ namespace {
           break;
       }
       bool same_zone    = char_in_zone(g, ch) == char_in_zone(g, who);
-      const char *where = sense_location(g, who);
+      std::string_view where = sense_location(g, who);
       if (beyond_scouter(g, obj, who))
         send_to_char(g, ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C{}@n\r\n", same_zone ? pathway.c_str() : where);
       else

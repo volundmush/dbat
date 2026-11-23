@@ -54,7 +54,7 @@ void topWrite(GameWorld *g, struct char_data *ch)
     return;
   if (g->TOPLOADED == false)
     return;
-  if (!char_get_desc(ch) || !char_get_user(ch))
+  if (!char_get_desc(ch))
     return;
 
   /* The places as they are right now, and an empty one past the end: someone listed twice in the last section can
@@ -69,7 +69,7 @@ void topWrite(GameWorld *g, struct char_data *ch)
   bool writeEm = false;
   for (size_t section = 0; section < std::size(toplist_sections); section++) {
     const toplist_section &listed = toplist_sections[section];
-    const char *name              = listed.by_account ? char_get_user(ch) : char_get_name(ch);
+    std::string_view name         = listed.by_account ? char_get_user(ch) : null_as_printed(char_get_name(ch));
     int start = static_cast<int>(section) * 5, finish = start + 5, location = -1;
     bool placed = false, progress = false;
 

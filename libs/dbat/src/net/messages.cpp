@@ -174,33 +174,34 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
       continue;
     }
     std::string_view i;
+    std::string held; /* what i views, when it is made here */
     switch (*++orig) {
       case 'n':
-        i = char_pers(g, ch, to);
+        i = held = char_pers(g, ch, to);
         break;
       case 'N':
-        i = vict_obj ? or_null(char_pers(g, (struct char_data *)const_cast<void *>(vict_obj), to)) : ACTNULL;
+        i = vict_obj ? std::string_view(held = char_pers(g, (struct char_data *)const_cast<void *>(vict_obj), to)) : ACTNULL;
         dg_victim = (const struct char_data *)vict_obj;
         break;
       case 'm':
         i = char_hmhr(ch);
         break;
       case 'M':
-        i = vict_obj ? or_null(char_hmhr((const struct char_data *)vict_obj)) : ACTNULL;
+        i = vict_obj ? char_hmhr((const struct char_data *)vict_obj) : ACTNULL;
         dg_victim = (const struct char_data *)vict_obj;
         break;
       case 's':
         i = char_hshr(ch);
         break;
       case 'S':
-        i = vict_obj ? or_null(char_hshr((const struct char_data *)vict_obj)) : ACTNULL;
+        i = vict_obj ? char_hshr((const struct char_data *)vict_obj) : ACTNULL;
         dg_victim = (const struct char_data *)vict_obj;
         break;
       case 'e':
         i = char_hssh(ch);
         break;
       case 'E':
-        i = vict_obj ? or_null(char_hssh((const struct char_data *)vict_obj)) : ACTNULL;
+        i = vict_obj ? char_hssh((const struct char_data *)vict_obj) : ACTNULL;
         dg_victim = (const struct char_data *)vict_obj;
         break;
       case 'o':
@@ -218,10 +219,10 @@ static void perform_act(GameWorld *g, const char *orig, struct char_data *ch, st
         dg_target = (const struct obj_data *)vict_obj;
         break;
       case 'a':
-        i = obj ? or_null(obj_sana(obj)) : ACTNULL;
+        i = obj ? obj_sana(obj) : ACTNULL;
         break;
       case 'A':
-        i = vict_obj ? or_null(obj_sana((const struct obj_data *)vict_obj)) : ACTNULL;
+        i = vict_obj ? obj_sana((const struct obj_data *)vict_obj) : ACTNULL;
         dg_target = (const struct obj_data *)vict_obj;
         break;
       case 'T':
@@ -437,15 +438,12 @@ const char *act(GameWorld *g, const char *str, int hide_invisible, struct char_d
 }
 
 /* Shows the first help entry with a keyword that starts with entry. */
-void show_help(GameWorld *g, struct descriptor_data *t, const char *entry)
+void show_help(GameWorld *g, struct descriptor_data *t, std::string_view entry)
 {
-  size_t len = strlen(entry);
-  auto found = std::lower_bound(g->help_table.begin(), g->help_table.end(), entry,
-                                [len](const help_index_element &el, const char *key) {
-                                  return strncasecmp(el.keywords.c_str(), key, len) < 0;
-                                });
+  auto starts_before = [&](const help_index_element &el) { return compare_nocase_n(el.keywords, entry, entry.size()) < 0; };
+  auto found         = std::ranges::partition_point(g->help_table, starts_before);
 
-  if (found == g->help_table.end() || strncasecmp(found->keywords.c_str(), entry, len))
+  if (found == g->help_table.end() || compare_nocase_n(found->keywords, entry, entry.size()))
     return;
   write_to_output(g, t, "\r\n{}\r\n", found->entry);
 }

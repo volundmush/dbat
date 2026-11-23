@@ -637,7 +637,7 @@ static void state_name_cnfrm(GameWorld *g, struct descriptor_data *d, char *arg)
     desc_set_connected(d, CON_NEWPASSWD);
   } else if (*arg == 'n' || *arg == 'N') {
     write_to_output(g, d, "Okay, what IS it, then? ");
-    char_set_alias(d->character, nullptr);
+    char_set_alias(d->character, "");
     desc_set_connected(d, CON_GET_NAME);
   } else
     write_to_output(g, d, "Please type Yes or No: ");

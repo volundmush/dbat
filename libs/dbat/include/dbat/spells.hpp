@@ -345,7 +345,7 @@ bool mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
                   int level, int cast_stat);
 
 /* other prototypes */
-const char *skill_name(GameWorld *g, int num);
+std::string_view skill_name(GameWorld *g, int num);
 int roll_skill(GameWorld *g, const struct char_data *ch, int snum);
 bool roll_resisted(GameWorld *g, const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
 int skill_type(GameWorld *g, int skill);

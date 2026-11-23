@@ -1,4 +1,5 @@
 #pragma once
+#include <string_view>
 #include <vector>
 #include <string>
 #include "dbat/extradesc.hpp"
@@ -51,11 +52,9 @@ room_vnum room_get_exit_to_room(GameWorld *g, room_vnum room, int dir);
 const id_list &room_get_contents(const struct room_data *room);
 const id_list &room_get_contents(GameWorld *g, room_vnum room);
 const char *room_get_description(const struct room_data *room);
-void room_set_description(struct room_data *room, const char *v);
-void room_set_description(struct room_data *room, const std::string &v);
+void room_set_description(struct room_data *room, std::string_view v);
 const char *room_get_description(GameWorld *g, room_vnum room);
-void room_set_description(GameWorld *g, room_vnum room, const char *v);
-void room_set_description(GameWorld *g, room_vnum room, const std::string &v);
+void room_set_description(GameWorld *g, room_vnum room, std::string_view v);
 int room_get_dmg(const struct room_data *room);
 const ex_desc_list &room_get_ex_description(const struct room_data *room);
 const ex_desc_list &room_get_ex_description(GameWorld *g, room_vnum room);
@@ -66,11 +65,9 @@ int room_get_gravity(const struct room_data *room);
 int8_t room_get_light(GameWorld *g, room_vnum room);
 void room_set_light(GameWorld *g, room_vnum room, int8_t v);
 const char *room_get_name(const struct room_data *room);
-void room_set_name(struct room_data *room, const char *v);
-void room_set_name(struct room_data *room, const std::string &v);
+void room_set_name(struct room_data *room, std::string_view v);
 const char *room_get_name(GameWorld *g, room_vnum room);
-void room_set_name(GameWorld *g, room_vnum room, const char *v);
-void room_set_name(GameWorld *g, room_vnum room, const std::string &v);
+void room_set_name(GameWorld *g, room_vnum room, std::string_view v);
 room_vnum room_get_number(const struct room_data *room);
 void room_set_number(struct room_data *room, room_vnum v);
 void room_set_number(GameWorld *g, room_vnum room, room_vnum v);

@@ -196,7 +196,7 @@ inline struct obj_data *to_lift(GameWorld *g, struct char_data *att, int64_t wei
 inline void lasting(GameWorld *g, struct char_data *att, const char *skill)
 {
   for (int i = 0; i < SKILL_TABLE_SIZE; i++)
-    if (g->spell_info[i].name && !strcasecmp(skill_name(g, i), skill)) {
+    if (g->spell_info[i].name && str_eq_nocase(skill_name(g, i), skill)) {
       assign_affect(g, att, AFF_INFUSE, i, 5, 0, 0, 0, 0, 0, 0);
       return;
     }

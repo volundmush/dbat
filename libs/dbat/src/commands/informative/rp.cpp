@@ -386,7 +386,7 @@ namespace {
       send_to_char(g, ch, "You can't nickname a ship and use color codes. Sorry.\r\n");
       return;
     }
-    obj_set_action_description(ship, CAP(nick).c_str());
+    obj_set_action_description(ship, CAP(nick));
     /* its interior, 1000 vnums on: gone, and the ship put back to show its new name */
     for (obj_data *k : each_obj(g) | std::views::filter([&](obj_data *o) { return obj_get_vnum(g, o) == obj_get_vnum(g, ship) + 1000; })) {
       extract_obj(g, k);
@@ -434,8 +434,8 @@ ACMD(do_nickname)
   send_to_char(g, ch, "@wYou nickname {}@w as '@C{}@w'.@n\r\n", obj_get_short_description(obj), arg2);
   std::string nick  = str_format("{} @wnicknamed @D(@C{}@D)@n", obj_get_short_description(obj), CAP(arg2));
   std::string nick2 = str_format("{} {}", obj_get_name(obj), arg2);
-  obj_set_short_description(obj, nick.c_str());
-  obj_set_name(obj, nick2.c_str());
+  obj_set_short_description(obj, nick);
+  obj_set_name(obj, nick2);
 }
 
 constexpr act_msgs SHOWOFF = {"@WYou hold up $p@W for @C$N@W to see:@n", "@C$n@W holds up $p@W for you to see:@n", "@C$n@W holds up $p@W for @c$N@W to see.@n", true};
@@ -597,7 +597,7 @@ ACMD(do_intro)
     send_to_char(g, ch, "There seems to have been an error, report this to Iovan.\r\n");
     return;
   }
-  if (readIntro(ch, vict) == 1 && strstr(juggleRaceName(vict, true), arg.c_str())) {
+  if (readIntro(ch, vict) == 1 && juggleRaceName(vict, true).contains(arg)) {
     send_to_char(g, ch, "You have already dubbed them a name. If you want to redub them target the name you know them by.\r\n");
     return;
   }

@@ -192,11 +192,11 @@ SPECIAL(pet_shops)
 
     if (!pet_name.empty()) {
       buf = str_format("{} {}", char_get_alias(pet), pet_name);
-      char_set_alias(pet, buf.c_str());
+      char_set_alias(pet, buf);
 
       buf = str_format("{}A small sign on a chain around the neck says 'My name is {}'\r\n",
                        char_get_ddesc(pet), pet_name);
-      char_set_ddesc(pet, buf.c_str());
+      char_set_ddesc(pet, buf);
     }
     char_to_room(g, pet, char_get_in_room(ch));
     add_follower(g, pet, ch);

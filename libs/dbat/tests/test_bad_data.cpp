@@ -708,19 +708,19 @@ static void check_toplist_name_listed_twice_at_the_bottom(void)
 {
   GameWorld *g         = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  const char *user     = char_get_user(ch);
-  const char *rpp[5]   = {"Aaa", user, "Ccc", "Bbb", user}; /* the last section, places 20 to 24 */
+  std::string user(char_get_user(ch));
+  const char *rpp[5]   = {"Aaa", user.c_str(), "Ccc", "Bbb", user.c_str()}; /* the last section, places 20 to 24 */
 
-  CHECK(user != nullptr && char_get_desc(ch) != nullptr);
+  CHECK(!user.empty() && char_get_desc(ch) != nullptr);
   for (int x = 0; x < 25; x++) {
-    th_set_text(g->topname[x], x < 20 ? "Nobody" : rpp[x - 20]);
+    g->topname[x]  = x < 20 ? "Nobody" : rpp[x - 20];
     g->toppoint[x] = x < 20 ? 2000000000000LL : 100 - x;
   }
   g->TOPLOADED = true;
   char_set_trp(ch, 150);
   topWrite(g, ch);
-  CHECK(str_eq_nocase(th_text(g->topname[20]), user) && g->toppoint[20] == 150);
-  CHECK(std::string_view(th_text(g->topname[21])) == "Aaa" && !*th_text(g->topname[24]) && g->toppoint[24] == 0);
+  CHECK(str_eq_nocase(g->topname[20], user) && g->toppoint[20] == 150);
+  CHECK(g->topname[21] == "Aaa" && g->topname[24].empty() && g->toppoint[24] == 0);
   th_shutdown(g);
 }
 
@@ -1325,10 +1325,10 @@ static void check_race_name_forms_stay_apart(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player_as(g, "Tester", ADMLVL_NONE, RACE_HUMAN, 0);
-  const char *upper = juggleRaceName(ch, true), *lower = juggleRaceName(ch, false);
+  std::string_view upper = juggleRaceName(ch, true), lower = juggleRaceName(ch, false);
 
-  CHECK(!strcmp(upper, "Human"));
-  CHECK(!strcmp(lower, "human"));
+  CHECK(upper == "Human");
+  CHECK(lower == "human");
   th_shutdown(g);
 }
 
@@ -1592,8 +1592,8 @@ static void check_empty_context_help(void)
   th_before_boot(empty_context_help);
   GameWorld *g = th_boot();
 
-  CHECK(std::string_view(th_text(g->context_help_list[0])) == "No help available (yet)!\r\n");
-  CHECK(std::string_view(th_text(g->context_help_list[1])) == "Some help.");
+  CHECK(g->context_help_list[0] == "No help available (yet)!\r\n");
+  CHECK(g->context_help_list[1] == "Some help.");
   th_shutdown(g);
 }
 
@@ -1982,7 +1982,7 @@ static void check_message_about_an_object_with_no_description(void)
   struct obj_data *obj = read_object(g, 350);
   std::string description = obj_get_short_description(obj); /* a copy: clearing the field invalidates the pointer */
 
-  obj_set_short_description(obj, nullptr);
+  obj_set_short_description(obj, "");
   act(g, "You look at $p.", false, ch, obj, nullptr, TO_CHAR);
   CHECK(saw(ch, "You look at"));
   obj_set_short_description(obj, description);

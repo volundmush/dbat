@@ -84,9 +84,9 @@ const char *guild_get_no_such_skill(const struct guild_data *guild)
   return c_str_or_null(guild->no_such_skill);
 }
 
-void guild_set_no_such_skill(struct guild_data *guild, const char *v)
+void guild_set_no_such_skill(struct guild_data *guild, std::string_view v)
 {
-  guild->no_such_skill = v ? v : "";
+  guild->no_such_skill = v;
 }
 
 const char *guild_get_not_enough_gold(const struct guild_data *guild)
@@ -94,9 +94,9 @@ const char *guild_get_not_enough_gold(const struct guild_data *guild)
   return c_str_or_null(guild->not_enough_gold);
 }
 
-void guild_set_not_enough_gold(struct guild_data *guild, const char *v)
+void guild_set_not_enough_gold(struct guild_data *guild, std::string_view v)
 {
-  guild->not_enough_gold = v ? v : "";
+  guild->not_enough_gold = v;
 }
 
 int guild_get_skill(const struct guild_data *guild, int n)

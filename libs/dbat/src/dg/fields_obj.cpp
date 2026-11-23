@@ -107,7 +107,7 @@ const field<obj_data> obj_fields[] = {
     {"name", [](const field_query &q, obj_data *o) -> result {
        if (!q.has_arg())
          return str_format("{}", obj_get_name(o));
-       obj_set_name(o, str_format("{} {}", obj_get_name(o), q.subfield).c_str());
+       obj_set_name(o, str_format("{} {}", obj_get_name(o), q.subfield));
        return std::nullopt; /* quirk: renaming gives the value of a global called "name", or logs */
      }},
     {"next_in_list", [](const field_query &q, obj_data *o) -> result {
@@ -126,7 +126,7 @@ const field<obj_data> obj_fields[] = {
     {"shortdesc", [](const field_query &q, obj_data *o) -> result {
        if (!q.has_arg())
          return str_format("{}", obj_get_short_description(o));
-       obj_set_short_description(o, str_format("{} @wnicknamed @D(@C{}@D)@n", obj_get_short_description(o), q.subfield).c_str());
+       obj_set_short_description(o, str_format("{} @wnicknamed @D(@C{}@D)@n", obj_get_short_description(o), q.subfield));
        return std::nullopt; /* quirk: as for name */
      }},
     {"size", [](const field_query &q, obj_data *o) -> result {

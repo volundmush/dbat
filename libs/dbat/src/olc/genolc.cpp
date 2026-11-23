@@ -43,9 +43,8 @@ static struct {
     {-1,     nullptr,      nullptr },
 };
 
-const char *npc_msg_format_problem(std::string_view msg, bool allow_int)
+std::optional<std::string> npc_msg_format_problem(std::string_view msg, bool allow_int)
 {
-  static std::string why; /* what is returned, until the next call */
   int ss = 0, ds = 0;
 
   for (size_t i = 0; i < msg.size(); i++) {
@@ -60,8 +59,7 @@ const char *npc_msg_format_problem(std::string_view msg, bool allow_int)
         return "%d before %s";
       ds++;
     } else if (msg[i] != '%') {
-      why = str_format("invalid format '%{:c}'", msg[i]);
-      return why.c_str();
+      return str_format("invalid format '%{:c}'", msg[i]);
     }
   }
 
@@ -69,7 +67,7 @@ const char *npc_msg_format_problem(std::string_view msg, bool allow_int)
     return "more than one %s";
   if (ds > 1)
     return "more than one %d";
-  return nullptr;
+  return std::nullopt;
 }
 
 std::string npc_message(std::string_view msg, const char *name, int amount)

@@ -515,7 +515,7 @@ ACMD(do_gen_write)
     return;
   }
   std::string entry = str_format("@D[@WUser: @c{:<10}@D] [@WChar: @C{:<10}@D] [@WRoom: @G{:<4d}@D] [@WDate: @Y{:>6.6}@D]@b \n-----------@w\n{}\n@D-------------------------------@n\n",
-                                 char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), char_get_in_room(ch), (tmp + 4), text);
+                                 char_get_user(ch), char_get_name(ch), char_get_in_room(ch), (tmp + 4), text);
   if (!io::append_file(filename, entry)) {
     perror("SYSERR: do_gen_write");
     send_to_char(g, ch, "Could not open the file.  Sorry.\r\n");

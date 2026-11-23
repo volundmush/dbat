@@ -97,18 +97,6 @@ ACMD(do_weather)
     send_to_char(g, ch, "You have no feeling about the weather at all.\r\n");
 }
 
-/* How argument compares with the start of keywords, ignoring case, as strncasecmp() over argument's length did */
-static int compare_start_nocase(std::string_view argument, std::string_view keywords)
-{
-  for (size_t i = 0; i < argument.size(); i++) {
-    int a = tolower(static_cast<unsigned char>(argument[i]));
-    int k = i < keywords.size() ? tolower(static_cast<unsigned char>(keywords[i])) : 0;
-    if (a != k)
-      return a - k;
-  }
-  return 0;
-}
-
 int search_help(GameWorld *g, std::string_view argument, int level)
 {
   int chk, bot, top, mid;
@@ -119,14 +107,14 @@ int search_help(GameWorld *g, std::string_view argument, int level)
   while (bot <= top) {
     mid = (bot + top) / 2;
 
-    if (!(chk = compare_start_nocase(argument, g->help_table[mid].keywords))) {
-      while ((mid > 0) && !compare_start_nocase(argument, g->help_table[mid - 1].keywords))
+    if (!(chk = compare_nocase_n(argument, g->help_table[mid].keywords, argument.size()))) {
+      while ((mid > 0) && !compare_nocase_n(argument, g->help_table[mid - 1].keywords, argument.size()))
         mid--;
 
       while (level < g->help_table[mid].min_level && mid < (bot + top) / 2)
         mid++;
 
-      if (compare_start_nocase(argument, g->help_table[mid].keywords))
+      if (compare_nocase_n(argument, g->help_table[mid].keywords, argument.size()))
         break;
 
       return mid;

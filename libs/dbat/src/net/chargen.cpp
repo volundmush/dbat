@@ -217,7 +217,7 @@ static_assert(std::size(traits) == MAX_BONUSES);
 
 constexpr int FIRST_NEGATIVE = BONUS_SOFT;
 
-const char *trait_name(int i)
+std::string_view trait_name(int i)
 {
   return traits[i].name;
 }

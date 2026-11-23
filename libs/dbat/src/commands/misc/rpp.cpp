@@ -168,7 +168,7 @@ void rpp_feature(GameWorld *g, struct char_data *ch, const std::string &arg)
   char_set_rbank(ch, char_get_rbank(ch) - cost);
   send_to_char(g, ch, "@R{:d}@W RPP paid for your selection. Enjoy!@n\r\n", cost);
   send_to_char(g, ch, "You now have the following line underneath you when someone sees you in a room as:\n@C{}@n\r\n", line);
-  char_set_feature(ch, line.c_str());
+  char_set_feature(ch, line);
   if (change) {
     send_to_imm(g, "{} has altered their extra description. Make sure the reason is legit! If it is then reimb them 2 RPP.\r\n", char_get_user(ch));
     send_to_char(g, ch, "The immortals have been notified about this change. It had better have been for a good reason.\r\n");

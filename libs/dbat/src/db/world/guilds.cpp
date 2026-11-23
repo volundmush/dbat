@@ -50,8 +50,8 @@ io::loaded<std::string> read_message(io::text_reader &in, guild_vnum vnum, const
     return text;
   if (text->empty())
     return fallback;
-  if (const char *problem = npc_msg_format_problem(text->c_str(), false)) {
-    mud_log("SYSERR: Guild #{:d} {}: {}; using the default.", vnum, field, problem);
+  if (std::optional<std::string> problem = npc_msg_format_problem(text->c_str(), false)) {
+    mud_log("SYSERR: Guild #{:d} {}: {}; using the default.", vnum, field, *problem);
     return fallback;
   }
   return text;

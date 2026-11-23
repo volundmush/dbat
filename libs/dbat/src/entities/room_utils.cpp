@@ -257,12 +257,7 @@ const char *room_get_description(const struct room_data *room)
   return room->description.empty() ? nullptr : room->description.c_str(); /* null for none, as the files have it */
 }
 
-void room_set_description(struct room_data *room, const char *v)
-{
-  room->description = v ? v : "";
-}
-
-void room_set_description(struct room_data *room, const std::string &v)
+void room_set_description(struct room_data *room, std::string_view v)
 {
   room->description = v;
 }
@@ -274,13 +269,7 @@ const char *room_get_description(GameWorld *g, room_vnum room)
   return nullptr;
 }
 
-void room_set_description(GameWorld *g, room_vnum room, const char *v)
-{
-  if (struct room_data *r = room_of(g, room))
-    room_set_description(r, v);
-}
-
-void room_set_description(GameWorld *g, room_vnum room, const std::string &v)
+void room_set_description(GameWorld *g, room_vnum room, std::string_view v)
 {
   if (struct room_data *r = room_of(g, room))
     r->description = v;
@@ -343,12 +332,7 @@ const char *room_get_name(const struct room_data *room)
   return room->name.empty() ? nullptr : room->name.c_str(); /* null for none, as the files have it */
 }
 
-void room_set_name(struct room_data *room, const char *v)
-{
-  room->name = v ? v : "";
-}
-
-void room_set_name(struct room_data *room, const std::string &v)
+void room_set_name(struct room_data *room, std::string_view v)
 {
   room->name = v;
 }
@@ -360,13 +344,7 @@ const char *room_get_name(GameWorld *g, room_vnum room)
   return nullptr;
 }
 
-void room_set_name(GameWorld *g, room_vnum room, const char *v)
-{
-  if (struct room_data *r = room_of(g, room))
-    room_set_name(r, v);
-}
-
-void room_set_name(GameWorld *g, room_vnum room, const std::string &v)
+void room_set_name(GameWorld *g, room_vnum room, std::string_view v)
 {
   if (struct room_data *r = room_of(g, room))
     r->name = v;

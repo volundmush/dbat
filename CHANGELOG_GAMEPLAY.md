@@ -2,6 +2,7 @@
 - ???
 - Looking at the auction list, or picking up mail, no longer capitalises the names of the players it shows in the game's list of players, which is kept in lowercase. [Volund]
 - A social with no message for a case (a `#` in the socials file) no longer shows "(null)" for it: using it with no argument, or `gemote` at someone it has no message for, now sends an empty line. [Volund]
+- A mob with no short description is named as nothing in messages, rather than "(null)" (or "<NULL>" in a message about it), and a message naming it first (`$n`) no longer reads through a null. [Volund]
 - Formatting text in the editor (`/fi`) no longer reads past the end of a word ending in `@` when working out how much room its colour codes take. [Volund]
 - A connection whose client was slow to read no longer loses what comes next: when the game had sent everything but the end of the prompt, the rest of the prompt was meant to go first next time, but the next text went into memory before the buffer instead, so the player missed the first part of it, or all of it. [Volund]
 - A message ending in `@[`, such as something a player typed, no longer shows the end of an earlier, longer message after it: with colour on, the colour code went on reading past the end of the message, into what was left of the last one, which could be someone else's. It now ends the message. [Volund]

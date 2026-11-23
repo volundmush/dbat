@@ -91,11 +91,12 @@ struct pfile_writer {
     if (value != fallback)
       number(tag, value);
   }
-  void text(const char *tag, const char *s)
+  void text(const char *tag, const char *s) /* none for null */
   {
     if (s)
       out.print("{}: {}\n", tag, s);
   }
+  void text(const char *tag, std::string_view s) { out.print("{}: {}\n", tag, s); }
   void flags(const char *tag, const bitvector_t *bits)
   {
     out.print("{}: {} {} {} {}\n", tag, flag_letters(bits[0]), flag_letters(bits[1]), flag_letters(bits[2]), flag_letters(bits[3]));
@@ -612,7 +613,7 @@ int load_char(GameWorld *g, const char *name, struct char_data *ch)
   char_set_max_ki(ch, PFDEF_MAXKI);
   char_set_speaking(ch, PFDEF_SPEAKING);
   char_set_olc_zone(g, ch, PFDEF_OLC);
-  char_set_host(g, ch, nullptr);
+  char_set_host(g, ch, "");
 
   char_set_time_maxage(ch, 0);
   char_set_time_created(ch, 0);

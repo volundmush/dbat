@@ -243,7 +243,7 @@ struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, std::str
       if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
-    } else if (!char_is_npc(i) && std::string_view(juggleRaceName(i, true)) == CAP(name) && i != ch) {
+    } else if (!char_is_npc(i) && juggleRaceName(i, true) == CAP(name) && i != ch) {
       if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
@@ -251,7 +251,7 @@ struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, std::str
       if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);
-    } else if (!char_is_npc(i) && std::string_view(juggleRaceName(i, true)) == name && i != ch) {
+    } else if (!char_is_npc(i) && juggleRaceName(i, true) == name && i != ch) {
       if (char_can_see(g, ch, i))
         if (--(*number) == 0)
           return (i);

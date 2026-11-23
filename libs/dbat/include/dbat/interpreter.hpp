@@ -9,7 +9,7 @@
 #define CMD_IS(g, cmd_name) (g->complete_cmd_info[cmd].command == (cmd_name))
 #define IS_MOVE(g, cmdnum)  (g->complete_cmd_info[cmdnum].command_pointer == do_move)
 
-const char *trait_name(int i); /* a bonus or negative trait's name, by BONUS_* */
+std::string_view trait_name(int i); /* a bonus or negative trait's name, by BONUS_* */
 extern const struct command_info cmd_info[];
 
 void userLoad(struct descriptor_data *d, const char *name);

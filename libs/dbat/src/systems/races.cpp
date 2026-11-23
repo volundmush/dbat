@@ -231,7 +231,7 @@ bool race_exists(int r)
   return r >= 0 && r < NUM_RACES;
 }
 
-const char *race_name(int r)
+std::string_view race_name(int r)
 {
   if (!race_exists(r))
     return "Unknown";

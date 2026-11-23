@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -14,7 +15,7 @@ constexpr zone_vnum HEDIT_PERMISSION = 888; /* arbitrary number higher then max 
 
 /* Shop and guild messages are builder text used as a printf format: one %s for the customer's name, plus one %d
  * for the price when allow_int is set (shop buy/sell). Returns NULL if msg is safe to use that way, else why not. */
-const char *npc_msg_format_problem(std::string_view msg, bool allow_int);
+std::optional<std::string> npc_msg_format_problem(std::string_view msg, bool allow_int);
 /* msg, a message npc_msg_format_problem() passed, as printf made it: its %s the customer's name (a null one
  * "(null)"), its %d the amount, and %% a % */
 std::string npc_message(std::string_view msg, const char *name, int amount = 0);

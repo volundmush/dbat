@@ -58,7 +58,7 @@ static void mag_nextstrike(int level, struct char_data *caster, int spellnum)
  * a valid spell/skill number.  A typical for() loop would not need to use
  * this because you can guarantee > 0 and < SKILL_TABLE_SIZE
  */
-const char *skill_name(GameWorld *g, int num)
+std::string_view skill_name(GameWorld *g, int num)
 {
   if (num > 0 && num < SKILL_TABLE_SIZE)
     return (g->spell_info[num].name);

@@ -66,11 +66,9 @@ void char_set_freeze_level(GameWorld *g, struct char_data *ch, int8_t v);
 uint8_t char_get_bad_pws(GameWorld *g, const struct char_data *ch);
 void char_set_bad_pws(GameWorld *g, struct char_data *ch, uint8_t v);
 const char *char_get_poofin(GameWorld *g, const struct char_data *ch);
-void char_set_poofin(GameWorld *g, struct char_data *ch, const char *v);
-void char_set_poofin(GameWorld *g, struct char_data *ch, const std::string &v);
+void char_set_poofin(GameWorld *g, struct char_data *ch, std::string_view v);
 const char *char_get_poofout(GameWorld *g, const struct char_data *ch);
-void char_set_poofout(GameWorld *g, struct char_data *ch, const char *v);
-void char_set_poofout(GameWorld *g, struct char_data *ch, const std::string &v);
+void char_set_poofout(GameWorld *g, struct char_data *ch, std::string_view v);
 int char_get_olc_zone(GameWorld *g, const struct char_data *ch);
 void char_set_olc_zone(GameWorld *g, struct char_data *ch, zone_vnum v);
 /* The character's aliases, newest first; null for one without player data */
@@ -78,8 +76,7 @@ std::list<alias_data> *char_aliases(GameWorld *g, struct char_data *ch);
 int32_t char_get_last_tell(GameWorld *g, const struct char_data *ch);
 void char_set_last_tell(GameWorld *g, struct char_data *ch, int32_t v);
 const char *char_get_host(GameWorld *g, const struct char_data *ch);
-void char_set_host(GameWorld *g, struct char_data *ch, const char *v);
-void char_set_host(GameWorld *g, struct char_data *ch, const std::string &v);
+void char_set_host(GameWorld *g, struct char_data *ch, std::string_view v);
 /* Channel i of ch's communication history, oldest first; null for one without player data */
 std::deque<std::string> *char_comm_hist(GameWorld *g, const struct char_data *ch, int i);
 int char_get_speaking(const struct char_data *ch);
@@ -90,12 +87,12 @@ void char_set_feat_points(GameWorld *g, struct char_data *ch, int v);
 /* Derived character values that used to be macros. */
 int char_get_age_years(GameWorld *g, struct char_data *ch);
 int char_can_carry_n(const struct char_data *ch);
-const char *char_true_race_name(const struct char_data *ch);
-const char *char_sensei_name(const struct char_data *ch);
-const char *char_sensei_name_lower(const struct char_data *ch);
-const char *char_sensei_style(const struct char_data *ch);
-const char *char_class_abbr(const struct char_data *ch);
-const char *char_race_abbr(const struct char_data *ch);
+std::string_view char_true_race_name(const struct char_data *ch);
+std::string_view char_sensei_name(const struct char_data *ch);
+std::string_view char_sensei_name_lower(const struct char_data *ch);
+std::string_view char_sensei_style(const struct char_data *ch);
+std::string_view char_class_abbr(const struct char_data *ch);
+std::string_view char_race_abbr(const struct char_data *ch);
 
 bitvector_t *char_get_act(const struct char_data *ch);
 bitvector_t *char_get_affected_by(const struct char_data *ch);
@@ -137,25 +134,21 @@ room_vnum char_get_was_in_room(const struct char_data *ch);
 void char_set_was_in_room(struct char_data *ch, room_vnum v);
 
 const char *char_get_pc_name(const struct char_data *ch);
-void char_set_pc_name(struct char_data *ch, const char *v);
-void char_set_pc_name(struct char_data *ch, const std::string &v);
+void char_set_pc_name(struct char_data *ch, std::string_view v);
 const char *char_get_name(const struct char_data *ch);
-const char *char_get_title(const struct char_data *ch);
+std::string_view char_get_title(const struct char_data *ch);
 int char_get_starphase(const struct char_data *ch);
 void char_set_starphase(struct char_data *ch, int v);
 int char_get_mimic(const struct char_data *ch);
 const char *char_get_voice(const struct char_data *ch);
-void char_set_voice(struct char_data *ch, const char *v);
-void char_set_voice(struct char_data *ch, const std::string &v);
+void char_set_voice(struct char_data *ch, std::string_view v);
 int char_get_transclass(const struct char_data *ch);
 void char_set_transclass(struct char_data *ch, int v);
 const char *char_get_feature(const struct char_data *ch);
-void char_set_feature(struct char_data *ch, const char *v);
-void char_set_feature(struct char_data *ch, const std::string &v);
-const char *char_get_user(const struct char_data *ch);
+void char_set_feature(struct char_data *ch, std::string_view v);
+std::string_view char_get_user(const struct char_data *ch);
 const char *char_get_loguser(const struct char_data *ch);
-void char_set_loguser(struct char_data *ch, const char *v);
-void char_set_loguser(struct char_data *ch, const std::string &v);
+void char_set_loguser(struct char_data *ch, std::string_view v);
 int char_get_admlevel(const struct char_data *ch);
 void char_set_admlevel(struct char_data *ch, int v);
 int char_get_class_level(const struct char_data *ch);
@@ -204,8 +197,7 @@ void char_set_suppression(struct char_data *ch, int64_t v);
 int64_t char_get_suppressed(const struct char_data *ch);
 void char_set_suppressed(struct char_data *ch, int64_t v);
 const char *char_get_rdisplay(const struct char_data *ch);
-void char_set_rdisplay(struct char_data *ch, const char *v);
-void char_set_rdisplay(struct char_data *ch, const std::string &v);
+void char_set_rdisplay(struct char_data *ch, std::string_view v);
 
 int8_t char_get_aff_abils_str(const struct char_data *ch);
 void char_set_aff_abils_str(struct char_data *ch, int8_t v);
@@ -504,7 +496,7 @@ bool char_can_see_obj(GameWorld *g, const struct char_data *sub, const struct ob
 
 bool char_can_get_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 
-const char *char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict);
+std::string char_pers(GameWorld *g, struct char_data *ch, struct char_data *vict);
 
 const char *obj_shortdesc_for(GameWorld *g, const struct obj_data *obj, const struct char_data *vict);
 
@@ -597,15 +589,15 @@ bool char_is_female(const struct char_data *ch);
 
 bool char_is_outside(GameWorld *g, const struct char_data *ch);
 
-const char *char_hshr(const struct char_data *ch);
-const char *char_hssh(const struct char_data *ch);
-const char *char_hmhr(const struct char_data *ch);
-const char *char_mafe(const struct char_data *ch);
+std::string_view char_hshr(const struct char_data *ch);
+std::string_view char_hssh(const struct char_data *ch);
+std::string_view char_hmhr(const struct char_data *ch);
+std::string_view char_mafe(const struct char_data *ch);
 
 /* returns the number of spells per slot */
 
 int roll_stats(GameWorld *g, struct char_data *ch, int type, int bonus);
-const char *juggleRaceName(char_data *ch, bool capitalized);
+std::string_view juggleRaceName(char_data *ch, bool capitalized);
 void restore_by(GameWorld *g, char_data *ch, char_data *healer);
 void restore(GameWorld *g, char_data *ch, bool announce);
 void resurrect(GameWorld *g, char_data *ch, int mode);
@@ -702,12 +694,12 @@ void remove_kaioken(GameWorld *g, char_data *ch, int8_t announce);
 
 void dispel_ash(GameWorld *g, struct char_data *ch);
 bool has_group(GameWorld *g, struct char_data *ch);
-const char *report_party_health(GameWorld *g, struct char_data *ch);
+std::string_view report_party_health(GameWorld *g, struct char_data *ch);
 bool sec_roll_check(GameWorld *g, struct char_data *ch);
 int get_measure(struct char_data *ch, int height, int weight);
 int trans_req(struct char_data *ch, int trans);
-const char *disp_align(struct char_data *ch);
-const char *align_name(int alignment); /* the alignment's name, as disp_align() gives a character's */
+std::string_view disp_align(struct char_data *ch);
+std::string_view align_name(int alignment); /* the alignment's name, as disp_align() gives a character's */
 void senseCreate(struct char_data *ch);
 int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict);
 void sense_memory_write(GameWorld *g, struct char_data *ch, struct char_data *vict);
@@ -719,7 +711,7 @@ void handle_evolution(GameWorld *g, struct char_data *ch, int64_t dmg);
 void demon_refill_lf(GameWorld *g, struct char_data *ch, int64_t num);
 void mob_talk(GameWorld *g, struct char_data *ch, const char *speech);
 bool is_sparring(struct char_data *ch);
-const char *introd_calc(struct char_data *ch);
+std::string introd_calc(struct char_data *ch);
 int64_t gear_exp(GameWorld *g, struct char_data *ch, int64_t exp);
 void purge_homing(GameWorld *g, struct char_data *ch);
 void improve_skill(GameWorld *g, struct char_data *ch, int skill, int num);
@@ -745,7 +737,7 @@ int init_skill(GameWorld *g, struct char_data *ch, int snum);
 int chance_to_hit(GameWorld *g, struct char_data *ch);
 int handle_speed(GameWorld *g, struct char_data *ch, struct char_data *vict);
 struct time_info_data *age(GameWorld *g, struct char_data *ch);
-const char *get_i_name(struct char_data *ch, struct char_data *vict);
+std::string get_i_name(struct char_data *ch, struct char_data *vict);
 
 void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
 bool know_skill(GameWorld *g, struct char_data *ch, int skill);
@@ -763,7 +755,7 @@ size_t send_to_char(GameWorld *g, struct char_data *ch, std::format_string<Args.
 }
 void admin_set(GameWorld *g, struct char_data *ch, int value);
 /* the name of the place ch is in, as sensing them tells it */
-const char *sense_location(GameWorld *g, struct char_data *ch);
+std::string_view sense_location(GameWorld *g, struct char_data *ch);
 void null_affect(GameWorld *g, struct char_data *ch, int aff_flag);
 bool is_affected(struct char_data *ch, int aff_flag);
 void remove_affect(GameWorld *g, struct char_data *ch, int aff_flag);
@@ -789,17 +781,13 @@ bool can_kill(GameWorld *g, struct char_data *ch, struct char_data *vict, struct
 
 /* Raw fields, used by OLC and the mob files (formerly genmob.hpp macros). */
 const char *char_get_alias(const struct char_data *ch);
-void char_set_alias(struct char_data *ch, const char *v);
-void char_set_alias(struct char_data *ch, const std::string &v);
+void char_set_alias(struct char_data *ch, std::string_view v);
 const char *char_get_sdesc(const struct char_data *ch);
-void char_set_sdesc(struct char_data *ch, const char *v);
-void char_set_sdesc(struct char_data *ch, const std::string &v);
+void char_set_sdesc(struct char_data *ch, std::string_view v);
 const char *char_get_ldesc(const struct char_data *ch);
-void char_set_ldesc(struct char_data *ch, const char *v);
-void char_set_ldesc(struct char_data *ch, const std::string &v);
+void char_set_ldesc(struct char_data *ch, std::string_view v);
 const char *char_get_ddesc(const struct char_data *ch);
-void char_set_ddesc(struct char_data *ch, const char *v);
-void char_set_ddesc(struct char_data *ch, const std::string &v);
+void char_set_ddesc(struct char_data *ch, std::string_view v);
 int8_t char_get_mob_specials_damnodice(const struct char_data *ch);
 void char_set_mob_specials_damnodice(struct char_data *ch, int8_t v);
 int8_t char_get_mob_specials_damsizedice(const struct char_data *ch);
@@ -890,8 +878,7 @@ void char_set_time_played(struct char_data *ch, time_t v);
 int char_get_timer(const struct char_data *ch);
 void char_set_timer(struct char_data *ch, int v);
 const char *char_get_raw_title(const struct char_data *ch);
-void char_set_raw_title(struct char_data *ch, const char *v);
-void char_set_raw_title(struct char_data *ch, const std::string &v);
+void char_set_raw_title(struct char_data *ch, std::string_view v);
 
 /* A field's address, for code that fills the field in later or unlinks through it */
 struct script_data **char_script_slot(struct char_data *ch);
@@ -918,4 +905,3 @@ void char_unlink_from_combat_list(GameWorld *g, struct char_data *ch);
 /* Resets the affected stats to the raw ones. */
 void char_reset_aff_abils(struct char_data *ch);
 void char_copy_time(struct char_data *to, const struct char_data *from);
-

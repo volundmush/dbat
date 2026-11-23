@@ -1,4 +1,5 @@
 #pragma once
+#include <string_view>
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/senseis.hpp"
@@ -22,7 +23,7 @@ time_t max_age(struct char_data *ch);
 
 // Sensei behaviour. Senseis are identified by their CLASS_* constant.
 bool sensei_exists(int s);
-const char *sensei_name(int s);
+std::string_view sensei_name(int s);
 bool sensei_is_pc_ok(int s);
 bool sensei_available_for_race(int s, int r);
 int sensei_find(const char *arg);

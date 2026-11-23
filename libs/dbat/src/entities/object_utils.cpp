@@ -476,7 +476,7 @@ bool obj_wear_flagged(const struct obj_data *obj, int part)
   return (IS_SET_AR(obj_get_wear_flags(obj), (part)));
 }
 
-const char *obj_sana(const struct obj_data *obj)
+std::string_view obj_sana(const struct obj_data *obj)
 {
   return (strchr("aeiouAEIOU", *(obj)->name.c_str()) ? "an" : "a");
 }
@@ -895,12 +895,7 @@ const char *obj_get_action_description(const struct obj_data *obj)
   return obj->action_description.empty() ? nullptr : obj->action_description.c_str(); /* null for none, as the files have it */
 }
 
-void obj_set_action_description(struct obj_data *obj, const char *v)
-{
-  obj->action_description = v ? v : "";
-}
-
-void obj_set_action_description(struct obj_data *obj, const std::string &v)
+void obj_set_action_description(struct obj_data *obj, std::string_view v)
 {
   obj->action_description = v;
 }
@@ -930,12 +925,7 @@ const char *obj_get_description(const struct obj_data *obj)
   return obj->description.empty() ? nullptr : obj->description.c_str(); /* null for none, as the files have it */
 }
 
-void obj_set_description(struct obj_data *obj, const char *v)
-{
-  obj->description = v ? v : "";
-}
-
-void obj_set_description(struct obj_data *obj, const std::string &v)
+void obj_set_description(struct obj_data *obj, std::string_view v)
 {
   obj->description = v;
 }
@@ -970,12 +960,7 @@ const char *obj_get_name(const struct obj_data *obj)
   return obj->name.empty() ? nullptr : obj->name.c_str(); /* null for none, as the files have it */
 }
 
-void obj_set_name(struct obj_data *obj, const char *v)
-{
-  obj->name = v ? v : "";
-}
-
-void obj_set_name(struct obj_data *obj, const std::string &v)
+void obj_set_name(struct obj_data *obj, std::string_view v)
 {
   obj->name = v;
 }
@@ -1010,12 +995,7 @@ void obj_set_script(struct obj_data *obj, struct script_data *v)
   obj->script = v;
 }
 
-void obj_set_short_description(struct obj_data *obj, const char *v)
-{
-  obj->short_description = v ? v : "";
-}
-
-void obj_set_short_description(struct obj_data *obj, const std::string &v)
+void obj_set_short_description(struct obj_data *obj, std::string_view v)
 {
   obj->short_description = v;
 }

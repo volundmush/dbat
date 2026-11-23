@@ -1,38 +1,14 @@
 #pragma once
 
 /* Runs a whole game inside a test: no sockets, no real data/ files. */
-#include <cstdlib>
-#include <cstring>
 #include <ctime>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
 #include "dbat/consts/types.hpp"
 
 /* The test sources are built against older trees too (tools/cmdcompare.py), so they reach a connection's account
    through these, whichever way the tree keeps it: on the descriptor itself, or as its acct. */
-/* A text field that older trees keep as a C string and this one as a std::string, a std::optional<std::string> (a
-   social's message) or a std::string_view (a command's name, which ends at a '\0'): read as a C string, "" for
-   none, and set, null for none, whichever way the tree keeps it */
-inline const char *th_text(const char *s) { return s ? s : ""; }
-inline const char *th_text(const std::string &s) { return s.c_str(); }
-inline const char *th_text(std::string_view s) { return s.data(); }
-template <class T>
-void th_set_text(T &field, const char *text)
-{
-  if constexpr (std::is_same_v<T, char *>) {
-    free(field);
-    field = text ? strdup(text) : nullptr;
-  } else if constexpr (requires { field.reset(); }) {
-    if (text)
-      field = text;
-    else
-      field.reset();
-  } else
-    field = text ? text : "";
-}
-
 template <class D>
 auto &th_account(D *d)
 {

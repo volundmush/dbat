@@ -828,9 +828,9 @@ void init_char(GameWorld *g, struct char_data *ch)
   }
 
   set_title(g, ch, nullptr);
-  char_set_sdesc(ch, nullptr);
-  char_set_ldesc(ch, nullptr);
-  char_set_ddesc(ch, nullptr);
+  char_set_sdesc(ch, "");
+  char_set_ldesc(ch, "");
+  char_set_ddesc(ch, "");
 
   /*ch->time.birth = time(0) - birth_age(ch);*/
   char_set_time_created(ch, game_now(g));

@@ -21,7 +21,7 @@ typedef enum softcap_type {
 } softcap_type;
 
 bool race_exists(int r);
-const char *race_name(int r);
+std::string_view race_name(int r);
 bool race_valid_sex(int r, int sex);
 bool race_can_be_mimiced(int r);
 int race_find(const char *arg, int sex, bool pc_only);

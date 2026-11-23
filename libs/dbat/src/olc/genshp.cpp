@@ -41,10 +41,10 @@ struct shop_data *find_shop(GameWorld *g, shop_vnum vnum)
 void set_npc_message(GameWorld *g, struct descriptor_data *d, std::string &message, std::string_view text, bool allow_int)
 {
   std::string wanted = text.starts_with('%') ? std::string(text) : str_format("%s {}", text);
-  if (const char *problem = npc_msg_format_problem(wanted.c_str(), allow_int))
+  if (std::optional<std::string> problem = npc_msg_format_problem(wanted.c_str(), allow_int))
     write_to_output(g, d,
                     "Invalid message: {}. It starts with %s, the customer's name (added if you leave it off){}, and can have no other % codes.\r\n",
-                    problem, allow_int ? ", may then use one %d for the price" : "");
+                    *problem, allow_int ? ", may then use one %d for the price" : "");
   else
     message = std::move(wanted);
 }
