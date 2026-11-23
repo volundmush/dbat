@@ -1,6 +1,8 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/roomflags.hpp"
 
-const char *const room_bits[NUM_ROOM_FLAGS + 1] = {
+static constexpr std::string_view room_bits_entries[] = {
     "DARK",
     "DEATH",
     "NO_MOB",
@@ -66,5 +68,6 @@ const char *const room_bits[NUM_ROOM_FLAGS + 1] = {
     "FERTILE2",
     "FISHING",
     "FRESHWATFISH",
-    "CANREMODEL",
-    "\n"};
+    "CANREMODEL"};
+static_assert(std::size(room_bits_entries) == NUM_ROOM_FLAGS);
+constinit const name_table room_bits(room_bits_entries);

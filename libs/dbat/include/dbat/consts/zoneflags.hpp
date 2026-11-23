@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Zone info: Used in zone_data.zone_flags */
 constexpr int ZONE_CLOSED   = 0;
@@ -41,5 +43,5 @@ constexpr int ZONE_SPARE33  = 35;
 constexpr int NUM_ZONE_FLAGS = 36;
 constexpr int ZF_ARRAY_MAX   = 4;
 
-extern const char *const zone_bits[NUM_ZONE_FLAGS + 1];
+extern const name_table zone_bits; /* NUM_ZONE_FLAGS of them */
 

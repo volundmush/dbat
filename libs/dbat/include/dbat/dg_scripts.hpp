@@ -10,6 +10,8 @@
 **************************************************************************/
 
 #pragma once
+#include "dbat/name_table.hpp"
+#include <span>
 #include <string>
 #include <string_view>
 #include "dbat/format.hpp"
@@ -278,10 +280,11 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
 void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
 bool valid_dg_target(GameWorld *g, char_data *ch, int bitvector);
 void script_damage(GameWorld *g, char_data *vict, int dam);
-extern const char *const dg_door_fields[];
+constexpr int NUM_DOOR_FIELDS = 6; /* what dg_door_apply() can change */
+extern const name_table dg_door_fields; /* NUM_DOOR_FIELDS of them */
 bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, std::string_view value);
 
-int check_flags_by_name_ar(bitvector_t *array, int numflags, std::string_view search, const char *const namelist[]);
+int check_flags_by_name_ar(bitvector_t *array, int numflags, std::string_view search, std::span<const std::string_view> namelist);
 
 /* from dg_objcmd.c */
 room_vnum obj_room(obj_data *obj);

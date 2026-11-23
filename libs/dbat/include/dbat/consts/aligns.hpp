@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 constexpr int ALIGN_SAINT    = 0;
 constexpr int ALIGN_VALIANT  = 1;
@@ -12,5 +14,5 @@ constexpr int ALIGN_HORRIBLE = 8;
 
 constexpr int NUM_ALIGNS = 9;
 
-extern const char *alignments[NUM_ALIGNS + 1];
+extern const name_table alignments; /* NUM_ALIGNS of them */
 

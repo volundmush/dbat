@@ -173,24 +173,26 @@ int scan_float(std::string_view text, float &x)
   if (at >= text.size())
     return -1;
   std::string rest(text.substr(at)); /* strtof() reads %f's numbers, "inf" and "nan" with them, and needs an end */
-  char *end = nullptr;
-  float read = std::strtof(rest.c_str(), &end);
-  if (end == rest.c_str())
+  char *end = nullptr; /* the C library's own: strtof() says where it stopped by a pointer */
+  float read  = std::strtof(rest.c_str(), &end);
+  size_t used = static_cast<size_t>(end - rest.c_str());
+  if (used == 0)
     return 0;
   /* sscanf() takes in what could still become a number, then has read nothing if it doesn't: an exponent's 'e' (or a
      hex number's 'p') and sign with no digits after them, or a "0x" with no hex digits */
-  std::string_view parsed(rest.c_str(), static_cast<size_t>(end - rest.c_str()));
+  std::string_view parsed = std::string_view(rest).substr(0, used);
+  char next               = rest[used]; /* the '\0' at the end, if it read it all */
   if (parsed.find_first_of("iInN") == std::string_view::npos) { /* not inf or nan */
     bool hex = parsed.find_first_of("xX") != std::string_view::npos;
     std::string_view digits = parsed.substr(parsed[0] == '+' || parsed[0] == '-');
-    if (!hex && digits == "0" && (*end == 'x' || *end == 'X'))
+    if (!hex && digits == "0" && (next == 'x' || next == 'X'))
       return 0;
-    const char *exponent = hex ? "pP" : "eE";
-    if (parsed.find_first_of(exponent) == std::string_view::npos && (*end == exponent[0] || *end == exponent[1])) {
-      const char *after = end + 1;
-      if (*after == '+' || *after == '-')
+    std::string_view exponent = hex ? "pP" : "eE";
+    if (parsed.find_first_of(exponent) == std::string_view::npos && exponent.contains(next) && next != '\0') {
+      size_t after = used + 1;
+      if (rest[after] == '+' || rest[after] == '-')
         after++;
-      if (!isdigit(static_cast<unsigned char>(*after)))
+      if (!isdigit(static_cast<unsigned char>(rest[after])))
         return 0;
     }
   }

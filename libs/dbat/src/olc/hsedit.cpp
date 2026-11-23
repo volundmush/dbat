@@ -7,6 +7,7 @@
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include <algorithm>
+#include "dbat/name_table.hpp"
 #include <cstdlib>
 
 #include "dbat/act.informative.hpp"
@@ -29,9 +30,11 @@
 #include "dbat/olc/commands.hpp"
 
 namespace {
-  const char *const house_flags[] = {"!GUEST", "FREE", "!IMM", "IMP_ONLY", "RENTFREE", "SAVE_!RENT", "!SAVE", "\n"};
+  static constexpr std::string_view house_flags_entries[] = {"!GUEST", "FREE", "!IMM", "IMP_ONLY", "RENTFREE", "SAVE_!RENT", "!SAVE"};
+  static constexpr name_table house_flags(house_flags_entries);
 
-  const char *const house_types[] = {"PLAYER_OWNED", "IMM_OWNED", "CLAN_OWNED", "UNOWNED", "\n"};
+  static constexpr std::string_view house_types_entries[] = {"PLAYER_OWNED", "IMM_OWNED", "CLAN_OWNED", "UNOWNED"};
+  static constexpr name_table house_types(house_types_entries);
 
   /* The atrium directions' menu lines, in the order of the directions */
   static constexpr std::string_view atrium_directions[] = {"North  ", "East   ", "South  ", "West   ", "Up     ", "Down   ",

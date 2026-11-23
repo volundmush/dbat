@@ -1,6 +1,8 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/admlevel.hpp"
 
-const char *const admin_level_names[ADMLVL_IMPL + 2] = {
+static constexpr std::string_view admin_level_names_entries[] = {
     "Mortal",
     "Enforcer",
     "1st C. Enforcer",
@@ -8,5 +10,6 @@ const char *const admin_level_names[ADMLVL_IMPL + 2] = {
     "Vice-Admin",
     "Admin",
     "Implementor",
-    "\n",
 };
+static_assert(std::size(admin_level_names_entries) == ADMLVL_IMPL + 1);
+constinit const name_table admin_level_names(admin_level_names_entries);

@@ -642,7 +642,7 @@ void dg_log_uid_stats(GameWorld *g)
           (long)(g->characters.size() + g->objects.size()));
 }
 
-int check_flags_by_name_ar(bitvector_t *array, int numflags, std::string_view search, const char *const namelist[])
+int check_flags_by_name_ar(bitvector_t *array, int numflags, std::string_view search, std::span<const std::string_view> namelist)
 {
   int i, item = -1;
 

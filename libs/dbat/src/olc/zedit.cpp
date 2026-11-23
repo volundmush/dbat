@@ -66,7 +66,7 @@ namespace {
       [](int n) { return MIN(MAX_DUPLICATES, n); }};
   constexpr arg_kind DOOR = {
       [](GameWorld *g, descriptor_data *d) {
-        for (int i = 0; *dirs[i] != '\n'; i++)
+        for (int i = 0; i < NUM_OF_DIRS; i++)
           write_to_output(g, d, "{:d}) Exit {}.\r\n", i, dirs[i]);
         say(g, d, "Enter exit number for door : ");
       },
@@ -86,8 +86,8 @@ namespace {
       nullptr};
   constexpr arg_kind WEAR_POSITION = {
       [](GameWorld *g, descriptor_data *d) {
-        for (int i = 0; *equipment_types[i] != '\n'; i += 2) {
-          const bool pair = *equipment_types[i + 1] != '\n';
+        for (int i = 0; i < NUM_WEARS; i += 2) {
+          const bool pair = i + 1 < NUM_WEARS;
           write_to_output(g, d, "{:>2d}) {:>26.26} {:>2d}) {:>26.26}\r\n", i, equipment_types[i], i + 1, pair ? equipment_types[i + 1] : "");
           if (!pair)
             break;
@@ -95,10 +95,7 @@ namespace {
         say(g, d, "Location to equip : ");
       },
       [](GameWorld *, int n) -> std::string_view {
-        int count = 0;
-        while (*equipment_types[count] != '\n')
-          count++;
-        return n < 0 || n > count ? "Try again : " : std::string_view(); /* quirk: one past the last */
+        return n < 0 || n > NUM_WEARS ? "Try again : " : std::string_view(); /* quirk: one past the last */
       },
       nullptr};
   constexpr arg_kind CONTAINER = {

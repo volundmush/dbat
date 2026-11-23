@@ -71,5 +71,5 @@ ACMD(do_intro);
 ACMD(do_scan);
 ACMD(do_toplist);
 ACMD(do_whois);
-extern const char *const default_color_choices[NUM_COLOR + 1];
+extern const std::string_view default_color_choices[NUM_COLOR + 1];
 

@@ -1,9 +1,12 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/exitflags.hpp"
 
-const char *const exit_bits[NUM_EXIT_FLAGS + 1] = {
+static constexpr std::string_view exit_bits_entries[] = {
     "DOOR",
     "CLOSED",
     "LOCKED",
     "PICKPROOF",
-    "SECRET",
-    "\n"};
+    "SECRET"};
+static_assert(std::size(exit_bits_entries) == NUM_EXIT_FLAGS);
+constinit const name_table exit_bits(exit_bits_entries);

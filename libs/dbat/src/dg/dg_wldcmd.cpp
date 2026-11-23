@@ -570,7 +570,6 @@ static const struct wld_command_info wld_cmd_info[] = {
     {"wdamage ",     do_wdamage,   0               },
     {"wat ",         do_wat,       0               },
     {"weffect ",     do_weffect,   0               },
-    {"\n",           nullptr,      0               }  /* this must be last */
 };
 
 /*
@@ -578,7 +577,6 @@ static const struct wld_command_info wld_cmd_info[] = {
  */
 void wld_command_interpreter(GameWorld *g, room_data *room, std::string_view argument)
 {
-  int cmd;
 
   argument = skip_spaces(argument);
 
@@ -590,12 +588,9 @@ void wld_command_interpreter(GameWorld *g, room_data *room, std::string_view arg
   std::string arg       = take_word(line);
 
   /* find the command: the first whose name begins with the word */
-  for (cmd = 0; wld_cmd_info[cmd].command != "\n"; cmd++)
-    if (wld_cmd_info[cmd].command.starts_with(arg))
-      break;
-
-  if (wld_cmd_info[cmd].command == "\n")
+  auto found = std::ranges::find_if(wld_cmd_info, [&](const auto &c) { return c.command.starts_with(arg); });
+  if (found == std::end(wld_cmd_info))
     wld_log(g, room, "Unknown world cmd: '{}'", argument);
   else
-    ((*wld_cmd_info[cmd].command_pointer)(g, room, line, cmd, wld_cmd_info[cmd].subcmd));
+    found->command_pointer(g, room, line, static_cast<int>(found - std::begin(wld_cmd_info)), found->subcmd);
 }

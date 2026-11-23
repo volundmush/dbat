@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/mobflags.hpp"
 
 /* MOB_x */
-const char *const action_bits[NUM_MOB_FLAGS + 1] = {
+static constexpr std::string_view action_bits_entries[] = {
     "SPEC",
     "SENTINEL",
     "NOSCAVENGER",
@@ -36,5 +38,6 @@ const char *const action_bits[NUM_MOB_FLAGS + 1] = {
     "REPAIR",
     "NOPOISON",
     "KNOWKAIO",
-    "POWERINGUP",
-    "\n"};
+    "POWERINGUP"};
+static_assert(std::size(action_bits_entries) == NUM_MOB_FLAGS);
+constinit const name_table action_bits(action_bits_entries);

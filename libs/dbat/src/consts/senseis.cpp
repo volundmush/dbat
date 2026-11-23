@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/senseis.hpp"
 
 /* Sensei Fighting Style */
-const char *const sensei_style[MAX_SENSEI] = {
+static constexpr std::string_view sensei_style_entries[MAX_SENSEI] = {
     "Kame Arts",         /* Roshi */
     "Demon Taijutsu",    /* Piccolo */
     "Crane Arts",        /* Krane */
@@ -17,8 +19,10 @@ const char *const sensei_style[MAX_SENSEI] = {
     "Sacred Tsunami",    /* Tsuna */
     "Adaptive Taijutsu", /* Kurzak */
     "\n"};
+static_assert(std::size(sensei_style_entries) == MAX_SENSEI);
+constinit const name_table sensei_style(sensei_style_entries);
 
-const char *const class_abbrevs[NUM_CLASSES + 1] = {
+static constexpr std::string_view class_abbrevs_entries[] = {
     "Ro",
     "Pi",
     "Kr",
@@ -49,11 +53,12 @@ const char *const class_abbrevs[NUM_CLASSES + 1] = {
     "Ad",
     "Co",
     "Ar",
-    "Wa",
-    "\n"};
+    "Wa"};
+static_assert(std::size(class_abbrevs_entries) == NUM_CLASSES);
+constinit const name_table class_abbrevs(class_abbrevs_entries);
 
 /* Copied from the SRD under OGL, see ../doc/srd.txt for information */
-const char *const pc_class_types[NUM_CLASSES + 1] = {
+static constexpr std::string_view pc_class_types_entries[] = {
     "Roshi",
     "Piccolo",
     "Krane",
@@ -84,11 +89,12 @@ const char *const pc_class_types[NUM_CLASSES + 1] = {
     "Adept",
     "Commoner",
     "Aristrocrat",
-    "Warrior",
-    "\n"};
+    "Warrior"};
+static_assert(std::size(pc_class_types_entries) == NUM_CLASSES);
+constinit const name_table pc_class_types(pc_class_types_entries);
 
 /* Copied from the SRD under OGL, see ../doc/srd.txt for information */
-const char *const class_names[NUM_CLASSES + 1] = {
+static constexpr std::string_view class_names_entries[] = {
     "roshi",
     "piccolo",
     "krane",
@@ -119,7 +125,8 @@ const char *const class_names[NUM_CLASSES + 1] = {
     "magi",
     "normal",
     "noble",
-    "soldier",
-    "\n"};
+    "soldier"};
+static_assert(std::size(class_names_entries) == NUM_CLASSES);
+constinit const name_table class_names(class_names_entries);
 
 /* The menu for choosing a class in interpreter.c: */

@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /*
  * ADMLVL_IMPL should always be the HIGHEST possible admin level, and
@@ -12,5 +14,5 @@ constexpr int ADMLVL_VICE    = 4;
 constexpr int ADMLVL_GRGOD   = 5;
 constexpr int ADMLVL_IMPL    = 6;
 
-extern const char *const admin_level_names[ADMLVL_IMPL + 2];
+extern const name_table admin_level_names; /* ADMLVL_IMPL + 1 of them */
 

@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/applies.hpp"
 
 /* APPLY_x */
-const char *const apply_types[NUM_APPLIES + 1] = {
+static constexpr std::string_view apply_types_entries[] = {
     "NONE",
     "STR",
     "AGL",
@@ -47,5 +49,6 @@ const char *const apply_types[NUM_APPLIES + 1] = {
     "FEAT",
     "ALL_SAVES",
     "RESISTANCE",
-    "ALL_STATS",
-    "\n"};
+    "ALL_STATS"};
+static_assert(std::size(apply_types_entries) == NUM_APPLIES);
+constinit const name_table apply_types(apply_types_entries);

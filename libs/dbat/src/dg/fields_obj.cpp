@@ -24,7 +24,7 @@ using result = std::optional<std::string>;
 std::string number(long long n) { return str_format("{:d}", n); }
 
 /* Whether the flag the argument names is set in flags, of the numflags in names; "0" without an argument */
-result has_flag(const field_query &q, bitvector_t *flags, int numflags, const char *const names[])
+result has_flag(const field_query &q, bitvector_t *flags, int numflags, std::span<const std::string_view> names)
 {
   if (!q.has_arg())
     return "0";
@@ -33,7 +33,7 @@ result has_flag(const field_query &q, bitvector_t *flags, int numflags, const ch
 }
 
 /* Turns the flag the argument names over, if it is set, giving "1"; otherwise it isn't a field after all */
-result toggle_flag(const field_query &q, bitvector_t *flags, int numflags, const char *const names[], obj_data *o,
+result toggle_flag(const field_query &q, bitvector_t *flags, int numflags, std::span<const std::string_view> names, obj_data *o,
                    bool (*toggle)(obj_data *, int))
 {
   if (!q.has_arg())

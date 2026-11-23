@@ -164,7 +164,6 @@ ACMD(do_tedit)
       {"handbook",   ADMLVL_IMPL,  &g->handbook,   24000, HANDBOOK_FILE  },
       {"update",     ADMLVL_IMPL,  &g->policies,   24000, POLICIES_FILE  },
       {"ihelp",      ADMLVL_GRGOD, &g->ihelp,      24000, IHELP_PAGE_FILE},
-      {"\n",         0,            nullptr,     0,     {}             }
   };
 
   if (char_get_desc(ch) == nullptr)
@@ -175,7 +174,7 @@ ACMD(do_tedit)
 
   if (field.empty()) {
     send_to_char(g, ch, "Files available to be edited:\r\n");
-    for (l = 0; fields[l].cmd != "\n"; l++) {
+    for (l = 0; l < static_cast<int>(std::size(fields)); l++) {
       if (char_get_admlevel(ch) >= fields[l].level) {
         send_to_char(g, ch, "{:<11.11} ", fields[l].cmd);
         if (!(++i % 7))
@@ -188,11 +187,11 @@ ACMD(do_tedit)
       send_to_char(g, ch, "None.\r\n");
     return;
   }
-  for (l = 0; fields[l].cmd != "\n"; l++)
+  for (l = 0; l < static_cast<int>(std::size(fields)); l++)
     if (fields[l].cmd.starts_with(field))
       break;
 
-  if (fields[l].cmd == "\n") {
+  if (l == static_cast<int>(std::size(fields))) {
     send_to_char(g, ch, "Invalid text editor option.\r\n");
     return;
   }

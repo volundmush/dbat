@@ -1,9 +1,11 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/races.hpp"
 #include "dbat/consts/sizes.hpp"
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 
-const char *const race_names[NUM_RACES + 1] = {
+static constexpr std::string_view race_names_entries[] = {
     "human",
     "saiyan",
     "icer",
@@ -27,10 +29,11 @@ const char *const race_names[NUM_RACES + 1] = {
     "arlian",
     "dragon",
     "mechanical",
-    "spirit",
-    "\n"};
+    "spirit"};
+static_assert(std::size(race_names_entries) == NUM_RACES);
+constinit const name_table race_names(race_names_entries);
 
-const char *const race_abbrevs[NUM_RACES + 1] = {
+static constexpr std::string_view race_abbrevs_entries[] = {
     "Hum",
     "Sai",
     "Ice",
@@ -54,10 +57,11 @@ const char *const race_abbrevs[NUM_RACES + 1] = {
     "Arl",
     "Mnd",
     "Mec",
-    "Spi",
-    "\n"};
+    "Spi"};
+static_assert(std::size(race_abbrevs_entries) == NUM_RACES);
+constinit const name_table race_abbrevs(race_abbrevs_entries);
 
-const char *const pc_race_types[NUM_RACES + 1] = {
+static constexpr std::string_view pc_race_types_entries[] = {
     "Human",
     "Saiyan",
     "Icer",
@@ -81,5 +85,6 @@ const char *const pc_race_types[NUM_RACES + 1] = {
     "Arlian",
     "Dragon",
     "mechanical",
-    "Spirit",
-    "\n"};
+    "Spirit"};
+static_assert(std::size(pc_race_types_entries) == NUM_RACES);
+constinit const name_table pc_race_types(pc_race_types_entries);

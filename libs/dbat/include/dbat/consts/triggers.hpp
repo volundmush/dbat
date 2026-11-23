@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 #include <cstdint>
 
 #include "dbat/consts/types.hpp"
@@ -82,9 +84,9 @@ constexpr int NUM_MTRIG_TYPES = 20;
 constexpr int NUM_OTRIG_TYPES = 20;
 constexpr int NUM_WTRIG_TYPES = 20;
 
-extern const char *const trig_types[NUM_MTRIG_TYPES + 1];
-extern const char *const otrig_types[NUM_OTRIG_TYPES + 1];
-extern const char *const wtrig_types[NUM_WTRIG_TYPES + 1];
+extern const name_table trig_types; /* NUM_MTRIG_TYPES of them */
+extern const name_table otrig_types; /* NUM_OTRIG_TYPES of them */
+extern const name_table wtrig_types; /* NUM_WTRIG_TYPES of them */
 
 /*
  * DG Scripts UID ranges. The range a UID falls in tells scripts what kind of

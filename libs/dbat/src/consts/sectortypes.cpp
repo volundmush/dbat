@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/sectortypes.hpp"
 
 /* SECT_ */
-const char *const sector_types[NUM_ROOM_SECTORS + 1] = {
+static constexpr std::string_view sector_types_entries[] = {
     "Inside",
     "City",
     "Plain",
@@ -16,5 +18,6 @@ const char *const sector_types[NUM_ROOM_SECTORS + 1] = {
     "#Important",
     "Desert",
     "Space",
-    "Lava",
-    "\n"};
+    "Lava"};
+static_assert(std::size(sector_types_entries) == NUM_ROOM_SECTORS);
+constinit const name_table sector_types(sector_types_entries);

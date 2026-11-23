@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/time.hpp"
 
 /* Not used in sprinttype(). */
-const char *const weekdays[NUM_WEEK_DAYS] = {
+static constexpr std::string_view weekdays_entries[NUM_WEEK_DAYS] = {
     "Sunday",
     "Monday",
     "Tuesday",
@@ -9,9 +11,11 @@ const char *const weekdays[NUM_WEEK_DAYS] = {
     "Thursday",
     "Friday",
     "Saturday"};
+static_assert(std::size(weekdays_entries) == NUM_WEEK_DAYS);
+constinit const name_table weekdays(weekdays_entries);
 
 /* Not used in sprinttype(). */
-const char *const month_name[NUM_MONTHS] = {
+static constexpr std::string_view month_name_entries[NUM_MONTHS] = {
     "Month of January", /* 0 */
     "Month of February",
     "Month of March",
@@ -24,3 +28,5 @@ const char *const month_name[NUM_MONTHS] = {
     "Month of October",
     "Month of November",
     "Month of December"};
+static_assert(std::size(month_name_entries) == NUM_MONTHS);
+constinit const name_table month_name(month_name_entries);

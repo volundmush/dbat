@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Affect bits: used in char_data.affected_by */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
@@ -86,5 +88,5 @@ constexpr int NUM_AFF_FLAGS = 79;
 
 constexpr int AF_ARRAY_MAX = 4;
 
-extern const char *const affected_bits[NUM_AFF_FLAGS + 1];
+extern const name_table affected_bits; /* NUM_AFF_FLAGS of them */
 

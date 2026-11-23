@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/positions.hpp"
 
 /* POS_x */
-const char *const position_types[NUM_POSITIONS + 1] = {
+static constexpr std::string_view position_types_entries[] = {
     "Dead",
     "Mortally wounded",
     "Incapacitated",
@@ -10,5 +12,6 @@ const char *const position_types[NUM_POSITIONS + 1] = {
     "Resting",
     "Sitting",
     "Fighting",
-    "Standing",
-    "\n"};
+    "Standing"};
+static_assert(std::size(position_types_entries) == NUM_POSITIONS);
+constinit const name_table position_types(position_types_entries);

@@ -7,6 +7,7 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 #include <cstdlib>
+#include "dbat/name_table.hpp"
 #include <optional>
 
 #include "dbat/io/reader.hpp"
@@ -199,7 +200,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
 
   /* find the property -- first search apply_types */
   i = 0;
-  while (apply_types[i] != std::string_view("\n")) {
+  while (i < NUM_APPLIES) {
     if (str_eq_nocase(apply_types[i], property)) {
       type = APPLY_TYPE;
       break;
@@ -209,7 +210,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
 
   if (!type) { /* search affect_types now */
     i = 0;
-    while (affected_bits[i] != std::string_view("\n")) {
+    while (i < NUM_AFF_FLAGS) {
       if (str_eq_nocase(affected_bits[i], property)) {
         type = AFFECT_TYPE;
         break;
@@ -323,14 +324,15 @@ void script_damage(GameWorld *g, struct char_data *vict, int dam)
 }
 
 /* the fields a script's door command (mdoor, odoor, wdoor) can change, numbered as dg_door_apply() takes them */
-const char *const dg_door_fields[] = {
+static constexpr std::string_view dg_door_fields_entries[] = {
     "purge",
     "description",
     "flags",
     "key",
     "name",
-    "room",
-    "\n"};
+    "room"};
+static_assert(std::size(dg_door_fields_entries) == NUM_DOOR_FIELDS);
+constinit const name_table dg_door_fields(dg_door_fields_entries);
 
 /*
  * Sets field (an index into dg_door_fields) of exit dir of room rm to value, creating the

@@ -1,8 +1,10 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/aligns.hpp"
 
 /* Alignments */
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-const char *alignments[NUM_ALIGNS + 1] = {
+static constexpr std::string_view alignments_entries[] = {
     "Saintly",
     "Valiant",
     "Hero",
@@ -12,5 +14,6 @@ const char *alignments[NUM_ALIGNS + 1] = {
     "Villain",
     "Terrible",
     "Horribly Evil",
-    "\n",
 };
+static_assert(std::size(alignments_entries) == NUM_ALIGNS);
+constinit const name_table alignments(alignments_entries);

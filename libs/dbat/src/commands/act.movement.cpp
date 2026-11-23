@@ -14,6 +14,7 @@
 #include "dbat/cmdargs.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.movement.hpp"
+#include "dbat/name_table.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/character_utils.hpp"
@@ -1159,13 +1160,14 @@ constexpr int NEED_CLOSED   = (1 << 1);
 constexpr int NEED_UNLOCKED = (1 << 2);
 constexpr int NEED_LOCKED   = (1 << 3);
 
-const std::string_view cmd_door[NUM_DOOR_CMD] =
-    {
+static constexpr std::string_view cmd_door_entries[] = {
         "open",
         "close",
         "unlock",
         "lock",
         "pick"};
+static_assert(std::size(cmd_door_entries) == NUM_DOOR_CMD);
+constinit const name_table cmd_door(cmd_door_entries);
 
 static const int flags_door[] =
     {
@@ -1306,7 +1308,7 @@ static void do_doorcmd(GameWorld *g, struct char_data *ch, struct obj_data *obj,
   }
 
   /* Notify the room. */
-  std::string dbuf = obj ? "" : dirs[door];
+  std::string dbuf(obj ? std::string_view() : dirs[door]);
   const std::string_view keyword = obj ? std::string_view() : exit_keyword(char_get_exit(g, ch, door)); /* NUL-ended: a std::string field */
   buf += str_format("{}{}{}{}.", obj ? "" : "the ", obj ? "$p" : !keyword.empty() ? "$F" : "door", obj ? "" : " that leads ", dbuf);
   if (!obj || obj_get_in_room(obj) != NOWHERE)

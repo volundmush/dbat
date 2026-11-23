@@ -1,8 +1,10 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 constexpr int NUM_WEEK_DAYS = 7;
 constexpr int NUM_MONTHS    = 12;
 
-extern const char *const weekdays[NUM_WEEK_DAYS];
-extern const char *const month_name[NUM_MONTHS];
+extern const name_table weekdays; /* NUM_WEEK_DAYS of them */
+extern const name_table month_name; /* NUM_MONTHS of them */
 

@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Sector types: used in room_data.sector_type */
 constexpr int SECT_INSIDE       = 0;  /* Indoors			*/
@@ -19,5 +21,5 @@ constexpr int SECT_LAVA         = 14; /* This room always has lava */
 
 constexpr int NUM_ROOM_SECTORS = 15;
 
-extern const char *const sector_types[NUM_ROOM_SECTORS + 1];
+extern const name_table sector_types; /* NUM_ROOM_SECTORS of them */
 

@@ -141,10 +141,11 @@ void send_to_room(GameWorld *g, room_vnum room, std::string_view text)
   }
 }
 
-static const char *const ACTNULL = "<NULL>";
+static constexpr std::string_view ACTNULL = "<NULL>";
 
-/* what $N and the rest give: "<NULL>" for nothing */
-static std::string_view or_null(const char *text) { return text ? text : ACTNULL; }
+/* What $T, $t and $F give: text act() was handed in its object or victim slot, a C string behind the untyped pointer
+   those take, as a character or an object may be; "<NULL>" for nothing */
+static std::string_view text_in(const void *slot) { return slot ? std::string_view(static_cast<const char *>(slot)) : ACTNULL; }
 
 /* higher-level communication: the act() function */
 static void perform_act(GameWorld *g, std::string_view orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)
@@ -225,13 +226,13 @@ static void perform_act(GameWorld *g, std::string_view orig, struct char_data *c
         dg_target = (const struct obj_data *)vict_obj;
         break;
       case 'T':
-        i = vict_obj ? or_null((const char *)vict_obj) : ACTNULL;
+        i = text_in(vict_obj);
         break;
       case 't':
-        i = obj ? or_null((char *)obj) : ACTNULL;
+        i = text_in(obj);
         break;
       case 'F':
-        i = vict_obj ? fname((const char *)vict_obj) : ACTNULL;
+        i = vict_obj ? fname(text_in(vict_obj)) : ACTNULL;
         break;
       /* uppercase previous word */
       case 'u': {

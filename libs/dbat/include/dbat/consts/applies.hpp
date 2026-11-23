@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Modifier constants used with obj affects ('A' fields) */
 constexpr int APPLY_NONE        = 0;  /* No effect			*/
@@ -50,5 +52,5 @@ constexpr int APPLY_ALL_STATS   = 45; /* Apply to all attributes	*/
 
 constexpr int NUM_APPLIES = 46;
 
-extern const char *const apply_types[NUM_APPLIES + 1];
+extern const name_table apply_types; /* NUM_APPLIES of them */
 

@@ -1,11 +1,12 @@
 #pragma once
+#include "dbat/name_table.hpp"
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 
 // global variables
-extern const std::string_view cmd_door[NUM_DOOR_CMD];
+extern const name_table cmd_door; /* NUM_DOOR_CMD of them */
 
 // functions
 void handle_teleport(GameWorld *g, struct char_data *ch, struct char_data *tar, room_vnum location);

@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Assembly type: Used in ASSEMBLY.iAssemblyType */
 constexpr int ASSM_MAKE     = 0;  // Assembly must be made.
@@ -15,5 +17,5 @@ constexpr int ASSM_FORGE    = 10; // Assembly must be forged.
 
 constexpr int MAX_ASSM = 11;
 
-extern const char *const AssemblyTypes[MAX_ASSM + 1];
+extern const name_table AssemblyTypes; /* MAX_ASSM of them */
 

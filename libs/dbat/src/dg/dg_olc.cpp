@@ -81,7 +81,7 @@ namespace {
   }
 
   /* The trigger types of what it is meant for */
-  const char *const *types_for(int attach_type)
+  std::span<const std::string_view> types_for(int attach_type)
   {
     switch (attach_type) {
       case WLD_TRIGGER: return wtrig_types;
@@ -103,7 +103,7 @@ namespace {
 
   void trigger_editor::types_menu(GameWorld *g, struct descriptor_data *d)
   {
-    const char *const *types = types_for(trig.attach_type);
+    std::span<const std::string_view> types = types_for(trig.attach_type);
 
     clear_screen(g, d);
     for (int i = 0; i < NUM_TRIG_TYPE_FLAGS; i++)

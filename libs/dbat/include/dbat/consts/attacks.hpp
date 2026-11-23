@@ -1,7 +1,10 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
-extern const char *const attack_names_comp[];
-extern const char *const attack_names[];
+constexpr int NUM_ATTACK_NAMES = 14; /* the attacks a group can combine */
+extern const name_table attack_names_comp; /* NUM_ATTACK_NAMES of them */
+extern const name_table attack_names; /* NUM_ATTACK_NAMES of them */
 extern const int attack_skills[];
 
 constexpr int TYPE_HIT      = 300;

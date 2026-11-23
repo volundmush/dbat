@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/materials.hpp"
 #include "dbat/consts/conditions.hpp"
@@ -471,16 +473,16 @@ constexpr int NUM_FULLNESS = 5;
 constexpr int EF_ARRAY_MAX = 4;
 constexpr int TW_ARRAY_MAX = 4;
 
-extern const char *const equipment_types[NUM_WEARS + 1];
-extern const char *const wear_where[NUM_WEARS + 1];
-extern const char *const item_types[NUM_ITEM_TYPES + 1];
-extern const char *const wear_bits[NUM_ITEM_WEARS + 1];
-extern const char *const extra_bits[NUM_ITEM_FLAGS + 1];
-extern const char *const container_bits[NUM_CONT_FLAGS + 1];
+extern const name_table equipment_types; /* NUM_WEARS of them */
+extern const name_table wear_where; /* NUM_WEARS of them */
+extern const name_table item_types; /* NUM_ITEM_TYPES of them */
+extern const name_table wear_bits; /* NUM_ITEM_WEARS of them */
+extern const name_table extra_bits; /* NUM_ITEM_FLAGS of them */
+extern const name_table container_bits; /* NUM_CONT_FLAGS of them */
 
-extern const char *const drinks[NUM_LIQ_TYPES + 1];
-extern const char *const drinknames[NUM_LIQ_TYPES + 1];
-extern const char *const color_liquid[NUM_LIQ_TYPES + 1];
+extern const name_table drinks; /* NUM_LIQ_TYPES of them */
+extern const name_table drinknames; /* NUM_LIQ_TYPES of them */
+extern const name_table color_liquid; /* NUM_LIQ_TYPES of them */
 extern const int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS];
-extern const char *const material_names[NUM_MATERIALS + 1];
+extern const name_table material_names; /* NUM_MATERIALS of them */
 

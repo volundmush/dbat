@@ -1,19 +1,20 @@
 #pragma once
+#include <span>
 #include <string>
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
 
 /* the names of the bits set in vector, each followed by a space but the last ("None " if none); a bit past the end of
- * names (ended by "\n") is UNDEFINED */
-std::string sprintbit(bitvector_t vector, const char *const names[]);
-/* names[type], or UNDEFINED past the end of names */
-std::string sprinttype(int type, const char *const names[]);
+ * names is UNDEFINED */
+std::string sprintbit(bitvector_t vector, std::span<const std::string_view> names);
+/* names[type], or UNDEFINED past the end of names (or for a negative type, quirk: the first name) */
+std::string sprinttype(int type, std::span<const std::string_view> names);
 /* sprintbit() for an array of maxar bitvectors, read up to the end of names; a set bit whose name is "" is left out */
-std::string sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar);
+std::string sprintbitarray(bitvector_t bitvector[], std::span<const std::string_view> names, int maxar);
 
-/* The place of flag_name in flag_list, exactly as it is there, or NOFLAG */
-int get_flag_by_name(const char *const flag_list[], std::string_view flag_name);
+/* The place of flag_name in flag_list, exactly as it is there, or NOFLAG; the list is read up to an empty name */
+int get_flag_by_name(std::span<const std::string_view> flag_list, std::string_view flag_name);
 
 #define Q_FIELD(x) ((x) / 32)
 #define Q_BIT(x)   (1U << ((x) % 32))

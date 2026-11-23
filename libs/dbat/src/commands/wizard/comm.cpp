@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <climits>
+#include "dbat/name_table.hpp"
 #include <cstdlib>
 
 
@@ -202,7 +203,8 @@ namespace {
       send_to_char(g, ch, "{}{}{}\r\n", before, text, after);
   }
 
-  const char *const logtypes[] = {"off", "brief", "normal", "complete", "\n"};
+  static constexpr std::string_view logtypes_entries[] = {"off", "brief", "normal", "complete"};
+  static constexpr name_table logtypes(logtypes_entries);
 } // namespace
 
 /* Read the news entry */

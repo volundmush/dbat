@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Positions */
 constexpr int POS_DEAD      = 0; /* dead			*/
@@ -13,5 +15,5 @@ constexpr int POS_STANDING  = 8; /* standing		*/
 
 constexpr int NUM_POSITIONS = 9;
 
-extern const char *const position_types[NUM_POSITIONS + 1];
+extern const name_table position_types; /* NUM_POSITIONS of them */
 

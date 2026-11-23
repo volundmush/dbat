@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Player flags: used by char_data.act */
 constexpr int PLR_KILLER       = 0;  /* Player is a player-killer        */
@@ -84,5 +86,5 @@ constexpr int PLR_NOGROW       = 79; /* Halt Growth for S & HB           */
 
 constexpr int NUM_PLR_FLAGS = 80;
 
-extern const char *const player_bits[NUM_PLR_FLAGS + 1];
+extern const name_table player_bits; /* NUM_PLR_FLAGS of them */
 

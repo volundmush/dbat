@@ -1,4 +1,4 @@
-#include <cstring>
+#include <algorithm>
 #include <string>
 #include <utility>
 
@@ -21,50 +21,41 @@ static std::string flag_list(std::string out)
   return out;
 }
 
-std::string sprintbit(bitvector_t bitvector, const char *const names[])
+std::string sprintbit(bitvector_t bitvector, std::span<const std::string_view> names)
 {
   std::string out;
-  int nr = 0;
+  size_t nr = 0;
 
-  while (bitvector) {
+  for (; bitvector; bitvector >>= 1, nr++)
     if (bitvector & 1) {
-      out += (*names[nr] != '\n') ? names[nr] : "UNDEFINED";
+      out += nr < names.size() ? names[nr] : "UNDEFINED"; /* past the end of names, each bit is UNDEFINED */
       out += ' ';
     }
-    if (*names[nr] != '\n')
-      nr++; /* past the end of names, each bit is UNDEFINED */
-    bitvector >>= 1;
-  }
   return flag_list(std::move(out));
 }
 
-std::string sprinttype(int type, const char *const names[])
+std::string sprinttype(int type, std::span<const std::string_view> names)
 {
-  int nr = 0;
-
-  while (type > 0 && *names[nr] != '\n') {
-    type--;
-    nr++;
-  }
-  return (*names[nr] != '\n') ? names[nr] : "UNDEFINED";
+  size_t nr = std::max(type, 0); /* quirk: a negative type is the first name */
+  return std::string(nr < names.size() ? names[nr] : "UNDEFINED");
 }
 
-std::string sprintbitarray(bitvector_t bitvector[], const char *const names[], int maxar)
+std::string sprintbitarray(bitvector_t bitvector[], std::span<const std::string_view> names, int maxar)
 {
   std::string out;
 
-  for (int flag = 0; flag < maxar * 32 && *names[flag] != '\n'; flag++)
-    if (flag_test(bitvector, flag) && *names[flag] != '\0') {
+  for (size_t flag = 0; flag < static_cast<size_t>(maxar) * 32 && flag < names.size(); flag++)
+    if (flag_test(bitvector, static_cast<int>(flag)) && !names[flag].empty()) {
       out += names[flag];
       out += ' ';
     }
   return flag_list(std::move(out));
 }
 
-int get_flag_by_name(const char *const flag_list[], std::string_view flag_name)
+int get_flag_by_name(std::span<const std::string_view> flag_list, std::string_view flag_name)
 {
-  for (int i = 0; flag_list[i] && *flag_list[i] && std::string_view(flag_list[i]) != "\n"; i++)
+  for (size_t i = 0; i < flag_list.size() && !flag_list[i].empty(); i++)
     if (flag_list[i] == flag_name)
-      return (i);
-  return (NOFLAG);
+      return static_cast<int>(i);
+  return NOFLAG;
 }

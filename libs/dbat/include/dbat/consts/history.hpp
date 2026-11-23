@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 constexpr int HIST_ALL     = 0;
 constexpr int HIST_SAY     = 1;
@@ -13,5 +15,5 @@ constexpr int HIST_SNET    = 9;
 
 constexpr int NUM_HIST = 10;
 
-extern const char *const history_types[NUM_HIST + 1];
+extern const name_table history_types; /* NUM_HIST of them */
 

@@ -1,9 +1,10 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/affflags.hpp"
 
 /* AFF_x */
 /* Many are taken from the SRD under OGL, see ../doc/srd.txt for information */
-const char *const affected_bits[NUM_AFF_FLAGS + 1] =
-    {
+static constexpr std::string_view affected_bits_entries[] = {
         "\0", /* DO NOT REMOVE!! */
         "BLIND",
         "INVIS",
@@ -82,5 +83,6 @@ const char *const affected_bits[NUM_AFF_FLAGS + 1] =
         "KYODAIKA",
         "STARPHASE",
         "SPECIAL POSE",
-        "SHADOW STITCH",
-        "\n"};
+        "SHADOW STITCH"};
+static_assert(std::size(affected_bits_entries) == NUM_AFF_FLAGS);
+constinit const name_table affected_bits(affected_bits_entries);

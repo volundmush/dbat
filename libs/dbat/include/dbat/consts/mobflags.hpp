@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Mobile flags: used by char_data.act */
 constexpr int MOB_SPEC         = 0;  /* Mob has a callable spec-proc   	*/
@@ -39,5 +41,5 @@ constexpr int MOB_POWERUP      = 34; /* Is powering up                    */
 
 constexpr int NUM_MOB_FLAGS = 35;
 
-extern const char *const action_bits[NUM_MOB_FLAGS + 1];
+extern const name_table action_bits; /* NUM_MOB_FLAGS of them */
 

@@ -1,6 +1,7 @@
 /* status.c: score, status, inventory, equipment, consider
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <algorithm>
+#include "dbat/name_table.hpp"
 #include <cstdlib>
 #include <iterator>
 #include <ranges>
@@ -517,9 +518,10 @@ std::string_view hair_word(struct char_data *ch)
   return "hair is";
 }
 
-const char *const FORGET_LEVELS[] = {
-    "@GRemembered Well@n", "@GRemembered Well Enough@n", "@RGetting Foggy@n", "@RHalf Forgotten@n", "@rAlmost Forgotten@n", "@rForgotten@n", "\n",
+static constexpr std::string_view FORGET_LEVELS_entries[] = {
+    "@GRemembered Well@n", "@GRemembered Well Enough@n", "@RGetting Foggy@n", "@RHalf Forgotten@n", "@rAlmost Forgotten@n", "@rForgotten@n",
 };
+static constexpr name_table FORGET_LEVELS(FORGET_LEVELS_entries);
 
 void info_status(GameWorld *g, struct char_data *ch)
 {

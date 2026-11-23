@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Distinguishing Feature */
 constexpr int DISTFEA_EYE    = 0;
@@ -98,11 +100,11 @@ constexpr int PHASE_GUARDIAN  = 4;
 constexpr int PHASE_LOVE      = 5;
 constexpr int PHASE_STRENGTH  = 6;
 
-extern const char *const hairl_types[];
-extern const char *const eye_types[];
-extern const char *const FHA_types[];
-extern const char *const hairc_types[];
-extern const char *const hairs_types[];
-extern const char *const skin_types[];
-extern const char *const aura_types[];
+extern const name_table hairl_types; /* 5 of them */
+extern const name_table eye_types; /* 12 of them */
+extern const name_table FHA_types; /* 5 of them */
+extern const name_table hairc_types; /* 14 of them */
+extern const name_table hairs_types; /* 12 of them */
+extern const name_table skin_types; /* 12 of them */
+extern const name_table aura_types; /* 9 of them */
 

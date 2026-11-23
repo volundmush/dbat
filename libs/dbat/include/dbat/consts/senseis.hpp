@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
 constexpr int CLASS_UNDEFINED        = -1;
@@ -74,9 +76,9 @@ constexpr int SENSEI_NPC_COMMONER     = 28;
 constexpr int SENSEI_NPC_ARISTOCRAT   = 29;
 constexpr int SENSEI_NPC_WARRIOR      = 30;
 
-extern const char *const sensei_style[MAX_SENSEI];
+extern const name_table sensei_style; /* MAX_SENSEI of them */
 
-extern const char *const pc_class_types[NUM_CLASSES + 1];
-extern const char *const class_names[NUM_CLASSES + 1];
-extern const char *const class_abbrevs[NUM_CLASSES + 1];
+extern const name_table pc_class_types; /* NUM_CLASSES of them */
+extern const name_table class_names; /* NUM_CLASSES of them */
+extern const name_table class_abbrevs; /* NUM_CLASSES of them */
 

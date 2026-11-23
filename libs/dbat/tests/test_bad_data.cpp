@@ -1202,6 +1202,7 @@ static void check_name_matching_matches_the_old_code(void)
                                        "@", "\xc8", "a", "-", "+", "0", "99999999999999999999", ".", "all", "all.",
                                        "!", "\n", "x.y", "ME", "-12"};
   static const char *const words[]  = {"finger", "neck", "body", "head", "\n"};
+  static constexpr std::string_view word_views[] = {"finger", "neck", "body", "head"}; /* the same, without the "\n" */
   unsigned seed                     = 4242;
   int mismatches                    = 0;
   auto next                         = [&] { return (seed = seed * 1103515245 + 12345) / 65536; };
@@ -1238,9 +1239,9 @@ static void check_name_matching_matches_the_old_code(void)
     mismatches += CAP(name) != old_CAP(old_buf);
 
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += search_block(a, words, false) != old_search_block(old_buf, words, false);
+    mismatches += search_block(a, word_views, false) != old_search_block(old_buf, words, false);
     snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += search_block(a, words, true) != old_search_block(old_buf, words, true);
+    mismatches += search_block(a, word_views, true) != old_search_block(old_buf, words, true);
   }
   CHECK(mismatches == 0);
 }

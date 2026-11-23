@@ -1,6 +1,7 @@
 #pragma once
 #include <cstring>
 #include <ctime>
+#include <span>
 #include <string>
 #include <string_view>
 #include <cctype>
@@ -48,9 +49,9 @@ constexpr std::string_view or_if_empty(std::string_view s, std::string_view othe
 int parse_int(std::string_view s);
 /* s with each "$$" made "$" */
 void delete_doubledollar(std::string &s);
-/* The place of arg in list, a table ended by "\n", ignoring case: the whole entry if exact, else the first that
-   starts with arg. -1 if there is none, or if arg starts with '!'. */
-int search_block(std::string_view arg, const char *const *list, int exact);
+/* The place of arg in list, ignoring case: the whole entry if exact, else the first that starts with arg (an empty arg
+   matches only an empty entry). -1 if there is none, or if arg starts with '!'. */
+int search_block(std::string_view arg, std::span<const std::string_view> list, int exact);
 bool is_number(std::string_view str);
 /* The first keyword of a name list: its leading letters */
 std::string_view fname(std::string_view namelist);

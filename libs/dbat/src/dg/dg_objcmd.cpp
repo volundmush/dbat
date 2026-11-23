@@ -723,7 +723,6 @@ static const struct obj_command_info obj_cmd_info[] = {
     {"otransform ",  do_otransform, 0               },
     {"ozoneecho ",   do_ozoneecho,  0               }, /* fix by Rumble */
 
-    {"\n",           nullptr,       0               }  /* this must be last */
 };
 
 /*
@@ -731,7 +730,6 @@ static const struct obj_command_info obj_cmd_info[] = {
  */
 void obj_command_interpreter(GameWorld *g, obj_data *obj, std::string_view argument)
 {
-  int cmd;
 
   argument = skip_spaces(argument);
 
@@ -743,12 +741,9 @@ void obj_command_interpreter(GameWorld *g, obj_data *obj, std::string_view argum
   std::string arg       = take_word(line);
 
   /* find the command: the first whose name begins with the word */
-  for (cmd = 0; obj_cmd_info[cmd].command != "\n"; cmd++)
-    if (obj_cmd_info[cmd].command.starts_with(arg))
-      break;
-
-  if (obj_cmd_info[cmd].command == "\n")
+  auto found = std::ranges::find_if(obj_cmd_info, [&](const auto &c) { return c.command.starts_with(arg); });
+  if (found == std::end(obj_cmd_info))
     obj_log(g, obj, "Unknown object cmd: '{}'", argument);
   else
-    ((*obj_cmd_info[cmd].command_pointer)(g, obj, line, cmd, obj_cmd_info[cmd].subcmd));
+    found->command_pointer(g, obj, line, static_cast<int>(found - std::begin(obj_cmd_info)), found->subcmd);
 }

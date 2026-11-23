@@ -990,7 +990,7 @@ ACMD(do_combine)
 
   /* quirk: the attack is the first word with its name in it, so those of two words (twin slash and the
      renzokou energy dan, and with them the sword and Nail's student checks) are never found */
-  std::span<const char *const> names(attack_names, 14);
+  std::span<const std::string_view> names(attack_names);
   auto named = std::ranges::find_if(names, [&](std::string_view name) { return arg.find(name) != std::string::npos; });
   if (named == names.end()) {
     combine_syntax(g, ch, "Follower Cancel");

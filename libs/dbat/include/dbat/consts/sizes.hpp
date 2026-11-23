@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
 constexpr int SIZE_UNDEFINED  = (-1);
@@ -14,5 +16,5 @@ constexpr int SIZE_COLOSSAL   = 8;
 
 constexpr int NUM_SIZES = 9;
 
-extern const char *const size_names[NUM_SIZES + 1];
+extern const name_table size_names; /* NUM_SIZES of them */
 

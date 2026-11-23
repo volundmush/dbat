@@ -53,7 +53,7 @@ result condition(const field_query &q, char_data *c, int which)
 }
 
 /* Whether c has the flag the argument names, of the flags names lists; "0" without an argument */
-result named_flag(const field_query &q, const char *const names[], auto &&flagged)
+result named_flag(const field_query &q, std::span<const std::string_view> names, auto &&flagged)
 {
   if (!q.has_arg())
     return "0";

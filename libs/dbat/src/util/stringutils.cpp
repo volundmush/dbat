@@ -199,19 +199,15 @@ bool is_abbrev(std::string_view arg1, std::string_view arg2)
 
 int parse_int(std::string_view s) { return static_cast<int>(io::c_atol(s)); }
 
-int search_block(std::string_view arg, const char *const *list, int exact)
+int search_block(std::string_view arg, std::span<const std::string_view> list, int exact)
 {
   if (!arg.empty() && arg[0] == '!')
     return -1;
 
-  std::string low(arg);
-  for (char &c : low)
-    c = tolower((unsigned char)c);
-
-  size_t l = std::max<size_t>(low.size(), 1); /* so "" doesn't match the first string */
-  for (int i = 0; *list[i] != '\n'; i++)
-    if (exact ? low == list[i] : !strncmp(low.c_str(), list[i], l))
-      return i;
+  std::string low = to_lower(until_nul(arg)); /* as strncmp() read it */
+  for (size_t i = 0; i < list.size(); i++)
+    if (exact ? low == list[i] : low.empty() ? list[i].empty() : list[i].starts_with(low))
+      return static_cast<int>(i);
   return -1;
 }
 

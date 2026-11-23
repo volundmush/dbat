@@ -847,7 +847,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
     return;
   }
 
-  if (std::string_view(sensei_style[char_get_class(ch)]).contains(until_nul(text))) {
+  if (sensei_style[char_get_class(ch)].contains(until_nul(text))) {
     skill_num = 539;
   }
 
@@ -1167,12 +1167,12 @@ static std::string guild_customer_string(GameWorld *g, struct guild_data *guild_
 {
   std::string buf;
 
-  for (int gindex = 0, flag = 0; *trade_letters[gindex] != '\n'; gindex++, flag++)
+  for (int gindex = 0, flag = 0; gindex < NUM_TRADER_NAMES; gindex++, flag++)
     if (detailed) {
       if (!guild_trade_flagged(guild_nr, flag))
         buf += str_format(", {}", trade_letters[gindex]);
     } else
-      buf += guild_trade_flagged(guild_nr, flag) ? '_' : *trade_letters[gindex];
+      buf += guild_trade_flagged(guild_nr, flag) ? '_' : first_char(trade_letters[gindex]);
   return buf;
 }
 

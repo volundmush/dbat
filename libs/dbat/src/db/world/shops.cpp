@@ -121,7 +121,7 @@ std::vector<shop_buy_data> read_buy_types(GameWorld *g, io::text_reader &in, sho
 
     num = -1;
     if (!buf.starts_with("-1"))
-      for (int i = 0; *item_types[i] != '\n'; i++) {
+      for (int i = 0; i < NUM_ITEM_TYPES; i++) {
         std::string_view name = item_types[i];
         if (buf.size() >= name.size() && str_eq_nocase(std::string_view(buf).substr(0, name.size()), name)) {
           num = i;

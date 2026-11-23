@@ -306,7 +306,7 @@ ACMD(do_users)
 
     std::string timeptr = asctime_text(d->login_time).substr(11, 8); /* the time of day */
 
-    std::string state = desc_get_connected(d) == CON_PLAYING && d->original ? "Switched" : connected_types[desc_get_connected(d)];
+    std::string state(desc_get_connected(d) == CON_PLAYING && d->original ? "Switched" : connected_types[desc_get_connected(d)]);
     std::string idletime;
     if (d->character && desc_get_connected(d) == CON_PLAYING && char_get_admlevel(d->character) <= char_get_admlevel(ch))
       idletime = str_format("{:>3d}", char_get_timer(d->character) * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);

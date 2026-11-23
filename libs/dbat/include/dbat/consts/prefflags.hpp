@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /*  flags: used by char_data.player_specials.pref */
 constexpr int PRF_BRIEF      = 0;  /* Room descs won't normally be shown	*/
@@ -65,5 +67,5 @@ constexpr int PRF_ENERGIZE   = 59;
 constexpr int NUM_PRF_FLAGS = 60;
 constexpr int PR_ARRAY_MAX  = 4;
 
-extern const char *const preference_bits[NUM_PRF_FLAGS + 1];
+extern const name_table preference_bits; /* NUM_PRF_FLAGS of them */
 

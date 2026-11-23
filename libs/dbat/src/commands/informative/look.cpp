@@ -1,6 +1,7 @@
 /* look.c: look, examine, rooms, exits and targets
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <algorithm>
+#include "dbat/name_table.hpp"
 #include <array>
 #include <cstdlib>
 #include <iterator>
@@ -58,14 +59,14 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
 static void do_auto_exits2(GameWorld *g, room_vnum target_room, struct char_data *ch);
 
 /* Portal appearance types */
-static const char *const portal_appearance[] = {
+static constexpr std::string_view portal_appearance_entries[] = {
     "All you can see is the glow of the portal.",
     "You see an image of yourself in the room - my, you are looking attractive today.",
     "All you can see is a swirling grey mist.",
     "The scene is of the surrounding countryside, but somehow blurry and lacking focus.",
     "The blackness appears to stretch on forever.",
-    "Suddenly, out of the blackness a flaming red eye appears and fixes its gaze upon you.",
-    "\n"};
+    "Suddenly, out of the blackness a flaming red eye appears and fixes its gaze upon you."};
+static constexpr name_table portal_appearance(portal_appearance_entries);
 
 namespace {
   /* A feature's word for each of its values, padded as it's shown. */
@@ -285,7 +286,7 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
     struct room_direction_data *exit = room_get_dir_option(g, target_room, door);
     if (!exit || exit->to_room == NOWHERE)
       continue;
-    std::string dir = dirs[door];
+    std::string dir(dirs[door]);
     CAP(dir);
     if (sees_all) {
       door_found++;
@@ -336,7 +337,8 @@ ACMD(do_exits)
     do_auto_exits2(g, char_get_in_room(ch), ch);
 }
 
-static const char *const exitlevels[] = {"off", "normal", "n/a", "complete", "\n"};
+static constexpr std::string_view exitlevels_entries[] = {"off", "normal", "n/a", "complete"};
+static constexpr name_table exitlevels(exitlevels_entries);
 
 ACMD(do_autoexit)
 {
@@ -1063,7 +1065,7 @@ ACMD(do_examine)
   }
 }
 
-const char *const default_color_choices[NUM_COLOR + 1] = {
+const std::string_view default_color_choices[NUM_COLOR + 1] = {
     /* COLOR_NORMAL */ AA_NORMAL,
     /* COLOR_ROOMNAME */ AA_NORMAL ANSISEPSTR AF_CYAN,
     /* COLOR_ROOMOBJS */ AA_NORMAL ANSISEPSTR AF_GREEN,
@@ -1080,4 +1082,4 @@ const char *const default_color_choices[NUM_COLOR + 1] = {
     /* COLOR_TELL */ AA_NORMAL ANSISEPSTR AF_RED,
     /* COLOR_YOUSAY */ AA_NORMAL ANSISEPSTR AF_CYAN,
     /* COLOR_ROOMSAY */ AA_NORMAL ANSISEPSTR AF_WHITE,
-    nullptr};
+    {}};

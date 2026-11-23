@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Modes of connectedness: used by descriptor_data.state */
 constexpr int CON_PLAYING      = 0;  /* Playing - Nominal state		*/
@@ -77,5 +79,5 @@ constexpr int CON_GENOME       = 72;
 
 constexpr int NUM_CON_TYPES = 73;
 
-extern const char *const connected_types[NUM_CON_TYPES + 1];
+extern const name_table connected_types; /* NUM_CON_TYPES of them */
 

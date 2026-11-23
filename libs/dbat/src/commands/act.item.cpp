@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <algorithm>
+#include "dbat/name_table.hpp"
 #include <climits>
 #include <cstdlib>
 #include <iterator>
@@ -3246,7 +3247,7 @@ void perform_wear(GameWorld *g, struct char_data *ch, struct obj_data *obj, int 
 
 int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::string_view arg)
 {
-  static const char *keywords[] = {
+  static constexpr std::string_view keywords_entries[] = {
       "!RESERVED!",
       "finger",
       "!RESERVED!",
@@ -3269,8 +3270,8 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::s
       "ear",
       "\r!RESERVED!",
       "shoulders",
-      "scouter",
-      "\n"};
+      "scouter"};
+  static constexpr name_table keywords(keywords_entries);
 
   if (arg.empty()) {
     auto place = std::ranges::find_if(NATURAL_PLACES, [&](const wear_place &p) { return obj_wear_flagged(obj, p.flag) && char_body_flagged(ch, p.where); });

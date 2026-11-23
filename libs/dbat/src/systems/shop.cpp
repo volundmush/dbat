@@ -12,6 +12,7 @@
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
 #include <algorithm>
+#include "dbat/name_table.hpp"
 #include <cstdlib>
 #include <memory>
 
@@ -41,7 +42,7 @@
 
 static bool shop_trade_flagged(const struct shop_data *rec, int flag);
 
-const std::string_view shop_default_msgs[NUM_SHOP_MSGS] = {
+const std::string_view shop_default_msgs[] = {
     "%s Sorry, I don't stock that item.",  /* SHOP_MSG_NOITEM1 */
     "%s You don't seem to have that.",     /* SHOP_MSG_NOITEM2 */
     "%s I don't trade in such items.",     /* SHOP_MSG_NOBUY */
@@ -98,7 +99,7 @@ static constexpr std::string_view operator_str[] = {
     "^'"};
 
 /* Constant list for printing out who we sell to */
-const char *const trade_letters[NUM_TRADERS + 1] = {
+static constexpr std::string_view trade_letters_entries[] = {
     "No Good", /* First, the alignment based ones */
     "No Evil",
     "No Neutral",
@@ -175,14 +176,16 @@ const char *const trade_letters[NUM_TRADERS + 1] = {
     "No Loremaster",
     "No Mystic Theurge",
     "No Shadowdancer",
-    "No Thaumaturgist",
-    "\n"};
+    "No Thaumaturgist"};
+static_assert(std::size(trade_letters_entries) == NUM_TRADER_NAMES);
+constinit const name_table trade_letters(trade_letters_entries);
 
-const char *const shop_bits[] = {
+static constexpr std::string_view shop_bits_entries[] = {
     "WILL_FIGHT",
     "USES_BANK",
-    "ALLOW_STEAL",
-    "\n"};
+    "ALLOW_STEAL"};
+static_assert(std::size(shop_bits_entries) == NUM_SHOP_FLAGS);
+constinit const name_table shop_bits(shop_bits_entries);
 
 static bool is_ok_char(GameWorld *g, struct char_data *keeper, struct char_data *ch, struct shop_data *shop)
 {
@@ -364,12 +367,12 @@ static int evaluate_expression(struct obj_data *obj, std::string_view expr)
         while (at < expr.size() && !isspace(expr[at]) && find_oper_num(expr[at]) == NOTHING)
           at++;
         std::string_view name = expr.substr(start, at - start);
-        for (eindex = 0; *extra_bits[eindex] != '\n'; eindex++)
+        for (eindex = 0; eindex < NUM_ITEM_FLAGS; eindex++)
           if (str_eq_nocase(name, extra_bits[eindex])) {
             push(&vals, obj_extra_flagged(obj, eindex));
             break;
           }
-        if (*extra_bits[eindex] == '\n')
+        if (eindex == NUM_ITEM_FLAGS)
           push(&vals, isname(name, obj_get_name(obj)));
       } else {
         if (temp != OPER_OPEN_PAREN)
@@ -1262,12 +1265,12 @@ static std::string customer_string(GameWorld *g, struct shop_data *shop, int det
 {
   std::string buf;
 
-  for (int sindex = 0, flag = 0; *trade_letters[sindex] != '\n'; sindex++, flag++)
+  for (int sindex = 0, flag = 0; sindex < NUM_TRADER_NAMES; sindex++, flag++)
     if (detailed) {
       if (!shop_trade_flagged(shop, flag))
         buf += str_format(", {}", trade_letters[sindex]);
     } else
-      buf += shop_trade_flagged(shop, flag) ? '_' : *trade_letters[sindex];
+      buf += shop_trade_flagged(shop, flag) ? '_' : first_char(trade_letters[sindex]);
   return buf;
 }
 

@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/attacks.hpp"
 
 /* Combine Attack Names */
-const char *const attack_names_comp[] = {
+static constexpr std::string_view attack_names_comp_entries[] = {
     "Kamehameha",          /* 0 Roshi */
     "Galik Gun",           /* 1 Bardock */
     "Masenko",             /* 2 Piccolo */
@@ -16,10 +18,12 @@ const char *const attack_names_comp[] = {
     "Star Breaker",        /* 11 Jinto */
     "Seishou Enko",        /* 12 Arlian */
     "Renzokou Energy Dan", /* 13 Nail */
-    "\n"};
+    };
+static_assert(std::size(attack_names_comp_entries) == NUM_ATTACK_NAMES);
+constinit const name_table attack_names_comp(attack_names_comp_entries);
 
 /* Combine Attack Names */
-const char *const attack_names[] = {
+static constexpr std::string_view attack_names_entries[] = {
     "kamehameha",          /* 0 Roshi */
     "galik gun",           /* 1 Bardock */
     "masenko",             /* 2 Piccolo */
@@ -34,7 +38,9 @@ const char *const attack_names[] = {
     "star breaker",        /* 11 Jinto */
     "seishou enko",        /* 12 Arlian */
     "renzokou energy dan", /* 13 Nail */
-    "\n"};
+    };
+static_assert(std::size(attack_names_entries) == NUM_ATTACK_NAMES);
+constinit const name_table attack_names(attack_names_entries);
 
 /* Combine Attack Skills */
 const int attack_skills[] = {464, 444, 441, 472, 476, 474, 488, 475, 485, 510, 482, 533, 528, 440};

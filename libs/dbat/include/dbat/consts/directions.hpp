@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* The cardinal directions: used as index to room_data.dir_option[] */
 constexpr int NORTH     = 0;
@@ -16,7 +18,7 @@ constexpr int OUTDIR    = 11;
 
 constexpr int NUM_OF_DIRS = 12; /* number of directions in a room (nsewud) */
 
-extern const char *const dirs[NUM_OF_DIRS + 1];
-extern const char *const abbr_dirs[NUM_OF_DIRS + 1];
+extern const name_table dirs; /* NUM_OF_DIRS of them */
+extern const name_table abbr_dirs; /* NUM_OF_DIRS of them */
 extern const int rev_dir[NUM_OF_DIRS];
 

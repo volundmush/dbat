@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/triggers.hpp"
 
 /* mob trigger types */
-const char *const trig_types[NUM_MTRIG_TYPES + 1] = {
+static constexpr std::string_view trig_types_entries[] = {
     "Global",
     "Random",
     "Command",
@@ -21,11 +23,12 @@ const char *const trig_types[NUM_MTRIG_TYPES + 1] = {
     "Leave",
     "Door",
     "UNUSED",
-    "Time",
-    "\n"};
+    "Time"};
+static_assert(std::size(trig_types_entries) == NUM_MTRIG_TYPES);
+constinit const name_table trig_types(trig_types_entries);
 
 /* obj trigger types */
-const char *const otrig_types[NUM_OTRIG_TYPES + 1] = {
+static constexpr std::string_view otrig_types_entries[] = {
     "Global",
     "Random",
     "Command",
@@ -45,11 +48,12 @@ const char *const otrig_types[NUM_OTRIG_TYPES + 1] = {
     "Leave",
     "UNUSED",
     "Consume",
-    "Time",
-    "\n"};
+    "Time"};
+static_assert(std::size(otrig_types_entries) == NUM_OTRIG_TYPES);
+constinit const name_table otrig_types(otrig_types_entries);
 
 /* wld trigger types */
-const char *const wtrig_types[NUM_WTRIG_TYPES + 1] = {
+static constexpr std::string_view wtrig_types_entries[] = {
     "Global",
     "Random",
     "Command",
@@ -69,5 +73,6 @@ const char *const wtrig_types[NUM_WTRIG_TYPES + 1] = {
     "Leave",
     "Door",
     "UNUSED",
-    "Time",
-    "\n"};
+    "Time"};
+static_assert(std::size(wtrig_types_entries) == NUM_WTRIG_TYPES);
+constinit const name_table wtrig_types(wtrig_types_entries);

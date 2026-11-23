@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/constates.hpp"
 
 /* CON_x */
-const char *const connected_types[NUM_CON_TYPES + 1] = {
+static constexpr std::string_view connected_types_entries[] = {
     "Playing",
     "Disconnecting",
     "Get name",
@@ -74,5 +76,6 @@ const char *const connected_types[NUM_CON_TYPES + 1] = {
     "Align Menu",
     "Skills Menu",
     "User Title",
-    "Genome Selection",
-    "\n"};
+    "Genome Selection"};
+static_assert(std::size(connected_types_entries) == NUM_CON_TYPES);
+constinit const name_table connected_types(connected_types_entries);

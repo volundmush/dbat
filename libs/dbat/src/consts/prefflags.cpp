@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/prefflags.hpp"
 
 /* PRF_x */
-const char *const preference_bits[NUM_PRF_FLAGS + 1] = {
+static constexpr std::string_view preference_bits_entries[] = {
     "BRIEF",
     "COMPACT",
     "DEAF",
@@ -61,5 +63,6 @@ const char *const preference_bits[NUM_PRF_FLAGS + 1] = {
     "INSTRUCT",
     "GHEALTH",
     "IHEALTH",
-    "ENERGIZE",
-    "\n"};
+    "ENERGIZE"};
+static_assert(std::size(preference_bits_entries) == NUM_PRF_FLAGS);
+constinit const name_table preference_bits(preference_bits_entries);

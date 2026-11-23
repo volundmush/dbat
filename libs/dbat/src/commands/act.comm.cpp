@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <cstdlib>
+#include "dbat/name_table.hpp"
 
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
@@ -40,7 +41,8 @@
 #include "dbat/game_world.hpp"
 
 namespace {
-  const char *const languages[] = {"common", "elven", "gnomish", "dwarven", "halfling", "orc", "druid", "draconic", "\n"};
+  static constexpr std::string_view languages_entries[] = {"common", "elven", "gnomish", "dwarven", "halfling", "orc", "druid", "draconic"};
+  static constexpr name_table languages(languages_entries);
 
   /* How ch is named on the channels and in tells: by name if an immortal, else by account */
   std::string_view public_name(struct char_data *ch) { return char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch); }

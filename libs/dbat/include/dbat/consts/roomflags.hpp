@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/name_table.hpp"
+#include <string_view>
 
 /* Room flags: used in room_data.room_flags */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
@@ -73,5 +75,5 @@ constexpr int NUM_ROOM_FLAGS = 66;
 
 constexpr int RF_ARRAY_MAX = 4;
 
-extern const char *const room_bits[NUM_ROOM_FLAGS + 1];
+extern const name_table room_bits; /* NUM_ROOM_FLAGS of them */
 

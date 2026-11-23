@@ -1,6 +1,8 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/songs.hpp"
 
-const char *const song_types[] = {
+static constexpr std::string_view song_types_entries[] = {
     "\n",
     "Safety",
     "Shielding",
@@ -14,3 +16,5 @@ const char *const song_types[] = {
     "Teleportation",
     "Teleportation",
     "\n"};
+static_assert(std::size(song_types_entries) == NUM_SONG_NAMES);
+constinit const name_table song_types(song_types_entries);

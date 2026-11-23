@@ -1,8 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/directions.hpp"
 
 /* cardinal directions */
-const char *const dirs[NUM_OF_DIRS + 1] =
-    {
+static constexpr std::string_view dirs_entries[] = {
         "north",
         "east",
         "south",
@@ -14,10 +15,10 @@ const char *const dirs[NUM_OF_DIRS + 1] =
         "southeast",
         "southwest",
         "inside",
-        "outside",
-        "\n"};
-const char *const abbr_dirs[NUM_OF_DIRS + 1] =
-    {
+        "outside"};
+static_assert(std::size(dirs_entries) == NUM_OF_DIRS);
+constinit const name_table dirs(dirs_entries);
+static constexpr std::string_view abbr_dirs_entries[] = {
         "n",
         "e",
         "s",
@@ -29,8 +30,9 @@ const char *const abbr_dirs[NUM_OF_DIRS + 1] =
         "se",
         "sw",
         "in",
-        "out",
-        "\n"};
+        "out"};
+static_assert(std::size(abbr_dirs_entries) == NUM_OF_DIRS);
+constinit const name_table abbr_dirs(abbr_dirs_entries);
 
 const int rev_dir[NUM_OF_DIRS] =
     {

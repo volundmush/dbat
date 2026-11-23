@@ -144,7 +144,7 @@ namespace {
   void positions_menu(GameWorld *g, struct descriptor_data *d, mob_editor &)
   {
     clear_screen(g, d);
-    for (int i = 0; *position_types[i] != '\n'; i++)
+    for (int i = 0; i < NUM_POSITIONS; i++)
       write_to_output(g, d, "@g{:>2d}@n) {}\r\n", i, position_types[i]);
     write_to_output(g, d, "Enter position number : ");
   }
@@ -167,7 +167,7 @@ namespace {
   void aff_flags_menu(GameWorld *g, struct descriptor_data *d, mob_editor &e)
   {
     clear_screen(g, d);
-    olc_list_columns(g, d, affected_bits + 1, NUM_AFF_FLAGS, 1, "  ", 2);
+    olc_list_columns(g, d, affected_bits.span().subspan(1), NUM_AFF_FLAGS, 1, "  ", 2);
     write_to_output(g, d, "\r\nCurrent flags   : @c{}@n\r\nEnter aff flags (0 to quit) : ",
                     sprintbitarray(char_get_affected_by(e.mob.get()), affected_bits, AF_ARRAY_MAX));
   }

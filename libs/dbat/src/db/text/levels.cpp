@@ -26,8 +26,8 @@
 
 namespace {
 
-const char *const config_sect[NUM_CONFIG_SECTIONS + 1] = {"version", "experience", "vernum", "fortitude",
-                                                          "reflex",  "will",       "basehit", "\n"};
+static constexpr std::string_view config_sect[NUM_CONFIG_SECTIONS] = {"version", "experience", "vernum", "fortitude",
+                                                          "reflex",  "will",       "basehit"};
 
 /* The keywords above, in order. */
 enum {

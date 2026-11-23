@@ -1,6 +1,7 @@
 /* help.c: help, commands, toggles, colour, history, time and weather
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
 #include <algorithm>
+#include "dbat/name_table.hpp"
 #include <cstdlib>
 
 #include "dbat/args.hpp"
@@ -233,7 +234,8 @@ ACMD(do_gen_ps)
   }
 }
 
-static const char *const ctypes[] = {"off", "on", "\n"}; /* by C_OFF and C_ON */
+static constexpr std::string_view ctypes_entries[] = {"off", "on"};
+static constexpr name_table ctypes(ctypes_entries); /* by C_OFF and C_ON */
 
 ACMD(do_color)
 {
@@ -393,11 +395,11 @@ ACMD(do_history)
   int type = search_block(arg, history_types, false);
   if (arg.empty() || type < 0) {
     send_to_char(g, ch, "Usage: history <");
-    for (int i = 0; *history_types[i] != '\n'; i++) {
+    for (int i = 0; i < NUM_HIST; i++) {
       bool shown = i != 3 || char_get_admlevel(ch) >= 1; /* the fourth is for immortals */
       if (shown)
         send_to_char(g, ch, " {} ", history_types[i]);
-      if (*history_types[i + 1] == '\n')
+      if (i + 1 == NUM_HIST)
         send_to_char(g, ch, ">\r\n");
       else if (shown)
         send_to_char(g, ch, "|");

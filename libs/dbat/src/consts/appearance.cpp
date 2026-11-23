@@ -1,7 +1,9 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/appearance.hpp"
 
 /* For Distinguishing Features */
-const char *const eye_types[13] = {
+static constexpr std::string_view eye_types_entries[] = {
     "blue",
     "black",
     "green",
@@ -13,10 +15,11 @@ const char *const eye_types[13] = {
     "crimson",
     "gold",
     "amber",
-    "emerald",
-    "\n"};
+    "emerald"};
+static_assert(std::size(eye_types_entries) == 12);
+constinit const name_table eye_types(eye_types_entries);
 
-const char *const aura_types[9] = {
+static constexpr std::string_view aura_types_entries[9] = {
     "white",
     "blue",
     "red",
@@ -26,24 +29,28 @@ const char *const aura_types[9] = {
     "yellow",
     "black",
     "orange"};
+static_assert(std::size(aura_types_entries) == 9);
+constinit const name_table aura_types(aura_types_entries);
 
-const char *const hairl_types[6] = {
+static constexpr std::string_view hairl_types_entries[] = {
     "bald",
     "short",
     "medium",
     "long",
-    "really long",
-    "\n"};
+    "really long"};
+static_assert(std::size(hairl_types_entries) == 5);
+constinit const name_table hairl_types(hairl_types_entries);
 
-const char *const FHA_types[6] = {
+static constexpr std::string_view FHA_types_entries[] = {
     "stubby",
     "short",
     "medium",
     "long",
-    "really long",
-    "\n"};
+    "really long"};
+static_assert(std::size(FHA_types_entries) == 5);
+constinit const name_table FHA_types(FHA_types_entries);
 
-const char *const hairc_types[15] = {
+static constexpr std::string_view hairc_types_entries[] = {
     "headed",
     "black",
     "brown",
@@ -57,10 +64,11 @@ const char *const hairc_types[15] = {
     "purple",
     "silver",
     "crimson",
-    "white",
-    "\n"};
+    "white"};
+static_assert(std::size(hairc_types_entries) == 14);
+constinit const name_table hairc_types(hairc_types_entries);
 
-const char *const hairs_types[13] = {
+static constexpr std::string_view hairs_types_entries[] = {
     "",
     "with a plain look",
     "in a mohawk",
@@ -72,10 +80,11 @@ const char *const hairs_types[13] = {
     "with a fade look",
     "in a crew cut",
     "with a feathered look",
-    "in dred locks",
-    "\n"};
+    "in dred locks"};
+static_assert(std::size(hairs_types_entries) == 12);
+constinit const name_table hairs_types(hairs_types_entries);
 
-const char *const skin_types[13] = {
+static constexpr std::string_view skin_types_entries[] = {
     "white",
     "black",
     "green",
@@ -87,5 +96,6 @@ const char *const skin_types[13] = {
     "aqua",
     "pink",
     "purple",
-    "tan",
-    "\n"};
+    "tan"};
+static_assert(std::size(skin_types_entries) == 12);
+constinit const name_table skin_types(skin_types_entries);

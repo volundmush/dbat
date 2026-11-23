@@ -1,6 +1,8 @@
+#include <string_view>
+#include "dbat/name_table.hpp"
 #include "dbat/consts/zoneflags.hpp"
 
-const char *const zone_bits[NUM_ZONE_FLAGS + 1] = {
+static constexpr std::string_view zone_bits_entries[] = {
     "CLOSED",
     "NO_IMMORT",
     "QUEST",
@@ -36,5 +38,6 @@ const char *const zone_bits[NUM_ZONE_FLAGS + 1] = {
     "SPARE30",
     "SPARE31",
     "SPARE32",
-    "SPARE33",
-    "\n"};
+    "SPARE33"};
+static_assert(std::size(zone_bits_entries) == NUM_ZONE_FLAGS);
+constinit const name_table zone_bits(zone_bits_entries);
