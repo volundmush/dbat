@@ -250,7 +250,7 @@ void oozaru_transform(GameWorld *g, char_data *ch)
 
   act(g, "@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", true, ch, nullptr, nullptr, TO_CHAR);
   act(g, "@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", true, ch, nullptr, nullptr, TO_ROOM);
-  char_plr_set(ch, oozaru.flag, true);
+  char_plr_set(ch, *oozaru_form.flag, true);
 }
 
 static void oozaru_add(GameWorld *g)

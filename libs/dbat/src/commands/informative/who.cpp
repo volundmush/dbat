@@ -112,7 +112,7 @@ namespace {
   };
 
   struct who_flag {
-    std::variant<pref_flag, int> flag; /* a preference, or a player flag (PLR_) */
+    std::variant<pref_flag, player_flag> flag;
     std::string_view tag{};
     bool immortals_see_only = false;
   };
@@ -159,7 +159,7 @@ namespace {
       send_to_char(g, ch, "{}", it->tag);
     for (const who_flag &f : WHO_FLAGS) {
       const pref_flag *pref = std::get_if<pref_flag>(&f.flag);
-      bool has              = pref ? char_prf_flagged(g, tch, *pref) : char_plr_flagged(tch, std::get<int>(f.flag));
+      bool has              = pref ? char_prf_flagged(g, tch, *pref) : char_plr_flagged(tch, std::get<player_flag>(f.flag));
       if (has && (!f.immortals_see_only || char_get_admlevel(ch) >= ADMLVL_IMMORT))
         send_to_char(g, ch, "{}", f.tag);
     }

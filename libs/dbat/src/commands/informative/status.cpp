@@ -4,6 +4,7 @@
 #include "dbat/name_table.hpp"
 #include <cstdlib>
 #include <iterator>
+#include <optional>
 #include <ranges>
 #include <span>
 #include <variant>
@@ -205,18 +206,18 @@ ACMD(do_gold)
 
 namespace {
   struct by_flag {
-    int flag;
+    std::optional<player_flag> flag; /* none for the last row, which fits anyone */
     std::string_view name{};
   };
 
   /* An android's model and version, the first flag it has; failing them all, the last. */
-  constexpr by_flag ANDROID_MODELS[]   = {{PLR_ABSORB, "@CAbsorption"}, {PLR_REPAIR, "@GSelf Repairing"}, {PLR_SENSEM, "@RSensor Equiped"}, {-1, "@WNone"}};
+  constexpr by_flag ANDROID_MODELS[]   = {{PLR_ABSORB, "@CAbsorption"}, {PLR_REPAIR, "@GSelf Repairing"}, {PLR_SENSEM, "@RSensor Equiped"}, {std::nullopt, "@WNone"}};
   constexpr by_flag ANDROID_VERSIONS[] = {{PLR_TRANS1, "Beta 1.0"}, {PLR_TRANS2, "ANS 2.0"}, {PLR_TRANS3, "ANS 3.0"}, {PLR_TRANS4, "ANS 4.0"},
-                                          {PLR_TRANS5, "ANS 5.0"},  {PLR_TRANS6, "ANS 6.0"}, {-1, "Alpha 0.5"}};
+                                          {PLR_TRANS5, "ANS 5.0"},  {PLR_TRANS6, "ANS 6.0"}, {std::nullopt, "Alpha 0.5"}};
 
   std::string_view first_flagged(struct char_data *ch, std::span<const by_flag> rows)
   {
-    return std::ranges::find_if(rows, [&](const by_flag &r) { return r.flag < 0 || char_plr_flagged(ch, r.flag); })->name;
+    return std::ranges::find_if(rows, [&](const by_flag &r) { return !r.flag || char_plr_flagged(ch, *r.flag); })->name;
   }
 
   /* Whether arg is part of view's name, in lower case or with a capital. */
@@ -300,28 +301,28 @@ ACMD(do_score)
 namespace {
   /* A transformation a race may be in: the flag, and another it needs as well. */
   struct transformation {
-    int flag;
-    int also;
+    player_flag flag;
+    std::optional<player_flag> also;
     std::string_view name{};
   };
 
   /* Rillao: transloc, add new transes here */
-  constexpr transformation HUMAN_FORMS[]     = {{PLR_TRANS1, -1, "@CSuper Human First"}, {PLR_TRANS2, -1, "@CSuper Human Second"}, {PLR_TRANS3, -1, "@CSuper Human Third"}, {PLR_TRANS4, -1, "@CSuper Human Fourth"}};
-  constexpr transformation SAIYAN_FORMS[]    = {{PLR_TRANS1, PLR_FPSSJ, "@YFull Powered @CSuper Saiyan"}, {PLR_TRANS1, -1, "@CSuper Saiyan First"},
-                                                {PLR_TRANS2, -1, "@CSuper Saiyan Second"}, {PLR_TRANS3, -1, "@CSuper Saiyan Third"},
-                                                {PLR_TRANS4, -1, "@CSuper Saiyan Fourth"}, {PLR_OOZARU, -1, "@COozaru"}};
-  constexpr transformation LEGENDARY_FORMS[] = {{PLR_TRANS1, PLR_FPSSJ, "@YFull Powered @CSuper Saiyan"}, {PLR_TRANS1, -1, "@CSuper Saiyan First"},
-                                                {PLR_TRANS2, -1, "@YLegendary @CSuper Saiyan"}, {PLR_OOZARU, -1, "@COozaru"}};
-  constexpr transformation NAMEK_FORMS[]     = {{PLR_TRANS1, -1, "@CSuper Namek First"}, {PLR_TRANS2, -1, "@CSuper Namek Second"}, {PLR_TRANS3, -1, "@CSuper Namek Third"}, {PLR_TRANS4, -1, "@CSuper Namek Fourth"}};
-  constexpr transformation ICER_FORMS[]      = {{PLR_TRANS1, -1, "@CTransform First"}, {PLR_TRANS2, -1, "@CTransform Second"}, {PLR_TRANS3, -1, "@CTransform Third"}, {PLR_TRANS4, -1, "@CTransform Fourth"}};
-  constexpr transformation KONATSU_FORMS[]   = {{PLR_TRANS1, -1, "@CShadow First"}, {PLR_TRANS2, -1, "@CShadow Second"}, {PLR_TRANS3, -1, "@CShadow Third"}, {PLR_TRANS4, -1, "@CShadow Fourth"}};
-  constexpr transformation MUTANT_FORMS[]    = {{PLR_TRANS1, -1, "@CMutate First"}, {PLR_TRANS2, -1, "@CMutate Second"}, {PLR_TRANS3, -1, "@CMutate Third"}};
-  constexpr transformation BIO_FORMS[]       = {{PLR_TRANS1, -1, "@CMature"}, {PLR_TRANS2, -1, "@CSemi-perfect"}, {PLR_TRANS3, -1, "@CPerfect"}, {PLR_TRANS4, -1, "@CSuper Perfect"}};
-  constexpr transformation ANDROID_FORMS[]   = {{PLR_TRANS1, -1, "@CSeries 1.0"}, {PLR_TRANS2, -1, "@CSeries 2.0"}, {PLR_TRANS3, -1, "@CSeries 3.0"},
-                                                {PLR_TRANS4, -1, "@CSeries 4.0"}, {PLR_TRANS5, -1, "@CSeries 5.0"}, {PLR_TRANS6, -1, "@CSeries 6.0"}};
-  constexpr transformation MAJIN_FORMS[]     = {{PLR_TRANS1, -1, "@CAffinity"}, {PLR_TRANS2, -1, "@CSuper"}, {PLR_TRANS3, -1, "@CTrue"}};
-  constexpr transformation TRUFFLE_FORMS[]   = {{PLR_TRANS1, -1, "@CAscend First"}, {PLR_TRANS2, -1, "@CAscend Second"}, {PLR_TRANS3, -1, "@CAscend Third"}};
-  constexpr transformation KAI_FORMS[]       = {{PLR_TRANS1, -1, "@CMystic First"}, {PLR_TRANS2, -1, "@CMystic Second"}, {PLR_TRANS3, -1, "@CMystic Third"}};
+  constexpr transformation HUMAN_FORMS[]     = {{PLR_TRANS1, std::nullopt, "@CSuper Human First"}, {PLR_TRANS2, std::nullopt, "@CSuper Human Second"}, {PLR_TRANS3, std::nullopt, "@CSuper Human Third"}, {PLR_TRANS4, std::nullopt, "@CSuper Human Fourth"}};
+  constexpr transformation SAIYAN_FORMS[]    = {{PLR_TRANS1, PLR_FPSSJ, "@YFull Powered @CSuper Saiyan"}, {PLR_TRANS1, std::nullopt, "@CSuper Saiyan First"},
+                                                {PLR_TRANS2, std::nullopt, "@CSuper Saiyan Second"}, {PLR_TRANS3, std::nullopt, "@CSuper Saiyan Third"},
+                                                {PLR_TRANS4, std::nullopt, "@CSuper Saiyan Fourth"}, {PLR_OOZARU, std::nullopt, "@COozaru"}};
+  constexpr transformation LEGENDARY_FORMS[] = {{PLR_TRANS1, PLR_FPSSJ, "@YFull Powered @CSuper Saiyan"}, {PLR_TRANS1, std::nullopt, "@CSuper Saiyan First"},
+                                                {PLR_TRANS2, std::nullopt, "@YLegendary @CSuper Saiyan"}, {PLR_OOZARU, std::nullopt, "@COozaru"}};
+  constexpr transformation NAMEK_FORMS[]     = {{PLR_TRANS1, std::nullopt, "@CSuper Namek First"}, {PLR_TRANS2, std::nullopt, "@CSuper Namek Second"}, {PLR_TRANS3, std::nullopt, "@CSuper Namek Third"}, {PLR_TRANS4, std::nullopt, "@CSuper Namek Fourth"}};
+  constexpr transformation ICER_FORMS[]      = {{PLR_TRANS1, std::nullopt, "@CTransform First"}, {PLR_TRANS2, std::nullopt, "@CTransform Second"}, {PLR_TRANS3, std::nullopt, "@CTransform Third"}, {PLR_TRANS4, std::nullopt, "@CTransform Fourth"}};
+  constexpr transformation KONATSU_FORMS[]   = {{PLR_TRANS1, std::nullopt, "@CShadow First"}, {PLR_TRANS2, std::nullopt, "@CShadow Second"}, {PLR_TRANS3, std::nullopt, "@CShadow Third"}, {PLR_TRANS4, std::nullopt, "@CShadow Fourth"}};
+  constexpr transformation MUTANT_FORMS[]    = {{PLR_TRANS1, std::nullopt, "@CMutate First"}, {PLR_TRANS2, std::nullopt, "@CMutate Second"}, {PLR_TRANS3, std::nullopt, "@CMutate Third"}};
+  constexpr transformation BIO_FORMS[]       = {{PLR_TRANS1, std::nullopt, "@CMature"}, {PLR_TRANS2, std::nullopt, "@CSemi-perfect"}, {PLR_TRANS3, std::nullopt, "@CPerfect"}, {PLR_TRANS4, std::nullopt, "@CSuper Perfect"}};
+  constexpr transformation ANDROID_FORMS[]   = {{PLR_TRANS1, std::nullopt, "@CSeries 1.0"}, {PLR_TRANS2, std::nullopt, "@CSeries 2.0"}, {PLR_TRANS3, std::nullopt, "@CSeries 3.0"},
+                                                {PLR_TRANS4, std::nullopt, "@CSeries 4.0"}, {PLR_TRANS5, std::nullopt, "@CSeries 5.0"}, {PLR_TRANS6, std::nullopt, "@CSeries 6.0"}};
+  constexpr transformation MAJIN_FORMS[]     = {{PLR_TRANS1, std::nullopt, "@CAffinity"}, {PLR_TRANS2, std::nullopt, "@CSuper"}, {PLR_TRANS3, std::nullopt, "@CTrue"}};
+  constexpr transformation TRUFFLE_FORMS[]   = {{PLR_TRANS1, std::nullopt, "@CAscend First"}, {PLR_TRANS2, std::nullopt, "@CAscend Second"}, {PLR_TRANS3, std::nullopt, "@CAscend Third"}};
+  constexpr transformation KAI_FORMS[]       = {{PLR_TRANS1, std::nullopt, "@CMystic First"}, {PLR_TRANS2, std::nullopt, "@CMystic Second"}, {PLR_TRANS3, std::nullopt, "@CMystic Third"}};
 
   struct race_forms {
     bool (*is)(const struct char_data *ch);
@@ -359,7 +360,7 @@ namespace {
     auto race = std::ranges::find_if(RACE_FORMS, [&](const race_forms &r) { return r.is(vict); });
     if (race == std::end(RACE_FORMS))
       return "@wNone";
-    auto form = std::ranges::find_if(race->forms, [&](const transformation &t) { return char_plr_flagged(vict, t.flag) && (t.also < 0 || char_plr_flagged(vict, t.also)); });
+    auto form = std::ranges::find_if(race->forms, [&](const transformation &t) { return char_plr_flagged(vict, t.flag) && (!t.also || char_plr_flagged(vict, *t.also)); });
     return form == race->forms.end() ? "@wNone" : form->name;
   }
 } // namespace
@@ -376,8 +377,8 @@ namespace {
 struct limb_row {
   std::string_view label{};
   int index;
-  int healthy_flag; /* a sound limb isn't cybernetic by this */
-  int cyber_flag;
+  player_flag healthy_flag; /* a sound limb isn't cybernetic by this */
+  player_flag cyber_flag;
 };
 constexpr limb_row LIMBS[] = {
     {"Right Arm   ", 0, PLR_CRARM, PLR_CRARM},
@@ -405,9 +406,13 @@ void appendages_status(GameWorld *g, struct char_data *ch)
       send_to_char(g, ch, "            @D[@c{}@D: @rMissing.         @D]@n\r\n", l.label);
   }
 
-  int tail = char_is_saiyan(ch) || char_is_halfbreed(ch) ? PLR_STAIL : char_is_icer(ch) || char_is_bio(ch) ? PLR_TAIL : -1;
-  if (tail >= 0) {
-    if (char_plr_flagged(ch, tail))
+  std::optional<player_flag> tail;
+  if (char_is_saiyan(ch) || char_is_halfbreed(ch))
+    tail = PLR_STAIL;
+  else if (char_is_icer(ch) || char_is_bio(ch))
+    tail = PLR_TAIL;
+  if (tail) {
+    if (char_plr_flagged(ch, *tail))
       send_to_char(g, ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
     else
       send_to_char(g, ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
@@ -467,7 +472,7 @@ constexpr rung DRUNK_RUNGS[] = {
 enum class flag_kind { plr, aff, prf, affected, spell };
 struct flag_line {
   flag_kind kind;
-  std::variant<int, pref_flag, aff_flag> flag; /* a pref_flag for flag_kind::prf, an aff_flag for aff and affected, an int for the rest */
+  std::variant<int, pref_flag, aff_flag, player_flag> flag; /* a player_flag for flag_kind::plr, a pref_flag for prf, an aff_flag for aff and affected, an int (spell) for the rest */
   std::string_view says{};
 };
 
@@ -475,7 +480,7 @@ bool has_flag(GameWorld *g, struct char_data *ch, const flag_line &f)
 {
   switch (f.kind) {
     case flag_kind::plr:
-      return char_plr_flagged(ch, std::get<int>(f.flag));
+      return char_plr_flagged(ch, std::get<player_flag>(f.flag));
     case flag_kind::aff:
       return char_aff_flagged(ch, std::get<aff_flag>(f.flag));
     case flag_kind::prf:
@@ -493,6 +498,8 @@ constexpr bool kinds_match(std::span<const flag_line> lines)
 {
   return std::ranges::all_of(lines, [](const flag_line &f) {
     switch (f.kind) {
+      case flag_kind::plr:
+        return std::holds_alternative<player_flag>(f.flag);
       case flag_kind::prf:
         return std::holds_alternative<pref_flag>(f.flag);
       case flag_kind::aff:

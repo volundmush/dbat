@@ -140,7 +140,7 @@ void mobiles(GameWorld *g)
                char_get_aff_abils_dex(m), char_get_aff_abils_con(m), char_get_aff_abils_cha(m),
                char_get_mob_specials_damnodice(m), char_get_mob_specials_damsizedice(m),
                char_get_mob_specials_attack_type(m));
-    file_print(out, "  act {} affected {}\n", bits(char_get_act(m), PM_ARRAY_MAX),
+    file_print(out, "  act {} affected {}\n", bits(char_get_mob_flags(m)),
                bits(char_get_affected_by(m)));
     std::string skills;
     for (int i = 0; i < SKILL_TABLE_SIZE; i++)

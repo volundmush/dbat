@@ -330,7 +330,8 @@ static int place_player(GameWorld *g, struct descriptor_data *d)
 static void reset_session_state(GameWorld *g, struct char_data *ch)
 {
   static const struct {
-    int flag, limb;
+    player_flag flag;
+    int limb;
   } regrown[] = {
       {PLR_RARM, 0},
       {PLR_LARM, 1},

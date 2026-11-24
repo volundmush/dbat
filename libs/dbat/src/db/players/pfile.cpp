@@ -241,7 +241,7 @@ constexpr pfile_tag pfile_tags[] = {
     {"Wate", [](R &r) { char_set_weight(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_weight(w.ch), PFDEF_HEIGHT); }}, /* quirk: the height's default */
     {"Alin", [](R &r) { char_set_alignment(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_alignment(w.ch), PFDEF_ALIGNMENT); }},
     {"Aura", [](R &r) { char_set_aura(r.ch, r.as_int()); }, [](W &w, std::string_view t) { w.unless(t, char_get_aura(w.ch), PFDEF_SKIN); }},
-    {"Act ", [](R &r) { r.flags(char_get_act(r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_act(w.ch)); }},
+    {"Act ", [](R &r) { r.flags(char_get_player_flags(r.g, r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_player_flags(w.g, w.ch)); }},
     {"Aff ", [](R &r) { r.flags(char_get_affected_by(r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_affected_by(w.ch)); }},
     {"Pref", [](R &r) { r.flags(char_get_pref(r.g, r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_pref(w.g, w.ch)); }},
     {"AdmF", [](R &r) { r.flags(char_get_admflags(r.ch)); }, [](W &w, std::string_view t) { w.flags(t, char_get_admflags(w.ch)); }},
@@ -571,8 +571,8 @@ int load_char(GameWorld *g, std::string_view name, struct char_data *ch)
   char_set_alignment(ch, PFDEF_ALIGNMENT);
   static_assert(PFDEF_AFFFLAGS == 0);
   char_get_affected_by(ch) = {};
-  for (i = 0; i < PM_ARRAY_MAX; i++)
-    char_get_act(ch)[i] = PFDEF_PLRFLAGS;
+  static_assert(PFDEF_PLRFLAGS == 0);
+  char_get_player_flags(g, ch) = {};
   static_assert(PFDEF_PREFFLAGS == 0);
   char_get_pref(g, ch) = {};
   char_get_admflags(ch) = {};

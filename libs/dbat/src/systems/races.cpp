@@ -631,9 +631,11 @@ static const transform_bonus *race_trans_table(const char_data *ch)
   }
 }
 
-int race_flag_to_tier(int flag)
+int race_flag_to_tier(std::optional<player_flag> flag)
 {
-  switch (flag) {
+  if (!flag)
+    return 0;
+  switch (*flag) {
     case PLR_TRANS1:
       return 1;
     case PLR_TRANS2:
@@ -653,7 +655,7 @@ int race_flag_to_tier(int flag)
 
 int race_current_trans_tier(const char_data *ch)
 {
-  static const int flags[] = {PLR_TRANS1, PLR_TRANS2, PLR_TRANS3, PLR_TRANS4, PLR_TRANS5, PLR_TRANS6};
+  static constexpr player_flag flags[] = {PLR_TRANS1, PLR_TRANS2, PLR_TRANS3, PLR_TRANS4, PLR_TRANS5, PLR_TRANS6};
   for (int i = 0; i < 6; i++) {
     if (char_plr_flagged(ch, flags[i]))
       return i + 1;
@@ -663,7 +665,7 @@ int race_current_trans_tier(const char_data *ch)
 
 transform_bonus race_current_form(GameWorld *g, char_data *ch)
 {
-  if (char_plr_flagged(ch, PLR_OOZARU)) return oozaru;
+  if (char_plr_flagged(ch, PLR_OOZARU)) return oozaru_form;
   if (char_is_hoshijin(ch)) {
     transform_bonus hoshi_form;
     double bon_mult = 0;

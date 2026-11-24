@@ -970,12 +970,7 @@ static void check_scan_range(void)
   }
 }
 
-/* flag_set's names and words, for every family's table, against sprintbitarray() and the raw words: stand-in
-   families of the same sizes */
-enum class test_plr_flag : uint8_t { count_ = NUM_PLR_FLAGS };
-template <> struct flag_traits<test_plr_flag> { static constexpr const name_table &names = player_bits; };
-enum class test_mob_flag : uint8_t { count_ = NUM_MOB_FLAGS };
-template <> struct flag_traits<test_mob_flag> { static constexpr const name_table &names = action_bits; };
+/* flag_set's names and words, for every family's table, against sprintbitarray() and the raw words */
 
 /* A flag_set is laid out as the four words it replaced, so the structures holding one keep their size */
 static_assert(sizeof(flag_set<zone_flag>) == sizeof(bitvector_t[FLAG_WORDS]) && alignof(flag_set<zone_flag>) == alignof(bitvector_t));
@@ -1010,13 +1005,37 @@ template <class E> static int flag_set_mismatches(const name_table &table)
   return mismatches;
 }
 
+/* Mob flags are an NPC's and player flags a player's: neither kind reads or takes the other's, save MOB_ISNPC on a
+   player, which lands on the player flag of its old shared bit */
+static void check_act_split(void)
+{
+  auto *ch = new char_data();
+  char_mob_set(ch, MOB_SENTINEL, true);
+  char_plr_set(ch, PLR_THIEF, true); /* an NPC has no player flags */
+  CHECK(char_mob_flagged(ch, MOB_SENTINEL));
+  CHECK(!char_plr_flagged(ch, PLR_THIEF));
+  CHECK(!char_plr_toggle(ch, PLR_THIEF));
+  char_make_player_specials(ch);
+  CHECK(!char_mob_flagged(ch, MOB_SENTINEL)); /* a player reads no mob flags */
+  char_mob_set(ch, MOB_AWARE, true);
+  CHECK(char_get_mob_flags(ch).test(MOB_SENTINEL) && !char_get_mob_flags(ch).test(MOB_AWARE));
+  char_plr_set(ch, PLR_THIEF, true);
+  CHECK(char_plr_flagged(ch, PLR_THIEF));
+  CHECK(!char_plr_toggle(ch, PLR_THIEF));
+  char_mob_set(ch, MOB_ISNPC, true);
+  CHECK(char_plr_flagged(ch, PLR_DONTSET));
+  CHECK(!char_mob_toggle(ch, MOB_ISNPC) && !char_plr_flagged(ch, PLR_DONTSET));
+  char_drop_player_specials(ch);
+  delete ch;
+}
+
 static void check_flag_sets(void)
 {
   CHECK(flag_set_mismatches<room_flag>(room_bits) == 0);
   CHECK(flag_set_mismatches<zone_flag>(zone_bits) == 0);
   CHECK(flag_set_mismatches<aff_flag>(affected_bits) == 0);
-  CHECK(flag_set_mismatches<test_plr_flag>(player_bits) == 0);
-  CHECK(flag_set_mismatches<test_mob_flag>(action_bits) == 0);
+  CHECK(flag_set_mismatches<player_flag>(player_bits) == 0);
+  CHECK(flag_set_mismatches<mob_flag>(action_bits) == 0);
   CHECK(flag_set_mismatches<pref_flag>(preference_bits) == 0);
   CHECK(flag_set_mismatches<extra_flag>(extra_bits) == 0);
   CHECK(flag_set_mismatches<wear_flag>(wear_bits) == 0);
@@ -3041,6 +3060,7 @@ static const struct {
     {"text_field_of_self",                          check_text_field_of_self                         },
     {"add_commas",                                  check_add_commas                                 },
     {"flag_sets",                                   check_flag_sets                                  },
+    {"act_split",                                   check_act_split                                  },
     {"asctime_text",                                check_asctime_text                               },
     {"guildmaster_special_hears_the_command",       check_guildmaster_special_hears_the_command      },
     {"scan_range",                                  check_scan_range                                 },

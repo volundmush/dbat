@@ -651,12 +651,12 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   if (char_is_npc(k)) {
     buf = sprinttype(char_get_mob_specials_default_pos(k), position_types);
     send_to_char(g, ch, ", Default position: {}\r\n", buf);
-    buf = sprintbitarray(char_get_act(k), action_bits, PM_ARRAY_MAX);
+    buf = flag_names(char_get_mob_flags(k));
     send_to_char(g, ch, "NPC flags: @c{}@n\r\n", buf);
   } else {
     send_to_char(g, ch, ", Idle Timer (in tics) [{:d}]\r\n", char_get_timer(k));
 
-    buf = sprintbitarray(char_get_act(k), player_bits, PM_ARRAY_MAX);
+    buf = flag_names(char_get_player_flags(g, k));
     send_to_char(g, ch, "PLR: @c{}@n\r\n", buf);
 
     buf = flag_names(char_get_pref(g, k));
@@ -1575,7 +1575,7 @@ ACMD(do_zcheck)
         buf += str_format("- Needs to be fixed - {}Autogenerate!{}\r\n", CCYEL(g, ch, C_NRM), CCNRM(g, ch, C_NRM));
 
       if (char_mob_flagged(mob, MOB_AGGRESSIVE) &&
-          char_mob_flagged(mob, MOB_AGGR_GOOD | MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL) && (found = 1))
+          char_mob_flagged(mob, MOB_MEMORY) /* quirk: reads MEMORY (AGGR_GOOD | AGGR_EVIL | AGGR_NEUTRAL, 9 | 8 | 10), meant any of them */ && (found = 1))
         buf += "- Both aggresive and agressive to align.\r\n";
 
       if ((char_get_gold(mob) > MAX_GOLD_ALLOWED) && (found = 1))

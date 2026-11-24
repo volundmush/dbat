@@ -472,7 +472,7 @@ ACMD(do_wiznet)
 
   for (descriptor_data *d : each_desc(g)) {
     if (!desc_is_playing(d) || char_get_admlevel(d->character) < level || char_prf_flagged(g, d->character, PRF_NOWIZ) ||
-        char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING) || (d == char_get_desc(ch) && char_prf_flagged(g, d->character, PRF_NOREPEAT)))
+        char_plr_flagged(d->character, PLR_MAILING) /* quirk: reads MAILING (WRITING | MAILING, 4 | 5), meant WRITING or MAILING */ || (d == char_get_desc(ch) && char_prf_flagged(g, d->character, PRF_NOREPEAT)))
       continue;
     const std::string &line = char_can_see(g, d->character, ch) ? seen : unseen;
     send_to_char(g, d->character, line);

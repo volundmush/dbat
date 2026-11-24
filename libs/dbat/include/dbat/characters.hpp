@@ -30,8 +30,6 @@
 #include "dbat/consts/sizes.hpp"
 #include "dbat/index.hpp"
 
-constexpr int PM_ARRAY_MAX = 4;
-
 /* These data contain information about a players time data */
 struct time_data {
   time_t birth{};   /* This represents the characters current age        */
@@ -85,6 +83,7 @@ struct player_special_data {
   room_vnum load_room{};                   /* Which room to place char in		*/
   std::map<uint16_t, skill_data> skills;   /* by skill id, only those with something set; NPCs have none */
   flag_set<pref_flag> pref;                /* preference flags for PC's.		*/
+  flag_set<player_flag> player_flags;      /* PLR_ flags: only players have them */
   uint8_t bad_pws{};                       /* number of bad password attemps	*/
   int8_t conditions[NUM_CONDITIONS]{};     /* Drunk, full, thirsty			*/
 
@@ -237,7 +236,7 @@ struct char_data {
   int forgeting{};
   int forgetcount{};
 
-  bitvector_t act[PM_ARRAY_MAX]{}; /* act flag for NPC's; player flag for PC's */
+  flag_set<mob_flag> mob_flags;            /* MOB_ flags: only NPCs read them (players' are in player_specials) */
 
   flag_set<aff_flag> affected_by;          /* current affects */
 

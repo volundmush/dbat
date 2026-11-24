@@ -71,7 +71,7 @@ template <flag_family E> result named_flag(const field_query &q, auto &&flagged)
 }
 
 /* A player flag, which an argument of "on" or "off" sets */
-result player_flag(const field_query &q, char_data *c, int flag)
+result player_flag_field(const field_query &q, char_data *c, player_flag flag)
 {
   if (str_eq_nocase(q.subfield, "on"))
     char_plr_set(c, flag, true);
@@ -204,9 +204,9 @@ const field<char_data> char_fields[] = {
            return uid_text(obj_get_id(obj));
        return "";
      }},
-    {"is_killer", [](const field_query &q, char_data *c) { return player_flag(q, c, PLR_KILLER); }},
+    {"is_killer", [](const field_query &q, char_data *c) { return player_flag_field(q, c, PLR_KILLER); }},
     {"is_pc", [](const field_query &, char_data *c) -> result { return yes_no(!char_is_npc(c)); }},
-    {"is_thief", [](const field_query &q, char_data *c) { return player_flag(q, c, PLR_THIEF); }},
+    {"is_thief", [](const field_query &q, char_data *c) { return player_flag_field(q, c, PLR_THIEF); }},
     {"level", [](const field_query &, char_data *c) -> result { return number(char_get_level(c)); }},
     {"mana", [](const field_query &q, char_data *c) -> result {
        change_points(q, c, incCurKI, decCurKI);
@@ -224,7 +224,7 @@ const field<char_data> char_fields[] = {
     {"name", [](const field_query &, char_data *c) -> result { return str_format("{}", char_get_name(c)); }},
     {"next_in_room", [](const field_query &q, char_data *c) -> result { return uid_or_none(char_next_in_room(q.g, c)); }},
     {"plr", [](const field_query &q, char_data *c) {
-       return named_flag(q, player_bits, [c](int f) { return char_plr_flagged(c, f); });
+       return named_flag<player_flag>(q, [c](player_flag f) { return char_plr_flagged(c, f); });
      }},
     {"pos", [](const field_query &q, char_data *c) -> result {
        if (q.has_arg()) /* sleeping, resting, sitting, fighting or standing, or the start of one */

@@ -6,7 +6,7 @@ const struct transform_bonus base_form = {
     .bonus                = 0,
     .mult                 = 1.0,
     .drain                = 0.0,
-    .flag                 = 0,
+    .flag                 = std::nullopt,
     .rpp_cost             = 0,
     .requires_pl          = 0,
     .name                 = "base form",
@@ -65,7 +65,7 @@ const struct transform_bonus base_form = {
  * Oozaru Transformation
  * ============================================================================= */
 
-const struct transform_bonus oozaru = {
+const struct transform_bonus oozaru_form = {
     .bonus                = 10000,
     .mult                 = 2.0,
     .drain                = 0.0,

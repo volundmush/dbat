@@ -1,11 +1,13 @@
 #pragma once
+#include <optional>
 #include <string_view>
+#include "dbat/consts/playerflags.hpp"
 #include "dbat/consts/types.hpp"
 
 struct transform_bonus {
   int64_t bonus{};
   long double mult{}, drain{};
-  int flag{};
+  std::optional<player_flag> flag{}; /* the form's player flag; none for the base form */
   int rpp_cost{};
   int64_t requires_pl{};
   std::string_view name{};
@@ -19,5 +21,5 @@ struct transforms_available {
 };
 
 extern const transform_bonus base_form;
-extern const transform_bonus oozaru;
+extern const transform_bonus oozaru_form;
 

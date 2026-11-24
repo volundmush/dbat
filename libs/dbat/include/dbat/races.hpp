@@ -32,7 +32,7 @@ bool race_can_transform(int r);
 bool race_can_revert(int r);
 bool race_has_noisy_transformations(int r);
 bool race_check_can_transform(GameWorld *g, char_data *ch);
-int race_flag_to_tier(int flag);
+int race_flag_to_tier(std::optional<player_flag> flag);
 int race_current_trans_tier(const char_data *ch);
 transform_bonus race_current_form(GameWorld *g, char_data *ch);
 bool race_find_form(char_data *ch, std::string_view arg, transform_bonus *out);

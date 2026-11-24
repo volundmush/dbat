@@ -985,7 +985,7 @@ struct answer {
   gain pl{}, st{}, ki{};
   ability raise{};    /* by one */
   int choice{};       /* or left alone */
-  int flag{-1};       /* a PLR_* set, or none */
+  std::optional<player_flag> flag{}; /* a PLR_* set, or none */
 };
 
 struct question {
@@ -1121,8 +1121,8 @@ static void apply_answer(GameWorld *g, struct char_data *ch, const answer &a)
   add_ability(ch, a.raise, 1);
   if (a.choice)
     char_set_choice(ch, a.choice);
-  if (a.flag >= 0)
-    char_plr_set(ch, a.flag, true);
+  if (a.flag)
+    char_plr_set(ch, *a.flag, true);
 }
 
 /* The alignment the answers picked give, added to the character's when they're applied. */

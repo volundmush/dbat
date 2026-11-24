@@ -658,14 +658,6 @@ namespace {
     }
   };
 
-  void set_bit(bitvector_t *flags, int flag, bool on)
-  {
-    if (on)
-      SET_BIT_AR(flags, flag);
-    else
-      REMOVE_BIT_AR(flags, flag);
-  }
-
   template <pref_flag Flag>
   bool pref(setting &s)
   {
@@ -673,10 +665,10 @@ namespace {
     return true;
   }
 
-  template <int Flag>
+  template <player_flag Flag>
   bool act_flag(setting &s)
   {
-    set_bit(char_get_act(s.vict), Flag, s.on);
+    char_get_player_flags(s.g, s.vict).set(Flag, s.on);
     return true;
   }
 

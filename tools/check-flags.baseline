@@ -1,5 +1,4 @@
 # check-flags.sh's counts: <lines using the old flags> <file>. Lower it with tools/check-flags.sh --update.
-1 libs/dbat/include/dbat/characters.hpp
 1 libs/dbat/include/dbat/dg_scripts.hpp
 12 libs/dbat/include/dbat/flags.hpp
 1 libs/dbat/src/commands/act.item.cpp
@@ -8,8 +7,7 @@
 1 libs/dbat/src/commands/informative/map.cpp
 1 libs/dbat/src/commands/other/items.cpp
 1 libs/dbat/src/commands/other/scouter.cpp
-13 libs/dbat/src/commands/wizard/info.cpp
-2 libs/dbat/src/commands/wizard/players.cpp
+11 libs/dbat/src/commands/wizard/info.cpp
 1 libs/dbat/src/db/mail.cpp
 5 libs/dbat/src/db/players.cpp
 6 libs/dbat/src/db/players/pfile.cpp
@@ -26,7 +24,7 @@
 2 libs/dbat/src/dg/fields_obj.cpp
 2 libs/dbat/src/dg/fields_room.cpp
 2 libs/dbat/src/entities/assemblies.cpp
-10 libs/dbat/src/entities/character_utils.cpp
+1 libs/dbat/src/entities/character_utils.cpp
 5 libs/dbat/src/entities/flags.cpp
 1 libs/dbat/src/entities/object_utils.cpp
 1 libs/dbat/src/entities/room_utils.cpp
@@ -36,7 +34,6 @@
 1 libs/dbat/src/olc/assedit.cpp
 1 libs/dbat/src/olc/gedit.cpp
 2 libs/dbat/src/olc/hsedit.cpp
-2 libs/dbat/src/olc/medit.cpp
 3 libs/dbat/src/olc/oasis_list.cpp
 4 libs/dbat/src/olc/oedit.cpp
 4 libs/dbat/src/olc/redit.cpp

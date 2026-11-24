@@ -161,7 +161,7 @@ namespace {
   {
     clear_screen(g, d);
     olc_list_columns(g, d, action_bits, NUM_MOB_FLAGS, 1, "  ", 2);
-    write_to_output(g, d, "\r\nCurrent flags : @c{}@n\r\nEnter mob flags (0 to quit) : ", sprintbitarray(char_get_act(e.mob.get()), action_bits, AF_ARRAY_MAX));
+    write_to_output(g, d, "\r\nCurrent flags : @c{}@n\r\nEnter mob flags (0 to quit) : ", flag_names(char_get_mob_flags(e.mob.get())));
   }
 
   void aff_flags_menu(GameWorld *g, struct descriptor_data *d, mob_editor &e)
@@ -268,7 +268,7 @@ namespace {
     write_to_output(g, d,
                     "@gI@n) Position   : @y{:<10}@n,	 @gJ@n) Default   : @y{:<10}\r\n@gK@n) Personality: @Y{}@n\r\n@gL@n) NPC Flags  : @c{}\r\n@gM@n) AFF Flags  : @c{}\r\n@gN@n) Class      : @y{:<10}@n,	 @gO@n) Race      : @y{:<10}\r\n@gS@n) Script     : @c{}\r\n@gW@n) Copy mob              ,	 @gX@n) Delete mob\r\n@gY@n) Size       : @y{}\r\n@gZ@n) Wiznet     :\r\n@gQ@n) Quit\r\nEnter choice : ",
                     position_types[(int)char_get_position(m)], position_types[(int)char_get_mob_specials_default_pos(m)],
-                    npc_personality[char_get_personality(m)], sprintbitarray(char_get_act(m), action_bits, AF_ARRAY_MAX),
+                    npc_personality[char_get_personality(m)], flag_names(char_get_mob_flags(m)),
                     flag_names(char_get_affected_by(m)), char_sensei_name(m), char_true_race_name(m),
                     !script.triggers.empty() ? "Set." : "Not Set.", size_names[get_size(m)]);
     asking = mode::main_menu;
@@ -329,8 +329,8 @@ namespace {
           done(g, d);
           return;
         }
-        if (n <= NUM_MOB_FLAGS)
-          char_mob_toggle(mob.get(), n - 1);
+        if (std::optional<mob_flag> flag = flag_from_index<mob_flag>(n - 1))
+          char_mob_toggle(mob.get(), *flag);
         npc_flags_menu(g, d, *this);
         return;
 

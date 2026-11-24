@@ -261,7 +261,7 @@ io::loaded<void> read_mob(GameWorld *g, io::text_reader &in, mob_vnum vnum)
         in.fail(str_format("mob #{:d}: expected 4 act flags, 4 affect flags, its alignment and S or E, got '{}'", vnum,
                            line.value_or(""))));
   for (int i = 0; i < 4; i++) {
-    char_get_act(mob)[i]         = io::ascii_flags(flags[i], 0, "asciiflag_conv");
+    char_get_mob_flags(mob).set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i], 0, "asciiflag_conv"));
     char_get_affected_by(mob).set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i + 4], 0, "asciiflag_conv"));
   }
   char_set_alignment(mob, alignment);
@@ -305,7 +305,7 @@ void write_mob(GameWorld *g, io::text_writer &out, mob_vnum vnum, char_data *mob
 
   std::string flags[8];
   for (int i = 0; i < 4; i++) {
-    flags[i]     = flag_letters(char_get_act(mob)[i]);
+    flags[i]     = flag_letters(char_get_mob_flags(mob).word(static_cast<std::size_t>(i)));
     flags[i + 4] = flag_letters(char_get_affected_by(mob).word(static_cast<std::size_t>(i)));
   }
   out.print("{} {} {} {} {} {} {} {} {:d} E\n"

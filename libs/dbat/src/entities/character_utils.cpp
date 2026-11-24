@@ -4472,14 +4472,15 @@ bool char_is_mob(GameWorld *g, const struct char_data *ch)
   return (char_is_npc(ch) && char_get_nr(ch) != NOBODY); /* a prototype goes only after every copy of it */
 }
 
-bool char_mob_flagged(const struct char_data *ch, int flag)
+bool char_mob_flagged(const struct char_data *ch, mob_flag flag)
 {
-  return (char_is_npc(ch) && IS_SET_AR(char_get_act(ch), (flag)));
+  return char_is_npc(ch) && ch->mob_flags.test(flag);
 }
 
-bool char_plr_flagged(const struct char_data *ch, int flag)
+/* NPCs have no player_specials, so no player flags: reads give false (quietly; many checks ask any character) */
+bool char_plr_flagged(const struct char_data *ch, player_flag flag)
 {
-  return (!char_is_npc(ch) && IS_SET_AR(char_get_act(ch), (flag)));
+  return ch->player_specials && ch->player_specials->player_flags.test(flag);
 }
 
 bool char_aff_flagged(const struct char_data *ch, aff_flag flag)
@@ -4508,11 +4509,13 @@ bool char_is_affected(const struct char_data *ch, aff_flag flag)
   return char_aff_flagged(ch, flag);
 }
 
-bool char_plr_toggle(struct char_data *ch, int flag)
+bool char_plr_toggle(struct char_data *ch, player_flag flag)
 {
-  if (char_is_npc(ch))
+  if (!ch->player_specials)
     return false;
-  return ((TOGGLE_BIT_AR(char_get_act(ch), (flag))) & Q_BIT(flag));
+  flag_set<player_flag> &flags = ch->player_specials->player_flags;
+  flags.toggle(flag);
+  return flags.test(flag);
 }
 
 bool char_prf_toggle(GameWorld *g, struct char_data *ch, pref_flag flag)
@@ -5254,9 +5257,14 @@ int char_get_bank_interest(const struct char_data *ch)
 
 /* Field accessors (formerly accessor macros). */
 
-bitvector_t *char_get_act(const struct char_data *ch)
+const flag_set<mob_flag> &char_get_mob_flags(const struct char_data *ch)
 {
-  return const_cast<bitvector_t *>(ch->act); /* writable flag array, as the macro allowed */
+  return ch->mob_flags;
+}
+
+flag_set<mob_flag> &char_get_mob_flags(struct char_data *ch)
+{
+  return ch->mob_flags;
 }
 
 const flag_set<aff_flag> &char_get_affected_by(const struct char_data *ch)
@@ -6728,44 +6736,43 @@ struct room_direction_data *char_get_exit2(GameWorld *g, const struct char_data 
 
 /* Flag setters and toggles. */
 
-static void flag_array_set(bitvector_t *array, int flag, bool on)
+void char_plr_set(struct char_data *ch, player_flag flag, bool on)
 {
-  if (on)
-    SET_BIT_AR(array, flag);
-  else
-    REMOVE_BIT_AR(array, flag);
+  if (ch->player_specials)
+    ch->player_specials->player_flags.set(flag, on);
 }
 
-static bool flag_array_toggle(bitvector_t *array, int flag)
+/* The flags a MOB_ flag of ch lands in: an NPC's mob flags, or for a PC only MOB_ISNPC, which lands on the player
+ * flag of the same bit */
+static bool mob_flag_write(struct char_data *ch, mob_flag flag, bool toggle, bool on)
 {
-  return (TOGGLE_BIT_AR(array, flag) & Q_BIT(flag)) != 0;
-}
-
-/* MOB bits only apply to NPCs; MOB_ISNPC is what makes a character one. */
-static bool mob_flag_applies(const struct char_data *ch, int flag)
-{
-  return flag == MOB_ISNPC || char_is_npc(ch);
-}
-
-void char_plr_set(struct char_data *ch, int flag, bool on)
-{
-  if (char_is_npc(ch))
-    return;
-  flag_array_set(char_get_act(ch), flag, on);
-}
-
-void char_mob_set(struct char_data *ch, int flag, bool on)
-{
-  if (!mob_flag_applies(ch, flag))
-    return;
-  flag_array_set(char_get_act(ch), flag, on);
-}
-
-bool char_mob_toggle(struct char_data *ch, int flag)
-{
-  if (!mob_flag_applies(ch, flag))
+  std::size_t bit = static_cast<std::size_t>(std::to_underlying(flag));
+  if (char_is_npc(ch)) {
+    if (toggle)
+      ch->mob_flags.toggle(flag);
+    else
+      ch->mob_flags.set(flag, on);
+    return ch->mob_flags.test(flag);
+  }
+  if (flag != MOB_ISNPC)
     return false;
-  return flag_array_toggle(char_get_act(ch), flag);
+  /* quirk: reads PLR_DONTSET, meant MOB_ISNPC (they were one bit of act; nothing sets it on a player today) */
+  flag_set<player_flag> &plr = ch->player_specials->player_flags;
+  if (toggle)
+    plr.toggle_bit(bit);
+  else
+    plr.set_bit(bit, on);
+  return plr.test_bit(bit);
+}
+
+void char_mob_set(struct char_data *ch, mob_flag flag, bool on)
+{
+  mob_flag_write(ch, flag, false, on);
+}
+
+bool char_mob_toggle(struct char_data *ch, mob_flag flag)
+{
+  return mob_flag_write(ch, flag, true, true);
 }
 
 void char_aff_set(struct char_data *ch, aff_flag flag, bool on)
@@ -6810,6 +6817,17 @@ static struct player_special_data *ps_of(GameWorld *g, const struct char_data *c
   mud_log("SYSERR: player-only field '{}' used on NPC {} (#{:d})", field, char_get_name(ch), char_get_mob_vnum(g, ch));
   log_backtrace();
   return nullptr;
+}
+
+flag_set<player_flag> &char_get_player_flags(GameWorld *g, const struct char_data *ch)
+{
+  static flag_set<player_flag> none; /* NPCs: always reads as "no player flags" */
+  struct player_special_data *ps = ps_of(g, ch, "player_flags");
+  if (!ps) {
+    none = {};
+    return none;
+  }
+  return ps->player_flags;
 }
 
 flag_set<pref_flag> &char_get_pref(GameWorld *g, const struct char_data *ch)

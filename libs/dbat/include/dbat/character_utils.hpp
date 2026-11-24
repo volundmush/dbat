@@ -94,7 +94,10 @@ std::string_view char_sensei_style(const struct char_data *ch);
 std::string_view char_class_abbr(const struct char_data *ch);
 std::string_view char_race_abbr(const struct char_data *ch);
 
-bitvector_t *char_get_act(const struct char_data *ch);
+const flag_set<mob_flag> &char_get_mob_flags(const struct char_data *ch);
+flag_set<mob_flag> &char_get_mob_flags(struct char_data *ch);
+/* A player's PLR_ flags; for an NPC, logs (as char_get_pref does) and gives an empty set */
+flag_set<player_flag> &char_get_player_flags(GameWorld *g, const struct char_data *ch);
 const flag_set<aff_flag> &char_get_affected_by(const struct char_data *ch);
 flag_set<aff_flag> &char_get_affected_by(struct char_data *ch);
 const flag_set<admin_flag> &char_get_admflags(const struct char_data *ch);
@@ -105,8 +108,8 @@ flag_set<admin_flag> &char_get_admflags(struct char_data *ch);
 bool char_is_npc(const struct char_data *ch);
 bool char_is_mob(GameWorld *g, const struct char_data *ch);
 
-bool char_mob_flagged(const struct char_data *ch, int flag);
-bool char_plr_flagged(const struct char_data *ch, int flag);
+bool char_mob_flagged(const struct char_data *ch, mob_flag flag);
+bool char_plr_flagged(const struct char_data *ch, player_flag flag);
 bool char_aff_flagged(const struct char_data *ch, aff_flag flag);
 bool char_prf_flagged(GameWorld *g, const struct char_data *ch, pref_flag flag);
 bool char_adm_flagged(const struct char_data *ch, admin_flag flag);
@@ -114,15 +117,14 @@ bool char_adm_flagged(const struct char_data *ch, admin_flag flag);
 bool char_body_flagged(const struct char_data *ch, int where);
 bool char_is_affected(const struct char_data *ch, aff_flag flag);
 
-bool char_plr_toggle(struct char_data *ch, int flag);
+bool char_plr_toggle(struct char_data *ch, player_flag flag);
 bool char_prf_toggle(GameWorld *g, struct char_data *ch, pref_flag flag);
 bool char_aff_toggle(struct char_data *ch, aff_flag flag);
-bool char_mob_toggle(struct char_data *ch, int flag);
+bool char_mob_toggle(struct char_data *ch, mob_flag flag);
 
-/* Flag setters. PLR bits are ignored on NPCs, and MOB bits on PCs (except MOB_ISNPC);
- * both kinds share char_data::act. */
-void char_plr_set(struct char_data *ch, int flag, bool on);
-void char_mob_set(struct char_data *ch, int flag, bool on);
+/* Flag setters. PLR bits are ignored on NPCs, and MOB bits on PCs (except MOB_ISNPC). */
+void char_plr_set(struct char_data *ch, player_flag flag, bool on);
+void char_mob_set(struct char_data *ch, mob_flag flag, bool on);
 void char_aff_set(struct char_data *ch, aff_flag flag, bool on);
 void char_adm_set(struct char_data *ch, admin_flag flag, bool on);
 void char_prf_set(GameWorld *g, struct char_data *ch, pref_flag flag, bool on);

@@ -413,7 +413,7 @@ namespace {
   constexpr struct {
     std::string_view word{};
     int limb;
-    int flag;
+    player_flag flag;
     std::string_view name{};
   } IMPLANTS[] = {{"rarm", 0, PLR_CRARM, "right arm"}, {"larm", 1, PLR_CLARM, "left arm"}, {"rleg", 2, PLR_CRLEG, "right leg"}, {"lleg", 3, PLR_CLLEG, "left leg"}};
 } // namespace
@@ -1448,7 +1448,7 @@ ACMD(do_transform)
     if (char_get_charge(ch) > 0)
       do_charge(g, ch, "release", 0, 0);
     race_echo_revert(g, ch, race_flag_to_tier(cur_form.flag));
-    char_plr_set(ch, cur_form.flag, false);
+    char_plr_set(ch, *cur_form.flag, false);
     if (!arg2.empty()) /* revert and transform anew */
       do_transform(g, ch, arg2.data(), 0, 0);
     return;
@@ -1460,7 +1460,9 @@ ACMD(do_transform)
     return;
   }
   int to_tier = race_flag_to_tier(trans.flag);
-  if (char_plr_flagged(ch, trans.flag)) {
+  /* quirk: reads PLR_KILLER (flag 0), meant the form's flag, for a form without one */
+  const player_flag trans_flag = trans.flag.value_or(PLR_KILLER);
+  if (char_plr_flagged(ch, trans_flag)) {
     send_to_char(g, ch, "You are already in that form! Try 'revert'.\r\n");
     return;
   }
@@ -1477,9 +1479,9 @@ ACMD(do_transform)
     return;
 
   if (cur_form.flag)
-    char_plr_set(ch, cur_form.flag, false);
+    char_plr_set(ch, *cur_form.flag, false);
   /* The stats are applied automatically just by having the flag. */
-  char_plr_set(ch, trans.flag, true);
+  char_plr_set(ch, trans_flag, true);
   race_echo_transform(g, ch, to_tier);
   reveal_hiding(g, ch, 0); /* No way is this a stealthy process... */
   if (race_has_noisy_transformations(char_get_race(ch)))
