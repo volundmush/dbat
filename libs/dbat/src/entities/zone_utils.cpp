@@ -10,6 +10,14 @@ bool zone_flagged(GameWorld *g, struct zone_data *rnum, int flag)
   return (IS_SET_AR(((rnum))->zone_flags, flag));
 }
 
+void zone_set_flag(struct zone_data *zone, int flag, bool on)
+{
+  if (on)
+    SET_BIT_AR(zone->zone_flags, flag);
+  else
+    REMOVE_BIT_AR(zone->zone_flags, flag);
+}
+
 /* Field accessors (formerly accessor macros). */
 
 int zone_get_min_level(GameWorld *g, struct zone_data *zone)

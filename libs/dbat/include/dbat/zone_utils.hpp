@@ -5,6 +5,8 @@
 int zone_get_min_level(GameWorld *g, struct zone_data *zone);
 int zone_get_max_level(GameWorld *g, struct zone_data *zone);
 bool zone_flagged(GameWorld *g, struct zone_data *rnum, int flag);
+/* Sets (or clears) one of the zone's flags */
+void zone_set_flag(struct zone_data *zone, int flag, bool on);
 /* The same on a zone_data pointer, e.g. an OLC working copy. */
 bool zone_data_toggle_flag(struct zone_data *zone, int flag);
 

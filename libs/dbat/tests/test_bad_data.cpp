@@ -52,6 +52,8 @@
 #include "dbat/fileop.hpp"
 #include "dbat/io/paths.hpp"
 #include "dbat/stringutils.hpp"
+#include "dbat/flag_set.hpp"
+#include "dbat/flags.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/utils.hpp"
@@ -966,6 +968,71 @@ static void check_scan_range(void)
     CHECK(low == old_low);
     CHECK(high == old_high);
   }
+}
+
+/* flag_set's names and words, for every family's table, against sprintbitarray() and the raw words: stand-in
+   families of the same sizes */
+enum class test_room_flag : uint8_t { count_ = NUM_ROOM_FLAGS };
+template <> struct flag_traits<test_room_flag> { static constexpr const name_table &names = room_bits; };
+enum class test_zone_flag : uint8_t { count_ = NUM_ZONE_FLAGS };
+template <> struct flag_traits<test_zone_flag> { static constexpr const name_table &names = zone_bits; };
+enum class test_aff_flag : uint8_t { count_ = NUM_AFF_FLAGS };
+template <> struct flag_traits<test_aff_flag> { static constexpr const name_table &names = affected_bits; };
+enum class test_plr_flag : uint8_t { count_ = NUM_PLR_FLAGS };
+template <> struct flag_traits<test_plr_flag> { static constexpr const name_table &names = player_bits; };
+enum class test_mob_flag : uint8_t { count_ = NUM_MOB_FLAGS };
+template <> struct flag_traits<test_mob_flag> { static constexpr const name_table &names = action_bits; };
+enum class test_prf_flag : uint8_t { count_ = NUM_PRF_FLAGS };
+template <> struct flag_traits<test_prf_flag> { static constexpr const name_table &names = preference_bits; };
+enum class test_extra_flag : uint8_t { count_ = NUM_ITEM_FLAGS };
+template <> struct flag_traits<test_extra_flag> { static constexpr const name_table &names = extra_bits; };
+enum class test_wear_flag : uint8_t { count_ = NUM_ITEM_WEARS };
+template <> struct flag_traits<test_wear_flag> { static constexpr const name_table &names = wear_bits; };
+enum class test_trade_flag : uint8_t { count_ = NUM_TRADER_NAMES };
+template <> struct flag_traits<test_trade_flag> { static constexpr const name_table &names = trade_letters; };
+
+template <class E> static int flag_set_mismatches(const name_table &table)
+{
+  int mismatches   = 0;
+  uint64_t state   = 88172645463325252ULL;
+  auto next_word   = [&]() { state ^= state << 13; state ^= state >> 7; state ^= state << 17; return static_cast<bitvector_t>(state); };
+  for (int round = 0; round < 2000; round++) {
+    bitvector_t words[FLAG_WORDS];
+    for (bitvector_t &w : words)
+      w = round % 3 == 0 ? 0 : round % 3 == 1 ? next_word() & next_word() : next_word(); /* none, sparse, dense */
+    flag_set<E> set = flag_set<E>::from_words(words);
+    mismatches += flag_names(set) != sprintbitarray(words, table, FLAG_WORDS);
+    mismatches += set.words() != std::to_array(words);
+    for (std::size_t i = 0; i < flag_count<E>; i++)
+      mismatches += set.test(static_cast<E>(i)) != (IS_SET_AR(words, i) != 0);
+    for (E flag : set.flags())
+      mismatches += !IS_SET_AR(words, static_cast<std::size_t>(flag));
+  }
+  return mismatches;
+}
+
+static void check_flag_sets(void)
+{
+  CHECK(flag_set_mismatches<test_room_flag>(room_bits) == 0);
+  CHECK(flag_set_mismatches<test_zone_flag>(zone_bits) == 0);
+  CHECK(flag_set_mismatches<test_aff_flag>(affected_bits) == 0);
+  CHECK(flag_set_mismatches<test_plr_flag>(player_bits) == 0);
+  CHECK(flag_set_mismatches<test_mob_flag>(action_bits) == 0);
+  CHECK(flag_set_mismatches<test_prf_flag>(preference_bits) == 0);
+  CHECK(flag_set_mismatches<test_extra_flag>(extra_bits) == 0);
+  CHECK(flag_set_mismatches<test_wear_flag>(wear_bits) == 0);
+  CHECK(flag_set_mismatches<test_trade_flag>(trade_letters) == 0);
+
+  /* by number and by name, as get_flag_by_name() found them */
+  CHECK(flag_from_index<test_room_flag>(-1) == std::nullopt);
+  CHECK(flag_from_index<test_room_flag>(NUM_ROOM_FLAGS) == std::nullopt);
+  CHECK(flag_from_index<test_room_flag>(3) == static_cast<test_room_flag>(3));
+  for (std::size_t i = 0; i < room_bits.size(); i++) {
+    std::optional<test_room_flag> named = flag_by_name<test_room_flag>(room_bits[i]);
+    int old                             = get_flag_by_name(room_bits, room_bits[i]);
+    CHECK(named ? static_cast<int>(*named) == old : old == NOFLAG);
+  }
+  CHECK(flag_by_name<test_room_flag>("NO_SUCH_FLAG") == std::nullopt);
 }
 
 /* asctime_text() writes a time as asctime() did, less its newline: the day padded with a space, the rest with zeros */
@@ -2974,6 +3041,7 @@ static const struct {
     {"message_ending_in_a_backslash",               check_message_ending_in_a_backslash              },
     {"text_field_of_self",                          check_text_field_of_self                         },
     {"add_commas",                                  check_add_commas                                 },
+    {"flag_sets",                                   check_flag_sets                                  },
     {"asctime_text",                                check_asctime_text                               },
     {"guildmaster_special_hears_the_command",       check_guildmaster_special_hears_the_command      },
     {"scan_range",                                  check_scan_range                                 },

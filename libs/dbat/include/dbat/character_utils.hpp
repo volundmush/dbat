@@ -121,6 +121,7 @@ bool char_mob_toggle(struct char_data *ch, int flag);
 void char_plr_set(struct char_data *ch, int flag, bool on);
 void char_mob_set(struct char_data *ch, int flag, bool on);
 void char_aff_set(struct char_data *ch, int flag, bool on);
+void char_adm_set(struct char_data *ch, int flag, bool on);
 void char_prf_set(GameWorld *g, struct char_data *ch, int flag, bool on);
 void char_body_set(struct char_data *ch, int flag, bool on);
 

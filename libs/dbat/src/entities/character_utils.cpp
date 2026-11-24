@@ -40,7 +40,6 @@
 #include "dbat/io/writer.hpp"
 #include "dbat/game_world.hpp"
 
-static void char_adm_set(struct char_data *ch, int flag, bool on);
 static bool char_has_legs(GameWorld *g, const struct char_data *ch);
 static bool char_is_fullpssj(const struct char_data *ch);
 static bool char_is_grap(GameWorld *g, const struct char_data *ch);
@@ -6785,7 +6784,7 @@ void char_prf_set(GameWorld *g, struct char_data *ch, int flag, bool on)
   flag_array_set(char_get_pref(g, ch), flag, on);
 }
 
-static void char_adm_set(struct char_data *ch, int flag, bool on)
+void char_adm_set(struct char_data *ch, int flag, bool on)
 {
   flag_array_set(char_get_admflags(ch), flag, on);
 }
