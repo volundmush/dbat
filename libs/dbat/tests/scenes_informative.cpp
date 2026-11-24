@@ -773,7 +773,7 @@ namespace {
     {"outside, sky 1", "weather", false, SETUP(room_set_flag(g, ARENA, ROOM_INDOORS, false); room_set_sector_type(g, ARENA, SECT_FIELD); g->weather_info.sky = 1; g->weather_info.change = 1 - 2;), false, 1},
     {"outside, sky 2", "weather", false, SETUP(room_set_flag(g, ARENA, ROOM_INDOORS, false); room_set_sector_type(g, ARENA, SECT_FIELD); g->weather_info.sky = 2; g->weather_info.change = 2 - 2;), false, 1},
     {"outside, sky 3", "weather", false, SETUP(room_set_flag(g, ARENA, ROOM_INDOORS, false); room_set_sector_type(g, ARENA, SECT_FIELD); g->weather_info.sky = 3; g->weather_info.change = 3 - 2;), false, 1},
-    {"outside, knowing weather", "weather", false, SETUP(room_set_flag(g, ARENA, ROOM_INDOORS, false); room_set_sector_type(g, ARENA, SECT_FIELD); SET_BIT_AR(char_get_admflags(att), ADM_KNOWWEATHER);), false, 1},
+    {"outside, knowing weather", "weather", false, SETUP(room_set_flag(g, ARENA, ROOM_INDOORS, false); room_set_sector_type(g, ARENA, SECT_FIELD); char_adm_set(att, ADM_KNOWWEATHER, true);), false, 1},
     {"inside", "weather", false, SETUP(room_set_flag(g, ARENA, ROOM_INDOORS, true);), false, 1},
     {"plainly", "help", false, SETUP(), false, 1},
     {"plainly", "help fixture", false, SETUP(), false, 1},

@@ -17,7 +17,7 @@
 19 libs/dbat/src/commands/wizard/info.cpp
 2 libs/dbat/src/commands/wizard/players.cpp
 1 libs/dbat/src/db/mail.cpp
-2 libs/dbat/src/db/players.cpp
+5 libs/dbat/src/db/players.cpp
 6 libs/dbat/src/db/players/pfile.cpp
 6 libs/dbat/src/db/reset.cpp
 4 libs/dbat/src/db/world/rooms.cpp
@@ -35,9 +35,10 @@
 2 libs/dbat/src/entities/assemblies.cpp
 21 libs/dbat/src/entities/character_utils.cpp
 5 libs/dbat/src/entities/flags.cpp
+2 libs/dbat/src/entities/guild_utils.cpp
 11 libs/dbat/src/entities/object_utils.cpp
 5 libs/dbat/src/entities/room_utils.cpp
-2 libs/dbat/src/entities/shop_utils.cpp
+4 libs/dbat/src/entities/shop_utils.cpp
 4 libs/dbat/src/entities/zone_utils.cpp
 2 libs/dbat/src/net/messages.cpp
 1 libs/dbat/src/net/nanny.cpp
@@ -57,8 +58,5 @@
 15 libs/dbat/src/systems/spell_parser.cpp
 15 libs/dbat/src/systems/spells.cpp
 1 libs/dbat/src/systems/vehicles.cpp
-1 libs/dbat/tests/scenes_informative.cpp
-3 libs/dbat/tests/scenes_movement.cpp
-2 libs/dbat/tests/scenes_other.cpp
-2 libs/dbat/tests/scenes_wizard.cpp
-9 libs/dbat/tests/test_bad_data.cpp
+1 libs/dbat/tests/scenes_wizard.cpp
+5 libs/dbat/tests/test_bad_data.cpp

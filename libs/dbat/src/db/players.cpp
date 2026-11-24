@@ -36,6 +36,19 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
+bool pindex_flagged(const player_index_element &entry, int flag)
+{
+  return IS_SET(entry.flags, flag);
+}
+
+void pindex_set_flag(player_index_element &entry, int flag, bool on)
+{
+  if (on)
+    SET_BIT(entry.flags, flag);
+  else
+    REMOVE_BIT(entry.flags, flag);
+}
+
 /* The player index, plrfiles/index: a line for each player,
  *
  *   <id> <name> <level> <flags> <last logon> <admin level> <ship> <ship room> <time played>

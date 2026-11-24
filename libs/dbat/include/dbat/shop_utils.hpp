@@ -36,6 +36,8 @@ void shop_set_profit_sell(struct shop_data *shop, float v);
 spec_proc_func shop_get_func(const struct shop_data *shop);
 void shop_set_func(struct shop_data *shop, spec_proc_func v);
 bitvector_t *shop_get_with_who(struct shop_data *shop);
+/* Sets or clears a trader flag (TRADE_*) in whom the shop won't trade with */
+void shop_set_with_who(struct shop_data *shop, int flag, bool on);
 /* What the shop sells, where it is, and what it buys, in file order. */
 std::vector<obj_vnum> &shop_products(struct shop_data *shop);
 const std::vector<obj_vnum> &shop_products(const struct shop_data *shop);

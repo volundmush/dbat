@@ -1920,8 +1920,8 @@ static void check_sensing_keeps_no_copies(void)
   struct char_data *ch  = th_player(g, "Sensed", 0);
   struct char_data *tch = th_player(g, "Senser", 0);
 
-  SET_BIT_AR(room_get_room_flags(g, 300), ROOM_EARTH);
-  SET_BIT_AR(room_get_room_flags(g, 301), ROOM_EARTH);
+  room_set_flag(g, 300, ROOM_EARTH, true);
+  room_set_flag(g, 301, ROOM_EARTH, true);
   char_from_room(g, ch);
   char_to_room(g, ch, 300);
   char_from_room(g, tch);
@@ -1951,7 +1951,7 @@ static void check_shop_with_no_customers(void)
   th_take_output(g, ch);
 
   for (int i = 0; i < NUM_TRADERS; i++)
-    SET_BIT_AR(shop_get_with_who(shop), i);
+    shop_set_with_who(shop, i, true);
   th_type(g, ch, "game shops 1");
   CHECK(saw(ch, "Customers:  None"));
   CHECK_AUDIT(g);
@@ -1972,7 +1972,7 @@ static void check_guild_with_no_customers(void)
   th_take_output(g, ch);
 
   for (int i = 0; i < NUM_TRADERS; i++)
-    SET_BIT_AR(guild_get_with_who(gild), i);
+    guild_set_with_who(gild, i, true);
   th_type(g, ch, show.c_str());
   CHECK(saw(ch, "Whom will train: \r\n"));
   CHECK_AUDIT(g);

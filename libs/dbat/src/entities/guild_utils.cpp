@@ -79,6 +79,14 @@ bitvector_t *guild_get_with_who(struct guild_data *guild)
   return guild->with_who;
 }
 
+void guild_set_with_who(struct guild_data *guild, int flag, bool on)
+{
+  if (on)
+    SET_BIT_AR(guild->with_who, flag);
+  else
+    REMOVE_BIT_AR(guild->with_who, flag);
+}
+
 std::string_view guild_get_no_such_skill(const struct guild_data *guild)
 {
   return guild->no_such_skill;

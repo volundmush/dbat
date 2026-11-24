@@ -9,7 +9,7 @@
 #include "dbat/flags.hpp"
 #include "dbat/interpreter.hpp"
 #include "dbat/players.hpp"
-#include "dbat/zones.hpp"
+#include "dbat/zone_utils.hpp"
 
 namespace {
   /* ... an immortal of this level, with the powers it brings */
@@ -98,7 +98,7 @@ namespace {
 
   void zone_flag(GameWorld *g, room_vnum room, int flag)
   {
-    SET_BIT_AR(room_get_zone(g, room)->zone_flags, flag);
+    zone_set_flag(room_get_zone(g, room), flag, true);
   }
 
   void key_exit(GameWorld *g, obj_vnum key)
