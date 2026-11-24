@@ -181,9 +181,9 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
         in.fail(str_format("object #{:d}: expected its type, 4 extra flags, 4 wear flags and 4 affect flags, got '{}'",
                            vnum, line.value_or(""))));
   for (int i = 0; i < 4; i++) {
-    obj_get_extra_flags(obj)[i] = io::ascii_flags(flags[i], 0, "asciiflag_conv");
-    obj_get_wear_flags(obj)[i]  = io::ascii_flags(flags[i + 4], 0, "asciiflag_conv");
-    obj_get_bitvector(obj)[i]   = io::ascii_flags(flags[i + 8], 0, "asciiflag_conv");
+    obj_get_extra_flags(obj).set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i], 0, "asciiflag_conv"));
+    obj_get_wear_flags(obj).set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i + 4], 0, "asciiflag_conv"));
+    obj_get_bitvector(obj).set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i + 8], 0, "asciiflag_conv"));
   }
   obj_set_type_flag(obj, type);
 
@@ -293,9 +293,9 @@ void write_object(GameWorld *g, io::text_writer &out, obj_data *obj)
 
   std::string flags[12];
   for (int i = 0; i < 4; i++) {
-    flags[i]     = flag_letters(obj_get_extra_flags(obj)[i]);
-    flags[i + 4] = flag_letters(obj_get_wear_flags(obj)[i]);
-    flags[i + 8] = flag_letters(obj_get_bitvector(obj)[i]);
+    flags[i]     = flag_letters(obj_get_extra_flags(obj).word(static_cast<std::size_t>(i)));
+    flags[i + 4] = flag_letters(obj_get_wear_flags(obj).word(static_cast<std::size_t>(i)));
+    flags[i + 8] = flag_letters(obj_get_bitvector(obj).word(static_cast<std::size_t>(i)));
   }
   out.print("{:d}", obj_get_type_flag(obj));
   for (const std::string &flag : flags)

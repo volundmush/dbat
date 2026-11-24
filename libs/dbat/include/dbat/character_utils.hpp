@@ -26,7 +26,7 @@
 
 /* Player-only data (player_specials). On an NPC these log the caller with a backtrace; reads then give
  * 0/NULL and writes are ignored. */
-bitvector_t *char_get_pref(GameWorld *g, const struct char_data *ch);
+flag_set<pref_flag> &char_get_pref(GameWorld *g, const struct char_data *ch);
 int char_get_gauntlet(GameWorld *g, const struct char_data *ch);
 void char_set_gauntlet(GameWorld *g, struct char_data *ch, int v);
 int char_get_tlevel(GameWorld *g, const struct char_data *ch);
@@ -95,8 +95,10 @@ std::string_view char_class_abbr(const struct char_data *ch);
 std::string_view char_race_abbr(const struct char_data *ch);
 
 bitvector_t *char_get_act(const struct char_data *ch);
-bitvector_t *char_get_affected_by(const struct char_data *ch);
-bitvector_t *char_get_admflags(const struct char_data *ch);
+const flag_set<aff_flag> &char_get_affected_by(const struct char_data *ch);
+flag_set<aff_flag> &char_get_affected_by(struct char_data *ch);
+const flag_set<admin_flag> &char_get_admflags(const struct char_data *ch);
+flag_set<admin_flag> &char_get_admflags(struct char_data *ch);
 
 /* Return the gauntlet highest room for ch */
 
@@ -105,25 +107,26 @@ bool char_is_mob(GameWorld *g, const struct char_data *ch);
 
 bool char_mob_flagged(const struct char_data *ch, int flag);
 bool char_plr_flagged(const struct char_data *ch, int flag);
-bool char_aff_flagged(const struct char_data *ch, int flag);
-bool char_prf_flagged(GameWorld *g, const struct char_data *ch, int flag);
-bool char_adm_flagged(const struct char_data *ch, int flag);
-bool char_body_flagged(const struct char_data *ch, int flag);
-bool char_is_affected(const struct char_data *ch, int skill);
+bool char_aff_flagged(const struct char_data *ch, aff_flag flag);
+bool char_prf_flagged(GameWorld *g, const struct char_data *ch, pref_flag flag);
+bool char_adm_flagged(const struct char_data *ch, admin_flag flag);
+/* Whether ch's body has equipment position where (WEAR_), and setting whether it does */
+bool char_body_flagged(const struct char_data *ch, int where);
+bool char_is_affected(const struct char_data *ch, aff_flag flag);
 
 bool char_plr_toggle(struct char_data *ch, int flag);
-bool char_prf_toggle(GameWorld *g, struct char_data *ch, int flag);
-bool char_aff_toggle(struct char_data *ch, int flag);
+bool char_prf_toggle(GameWorld *g, struct char_data *ch, pref_flag flag);
+bool char_aff_toggle(struct char_data *ch, aff_flag flag);
 bool char_mob_toggle(struct char_data *ch, int flag);
 
 /* Flag setters. PLR bits are ignored on NPCs, and MOB bits on PCs (except MOB_ISNPC);
  * both kinds share char_data::act. */
 void char_plr_set(struct char_data *ch, int flag, bool on);
 void char_mob_set(struct char_data *ch, int flag, bool on);
-void char_aff_set(struct char_data *ch, int flag, bool on);
-void char_adm_set(struct char_data *ch, int flag, bool on);
-void char_prf_set(GameWorld *g, struct char_data *ch, int flag, bool on);
-void char_body_set(struct char_data *ch, int flag, bool on);
+void char_aff_set(struct char_data *ch, aff_flag flag, bool on);
+void char_adm_set(struct char_data *ch, admin_flag flag, bool on);
+void char_prf_set(GameWorld *g, struct char_data *ch, pref_flag flag, bool on);
+void char_body_set(struct char_data *ch, int where, bool on);
 
 /* new define for quick check */
 bool char_is_dead(const struct char_data *ch);
@@ -441,7 +444,7 @@ void char_set_skills_perf(struct char_data *ch, int i, int8_t v);
 int8_t char_get_skills_base(const struct char_data *ch, int i);
 void char_set_skills_base(struct char_data *ch, int i, int8_t v);
 int char_get_skill(const struct char_data *ch, int i);
-bitvector_t *char_get_bodyparts(const struct char_data *ch);
+const flag_set<body_part> &char_get_bodyparts(const struct char_data *ch);
 
 struct obj_data *char_get_equipment(const struct char_data *ch, int i);
 void char_set_equipment(struct char_data *ch, int i, struct obj_data *v);
@@ -740,7 +743,7 @@ int handle_speed(GameWorld *g, struct char_data *ch, struct char_data *vict);
 struct time_info_data *age(GameWorld *g, struct char_data *ch);
 std::string get_i_name(struct char_data *ch, struct char_data *vict);
 
-void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
+void assign_affect(GameWorld *g, struct char_data *ch, aff_flag flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
 bool know_skill(GameWorld *g, struct char_data *ch, int skill);
 
 /* Sends text to ch's connection, if it has one, as it is */
@@ -757,9 +760,9 @@ size_t send_to_char(GameWorld *g, struct char_data *ch, std::format_string<Args.
 void admin_set(GameWorld *g, struct char_data *ch, int value);
 /* the name of the place ch is in, as sensing them tells it */
 std::string_view sense_location(GameWorld *g, struct char_data *ch);
-void null_affect(GameWorld *g, struct char_data *ch, int aff_flag);
-bool is_affected(struct char_data *ch, int aff_flag);
-void remove_affect(GameWorld *g, struct char_data *ch, int aff_flag);
+void null_affect(GameWorld *g, struct char_data *ch, aff_flag flag);
+bool is_affected(struct char_data *ch, aff_flag flag);
+void remove_affect(GameWorld *g, struct char_data *ch, aff_flag flag);
 bool planet_check(GameWorld *g, struct char_data *ch, struct char_data *vict);
 /* Player autoexit levels: used as an index to exitlevels           */
 

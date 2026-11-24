@@ -217,7 +217,6 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
 {
   std::string buf;
   struct obj_data *obj;
-  int y;
 
   if (!has_mail(g, char_get_idnum(ch)) && mailman != nullptr) {
     buf = "$n tells you, 'Sorry, you don't have any mail waiting.'";
@@ -229,8 +228,7 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
     obj_set_item_number(obj, NOTHING);
 
     obj_set_type_flag(obj, ITEM_NOTE);
-    for (y = 0; y < TW_ARRAY_MAX; y++)
-      obj_get_wear_flags(obj)[y] = 0;
+    obj_get_wear_flags(obj) = {};
     obj_wear_set(obj, ITEM_WEAR_TAKE, true);
     obj_wear_set(obj, ITEM_WEAR_HOLD, true);
     obj_set_weight(obj, 1);

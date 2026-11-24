@@ -200,14 +200,14 @@ namespace {
     clear_screen(g, d);
     olc_list_columns(g, d, extra_bits, NUM_ITEM_FLAGS, 1, " ", 3);
     write_to_output(g, d, "\r\nObject flags: @c{}@n\r\nEnter object extra flag (0 to quit) : ",
-                    sprintbitarray(obj_get_extra_flags(&e.obj), extra_bits, EF_ARRAY_MAX));
+                    flag_names(obj_get_extra_flags(&e.obj)));
   }
 
   void wear_menu(GameWorld *g, struct descriptor_data *d, object_editor &e)
   {
     clear_screen(g, d);
     olc_list_columns(g, d, wear_bits, NUM_ITEM_WEARS, 1, " ", 3);
-    write_to_output(g, d, "\r\nWear flags: @c{}@n\r\nEnter wear flag, 0 to quit : ", sprintbitarray(obj_get_wear_flags(&e.obj), wear_bits, TW_ARRAY_MAX));
+    write_to_output(g, d, "\r\nWear flags: @c{}@n\r\nEnter wear flag, 0 to quit : ", flag_names(obj_get_wear_flags(&e.obj)));
   }
 
   void material_menu(GameWorld *g, struct descriptor_data *d, object_editor &)
@@ -222,12 +222,12 @@ namespace {
     clear_screen(g, d);
     int columns = 0;
     for (int counter = 1; counter < NUM_AFF_FLAGS; counter++) {
-      if (counter == AFF_CHARM) /* Setting AFF_CHARM on objects like this is dangerous. */
+      if (counter == std::to_underlying(AFF_CHARM)) /* Setting AFF_CHARM on objects like this is dangerous. */
         continue;
       write_to_output(g, d, "@g{:>2d}@n) {:<20.20}{}", counter, affected_bits[counter], !(++columns % 3) ? "\r\n" : "");
     }
     write_to_output(g, d, "\r\nObject permanent flags: @c{}@n\r\nEnter object perm flag (0 to quit) : ",
-                    sprintbitarray(obj_get_bitvector(&e.obj), affected_bits, EF_ARRAY_MAX));
+                    flag_names(obj_get_bitvector(&e.obj)));
   }
 
   void size_menu(GameWorld *g, struct descriptor_data *d, object_editor &)
@@ -510,16 +510,16 @@ namespace {
                     or_if_empty(obj_get_short_description(&obj), "undefined"),
                     or_if_empty(obj_get_description(&obj), "undefined"),
                     or_if_empty(obj_get_action_description(&obj), "Not Set.\r\n"),
-                    sprinttype(obj_get_type_flag(&obj), item_types), sprintbitarray(obj_get_extra_flags(&obj), extra_bits, EF_ARRAY_MAX));
+                    sprinttype(obj_get_type_flag(&obj), item_types), flag_names(obj_get_extra_flags(&obj)));
 
     std::string values;
     for (int i = 0; i < NUM_OBJ_VAL_POSITIONS; i++)
       values += str_format("{}{:d}", i ? " " : "", obj_get_value(&obj, i));
     write_to_output(g, d,
                     "@g7@n) Wear flags  : @c{}@n\r\n@g8@n) Weight      : @c{:<4d}@n, 	@g9@n) Cost        : @c{:<4d}@n\r\n@gA@n) Cost/Day    : @c{:<4d}@n, 	@gB@n) Timer       : @c{:<4d}@n\r\n@gC@n) Values      : @c{}@n\r\n@gD@n) Applies menu@n\r\n@gE@n) Extra descriptions menu {}\r\n@gM@n) Min Level   : @c{:d}@n\r\n@gN@n) Material    : @c{}@n\r\n@gP@n) Perm Affects: @c{}@n\r\n@gS@n) Script      : @c{}@n\r\n@gT@n) Spellbook menu\r\n@gW@n) Copy object        ,	@gX@n) Delete object\r\n@gY@n) Size        : @c{}@n\r\n@gZ@n) Wiznet      :\r\n@gQ@n) Quit\r\nEnter choice : ",
-                    sprintbitarray(obj_get_wear_flags(&obj), wear_bits, EF_ARRAY_MAX), obj_get_weight(&obj), obj_get_cost(&obj), obj_get_cost_per_day(&obj),
+                    flag_names(obj_get_wear_flags(&obj)), obj_get_weight(&obj), obj_get_cost(&obj), obj_get_cost_per_day(&obj),
                     obj_get_timer(&obj), values, "Set." /* quirk: always; it once asked whether the extra flags (an array) were there */,
-                    obj_get_level(&obj), material_names[obj_get_value(&obj, 7)], sprintbitarray(obj_get_bitvector(&obj), affected_bits, EF_ARRAY_MAX),
+                    obj_get_level(&obj), material_names[obj_get_value(&obj, 7)], flag_names(obj_get_bitvector(&obj)),
                     !script.triggers.empty() ? "Set." : "Not Set.", size_names[obj_get_size(&obj)]);
     asking = mode::main_menu;
   }
@@ -604,8 +604,8 @@ namespace {
         if (n == 0)
           done(g, d);
         else {
-          if (n > 0 && n <= NUM_ITEM_FLAGS)
-            obj_extra_toggle(&obj, n - 1);
+          if (std::optional<extra_flag> flag = flag_from_index<extra_flag>(n - 1))
+            obj_extra_toggle(&obj, *flag);
           extras_menu(g, d, *this);
         }
         return;
@@ -616,8 +616,8 @@ namespace {
         else {
           if (n < 0 || n > NUM_ITEM_WEARS)
             write_to_output(g, d, "That's not a valid choice!\r\n");
-          else
-            obj_wear_toggle(&obj, n - 1);
+          else if (std::optional<wear_flag> flag = flag_from_index<wear_flag>(n - 1))
+            obj_wear_toggle(&obj, *flag);
           wear_menu(g, d, *this);
         }
         return;
@@ -632,8 +632,10 @@ namespace {
           done(g, d);
           return;
         }
-        if (n > 0 && n <= NUM_AFF_FLAGS && n != AFF_CHARM) /* Setting AFF_CHARM on objects like this is dangerous. */
-          obj_aff_toggle(&obj, n);
+        /* Setting AFF_CHARM on objects like this is dangerous. The menu's numbers are the flags' (quirk: so the last
+           toggles bit 79, past them) */
+        if (n > 0 && n <= NUM_AFF_FLAGS && n != std::to_underlying(AFF_CHARM))
+          obj_get_bitvector(&obj).toggle_bit(static_cast<std::size_t>(n));
         perm_menu(g, d, *this);
         return;
 

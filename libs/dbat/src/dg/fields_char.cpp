@@ -61,6 +61,15 @@ result named_flag(const field_query &q, std::span<const std::string_view> names,
   return yes_no(flag != NOFLAG && flagged(flag));
 }
 
+/* The same for a typed family, flagged() taking its flag */
+template <flag_family E> result named_flag(const field_query &q, auto &&flagged)
+{
+  if (!q.has_arg())
+    return "0";
+  std::optional<E> flag = flag_by_name<E>(q.subfield);
+  return yes_no(flag && flagged(*flag));
+}
+
 /* A player flag, which an argument of "on" or "off" sets */
 result player_flag(const field_query &q, char_data *c, int flag)
 {
@@ -108,7 +117,7 @@ bool char_has_item(GameWorld *g, std::string_view item, char_data *ch)
 const field<char_data> char_fields[] = {
     {"aaaaa", [](const field_query &, char_data *) -> result { return "0"; }},
     {"affect", [](const field_query &q, char_data *c) {
-       return named_flag(q, affected_bits, [c](int f) { return char_aff_flagged(c, f); });
+       return named_flag<aff_flag>(q, [c](aff_flag f) { return char_aff_flagged(c, f); });
      }},
     {"alias", [](const field_query &, char_data *c) -> result { return str_format("{}", char_get_pc_name(c)); }},
     {"align", [](const field_query &q, char_data *c) -> result {
@@ -238,7 +247,7 @@ const field<char_data> char_fields[] = {
        return number(char_get_practice_points(q.g, c));
      }},
     {"pref", [](const field_query &q, char_data *c) {
-       return named_flag(q, preference_bits, [&q, c](int f) { return char_prf_flagged(q.g, c, f); });
+       return named_flag<pref_flag>(q, [&q, c](pref_flag f) { return char_prf_flagged(q.g, c, f); });
      }},
     {"race", [](const field_query &, char_data *c) -> result { return str_format("{}", char_true_race_name(c)); }},
     {"room", [](const field_query &, char_data *c) -> result { /* in NOWHERE, the void; see dg_scripts.hpp */

@@ -101,7 +101,7 @@ io::loaded<void> read_zone_file(GameWorld *g, io::text_reader &in)
           "zone #{:d}: expected 10 numbers and flags (bottom, top, lifespan, reset mode, 4 flags, min and max level), got {:d}",
           zone.number, f.count())));
     for (int i = 0; i < 4; i++)
-      zone.zone_flags[i] = io::ascii_flags(flags[i], 0, "asciiflag_conv");
+      zone.zone_flags.set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i], 0, "asciiflag_conv"));
   } else {
     int numbers[4];
     if (io::scan_ints(*line, numbers) != 4) {
@@ -208,8 +208,8 @@ bool save_zone(GameWorld *g, struct zone_data *zone_num)
             "{:d} {:d} {:d} {:d} {} {} {} {} {:d} {:d}\n",
             zone_num->number, !zone_num->builders.empty() ? zone_num->builders.c_str() : "None.",
             !zone_num->name.empty() ? zone_num->name.c_str() : "undefined", genolc_zone_bottom(g, zone_num),
-            zone_num->top, zone_num->lifespan, zone_num->reset_mode, flag_letters(zone_num->zone_flags[0]),
-            flag_letters(zone_num->zone_flags[1]), flag_letters(zone_num->zone_flags[2]), flag_letters(zone_num->zone_flags[3]), zone_num->min_level,
+            zone_num->top, zone_num->lifespan, zone_num->reset_mode, flag_letters(zone_num->zone_flags.word(0)),
+            flag_letters(zone_num->zone_flags.word(1)), flag_letters(zone_num->zone_flags.word(2)), flag_letters(zone_num->zone_flags.word(3)), zone_num->min_level,
             zone_num->max_level);
 
   /*

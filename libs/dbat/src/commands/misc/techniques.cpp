@@ -408,7 +408,7 @@ namespace {
   /* The seas warp pool reaches */
   struct warp_sea {
     std::string_view planet{};
-    int flag; /* the rooms of that planet */
+    room_flag flag; /* the rooms of that planet */
     std::string_view already{};
     room_vnum room;
   };

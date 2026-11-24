@@ -347,7 +347,7 @@ static void reset_session_state(GameWorld *g, struct char_data *ch)
   char_set_sleeptime(ch, 8);
   char_set_foodr(ch, 2);
   char_set_altitude(ch, char_aff_flagged(ch, AFF_FLYING) ? 1 : 0);
-  for (int aff : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN})
+  for (aff_flag aff : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN})
     if (char_aff_flagged(ch, aff))
       char_aff_set(ch, aff, false);
   if (char_plr_flagged(ch, PLR_KNOCKED))

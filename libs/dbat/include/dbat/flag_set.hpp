@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
-#include <bitset>
 #include <cstddef>
+#include <initializer_list>
 #include <optional>
 #include <ranges>
 #include <span>
@@ -15,9 +15,10 @@
 
 /*
  * Typed flags. Each family (rooms', affects', players' and so on) is an enum class whose last enumerator is count_,
- * and a flag_traits specialisation next to it gives the family's names:
+ * and a flag_traits specialisation next to it gives the family's names. Every enumerator has its value written out:
+ * the value is the bit the files save, so it must never move.
  *
- *   enum class room_flag : uint8_t { dark, death, ..., count_ };
+ *   enum class room_flag : uint8_t { dark = 0, death = 1, ..., count_ = 66 };
  *   template <> struct flag_traits<room_flag> { static constexpr const name_table &names = room_bits; };
  *
  * A flag_set<room_flag> holds a room's flags. It can't be asked about another family's flag: that is a compile
@@ -37,25 +38,46 @@ constexpr std::size_t FLAG_BITS  = FLAG_WORDS * 32;
 
 template <flag_family E> class flag_set {
   static_assert(flag_count<E> <= FLAG_BITS, "a flag family must fit in the four words it is saved as");
+  static_assert(std::is_unsigned_v<bitvector_t> && sizeof(bitvector_t) * 8 == 32);
 
 public:
   constexpr flag_set() = default;
+  /* these flags set */
+  constexpr flag_set(std::initializer_list<E> flags)
+  {
+    for (E flag : flags)
+      set(flag);
+  }
 
   /* the family's flags */
-  constexpr bool test(E flag) const { return bits_.test(index(flag)); }
-  constexpr void set(E flag, bool on = true) { bits_.set(index(flag), on); }
-  constexpr void reset(E flag) { bits_.reset(index(flag)); }
-  constexpr void toggle(E flag) { bits_.flip(index(flag)); }
+  constexpr bool test(E flag) const { return test_bit(index(flag)); }
+  constexpr void set(E flag, bool on = true) { set_bit(index(flag), on); }
+  constexpr void reset(E flag) { set_bit(index(flag), false); }
+  constexpr void toggle(E flag) { words_[index(flag) / 32] ^= mask(index(flag)); }
 
   /* whether any bit is set, the family's or not */
-  constexpr bool any() const { return bits_.any(); }
-  constexpr bool none() const { return bits_.none(); }
+  constexpr bool any() const { return !none(); }
+  constexpr bool none() const { return words_ == std::array<bitvector_t, FLAG_WORDS>{}; }
   constexpr bool operator==(const flag_set &) const = default;
+
+  /* other's bits set here as well, or taken away */
+  constexpr flag_set &operator|=(const flag_set &other)
+  {
+    for (std::size_t i = 0; i < FLAG_WORDS; i++)
+      words_[i] |= other.words_[i];
+    return *this;
+  }
+  constexpr flag_set &operator-=(const flag_set &other)
+  {
+    for (std::size_t i = 0; i < FLAG_WORDS; i++)
+      words_[i] &= ~other.words_[i];
+    return *this;
+  }
 
   /* The family's flags that are set, in order */
   auto flags() const
   {
-    return std::views::iota(std::size_t{0}, flag_count<E>) | std::views::filter([this](std::size_t i) { return bits_.test(i); }) |
+    return std::views::iota(std::size_t{0}, flag_count<E>) | std::views::filter([this](std::size_t i) { return test_bit(i); }) |
            std::views::transform([](std::size_t i) { return static_cast<E>(i); });
   }
 
@@ -63,13 +85,7 @@ public:
    * The words, for the files: a bit past the family's flags, as a file may set, is kept, so it is saved as it was
    * read. word() and set_word() are the single-word families' one word.
    */
-  constexpr std::array<bitvector_t, FLAG_WORDS> words() const
-  {
-    std::array<bitvector_t, FLAG_WORDS> out{};
-    for (std::size_t i = 0; i < FLAG_WORDS; i++)
-      out[i] = word(i);
-    return out;
-  }
+  constexpr std::array<bitvector_t, FLAG_WORDS> words() const { return words_; }
   static constexpr flag_set from_words(std::span<const bitvector_t> words)
   {
     flag_set set;
@@ -77,31 +93,31 @@ public:
       set.set_word(i, words[i]);
     return set;
   }
-  constexpr bitvector_t word(std::size_t i) const
-  {
-    bitvector_t w = 0;
-    for (std::size_t b = 0; b < 32; b++)
-      if (bits_.test(i * 32 + b))
-        w |= bitvector_t{1} << b;
-    return w;
-  }
+  constexpr bitvector_t word(std::size_t i) const { return i < FLAG_WORDS ? words_[i] : 0; }
   constexpr void set_word(std::size_t i, bitvector_t w)
   {
-    for (std::size_t b = 0; b < 32; b++)
-      bits_.set(i * 32 + b, (w >> b) & 1);
+    if (i < FLAG_WORDS)
+      words_[i] = w;
   }
 
   /* Bit n, whether or not the family names it: for numbers from a menu or a script past its flags (quirk) */
-  constexpr bool test_bit(std::size_t n) const { return n < FLAG_BITS && bits_.test(n); }
+  constexpr bool test_bit(std::size_t n) const { return n < FLAG_BITS && (words_[n / 32] & mask(n)) != 0; }
+  constexpr void toggle_bit(std::size_t n) { set_bit(n, !test_bit(n)); }
   constexpr void set_bit(std::size_t n, bool on = true)
   {
-    if (n < FLAG_BITS)
-      bits_.set(n, on);
+    if (n >= FLAG_BITS)
+      return;
+    if (on)
+      words_[n / 32] |= mask(n);
+    else
+      words_[n / 32] &= ~mask(n);
   }
 
 private:
   static constexpr std::size_t index(E flag) { return static_cast<std::size_t>(std::to_underlying(flag)); }
-  std::bitset<FLAG_BITS> bits_;
+  static constexpr bitvector_t mask(std::size_t n) { return bitvector_t{1} << (n % 32); }
+  /* the four words as the files hold them, so a flag_set is the size and alignment of the array it replaces */
+  std::array<bitvector_t, FLAG_WORDS> words_{};
 };
 
 /* Flag i of the family, if there is one */

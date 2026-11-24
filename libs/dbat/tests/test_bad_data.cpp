@@ -972,24 +972,23 @@ static void check_scan_range(void)
 
 /* flag_set's names and words, for every family's table, against sprintbitarray() and the raw words: stand-in
    families of the same sizes */
-enum class test_room_flag : uint8_t { count_ = NUM_ROOM_FLAGS };
-template <> struct flag_traits<test_room_flag> { static constexpr const name_table &names = room_bits; };
-enum class test_zone_flag : uint8_t { count_ = NUM_ZONE_FLAGS };
-template <> struct flag_traits<test_zone_flag> { static constexpr const name_table &names = zone_bits; };
-enum class test_aff_flag : uint8_t { count_ = NUM_AFF_FLAGS };
-template <> struct flag_traits<test_aff_flag> { static constexpr const name_table &names = affected_bits; };
 enum class test_plr_flag : uint8_t { count_ = NUM_PLR_FLAGS };
 template <> struct flag_traits<test_plr_flag> { static constexpr const name_table &names = player_bits; };
 enum class test_mob_flag : uint8_t { count_ = NUM_MOB_FLAGS };
 template <> struct flag_traits<test_mob_flag> { static constexpr const name_table &names = action_bits; };
-enum class test_prf_flag : uint8_t { count_ = NUM_PRF_FLAGS };
-template <> struct flag_traits<test_prf_flag> { static constexpr const name_table &names = preference_bits; };
-enum class test_extra_flag : uint8_t { count_ = NUM_ITEM_FLAGS };
-template <> struct flag_traits<test_extra_flag> { static constexpr const name_table &names = extra_bits; };
-enum class test_wear_flag : uint8_t { count_ = NUM_ITEM_WEARS };
-template <> struct flag_traits<test_wear_flag> { static constexpr const name_table &names = wear_bits; };
-enum class test_trade_flag : uint8_t { count_ = NUM_TRADER_NAMES };
-template <> struct flag_traits<test_trade_flag> { static constexpr const name_table &names = trade_letters; };
+
+/* A flag_set is laid out as the four words it replaced, so the structures holding one keep their size */
+static_assert(sizeof(flag_set<zone_flag>) == sizeof(bitvector_t[FLAG_WORDS]) && alignof(flag_set<zone_flag>) == alignof(bitvector_t));
+
+/* A list of flags, and adding and taking away sets, checked by the compiler */
+static_assert([] {
+  constexpr flag_set<zone_flag> some{ZONE_CLOSED, ZONE_QUEST};
+  flag_set<zone_flag> set{ZONE_QUEST, ZONE_DBALLS};
+  set |= some;
+  bool added = set.test(ZONE_CLOSED) && set.test(ZONE_QUEST) && set.test(ZONE_DBALLS) && !set.test(ZONE_NOIMMORT);
+  set -= some;
+  return added && set == flag_set<zone_flag>{ZONE_DBALLS} && some.word(0) == 0b101;
+}());
 
 template <class E> static int flag_set_mismatches(const name_table &table)
 {
@@ -1013,26 +1012,26 @@ template <class E> static int flag_set_mismatches(const name_table &table)
 
 static void check_flag_sets(void)
 {
-  CHECK(flag_set_mismatches<test_room_flag>(room_bits) == 0);
-  CHECK(flag_set_mismatches<test_zone_flag>(zone_bits) == 0);
-  CHECK(flag_set_mismatches<test_aff_flag>(affected_bits) == 0);
+  CHECK(flag_set_mismatches<room_flag>(room_bits) == 0);
+  CHECK(flag_set_mismatches<zone_flag>(zone_bits) == 0);
+  CHECK(flag_set_mismatches<aff_flag>(affected_bits) == 0);
   CHECK(flag_set_mismatches<test_plr_flag>(player_bits) == 0);
   CHECK(flag_set_mismatches<test_mob_flag>(action_bits) == 0);
-  CHECK(flag_set_mismatches<test_prf_flag>(preference_bits) == 0);
-  CHECK(flag_set_mismatches<test_extra_flag>(extra_bits) == 0);
-  CHECK(flag_set_mismatches<test_wear_flag>(wear_bits) == 0);
-  CHECK(flag_set_mismatches<test_trade_flag>(trade_letters) == 0);
+  CHECK(flag_set_mismatches<pref_flag>(preference_bits) == 0);
+  CHECK(flag_set_mismatches<extra_flag>(extra_bits) == 0);
+  CHECK(flag_set_mismatches<wear_flag>(wear_bits) == 0);
+  CHECK(flag_set_mismatches<trade_flag>(trade_letters) == 0);
 
   /* by number and by name, as get_flag_by_name() found them */
-  CHECK(flag_from_index<test_room_flag>(-1) == std::nullopt);
-  CHECK(flag_from_index<test_room_flag>(NUM_ROOM_FLAGS) == std::nullopt);
-  CHECK(flag_from_index<test_room_flag>(3) == static_cast<test_room_flag>(3));
+  CHECK(flag_from_index<room_flag>(-1) == std::nullopt);
+  CHECK(flag_from_index<room_flag>(NUM_ROOM_FLAGS) == std::nullopt);
+  CHECK(flag_from_index<room_flag>(3) == static_cast<room_flag>(3));
   for (std::size_t i = 0; i < room_bits.size(); i++) {
-    std::optional<test_room_flag> named = flag_by_name<test_room_flag>(room_bits[i]);
+    std::optional<room_flag> named = flag_by_name<room_flag>(room_bits[i]);
     int old                             = get_flag_by_name(room_bits, room_bits[i]);
     CHECK(named ? static_cast<int>(*named) == old : old == NOFLAG);
   }
-  CHECK(flag_by_name<test_room_flag>("NO_SUCH_FLAG") == std::nullopt);
+  CHECK(flag_by_name<room_flag>("NO_SUCH_FLAG") == std::nullopt);
 }
 
 /* asctime_text() writes a time as asctime() did, less its newline: the day padded with a space, the rest with zeros */
@@ -1951,7 +1950,7 @@ static void check_shop_with_no_customers(void)
   th_take_output(g, ch);
 
   for (int i = 0; i < NUM_TRADERS; i++)
-    shop_set_with_who(shop, i, true);
+    shop_set_with_who(shop, *flag_from_index<trade_flag>(i), true);
   th_type(g, ch, "game shops 1");
   CHECK(saw(ch, "Customers:  None"));
   CHECK_AUDIT(g);
@@ -1972,7 +1971,7 @@ static void check_guild_with_no_customers(void)
   th_take_output(g, ch);
 
   for (int i = 0; i < NUM_TRADERS; i++)
-    guild_set_with_who(gild, i, true);
+    guild_set_with_who(gild, *flag_from_index<trade_flag>(i), true);
   th_type(g, ch, show.c_str());
   CHECK(saw(ch, "Whom will train: \r\n"));
   CHECK_AUDIT(g);

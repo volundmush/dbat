@@ -207,7 +207,7 @@ namespace {
     clear_screen(g, d);
     for (int i = 0; i < NUM_TRADERS; i++)
       write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, trade_letters[i], (i + 1) % 2 ? "" : "\r\n");
-    write_to_output(g, d, "\r\nCurrently won't trade with: @c{}@n\r\nEnter choice : ", sprintbitarray(shop.with_who, trade_letters, 4));
+    write_to_output(g, d, "\r\nCurrently won't trade with: @c{}@n\r\nEnter choice : ", flag_names(shop.with_who));
     asking = mode::no_trade;
   }
 
@@ -229,7 +229,7 @@ namespace {
                     number, keeper ? mob_index_of(g, shop.keeper)->vnum : -1, keeper ? char_get_sdesc(mob_proto_of(g, shop.keeper)) : "None",
                     shop.open1, shop.close1, shop.open2, shop.close2, shop.profit_buy, shop.profit_sell, shop.no_such_item1,
                     shop.no_such_item2, shop.missing_cash1, shop.missing_cash2, shop.do_not_buy, shop.message_buy, shop.message_sell,
-                    sprintbitarray(shop.with_who, trade_letters, 4), sprintbit(shop.bitvector, shop_bits));
+                    flag_names(shop.with_who), sprintbit(shop.bitvector, shop_bits));
     asking = mode::main_menu;
   }
 
@@ -417,7 +417,7 @@ namespace {
         break;
       case mode::no_trade:
         if (int trader = LIMIT(n, 0, NUM_TRADERS); trader > 0) {
-          shop_trade_toggle(&shop, trader - 1);
+          shop_trade_toggle(&shop, *flag_from_index<trade_flag>(trader - 1)); /* 0 to NUM_TRADERS - 1 */
           no_trade_menu(g, d);
           return;
         }

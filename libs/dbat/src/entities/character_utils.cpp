@@ -1,3 +1,5 @@
+#include <optional>
+#include <array>
 #include <cstdlib>
 #include <cstring>
 
@@ -1366,38 +1368,38 @@ bool know_skill(GameWorld *g, struct char_data *ch, int skill)
   return (know);
 }
 
-bool is_affected(struct char_data *ch, int aff_flag)
+bool is_affected(struct char_data *ch, aff_flag flag)
 {
 
   for (const struct affected_type &af : ch->affected) {
-    if (af.location == APPLY_NONE && af.bitvector == (bitvector_t)aff_flag)
+    if (af.location == APPLY_NONE && af.bitvector == flag)
       return (true);
   }
 
   return (false);
 }
 
-void null_affect(GameWorld *g, struct char_data *ch, int aff_flag)
+void null_affect(GameWorld *g, struct char_data *ch, aff_flag flag)
 {
 
   for (auto it = ch->affected.begin(); it != ch->affected.end();) {
     struct affected_type *af = &*it++;
-    if (af->location == APPLY_NONE && af->bitvector == (bitvector_t)aff_flag)
+    if (af->location == APPLY_NONE && af->bitvector == flag)
       affect_remove(g, ch, af);
   }
 }
 
-void remove_affect(GameWorld *g, struct char_data *ch, int aff_flag)
+void remove_affect(GameWorld *g, struct char_data *ch, aff_flag flag)
 {
 
   for (auto it = ch->affected.begin(); it != ch->affected.end();) {
     struct affected_type *af = &*it++;
-    if (af->bitvector == (bitvector_t)aff_flag)
+    if (af->bitvector == flag)
       affect_remove(g, ch, af);
   }
 }
 
-void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd)
+void assign_affect(GameWorld *g, struct char_data *ch, aff_flag flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd)
 {
   struct affected_type af[6] = {};
   int num = 0;
@@ -1407,7 +1409,7 @@ void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, 
     af[num].duration  = dur;
     af[num].modifier  = 0;
     af[num].location  = APPLY_NONE;
-    af[num].bitvector = aff_flag;
+    af[num].bitvector = flag;
     affect_join(g, ch, &af[num], false, false, false, false);
     num += 1;
   }
@@ -1416,7 +1418,7 @@ void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, 
     af[num].duration  = dur;
     af[num].modifier  = str;
     af[num].location  = APPLY_STR;
-    af[num].bitvector = aff_flag;
+    af[num].bitvector = flag;
     affect_join(g, ch, &af[num], false, false, false, false);
     num += 1;
   }
@@ -1425,7 +1427,7 @@ void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, 
     af[num].duration  = dur;
     af[num].modifier  = con;
     af[num].location  = APPLY_CON;
-    af[num].bitvector = aff_flag;
+    af[num].bitvector = flag;
     affect_join(g, ch, &af[num], false, false, false, false);
     num += 1;
   }
@@ -1434,7 +1436,7 @@ void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, 
     af[num].duration  = dur;
     af[num].modifier  = intel;
     af[num].location  = APPLY_INT;
-    af[num].bitvector = aff_flag;
+    af[num].bitvector = flag;
     affect_join(g, ch, &af[num], false, false, false, false);
     num += 1;
   }
@@ -1443,7 +1445,7 @@ void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, 
     af[num].duration  = dur;
     af[num].modifier  = agl;
     af[num].location  = APPLY_DEX;
-    af[num].bitvector = aff_flag;
+    af[num].bitvector = flag;
     affect_join(g, ch, &af[num], false, false, false, false);
     num += 1;
   }
@@ -1452,7 +1454,7 @@ void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, 
     af[num].duration  = dur;
     af[num].modifier  = spd;
     af[num].location  = APPLY_CHA;
-    af[num].bitvector = aff_flag;
+    af[num].bitvector = flag;
     affect_join(g, ch, &af[num], false, false, false, false);
     num += 1;
   }
@@ -1461,7 +1463,7 @@ void assign_affect(GameWorld *g, struct char_data *ch, int aff_flag, int skill, 
     af[num].duration  = dur;
     af[num].modifier  = wis;
     af[num].location  = APPLY_WIS;
-    af[num].bitvector = aff_flag;
+    af[num].bitvector = flag;
     affect_join(g, ch, &af[num], false, false, false, false);
     num += 1;
   }
@@ -3623,37 +3625,17 @@ void add_follower(GameWorld *g, struct char_data *ch, struct char_data *leader)
   }
 }
 
-static const int default_admin_flags_mortal[] =
-    {-1};
-
-static const int default_admin_flags_immortal[] =
-    {ADM_SEEINV, ADM_SEESECRET, ADM_FULLWHERE, ADM_NOPOISON, ADM_WALKANYWHERE,
-     ADM_NODAMAGE, ADM_NOSTEAL, -1};
-
-static const int default_admin_flags_builder[] =
-    {-1};
-
-static const int default_admin_flags_god[] =
-    {ADM_ALLSHOPS, ADM_TELLALL, ADM_KNOWWEATHER, ADM_MONEY, ADM_EATANYTHING,
-     ADM_NOKEYS, -1};
-
-static const int default_admin_flags_vice[] =
-    {-1};
-
-static const int default_admin_flags_grgod[] =
-    {ADM_TRANSALL, ADM_FORCEMASS, ADM_ALLHOUSES, -1};
-
-static const int default_admin_flags_impl[] =
-    {ADM_SWITCHMORTAL, ADM_INSTANTKILL, ADM_CEDIT, -1};
-
-static const int *const default_admin_flags[ADMLVL_IMPL + 1] = {
-    default_admin_flags_mortal,
-    default_admin_flags_immortal,
-    default_admin_flags_builder,
-    default_admin_flags_god,
-    default_admin_flags_vice,
-    default_admin_flags_grgod,
-    default_admin_flags_impl};
+/* The admin flags each level gives on promotion to it, and takes away on demotion from it */
+static constexpr std::array<flag_set<admin_flag>, ADMLVL_IMPL + 1> default_admin_flags = {
+    flag_set<admin_flag>{}, /* mortal */
+    flag_set<admin_flag>{ADM_SEEINV, ADM_SEESECRET, ADM_FULLWHERE, ADM_NOPOISON, ADM_WALKANYWHERE, ADM_NODAMAGE,
+                         ADM_NOSTEAL}, /* immortal */
+    flag_set<admin_flag>{}, /* builder */
+    flag_set<admin_flag>{ADM_ALLSHOPS, ADM_TELLALL, ADM_KNOWWEATHER, ADM_MONEY, ADM_EATANYTHING, ADM_NOKEYS}, /* god */
+    flag_set<admin_flag>{}, /* vice */
+    flag_set<admin_flag>{ADM_TRANSALL, ADM_FORCEMASS, ADM_ALLHOUSES}, /* greater god */
+    flag_set<admin_flag>{ADM_SWITCHMORTAL, ADM_INSTANTKILL, ADM_CEDIT}, /* implementor */
+};
 
 void admin_set(GameWorld *g, struct char_data *ch, int value)
 {
@@ -3668,8 +3650,7 @@ void admin_set(GameWorld *g, struct char_data *ch, int value)
            admin_level_names[value]);
     while (char_get_admlevel(ch) < value) {
       char_set_admlevel(ch, char_get_admlevel(ch) + 1);
-      for (i = 0; default_admin_flags[char_get_admlevel(ch)][i] != -1; i++)
-        char_adm_set(ch, default_admin_flags[char_get_admlevel(ch)][i], true);
+      char_get_admflags(ch) |= default_admin_flags[static_cast<std::size_t>(char_get_admlevel(ch))];
     }
     run_autowiz(g);
     if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
@@ -3690,8 +3671,7 @@ void admin_set(GameWorld *g, struct char_data *ch, int value)
            "{} demoted from {} to {}", char_get_name(ch), admin_level_names[char_get_admlevel(ch)],
            admin_level_names[value]);
     while (char_get_admlevel(ch) > value) {
-      for (i = 0; default_admin_flags[char_get_admlevel(ch)][i] != -1; i++)
-        char_adm_set(ch, default_admin_flags[char_get_admlevel(ch)][i], false);
+      char_get_admflags(ch) -= default_admin_flags[static_cast<std::size_t>(char_get_admlevel(ch))];
       char_set_admlevel(ch, char_get_admlevel(ch) - 1);
     }
     run_autowiz(g);
@@ -4502,29 +4482,30 @@ bool char_plr_flagged(const struct char_data *ch, int flag)
   return (!char_is_npc(ch) && IS_SET_AR(char_get_act(ch), (flag)));
 }
 
-bool char_aff_flagged(const struct char_data *ch, int flag)
+bool char_aff_flagged(const struct char_data *ch, aff_flag flag)
 {
-  return (IS_SET_AR(char_get_affected_by(ch), (flag)));
+  return ch->affected_by.test(flag);
 }
 
-bool char_prf_flagged(GameWorld *g, const struct char_data *ch, int flag)
+bool char_prf_flagged(GameWorld *g, const struct char_data *ch, pref_flag flag)
 {
-  return (IS_SET_AR(char_get_pref(g, ch), (flag)));
+  return char_get_pref(g, ch).test(flag);
 }
 
-bool char_adm_flagged(const struct char_data *ch, int flag)
+bool char_adm_flagged(const struct char_data *ch, admin_flag flag)
 {
-  return (IS_SET_AR(char_get_admflags(ch), (flag)));
+  return ch->admflags.test(flag);
 }
 
-bool char_body_flagged(const struct char_data *ch, int flag)
+bool char_body_flagged(const struct char_data *ch, int where)
 {
-  return (IS_SET_AR(char_get_bodyparts(ch), (flag)));
+  std::optional<body_part> part = flag_from_index<body_part>(where);
+  return part && ch->bodyparts.test(*part);
 }
 
-bool char_is_affected(const struct char_data *ch, int skill)
+bool char_is_affected(const struct char_data *ch, aff_flag flag)
 {
-  return (char_aff_flagged((ch), (skill)));
+  return char_aff_flagged(ch, flag);
 }
 
 bool char_plr_toggle(struct char_data *ch, int flag)
@@ -4534,14 +4515,17 @@ bool char_plr_toggle(struct char_data *ch, int flag)
   return ((TOGGLE_BIT_AR(char_get_act(ch), (flag))) & Q_BIT(flag));
 }
 
-bool char_prf_toggle(GameWorld *g, struct char_data *ch, int flag)
+bool char_prf_toggle(GameWorld *g, struct char_data *ch, pref_flag flag)
 {
-  return ((TOGGLE_BIT_AR(char_get_pref(g, ch), (flag))) & Q_BIT(flag));
+  flag_set<pref_flag> &pref = char_get_pref(g, ch);
+  pref.toggle(flag);
+  return pref.test(flag);
 }
 
-bool char_aff_toggle(struct char_data *ch, int flag)
+bool char_aff_toggle(struct char_data *ch, aff_flag flag)
 {
-  return ((TOGGLE_BIT_AR(char_get_affected_by(ch), (flag))) & Q_BIT(flag));
+  ch->affected_by.toggle(flag);
+  return ch->affected_by.test(flag);
 }
 
 bool char_is_dead(const struct char_data *ch)
@@ -5275,14 +5259,24 @@ bitvector_t *char_get_act(const struct char_data *ch)
   return const_cast<bitvector_t *>(ch->act); /* writable flag array, as the macro allowed */
 }
 
-bitvector_t *char_get_affected_by(const struct char_data *ch)
+const flag_set<aff_flag> &char_get_affected_by(const struct char_data *ch)
 {
-  return const_cast<bitvector_t *>(ch->affected_by); /* writable flag array, as the macro allowed */
+  return ch->affected_by;
 }
 
-bitvector_t *char_get_admflags(const struct char_data *ch)
+flag_set<aff_flag> &char_get_affected_by(struct char_data *ch)
 {
-  return const_cast<bitvector_t *>(ch->admflags); /* writable flag array, as the macro allowed */
+  return ch->affected_by;
+}
+
+const flag_set<admin_flag> &char_get_admflags(const struct char_data *ch)
+{
+  return ch->admflags;
+}
+
+flag_set<admin_flag> &char_get_admflags(struct char_data *ch)
+{
+  return ch->admflags;
 }
 
 room_vnum char_get_in_room(const struct char_data *ch)
@@ -6642,9 +6636,9 @@ void char_set_skills_base(struct char_data *ch, int i, int8_t v)
   change_skill(ch, i, [v](struct skill_data &s) { s.base = v; });
 }
 
-bitvector_t *char_get_bodyparts(const struct char_data *ch)
+const flag_set<body_part> &char_get_bodyparts(const struct char_data *ch)
 {
-  return const_cast<bitvector_t *>(ch->bodyparts); /* writable flag array, as the macro allowed */
+  return ch->bodyparts;
 }
 
 struct obj_data *char_get_equipment(const struct char_data *ch, int i)
@@ -6774,24 +6768,25 @@ bool char_mob_toggle(struct char_data *ch, int flag)
   return flag_array_toggle(char_get_act(ch), flag);
 }
 
-void char_aff_set(struct char_data *ch, int flag, bool on)
+void char_aff_set(struct char_data *ch, aff_flag flag, bool on)
 {
-  flag_array_set(char_get_affected_by(ch), flag, on);
+  ch->affected_by.set(flag, on);
 }
 
-void char_prf_set(GameWorld *g, struct char_data *ch, int flag, bool on)
+void char_prf_set(GameWorld *g, struct char_data *ch, pref_flag flag, bool on)
 {
-  flag_array_set(char_get_pref(g, ch), flag, on);
+  char_get_pref(g, ch).set(flag, on);
 }
 
-void char_adm_set(struct char_data *ch, int flag, bool on)
+void char_adm_set(struct char_data *ch, admin_flag flag, bool on)
 {
-  flag_array_set(char_get_admflags(ch), flag, on);
+  ch->admflags.set(flag, on);
 }
 
-void char_body_set(struct char_data *ch, int flag, bool on)
+void char_body_set(struct char_data *ch, int where, bool on)
 {
-  flag_array_set(char_get_bodyparts(ch), flag, on);
+  if (std::optional<body_part> part = flag_from_index<body_part>(where))
+    ch->bodyparts.set(*part, on);
 }
 
 bool race_is_people(int r_id)
@@ -6817,12 +6812,12 @@ static struct player_special_data *ps_of(GameWorld *g, const struct char_data *c
   return nullptr;
 }
 
-bitvector_t *char_get_pref(GameWorld *g, const struct char_data *ch)
+flag_set<pref_flag> &char_get_pref(GameWorld *g, const struct char_data *ch)
 {
-  static bitvector_t none[PR_ARRAY_MAX]; /* NPCs: always reads as "no preferences" */
+  static flag_set<pref_flag> none; /* NPCs: always reads as "no preferences" */
   struct player_special_data *ps = ps_of(g, ch, "pref");
   if (!ps) {
-    std::ranges::fill(none, 0);
+    none = {};
     return none;
   }
   return ps->pref;

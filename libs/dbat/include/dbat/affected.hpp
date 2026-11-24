@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 
+#include "dbat/consts/affflags.hpp"
 #include "dbat/consts/types.hpp"
 
 struct obj_affected_type {
@@ -16,6 +17,6 @@ struct affected_type {
   int modifier{};          /* This is added to apropriate ability     */
   int location{};          /* Tells which ability to change(APPLY_XXX)*/
   int specific{};          /* Some locations have parameters          */
-  bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
+  aff_flag bitvector{};    /* Tells which bit to set (AFF_XXX) */
 };
 

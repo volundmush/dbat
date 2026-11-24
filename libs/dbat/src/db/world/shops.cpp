@@ -233,14 +233,14 @@ io::loaded<void> read_shop(GameWorld *g, io::text_reader &in, shop_vnum vnum)
       mud_log("SYSERR: Can't parse TRADE_WITH line in {}: '{}'", context, with_who);
       break;
     }
-    shop_get_with_who(shop)[slot] = static_cast<bitvector_t>(n);
+    shop_get_with_who(shop).set_word(static_cast<std::size_t>(slot), static_cast<bitvector_t>(n));
     while (at < with_who.size() && (isdigit(static_cast<unsigned char>(with_who[at])) || with_who[at] == '-'))
       at++;
     while (at < with_who.size() && !(isdigit(static_cast<unsigned char>(with_who[at])) || with_who[at] == '-'))
       at++;
   }
   for (; slot < SW_ARRAY_MAX; slot++)
-    shop_get_with_who(shop)[slot] = 0;
+    shop_get_with_who(shop).set_word(static_cast<std::size_t>(slot), 0);
 
   io::loaded<std::vector<shop_buy_data>> rooms = read_list(g, in, vnum, LIST_ROOM, "a room it is in");
   if (!rooms)
@@ -331,7 +331,7 @@ bool save_shops(GameWorld *g, struct zone_data *zone)
               static_cast<int>(shop_get_bitvector(shop)), /* as signed, as always */
               shop_get_keeper(shop) == NOBODY ? -1 : mob_index_of(g, shop_get_keeper(shop))->vnum);
     for (int i = 0; i < SW_ARRAY_MAX; i++)
-      out.print("{}{:d}", i ? " " : "", static_cast<int>(shop_get_with_who(shop)[i]));
+      out.print("{}{:d}", i ? " " : "", static_cast<int>(shop_get_with_who(shop).word(static_cast<std::size_t>(i))));
     out.write("\n");
     for (room_vnum room : shop_rooms(shop))
       out.print("{:d}\n", room);

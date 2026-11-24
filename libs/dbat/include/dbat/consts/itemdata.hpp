@@ -1,9 +1,12 @@
 #pragma once
-#include "dbat/name_table.hpp"
+#include <cstdint>
 #include <string_view>
-#include "dbat/consts/types.hpp"
-#include "dbat/consts/materials.hpp"
+
 #include "dbat/consts/conditions.hpp"
+#include "dbat/consts/materials.hpp"
+#include "dbat/consts/types.hpp"
+#include "dbat/flag_set.hpp"
+#include "dbat/name_table.hpp"
 
 /* Character equipment positions: used as index for char_data.equipment[] */
 /* NOTE: Don't confuse these constants with the ITEM_ bitvectors
@@ -33,6 +36,40 @@ constexpr int WEAR_SH       = 21;
 constexpr int WEAR_EYE      = 22;
 
 constexpr int NUM_WEARS = 23; /* This must be the # of eq positions!! */
+
+extern const name_table equipment_types; /* NUM_WEARS of them */
+
+/* Body parts: the equipment positions a character's body has (char_data.bodyparts), each the WEAR_ position's number */
+enum class body_part : uint8_t {
+  unused0  = 0,
+  finger_r = 1,
+  finger_l = 2,
+  neck_1   = 3,
+  neck_2   = 4,
+  body     = 5,
+  head     = 6,
+  legs     = 7,
+  feet     = 8,
+  hands    = 9,
+  arms     = 10,
+  unused1  = 11,
+  about    = 12,
+  waist    = 13,
+  wrist_r  = 14,
+  wrist_l  = 15,
+  wield1   = 16,
+  wield2   = 17,
+  backpack = 18,
+  ear_r    = 19,
+  ear_l    = 20,
+  sh       = 21,
+  eye      = 22,
+  count_   = 23,
+};
+template <> struct flag_traits<body_part> {
+  static constexpr const name_table &names = equipment_types;
+};
+static_assert(flag_count<body_part> == NUM_WEARS, "a body part for every equipment position");
 
 /* object-related defines ********************************************/
 
@@ -76,127 +113,261 @@ constexpr int ITEM_FISHBAIT   = 36; /* DITTO                        */
 
 constexpr int NUM_ITEM_TYPES = 37;
 
-/* Take/Wear flags: used by obj_data.wear_flags */
-constexpr int ITEM_WEAR_TAKE   = 0;  /* Item can be taken         */
-constexpr int ITEM_WEAR_FINGER = 1;  /* Can be worn on finger     */
-constexpr int ITEM_WEAR_NECK   = 2;  /* Can be worn around neck   */
-constexpr int ITEM_WEAR_BODY   = 3;  /* Can be worn on body       */
-constexpr int ITEM_WEAR_HEAD   = 4;  /* Can be worn on head       */
-constexpr int ITEM_WEAR_LEGS   = 5;  /* Can be worn on legs       */
-constexpr int ITEM_WEAR_FEET   = 6;  /* Can be worn on feet       */
-constexpr int ITEM_WEAR_HANDS  = 7;  /* Can be worn on hands      */
-constexpr int ITEM_WEAR_ARMS   = 8;  /* Can be worn on arms       */
-constexpr int ITEM_WEAR_SHIELD = 9;  /* Can be used as a shield   */
-constexpr int ITEM_WEAR_ABOUT  = 10; /* Can be worn about body    */
-constexpr int ITEM_WEAR_WAIST  = 11; /* Can be worn around waist  */
-constexpr int ITEM_WEAR_WRIST  = 12; /* Can be worn on wrist      */
-constexpr int ITEM_WEAR_WIELD  = 13; /* Can be wielded            */
-constexpr int ITEM_WEAR_HOLD   = 14; /* Can be held               */
-constexpr int ITEM_WEAR_PACK   = 15; /* Can be worn as a backpack */
-constexpr int ITEM_WEAR_EAR    = 16; /* Can be worn as an earring */
-constexpr int ITEM_WEAR_SH     = 17; /* Can be worn as wings      */
-constexpr int ITEM_WEAR_EYE    = 18; /* Can be worn as a mask     */
+extern const name_table wear_bits; /* NUM_ITEM_WEARS of them */
 
-constexpr int NUM_ITEM_WEARS = 19;
+/* Take/Wear flags: used by obj_data.wear_flags */
+enum class wear_flag : uint8_t {
+  take   = 0,   /* Item can be taken         */
+  finger = 1,   /* Can be worn on finger     */
+  neck   = 2,   /* Can be worn around neck   */
+  body   = 3,   /* Can be worn on body       */
+  head   = 4,   /* Can be worn on head       */
+  legs   = 5,   /* Can be worn on legs       */
+  feet   = 6,   /* Can be worn on feet       */
+  hands  = 7,   /* Can be worn on hands      */
+  arms   = 8,   /* Can be worn on arms       */
+  shield = 9,   /* Can be used as a shield   */
+  about  = 10,  /* Can be worn about body    */
+  waist  = 11,  /* Can be worn around waist  */
+  wrist  = 12,  /* Can be worn on wrist      */
+  wield  = 13,  /* Can be wielded            */
+  hold   = 14,  /* Can be held               */
+  pack   = 15,  /* Can be worn as a backpack */
+  ear    = 16,  /* Can be worn as an earring */
+  sh     = 17,  /* Can be worn as wings      */
+  eye    = 18,  /* Can be worn as a mask     */
+  count_ = 19,
+};
+template <> struct flag_traits<wear_flag> {
+  static constexpr const name_table &names = wear_bits;
+};
+
+/* The old names, until every use says wear_flag:: */
+constexpr wear_flag ITEM_WEAR_TAKE   = wear_flag::take;
+constexpr wear_flag ITEM_WEAR_FINGER = wear_flag::finger;
+constexpr wear_flag ITEM_WEAR_NECK   = wear_flag::neck;
+constexpr wear_flag ITEM_WEAR_BODY   = wear_flag::body;
+constexpr wear_flag ITEM_WEAR_HEAD   = wear_flag::head;
+constexpr wear_flag ITEM_WEAR_LEGS   = wear_flag::legs;
+constexpr wear_flag ITEM_WEAR_FEET   = wear_flag::feet;
+constexpr wear_flag ITEM_WEAR_HANDS  = wear_flag::hands;
+constexpr wear_flag ITEM_WEAR_ARMS   = wear_flag::arms;
+constexpr wear_flag ITEM_WEAR_SHIELD = wear_flag::shield;
+constexpr wear_flag ITEM_WEAR_ABOUT  = wear_flag::about;
+constexpr wear_flag ITEM_WEAR_WAIST  = wear_flag::waist;
+constexpr wear_flag ITEM_WEAR_WRIST  = wear_flag::wrist;
+constexpr wear_flag ITEM_WEAR_WIELD  = wear_flag::wield;
+constexpr wear_flag ITEM_WEAR_HOLD   = wear_flag::hold;
+constexpr wear_flag ITEM_WEAR_PACK   = wear_flag::pack;
+constexpr wear_flag ITEM_WEAR_EAR    = wear_flag::ear;
+constexpr wear_flag ITEM_WEAR_SH     = wear_flag::sh;
+constexpr wear_flag ITEM_WEAR_EYE    = wear_flag::eye;
+
+constexpr int NUM_ITEM_WEARS = static_cast<int>(flag_count<wear_flag>);
+
+extern const name_table extra_bits; /* NUM_ITEM_FLAGS of them */
 
 /* Extra object flags: used by obj_data.extra_flags */
-constexpr int ITEM_GLOW                  = 0;  /* Item is glowing              */
-constexpr int ITEM_HUM                   = 1;  /* Item is humming              */
-constexpr int ITEM_NORENT                = 2;  /* Item cannot be rented        */
-constexpr int ITEM_NODONATE              = 3;  /* Item cannot be donated       */
-constexpr int ITEM_NOINVIS               = 4;  /* Item cannot be made invis    */
-constexpr int ITEM_INVISIBLE             = 5;  /* Item is invisible            */
-constexpr int ITEM_MAGIC                 = 6;  /* Item is magical              */
-constexpr int ITEM_NODROP                = 7;  /* Item is cursed: can't drop   */
-constexpr int ITEM_BLESS                 = 8;  /* Item is blessed              */
-constexpr int ITEM_ANTI_GOOD             = 9;  /* Not usable by good people    */
-constexpr int ITEM_ANTI_EVIL             = 10; /* Not usable by evil people    */
-constexpr int ITEM_ANTI_NEUTRAL          = 11; /* Not usable by neutral people */
-constexpr int ITEM_ANTI_WIZARD           = 12; /* Not usable by mages          */
-constexpr int ITEM_ANTI_CLERIC           = 13; /* Not usable by clerics        */
-constexpr int ITEM_ANTI_ROGUE            = 14; /* Not usable by thieves        */
-constexpr int ITEM_ANTI_FIGHTER          = 15; /* Not usable by warriors       */
-constexpr int ITEM_NOSELL                = 16; /* Shopkeepers won't touch it   */
-constexpr int ITEM_ANTI_DRUID            = 17; /* Not usable by druids         */
-constexpr int ITEM_2H                    = 18; /* Requires two free hands      */
-constexpr int ITEM_ANTI_BARD             = 19; /* Not usable by bards          */
-constexpr int ITEM_ANTI_RANGER           = 20; /* Not usable by rangers        */
-constexpr int ITEM_ANTI_PALADIN          = 21; /* Not usable by paladins       */
-constexpr int ITEM_ANTI_HUMAN            = 22; /* Not usable by humans         */
-constexpr int ITEM_ANTI_ICER             = 23; /* Not usable by dwarves        */
-constexpr int ITEM_ANTI_SAIYAN           = 24; /* Not usable by elves          */
-constexpr int ITEM_ANTI_KONATSU          = 25; /* Not usable by gnomes         */
-constexpr int ITEM_UNIQUE_SAVE           = 26; /* unique object save           */
-constexpr int ITEM_BROKEN                = 27; /* Item is broken hands         */
-constexpr int ITEM_UNBREAKABLE           = 28; /* Item is unbreakable          */
-constexpr int ITEM_ANTI_MONK             = 29; /* Not usable by monks          */
-constexpr int ITEM_ANTI_BARBARIAN        = 30; /* Not usable by barbarians     */
-constexpr int ITEM_ANTI_SORCERER         = 31; /* Not usable by sorcerers      */
-constexpr int ITEM_DOUBLE                = 32; /* Double weapon                */
-constexpr int ITEM_ONLY_WIZARD           = 33; /* Only usable by mages         */
-constexpr int ITEM_ONLY_CLERIC           = 34; /* Only usable by clerics       */
-constexpr int ITEM_ONLY_ROGUE            = 35; /* Only usable by thieves       */
-constexpr int ITEM_ONLY_FIGHTER          = 36; /* Only usable by warriors      */
-constexpr int ITEM_ONLY_DRUID            = 37; /* Only usable by druids        */
-constexpr int ITEM_ONLY_BARD             = 38; /* Only usable by bards         */
-constexpr int ITEM_ONLY_RANGER           = 39; /* Only usable by rangers       */
-constexpr int ITEM_ONLY_PALADIN          = 40; /* Only usable by paladins      */
-constexpr int ITEM_ONLY_HUMAN            = 41; /* Only usable by humans        */
-constexpr int ITEM_ONLY_ICER             = 42; /* Only usable by dwarves       */
-constexpr int ITEM_ONLY_SAIYAN           = 43; /* Only usable by elves         */
-constexpr int ITEM_ONLY_KONATSU          = 44; /* Only usable by gnomes        */
-constexpr int ITEM_ONLY_MONK             = 45; /* Only usable by monks         */
-constexpr int ITEM_ONLY_BARBARIAN        = 46; /* Only usable by barbarians    */
-constexpr int ITEM_ONLY_SORCERER         = 47; /* Only usable by sorcerers     */
-constexpr int ITEM_ANTI_ARCANE_ARCHER    = 48; /* Not usable by Aracane Archers          */
-constexpr int ITEM_ANTI_ARCANE_TRICKSTER = 49; /* Not usable by Aracane tricksters       */
-constexpr int ITEM_ANTI_ARCHMAGE         = 50; /* Not usable by Archmages                */
-constexpr int ITEM_ANTI_ASSASSIN         = 51; /* Not usable by Assassins                */
-constexpr int ITEM_ANTI_BLACKGUARD       = 52; /* Not usable by Blackguards              */
-constexpr int ITEM_ANTI_DRAGON_DISCIPLE  = 53; /* Not usable by Dragon disciples         */
-constexpr int ITEM_ANTI_DUELIST          = 54; /* Not usable by Duelists                 */
-constexpr int ITEM_ANTI_DWARVEN_DEFENDER = 55; /* Not usable by Dwarven defenders        */
-constexpr int ITEM_ANTI_ELDRITCH_KNIGHT  = 56; /* Not usable by Eldritch knights         */
-constexpr int ITEM_ANTI_HIEROPHANT       = 57; /* Not usable by Hierophants              */
-constexpr int ITEM_ANTI_HORIZON_WALKER   = 58; /* Not usable by Horizon walkers          */
-constexpr int ITEM_ANTI_LOREMASTER       = 59; /* Not usable by Loremasters              */
-constexpr int ITEM_ANTI_MYSTIC_THEURGE   = 60; /* Not usable by Mystic theurges          */
-constexpr int ITEM_ANTI_SHADOWDANCER     = 61; /* Not useable by shadowdancers           */
-constexpr int ITEM_ANTI_THAUMATURGIST    = 62; /* Not useable by thaumaturgists          */
-constexpr int ITEM_BSCOUTER              = 63;
-constexpr int ITEM_MSCOUTER              = 64;
-constexpr int ITEM_ASCOUTER              = 65;
-constexpr int ITEM_USCOUTER              = 66;
-constexpr int ITEM_WEAPLVL1              = 67;
-constexpr int ITEM_WEAPLVL2              = 68;
-constexpr int ITEM_WEAPLVL3              = 69;
-constexpr int ITEM_WEAPLVL4              = 70;
-constexpr int ITEM_WEAPLVL5              = 71;
-constexpr int ITEM_CBOARD                = 72;
-constexpr int ITEM_FORGED                = 73;
-constexpr int ITEM_SHEATH                = 74;
-constexpr int ITEM_ONLY_JINTO            = 75;
-constexpr int ITEM_BURIED                = 76;
-constexpr int ITEM_SLOT1                 = 77;
-constexpr int ITEM_SLOT2                 = 78;
-constexpr int ITEM_TOKEN                 = 79;
-constexpr int ITEM_SLOT_ONE              = 80;
-constexpr int ITEM_SLOTS_FILLED          = 81;
-constexpr int ITEM_RESTRING              = 82;
-constexpr int ITEM_CUSTOM                = 83;
-constexpr int ITEM_PROTECTED             = 84;
-constexpr int ITEM_NORANDOM              = 85;
-constexpr int ITEM_THROW                 = 86;
-constexpr int ITEM_HOT                   = 87;
-constexpr int ITEM_PURGE                 = 88;
-constexpr int ITEM_ICE                   = 89;
-constexpr int ITEM_DUPLICATE             = 90;
-constexpr int ITEM_MATURE                = 91;
-constexpr int ITEM_CARDCASE              = 92;
-constexpr int ITEM_NOPICKUP              = 93;
-constexpr int ITEM_NOSTEAL               = 94;
+enum class extra_flag : uint8_t {
+  glow                  = 0,   /* Item is glowing              */
+  hum                   = 1,   /* Item is humming              */
+  norent                = 2,   /* Item cannot be rented        */
+  nodonate              = 3,   /* Item cannot be donated       */
+  noinvis               = 4,   /* Item cannot be made invis    */
+  invisible             = 5,   /* Item is invisible            */
+  magic                 = 6,   /* Item is magical              */
+  nodrop                = 7,   /* Item is cursed: can't drop   */
+  bless                 = 8,   /* Item is blessed              */
+  anti_good             = 9,   /* Not usable by good people    */
+  anti_evil             = 10,  /* Not usable by evil people    */
+  anti_neutral          = 11,  /* Not usable by neutral people */
+  anti_wizard           = 12,  /* Not usable by mages          */
+  anti_cleric           = 13,  /* Not usable by clerics        */
+  anti_rogue            = 14,  /* Not usable by thieves        */
+  anti_fighter          = 15,  /* Not usable by warriors       */
+  nosell                = 16,  /* Shopkeepers won't touch it   */
+  anti_druid            = 17,  /* Not usable by druids         */
+  two_handed                  = 18,  /* Requires two free hands      */
+  anti_bard             = 19,  /* Not usable by bards          */
+  anti_ranger           = 20,  /* Not usable by rangers        */
+  anti_paladin          = 21,  /* Not usable by paladins       */
+  anti_human            = 22,  /* Not usable by humans         */
+  anti_icer             = 23,  /* Not usable by dwarves        */
+  anti_saiyan           = 24,  /* Not usable by elves          */
+  anti_konatsu          = 25,  /* Not usable by gnomes         */
+  unique_save           = 26,  /* unique object save           */
+  broken                = 27,  /* Item is broken hands         */
+  unbreakable           = 28,  /* Item is unbreakable          */
+  anti_monk             = 29,  /* Not usable by monks          */
+  anti_barbarian        = 30,  /* Not usable by barbarians     */
+  anti_sorcerer         = 31,  /* Not usable by sorcerers      */
+  double_               = 32,  /* Double weapon                */
+  only_wizard           = 33,  /* Only usable by mages         */
+  only_cleric           = 34,  /* Only usable by clerics       */
+  only_rogue            = 35,  /* Only usable by thieves       */
+  only_fighter          = 36,  /* Only usable by warriors      */
+  only_druid            = 37,  /* Only usable by druids        */
+  only_bard             = 38,  /* Only usable by bards         */
+  only_ranger           = 39,  /* Only usable by rangers       */
+  only_paladin          = 40,  /* Only usable by paladins      */
+  only_human            = 41,  /* Only usable by humans        */
+  only_icer             = 42,  /* Only usable by dwarves       */
+  only_saiyan           = 43,  /* Only usable by elves         */
+  only_konatsu          = 44,  /* Only usable by gnomes        */
+  only_monk             = 45,  /* Only usable by monks         */
+  only_barbarian        = 46,  /* Only usable by barbarians    */
+  only_sorcerer         = 47,  /* Only usable by sorcerers     */
+  anti_arcane_archer    = 48,  /* Not usable by Aracane Archers          */
+  anti_arcane_trickster = 49,  /* Not usable by Aracane tricksters       */
+  anti_archmage         = 50,  /* Not usable by Archmages                */
+  anti_assassin         = 51,  /* Not usable by Assassins                */
+  anti_blackguard       = 52,  /* Not usable by Blackguards              */
+  anti_dragon_disciple  = 53,  /* Not usable by Dragon disciples         */
+  anti_duelist          = 54,  /* Not usable by Duelists                 */
+  anti_dwarven_defender = 55,  /* Not usable by Dwarven defenders        */
+  anti_eldritch_knight  = 56,  /* Not usable by Eldritch knights         */
+  anti_hierophant       = 57,  /* Not usable by Hierophants              */
+  anti_horizon_walker   = 58,  /* Not usable by Horizon walkers          */
+  anti_loremaster       = 59,  /* Not usable by Loremasters              */
+  anti_mystic_theurge   = 60,  /* Not usable by Mystic theurges          */
+  anti_shadowdancer     = 61,  /* Not useable by shadowdancers           */
+  anti_thaumaturgist    = 62,  /* Not useable by thaumaturgists          */
+  bscouter              = 63,
+  mscouter              = 64,
+  ascouter              = 65,
+  uscouter              = 66,
+  weaplvl1              = 67,
+  weaplvl2              = 68,
+  weaplvl3              = 69,
+  weaplvl4              = 70,
+  weaplvl5              = 71,
+  cboard                = 72,
+  forged                = 73,
+  sheath                = 74,
+  only_jinto            = 75,
+  buried                = 76,
+  slot1                 = 77,
+  slot2                 = 78,
+  token                 = 79,
+  slot_one              = 80,
+  slots_filled          = 81,
+  restring              = 82,
+  custom                = 83,
+  protected_           = 84,
+  norandom              = 85,
+  throw_                = 86,
+  hot                   = 87,
+  purge                 = 88,
+  ice                   = 89,
+  duplicate             = 90,
+  mature                = 91,
+  cardcase              = 92,
+  nopickup              = 93,
+  nosteal               = 94,
+  count_                = 95,
+};
+template <> struct flag_traits<extra_flag> {
+  static constexpr const name_table &names = extra_bits;
+};
 
-constexpr int NUM_ITEM_FLAGS = 95;
+/* The old names, until every use says extra_flag:: */
+constexpr extra_flag ITEM_GLOW                  = extra_flag::glow;
+constexpr extra_flag ITEM_HUM                   = extra_flag::hum;
+constexpr extra_flag ITEM_NORENT                = extra_flag::norent;
+constexpr extra_flag ITEM_NODONATE              = extra_flag::nodonate;
+constexpr extra_flag ITEM_NOINVIS               = extra_flag::noinvis;
+constexpr extra_flag ITEM_INVISIBLE             = extra_flag::invisible;
+constexpr extra_flag ITEM_MAGIC                 = extra_flag::magic;
+constexpr extra_flag ITEM_NODROP                = extra_flag::nodrop;
+constexpr extra_flag ITEM_BLESS                 = extra_flag::bless;
+constexpr extra_flag ITEM_ANTI_GOOD             = extra_flag::anti_good;
+constexpr extra_flag ITEM_ANTI_EVIL             = extra_flag::anti_evil;
+constexpr extra_flag ITEM_ANTI_NEUTRAL          = extra_flag::anti_neutral;
+constexpr extra_flag ITEM_ANTI_WIZARD           = extra_flag::anti_wizard;
+constexpr extra_flag ITEM_ANTI_CLERIC           = extra_flag::anti_cleric;
+constexpr extra_flag ITEM_ANTI_ROGUE            = extra_flag::anti_rogue;
+constexpr extra_flag ITEM_ANTI_FIGHTER          = extra_flag::anti_fighter;
+constexpr extra_flag ITEM_NOSELL                = extra_flag::nosell;
+constexpr extra_flag ITEM_ANTI_DRUID            = extra_flag::anti_druid;
+constexpr extra_flag ITEM_2H                    = extra_flag::two_handed;
+constexpr extra_flag ITEM_ANTI_BARD             = extra_flag::anti_bard;
+constexpr extra_flag ITEM_ANTI_RANGER           = extra_flag::anti_ranger;
+constexpr extra_flag ITEM_ANTI_PALADIN          = extra_flag::anti_paladin;
+constexpr extra_flag ITEM_ANTI_HUMAN            = extra_flag::anti_human;
+constexpr extra_flag ITEM_ANTI_ICER             = extra_flag::anti_icer;
+constexpr extra_flag ITEM_ANTI_SAIYAN           = extra_flag::anti_saiyan;
+constexpr extra_flag ITEM_ANTI_KONATSU          = extra_flag::anti_konatsu;
+constexpr extra_flag ITEM_UNIQUE_SAVE           = extra_flag::unique_save;
+constexpr extra_flag ITEM_BROKEN                = extra_flag::broken;
+constexpr extra_flag ITEM_UNBREAKABLE           = extra_flag::unbreakable;
+constexpr extra_flag ITEM_ANTI_MONK             = extra_flag::anti_monk;
+constexpr extra_flag ITEM_ANTI_BARBARIAN        = extra_flag::anti_barbarian;
+constexpr extra_flag ITEM_ANTI_SORCERER         = extra_flag::anti_sorcerer;
+constexpr extra_flag ITEM_DOUBLE                = extra_flag::double_;
+constexpr extra_flag ITEM_ONLY_WIZARD           = extra_flag::only_wizard;
+constexpr extra_flag ITEM_ONLY_CLERIC           = extra_flag::only_cleric;
+constexpr extra_flag ITEM_ONLY_ROGUE            = extra_flag::only_rogue;
+constexpr extra_flag ITEM_ONLY_FIGHTER          = extra_flag::only_fighter;
+constexpr extra_flag ITEM_ONLY_DRUID            = extra_flag::only_druid;
+constexpr extra_flag ITEM_ONLY_BARD             = extra_flag::only_bard;
+constexpr extra_flag ITEM_ONLY_RANGER           = extra_flag::only_ranger;
+constexpr extra_flag ITEM_ONLY_PALADIN          = extra_flag::only_paladin;
+constexpr extra_flag ITEM_ONLY_HUMAN            = extra_flag::only_human;
+constexpr extra_flag ITEM_ONLY_ICER             = extra_flag::only_icer;
+constexpr extra_flag ITEM_ONLY_SAIYAN           = extra_flag::only_saiyan;
+constexpr extra_flag ITEM_ONLY_KONATSU          = extra_flag::only_konatsu;
+constexpr extra_flag ITEM_ONLY_MONK             = extra_flag::only_monk;
+constexpr extra_flag ITEM_ONLY_BARBARIAN        = extra_flag::only_barbarian;
+constexpr extra_flag ITEM_ONLY_SORCERER         = extra_flag::only_sorcerer;
+constexpr extra_flag ITEM_ANTI_ARCANE_ARCHER    = extra_flag::anti_arcane_archer;
+constexpr extra_flag ITEM_ANTI_ARCANE_TRICKSTER = extra_flag::anti_arcane_trickster;
+constexpr extra_flag ITEM_ANTI_ARCHMAGE         = extra_flag::anti_archmage;
+constexpr extra_flag ITEM_ANTI_ASSASSIN         = extra_flag::anti_assassin;
+constexpr extra_flag ITEM_ANTI_BLACKGUARD       = extra_flag::anti_blackguard;
+constexpr extra_flag ITEM_ANTI_DRAGON_DISCIPLE  = extra_flag::anti_dragon_disciple;
+constexpr extra_flag ITEM_ANTI_DUELIST          = extra_flag::anti_duelist;
+constexpr extra_flag ITEM_ANTI_DWARVEN_DEFENDER = extra_flag::anti_dwarven_defender;
+constexpr extra_flag ITEM_ANTI_ELDRITCH_KNIGHT  = extra_flag::anti_eldritch_knight;
+constexpr extra_flag ITEM_ANTI_HIEROPHANT       = extra_flag::anti_hierophant;
+constexpr extra_flag ITEM_ANTI_HORIZON_WALKER   = extra_flag::anti_horizon_walker;
+constexpr extra_flag ITEM_ANTI_LOREMASTER       = extra_flag::anti_loremaster;
+constexpr extra_flag ITEM_ANTI_MYSTIC_THEURGE   = extra_flag::anti_mystic_theurge;
+constexpr extra_flag ITEM_ANTI_SHADOWDANCER     = extra_flag::anti_shadowdancer;
+constexpr extra_flag ITEM_ANTI_THAUMATURGIST    = extra_flag::anti_thaumaturgist;
+constexpr extra_flag ITEM_BSCOUTER              = extra_flag::bscouter;
+constexpr extra_flag ITEM_MSCOUTER              = extra_flag::mscouter;
+constexpr extra_flag ITEM_ASCOUTER              = extra_flag::ascouter;
+constexpr extra_flag ITEM_USCOUTER              = extra_flag::uscouter;
+constexpr extra_flag ITEM_WEAPLVL1              = extra_flag::weaplvl1;
+constexpr extra_flag ITEM_WEAPLVL2              = extra_flag::weaplvl2;
+constexpr extra_flag ITEM_WEAPLVL3              = extra_flag::weaplvl3;
+constexpr extra_flag ITEM_WEAPLVL4              = extra_flag::weaplvl4;
+constexpr extra_flag ITEM_WEAPLVL5              = extra_flag::weaplvl5;
+constexpr extra_flag ITEM_CBOARD                = extra_flag::cboard;
+constexpr extra_flag ITEM_FORGED                = extra_flag::forged;
+constexpr extra_flag ITEM_SHEATH                = extra_flag::sheath;
+constexpr extra_flag ITEM_ONLY_JINTO            = extra_flag::only_jinto;
+constexpr extra_flag ITEM_BURIED                = extra_flag::buried;
+constexpr extra_flag ITEM_SLOT1                 = extra_flag::slot1;
+constexpr extra_flag ITEM_SLOT2                 = extra_flag::slot2;
+constexpr extra_flag ITEM_TOKEN                 = extra_flag::token;
+constexpr extra_flag ITEM_SLOT_ONE              = extra_flag::slot_one;
+constexpr extra_flag ITEM_SLOTS_FILLED          = extra_flag::slots_filled;
+constexpr extra_flag ITEM_RESTRING              = extra_flag::restring;
+constexpr extra_flag ITEM_CUSTOM                = extra_flag::custom;
+constexpr extra_flag ITEM_PROTECTED             = extra_flag::protected_;
+constexpr extra_flag ITEM_NORANDOM              = extra_flag::norandom;
+constexpr extra_flag ITEM_THROW                 = extra_flag::throw_;
+constexpr extra_flag ITEM_HOT                   = extra_flag::hot;
+constexpr extra_flag ITEM_PURGE                 = extra_flag::purge;
+constexpr extra_flag ITEM_ICE                   = extra_flag::ice;
+constexpr extra_flag ITEM_DUPLICATE             = extra_flag::duplicate;
+constexpr extra_flag ITEM_MATURE                = extra_flag::mature;
+constexpr extra_flag ITEM_CARDCASE              = extra_flag::cardcase;
+constexpr extra_flag ITEM_NOPICKUP              = extra_flag::nopickup;
+constexpr extra_flag ITEM_NOSTEAL               = extra_flag::nosteal;
+
+constexpr int NUM_ITEM_FLAGS = static_cast<int>(flag_count<extra_flag>);
 
 /* Container flags - value[1] */
 constexpr bitvector_t CONT_CLOSEABLE = (1u << 0); /* Container can be closed	*/
@@ -473,11 +644,8 @@ constexpr int NUM_FULLNESS = 5;
 constexpr int EF_ARRAY_MAX = 4;
 constexpr int TW_ARRAY_MAX = 4;
 
-extern const name_table equipment_types; /* NUM_WEARS of them */
 extern const name_table wear_where; /* NUM_WEARS of them */
 extern const name_table item_types; /* NUM_ITEM_TYPES of them */
-extern const name_table wear_bits; /* NUM_ITEM_WEARS of them */
-extern const name_table extra_bits; /* NUM_ITEM_FLAGS of them */
 extern const name_table container_bits; /* NUM_CONT_FLAGS of them */
 
 extern const name_table drinks; /* NUM_LIQ_TYPES of them */

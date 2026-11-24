@@ -1495,7 +1495,6 @@ static void make_pcorpse(GameWorld *g, struct char_data *ch)
 
   struct obj_data *corpse;
   struct obj_data *money;
-  int x, y;
 
   corpse = create_obj(g);
 
@@ -1528,12 +1527,8 @@ static void make_pcorpse(GameWorld *g, struct char_data *ch)
 
   obj_set_type_flag(corpse, ITEM_CONTAINER);
   obj_set_size(corpse, get_size(ch));
-  for (x = y = 0; x < EF_ARRAY_MAX || y < TW_ARRAY_MAX; x++, y++) {
-    if (x < EF_ARRAY_MAX)
-      obj_get_extra_flags(corpse)[x] = 0;
-    if (y < TW_ARRAY_MAX)
-      obj_get_wear_flags(corpse)[y] = 0;
-  }
+  obj_get_extra_flags(corpse) = {};
+  obj_get_wear_flags(corpse) = {};
 
   obj_wear_set(corpse, ITEM_WEAR_TAKE, true);
   obj_extra_set(corpse, ITEM_NODONATE, true);
@@ -1659,7 +1654,7 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
   struct obj_data *corpse;
   struct obj_data *money;
   struct obj_data *meat;
-  int i, x, y;
+  int i;
 
   corpse = create_obj(g);
 
@@ -1714,12 +1709,8 @@ static void make_corpse(GameWorld *g, struct char_data *ch, struct char_data *tc
 
   obj_set_type_flag(corpse, ITEM_CONTAINER);
   obj_set_size(corpse, get_size(ch));
-  for (x = y = 0; x < EF_ARRAY_MAX || y < TW_ARRAY_MAX; x++, y++) {
-    if (x < EF_ARRAY_MAX)
-      obj_get_extra_flags(corpse)[x] = 0;
-    if (y < TW_ARRAY_MAX)
-      obj_get_wear_flags(corpse)[y] = 0;
-  }
+  obj_get_extra_flags(corpse) = {};
+  obj_get_wear_flags(corpse) = {};
   obj_wear_set(corpse, ITEM_WEAR_TAKE, true);
   obj_extra_set(corpse, ITEM_NODONATE, true);
   obj_set_value(corpse, VAL_CONTAINER_CAPACITY, 0);                  /* You can't store stuff in a corpse */

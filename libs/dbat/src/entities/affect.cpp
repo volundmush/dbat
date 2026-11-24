@@ -179,11 +179,11 @@ bool affect_is_loadable(const struct affected_type *af)
 {
   constexpr int MAX_LOADED_MODIFIER = 100000000; /* far past any real one, and too small to overflow a stat */
 
-  return af->type >= 0 && af->type < SKILL_TABLE_SIZE && af->bitvector < (bitvector_t)NUM_AFF_FLAGS &&
+  return af->type >= 0 && af->type < SKILL_TABLE_SIZE && std::to_underlying(af->bitvector) < NUM_AFF_FLAGS &&
          af->location >= 0 && af->location <= APPLY_ALL_STATS && abs(af->modifier) <= MAX_LOADED_MODIFIER;
 }
 
-static void affect_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, long bitv, bool add)
+static void affect_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, aff_flag bitv, bool add)
 {
   if (add) {
     if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
@@ -199,28 +199,14 @@ static void affect_modify(GameWorld *g, struct char_data *ch, int loc, int mod, 
   aff_apply_modify(g, ch, loc, mod, spec, "affect_modify");
 }
 
-void affect_modify_ar(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, bitvector_t bitv[], bool add)
+void affect_modify_ar(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, const flag_set<aff_flag> &bitv, bool add)
 {
-  int i, j;
-
-  if (add) {
-    for (i = 0; i < AF_ARRAY_MAX; i++)
-      for (j = 0; j < 32; j++)
-        if (IS_SET_AR(bitv, (i * 32) + j)) {
-          if ((i * 32) + j != AFF_INFRAVISION || !char_is_android(ch)) {
-            char_aff_set(ch, (i * 32) + j, true);
-          }
-        }
-  } else {
-    for (i = 0; i < AF_ARRAY_MAX; i++)
-      for (j = 0; j < 32; j++)
-        if (IS_SET_AR(bitv, (i * 32) + j)) {
-          if ((i * 32) + j != AFF_INFRAVISION || !char_is_android(ch)) {
-            char_aff_set(ch, (i * 32) + j, false);
-          }
-        }
+  /* every bit the object sets, those past the affects too, as the file had them */
+  for (std::size_t n = 0; n < FLAG_BITS; n++)
+    if (bitv.test_bit(n) && (n != std::to_underlying(AFF_INFRAVISION) || !char_is_android(ch)))
+      char_get_affected_by(ch).set_bit(n, add);
+  if (!add)
     mod = -mod;
-  }
 
   aff_apply_modify(g, ch, loc, mod, spec, "affect_modify_ar");
 }

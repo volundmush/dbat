@@ -84,7 +84,7 @@ struct player_special_data {
   int16_t invis_level{};                   /* level of invisibility		*/
   room_vnum load_room{};                   /* Which room to place char in		*/
   std::map<uint16_t, skill_data> skills;   /* by skill id, only those with something set; NPCs have none */
-  bitvector_t pref[PR_ARRAY_MAX]{};        /* preference flags for PC's.		*/
+  flag_set<pref_flag> pref;                /* preference flags for PC's.		*/
   uint8_t bad_pws{};                       /* number of bad password attemps	*/
   int8_t conditions[NUM_CONDITIONS]{};     /* Drunk, full, thirsty			*/
 
@@ -155,7 +155,7 @@ struct char_data {
 
   // admin stuff
   int admlevel{};                       /* PC / NPC's admin level               */
-  bitvector_t admflags[AD_ARRAY_MAX]{}; /* Bitvector for admin privs		*/
+  flag_set<admin_flag> admflags;        /* admin privs */
 
   room_vnum hometown{};    /* PC Hometown / NPC spawn room         */
   struct time_data time{}; /* PC's AGE in days			*/
@@ -239,7 +239,7 @@ struct char_data {
 
   bitvector_t act[PM_ARRAY_MAX]{}; /* act flag for NPC's; player flag for PC's */
 
-  bitvector_t affected_by[AF_ARRAY_MAX]{}; /* Bitvector for current affects	*/
+  flag_set<aff_flag> affected_by;          /* current affects */
 
   // magic music
   short song{};
@@ -325,7 +325,7 @@ struct char_data {
   // limb information... why do we have three of them?
   int limbs[4]{}; /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
   int limb_condition[4]{};
-  bitvector_t bodyparts[AF_ARRAY_MAX]{}; /* Bitvector for current bodyparts      */
+  flag_set<body_part> bodyparts;          /* current bodyparts, by equipment position */
 
   time_t rewtime{};
 

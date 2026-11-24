@@ -245,10 +245,10 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
 
   if (type == APPLY_TYPE) {
     af.location  = i;
-    af.bitvector = 0;
+    af.bitvector = AFF_DONTUSE;
   } else {
     af.location  = 0;
-    af.bitvector = i;
+    af.bitvector = *flag_from_index<aff_flag>(i); /* found among the affects' names above */
   }
 
   affect_to_char(g, ch, &af);

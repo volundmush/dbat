@@ -134,17 +134,14 @@ void shop_set_func(struct shop_data *shop, spec_proc_func v)
   shop->func = v;
 }
 
-bitvector_t *shop_get_with_who(struct shop_data *shop)
+flag_set<trade_flag> &shop_get_with_who(struct shop_data *shop)
 {
   return shop->with_who;
 }
 
-void shop_set_with_who(struct shop_data *shop, int flag, bool on)
+void shop_set_with_who(struct shop_data *shop, trade_flag flag, bool on)
 {
-  if (on)
-    SET_BIT_AR(shop->with_who, flag);
-  else
-    REMOVE_BIT_AR(shop->with_who, flag);
+  shop->with_who.set(flag, on);
 }
 
 std::vector<obj_vnum> &shop_products(struct shop_data *shop)

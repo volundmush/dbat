@@ -24,12 +24,13 @@ spec_proc_func room_get_spec(GameWorld *g, room_vnum room);
 /* Minor Planet Defines */
 bool room_planet_zenith(GameWorld *g, room_vnum room);
 
-bitvector_t *room_get_room_flags(GameWorld *g, room_vnum room);
-bool room_flagged(GameWorld *g, room_vnum loc, int flag);
-void room_set_flag(GameWorld *g, room_vnum room, int flag, bool on);
-bool room_flagged(const struct room_data *room, int flag);
-void room_set_flag(struct room_data *room, int flag, bool on);
-bool room_toggle_flag(struct room_data *room, int flag);
+/* The room's flags, or null if there is no such room */
+flag_set<room_flag> *room_get_room_flags(GameWorld *g, room_vnum room);
+bool room_flagged(GameWorld *g, room_vnum loc, room_flag flag);
+void room_set_flag(GameWorld *g, room_vnum room, room_flag flag, bool on);
+bool room_flagged(const struct room_data *room, room_flag flag);
+void room_set_flag(struct room_data *room, room_flag flag, bool on);
+bool room_toggle_flag(struct room_data *room, room_flag flag);
 bool room_exit_flagged(const struct room_direction_data *ex, bitvector_t flag);
 
 struct room_direction_data *room_get_dir_option(GameWorld *g, room_vnum room, int i);
@@ -78,7 +79,8 @@ std::vector<trig_vnum> &room_proto_script(struct room_data *room);
 void room_set_proto_script(struct room_data *room, std::vector<trig_vnum> v);
 const std::vector<trig_vnum> &room_get_proto_script(GameWorld *g, room_vnum room);
 void room_set_proto_script(GameWorld *g, room_vnum room, std::vector<trig_vnum> v);
-bitvector_t *room_get_room_flags(struct room_data *room);
+flag_set<room_flag> &room_get_room_flags(struct room_data *room);
+const flag_set<room_flag> &room_get_room_flags(const struct room_data *room);
 struct script_data *room_get_script(const struct room_data *room);
 void room_set_script(struct room_data *room, struct script_data *v);
 struct script_data *room_get_script(GameWorld *g, room_vnum room);

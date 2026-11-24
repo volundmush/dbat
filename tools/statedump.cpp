@@ -50,6 +50,14 @@ std::string bits(const bitvector_t (&flags)[N])
     s += str_format("{}{:d}", i ? "," : "", (long long)flags[i]);
   return s;
 }
+template <flag_family E>
+std::string bits(const flag_set<E> &flags)
+{
+  std::string s;
+  for (size_t i = 0; i < FLAG_WORDS; i++)
+    s += str_format("{}{:d}", i ? "," : "", static_cast<long long>(flags.word(i)));
+  return s;
+}
 std::string bits(const bitvector_t *flags, size_t n)
 {
   std::string s;
@@ -133,7 +141,7 @@ void mobiles(GameWorld *g)
                char_get_mob_specials_damnodice(m), char_get_mob_specials_damsizedice(m),
                char_get_mob_specials_attack_type(m));
     file_print(out, "  act {} affected {}\n", bits(char_get_act(m), PM_ARRAY_MAX),
-               bits(char_get_affected_by(m), AF_ARRAY_MAX));
+               bits(char_get_affected_by(m)));
     std::string skills;
     for (int i = 0; i < SKILL_TABLE_SIZE; i++)
       if (char_get_skills_base(m, i))
@@ -157,8 +165,8 @@ void objects(GameWorld *g)
                vnum, ix && ix->func != nullptr, text(obj_get_short_description(o)), obj_get_type_flag(o),
                (long long)obj_get_weight(o), obj_get_cost(o), obj_get_cost_per_day(o), obj_get_level(o),
                obj_get_size(o), obj_get_timer(o), values);
-    file_print(out, "  extra {} wear {} affects {}\n", bits(obj_get_extra_flags(o), EF_ARRAY_MAX),
-               bits(obj_get_wear_flags(o), TW_ARRAY_MAX), bits(obj_get_bitvector(o), AF_ARRAY_MAX));
+    file_print(out, "  extra {} wear {} affects {}\n", bits(obj_get_extra_flags(o)),
+               bits(obj_get_wear_flags(o)), bits(obj_get_bitvector(o)));
     for (int i = 0; i < MAX_OBJ_AFFECT; i++)
       if (obj_get_affected(o)[i].location || obj_get_affected(o)[i].modifier)
         file_print(out, "  apply {:d} {:d} {:d}\n", obj_get_affected(o)[i].location, obj_get_affected(o)[i].modifier,

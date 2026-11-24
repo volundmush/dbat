@@ -48,7 +48,7 @@ struct zone_data {
   int reset_mode{};                       /* conditions for reset (see below)   */
   int min_level{};                        /* Minimum level to enter zone        */
   int max_level{};                        /* Max Mortal level to enter zone     */
-  bitvector_t zone_flags[ZF_ARRAY_MAX]{}; /* Flags for the zone.                */
+  flag_set<zone_flag> zone_flags;     /* Flags for the zone.                */
   std::vector<reset_com> cmd;             /* the reset commands, ending with an 'S' */
 
   /*

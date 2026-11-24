@@ -1922,7 +1922,7 @@ static void fly_to_space(GameWorld *g, struct char_data *ch, room_vnum space)
 namespace {
   /* By the planet's flag, the space above it, and the one room it can be left from if there is one */
   struct launch {
-    int planet;
+    room_flag planet;
     room_vnum space, only_from;
   };
 

@@ -282,7 +282,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
                room_get_zone(rm)->number, room_get_number(rm), char_get_in_room(ch),
                (long)room_get_number(rm) + ROOM_ID_BASE, buf2);
 
-  buf2 = sprintbitarray(room_get_room_flags(rm), room_bits, RF_ARRAY_MAX);
+  buf2 = flag_names(room_get_room_flags(rm));
   send_to_char(g, ch, "Room Damage: {:d}, Room Effect: {:d}\r\n", room_get_dmg(rm), room_get_geffect(rm));
   send_to_char(g, ch, "SpecProc: {}, Flags: {}\r\n", room_get_func(rm) == nullptr ? "None" : "Exists", buf2);
 
@@ -404,13 +404,13 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
     send_to_char(g, ch, "\r\n");
   }
 
-  buf = sprintbitarray(obj_get_wear_flags(j), wear_bits, TW_ARRAY_MAX);
+  buf = flag_names(obj_get_wear_flags(j));
   send_to_char(g, ch, "Can be worn on: {}\r\n", buf);
 
-  buf = sprintbitarray(obj_get_bitvector(j), affected_bits, AF_ARRAY_MAX);
+  buf = flag_names(obj_get_bitvector(j));
   send_to_char(g, ch, "Set char bits : {}\r\n", buf);
 
-  buf = sprintbitarray(obj_get_extra_flags(j), extra_bits, EF_ARRAY_MAX);
+  buf = flag_names(obj_get_extra_flags(j));
   send_to_char(g, ch, "Extra flags   : {}\r\n", buf);
 
   send_to_char(g, ch, "Weight: {:d}, Value: {:d}, Cost/day: {:d}, Timer: {:d}, Min Level: {:d}\r\n",
@@ -659,7 +659,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
     buf = sprintbitarray(char_get_act(k), player_bits, PM_ARRAY_MAX);
     send_to_char(g, ch, "PLR: @c{}@n\r\n", buf);
 
-    buf = sprintbitarray(char_get_pref(g, k), preference_bits, PR_ARRAY_MAX);
+    buf = flag_names(char_get_pref(g, k));
     send_to_char(g, ch, "PRF: @g{}@n\r\n", buf);
   }
 
@@ -714,7 +714,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
   }
 
   /* Showing the bitvector */
-  buf = sprintbitarray(char_get_affected_by(k), affected_bits, AF_ARRAY_MAX);
+  buf = flag_names(char_get_affected_by(k));
   send_to_char(g, ch, "AFF: @y{}@n\r\n", buf);
 
   /* Routine to show what spells a char is affected by */
@@ -725,11 +725,11 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
       if (aff->modifier)
         send_to_char(g, ch, "{:+d} to {}", aff->modifier, apply_types[(int)aff->location]);
 
-      if (aff->bitvector) {
+      if (aff->bitvector != AFF_DONTUSE) {
         if (aff->modifier)
           send_to_char(g, ch, ", ");
 
-        buf = affected_bits[aff->bitvector];
+        buf = flag_name(aff->bitvector);
         send_to_char(g, ch, "sets {}", buf);
       }
       send_to_char(g, ch, "\r\n");
@@ -1147,7 +1147,7 @@ namespace {
     send_to_char(g, ch, buf);
   }
 
-  template <const std::string_view &Title, int Flag>
+  template <const std::string_view &Title, room_flag Flag>
   void show_flagged_rooms(GameWorld *g, struct char_data *ch, std::string &)
   {
     std::string buf(Title);
@@ -1228,10 +1228,10 @@ namespace {
         text += str_format("SPL: ({:>3d}{}) @c{:<21}@n ", aff.duration + 1, Unit, skill_name(g, aff.type));
         if (aff.modifier)
           text += str_format("{:+d} to {}", aff.modifier, apply_types[(int)aff.location]);
-        if (aff.bitvector) {
+        if (aff.bitvector != AFF_DONTUSE) {
           if (aff.modifier)
             text += ", ";
-          text += str_format("sets {}", affected_bits[aff.bitvector]);
+          text += str_format("sets {}", flag_name(aff.bitvector));
         }
         text += "\r\n";
       }
@@ -1416,7 +1416,7 @@ constexpr int MAX_AFFECTS_ALLOWED = 3;
 /* Armor class limits*/
 constexpr int TOTAL_WEAR_CHECKS = (NUM_ITEM_WEARS - 2); /*minus Wield and Take*/
 static const struct zcheck_armor {
-  bitvector_t bitvector{}; /* from Structs.h                       */
+  wear_flag bitvector{};   /* from Structs.h                       */
   int ac_allowed{};        /* Max. AC allowed for this body part  */
   std::string_view message{};   /* phrase for error message            */
 } zarmor[] = {
@@ -1586,7 +1586,9 @@ ACMD(do_zcheck)
       if (char_get_exp(mob) > MAX_EXP_ALLOWED && (found = 1))
         buf += str_format("- Has {:d} experience (limit: {:d})\r\n",
                           char_get_exp(mob), MAX_EXP_ALLOWED);
-      if (char_aff_flagged(mob, AFF_GROUP | AFF_CHARM | AFF_POISON) && (found = 1))
+      /* quirk: reads AFF_TAMED alone, meant AFF_GROUP, AFF_CHARM or AFF_POISON: their numbers or-ed as bits, 9 | 22 | 12
+         is 31 */
+      if (char_aff_flagged(mob, AFF_TAMED) && (found = 1))
         buf += str_format("- Has illegal affection bits set ({} {} {})\r\n",
                           char_aff_flagged(mob, AFF_GROUP) ? "GROUP" : "",
                           char_aff_flagged(mob, AFF_CHARM) ? "CHARM" : "",
@@ -1748,7 +1750,9 @@ ACMD(do_zcheck)
         } /* for (k.. */
       } /* cycle directions */
 
-      if (room_flagged(g, i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_HOUSE_CRASH | ROOM_OLC | ROOM_BFS_MARK))
+      /* quirk: reads ROOM_BFS_MARK alone, meant any of the five: the flags' numbers were or-ed as if they were
+         bits, and 11 | 12 | 13 | 14 | 15 is 15 */
+      if (room_flagged(g, i, ROOM_BFS_MARK))
         buf += str_format("- Has illegal affection bits set ({} {} {} {} {})\r\n",
                           room_flagged(g, i, ROOM_ATRIUM) ? "ATRIUM" : "",
                           room_flagged(g, i, ROOM_HOUSE) ? "HOUSE" : "",

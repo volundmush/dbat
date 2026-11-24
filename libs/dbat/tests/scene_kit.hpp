@@ -2,6 +2,7 @@
 /* What the scenes of test_techniques share: the helpers that set them up, and the scene itself. */
 #include <type_traits>
 #include <cstdio>
+#include <optional>
 #include <span>
 #include <vector>
 #include <cstdlib>
@@ -61,16 +62,20 @@ inline void clear_arena(GameWorld *g, struct char_data *a, struct char_data *b, 
     }
 }
 
+/* The type of a family's flags, as Flag has it: its enum class (room_flag), or int on a base from before the family
+   was typed, so a helper taking flags builds on both trees cmdcompare compares */
+template <auto Flag> using flag_type_of = std::remove_cv_t<decltype(Flag)>;
+
 /* A sword in att's hands for throwing (steel, slashing, three pounds, at full health), made into what is asked */
 inline struct obj_data *missile(GameWorld *g, struct char_data *att, int damtype = TYPE_SLASH - TYPE_HIT,
-                                int material = MATERIAL_STEEL, int flag = -1)
+                                int material = MATERIAL_STEEL, std::optional<flag_type_of<ITEM_GLOW>> flag = std::nullopt)
 {
   struct obj_data *obj = read_object(g, 301);
 
   obj_set_value(obj, VAL_WEAPON_DAMTYPE, damtype);
   obj_set_value(obj, VAL_ALL_MATERIAL, material);
-  if (flag >= 0)
-    obj_extra_set(obj, flag, true);
+  if (flag)
+    obj_extra_set(obj, *flag, true);
   obj_to_char(g, obj, att);
   return obj;
 }
@@ -84,14 +89,14 @@ inline void group(GameWorld *g, struct char_data *leader, struct char_data *foll
 }
 
 /* att wields a sword made into this damage type in pos, in place of whatever was there */
-inline struct obj_data *wield(GameWorld *g, struct char_data *att, int damtype, int pos = WEAR_WIELD1, int flag = -1)
+inline struct obj_data *wield(GameWorld *g, struct char_data *att, int damtype, int pos = WEAR_WIELD1, std::optional<flag_type_of<ITEM_GLOW>> flag = std::nullopt)
 {
   if (char_get_equipment(att, pos))
     extract_obj(g, unequip_char(g, att, pos));
   struct obj_data *obj = read_object(g, 301);
   obj_set_value(obj, VAL_WEAPON_DAMTYPE, damtype);
-  if (flag >= 0)
-    obj_extra_set(obj, flag, true);
+  if (flag)
+    obj_extra_set(obj, *flag, true);
   equip_char(g, att, obj, pos);
   for (int skill : {SKILL_SWORD, SKILL_DAGGER, SKILL_CLUB, SKILL_SPEAR, SKILL_GUN, SKILL_BRAWL}) /* to hit with it */
     char_set_skills_base(att, skill, 100);
@@ -414,12 +419,12 @@ inline struct obj_data *thing_here(GameWorld *g, const char *name, int type, std
 inline void described(ex_desc_list *list, const char *keyword) { list->push_back({keyword, "You see it closely.\r\n"}); }
 
 /* ... a scouter on ch's eye (item70), flagged as asked and tuned to freq */
-inline struct obj_data *scouter_on(GameWorld *g, struct char_data *ch, int flag = -1, int freq = 0)
+inline struct obj_data *scouter_on(GameWorld *g, struct char_data *ch, std::optional<flag_type_of<ITEM_GLOW>> flag = std::nullopt, int freq = 0)
 {
   struct obj_data *obj = read_object(g, 70);
   obj_set_name(obj, "scouter");
-  if (flag >= 0)
-    obj_extra_set(obj, flag, true);
+  if (flag)
+    obj_extra_set(obj, *flag, true);
   obj_set_scoutfreq(obj, freq);
   equip_char(g, ch, obj, WEAR_EYE);
   return obj;
@@ -431,7 +436,7 @@ inline void away(GameWorld *g, struct char_data *ch, int freq = -1)
   char_from_room(g, ch);
   char_to_room(g, ch, 300);
   if (freq >= 0)
-    scouter_on(g, ch, -1, freq);
+    scouter_on(g, ch, std::nullopt, freq);
 }
 
 /* ... a telepath, the victim away by the arena unless asked */

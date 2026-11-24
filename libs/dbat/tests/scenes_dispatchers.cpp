@@ -845,7 +845,7 @@ namespace {
     {"with plr auralight", "status", false, SETUP(char_plr_set(att, PLR_AURALIGHT, true);), false, 1},
     {"summonable and refusing gifts", "status", false, SETUP(char_prf_set(g, att, PRF_SUMMONABLE, true); char_prf_set(g, att, PRF_NOGIVE, true);), false, 1},
     {"posing and zapped", "status", false, SETUP(assign_affect(g, att, AFF_SPECIAL_POSE, SKILL_POSE, 3, 0, 0, 0, 0, 0, 0); assign_affect(g, att, AFF_HYDROZAP, SKILL_KAMEHAMEHA, 3, 0, 0, 0, 0, 0, 0);), false, 1},
-    {"mage armored", "status", false, SETUP(assign_affect(g, att, 0, SPELL_MAGE_ARMOR, 3, 0, 0, 0, 0, 0, 0);), false, 1},
+    {"mage armored", "status", false, SETUP(assign_affect(g, att, AFF_DONTUSE, SPELL_MAGE_ARMOR, 3, 0, 0, 0, 0, 0, 0);), false, 1},
     {"playing a song", "status", false, SETUP(char_set_powerattack(att, 2);), false, 1},
     {"augmented", "status", false, SETUP(char_set_regen(att, 10); char_set_asb(att, 5); char_set_raw_lifebonus(att, 20); char_set_accuracy(att, 7);), false, 1},
     {"diminished", "status", false, SETUP(char_set_regen(att, -10); char_set_asb(att, -5); char_set_raw_lifebonus(att, -20);), false, 1},

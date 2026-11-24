@@ -116,7 +116,7 @@ namespace {
     clear_screen(g, d);
     for (int i = 0; i < NUM_TRADERS; i++)
       write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, trade_letters[i], (i + 1) % 2 ? "" : "\r\n");
-    write_to_output(g, d, "\r\nCurrent train flags: @c{}@n\r\nEnter choice, 0 to quit : ", sprintbitarray(guild.with_who, trade_letters, 4));
+    write_to_output(g, d, "\r\nCurrent train flags: @c{}@n\r\nEnter choice, 0 to quit : ", flag_names(guild.with_who));
     asking = mode::no_train;
   }
 
@@ -151,7 +151,7 @@ namespace {
                     "-- Guild Number: [@c{:d}@n]\r\n@g 0@n) Guild Master : [@c{:d}@n] @y{}\r\n@g 1@n) Doesn't know skill:\r\n @y{}\r\n@g 2@n) Player no gold:\r\n @y{}\r\n@g 3@n) Open   :  [@c{:d}@n]\r\n@g 4@n) Close  :  [@c{:d}@n]\r\n@g 5@n) Charge :  [@c{:>3.1f}@n]\r\n@g 6@n) Minlvl :  [@c{:d}@n]\r\n@g 7@n) Who to Train:  @c{}\r\n@g 8@n) Feats Menu\r\n@g 9@n) Skills Menu\r\n@g B@n) Languages Menu\r\n@g Q@n) Quit\r\nEnter Choice : ",
                     number, master ? mob_index_of(g, guild.gm)->vnum : -1, master ? char_get_sdesc(mob_proto_of(g, guild.gm)) : "None",
                     guild.no_such_skill, guild.not_enough_gold, guild.open, guild.close, guild.charge, guild.minlvl,
-                    sprintbitarray(guild.with_who, trade_letters, 4));
+                    flag_names(guild.with_who));
     asking = mode::main_menu;
   }
 
@@ -244,7 +244,7 @@ namespace {
       case mode::min_level: guild.minlvl = MAX(n, 0); break;
       case mode::no_train:
         if (int trader = LIMIT(n, 0, NUM_TRADERS - 1); trader > 0) { /* quirk: the last can't be chosen */
-          guild_trade_toggle(&guild, trader - 1);
+          guild_trade_toggle(&guild, *flag_from_index<trade_flag>(trader - 1)); /* 0 to NUM_TRADERS - 2 */
           no_train_menu(g, d);
           return;
         }

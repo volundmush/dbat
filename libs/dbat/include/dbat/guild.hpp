@@ -3,6 +3,8 @@
 #include <string>
 #include <string_view>
 
+#include "dbat/consts/tradeflags.hpp"
+#include "dbat/flag_set.hpp"
 #include "dbat/guild_utils.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/skills.hpp"
@@ -22,7 +24,7 @@ struct guild_data {
   std::string not_enough_gold{};        /* message when the student doesn't have enough gold */
   int minlvl{};                         /* Minumum level guildmaster will train */
   mob_vnum gm{};                        /* GM's vnum */
-  bitvector_t with_who[GW_ARRAY_MAX]{}; /* whom we dislike */
+  flag_set<trade_flag> with_who;        /* whom we dislike */
   int open{}, close{};                    /* when we will train */
   SPECIAL(*func){};                     /* secondary spec_proc for the GM */
   int feats[NUM_FEATS_DEFINED]{};       /* array to keep track of which feats things we'll train */
@@ -45,7 +47,7 @@ int count_guilds(GameWorld *g, guild_vnum low, guild_vnum high);
 SPECIAL(guild);
 
 /* Trade restriction flags (TRADE_*) on a guild_data. */
-bool guild_trade_toggle(struct guild_data *rec, int flag);
+bool guild_trade_toggle(struct guild_data *rec, trade_flag flag);
 void assign_the_guilds(GameWorld *g);
 void list_guilds(GameWorld *g, struct char_data *ch, struct zone_data *rnum, guild_vnum vmin, guild_vnum vmax);
 void destroy_guilds(GameWorld *g);

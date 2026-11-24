@@ -77,7 +77,7 @@ namespace {
   /* Where fish of which kinds are caught: four kinds from first, from the most common up */
   struct fishing_water {
     bool fresh;
-    int planet;
+    room_flag planet;
     obj_vnum first;
   };
   constexpr fishing_water FISHING_WATERS[] = {
@@ -393,7 +393,7 @@ namespace {
   struct rune_effect {
     std::string_view name{};
     double per_skill; /* duration, per point of runic */
-    int affect;       /* 0: Gebo, which teaches instead */
+    aff_flag affect;  /* AFF_DONTUSE: Gebo, which teaches instead */
     int spell;
     std::string_view gained{};
   };
@@ -403,7 +403,7 @@ namespace {
   constexpr rune_effect LAGUZ   = {"Laguz", 0.04, AFF_WATERBREATH, SKILL_SBC, "@GYou now have water breathing!"};
   constexpr rune_effect WUNJO   = {"Wunjo", 0.08, AFF_WUNJO, SKILL_SLAM, "@GYou are now blessed with a deeper understanding of things you experience!"};
   constexpr rune_effect PURISAZ = {"Purisaz", 0.06, AFF_POTENT, SKILL_HEELDROP, "@GYou feel as if your inner energy is more potent!"};
-  constexpr rune_effect GEBO    = {"Gebo", 0, 0, 0, {}};
+  constexpr rune_effect GEBO    = {"Gebo", 0, AFF_DONTUSE, 0, {}};
 
   struct rune {
     std::string_view word{};
@@ -428,7 +428,7 @@ namespace {
   void write_rune(GameWorld *g, struct char_data *ch, struct char_data *vict, const rune &r, const rune_effect &effect, struct obj_data *bottle,
                   int inkcost, int skill, int64_t cost)
   {
-    std::string_view flash = effect.affect ? "" : " The rune flashes out of existence immediately!";
+    std::string_view flash = effect.affect != AFF_DONTUSE ? "" : " The rune flashes out of existence immediately!";
     decCurKI(g, ch, cost, 0);
     if (vict == ch) {
       act(g, str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on your skin!{}@n", effect.name, flash), true, ch, nullptr, nullptr, TO_CHAR);
@@ -441,7 +441,7 @@ namespace {
     }
     send_to_char(g, ch, "@D[@B{:d}@b ink used.@D]@n\r\n", inkcost);
 
-    if (!effect.affect) {
+    if (effect.affect == AFF_DONTUSE) {
       char_set_practice_points(g, vict, char_get_practice_points(g, vict) + 125);
       send_to_char(g, vict, "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
     } else {

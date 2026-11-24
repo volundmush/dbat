@@ -1408,10 +1408,7 @@ void list_char_to_char(GameWorld *g, const id_list &list, struct char_data *ch)
         auto stacks = [&](char_data *j) {
           return (char_get_nr(i) == char_get_nr(j)) &&
                  (char_get_position(i) == char_get_position(j)) &&
-                 (char_get_affected_by(i)[0] == char_get_affected_by(j)[0]) &&
-                 (char_get_affected_by(i)[1] == char_get_affected_by(j)[1]) &&
-                 (char_get_affected_by(i)[2] == char_get_affected_by(j)[2]) &&
-                 (char_get_affected_by(i)[3] == char_get_affected_by(j)[3]) &&
+                 (char_get_affected_by(i) == char_get_affected_by(j)) &&
                  (!char_get_fighting(g, i) && !char_get_fighting(g, j)) &&
                  (getCurPL(g, i) == getEffMaxPL(g, i) && getCurPL(g, j) == getEffMaxPL(g, j)) &&
                  char_get_name(i) == char_get_name(j) &&

@@ -24,27 +24,31 @@ struct index_data *obj_index_of(GameWorld *g, obj_vnum vnum);
 // Misc
 // =============================================================================
 
-bool obj_aff_flagged(const struct obj_data *obj, int flag);
+bool obj_aff_flagged(const struct obj_data *obj, aff_flag flag);
 bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag);
-bool obj_extra_flagged(const struct obj_data *obj, int flag);
-void obj_extra_set(struct obj_data *obj, int flag, bool on);
-bool obj_extra_toggle(struct obj_data *obj, int flag);
-void obj_aff_set(struct obj_data *obj, int flag, bool on);
-bool obj_aff_toggle(struct obj_data *obj, int flag);
-void obj_wear_set(struct obj_data *obj, int flag, bool on);
-bool obj_wear_toggle(struct obj_data *obj, int flag);
+bool obj_extra_flagged(const struct obj_data *obj, extra_flag flag);
+void obj_extra_set(struct obj_data *obj, extra_flag flag, bool on);
+bool obj_extra_toggle(struct obj_data *obj, extra_flag flag);
+void obj_aff_set(struct obj_data *obj, aff_flag flag, bool on);
+bool obj_aff_toggle(struct obj_data *obj, aff_flag flag);
+void obj_wear_set(struct obj_data *obj, wear_flag flag, bool on);
+bool obj_wear_toggle(struct obj_data *obj, wear_flag flag);
 
 int obj_get_level(const struct obj_data *obj);
 void obj_set_level(struct obj_data *obj, int v);
-bitvector_t *obj_get_bitvector(const struct obj_data *obj);
+/* The affects the object gives whoever wears it */
+const flag_set<aff_flag> &obj_get_bitvector(const struct obj_data *obj);
+flag_set<aff_flag> &obj_get_bitvector(struct obj_data *obj);
 int8_t obj_get_type_flag(const struct obj_data *obj);
 void obj_set_type_flag(struct obj_data *obj, int8_t v);
 int obj_get_cost(const struct obj_data *obj);
 void obj_set_cost(struct obj_data *obj, int v);
 int obj_get_cost_per_day(const struct obj_data *obj);
 void obj_set_cost_per_day(struct obj_data *obj, int v);
-bitvector_t *obj_get_extra_flags(const struct obj_data *obj);
-bitvector_t *obj_get_wear_flags(const struct obj_data *obj);
+const flag_set<extra_flag> &obj_get_extra_flags(const struct obj_data *obj);
+flag_set<extra_flag> &obj_get_extra_flags(struct obj_data *obj);
+const flag_set<wear_flag> &obj_get_wear_flags(const struct obj_data *obj);
+flag_set<wear_flag> &obj_get_wear_flags(struct obj_data *obj);
 int obj_get_value(const struct obj_data *obj, int i);
 void obj_set_value(struct obj_data *obj, int i, int v);
 int64_t obj_get_weight(const struct obj_data *obj);
@@ -99,7 +103,7 @@ spec_proc_func obj_get_spec(GameWorld *g, const struct obj_data *obj);
 
 bool obj_is_corpse(const struct obj_data *obj);
 
-bool obj_wear_flagged(const struct obj_data *obj, int part);
+bool obj_wear_flagged(const struct obj_data *obj, wear_flag part);
 std::string_view obj_get_short_description(const struct obj_data *obj);
 
 std::string_view obj_sana(const struct obj_data *obj);

@@ -74,17 +74,14 @@ void guild_set_minlvl(struct guild_data *guild, int v)
   guild->minlvl = v;
 }
 
-bitvector_t *guild_get_with_who(struct guild_data *guild)
+flag_set<trade_flag> &guild_get_with_who(struct guild_data *guild)
 {
   return guild->with_who;
 }
 
-void guild_set_with_who(struct guild_data *guild, int flag, bool on)
+void guild_set_with_who(struct guild_data *guild, trade_flag flag, bool on)
 {
-  if (on)
-    SET_BIT_AR(guild->with_who, flag);
-  else
-    REMOVE_BIT_AR(guild->with_who, flag);
+  guild->with_who.set(flag, on);
 }
 
 std::string_view guild_get_no_such_skill(const struct guild_data *guild)

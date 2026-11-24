@@ -5,6 +5,7 @@
 *  This is an original file created by me for Dragonball Advent Truth     *
 *  to house all player level object editing functions -- Iovan 1/6/13     *
 ************************************************************************ */
+#include <optional>
 #include <string_view>
 
 #include "dbat/act.other.hpp"
@@ -33,7 +34,7 @@ namespace {
                                             "Head Slot",  "Neck Slot",  "Back Slot", "Shoulder Slot", "Weapon"};
 
   /* Where custom equipment of each type (but the weapon) is worn */
-  constexpr int CUSTOM_WEAR[16] = {0,              ITEM_WEAR_BODY, ITEM_WEAR_ABOUT, ITEM_WEAR_WRIST, ITEM_WEAR_EAR,  ITEM_WEAR_FINGER,
+  constexpr std::optional<wear_flag> CUSTOM_WEAR[16] = {std::nullopt,   ITEM_WEAR_BODY, ITEM_WEAR_ABOUT, ITEM_WEAR_WRIST, ITEM_WEAR_EAR,  ITEM_WEAR_FINGER,
                                    ITEM_WEAR_EYE,  ITEM_WEAR_HANDS, ITEM_WEAR_FEET, ITEM_WEAR_WAIST, ITEM_WEAR_LEGS, ITEM_WEAR_ARMS,
                                    ITEM_WEAR_HEAD, ITEM_WEAR_NECK, ITEM_WEAR_PACK,  ITEM_WEAR_SH};
 
@@ -271,7 +272,7 @@ namespace {
     struct obj_data *obj = read_object(g, order.weapon == 0 ? CUSTOM_ARMOR : CUSTOM_WEAPON);
     obj_to_char(g, obj, d->character);
     if (order.weapon == 0 && order.type < (int)std::size(CUSTOM_WEAR) && CUSTOM_WEAR[order.type])
-      obj_wear_set(obj, CUSTOM_WEAR[order.type], true);
+      obj_wear_set(obj, *CUSTOM_WEAR[order.type], true);
     obj_set_name(obj, order.name);
     obj_set_short_description(obj, order.short_desc);
     obj_set_description(obj, order.long_desc);

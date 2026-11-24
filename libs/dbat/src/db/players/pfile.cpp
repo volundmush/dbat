@@ -6,6 +6,7 @@
  * pfile_tags[] is every tag: how it is read and how it is written, in the order the file has them, then the tags
  * only older files have.
  */
+#include <array>
 #include <algorithm>
 #include <optional>
 #include <span>
@@ -66,6 +67,12 @@ struct pfile_reader {
     for (int i = 0; i < 4; i++)
       bits[i] = io::ascii_flags(flag_words[i], 0, "asciiflag_conv");
   }
+  template <flag_family E> void flags(flag_set<E> &set)
+  {
+    std::array<bitvector_t, FLAG_WORDS> bits{};
+    flags(bits.data());
+    set = flag_set<E>::from_words(bits);
+  }
   /* "Hit : <current>/<max>" and the like: the max, or 0 if the line doesn't have both */
   long long current_and_max() const
   {
@@ -102,6 +109,7 @@ struct pfile_writer {
   {
     out.print("{}: {} {} {} {}\n", tag, flag_letters(bits[0]), flag_letters(bits[1]), flag_letters(bits[2]), flag_letters(bits[3]));
   }
+  template <flag_family E> void flags(std::string_view tag, const flag_set<E> &set) { flags(tag, set.words().data()); }
 };
 
 /* "\r\r" as one "\r", as the old kill_ems() left a description */
@@ -169,9 +177,10 @@ void read_affects(pfile_reader &r)
       af.duration  = n[1];
       af.modifier  = n[2];
       af.location  = n[3];
-      af.bitvector = n[4];
-      af.specific  = affect_checked_specific(n[3], n[5]);
-      if (affect_is_loadable(&af))
+      std::optional<aff_flag> bit = flag_from_index<aff_flag>(n[4]); /* a number past the affects isn't loaded */
+      af.bitvector                = bit.value_or(AFF_DONTUSE);
+      af.specific                 = affect_checked_specific(n[3], n[5]);
+      if (bit && affect_is_loadable(&af))
         affect_to_char(r.g, r.ch, &af);
       else
         mud_log("SYSERR: {} has an impossible saved affect: {}", char_get_name(r.ch), *line);
@@ -560,15 +569,13 @@ int load_char(GameWorld *g, std::string_view name, struct char_data *ch)
   char_set_radar3(ch, PFDEF_RADAR3);
   char_set_droom(ch, PFDEF_DROOM);
   char_set_alignment(ch, PFDEF_ALIGNMENT);
-  for (i = 0; i < AF_ARRAY_MAX; i++)
-    char_get_affected_by(ch)[i] = PFDEF_AFFFLAGS;
+  static_assert(PFDEF_AFFFLAGS == 0);
+  char_get_affected_by(ch) = {};
   for (i = 0; i < PM_ARRAY_MAX; i++)
     char_get_act(ch)[i] = PFDEF_PLRFLAGS;
-  for (i = 0; i < PR_ARRAY_MAX; i++)
-    char_get_pref(g, ch)
-        [i] = PFDEF_PREFFLAGS;
-  for (i = 0; i < AD_ARRAY_MAX; i++)
-    char_get_admflags(ch)[i] = 0;
+  static_assert(PFDEF_PREFFLAGS == 0);
+  char_get_pref(g, ch) = {};
+  char_get_admflags(ch) = {};
   char_set_load_room(g, ch, PFDEF_LOADROOM);
   char_set_invis_level(g, ch, PFDEF_INVISLEV);
   char_set_freeze_level(g, ch, PFDEF_FREEZELEV);
@@ -729,7 +736,7 @@ void save_char(GameWorld *g, struct char_data *ch)
       tmp_aff[i].modifier  = 0;
       tmp_aff[i].specific  = 0;
       tmp_aff[i].location  = 0;
-      tmp_aff[i].bitvector = 0;
+      tmp_aff[i].bitvector = AFF_DONTUSE;
     }
   }
 

@@ -31,7 +31,7 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static bool guild_trade_flagged(const struct guild_data *rec, int flag);
+static bool guild_trade_flagged(const struct guild_data *rec, trade_flag flag);
 
 const std::string_view guild_default_no_skill = "%s Sorry, but I don't know that one.";
 const std::string_view guild_default_no_gold  = "%s Sorry, but I'm gonna need more zenni first.";
@@ -1167,12 +1167,14 @@ static std::string guild_customer_string(GameWorld *g, struct guild_data *guild_
 {
   std::string buf;
 
-  for (int gindex = 0, flag = 0; gindex < NUM_TRADER_NAMES; gindex++, flag++)
+  for (int gindex = 0; gindex < NUM_TRADER_NAMES; gindex++) {
+    trade_flag flag = *flag_from_index<trade_flag>(gindex);
     if (detailed) {
       if (!guild_trade_flagged(guild_nr, flag))
         buf += str_format(", {}", trade_letters[gindex]);
     } else
       buf += guild_trade_flagged(guild_nr, flag) ? '_' : first_char(trade_letters[gindex]);
+  }
   return buf;
 }
 
@@ -1314,12 +1316,13 @@ int count_guilds(GameWorld *g, guild_vnum low, guild_vnum high)
   return j;
 }
 
-static bool guild_trade_flagged(const struct guild_data *rec, int flag)
+static bool guild_trade_flagged(const struct guild_data *rec, trade_flag flag)
 {
-  return IS_SET_AR(rec->with_who, flag) != 0;
+  return rec->with_who.test(flag);
 }
 
-bool guild_trade_toggle(struct guild_data *rec, int flag)
+bool guild_trade_toggle(struct guild_data *rec, trade_flag flag)
 {
-  return (TOGGLE_BIT_AR(rec->with_who, flag) & Q_BIT(flag)) != 0;
+  rec->with_who.toggle(flag);
+  return rec->with_who.test(flag);
 }

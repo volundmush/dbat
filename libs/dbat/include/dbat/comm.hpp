@@ -5,6 +5,7 @@
 #include <string_view>
 #include <type_traits>
 
+#include "dbat/consts/roomflags.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/format.hpp"
 #include "dbat/descriptor.hpp"
@@ -59,11 +60,11 @@ void send_to_moon(GameWorld *g, std::format_string<Args...> fmt, Args &&...args)
 }
 
 /* send_to_planet(): the text as it is */
-void send_to_planet(GameWorld *g, int type, int planet, std::string_view text);
+void send_to_planet(GameWorld *g, int type, room_flag planet, std::string_view text);
 /* send_to_planet(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
-void send_to_planet(GameWorld *g, int type, int planet, std::format_string<Args...> fmt, Args &&...args)
+void send_to_planet(GameWorld *g, int type, room_flag planet, std::format_string<Args...> fmt, Args &&...args)
 {
   send_to_planet(g, type, planet, str_format(fmt, std::forward<Args>(args)...));
 }

@@ -365,7 +365,7 @@ ACMD(do_autoexit)
 }
 
 namespace {
-  template <int Flag> bool room_is(GameWorld *g, room_vnum room) { return room_flagged(g, room, Flag); }
+  template <room_flag Flag> bool room_is(GameWorld *g, room_vnum room) { return room_flagged(g, room, Flag); }
 
   struct place_line {
     bool (*is)(GameWorld *g, room_vnum room);
@@ -472,7 +472,7 @@ namespace {
     bool decorated = !char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_NODEC);
     if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS)) {
       struct room_data *rm = room_of(g, char_get_in_room(ch)); /* quirk: the sector and triggers are those of the room ch is in */
-      std::string flags    = sprintbitarray(room_get_room_flags(g, target_room), room_bits, RF_ARRAY_MAX);
+      std::string flags    = flag_names(*room_get_room_flags(g, target_room));
       std::string sector   = sprinttype(room_get_sector_type(rm), sector_types);
       if (decorated)
         send_to_char(g, ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");

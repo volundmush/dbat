@@ -857,8 +857,7 @@ void init_char(GameWorld *g, struct char_data *ch)
     char_set_skills_mod(ch, i, 0);
   }
 
-  for (i = 0; i < AF_ARRAY_MAX; i++)
-    char_get_affected_by(ch)[i] = 0;
+  char_get_affected_by(ch) = {};
 
   for (i = 0; i < 3; i++)
     char_set_conditions(g, ch, i, (char_get_admlevel(ch) == ADMLVL_IMPL ? -1 : 24));

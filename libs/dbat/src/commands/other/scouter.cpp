@@ -478,7 +478,7 @@ ACMD(do_snet)
 namespace {
   /* What each kind of scouter can't read without overloading */
   constexpr struct {
-    int flag;
+    extra_flag flag;
     int64_t limit;
   } SCOUTER_LIMITS[] = {{ITEM_BSCOUTER, 150000}, {ITEM_MSCOUTER, 5000000}, {ITEM_ASCOUTER, 15000000}};
 
@@ -520,9 +520,9 @@ namespace {
 
   /* What a scouter notices about someone beyond their numbers */
   constexpr struct {
-    int aff; /* or -1 for the PLR_SELFD flag */
+    std::optional<aff_flag> aff; /* or none for the PLR_SELFD flag */
     std::string_view what{};
-  } NOTICED[] = {{AFF_ZANZOKEN, "Zanzoken Prepared"}, {AFF_HASS, "Accelerated Arms"}, {AFF_HEALGLOW, "Healing Glow Prepared"}, {AFF_POISON, "Poisoned"}, {-1, "Explosive Energy"}};
+  } NOTICED[] = {{AFF_ZANZOKEN, "Zanzoken Prepared"}, {AFF_HASS, "Accelerated Arms"}, {AFF_HEALGLOW, "Healing Glow Prepared"}, {AFF_POISON, "Poisoned"}, {std::nullopt, "Explosive Energy"}};
 
   /* scouter scan: everyone on ch's planet, and the way to them or where they are */
   void scouter_scan(GameWorld *g, struct char_data *ch, struct obj_data *obj)
@@ -626,7 +626,7 @@ ACMD(do_scouter)
   send_to_char(g, ch, "{} ", READING_EXTRA);
   bool noticed = false;
   for (const auto &n : NOTICED) {
-    if (n.aff >= 0 ? !char_aff_flagged(vict, n.aff) : !char_plr_flagged(vict, PLR_SELFD))
+    if (n.aff ? !char_aff_flagged(vict, *n.aff) : !char_plr_flagged(vict, PLR_SELFD))
       continue;
     send_to_char(g, ch, "{}@Y{:>21}@n@D|@n\n", noticed ? "@D|@1             " : "", n.what);
     noticed = true;

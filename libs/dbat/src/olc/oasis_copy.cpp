@@ -206,7 +206,6 @@ ACMD(do_rcopy)
 
   std::string arg;
   std::string arg2;
-  int i;
 
   std::string_view rest = argument;
   arg                   = take_arg(rest);
@@ -264,9 +263,7 @@ ACMD(do_rcopy)
   *room_ex_description_slot(room_of(g, rrnum)) = room_get_ex_description(g, trnum);
 
   /* Finally copy over room flags */
-  for (i = 0; i < AF_ARRAY_MAX; i++) {
-    room_get_room_flags(g, rrnum)[i] = room_get_room_flags(g, trnum)[i];
-  }
+  *room_get_room_flags(g, rrnum) = *room_get_room_flags(g, trnum);
   send_to_imm(g, "Log: {} has copied room [{:d}] to room [{:d}].", char_get_name(ch), tvnum, rvnum);
   add_to_save_list(g, room_get_zone(g, rrnum)->number, SL_WLD);
   save_rooms(g, room_get_zone(g, rrnum));

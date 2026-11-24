@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <optional>
 #include <algorithm>
 #include "dbat/name_table.hpp"
 #include <climits>
@@ -272,7 +273,7 @@ namespace {
   }
 
   struct soil_grade {
-    int flag; /* the room's, or -1 for any */
+    std::optional<room_flag> flag; /* the room's, or none for any */
     std::string_view kind{};
     int lo, hi; /* its quality */
   };
@@ -280,7 +281,7 @@ namespace {
   constexpr soil_grade SOIL_GRADES[] = {
       {ROOM_FERTILE1, "fertile soil", 8, 8},
       {ROOM_FERTILE2, "good soil",    5, 7},
-      {-1,            "soil",         0, 4},
+      {std::nullopt,  "soil",         0, 4},
   };
 
   void collect_soil(GameWorld *g, struct char_data *ch)
@@ -294,7 +295,7 @@ namespace {
       send_to_char(g, ch, "You can not collect soil from this area.\r\n");
       return;
     }
-    const soil_grade &grade = *std::ranges::find_if(SOIL_GRADES, [&](const soil_grade &s) { return s.flag < 0 || room_flagged(g, char_get_in_room(ch), s.flag); });
+    const soil_grade &grade = *std::ranges::find_if(SOIL_GRADES, [&](const soil_grade &s) { return !s.flag || room_flagged(g, char_get_in_room(ch), *s.flag); });
     struct obj_data *soil   = read_object(g, SOIL);
     obj_to_char(g, soil, ch);
     act(g, str_format("@yYou sink your shovel into the soft ground and manage to dig up a pile of {}!@n", grade.kind), true, ch, nullptr, nullptr, TO_CHAR);
@@ -1122,7 +1123,8 @@ namespace {
   }
 
   struct weapon_grade {
-    int flag, bonus;
+    extra_flag flag;
+    int bonus;
   };
 
   constexpr weapon_grade WEAPON_GRADES[] = {
@@ -1145,7 +1147,7 @@ namespace {
     send_to_char(g, ch, "@GItem Min LVL@W: @w{:d}@n\n", obj_get_level(lot));
     send_to_char(g, ch, "@GCondition   @W: {}{:d}%@n\n", condition_colour(obj_get_value(lot, VAL_ALL_HEALTH)), obj_get_value(lot, VAL_ALL_HEALTH));
     send_to_char(g, ch, "@GItem Weight @W: @w{}@n\n", add_commas(obj_get_weight(lot)));
-    std::string bits = sprintbitarray(obj_get_wear_flags(lot), wear_bits, TW_ARRAY_MAX);
+    std::string bits = flag_names(obj_get_wear_flags(lot));
     search_replace(bits, "TAKE", "");
     send_to_char(g, ch, "@GWear Loc.   @W:@w{}\n", bits);
     if (obj_get_type_flag(lot) == ITEM_WEAPON) {
@@ -1168,7 +1170,7 @@ namespace {
         send_to_char(g, ch, " ({})", g->spell_info[aff.specific].name);
     }
     send_to_char(g, ch, found_bonus ? "@n" : " None@n");
-    send_to_char(g, ch, "\n@GSpecial     @W:@w {}\n", sprintbitarray(obj_get_bitvector(lot), affected_bits, AF_ARRAY_MAX));
+    send_to_char(g, ch, "\n@GSpecial     @W:@w {}\n", flag_names(obj_get_bitvector(lot)));
     send_to_char(g, ch, "@c------------------------------------------------------------------------\n");
   }
 
@@ -2752,7 +2754,7 @@ namespace {
     if (obj_get_value(food, VAL_FOOD_POISON) || getCurPL(g, ch) >= getEffMaxPL(g, ch))
       return;
     incCurHealthPercent(g, ch, obj_get_weight(food) < 6 ? .05 : .1, true);
-    if (obj_extra_flagged(food, ITEM_YUM))
+    if (obj_extra_flagged(food, ITEM_ONLY_WIZARD)) /* quirk: reads extra flag ONLY_WIZARD (33), meant item type YUM (33) */
       incCurHealthPercent(g, ch, .2, true);
     send_to_char(g, ch, "@MYou feel some of your strength return!@n\r\n");
   }
@@ -2842,7 +2844,7 @@ ACMD(do_eat)
   if (char_get_foodr(ch) == 0 && subcmd != SCMD_TASTE) {
     incCurSTPercent(g, ch, 0.01 * (double)amount, true);
     char_set_foodr(ch, 2);
-    if (obj_extra_flagged(food, ITEM_YUM))
+    if (obj_extra_flagged(food, ITEM_ONLY_WIZARD)) /* quirk: reads extra flag ONLY_WIZARD (33), meant item type YUM (33) */
       incCurSTPercent(g, ch, .25, true);
     send_to_char(g, ch, "You feel rejuvinated by it.\r\n");
   }
@@ -3054,7 +3056,7 @@ namespace {
    * By where it's worn, what it takes to be worn there: ITEM_WEAR_TAKE is used for objects that do not require
    * special bits to be put into that position (e.g. you can hold any object, not just an object with a HOLD bit.)
    */
-  constexpr int WEAR_BITVECTORS[] = {
+  constexpr wear_flag WEAR_BITVECTORS[] = {
       ITEM_WEAR_TAKE, ITEM_WEAR_FINGER, ITEM_WEAR_FINGER, ITEM_WEAR_NECK,
       ITEM_WEAR_NECK, ITEM_WEAR_BODY, ITEM_WEAR_HEAD, ITEM_WEAR_LEGS,
       ITEM_WEAR_FEET, ITEM_WEAR_HANDS, ITEM_WEAR_ARMS, ITEM_WEAR_SHIELD,
@@ -3089,7 +3091,8 @@ namespace {
 
   /* Where a thing goes when no place is named: the first of these its wear flags and the body allow */
   struct wear_place {
-    int flag, where;
+    wear_flag flag;
+    int where;
   };
 
   constexpr wear_place NATURAL_PLACES[] = {

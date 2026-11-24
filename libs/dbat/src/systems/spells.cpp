@@ -89,7 +89,9 @@ ASPELL(spell_teleport)
 
   do {
     to_room = g->rooms.nth(rand_number(g, 0, (int)g->rooms.size() - 1));
-  } while (room_flagged(g, to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
+    /* quirk: reads ROOM_HOUSE alone, meant ROOM_PRIVATE, ROOM_DEATH or ROOM_GODROOM: their numbers or-ed as
+       bits, 9 | 1 | 10 is 11, so teleport may land in a death trap */
+  } while (room_flagged(g, to_room, ROOM_HOUSE));
 
   act(g, "$n slowly fades out of existence and is gone.",
       false, victim, nullptr, nullptr, TO_ROOM);
@@ -261,12 +263,12 @@ ASPELL(spell_identify)
     bitbuf = sprinttype(obj_get_type_flag(obj), item_types);
     send_to_char(g, ch, "You feel informed:\r\nObject '{}', Item type: {}\r\n", obj_get_short_description(obj), bitbuf);
 
-    if (obj_get_bitvector(obj)) {
-      bitbuf = sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX);
+    { /* quirk: tested the affects array's address, which is never null, so this always shows */
+      bitbuf = flag_names(obj_get_bitvector(obj));
       send_to_char(g, ch, "Item will give you following abilities:  {}\r\n", bitbuf);
     }
 
-    bitbuf = sprintbitarray(obj_get_extra_flags(obj), extra_bits, EF_ARRAY_MAX);
+    bitbuf = flag_names(obj_get_extra_flags(obj));
     send_to_char(g, ch, "Item is: {}\r\n", bitbuf);
 
     send_to_char(g, ch, "Weight: {:d}, Value: {:d}, Rent: {:d}, Min Level: {:d}\r\n", obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));

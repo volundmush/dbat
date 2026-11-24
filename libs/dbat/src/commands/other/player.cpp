@@ -436,7 +436,7 @@ namespace {
   /* What each letter of prompt shows, in the order all/on and none/off set them */
   struct prompt_part {
     char letter;
-    int flag;
+    pref_flag flag;
   };
   constexpr prompt_part PROMPT_PARTS[] = {{'p', PRF_DISPHP}, {'s', PRF_DISPMOVE}, {'k', PRF_DISPKI}, {'t', PRF_DISPTNL}, {'f', PRF_FURY}, {'h', PRF_DISTIME}, {'g', PRF_DISGOLD}, {'l', PRF_DISPRAC}, {'m', PRF_DISHUTH}, {'c', PRF_DISPERC}};
 } // namespace
@@ -537,10 +537,10 @@ namespace {
     void (*after)(GameWorld *g, struct char_data *ch)  = nullptr;
   };
 
-  template <int Flag>
+  template <pref_flag Flag>
   bool prf(GameWorld *g, struct char_data *ch) { return char_prf_toggle(g, ch, Flag); }
 
-  template <int Flag>
+  template <aff_flag Flag>
   bool aff(GameWorld *, struct char_data *ch) { return char_aff_toggle(ch, Flag); }
 
   bool slow_nameserver(GameWorld *g, struct char_data *) { return (CONFIG_NS_IS_SLOW = !CONFIG_NS_IS_SLOW); }

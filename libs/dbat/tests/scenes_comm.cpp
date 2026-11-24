@@ -15,7 +15,8 @@ namespace {
     char_set_speaking(ch, language);
   }
 
-  void prefers(GameWorld *g, struct char_data *ch, int flag) { char_prf_set(g, ch, flag, true); }
+  /* flag is a pref_flag (an int on a base from before pref_flag) */
+  void prefers(GameWorld *g, struct char_data *ch, auto flag) { char_prf_set(g, ch, flag, true); }
 
   /* ... known by this account name */
   void account(struct char_data *ch, const char *user)

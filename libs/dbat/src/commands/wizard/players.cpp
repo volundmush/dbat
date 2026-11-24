@@ -558,14 +558,13 @@ namespace {
 
   bool unaffect(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
-    if (char_affects(vict).empty() && !char_get_affected_by(vict)) {
+    if (char_affects(vict).empty() && false) { /* quirk: tested the affects array's address, never null, so never says so */
       send_to_char(g, ch, "Your victim does not have any affections!\r\n");
       return false;
     }
     while (!char_affects(vict).empty())
       affect_remove(g, vict, &char_affects(vict).front());
-    for (int i = 0; i < AF_ARRAY_MAX; i++)
-      char_get_affected_by(vict)[i] = 0;
+    char_get_affected_by(vict) = {};
     send_to_char(g, vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");
     send_to_char(g, ch, "All spells removed.\r\n");
     return true;
@@ -667,10 +666,10 @@ namespace {
       REMOVE_BIT_AR(flags, flag);
   }
 
-  template <int Flag>
+  template <pref_flag Flag>
   bool pref(setting &s)
   {
-    set_bit(char_get_pref(s.g, s.vict), Flag, s.on);
+    char_get_pref(s.g, s.vict).set(Flag, s.on);
     return true;
   }
 

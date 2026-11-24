@@ -96,7 +96,8 @@ namespace {
     return nullptr;
   }
 
-  void zone_flag(GameWorld *g, room_vnum room, int flag)
+  /* flag is a zone_flag (an int on a base from before zone_flag) */
+  void flag_zone(GameWorld *g, room_vnum room, auto flag)
   {
     zone_set_flag(room_get_zone(g, room), flag, true);
   }
@@ -251,9 +252,9 @@ namespace {
     {"an immortal in a tank", "goto 300", false, SETUP(imm(g, att); char_plr_set(att, PLR_HEALT, true);), false, 1},
     {"a builder, poofing", "goto 300", false, SETUP(imm(g, att, ADMLVL_BUILDER); char_get_player_specials(att)->poofin = "pops in."; char_get_player_specials(att)->poofout = "pops out.";), false, 1},
     {"a builder, to a godroom", "goto 300", false, SETUP(imm(g, att, ADMLVL_BUILDER); room_set_flag(g, 300, ROOM_GODROOM, true);), false, 1},
-    {"a builder, to a quest zone", "goto 300", false, SETUP(imm(g, att, ADMLVL_BUILDER); zone_flag(g, 300, ZONE_QUEST);), false, 1},
-    {"a builder, to a closed zone", "goto 300", false, SETUP(imm(g, att, ADMLVL_BUILDER); zone_flag(g, 300, ZONE_NOIMMORT);), false, 1},
-    {"a vice, to a closed zone", "goto 300", false, SETUP(imm(g, att, ADMLVL_VICE); zone_flag(g, 300, ZONE_NOIMMORT);), false, 1},
+    {"a builder, to a quest zone", "goto 300", false, SETUP(imm(g, att, ADMLVL_BUILDER); flag_zone(g, 300, ZONE_QUEST);), false, 1},
+    {"a builder, to a closed zone", "goto 300", false, SETUP(imm(g, att, ADMLVL_BUILDER); flag_zone(g, 300, ZONE_NOIMMORT);), false, 1},
+    {"a vice, to a closed zone", "goto 300", false, SETUP(imm(g, att, ADMLVL_VICE); flag_zone(g, 300, ZONE_NOIMMORT);), false, 1},
     {"an immortal", "at", false, SETUP(imm(g, att);), false, 1},
     {"an immortal", "at 300", false, SETUP(imm(g, att);), false, 1},
     {"an immortal", "at 99999 look", false, SETUP(imm(g, att);), false, 1},
@@ -520,7 +521,7 @@ namespace {
     {"an immortal", "players -x", false, SETUP(imm(g, att);), false, 1},
     {"an immortal", "players -", false, SETUP(imm(g, att);), false, 1},
     {"an immortal", "players abc", false, SETUP(imm(g, att);), false, 1},
-    {"an immortal, a player deleted", "players", false, SETUP(imm(g, att); SET_BIT(g->player_table[0].flags, PINDEX_DELETED);), false, 1},
+    {"an immortal, a player deleted", "players", false, SETUP(imm(g, att); pindex_set_flag(g->player_table[0], PINDEX_DELETED, true);), false, 1},
     {"an immortal", "zcheck", false, SETUP(imm(g, att);), false, 1},
     {"an immortal", "zcheck .", false, SETUP(imm(g, att);), false, 1},
     {"an immortal", "zcheck 999", false, SETUP(imm(g, att);), false, 1},

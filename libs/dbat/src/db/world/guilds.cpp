@@ -116,10 +116,10 @@ io::loaded<void> read_guild(GameWorld *g, io::text_reader &in, guild_vnum vnum, 
     return r;
   if (!mob_proto_of(g, guild_get_gm(guild)))
     guild_set_gm(guild, NOBODY);
-  int first = static_cast<int>(guild->with_who[0]);
+  int first = static_cast<int>(guild->with_who.word(0));
   if (io::loaded<void> r = read_number(in, vnum, first, "with whom it won't trade"); !r)
     return r;
-  guild->with_who[0] = static_cast<bitvector_t>(first);
+  guild->with_who.set_word(0, static_cast<bitvector_t>(first));
   if (io::loaded<void> r = read_number(in, vnum, guild->open, "the hour it opens"); !r)
     return r;
   if (io::loaded<void> r = read_number(in, vnum, guild->close, "the hour it closes"); !r)
@@ -139,14 +139,14 @@ io::loaded<void> read_guild(GameWorld *g, io::text_reader &in, guild_vnum vnum, 
         mud_log("SYSERR: Can't parse GM_WITH_WHO line in {}: '{}'", context, with_who);
         break;
       }
-      guild_get_with_who(guild)[slot] = static_cast<bitvector_t>(n);
+      guild_get_with_who(guild).set_word(static_cast<std::size_t>(slot), static_cast<bitvector_t>(n));
       while (at < with_who.size() && (isdigit(static_cast<unsigned char>(with_who[at])) || with_who[at] == '-'))
         at++;
       while (at < with_who.size() && !(isdigit(static_cast<unsigned char>(with_who[at])) || with_who[at] == '-'))
         at++;
     }
     for (; slot < GW_ARRAY_MAX; slot++)
-      guild_get_with_who(guild)[slot] = 0;
+      guild_get_with_who(guild).set_word(static_cast<std::size_t>(slot), 0);
     io::loaded<std::string> after = in.tilde_string(context);
     if (!after)
       return std::unexpected(after.error());
@@ -212,10 +212,10 @@ bool save_guilds(GameWorld *g, struct zone_data *zone)
               or_if_empty(guild_get_not_enough_gold(guild), "%s ERROR"));
     out.print("{:d}\n{:d}\n{:d}\n{:d}\n{:d}\n", guild_get_minlvl(guild),
               guild_get_gm(guild) == NOBODY ? -1 : mob_index_of(g, guild_get_gm(guild))->vnum,
-              static_cast<int>(guild_get_with_who(guild)[0]), /* as signed, as always */
+              static_cast<int>(guild_get_with_who(guild).word(0)), /* as signed, as always */
               guild_get_open(guild), guild_get_close(guild));
     for (int i = 1; i < GW_ARRAY_MAX; i++)
-      out.print("{}{:d}", i == 1 ? "" : " ", static_cast<int>(guild_get_with_who(guild)[i]));
+      out.print("{}{:d}", i == 1 ? "" : " ", static_cast<int>(guild_get_with_who(guild).word(static_cast<std::size_t>(i))));
     out.write("\n");
   }
   out.write("$~\n");

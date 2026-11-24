@@ -104,7 +104,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++) {
     af[i].type      = spellnum;
-    af[i].bitvector = 0;
+    af[i].bitvector = AFF_DONTUSE;
     af[i].modifier  = 0;
     af[i].location  = APPLY_NONE;
   }
@@ -362,7 +362,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
   }
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-    if (af[i].bitvector || (af[i].location != APPLY_NONE))
+    if (af[i].bitvector != AFF_DONTUSE || (af[i].location != APPLY_NONE))
       affect_join(g, victim, af + i, accum_duration, false, accum_affect, false);
 
   if (!to_vict.empty())
@@ -615,7 +615,9 @@ void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_da
       }
       break;
     case SPELL_INVISIBLE:
-      if (!obj_extra_flagged(obj, ITEM_NOINVIS | ITEM_INVISIBLE)) {
+      /* quirk: reads ITEM_INVISIBLE alone, meant ITEM_NOINVIS or ITEM_INVISIBLE: their numbers or-ed as bits, 4 | 5 is
+         5, so an item that can't be made invisible still can */
+      if (!obj_extra_flagged(obj, ITEM_INVISIBLE)) {
         obj_extra_set(obj, ITEM_INVISIBLE, true);
         to_char = "$p vanishes.";
       }
@@ -703,7 +705,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++) {
     af[i].type      = spellnum;
-    af[i].bitvector = 0;
+    af[i].bitvector = AFF_DONTUSE;
     af[i].modifier  = 0;
     af[i].location  = APPLY_NONE;
   }

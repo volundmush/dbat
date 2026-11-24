@@ -6,6 +6,7 @@
 #include <iterator>
 #include <ranges>
 #include <span>
+#include <variant>
 
 #include "dbat/args.hpp"
 #include "dbat/cmdargs.hpp"
@@ -466,7 +467,7 @@ constexpr rung DRUNK_RUNGS[] = {
 enum class flag_kind { plr, aff, prf, affected, spell };
 struct flag_line {
   flag_kind kind;
-  int flag;
+  std::variant<int, pref_flag, aff_flag> flag; /* a pref_flag for flag_kind::prf, an aff_flag for aff and affected, an int for the rest */
   std::string_view says{};
 };
 
@@ -474,17 +475,33 @@ bool has_flag(GameWorld *g, struct char_data *ch, const flag_line &f)
 {
   switch (f.kind) {
     case flag_kind::plr:
-      return char_plr_flagged(ch, f.flag);
+      return char_plr_flagged(ch, std::get<int>(f.flag));
     case flag_kind::aff:
-      return char_aff_flagged(ch, f.flag);
+      return char_aff_flagged(ch, std::get<aff_flag>(f.flag));
     case flag_kind::prf:
-      return char_prf_flagged(g, ch, f.flag);
+      return char_prf_flagged(g, ch, std::get<pref_flag>(f.flag));
     case flag_kind::affected:
-      return is_affected(ch, f.flag);
+      return is_affected(ch, std::get<aff_flag>(f.flag));
     case flag_kind::spell:
-      return affected_by_spell(ch, f.flag);
+      return affected_by_spell(ch, std::get<int>(f.flag));
   }
   return false;
+}
+
+/* Whether each line's flag is of its kind's family */
+constexpr bool kinds_match(std::span<const flag_line> lines)
+{
+  return std::ranges::all_of(lines, [](const flag_line &f) {
+    switch (f.kind) {
+      case flag_kind::prf:
+        return std::holds_alternative<pref_flag>(f.flag);
+      case flag_kind::aff:
+      case flag_kind::affected:
+        return std::holds_alternative<aff_flag>(f.flag);
+      default:
+        return std::holds_alternative<int>(f.flag);
+    }
+  });
 }
 
 void say_flags(GameWorld *g, struct char_data *ch, std::span<const flag_line> lines)
@@ -627,6 +644,7 @@ constexpr flag_line STEALTH_LINES[] = {
     {flag_kind::aff, AFF_FLYING, "You are flying.\r\n"},
     {flag_kind::plr, PLR_PILOTING, "You are busy piloting a ship.\r\n"},
 };
+static_assert(kinds_match(STEALTH_LINES));
 constexpr flag_line READY_LINES[] = {
     {flag_kind::aff, AFF_ZANZOKEN, "You are prepared to zanzoken.\r\n"},
     {flag_kind::aff, AFF_HASS, "Your arms are moving fast.\r\n"},
@@ -636,6 +654,7 @@ constexpr flag_line READY_LINES[] = {
     {flag_kind::affected, AFF_SPECIAL_POSE, "You are feeling confident from your pose earlier.\r\n"},
     {flag_kind::affected, AFF_HYDROZAP, "You are effected by Kanso Suru.\r\n"},
 };
+static_assert(kinds_match(READY_LINES));
 constexpr flag_line AFFLICTION_LINES[] = {
     {flag_kind::aff, AFF_KNOCKED, "You have been knocked unconcious!\r\n"},
     {flag_kind::aff, AFF_INVISIBLE, "You are invisible.\r\n"},
@@ -653,6 +672,7 @@ constexpr flag_line AFFLICTION_LINES[] = {
     {flag_kind::prf, PRF_NOGIVE, "You are not accepting items being handed to you right now.\r\n"},
     {flag_kind::aff, AFF_ETHEREAL, "You are ethereal and cannot interact with normal space!\r\n"},
 };
+static_assert(kinds_match(AFFLICTION_LINES));
 
 /* What lasting effects are told, by their skill's name */
 constexpr struct {

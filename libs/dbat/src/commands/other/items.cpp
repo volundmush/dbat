@@ -840,7 +840,7 @@ ACMD(do_forgery)
 
 namespace {
   constexpr struct {
-    int flag;
+    extra_flag flag;
     std::string_view line{};
   } WEAPON_LEVELS[] = {
       {ITEM_WEAPLVL1, "Weapon Level: 1\nDamage Bonus: 5%\r\n"},  {ITEM_WEAPLVL2, "Weapon Level: 2\nDamage Bonus: 10%\r\n"},
@@ -877,7 +877,7 @@ namespace {
     }
     if (!found)
       send_to_char(g, ch, " None");
-    send_to_char(g, ch, "\nSpecial: {}\r\n", sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX));
+    send_to_char(g, ch, "\nSpecial: {}\r\n", flag_names(obj_get_bitvector(obj)));
   }
 } // namespace
 

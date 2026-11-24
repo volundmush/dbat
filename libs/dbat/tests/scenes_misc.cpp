@@ -33,22 +33,22 @@ namespace {
   }
 
   /* ... a token of this stat, flagged as asked */
-  struct obj_data *token(GameWorld *g, struct char_data *att, int stat = APPLY_STR, int flag = ITEM_TOKEN)
+  struct obj_data *token(GameWorld *g, struct char_data *att, int stat = APPLY_STR, std::optional<flag_type_of<ITEM_GLOW>> flag = ITEM_TOKEN)
   {
     struct obj_data *obj = holding(g, att, "token");
-    if (flag >= 0)
-      obj_extra_set(obj, flag, true);
+    if (flag)
+      obj_extra_set(obj, *flag, true);
     obj_get_affected(obj)[0].location = stat;
     obj_get_affected(obj)[0].modifier = 3;
     return obj;
   }
 
   /* ... a ring with slots so, and its affects at these locations */
-  struct obj_data *ring(GameWorld *g, struct char_data *att, std::initializer_list<int> slots, std::initializer_list<int> stats = {})
+  struct obj_data *ring(GameWorld *g, struct char_data *att, std::initializer_list<flag_type_of<ITEM_GLOW>> slots, std::initializer_list<int> stats = {})
   {
     struct obj_data *obj = holding(g, att, "ring");
     obj_wear_set(obj, ITEM_WEAR_FINGER, true);
-    for (int slot : slots)
+    for (flag_type_of<ITEM_GLOW> slot : slots)
       obj_extra_set(obj, slot, true);
     int i = 0;
     for (int stat : stats) {
@@ -86,13 +86,13 @@ namespace {
   }
 
   /* ... fishing at the arena, of this water, with a pole baited so */
-  struct obj_data *angler(GameWorld *g, struct char_data *att, int bait = 5, bool fresh = true, int planet = ROOM_EARTH)
+  struct obj_data *angler(GameWorld *g, struct char_data *att, int bait = 5, bool fresh = true, std::optional<flag_type_of<ROOM_DARK>> planet = ROOM_EARTH)
   {
     room_set_flag(g, ARENA, ROOM_FISHING, true);
     if (fresh)
       room_set_flag(g, ARENA, ROOM_FISHFRESH, true);
-    if (planet >= 0)
-      room_set_flag(g, ARENA, planet, true);
+    if (planet)
+      room_set_flag(g, ARENA, *planet, true);
     struct obj_data *pole = wearing(g, att, "pole", WEAR_WIELD2, ITEM_FISHPOLE);
     obj_set_value(pole, 0, bait);
     stock(g, {1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015});
@@ -286,7 +286,7 @@ namespace {
     {"instilling", "instill token", false, SETUP(token(g, att);), false, 1},
     {"instilling without the token", "instill token ring", false, SETUP(ring(g, att, {ITEM_SLOT1});), false, 1},
     {"instilling into nothing", "instill token ring", false, SETUP(token(g, att);), false, 1},
-    {"instilling a plain thing", "instill token ring", false, SETUP(token(g, att, APPLY_STR, -1); ring(g, att, {ITEM_SLOT1});), false, 1},
+    {"instilling a plain thing", "instill token ring", false, SETUP(token(g, att, APPLY_STR, std::nullopt); ring(g, att, {ITEM_SLOT1});), false, 1},
     {"instilling a forgery", "instill token ring", false, SETUP(obj_extra_set(token(g, att), ITEM_FORGED, true); ring(g, att, {ITEM_SLOT1});), false, 1},
     {"instilling into a plain thing", "instill token ring", false, SETUP(token(g, att); holding(g, att, "ring");), false, 1},
     {"instilling into a ring without slots", "instill token ring", false, SETUP(token(g, att); ring(g, att, {});), false, 1},
@@ -619,7 +619,7 @@ namespace {
     {"fishing in aether's fresh water, landing it", "fish stop", false, SETUP(angler(g, att, 200, true, ROOM_AETHER); fishing(g, att, FISH_REELING, 0, 100);), false, 4},
     {"fishing in earth's sea, landing it", "fish stop", false, SETUP(angler(g, att, 100, false); fishing(g, att, FISH_REELING, 0, 100);), false, 4},
     {"fishing in namek's sea, landing it", "fish stop", false, SETUP(angler(g, att, 100, false, ROOM_NAMEK); fishing(g, att, FISH_REELING, 0, 100);), false, 4},
-    {"fishing nowhere in particular, landing it", "fish stop", false, SETUP(angler(g, att, 5, false, -1); fishing(g, att, FISH_REELING, 0, 100);), false, 2},
+    {"fishing nowhere in particular, landing it", "fish stop", false, SETUP(angler(g, att, 5, false, std::nullopt); fishing(g, att, FISH_REELING, 0, 100);), false, 2},
     {"unskilled", "extract plant", false, SETUP(), false, 1},
     {"an extractor", "extract", false, SETUP(char_set_skills_base(att, SKILL_EXTRACT, 100);), false, 1},
     {"an extractor", "extract combine", false, SETUP(char_set_skills_base(att, SKILL_EXTRACT, 100);), false, 1},

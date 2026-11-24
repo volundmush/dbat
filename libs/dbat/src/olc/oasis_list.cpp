@@ -272,6 +272,6 @@ void print_zone(GameWorld *g, struct char_data *ch, zone_vnum vnum)
                "@gVirtual Number = @c{:d}\r\n@gName of zone   = @c{}\r\n@gBuilders       = @c{}\r\n@gLifespan       = @c{:d}\r\n@gAge            = @c{:d}\r\n@gBottom of Zone = @c{:d}\r\n@gTop of Zone    = @c{:d}\r\n@gReset Mode     = @c{}\r\n@gMin Level      = @c{:d}\r\n@gMax Level      = @c{:d}\r\n@gZone Flags     = @c{}\r\n@gSize\r\n@g   Rooms       = @c{:d}\r\n@g   Objects     = @c{:d}\r\n@g   Mobiles     = @c{:d}\r\n@g   Shops       = @c{:d}\r\n@g   Triggers    = @c{:d}\r\n@g   Guilds      = @c{:d}@n\r\n",
                zone->number, zone->name, zone->builders, zone->lifespan, zone->age, zone->bot, zone->top,
                zone->reset_mode ? ((zone->reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset",
-               zone->min_level, zone->max_level, sprintbitarray(zone->zone_flags, zone_bits, ZF_ARRAY_MAX), rooms, objects, mobiles,
+               zone->min_level, zone->max_level, flag_names(zone->zone_flags), rooms, objects, mobiles,
                count_shops(g, bottom, top), triggers, count_guilds(g, bottom, top));
 }

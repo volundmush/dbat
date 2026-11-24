@@ -169,7 +169,7 @@ namespace {
     clear_screen(g, d);
     olc_list_columns(g, d, affected_bits.span().subspan(1), NUM_AFF_FLAGS, 1, "  ", 2);
     write_to_output(g, d, "\r\nCurrent flags   : @c{}@n\r\nEnter aff flags (0 to quit) : ",
-                    sprintbitarray(char_get_affected_by(e.mob.get()), affected_bits, AF_ARRAY_MAX));
+                    flag_names(char_get_affected_by(e.mob.get())));
   }
 
   void class_menu(GameWorld *g, struct descriptor_data *d, mob_editor &)
@@ -269,7 +269,7 @@ namespace {
                     "@gI@n) Position   : @y{:<10}@n,	 @gJ@n) Default   : @y{:<10}\r\n@gK@n) Personality: @Y{}@n\r\n@gL@n) NPC Flags  : @c{}\r\n@gM@n) AFF Flags  : @c{}\r\n@gN@n) Class      : @y{:<10}@n,	 @gO@n) Race      : @y{:<10}\r\n@gS@n) Script     : @c{}\r\n@gW@n) Copy mob              ,	 @gX@n) Delete mob\r\n@gY@n) Size       : @y{}\r\n@gZ@n) Wiznet     :\r\n@gQ@n) Quit\r\nEnter choice : ",
                     position_types[(int)char_get_position(m)], position_types[(int)char_get_mob_specials_default_pos(m)],
                     npc_personality[char_get_personality(m)], sprintbitarray(char_get_act(m), action_bits, AF_ARRAY_MAX),
-                    sprintbitarray(char_get_affected_by(m), affected_bits, AF_ARRAY_MAX), char_sensei_name(m), char_true_race_name(m),
+                    flag_names(char_get_affected_by(m)), char_sensei_name(m), char_true_race_name(m),
                     !script.triggers.empty() ? "Set." : "Not Set.", size_names[get_size(m)]);
     asking = mode::main_menu;
   }
@@ -339,9 +339,11 @@ namespace {
           done(g, d);
           return;
         }
-        if (n <= NUM_AFF_FLAGS)
-          char_aff_toggle(mob.get(), n);
-        char_aff_set(mob.get(), AFF_CHARM | AFF_POISON | AFF_GROUP | AFF_SLEEP, false); /* Remove unwanted bits right away. */
+        if (n <= NUM_AFF_FLAGS) /* the menu's numbers are the flags' (quirk: so the last toggles bit 79, past them) */
+          char_get_affected_by(mob.get()).toggle_bit(static_cast<std::size_t>(n));
+        /* Remove unwanted bits right away. quirk: clears AFF_TAMED alone, meant AFF_CHARM, AFF_POISON, AFF_GROUP and
+           AFF_SLEEP: their numbers or-ed as bits, 22 | 12 | 9 | 15 is 31 */
+        char_aff_set(mob.get(), AFF_TAMED, false);
         aff_flags_menu(g, d, *this);
         return;
 

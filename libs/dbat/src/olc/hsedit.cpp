@@ -215,7 +215,8 @@ namespace {
     if (room_vnum room = g->house_control[i].vnum; !room_of(g, room))
       mud_log("SYSERR: House {:d} had invalid vnum {:d}!", house.vnum, room);
     else
-      room_set_flag(g, room, ROOM_HOUSE | ROOM_HOUSE_CRASH, false);
+      room_set_flag(g, room, ROOM_BFS_MARK, false); /* quirk: clears ROOM_BFS_MARK, meant ROOM_HOUSE and ROOM_HOUSE_CRASH:
+                                                         their numbers or-ed as bits, 11 | 12 is 15 */
     House_delete_file(g->house_control[i].vnum);
     std::copy(g->house_control + i + 1, g->house_control + g->num_of_houses, g->house_control + i);
     g->num_of_houses--;

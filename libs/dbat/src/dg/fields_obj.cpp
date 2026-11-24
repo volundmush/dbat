@@ -23,25 +23,26 @@ using result = std::optional<std::string>;
 
 std::string number(long long n) { return str_format("{:d}", n); }
 
-/* Whether the flag the argument names is set in flags, of the numflags in names; "0" without an argument */
-result has_flag(const field_query &q, bitvector_t *flags, int numflags, std::span<const std::string_view> names)
+/* Whether the flag the argument names is set in flags; "0" without an argument */
+template <flag_family E> result has_flag(const field_query &q, const flag_set<E> &flags)
 {
   if (!q.has_arg())
     return "0";
-  /* quirk: the first flag of the list never counts as set, as check_flags_by_name_ar gives its index */
-  return check_flags_by_name_ar(flags, numflags, q.subfield, names) > 0 ? "1" : "0";
+  /* quirk: the first flag never counts as set, as check_flags_by_name_ar gave its index */
+  std::optional<E> flag = flag_by_name<E>(q.subfield);
+  return flag && std::to_underlying(*flag) > 0 && flags.test(*flag) ? "1" : "0";
 }
 
 /* Turns the flag the argument names over, if it is set, giving "1"; otherwise it isn't a field after all */
-result toggle_flag(const field_query &q, bitvector_t *flags, int numflags, std::span<const std::string_view> names, obj_data *o,
-                   bool (*toggle)(obj_data *, int))
+template <flag_family E>
+result toggle_flag(const field_query &q, const flag_set<E> &flags, obj_data *o, bool (*toggle)(obj_data *, E))
 {
   if (!q.has_arg())
     return std::nullopt;
-  int ns = check_flags_by_name_ar(flags, numflags, q.subfield, names);
-  if (ns <= 0)
+  std::optional<E> flag = flag_by_name<E>(q.subfield);
+  if (!flag || std::to_underlying(*flag) == 0 || !flags.test(*flag))
     return std::nullopt;
-  toggle(o, ns);
+  toggle(o, *flag);
   return "1";
 }
 
@@ -60,7 +61,7 @@ result value_field(const field_query &, obj_data *o)
 
 /* The fields, by name */
 const field<obj_data> obj_fields[] = {
-    {"affects", [](const field_query &q, obj_data *o) { return has_flag(q, obj_get_bitvector(o), NUM_AFF_FLAGS, affected_bits); }},
+    {"affects", [](const field_query &q, obj_data *o) { return has_flag(q, obj_get_bitvector(o)); }},
     {"carried_by", [](const field_query &, obj_data *o) -> result {
        return obj_get_carried_by(o) ? uid_text(char_get_id(obj_get_carried_by(o))) : "";
      }},
@@ -80,7 +81,7 @@ const field<obj_data> obj_fields[] = {
     {"count", [](const field_query &q, obj_data *o) -> result { /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
        return obj_get_type_flag(o) == ITEM_CONTAINER ? number(count_in(q, o)) : "0";
      }},
-    {"extra", [](const field_query &q, obj_data *o) { return has_flag(q, obj_get_extra_flags(o), NUM_ITEM_FLAGS, extra_bits); }},
+    {"extra", [](const field_query &q, obj_data *o) { return has_flag(q, obj_get_extra_flags(o)); }},
     {"has_in", [](const field_query &q, obj_data *o) -> result {
        return obj_get_type_flag(o) == ITEM_CONTAINER && count_in(q, o) ? "1" : "0";
      }},
@@ -100,8 +101,8 @@ const field<obj_data> obj_fields[] = {
     {"itemflag", [](const field_query &q, obj_data *o) -> result {
        if (!q.has_arg())
          return "0";
-       int item = get_flag_by_name(extra_bits, q.subfield);
-       return item != NOFLAG && obj_extra_flagged(o, item) ? "1" : "0";
+       std::optional<extra_flag> item = flag_by_name<extra_flag>(q.subfield);
+       return item && obj_extra_flagged(o, *item) ? "1" : "0";
      }},
     {"level", [](const field_query &, obj_data *o) -> result { return number(obj_get_level(o)); }},
     {"name", [](const field_query &q, obj_data *o) -> result {
@@ -118,10 +119,10 @@ const field<obj_data> obj_fields[] = {
        return obj_room(o) != NOWHERE ? uid_text(obj_room(o) + ROOM_ID_BASE) : "";
      }},
     {"setaffects", [](const field_query &q, obj_data *o) {
-       return toggle_flag(q, obj_get_bitvector(o), NUM_AFF_FLAGS, affected_bits, o, obj_aff_toggle);
+       return toggle_flag(q, obj_get_bitvector(o), o, obj_aff_toggle);
      }},
     {"setextra", [](const field_query &q, obj_data *o) {
-       return toggle_flag(q, obj_get_extra_flags(o), NUM_ITEM_FLAGS, extra_bits, o, obj_extra_toggle);
+       return toggle_flag(q, obj_get_extra_flags(o), o, obj_extra_toggle);
      }},
     {"shortdesc", [](const field_query &q, obj_data *o) -> result {
        if (!q.has_arg())
@@ -179,7 +180,7 @@ std::string obj_field(const field_query &q, obj_data *o)
       return *value;
   } else if (tolower(static_cast<unsigned char>(q.field[0])) == 'e')
     /* quirk: any other field starting with e gives the extra flags */
-    return sprintbitarray(obj_get_extra_flags(o), extra_bits, EF_ARRAY_MAX);
+    return flag_names(obj_get_extra_flags(o));
 
   /* not a field: one of o's global variables */
   if (obj_get_script(o))

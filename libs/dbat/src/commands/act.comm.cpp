@@ -670,7 +670,8 @@ namespace {
   /* A channel, by its subcommand: the preference that keeps it from being heard, its history, the messages for
      one who can't use it, its name and for one not on it, and its colour */
   struct channel {
-    int off_flag, history;
+    pref_flag off_flag;
+    int history;
     std::string_view cant, name, not_on, colour;
   };
 
@@ -680,7 +681,7 @@ namespace {
       {PRF_NOGOSS,  HIST_GOSSIP,  "You cannot ooc!!\r\n",        "@D[@BOOC@D]",   "You aren't even on the channel!\r\n",   "@[10]"},
       {PRF_NOAUCT,  HIST_AUCTION, "You cannot newbie!!\r\n",     "newbie",        "You aren't even on the channel!\r\n",   "@[11]"},
       {PRF_NOGRATZ, HIST_GRATS,   "You cannot congratulate!\r\n", "congrat",      "You aren't even on the channel!\r\n",   "@[12]"},
-      {0,           -1,           "You cannot gemote!!\r\n",     "gemote",        "You aren't even on the channel!\r\n",   "@[10]"},
+      {PRF_BRIEF,   -1,           "You cannot gemote!!\r\n",     "gemote",        "You aren't even on the channel!\r\n",   "@[10]"}, /* quirk: reads PRF_BRIEF (0), meant as no flag */
   };
 
   /* Whether whoever is at i hears ch on the channel */

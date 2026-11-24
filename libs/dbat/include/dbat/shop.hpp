@@ -1,10 +1,13 @@
 #pragma once
-#include "dbat/name_table.hpp"
+#include <cstdint>
 #include <cstdio>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "dbat/consts/tradeflags.hpp"
+#include "dbat/flag_set.hpp"
+#include "dbat/name_table.hpp"
 #include "dbat/shop_utils.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -47,7 +50,7 @@ struct shop_data {
   int temper1{};                        /* How does keeper react if no money	*/
   bitvector_t bitvector{};              /* Can attack? Use bank? Cast here?	*/
   mob_vnum keeper{};                    /* The mobile who owns the shop (vnum)	*/
-  bitvector_t with_who[SW_ARRAY_MAX]{}; /* Who does the shop trade with?	*/
+  flag_set<trade_flag> with_who;        /* whom the shop won't trade with */
   std::vector<room_vnum> in_room{};     /* Where is the shop?			*/
   int open1{}, open2{};                   /* When does the shop open?		*/
   int close1{}, close2{};                 /* When does the shop close?		*/
@@ -71,86 +74,6 @@ constexpr int LIST_PRODUCE = 0;
 constexpr int LIST_TRADE   = 1;
 constexpr int LIST_ROOM    = 2;
 
-/* Whom will we not trade with (bitvector for rshop_get_with_who()) */
-constexpr int TRADE_NOGOOD               = 0;
-constexpr int TRADE_NOEVIL               = 1;
-constexpr int TRADE_NONEUTRAL            = 2;
-constexpr int TRADE_NOWIZARD             = 3;
-constexpr int TRADE_NOCLERIC             = 4;
-constexpr int TRADE_NOROGUE              = 5;
-constexpr int TRADE_NOFIGHTER            = 6;
-constexpr int TRADE_NOHUMAN              = 7;
-constexpr int TRADE_NOICER               = 8;
-constexpr int TRADE_NOSAIYAN             = 9;
-constexpr int TRADE_NOKONATSU            = 10;
-constexpr int TRADE_NONAMEK              = 11;
-constexpr int TRADE_NOMUTANT             = 12;
-constexpr int TRADE_NOKANASSAN           = 13;
-constexpr int TRADE_NOBIO                = 14;
-constexpr int TRADE_NOANDROID            = 15;
-constexpr int TRADE_NODEMON              = 16;
-constexpr int TRADE_NOMAJIN              = 17;
-constexpr int TRADE_NOKAI                = 18;
-constexpr int TRADE_NOTRUFFLE            = 19;
-constexpr int TRADE_NOGOBLIN             = 20;
-constexpr int TRADE_NOANIMAL             = 21;
-constexpr int TRADE_NOORC                = 22;
-constexpr int TRADE_NOSNAKE              = 23;
-constexpr int TRADE_NOTROLL              = 24;
-constexpr int TRADE_NOHALFBREED          = 25;
-constexpr int TRADE_NOMINOTAUR           = 26;
-constexpr int TRADE_NOKOBOLD             = 27;
-constexpr int TRADE_NOLIZARDFOLK         = 28;
-constexpr int TRADE_NOMONK               = 29;
-constexpr int TRADE_NOPALADIN            = 30;
-constexpr int TRADE_UNUSED               = 31;
-constexpr int TRADE_ONLYWIZARD           = 32;
-constexpr int TRADE_ONLYCLERIC           = 33;
-constexpr int TRADE_ONLYROGUE            = 34;
-constexpr int TRADE_ONLYFIGHTER          = 35;
-constexpr int TRADE_ONLYMONK             = 36;
-constexpr int TRADE_ONLYPALADIN          = 37;
-constexpr int TRADE_NOSORCERER           = 38;
-constexpr int TRADE_NODRUID              = 39;
-constexpr int TRADE_NOBARD               = 40;
-constexpr int TRADE_NORANGER             = 41;
-constexpr int TRADE_NOBARBARIAN          = 42;
-constexpr int TRADE_ONLYSORCERER         = 43;
-constexpr int TRADE_ONLYDRUID            = 44;
-constexpr int TRADE_ONLYBARD             = 45;
-constexpr int TRADE_ONLYRANGER           = 46;
-constexpr int TRADE_ONLYBARBARIAN        = 47;
-constexpr int TRADE_ONLYARCANE_ARCHER    = 48;
-constexpr int TRADE_ONLYARCANE_TRICKSTER = 49;
-constexpr int TRADE_ONLYARCHMAGE         = 50;
-constexpr int TRADE_ONLYASSASSIN         = 51;
-constexpr int TRADE_ONLYBLACKGUARD       = 52;
-constexpr int TRADE_ONLYDRAGON_DISCIPLE  = 53;
-constexpr int TRADE_ONLYDUELIST          = 54;
-constexpr int TRADE_ONLYDWARVEN_DEFENDER = 55;
-constexpr int TRADE_ONLYELDRITCH_KNIGHT  = 56;
-constexpr int TRADE_ONLYHIEROPHANT       = 57;
-constexpr int TRADE_ONLYHORIZON_WALKER   = 58;
-constexpr int TRADE_ONLYLOREMASTER       = 59;
-constexpr int TRADE_ONLYMYSTIC_THEURGE   = 60;
-constexpr int TRADE_ONLYSHADOWDANCER     = 61;
-constexpr int TRADE_ONLYTHAUMATURGIST    = 62;
-constexpr int TRADE_NOARCANE_ARCHER      = 63;
-constexpr int TRADE_NOARCANE_TRICKSTER   = 64;
-constexpr int TRADE_NOARCHMAGE           = 65;
-constexpr int TRADE_NOASSASSIN           = 66;
-constexpr int TRADE_NOBLACKGUARD         = 67;
-constexpr int TRADE_NODRAGON_DISCIPLE    = 68;
-constexpr int TRADE_NODUELIST            = 69;
-constexpr int TRADE_NODWARVEN_DEFENDER   = 70;
-constexpr int TRADE_NOELDRITCH_KNIGHT    = 71;
-constexpr int TRADE_NOHIEROPHANT         = 72;
-constexpr int TRADE_NOHORIZON_WALKER     = 73;
-constexpr int TRADE_NOLOREMASTER         = 74;
-constexpr int TRADE_NOMYSTIC_THEURGE     = 75;
-constexpr int TRADE_NOSHADOWDANCER       = 76;
-constexpr int TRADE_NOTHAUMATURGIST      = 77;
-constexpr int TRADE_NOBROKEN             = 78;
 
 struct stack_data {
   int data[100]{};
@@ -188,7 +111,6 @@ constexpr int MAX_OUTSIDE_BANK = 15000;
 /* The traders' names: quirk, one fewer than NUM_TRADERS, so the last trader, as the editors' menus list it, is
    the "\n" that ended them */
 constexpr int NUM_TRADER_NAMES = NUM_TRADERS - 1;
-extern const name_table trade_letters; /* NUM_TRADER_NAMES of them */
 extern const name_table shop_bits; /* NUM_SHOP_FLAGS of them */
 
 // functions
@@ -205,6 +127,6 @@ SPECIAL(shop_keeper);
 // commands
 
 /* Trade restriction flags (TRADE_*) on a shop_data. */
-void shop_trade_set(struct shop_data *rec, int flag, bool on);
-bool shop_trade_toggle(struct shop_data *rec, int flag);
+void shop_trade_set(struct shop_data *rec, trade_flag flag, bool on);
+bool shop_trade_toggle(struct shop_data *rec, trade_flag flag);
 

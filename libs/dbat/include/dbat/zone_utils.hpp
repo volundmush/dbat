@@ -4,11 +4,11 @@
 
 int zone_get_min_level(GameWorld *g, struct zone_data *zone);
 int zone_get_max_level(GameWorld *g, struct zone_data *zone);
-bool zone_flagged(GameWorld *g, struct zone_data *rnum, int flag);
+bool zone_flagged(GameWorld *g, struct zone_data *rnum, zone_flag flag);
 /* Sets (or clears) one of the zone's flags */
-void zone_set_flag(struct zone_data *zone, int flag, bool on);
+void zone_set_flag(struct zone_data *zone, zone_flag flag, bool on);
 /* The same on a zone_data pointer, e.g. an OLC working copy. */
-bool zone_data_toggle_flag(struct zone_data *zone, int flag);
+bool zone_data_toggle_flag(struct zone_data *zone, zone_flag flag);
 
 /* A zone's place in vnum order, from 0, -1 if it isn't in the world. */
 int zone_place(GameWorld *g, const struct zone_data *zone);

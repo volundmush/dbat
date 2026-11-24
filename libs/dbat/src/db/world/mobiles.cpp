@@ -100,9 +100,10 @@ const espec_field especs[] = {
        af.duration  = n[1];
        af.modifier  = n[2];
        af.location  = n[3];
-       af.bitvector = n[4];
-       af.specific  = affect_checked_specific(n[3], n[5]);
-       if (affect_is_loadable(&af))
+       std::optional<aff_flag> bit = flag_from_index<aff_flag>(n[4]); /* a number past the affects isn't loaded */
+       af.bitvector                = bit.value_or(AFF_DONTUSE);
+       af.specific                 = affect_checked_specific(n[3], n[5]);
+       if (bit && affect_is_loadable(&af))
          affect_to_char(g, mob, &af);
        else
          mud_log("SYSERR: mob {} has an impossible affect: {}", char_get_name(mob), value);
@@ -261,7 +262,7 @@ io::loaded<void> read_mob(GameWorld *g, io::text_reader &in, mob_vnum vnum)
                            line.value_or(""))));
   for (int i = 0; i < 4; i++) {
     char_get_act(mob)[i]         = io::ascii_flags(flags[i], 0, "asciiflag_conv");
-    char_get_affected_by(mob)[i] = io::ascii_flags(flags[i + 4], 0, "asciiflag_conv");
+    char_get_affected_by(mob).set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i + 4], 0, "asciiflag_conv"));
   }
   char_set_alignment(mob, alignment);
   char_mob_set(mob, MOB_ISNPC, true);
@@ -305,7 +306,7 @@ void write_mob(GameWorld *g, io::text_writer &out, mob_vnum vnum, char_data *mob
   std::string flags[8];
   for (int i = 0; i < 4; i++) {
     flags[i]     = flag_letters(char_get_act(mob)[i]);
-    flags[i + 4] = flag_letters(char_get_affected_by(mob)[i]);
+    flags[i + 4] = flag_letters(char_get_affected_by(mob).word(static_cast<std::size_t>(i)));
   }
   out.print("{} {} {} {} {} {} {} {} {:d} E\n"
             "{:d} {:d} {:d} {:d}d{:d}+{:d} {:d}d{:d}+{:d}\n"

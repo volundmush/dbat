@@ -104,10 +104,7 @@ std::expected<zone_data *, std::string_view> create_new_zone(GameWorld *g, zone_
   zone->lifespan      = 30;
   zone->age           = 0;
   zone->reset_mode    = 2;
-  zone->zone_flags[0] = 0;
-  zone->zone_flags[1] = 0;
-  zone->zone_flags[2] = 0;
-  zone->zone_flags[3] = 0;
+  zone->zone_flags = {};
   zone->min_level     = 0;
   zone->max_level     = ADMLVL_IMPL;
   /*

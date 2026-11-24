@@ -70,7 +70,7 @@ io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_k
     for (int i = 0; i < 8; i++)
       obj_set_value(temp, i, t[i + 1]);
     for (int i = 0; i < 4; i++) /* quirk: a house file's fourth flags word is its third again */
-      obj_get_extra_flags(temp)[i] = io::ascii_flags(f[kind == record_kind::house && i == 3 ? 2 : i], 0, "asciiflag_conv");
+      obj_get_extra_flags(temp).set_word(static_cast<std::size_t>(i), io::ascii_flags(f[kind == record_kind::house && i == 3 ? 2 : i], 0, "asciiflag_conv"));
     for (int i = 8; i < 16; i++)
       obj_set_value(temp, i, t[i + 5]);
     if (kind == record_kind::house) {
@@ -98,7 +98,7 @@ io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_k
                                                   file_kind, nr)));
       obj_set_type_flag(temp, t[0]);
       for (int i = 0; i < 4; i++)
-        obj_get_wear_flags(temp)[i] = t[i + 1];
+        obj_get_wear_flags(temp).set_word(static_cast<std::size_t>(i), static_cast<bitvector_t>(t[i + 1]));
       obj_set_weight(temp, t[5]);
       obj_set_cost(temp, t[6]);
       if (kind == record_kind::house) /* quirk: a rented object's cost per day is its prototype's */
@@ -204,7 +204,7 @@ void write_object_record(GameWorld *g, io::text_writer &out, obj_data *obj, int 
 {
   std::string flags[4];
   for (int i = 0; i < 4; i++)
-    flags[i] = flag_letters(obj_get_extra_flags(obj)[i]);
+    flags[i] = flag_letters(obj_get_extra_flags(obj).word(static_cast<std::size_t>(i)));
   out.print("#{:d}\n{:d}", obj_get_vnum(g, obj), locate);
   for (int i = 0; i < 8; i++)
     out.print(" {:d}", obj_get_value(obj, i));
@@ -220,9 +220,9 @@ void write_object_record(GameWorld *g, io::text_writer &out, obj_data *obj, int 
             or_if_empty(obj_get_short_description(obj), "undefined"),
             or_if_empty(obj_get_description(obj), "undefined"), action);
   out.print("{:d} {:d} {:d} {:d} {:d} {:d} {:d} {:d}\n", obj_get_type_flag(obj),
-            static_cast<int>(obj_get_wear_flags(obj)[0]), /* as signed, as always */
-            static_cast<int>(obj_get_wear_flags(obj)[1]), static_cast<int>(obj_get_wear_flags(obj)[2]),
-            static_cast<int>(obj_get_wear_flags(obj)[3]), obj_get_weight(obj), obj_get_cost(obj),
+            static_cast<int>(obj_get_wear_flags(obj).word(0)), /* as signed, as always */
+            static_cast<int>(obj_get_wear_flags(obj).word(1)), static_cast<int>(obj_get_wear_flags(obj).word(2)),
+            static_cast<int>(obj_get_wear_flags(obj).word(3)), obj_get_weight(obj), obj_get_cost(obj),
             obj_get_cost_per_day(obj));
 
   if (obj_get_generation(obj))

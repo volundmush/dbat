@@ -40,7 +40,7 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static bool shop_trade_flagged(const struct shop_data *rec, int flag);
+static bool shop_trade_flagged(const struct shop_data *rec, trade_flag flag);
 
 const std::string_view shop_default_msgs[] = {
     "%s Sorry, I don't stock that item.",  /* SHOP_MSG_NOITEM1 */
@@ -369,7 +369,7 @@ static int evaluate_expression(struct obj_data *obj, std::string_view expr)
         std::string_view name = expr.substr(start, at - start);
         for (eindex = 0; eindex < NUM_ITEM_FLAGS; eindex++)
           if (str_eq_nocase(name, extra_bits[eindex])) {
-            push(&vals, obj_extra_flagged(obj, eindex));
+            push(&vals, obj_extra_flagged(obj, *flag_from_index<extra_flag>(eindex)));
             break;
           }
         if (eindex == NUM_ITEM_FLAGS)
@@ -422,8 +422,7 @@ static int trade_with(GameWorld *g, struct obj_data *item, struct shop_data *sho
 
 static bool same_obj(struct obj_data *obj1, struct obj_data *obj2)
 {
-  int aindex, i;
-  int ef1, ef2;
+  int aindex;
 
   if (!obj1 || !obj2)
     return (obj1 == obj2);
@@ -434,16 +433,11 @@ static bool same_obj(struct obj_data *obj1, struct obj_data *obj2)
   if (obj_get_cost(obj1) != obj_get_cost(obj2))
     return (false);
 
-  for (i = 0; i < EF_ARRAY_MAX; i++) {
-    ef1 = obj_get_extra_flags(obj1)[i];
-    ef2 = obj_get_extra_flags(obj2)[i];
-    if (i == Q_FIELD(ITEM_UNIQUE_SAVE)) {
-      ef1 &= ~Q_BIT(ITEM_UNIQUE_SAVE);
-      ef2 &= ~Q_BIT(ITEM_UNIQUE_SAVE);
-    }
-    if (ef1 != ef2)
-      return (false);
-  }
+  flag_set<extra_flag> ef1 = obj_get_extra_flags(obj1), ef2 = obj_get_extra_flags(obj2);
+  ef1.reset(ITEM_UNIQUE_SAVE);
+  ef2.reset(ITEM_UNIQUE_SAVE);
+  if (ef1 != ef2)
+    return (false);
 
   for (aindex = 0; aindex < MAX_OBJ_AFFECT; aindex++)
     if ((obj_get_affected(obj1)[aindex].location != obj_get_affected(obj2)[aindex].location) ||
@@ -735,7 +729,7 @@ static void shopping_app(GameWorld *g, std::string_view arg, struct char_data *c
   } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
     send_to_char(g, ch, "GToken Slots  @W: @m2/2@n\n");
   }
-  std::string bits = sprintbitarray(obj_get_wear_flags(obj), wear_bits, TW_ARRAY_MAX);
+  std::string bits = flag_names(obj_get_wear_flags(obj));
   search_replace(bits, "TAKE", "");
   send_to_char(g, ch, "@GWear Loc.   @W:@w{}\n", bits);
   if (obj_get_type_flag(obj) == ITEM_WEAPON) {
@@ -770,7 +764,7 @@ static void shopping_app(GameWorld *g, std::string_view arg, struct char_data *c
     send_to_char(g, ch, " None@n");
   else
     send_to_char(g, ch, "@n");
-  std::string buf2 = sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX);
+  std::string buf2 = flag_names(obj_get_bitvector(obj));
   send_to_char(g, ch, "\n@GSpecial     @W:@w {}", buf2);
   send_to_char(g, ch, "\n@c---------------------------------------------------------------@n\n");
 }
@@ -1265,12 +1259,14 @@ static std::string customer_string(GameWorld *g, struct shop_data *shop, int det
 {
   std::string buf;
 
-  for (int sindex = 0, flag = 0; sindex < NUM_TRADER_NAMES; sindex++, flag++)
+  for (int sindex = 0; sindex < NUM_TRADER_NAMES; sindex++) {
+    trade_flag flag = *flag_from_index<trade_flag>(sindex);
     if (detailed) {
       if (!shop_trade_flagged(shop, flag))
         buf += str_format(", {}", trade_letters[sindex]);
     } else
       buf += shop_trade_flagged(shop, flag) ? '_' : first_char(trade_letters[sindex]);
+  }
   return buf;
 }
 
@@ -1464,20 +1460,18 @@ int count_shops(GameWorld *g, shop_vnum low, shop_vnum high)
   return j;
 }
 
-static bool shop_trade_flagged(const struct shop_data *rec, int flag)
+static bool shop_trade_flagged(const struct shop_data *rec, trade_flag flag)
 {
-  return IS_SET_AR(rec->with_who, flag) != 0;
+  return rec->with_who.test(flag);
 }
 
-void shop_trade_set(struct shop_data *rec, int flag, bool on)
+void shop_trade_set(struct shop_data *rec, trade_flag flag, bool on)
 {
-  if (on)
-    SET_BIT_AR(rec->with_who, flag);
-  else
-    REMOVE_BIT_AR(rec->with_who, flag);
+  rec->with_who.set(flag, on);
 }
 
-bool shop_trade_toggle(struct shop_data *rec, int flag)
+bool shop_trade_toggle(struct shop_data *rec, trade_flag flag)
 {
-  return (TOGGLE_BIT_AR(rec->with_who, flag) & Q_BIT(flag)) != 0;
+  rec->with_who.toggle(flag);
+  return rec->with_who.test(flag);
 }

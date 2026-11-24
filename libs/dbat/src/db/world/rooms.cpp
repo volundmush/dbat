@@ -135,8 +135,8 @@ io::loaded<void> read_room(GameWorld *g, io::text_reader &in, room_vnum vnum)
   if (f.count() != 6)
     return std::unexpected(
         in.fail(str_format("room #{:d}: expected its zone, 4 flags and its sector, got '{}'", vnum, *line)));
-  for (int i = 0; i < 4; i++)
-    room_get_room_flags(g, vnum)[i] = io::ascii_flags(flags[i], 0, "asciiflag_conv");
+  for (std::size_t i = 0; i < 4; i++)
+    room_get_room_flags(g, vnum)->set_word(i, io::ascii_flags(flags[i], 0, "asciiflag_conv"));
   room_set_sector_type(g, vnum, sector);
 
   room_set_func(g, vnum, nullptr);
@@ -219,8 +219,8 @@ bool save_rooms(GameWorld *g, struct zone_data *zone_num)
               "{:d} {} {} {} {} {:d}\n",
               room_get_number(room), or_if_empty(room_get_name(room), "Untitled"),
               as_char(STRING_TERMINATOR), description, as_char(STRING_TERMINATOR), room_get_zone(room)->number,
-              flag_letters(room_get_room_flags(room)[0]), flag_letters(room_get_room_flags(room)[1]),
-              flag_letters(room_get_room_flags(room)[2]), flag_letters(room_get_room_flags(room)[3]), room_get_sector_type(room));
+              flag_letters(room_get_room_flags(room).word(0)), flag_letters(room_get_room_flags(room).word(1)),
+              flag_letters(room_get_room_flags(room).word(2)), flag_letters(room_get_room_flags(room).word(3)), room_get_sector_type(room));
 
     for (int j = 0; j < NUM_OF_DIRS; j++) {
       room_direction_data *exit = room_get_dir_option(room, j);

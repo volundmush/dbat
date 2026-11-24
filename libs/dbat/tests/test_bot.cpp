@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <type_traits>
 
 #include <dirent.h>
 #include <strings.h>
@@ -217,9 +218,9 @@ static void equip_bot(GameWorld *g, struct char_data *ch, unsigned long kit)
     if (roll(&kit, 2))
       char_set_skills_base(ch, skill, 1 + roll(&kit, 100));
   for (unsigned long n = roll(&kit, 4); n > 0; n--)
-    char_aff_set(ch, roll(&kit, NUM_AFF_FLAGS), true);
+    char_aff_set(ch, static_cast<std::remove_cv_t<decltype(AFF_DONTUSE)>>(roll(&kit, NUM_AFF_FLAGS)), true); /* an aff_flag, or an int on an older base */
   for (unsigned long n = roll(&kit, 4); n > 0; n--)
-    char_prf_set(g, ch, roll(&kit, NUM_PRF_FLAGS), true);
+    char_prf_set(g, ch, static_cast<std::remove_cv_t<decltype(PRF_BRIEF)>>(roll(&kit, NUM_PRF_FLAGS)), true); /* a pref_flag, or an int on an older base */
   restore(g, ch, false);
   for (unsigned long n = roll(&kit, 8) + 2; n > 0; n--)
     obj_to_char(g, read_object(g, nth_obj_vnum(g, roll(&kit, g->obj_proto.size()))), ch);

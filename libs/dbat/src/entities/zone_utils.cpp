@@ -5,17 +5,14 @@
 
 /* Formerly macros in zone_utils.hpp. */
 
-bool zone_flagged(GameWorld *g, struct zone_data *rnum, int flag)
+bool zone_flagged(GameWorld *g, struct zone_data *rnum, zone_flag flag)
 {
-  return (IS_SET_AR(((rnum))->zone_flags, flag));
+  return rnum->zone_flags.test(flag);
 }
 
-void zone_set_flag(struct zone_data *zone, int flag, bool on)
+void zone_set_flag(struct zone_data *zone, zone_flag flag, bool on)
 {
-  if (on)
-    SET_BIT_AR(zone->zone_flags, flag);
-  else
-    REMOVE_BIT_AR(zone->zone_flags, flag);
+  zone->zone_flags.set(flag, on);
 }
 
 /* Field accessors (formerly accessor macros). */
@@ -30,9 +27,10 @@ int zone_get_max_level(GameWorld *g, struct zone_data *zone)
   return zone->max_level;
 }
 
-bool zone_data_toggle_flag(struct zone_data *zone, int flag)
+bool zone_data_toggle_flag(struct zone_data *zone, zone_flag flag)
 {
-  return (TOGGLE_BIT_AR(zone->zone_flags, flag) & Q_BIT(flag)) != 0;
+  zone->zone_flags.toggle(flag);
+  return zone->zone_flags.test(flag);
 }
 
 struct reset_com *zone_get_cmd(GameWorld *g, struct zone_data *zone, int n)

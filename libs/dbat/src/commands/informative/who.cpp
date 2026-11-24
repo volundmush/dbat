@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iterator>
 #include <ranges>
+#include <variant>
 
 #include "dbat/io/reader.hpp"
 #include "dbat/fileop.hpp"
@@ -111,22 +112,21 @@ namespace {
   };
 
   struct who_flag {
-    bool prf; /* a preference, or a player flag */
-    int flag;
+    std::variant<pref_flag, int> flag; /* a preference, or a player flag (PLR_) */
     std::string_view tag{};
     bool immortals_see_only = false;
   };
 
   constexpr who_flag WHO_FLAGS[] = {
-      {true,  PRF_DEAF,      " (DEAF)"           },
-      {true,  PRF_NOTELL,    " (NO TELL)"        },
-      {true,  PRF_NOGOSS,    " (NO OOC)"         },
-      {false, PLR_NOSHOUT,   " (MUTED)"          },
-      {true,  PRF_HIDE,      " (WH)"             },
-      {true,  PRF_BUILDWALK, " (Buildwalking)"   },
-      {true,  PRF_AFK,       " (AFK)"            },
-      {false, PLR_FISHING,   " (@BFISHING@n)", true},
-      {true,  PRF_NOWIZ,     " (NO WIZ)"         },
+      {PRF_DEAF,      " (DEAF)"           },
+      {PRF_NOTELL,    " (NO TELL)"        },
+      {PRF_NOGOSS,    " (NO OOC)"         },
+      {PLR_NOSHOUT,   " (MUTED)"          },
+      {PRF_HIDE,      " (WH)"             },
+      {PRF_BUILDWALK, " (Buildwalking)"   },
+      {PRF_AFK,       " (AFK)"            },
+      {PLR_FISHING,   " (@BFISHING@n)", true},
+      {PRF_NOWIZ,     " (NO WIZ)"         },
   };
 
   void who_line(GameWorld *g, struct char_data *ch, descriptor_data *d, struct char_data *tch)
@@ -158,7 +158,8 @@ namespace {
     if (auto it = std::ranges::find(EDIT_TAGS, d->connected, &edit_tag::connected); it != std::end(EDIT_TAGS))
       send_to_char(g, ch, "{}", it->tag);
     for (const who_flag &f : WHO_FLAGS) {
-      bool has = f.prf ? char_prf_flagged(g, tch, f.flag) : char_plr_flagged(tch, f.flag);
+      const pref_flag *pref = std::get_if<pref_flag>(&f.flag);
+      bool has              = pref ? char_prf_flagged(g, tch, *pref) : char_plr_flagged(tch, std::get<int>(f.flag));
       if (has && (!f.immortals_see_only || char_get_admlevel(ch) >= ADMLVL_IMMORT))
         send_to_char(g, ch, "{}", f.tag);
     }
@@ -386,7 +387,7 @@ static void print_object_location(GameWorld *g, int num, struct obj_data *obj, s
 }
 
 namespace {
-  template <int Flag> bool flagged(GameWorld *g, room_vnum room) { return room_flagged(g, room, Flag); }
+  template <room_flag Flag> bool flagged(GameWorld *g, room_vnum room) { return room_flagged(g, room, Flag); }
 
   struct planet {
     std::string_view name{};

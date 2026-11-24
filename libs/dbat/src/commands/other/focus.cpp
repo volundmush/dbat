@@ -89,7 +89,7 @@ struct focus_limit {
 
 struct focus_buff {
   int skill{};
-  int aff{};
+  aff_flag aff{};
   int kill_flag{2};              /* can_kill()'s, on another */
   std::string_view who{};             /* when there is no one by that name */
   std::string_view self_has{};        /* already has it */

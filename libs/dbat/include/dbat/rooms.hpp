@@ -35,7 +35,7 @@ struct room_data {
   std::string description;                               /* Shown when entered; empty for none */
   ex_desc_list ex_description;                           /* for examine/look */
   owned<room_direction_data> dir_option[NUM_OF_DIRS];    /* Directions: the room owns its exits */
-  bitvector_t room_flags[RF_ARRAY_MAX]{};                /* DEATH,DARK ... etc */
+  flag_set<room_flag> room_flags;                         /* DEATH,DARK ... etc */
 
   std::vector<trig_vnum> proto_script{}; /* the triggers it starts with */
   struct script_data *script{};           /* script info for the object         */

@@ -114,7 +114,7 @@ bool room_planet_zenith(GameWorld *g, room_vnum room)
   return ((room >= 3400 && room <= 3599) || (room >= 62900 && room <= 62999) || (room == 19600));
 }
 
-bool room_flagged(GameWorld *g, room_vnum loc, int flag)
+bool room_flagged(GameWorld *g, room_vnum loc, room_flag flag)
 {
   struct room_data *r = room_of(g, loc);
   return r && room_flagged(r, flag);
@@ -166,10 +166,10 @@ void room_set_gravity(GameWorld *g, room_vnum room, int v)
     r->gravity = v;
 }
 
-bitvector_t *room_get_room_flags(GameWorld *g, room_vnum room)
+flag_set<room_flag> *room_get_room_flags(GameWorld *g, room_vnum room)
 {
   if (struct room_data *r = room_of(g, room))
-    return r->room_flags;
+    return &r->room_flags;
   return {};
 }
 
@@ -208,25 +208,23 @@ std::string_view exit_description(const struct room_direction_data *exit)
 
 /* Room flag setters and toggles, on the room or on its vnum. */
 
-bool room_flagged(const struct room_data *room, int flag)
+bool room_flagged(const struct room_data *room, room_flag flag)
 {
-  return IS_SET_AR(room->room_flags, flag) != 0;
+  return room->room_flags.test(flag);
 }
 
-void room_set_flag(struct room_data *room, int flag, bool on)
+void room_set_flag(struct room_data *room, room_flag flag, bool on)
 {
-  if (on)
-    SET_BIT_AR(room->room_flags, flag);
-  else
-    REMOVE_BIT_AR(room->room_flags, flag);
+  room->room_flags.set(flag, on);
 }
 
-bool room_toggle_flag(struct room_data *room, int flag)
+bool room_toggle_flag(struct room_data *room, room_flag flag)
 {
-  return (TOGGLE_BIT_AR(room->room_flags, flag) & Q_BIT(flag)) != 0;
+  room->room_flags.toggle(flag);
+  return room->room_flags.test(flag);
 }
 
-void room_set_flag(GameWorld *g, room_vnum room, int flag, bool on)
+void room_set_flag(GameWorld *g, room_vnum room, room_flag flag, bool on)
 {
   if (struct room_data *r = room_of(g, room))
     room_set_flag(r, flag, on);
@@ -409,7 +407,12 @@ void room_set_proto_script(GameWorld *g, room_vnum room, std::vector<trig_vnum> 
     r->proto_script = std::move(v);
 }
 
-bitvector_t *room_get_room_flags(struct room_data *room)
+flag_set<room_flag> &room_get_room_flags(struct room_data *room)
+{
+  return room->room_flags;
+}
+
+const flag_set<room_flag> &room_get_room_flags(const struct room_data *room)
 {
   return room->room_flags;
 }

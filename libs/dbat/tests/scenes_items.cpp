@@ -16,8 +16,8 @@ namespace {
     int type                                          = -1;
     int64_t weight                                    = 1;
     std::initializer_list<std::pair<int, int>> values = {};
-    std::initializer_list<int> flags                  = {}; /* extra flags */
-    std::initializer_list<int> wear                   = {}; /* wear flags */
+    std::initializer_list<flag_type_of<ITEM_GLOW>> flags                  = {}; /* extra flags */
+    std::initializer_list<flag_type_of<ITEM_WEAR_TAKE>> wear = {}; /* wear flags */
   };
 
   struct obj_data *make(GameWorld *g, const made &m)
@@ -31,9 +31,9 @@ namespace {
       obj_set_type_flag(obj, m.type);
     for (auto [i, v] : m.values)
       obj_set_value(obj, i, v);
-    for (int flag : m.flags)
+    for (flag_type_of<ITEM_GLOW> flag : m.flags)
       obj_extra_set(obj, flag, true);
-    for (int flag : m.wear)
+    for (flag_type_of<ITEM_WEAR_TAKE> flag : m.wear)
       obj_wear_set(obj, flag, true);
     return obj;
   }
@@ -186,16 +186,16 @@ namespace {
   }
 
   /* ... a furniture capsule of this vnum, in a house unless `where` says otherwise */
-  void furniture(GameWorld *g, struct char_data *att, obj_vnum vnum, std::initializer_list<int> flags = {ROOM_HOUSE})
+  void furniture(GameWorld *g, struct char_data *att, obj_vnum vnum, std::initializer_list<flag_type_of<ROOM_DARK>> flags = {ROOM_HOUSE})
   {
     carry(g, att, {.name = "capsule", .vnum = vnum});
-    for (int flag : flags)
+    for (flag_type_of<ROOM_DARK> flag : flags)
       room_set_flag(g, ARENA, flag, true);
     stock(g, {19090, 19091, 19092, 19093, 11});
   }
 
   /* auction: selling a rock for this much (said before the line, and the pulses of it played `calls` times) */
-  struct obj_data *rock(GameWorld *g, struct char_data *ch, std::initializer_list<int> flags = {})
+  struct obj_data *rock(GameWorld *g, struct char_data *ch, std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {})
   {
     return carry(g, ch, {.name = "rock", .flags = flags});
   }
@@ -293,7 +293,7 @@ namespace {
   }
 
   /* put and get: a bag, of this capacity, flagged so */
-  struct obj_data *bag(GameWorld *g, struct char_data *att, int capacity = 100, std::initializer_list<int> flags = {}, int closed = 0)
+  struct obj_data *bag(GameWorld *g, struct char_data *att, int capacity = 100, std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {}, int closed = 0)
   {
     return carry(g, att, {.name = "bag", .type = ITEM_CONTAINER, .values = {{0, capacity}, {1, closed}}, .flags = flags});
   }
@@ -309,7 +309,7 @@ namespace {
 
   /* drink: a flask of this liquid, so full of so much */
   struct obj_data *flask(GameWorld *g, struct char_data *att, int liquid = LIQ_WATER, int full = 10, int capacity = 10,
-                         std::initializer_list<int> flags = {}, int poison = 0, const char *name = "flask")
+                         std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {}, int poison = 0, const char *name = "flask")
   {
     return carry(g, att, {.name = name, .type = ITEM_DRINKCON, .weight = 12, .values = {{0, capacity}, {1, full}, {2, liquid}, {3, poison}}, .flags = flags});
   }
@@ -334,14 +334,14 @@ namespace {
   }
 
   /* eat: food, so nourishing */
-  struct obj_data *bread(GameWorld *g, struct char_data *att, int food = 10, std::initializer_list<int> flags = {}, int poison = 0,
+  struct obj_data *bread(GameWorld *g, struct char_data *att, int food = 10, std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {}, int poison = 0,
                          int type = ITEM_FOOD, int64_t weight = 2)
   {
     return carry(g, att, {.name = "bread", .type = type, .weight = weight, .values = {{0, food}, {1, 10}, {2, 5}, {3, poison}, {6, 10}}, .flags = flags});
   }
 
   /* wear: something that goes there */
-  struct obj_data *wearable(GameWorld *g, struct char_data *att, const char *name, int wear, std::initializer_list<int> flags = {},
+  struct obj_data *wearable(GameWorld *g, struct char_data *att, const char *name, flag_type_of<ITEM_WEAR_TAKE> wear, std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {},
                             int level = 0, int type = -1)
   {
     struct obj_data *obj = make(g, {.name = name, .type = type, .flags = flags, .wear = {wear}});
@@ -353,7 +353,7 @@ namespace {
   /* ... one of everything */
   void wardrobe(GameWorld *g, struct char_data *att)
   {
-    for (int wear : {ITEM_WEAR_FINGER, ITEM_WEAR_NECK, ITEM_WEAR_BODY, ITEM_WEAR_HEAD, ITEM_WEAR_LEGS, ITEM_WEAR_FEET,
+    for (flag_type_of<ITEM_WEAR_TAKE> wear : {ITEM_WEAR_FINGER, ITEM_WEAR_NECK, ITEM_WEAR_BODY, ITEM_WEAR_HEAD, ITEM_WEAR_LEGS, ITEM_WEAR_FEET,
                      ITEM_WEAR_HANDS, ITEM_WEAR_ARMS, ITEM_WEAR_SHIELD, ITEM_WEAR_ABOUT, ITEM_WEAR_WAIST, ITEM_WEAR_WRIST,
                      ITEM_WEAR_HOLD, ITEM_WEAR_PACK, ITEM_WEAR_EAR, ITEM_WEAR_SH, ITEM_WEAR_EYE})
       wearable(g, att, "garment", wear);
@@ -844,7 +844,7 @@ namespace {
     {"hurt, with bread", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att);), false, 1},
     {"hurt, with a big loaf", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att, 10, {}, 0, ITEM_FOOD, 6);), false, 1},
     {"hurt, with a treat", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att, 10, {}, 0, ITEM_YUM);), false, 1},
-    {"hurt, with a sweet loaf", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att, 10, {ITEM_YUM});), false, 1},
+    {"hurt, with a sweet loaf", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att, 10, {ITEM_ONLY_WIZARD}); /* as eating reads it: extra flag 33, meant as type YUM */), false, 1},
     {"watching the dummy eat", "eat", false, SETUP(command_interpreter(g, dummy(g), "eat bread");), false, 1},
     {"refreshed, with bread", "eat bread", false, SETUP(conditions(g, att, 10, 20); char_set_foodr(att, 2); bread(g, att);), false, 1},
     {"with a described loaf", "eat bread", false, SETUP(conditions(g, att, 10, 20); obj_set_action_description(bread(g, att), "It is stale.");), false, 1},

@@ -351,7 +351,6 @@ struct obj_data *create_money(GameWorld *g, int amount)
   struct obj_data *obj;
   extra_descr_data descr;
   std::string buf;
-  int y;
 
   if (amount <= 0) {
     mud_log("SYSERR: Try to create negative or 0 money. ({:d})", amount);
@@ -392,8 +391,7 @@ struct obj_data *create_money(GameWorld *g, int amount)
   obj_set_value(obj, 7, MATERIAL_GOLD);
   obj_set_value(obj, VAL_ALL_MAXHEALTH, 100);
   obj_set_value(obj, VAL_ALL_HEALTH, 100);
-  for (y = 0; y < TW_ARRAY_MAX; y++)
-    obj->wear_flags[y] = 0;
+  obj->wear_flags = {};
   obj_wear_set(obj, ITEM_WEAR_TAKE, true);
   obj_set_value(obj, VAL_MONEY_SIZE, amount);
   obj_set_cost(obj, amount);
@@ -438,9 +436,9 @@ obj_vnum obj_get_vnum(GameWorld *g, const struct obj_data *obj)
 
 /* Formerly macros in object_utils.hpp. */
 
-bool obj_aff_flagged(const struct obj_data *obj, int flag)
+bool obj_aff_flagged(const struct obj_data *obj, aff_flag flag)
 {
-  return (IS_SET_AR(obj_get_bitvector(obj), (flag)));
+  return obj->bitvector.test(flag);
 }
 
 bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag)
@@ -448,9 +446,9 @@ bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag)
   return (IS_SET(obj_get_value((obj), VAL_CONTAINER_FLAGS), (flag)));
 }
 
-bool obj_extra_flagged(const struct obj_data *obj, int flag)
+bool obj_extra_flagged(const struct obj_data *obj, extra_flag flag)
 {
-  return (IS_SET_AR(obj_get_extra_flags(obj), (flag)));
+  return obj->extra_flags.test(flag);
 }
 
 static bool obj_valid_rnum(GameWorld *g, const struct obj_data *obj)
@@ -468,9 +466,9 @@ bool obj_is_corpse(const struct obj_data *obj)
   return (obj_get_type_flag(obj) == ITEM_CONTAINER && obj_get_value((obj), VAL_CONTAINER_CORPSE) == 1);
 }
 
-bool obj_wear_flagged(const struct obj_data *obj, int part)
+bool obj_wear_flagged(const struct obj_data *obj, wear_flag part)
 {
-  return (IS_SET_AR(obj_get_wear_flags(obj), (part)));
+  return obj->wear_flags.test(part);
 }
 
 std::string_view obj_sana(const struct obj_data *obj)
@@ -492,9 +490,14 @@ void obj_set_level(struct obj_data *obj, int v)
   obj->level = v;
 }
 
-bitvector_t *obj_get_bitvector(const struct obj_data *obj)
+const flag_set<aff_flag> &obj_get_bitvector(const struct obj_data *obj)
 {
-  return const_cast<bitvector_t *>(obj->bitvector); /* writable flag array, as the macro allowed */
+  return obj->bitvector;
+}
+
+flag_set<aff_flag> &obj_get_bitvector(struct obj_data *obj)
+{
+  return obj->bitvector;
 }
 
 int8_t obj_get_type_flag(const struct obj_data *obj)
@@ -527,14 +530,24 @@ void obj_set_cost_per_day(struct obj_data *obj, int v)
   obj->cost_per_day = v;
 }
 
-bitvector_t *obj_get_extra_flags(const struct obj_data *obj)
+const flag_set<extra_flag> &obj_get_extra_flags(const struct obj_data *obj)
 {
-  return const_cast<bitvector_t *>(obj->extra_flags); /* writable flag array, as the macro allowed */
+  return obj->extra_flags;
 }
 
-bitvector_t *obj_get_wear_flags(const struct obj_data *obj)
+flag_set<extra_flag> &obj_get_extra_flags(struct obj_data *obj)
 {
-  return const_cast<bitvector_t *>(obj->wear_flags); /* writable flag array, as the macro allowed */
+  return obj->extra_flags;
+}
+
+const flag_set<wear_flag> &obj_get_wear_flags(const struct obj_data *obj)
+{
+  return obj->wear_flags;
+}
+
+flag_set<wear_flag> &obj_get_wear_flags(struct obj_data *obj)
+{
+  return obj->wear_flags;
 }
 
 int obj_get_value(const struct obj_data *obj, int i)
@@ -819,47 +832,37 @@ struct room_direction_data *obj_get_exit(GameWorld *g, const struct obj_data *ob
 
 /* Flag setters and toggles. */
 
-static void flag_array_set(bitvector_t *array, int flag, bool on)
+void obj_extra_set(struct obj_data *obj, extra_flag flag, bool on)
 {
-  if (on)
-    SET_BIT_AR(array, flag);
-  else
-    REMOVE_BIT_AR(array, flag);
+  obj->extra_flags.set(flag, on);
 }
 
-static bool flag_array_toggle(bitvector_t *array, int flag)
+bool obj_extra_toggle(struct obj_data *obj, extra_flag flag)
 {
-  return (TOGGLE_BIT_AR(array, flag) & Q_BIT(flag)) != 0;
+  obj->extra_flags.toggle(flag);
+  return obj->extra_flags.test(flag);
 }
 
-void obj_extra_set(struct obj_data *obj, int flag, bool on)
+void obj_aff_set(struct obj_data *obj, aff_flag flag, bool on)
 {
-  flag_array_set(obj_get_extra_flags(obj), flag, on);
+  obj->bitvector.set(flag, on);
 }
 
-bool obj_extra_toggle(struct obj_data *obj, int flag)
+bool obj_aff_toggle(struct obj_data *obj, aff_flag flag)
 {
-  return flag_array_toggle(obj_get_extra_flags(obj), flag);
+  obj->bitvector.toggle(flag);
+  return obj->bitvector.test(flag);
 }
 
-void obj_aff_set(struct obj_data *obj, int flag, bool on)
+void obj_wear_set(struct obj_data *obj, wear_flag flag, bool on)
 {
-  flag_array_set(obj_get_bitvector(obj), flag, on);
+  obj->wear_flags.set(flag, on);
 }
 
-bool obj_aff_toggle(struct obj_data *obj, int flag)
+bool obj_wear_toggle(struct obj_data *obj, wear_flag flag)
 {
-  return flag_array_toggle(obj_get_bitvector(obj), flag);
-}
-
-void obj_wear_set(struct obj_data *obj, int flag, bool on)
-{
-  flag_array_set(obj_get_wear_flags(obj), flag, on);
-}
-
-bool obj_wear_toggle(struct obj_data *obj, int flag)
-{
-  return flag_array_toggle(obj_get_wear_flags(obj), flag);
+  obj->wear_flags.toggle(flag);
+  return obj->wear_flags.test(flag);
 }
 
 id_list *obj_contains_slot(struct obj_data *obj)

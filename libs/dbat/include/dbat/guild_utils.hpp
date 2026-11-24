@@ -1,5 +1,6 @@
 #pragma once
 #include <string_view>
+#include "dbat/consts/tradeflags.hpp"
 #include "dbat/consts/types.hpp"
 
 struct guild_data;
@@ -19,9 +20,9 @@ float guild_get_charge(const struct guild_data *guild);
 void guild_set_charge(struct guild_data *guild, float v);
 int guild_get_minlvl(const struct guild_data *guild);
 void guild_set_minlvl(struct guild_data *guild, int v);
-bitvector_t *guild_get_with_who(struct guild_data *guild);
+flag_set<trade_flag> &guild_get_with_who(struct guild_data *guild);
 /* Sets or clears a trader flag (TRADE_*) in whom the guild won't train */
-void guild_set_with_who(struct guild_data *guild, int flag, bool on);
+void guild_set_with_who(struct guild_data *guild, trade_flag flag, bool on);
 std::string_view guild_get_no_such_skill(const struct guild_data *guild);
 void guild_set_no_such_skill(struct guild_data *guild, std::string_view v);
 std::string_view guild_get_not_enough_gold(const struct guild_data *guild);

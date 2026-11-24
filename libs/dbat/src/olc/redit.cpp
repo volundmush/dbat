@@ -5,6 +5,7 @@
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <optional>
 #include <algorithm>
 #include <cctype>
 
@@ -178,7 +179,7 @@ namespace {
       }
       write_to_output(g, d,
                       "-- Room number : [@c{:d}@n]  \tRoom zone: [@c{:d}@n]\r\n@g1@n) Name        : @y{}\r\n@g2@n) Description :\r\n@y{}@g3@n) Room flags  : @c{}\r\n@g4@n) Sector type : @c{}\r\n{}@gH@n) Extra descriptions menu\r\n@gW@n) Copy Room\r\n@gX@n) Delete Room\r\n@gS@n) Script      : @c{}\r\n@gZ@n) Wiznet      :\r\n@gQ@n) Quit\r\nEnter choice : ",
-                      vnum, zone->number, room.name, room.description, sprintbitarray(room.room_flags, room_bits, RF_ARRAY_MAX),
+                      vnum, zone->number, room.name, room.description, flag_names(room.room_flags),
                       sprinttype(room.sector_type, sector_types), exits, !script.triggers.empty() ? "Set." : "Not Set.");
     }
     asking = mode::main_menu;
@@ -188,7 +189,7 @@ namespace {
   {
     clear_screen(g, d);
     olc_list_columns(g, d, room_bits, NUM_ROOM_FLAGS, 1, "", 2);
-    write_to_output(g, d, "\r\nRoom flags: @c{}@n\r\nEnter room flags, 0 to quit : ", sprintbitarray(room.room_flags, room_bits, RF_ARRAY_MAX));
+    write_to_output(g, d, "\r\nRoom flags: @c{}@n\r\nEnter room flags, 0 to quit : ", flag_names(room.room_flags));
     asking = mode::flags;
   }
 
@@ -267,7 +268,8 @@ namespace {
         } else if (number == 0)
           done(g, d);
         else {
-          room_toggle_flag(&room, number - 1);
+          if (std::optional<room_flag> flag = flag_from_index<room_flag>(number - 1))
+            room_toggle_flag(&room, *flag);
           flag_menu(g, d);
         }
         return;

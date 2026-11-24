@@ -219,7 +219,7 @@ int take_up(GameWorld *g, struct char_data *ch, const weapon_style &style)
   return skill;
 }
 
-constexpr int LEVEL_FLAGS[]    = {ITEM_WEAPLVL1, ITEM_WEAPLVL2, ITEM_WEAPLVL3, ITEM_WEAPLVL4, ITEM_WEAPLVL5};
+constexpr extra_flag LEVEL_FLAGS[] = {ITEM_WEAPLVL1, ITEM_WEAPLVL2, ITEM_WEAPLVL3, ITEM_WEAPLVL4, ITEM_WEAPLVL5};
 constexpr double LEVEL_SHARE[] = {0.05, 0.1, 0.2, 0.3, 0.5}; /* the damage a weapon's level adds */
 constexpr int GUN_COSTS[]      = {0, 0, 2, 4, 6, 12};         /* zenni a shot, by the gun's level */
 constexpr double SPEAR_REACH[] = {0.04, 0.08, 0.12, 0.2, 0.25}; /* a spear's level adds this, two-handed */

@@ -1087,7 +1087,7 @@ ACMD(do_seishou)
 namespace {
 
 /* A thrown object's weapon level adds a share of its damage, and later a flat amount */
-constexpr int THROW_LEVEL_FLAGS[]     = {ITEM_WEAPLVL1, ITEM_WEAPLVL2, ITEM_WEAPLVL3, ITEM_WEAPLVL4, ITEM_WEAPLVL5};
+constexpr extra_flag THROW_LEVEL_FLAGS[] = {ITEM_WEAPLVL1, ITEM_WEAPLVL2, ITEM_WEAPLVL3, ITEM_WEAPLVL4, ITEM_WEAPLVL5};
 constexpr double THROW_LEVEL_SHARE[]  = {0.1, 0.2, 0.3, 0.4, 0.5};
 constexpr int THROW_LEVEL_BONUS[]     = {1000, 5000, 10000, 16000, 25000};
 

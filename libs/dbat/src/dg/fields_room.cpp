@@ -64,8 +64,9 @@ const field<room_data> room_fields[] = {
     {"roomflag", [](const field_query &q, room_data *r) -> result {
        if (!q.has_arg())
          return "0";
-       /* quirk: the first flag never counts as set, as check_flags_by_name_ar gives its index */
-       return check_flags_by_name_ar(room_get_room_flags(q.g, room_get_number(r)), NUM_ROOM_FLAGS, q.subfield, room_bits) > 0 ? "1" : "0";
+       /* quirk: the first flag (DARK) never counts as set, as check_flags_by_name_ar gave its index */
+       std::optional<room_flag> flag = flag_by_name<room_flag>(q.subfield);
+       return flag && *flag != room_flag::dark && room_flagged(r, *flag) ? "1" : "0";
      }},
     {"sector", [](const field_query &, room_data *r) -> result { return sprinttype(room_get_sector_type(r), sector_types); }},
     {"vnum", [](const field_query &q, room_data *r) -> result {

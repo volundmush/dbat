@@ -90,7 +90,7 @@ void send_to_moon(GameWorld *g, std::string_view text)
   }
 }
 
-void send_to_planet(GameWorld *g, int type, int planet, std::string_view text)
+void send_to_planet(GameWorld *g, int type, room_flag planet, std::string_view text)
 {
 
   if (text.empty())

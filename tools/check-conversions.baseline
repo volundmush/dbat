@@ -1,7 +1,7 @@
 # check-conversions.py's counts: <warning sites> <file>. Lower it with tools/check-conversions.py --update.
 1 apps/server/src/main.cpp
 1 libs/dbat/include/dbat/config.hpp
-5 libs/dbat/include/dbat/flags.hpp
+4 libs/dbat/include/dbat/flags.hpp
 2 libs/dbat/include/dbat/utils.hpp
 115 libs/dbat/src/commands/act.attack.cpp
 6 libs/dbat/src/commands/act.comm.cpp
@@ -41,7 +41,7 @@
 5 libs/dbat/src/commands/other/scouter.cpp
 66 libs/dbat/src/commands/other/training.cpp
 2 libs/dbat/src/commands/wizard/comm.cpp
-60 libs/dbat/src/commands/wizard/info.cpp
+59 libs/dbat/src/commands/wizard/info.cpp
 37 libs/dbat/src/commands/wizard/players.cpp
 4 libs/dbat/src/db/alias.cpp
 1 libs/dbat/src/db/ban.cpp
@@ -54,11 +54,11 @@
 4 libs/dbat/src/db/house.cpp
 4 libs/dbat/src/db/mail.cpp
 6 libs/dbat/src/db/players.cpp
-2 libs/dbat/src/db/players/object_records.cpp
-31 libs/dbat/src/db/players/pfile.cpp
+1 libs/dbat/src/db/players/object_records.cpp
+30 libs/dbat/src/db/players/pfile.cpp
 7 libs/dbat/src/db/reset.cpp
 1 libs/dbat/src/db/world/boot.cpp
-15 libs/dbat/src/db/world/mobiles.cpp
+14 libs/dbat/src/db/world/mobiles.cpp
 1 libs/dbat/src/db/world/objects.cpp
 1 libs/dbat/src/db/world/rooms.cpp
 1 libs/dbat/src/db/world/shops.cpp
@@ -68,7 +68,7 @@
 9 libs/dbat/src/dg/dg_eval.cpp
 13 libs/dbat/src/dg/dg_event.cpp
 9 libs/dbat/src/dg/dg_lookup.cpp
-5 libs/dbat/src/dg/dg_misc.cpp
+4 libs/dbat/src/dg/dg_misc.cpp
 2 libs/dbat/src/dg/dg_objcmd.cpp
 3 libs/dbat/src/dg/dg_olc.cpp
 5 libs/dbat/src/dg/dg_scripts.cpp
@@ -80,9 +80,9 @@
 1 libs/dbat/src/dg/fields_obj.cpp
 2 libs/dbat/src/dg/fields_room.cpp
 4 libs/dbat/src/dg/owner.cpp
-19 libs/dbat/src/entities/affect.cpp
+16 libs/dbat/src/entities/affect.cpp
 4 libs/dbat/src/entities/assemblies.cpp
-400 libs/dbat/src/entities/character_utils.cpp
+390 libs/dbat/src/entities/character_utils.cpp
 97 libs/dbat/src/entities/characters.cpp
 1 libs/dbat/src/entities/flags.cpp
 1 libs/dbat/src/entities/object_utils.cpp
@@ -132,11 +132,11 @@
 47 libs/dbat/src/systems/graph.cpp
 16 libs/dbat/src/systems/guild.cpp
 156 libs/dbat/src/systems/local_limits.cpp
-24 libs/dbat/src/systems/magic.cpp
+22 libs/dbat/src/systems/magic.cpp
 4 libs/dbat/src/systems/mobact.cpp
 50 libs/dbat/src/systems/races.cpp
 2 libs/dbat/src/systems/search.cpp
-40 libs/dbat/src/systems/shop.cpp
+36 libs/dbat/src/systems/shop.cpp
 5 libs/dbat/src/systems/spec_procs.cpp
 3 libs/dbat/src/systems/spell_parser.cpp
 7 libs/dbat/src/systems/spells.cpp
@@ -155,7 +155,7 @@
 99 libs/dbat/tests/scenes_other.cpp
 2 libs/dbat/tests/scenes_social.cpp
 16 libs/dbat/tests/test_bad_data.cpp
-32 libs/dbat/tests/test_bot.cpp
+30 libs/dbat/tests/test_bot.cpp
 8 libs/dbat/tests/test_commands.cpp
 3 libs/dbat/tests/test_game_world.cpp
 2 libs/dbat/tests/test_gameplay.cpp

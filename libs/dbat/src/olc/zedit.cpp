@@ -282,7 +282,7 @@ namespace {
     edit.bot           = zone->bot;
     edit.top           = zone->top;
     edit.reset_mode    = zone->reset_mode;
-    std::ranges::copy(zone->zone_flags, edit.zone_flags);
+    edit.zone_flags = zone->zone_flags;
     edit.min_level = zone->min_level;
     edit.max_level = zone->max_level;
     edit.cmd       = empty_cmd_list();
@@ -303,7 +303,7 @@ namespace {
                  "Room number: [@c{:d}@n]		Room zone: @c{:d}\r\n@g1@n) Builders       : @y{}\r\n@gA@n) Zone name      : @y{}\r\n@gL@n) Lifespan       : @y{:d} minutes\r\n@gB@n) Bottom of zone : @y{:d}\r\n@gT@n) Top of zone    : @y{:d}\r\n@gR@n) Reset Mode     : @y{}@n\r\n@gF@n) Zone Flags     : @y{}@n\r\n@gM@n) Min Level      : @y{:d}@n\r\n@gX@n) Max Level      : @y{:d}@n\r\n@gZ@n) Wiznet         :\r\n[Command list]\r\n",
                  room, zone->number, edit.builders, edit.name, edit.lifespan, edit.bot, edit.top,
                  edit.reset_mode ? ((edit.reset_mode == 1) ? "Reset when no players are in zone." : "Normal reset.") : "Never reset",
-                 sprintbitarray(edit.zone_flags, zone_bits, ZF_ARRAY_MAX), edit.min_level, edit.max_level);
+                 flag_names(edit.zone_flags), edit.min_level, edit.max_level);
 
     int counter = 0;
     for (const reset_com &c : edit.cmd) {
@@ -323,7 +323,7 @@ namespace {
   {
     clear_screen(g, d);
     olc_list_columns(g, d, zone_bits, NUM_ZONE_FLAGS, 1, " ", 2);
-    write_to_output(g, d, "\r\nZone flags: @c{}@n\r\nEnter Zone flags, 0 to quit : ", sprintbitarray(edit.zone_flags, zone_bits, ZF_ARRAY_MAX));
+    write_to_output(g, d, "\r\nZone flags: @c{}@n\r\nEnter Zone flags, 0 to quit : ", flag_names(edit.zone_flags));
     asking = mode::zone_flags;
   }
 
@@ -455,7 +455,7 @@ namespace {
       zone->top        = edit.top;
       zone->reset_mode = edit.reset_mode;
       zone->lifespan   = edit.lifespan;
-      std::ranges::copy(edit.zone_flags, zone->zone_flags);
+      zone->zone_flags = edit.zone_flags;
       zone->min_level = edit.min_level;
       zone->max_level = edit.max_level;
     }
@@ -719,7 +719,8 @@ namespace {
         } else if (n == 0)
           menu(g, d);
         else {
-          zone_data_toggle_flag(&edit, n - 1);
+          if (std::optional<zone_flag> flag = flag_from_index<zone_flag>(n - 1))
+            zone_data_toggle_flag(&edit, *flag);
           settings_changed = true;
           flag_menu(g, d);
         }
