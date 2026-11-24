@@ -591,13 +591,13 @@ int get_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 }
 
 /* Runs obj's command triggers for where the actor has it (type), until one takes the command or purges obj */
-static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, std::string_view cmd, std::string_view argument, int type)
+static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, std::string_view cmd, std::string_view argument, ocmd_where type)
 {
   if (!obj)
     return false;
   auto r = fire(g, obj, OTRIG_COMMAND,
                 [&](trig_data *t) {
-                  return ready(g, t) && IS_SET(t->narg, type) && has_text(g, t, "O-Command") && command_matches(t, cmd);
+                  return ready(g, t) && narg_hears(t->narg, type) && has_text(g, t, "O-Command") && command_matches(t, cmd);
                 },
                 [&](trig_data *t) { set_command_vars(t, actor, cmd, argument); },
                 [](const run_result &ran) { return ran.value || ran.owner_gone ? then::stop : then::go_on; });
@@ -605,7 +605,7 @@ static bool cmd_otrig(GameWorld *g, obj_data *obj, char_data *actor, std::string
 }
 
 /* Runs the command triggers on a list of objects, returning true if one of them took the command. */
-static bool cmd_otrig_list(GameWorld *g, const id_list &list, char_data *actor, std::string_view cmd, std::string_view argument, int type)
+static bool cmd_otrig_list(GameWorld *g, const id_list &list, char_data *actor, std::string_view cmd, std::string_view argument, ocmd_where type)
 {
   /* a script can purge any object at all: the loop passes over whatever goes */
   for (obj_data *o : obj_list(g, list)) {
@@ -732,7 +732,7 @@ bool leave_otrigger(GameWorld *g, room_data *room, char_data *actor, int dir)
   return final;
 }
 
-int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int cmd)
+int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, consume_cmd cmd)
 {
   return run_unless_purged(fire(g, obj, OTRIG_CONSUME, ready_only(g),
                                 [&](trig_data *t) {

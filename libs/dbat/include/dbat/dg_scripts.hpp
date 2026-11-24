@@ -170,7 +170,7 @@ bool leave_otrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
 int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir);
 int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir);
 
-int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int cmd);
+int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, consume_cmd cmd);
 
 void time_mtrigger(GameWorld *g, char_data *ch);
 void time_otrigger(GameWorld *g, obj_data *obj);
@@ -272,7 +272,8 @@ void copy_proto_script(owner_ptr source, owner_ptr dest); /* of the same kind */
 void delete_variables(std::string_view charname);
 
 /* from dg_comm.c */
-void sub_write(GameWorld *g, std::string_view arg, char_data *ch, int targets);
+enum class act_to : uint8_t; /* comm.hpp */
+void sub_write(GameWorld *g, std::string_view arg, char_data *ch, act_to targets);
 void send_to_zone(GameWorld *g, std::string_view messg, struct zone_data *zone);
 
 /* from dg_misc.c */

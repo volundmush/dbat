@@ -61,6 +61,14 @@ public:
   constexpr bool any() const { return !none(); }
   constexpr bool none() const { return words_ == std::array<bitvector_t, FLAG_WORDS>{}; }
   constexpr bool operator==(const flag_set &) const = default;
+  /* whether any bit is set in both: "has any of these", as IS_SET() with a mask asked */
+  constexpr bool intersects(const flag_set &other) const
+  {
+    for (std::size_t i = 0; i < FLAG_WORDS; i++)
+      if (words_[i] & other.words_[i])
+        return true;
+    return false;
+  }
 
   /* other's bits set here as well, or taken away */
   constexpr flag_set &operator|=(const flag_set &other)

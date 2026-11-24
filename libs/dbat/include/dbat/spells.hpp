@@ -2,6 +2,8 @@
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/flag_set.hpp"
+#include "dbat/name_table.hpp"
 #include "dbat/consts/races.hpp"
 #include "dbat/consts/senseis.hpp"
 #include "dbat/consts/skills.hpp"
@@ -17,24 +19,52 @@ constexpr int CAST_STAFF     = 3;
 constexpr int CAST_SCROLL    = 4;
 constexpr int CAST_STRIKE    = 5;
 
-constexpr int MAG_DAMAGE         = (1 << 0);
-constexpr int MAG_AFFECTS        = (1 << 1);
-constexpr int MAG_UNAFFECTS      = (1 << 2);
-constexpr int MAG_POINTS         = (1 << 3);
-constexpr int MAG_ALTER_OBJS     = (1 << 4);
-constexpr int MAG_GROUPS         = (1 << 5);
-constexpr int MAG_MASSES         = (1 << 6);
-constexpr int MAG_AREAS          = (1 << 7);
-constexpr int MAG_SUMMONS        = (1 << 8);
-constexpr int MAG_CREATIONS      = (1 << 9);
-constexpr int MAG_MANUAL         = (1 << 10);
-constexpr int MAG_AFFECTSV       = (1 << 11);
-constexpr int MAG_ACTION_FREE    = (1 << 12);
-constexpr int MAG_ACTION_PARTIAL = (1 << 13);
-constexpr int MAG_ACTION_FULL    = (1 << 14);
-constexpr int MAG_NEXTSTRIKE     = (1 << 15);
-constexpr int MAG_TOUCH_MELEE    = (1 << 16);
-constexpr int MAG_TOUCH_RANGED   = (1 << 17);
+/* What a spell does (spell_info_type::routines) */
+extern const name_table routine_bits; /* flag_count<mag_routine> of them */
+enum class mag_routine : uint8_t {
+  damage         = 0,
+  affects        = 1,
+  unaffects      = 2,
+  points         = 3,
+  alter_objs     = 4,
+  groups         = 5,
+  masses         = 6,
+  areas          = 7,
+  summons        = 8,
+  creations      = 9,
+  manual         = 10,
+  affectsv       = 11,
+  action_free    = 12,
+  action_partial = 13,
+  action_full    = 14,
+  nextstrike     = 15,
+  touch_melee    = 16,
+  touch_ranged   = 17,
+  count_         = 18,
+};
+template <> struct flag_traits<mag_routine> {
+  static constexpr const name_table &names = routine_bits;
+};
+
+/* The old names, until every use says mag_routine:: */
+constexpr mag_routine MAG_DAMAGE         = mag_routine::damage;
+constexpr mag_routine MAG_AFFECTS        = mag_routine::affects;
+constexpr mag_routine MAG_UNAFFECTS      = mag_routine::unaffects;
+constexpr mag_routine MAG_POINTS         = mag_routine::points;
+constexpr mag_routine MAG_ALTER_OBJS     = mag_routine::alter_objs;
+constexpr mag_routine MAG_GROUPS         = mag_routine::groups;
+constexpr mag_routine MAG_MASSES         = mag_routine::masses;
+constexpr mag_routine MAG_AREAS          = mag_routine::areas;
+constexpr mag_routine MAG_SUMMONS        = mag_routine::summons;
+constexpr mag_routine MAG_CREATIONS      = mag_routine::creations;
+constexpr mag_routine MAG_MANUAL         = mag_routine::manual;
+constexpr mag_routine MAG_AFFECTSV       = mag_routine::affectsv;
+constexpr mag_routine MAG_ACTION_FREE    = mag_routine::action_free;
+constexpr mag_routine MAG_ACTION_PARTIAL = mag_routine::action_partial;
+constexpr mag_routine MAG_ACTION_FULL    = mag_routine::action_full;
+constexpr mag_routine MAG_NEXTSTRIKE     = mag_routine::nextstrike;
+constexpr mag_routine MAG_TOUCH_MELEE    = mag_routine::touch_melee;
+constexpr mag_routine MAG_TOUCH_RANGED   = mag_routine::touch_ranged;
 
 constexpr int MAGSAVE_FORT    = (1 << 0);
 constexpr int MAGSAVE_REFLEX  = (1 << 1);
@@ -190,17 +220,38 @@ constexpr int SAVING_OBJ_COLD   = 2;
 constexpr int SAVING_OBJ_BREATH = 3;
 constexpr int SAVING_OBJ_SPELL  = 4;
 
-constexpr int TAR_IGNORE     = (1 << 0);
-constexpr int TAR_CHAR_ROOM  = (1 << 1);
-constexpr int TAR_CHAR_WORLD = (1 << 2);
-constexpr int TAR_FIGHT_SELF = (1 << 3);
-constexpr int TAR_FIGHT_VICT = (1 << 4);
-constexpr int TAR_SELF_ONLY  = (1 << 5); /* Only a check, use with i.e. TAR_CHAR_ROOM */
-constexpr int TAR_NOT_SELF   = (1 << 6); /* Only a check, use with i.e. TAR_CHAR_ROOM */
-constexpr int TAR_OBJ_INV    = (1 << 7);
-constexpr int TAR_OBJ_ROOM   = (1 << 8);
-constexpr int TAR_OBJ_WORLD  = (1 << 9);
-constexpr int TAR_OBJ_EQUIP  = (1 << 10);
+/* What a spell can be cast at (spell_info_type::targets) */
+extern const name_table target_bits; /* flag_count<spell_target> of them */
+enum class spell_target : uint8_t {
+  ignore     = 0,
+  char_room  = 1,
+  char_world = 2,
+  fight_self = 3,
+  fight_vict = 4,
+  self_only  = 5,   /* Only a check, use with i.e. TAR_CHAR_ROOM */
+  not_self   = 6,   /* Only a check, use with i.e. TAR_CHAR_ROOM */
+  obj_inv    = 7,
+  obj_room   = 8,
+  obj_world  = 9,
+  obj_equip  = 10,
+  count_     = 11,
+};
+template <> struct flag_traits<spell_target> {
+  static constexpr const name_table &names = target_bits;
+};
+
+/* The old names, until every use says spell_target:: */
+constexpr spell_target TAR_IGNORE     = spell_target::ignore;
+constexpr spell_target TAR_CHAR_ROOM  = spell_target::char_room;
+constexpr spell_target TAR_CHAR_WORLD = spell_target::char_world;
+constexpr spell_target TAR_FIGHT_SELF = spell_target::fight_self;
+constexpr spell_target TAR_FIGHT_VICT = spell_target::fight_vict;
+constexpr spell_target TAR_SELF_ONLY  = spell_target::self_only;
+constexpr spell_target TAR_NOT_SELF   = spell_target::not_self;
+constexpr spell_target TAR_OBJ_INV    = spell_target::obj_inv;
+constexpr spell_target TAR_OBJ_ROOM   = spell_target::obj_room;
+constexpr spell_target TAR_OBJ_WORLD  = spell_target::obj_world;
+constexpr spell_target TAR_OBJ_EQUIP  = spell_target::obj_equip;
 
 constexpr int SKTYPE_NONE   = 0;
 constexpr int SKTYPE_SPELL  = (1 << 0);
@@ -239,9 +290,9 @@ struct spell_info_type {
   int ki_change{};       /* Change in mana used by spell from lev to lev */
 
   int min_level[NUM_CLASSES]{};
-  int routines{};
+  flag_set<mag_routine> routines;
   int8_t violent{};
-  int targets{};              /* See below for use with TAR_XXX  */
+  flag_set<spell_target> targets; /* See below for use with TAR_XXX  */
   std::string_view name{};         /* a string constant */
   std::string_view wear_off_msg{}; /* a string constant, or empty for none */
   int race_can_learn[NUM_RACES]{};
@@ -256,7 +307,8 @@ struct spell_info_type {
 };
 
 
-bool spell_has_routine(GameWorld *g, int spellnum, int flag);
+/* Whether the spell has any of these routines */
+bool spell_has_routine(GameWorld *g, int spellnum, flag_set<mag_routine> routines);
 
 /* Possible Targets:
 

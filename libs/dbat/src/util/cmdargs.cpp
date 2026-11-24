@@ -34,12 +34,12 @@ parsed<struct obj_data *> find_inside(GameWorld *g, struct char_data *ch, std::s
   return found(get_obj_in_list_vis(g, ch, word, nullptr, obj_get_contains(container)), why);
 }
 
-parsed<struct char_data *> find_char(GameWorld *g, struct char_data *ch, std::string &word, int where, std::string_view why)
+parsed<struct char_data *> find_char(GameWorld *g, struct char_data *ch, std::string &word, find_flag where, std::string_view why)
 {
   return found(get_char_vis(g, ch, word, nullptr, where), why);
 }
 
-parsed<struct char_data *> find_player(GameWorld *g, struct char_data *ch, std::string &word, int where, std::string_view why)
+parsed<struct char_data *> find_player(GameWorld *g, struct char_data *ch, std::string &word, find_flag where, std::string_view why)
 {
   return found(get_player_vis(g, ch, word, nullptr, where), why);
 }

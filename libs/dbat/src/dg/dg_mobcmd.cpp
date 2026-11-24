@@ -249,7 +249,7 @@ ACMD(do_mjunk)
     return;
   }
 
-  int dotmode = find_all_dots(arg); /* takes "all." off arg */
+  find_dots dotmode = find_all_dots(arg); /* takes "all." off arg */
 
   if (dotmode == FIND_INDIV) {
     /* Thanks to Carlos Myers for fixing the line below */

@@ -631,7 +631,7 @@ namespace {
   /* The containers whose looking in is seen */
   constexpr obj_vnum WATCHED_CONTAINERS[] = {697, 698, 682, 683, 684};
 
-  void look_in_container(GameWorld *g, struct char_data *ch, struct obj_data *obj, int bits)
+  void look_in_container(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::optional<find_flag> bits)
   {
     if (obj_val_flagged(obj, CONT_CLOSED)) {
       send_to_char(g, ch, "It is closed.\r\n");
@@ -686,7 +686,7 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, const std::string &a
   }
   struct obj_data *obj    = nullptr;
   struct char_data *dummy = nullptr;
-  int bits                = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj);
+  std::optional<find_flag> bits                = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj);
   if (!bits) {
     send_to_char(g, ch, "There doesn't seem to be {} {} here.\r\n", AN(arg.c_str()), arg);
     return;
@@ -819,7 +819,7 @@ static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg,
 
   struct char_data *found_char = nullptr;
   struct obj_data *found_obj   = nullptr;
-  int bits                     = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP | FIND_CHAR_ROOM, ch, &found_char, &found_obj);
+  std::optional<find_flag> bits                     = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP | FIND_CHAR_ROOM, ch, &found_char, &found_obj);
 
   /* Is the target a character? */
   if (found_char != nullptr) {

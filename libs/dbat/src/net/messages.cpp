@@ -298,31 +298,15 @@ static const std::string *last_act_message(const GameWorld *g)
 }
 
 const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, struct char_data *ch,
-                       struct obj_data *obj, const void *vict_obj, int type)
+                       struct obj_data *obj, const void *vict_obj, act_target target)
 {
-  int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
+  int dcval = 0, resskill = 0;
+  const bool to_sleeping = target.even_asleep, res_sneak = target.sneak_resist, res_hide = target.hide_resist;
+  const act_to type      = target.to;
 
   str = str.substr(0, str.find('\0')); /* the message ends at a '\0', as a C string did */
   if (str.empty())
     return nullptr;
-
-  /* Warning: the following TO_SLEEP code is a hack. I wanted to be able to tell
-   * act to deliver a message regardless of sleep without adding an additional 
-   * argument.  TO_SLEEP is 128 (a single bit high up).  It's ONLY legal to 
-   * combine TO_SLEEP with one other TO_x command.  It's not legal to combine 
-   * TO_x's with each other otherwise. TO_SLEEP only works because its value 
-   * "happens to be" a single bit; do not change it to something else.  In 
-   * short, it is a hack.  The same applies to TO_*RESIST.  */
-
-  /* check if TO_SLEEP is there, and remove it if it is. */
-  if ((to_sleeping = (type & TO_SLEEP)))
-    type &= ~TO_SLEEP;
-
-  if ((res_sneak = (type & TO_SNEAKRESIST)))
-    type &= ~TO_SNEAKRESIST;
-
-  if ((res_hide = (type & TO_HIDERESIST)))
-    type &= ~TO_HIDERESIST;
 
   if (res_sneak && char_aff_flagged(ch, AFF_SNEAK)) {
     dcval = roll_skill(g, ch, SKILL_MOVE_SILENTLY); /* How difficult to counter? */
@@ -339,10 +323,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
     resskill = SKILL_SPOT;
   }
 
-  /* this is a hack as well - DG_NO_TRIG is 256 -- Welcor */
-  /* If the bit is set, unset dg_act_check, thus the ! below */
-  if (!(g->dg_act_check = !IS_SET(type, DG_NO_TRIG)))
-    REMOVE_BIT(type, DG_NO_TRIG);
+  g->dg_act_check = !target.no_trig;
 
   if (type == TO_CHAR) {
     if (ch && sendok(ch, to_sleeping) && (!resskill || (roll_skill(g, ch, resskill) >= dcval))) {
@@ -389,7 +370,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
     return nullptr;
   }
 
-  if ((type & TO_ROOM)) {
+  if (std::to_underlying(type) & std::to_underlying(TO_ROOM)) { /* quirk: TO_NOTVICT too, which has the bit */
 
     for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING)

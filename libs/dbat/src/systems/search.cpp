@@ -11,6 +11,10 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
+static constexpr std::string_view find_bits_entries[] = {"CHAR_ROOM", "CHAR_WORLD", "OBJ_INV", "OBJ_ROOM", "OBJ_WORLD", "OBJ_EQUIP"};
+static_assert(std::size(find_bits_entries) == flag_count<find_flag>);
+constinit const name_table find_bits(find_bits_entries);
+
 static unsigned char char_at(std::string_view s, size_t i) { return i < s.size() ? s[i] : '\0'; }
 
 static bool contains(std::string_view text, std::string_view part) { return text.find(part) != std::string_view::npos; }
@@ -172,7 +176,7 @@ static bool goes_by(struct char_data *ch, struct char_data *i, std::string_view 
   return true;
 }
 
-struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, int inroom)
+struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, std::optional<find_flag> inroom)
 {
   int num;
 
@@ -274,7 +278,7 @@ struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, std::st
     return (i);
 
   if (*number == 0)
-    return get_player_vis(g, ch, name, nullptr, 0);
+    return get_player_vis(g, ch, name, nullptr, std::nullopt);
 
   for (char_data *tch : each_char(g)) {
     if (!(*number))
@@ -293,7 +297,7 @@ struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, std::st
   return (nullptr);
 }
 
-struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, int where)
+struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, find_flag where)
 {
   if (where == FIND_CHAR_ROOM)
     return get_char_room_vis(g, ch, name, number);
@@ -391,7 +395,7 @@ int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &na
 }
 
 /* a function to scan for "all" or "all.x" */
-int find_all_dots(std::string &arg)
+find_dots find_all_dots(std::string &arg)
 {
   if (arg == "all")
     return (FIND_ALL);
@@ -419,8 +423,8 @@ int find_all_dots(std::string &arg)
  * describes what it filled in.
  */
 
-int generic_find(GameWorld *g, std::string_view arg, bitvector_t bitvector, struct char_data *ch,
-                 struct char_data **tar_ch, struct obj_data **tar_obj)
+std::optional<find_flag> generic_find(GameWorld *g, std::string_view arg, flag_set<find_flag> where, struct char_data *ch,
+                                      struct char_data **tar_ch, struct obj_data **tar_obj)
 {
   int i, found, number;
 
@@ -430,21 +434,21 @@ int generic_find(GameWorld *g, std::string_view arg, bitvector_t bitvector, stru
   std::string name = take_arg(arg);
 
   if (name.empty())
-    return (0);
+    return std::nullopt;
   if (!(number = get_number(name)))
-    return (0);
+    return std::nullopt;
 
-  if (IS_SET(bitvector, FIND_CHAR_ROOM)) { /* Find person in room */
+  if (where.test(FIND_CHAR_ROOM)) { /* Find person in room */
     if ((*tar_ch = get_char_room_vis(g, ch, name, &number)) != nullptr)
       return (FIND_CHAR_ROOM);
   }
 
-  if (IS_SET(bitvector, FIND_CHAR_WORLD)) {
+  if (where.test(FIND_CHAR_WORLD)) {
     if ((*tar_ch = get_char_world_vis(g, ch, name, &number)) != nullptr)
       return (FIND_CHAR_WORLD);
   }
 
-  if (IS_SET(bitvector, FIND_OBJ_EQUIP)) {
+  if (where.test(FIND_OBJ_EQUIP)) {
     for (found = false, i = 0; i < NUM_WEARS && !found; i++)
       if (char_get_equipment(ch, i) && isname(name, obj_get_name(char_get_equipment(ch, i))) && --number == 0) {
         *tar_obj = char_get_equipment(ch, i);
@@ -454,20 +458,20 @@ int generic_find(GameWorld *g, std::string_view arg, bitvector_t bitvector, stru
       return (FIND_OBJ_EQUIP);
   }
 
-  if (IS_SET(bitvector, FIND_OBJ_INV)) {
+  if (where.test(FIND_OBJ_INV)) {
     if ((*tar_obj = get_obj_in_list_vis(g, ch, name, &number, char_get_inventory(ch))) != nullptr)
       return (FIND_OBJ_INV);
   }
 
-  if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
+  if (where.test(FIND_OBJ_ROOM)) {
     if ((*tar_obj = get_obj_in_list_vis(g, ch, name, &number, room_get_contents(g, char_get_in_room(ch)))) != nullptr)
       return (FIND_OBJ_ROOM);
   }
 
-  if (IS_SET(bitvector, FIND_OBJ_WORLD)) {
+  if (where.test(FIND_OBJ_WORLD)) {
     if ((*tar_obj = get_obj_vis(g, ch, name, &number)))
       return (FIND_OBJ_WORLD);
   }
 
-  return (0);
+  return std::nullopt;
 }

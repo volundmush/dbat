@@ -108,21 +108,21 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
   /* Find the target */
   if (!rest.empty())
     victim = take_arg(rest);
-  if (IS_SET(SINFO.targets, TAR_IGNORE)) {
+  if (SINFO.targets.test(TAR_IGNORE)) {
     target = true;
   } else if (victim && !victim->empty()) {
     if (!target &&
-        (IS_SET(SINFO.targets, TAR_CHAR_ROOM) ||
-         IS_SET(SINFO.targets, TAR_CHAR_WORLD))) {
+        (SINFO.targets.test(TAR_CHAR_ROOM) ||
+         SINFO.targets.test(TAR_CHAR_WORLD))) {
       if ((tch = get_char(g, *victim)) != nullptr)
         target = true;
     }
 
     if (!target &&
-        (IS_SET(SINFO.targets, TAR_OBJ_INV) ||
-         IS_SET(SINFO.targets, TAR_OBJ_EQUIP) ||
-         IS_SET(SINFO.targets, TAR_OBJ_ROOM) ||
-         IS_SET(SINFO.targets, TAR_OBJ_WORLD))) {
+        (SINFO.targets.test(TAR_OBJ_INV) ||
+         SINFO.targets.test(TAR_OBJ_EQUIP) ||
+         SINFO.targets.test(TAR_OBJ_ROOM) ||
+         SINFO.targets.test(TAR_OBJ_WORLD))) {
       if ((tobj = get_obj(g, *victim)) != nullptr)
         target = true;
     }
@@ -134,7 +134,7 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
     }
   }
 
-  if (IS_SET(SINFO.routines, MAG_GROUPS)) {
+  if (SINFO.routines.test(MAG_GROUPS)) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_cast: group spells not permitted ({})",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;

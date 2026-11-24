@@ -1149,8 +1149,8 @@ ACMD(do_compare)
   }
   struct char_data *tchar;
   struct obj_data *obj1, *obj2;
-  int o1 = generic_find(g, arg1, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj1);
-  int o2 = generic_find(g, arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj2);
+  std::optional<find_flag> o1 = generic_find(g, arg1, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj1);
+  std::optional<find_flag> o2 = generic_find(g, arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &tchar, &obj2);
   if (!o1 || !o2) {
     send_to_char(g, ch, "You do not have that item.\r\n");
     return;

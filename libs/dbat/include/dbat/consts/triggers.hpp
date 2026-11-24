@@ -157,14 +157,30 @@ template <trig_family E> constexpr bool trig_word_has(bitvector_t word, E type) 
 std::string trig_type_names(int attach_type, bitvector_t word);
 
 /* obj command trigger types */
-constexpr bitvector_t OCMD_EQUIP = (1u << 0); /* obj must be in char's equip */
-constexpr bitvector_t OCMD_INVEN = (1u << 1); /* obj must be in char's inven */
-constexpr bitvector_t OCMD_ROOM  = (1u << 2); /* obj must be in char's room  */
+/* Where an object command trigger hears the command from: bits of its narg, which is a plain number (the other
+   triggers' chance) */
+extern const name_table ocmd_bits; /* flag_count<ocmd_where> of them */
+enum class ocmd_where : uint8_t {
+  equip  = 0, /* obj must be in char's equip */
+  inven  = 1, /* obj must be in char's inven */
+  room   = 2, /* obj must be in char's room  */
+  count_ = 3,
+};
+template <> struct flag_traits<ocmd_where> {
+  static constexpr const name_table &names = ocmd_bits;
+};
+constexpr ocmd_where OCMD_EQUIP = ocmd_where::equip;
+constexpr ocmd_where OCMD_INVEN = ocmd_where::inven;
+constexpr ocmd_where OCMD_ROOM  = ocmd_where::room;
+
+/* Whether a trigger's narg has this where */
+constexpr bool narg_hears(int narg, ocmd_where where) { return (static_cast<bitvector_t>(narg) & flag_set<ocmd_where>{where}.word(0)) != 0; }
 
 /* obj consume trigger commands */
-constexpr int OCMD_EAT   = 1;
-constexpr int OCMD_DRINK = 2;
-constexpr int OCMD_QUAFF = 3;
+enum class consume_cmd : uint8_t { eat = 1, drink = 2, quaff = 3 };
+constexpr consume_cmd OCMD_EAT   = consume_cmd::eat;
+constexpr consume_cmd OCMD_DRINK = consume_cmd::drink;
+constexpr consume_cmd OCMD_QUAFF = consume_cmd::quaff;
 
 constexpr int TRIG_NEW     = 0; /* trigger starts from top  */
 constexpr int TRIG_RESTART = 1; /* trigger restarting       */

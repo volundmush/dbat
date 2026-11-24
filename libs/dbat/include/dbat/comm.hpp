@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdarg>
+#include <cstdint>
 #include <cstdio>
 #include <string>
 #include <string_view>
@@ -78,14 +79,50 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::format_
 {
   send_to_range(g, start, finish, str_format(fmt, std::forward<Args>(args)...));
 }
+/* Whom act() tells. The values are the old TO_ numbers, and they matter: act() asks bit 0 for "the room" (which
+   TO_NOTVICT has too), and sub_write() asks TO_CHAR's and TO_ROOM's bits. */
+enum class act_to : uint8_t { room = 1, vict = 2, notvict = 3, actor = 4, gmote = 5 };
+/* How act() tells them, added to whom with |: TO_CHAR | TO_SLEEP */
+enum class act_option : uint8_t { even_asleep, no_trig, sneak_resist, hide_resist };
+struct act_target {
+  act_to to;
+  bool even_asleep  = false; /* even if they sleep */
+  bool no_trig      = false; /* don't check act triggers */
+  bool sneak_resist = false; /* each roll their spot against the actor's move silently, if it sneaks */
+  bool hide_resist  = false; /* ... or against its hide, if it hides */
+  constexpr act_target(act_to who) : to(who) {}
+};
+constexpr act_target operator|(act_target target, act_option option)
+{
+  switch (option) {
+    case act_option::even_asleep: target.even_asleep = true; break;
+    case act_option::no_trig: target.no_trig = true; break;
+    case act_option::sneak_resist: target.sneak_resist = true; break;
+    case act_option::hide_resist: target.hide_resist = true; break;
+  }
+  return target;
+}
+constexpr act_target operator|(act_to who, act_option option) { return act_target(who) | option; }
+
+/* The old names, until every use says act_to:: and act_option:: */
+constexpr act_to TO_ROOM               = act_to::room;
+constexpr act_to TO_VICT               = act_to::vict;
+constexpr act_to TO_NOTVICT            = act_to::notvict;
+constexpr act_to TO_CHAR               = act_to::actor;
+constexpr act_to TO_GMOTE              = act_to::gmote;
+constexpr act_option TO_SLEEP          = act_option::even_asleep;
+constexpr act_option DG_NO_TRIG        = act_option::no_trig;
+constexpr act_option TO_SNEAKRESIST    = act_option::sneak_resist;
+constexpr act_option TO_HIDERESIST     = act_option::hide_resist;
+
 /* Sends str, with its $ codes filled in, to those type names. Nothing is sent for an empty str. The message made,
    or null if none has been made yet (it is the last one made, even when none was sent this time: a quirk). */
-const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, act_target type);
 /* No char pointer for act()'s message, which could be null: a std::string, a view or a literal */
 template <class P>
   requires(!std::is_array_v<std::remove_reference_t<P>> && std::is_pointer_v<std::decay_t<P>> &&
            std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::decay_t<P>>>, char>)
-void act(GameWorld *g, P &&str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type) = delete;
+void act(GameWorld *g, P &&str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, act_target type) = delete;
 /* The three messages of an act() at a victim: to the actor, to the victim and to everyone else, and act()'s
  * hide_invisible for them. An empty one isn't sent. */
 struct act_msgs {
@@ -101,15 +138,6 @@ void act_triple_vict_last(GameWorld *g, const act_msgs &m, struct char_data *ch,
 void close_socket(GameWorld *g, struct descriptor_data *d);
 void close_all_sockets(GameWorld *g);
 
-constexpr int TO_ROOM        = 1;
-constexpr int TO_VICT        = 2;
-constexpr int TO_NOTVICT     = 3;
-constexpr int TO_CHAR        = 4;
-constexpr int TO_GMOTE       = 5;
-constexpr int TO_SLEEP       = (2 << 7);  /* to char, even if sleeping */
-constexpr int DG_NO_TRIG     = (2 << 8);  /* don't check act trigger   */
-constexpr int TO_SNEAKRESIST = (2 << 9);  /* resisted sneaking roll    */
-constexpr int TO_HIDERESIST  = (2 << 10); /* resisted hiding roll      */
 
 /* I/O functions */
 void write_to_q(std::string_view txt, struct txt_q *queue, int aliased);

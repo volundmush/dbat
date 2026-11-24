@@ -500,8 +500,8 @@ namespace {
       struct obj_data *obj = owner_obj(g, s);
       obj_from_char(g, obj);
       bool carried = (t.types & bits_of<OTRIG_DROP, OTRIG_GIVE, OTRIG_WEAR, OTRIG_REMOVE, OTRIG_CONSUME>) ||
-                     ((t.types & bit_of<OTRIG_COMMAND>) && (t.narg & OCMD_INVEN));
-      int pos = (t.types & bit_of<OTRIG_COMMAND>) && !(t.narg & (OCMD_INVEN | OCMD_ROOM)) ? find_eq_pos(g, s.actor, obj) : -1;
+                     ((t.types & bit_of<OTRIG_COMMAND>) && (t.narg & bit_of<OCMD_INVEN>));
+      int pos = (t.types & bit_of<OTRIG_COMMAND>) && !(t.narg & bits_of<OCMD_INVEN, OCMD_ROOM>) ? find_eq_pos(g, s.actor, obj) : -1;
       if (pos >= 0)
         equip_char(g, s.actor, obj, pos);
       else if (carried)

@@ -78,6 +78,10 @@ static constexpr std::string_view wtrig_types_entries[] = {
 static_assert(std::size(wtrig_types_entries) == NUM_WTRIG_TYPES);
 constinit const name_table wtrig_types(wtrig_types_entries);
 
+static constexpr std::string_view ocmd_bits_entries[] = {"EQUIP", "INVEN", "ROOM"};
+static_assert(std::size(ocmd_bits_entries) == flag_count<ocmd_where>);
+constinit const name_table ocmd_bits(ocmd_bits_entries);
+
 std::string trig_type_names(int attach_type, bitvector_t word)
 {
   switch (attach_type) {

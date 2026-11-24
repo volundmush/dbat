@@ -41,7 +41,7 @@ def build(tree, jobs):
     subprocess.run(['cmake', '--preset', 'debug'], cwd=tree, check=True, stdout=subprocess.DEVNULL)
     targets = [t for t in TARGETS if t not in OPTIONAL or os.path.exists(os.path.join(tree, 'libs/dbat/tests', OPTIONAL[t]))]
     r = subprocess.run(['cmake', '--build', '--preset', 'debug', f'-j{jobs}', '--target', *targets], cwd=tree,
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, errors='replace')
     if r.returncode:
         sys.exit(f'cmdcompare: build failed in {tree}:\n{r.stdout[-3000:]}{r.stderr[-3000:]}')
     return os.path.join(tree, 'build/bin')

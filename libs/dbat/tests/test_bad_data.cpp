@@ -1047,6 +1047,10 @@ template <class E> static int flag_mask_mismatches(const name_table &table)
 /* Flags or'ed together are a set of them, never a flag */
 static_assert((EX_ISDOOR | EX_CLOSED | EX_LOCKED).word(0) == 0b111 && (CONT_CLOSED | CONT_LOCKED).word(0) == 0b1100);
 static_assert(!std::is_convertible_v<decltype(EX_ISDOOR | EX_CLOSED), exit_flag>);
+/* act()'s whom and how: an option goes with someone to tell, never alone */
+static_assert((TO_CHAR | TO_SLEEP).to == TO_CHAR && (TO_CHAR | TO_SLEEP).even_asleep && !(TO_CHAR | TO_SLEEP).sneak_resist);
+static_assert((TO_ROOM | TO_SNEAKRESIST).sneak_resist && act_target(TO_VICT).to == TO_VICT && !act_target(TO_VICT).even_asleep);
+static_assert(!std::is_convertible_v<act_option, act_target>);
 
 static void check_flag_sets(void)
 {
@@ -1304,7 +1308,7 @@ static int old_get_number(char **name)
   return (1);
 }
 
-static int old_find_all_dots(char *arg)
+static find_dots old_find_all_dots(char *arg)
 {
   if (!strcmp(arg, "all"))
     return (FIND_ALL);

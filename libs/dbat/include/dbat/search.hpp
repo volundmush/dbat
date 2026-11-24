@@ -1,9 +1,42 @@
 #pragma once
+#include <cstdint>
+#include <optional>
 #include <string>
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/flag_set.hpp"
+#include "dbat/name_table.hpp"
 #include "dbat/registry.hpp"
+
+/* Where a lookup looks: generic_find() takes a set of these, the character lookups one of the first two */
+extern const name_table find_bits; /* flag_count<find_flag> of them */
+enum class find_flag : uint8_t {
+  char_room  = 0,
+  char_world = 1,
+  obj_inv    = 2,
+  obj_room   = 3,
+  obj_world  = 4,
+  obj_equip  = 5,
+  count_     = 6,
+};
+template <> struct flag_traits<find_flag> {
+  static constexpr const name_table &names = find_bits;
+};
+
+/* The old names, until every use says find_flag:: */
+constexpr find_flag FIND_CHAR_ROOM  = find_flag::char_room;
+constexpr find_flag FIND_CHAR_WORLD = find_flag::char_world;
+constexpr find_flag FIND_OBJ_INV    = find_flag::obj_inv;
+constexpr find_flag FIND_OBJ_ROOM   = find_flag::obj_room;
+constexpr find_flag FIND_OBJ_WORLD  = find_flag::obj_world;
+constexpr find_flag FIND_OBJ_EQUIP  = find_flag::obj_equip;
+
+/* What an argument asks for: one thing, "all", or "all.x" */
+enum class find_dots : uint8_t { indiv = 0, all = 1, alldot = 2 };
+constexpr find_dots FIND_INDIV  = find_dots::indiv;
+constexpr find_dots FIND_ALL    = find_dots::all;
+constexpr find_dots FIND_ALLDOT = find_dots::alldot;
 
 /* Whether str abbreviates one of the words of namelist, ignoring case (a number must match whole) */
 bool isname(std::string_view str, std::string_view namelist);
@@ -19,8 +52,9 @@ int get_number(std::string &name);
  * afterwards prints what is left.
  */
 struct char_data *get_char_room(GameWorld *g, std::string &name, int *number, room_vnum room);
-struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, int inroom);
-struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, int where);
+/* inroom: FIND_CHAR_ROOM for the room only; anything else, or none, for anywhere */
+struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, std::optional<find_flag> inroom);
+struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, find_flag where);
 struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number);
 struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number);
 struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, const id_list &list);
@@ -40,21 +74,12 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::s
 /* find all dots */
 
 /* FIND_ALL for "all", FIND_ALLDOT for "all.x" (taking "all." off arg), FIND_INDIV otherwise */
-int find_all_dots(std::string &arg);
-
-constexpr int FIND_INDIV  = 0;
-constexpr int FIND_ALL    = 1;
-constexpr int FIND_ALLDOT = 2;
+find_dots find_all_dots(std::string &arg);
 
 /* Generic Find */
 
-int generic_find(GameWorld *g, std::string_view arg, bitvector_t bitvector, struct char_data *ch,
-                 struct char_data **tar_ch, struct obj_data **tar_obj);
-
-constexpr int FIND_CHAR_ROOM  = (1 << 0);
-constexpr int FIND_CHAR_WORLD = (1 << 1);
-constexpr int FIND_OBJ_INV    = (1 << 2);
-constexpr int FIND_OBJ_ROOM   = (1 << 3);
-constexpr int FIND_OBJ_WORLD  = (1 << 4);
-constexpr int FIND_OBJ_EQUIP  = (1 << 5);
+/* Looks where says, in the order char_room, char_world, obj_equip, obj_inv, obj_room, obj_world; the place it was
+   found, or none */
+std::optional<find_flag> generic_find(GameWorld *g, std::string_view arg, flag_set<find_flag> where, struct char_data *ch,
+                                      struct char_data **tar_ch, struct obj_data **tar_obj);
 

@@ -26,6 +26,16 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
+static constexpr std::string_view routine_bits_entries[] = {"DAMAGE", "AFFECTS", "UNAFFECTS", "POINTS", "ALTER_OBJS", "GROUPS", "MASSES", "AREAS", "SUMMONS",
+                                                            "CREATIONS", "MANUAL", "AFFECTSV", "ACTION_FREE", "ACTION_PARTIAL", "ACTION_FULL", "NEXTSTRIKE",
+                                                            "TOUCH_MELEE", "TOUCH_RANGED"};
+static_assert(std::size(routine_bits_entries) == flag_count<mag_routine>);
+constinit const name_table routine_bits(routine_bits_entries);
+static constexpr std::string_view target_bits_entries[] = {"IGNORE", "CHAR_ROOM", "CHAR_WORLD", "FIGHT_SELF", "FIGHT_VICT", "SELF_ONLY", "NOT_SELF",
+                                                           "OBJ_INV", "OBJ_ROOM", "OBJ_WORLD", "OBJ_EQUIP"};
+static_assert(std::size(target_bits_entries) == flag_count<spell_target>);
+constinit const name_table target_bits(target_bits_entries);
+
 /* extern globals */
 
 /* local globals */
@@ -119,46 +129,46 @@ int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
     return 0;
 
   if (room_flagged(g, char_get_in_room(caster), ROOM_PEACEFUL) && char_get_admlevel(caster) < ADMLVL_IMPL &&
-      (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
+      (SINFO.violent || SINFO.routines.test(MAG_DAMAGE))) {
     send_to_char(g, caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
     act(g, "White light from no particular source suddenly fills the room, then vanishes.", false, caster, nullptr, nullptr, TO_ROOM);
     return (0);
   }
 
-  if (IS_SET(SINFO.routines, MAG_NEXTSTRIKE) && casttype != CAST_STRIKE) {
+  if (SINFO.routines.test(MAG_NEXTSTRIKE) && casttype != CAST_STRIKE) {
     mag_nextstrike(level, caster, spellnum);
     return 1;
   }
 
-  if (IS_SET(SINFO.routines, MAG_DAMAGE))
+  if (SINFO.routines.test(MAG_DAMAGE))
     if (mag_damage(level, caster, cvict, spellnum) == -1)
       return (-1); /* Successful and target died, don't cast again. */
 
-  if (IS_SET(SINFO.routines, MAG_AFFECTS))
+  if (SINFO.routines.test(MAG_AFFECTS))
     mag_affects(g, level, caster, cvict, spellnum);
 
-  if (IS_SET(SINFO.routines, MAG_UNAFFECTS))
+  if (SINFO.routines.test(MAG_UNAFFECTS))
     mag_unaffects(g, level, caster, cvict, spellnum);
 
-  if (IS_SET(SINFO.routines, MAG_POINTS))
+  if (SINFO.routines.test(MAG_POINTS))
     mag_points(g, level, caster, cvict, spellnum);
 
-  if (IS_SET(SINFO.routines, MAG_ALTER_OBJS))
+  if (SINFO.routines.test(MAG_ALTER_OBJS))
     mag_alter_objs(g, level, caster, ovict, spellnum);
 
-  if (IS_SET(SINFO.routines, MAG_GROUPS))
+  if (SINFO.routines.test(MAG_GROUPS))
     mag_groups(g, level, caster, spellnum);
 
-  if (IS_SET(SINFO.routines, MAG_MASSES))
+  if (SINFO.routines.test(MAG_MASSES))
     mag_masses(g, level, caster, spellnum);
 
-  if (IS_SET(SINFO.routines, MAG_AREAS))
+  if (SINFO.routines.test(MAG_AREAS))
     mag_areas(g, level, caster, spellnum);
 
-  if (IS_SET(SINFO.routines, MAG_CREATIONS))
+  if (SINFO.routines.test(MAG_CREATIONS))
     mag_creations(g, level, caster, spellnum);
 
-  if (IS_SET(SINFO.routines, MAG_MANUAL))
+  if (SINFO.routines.test(MAG_MANUAL))
     switch (spellnum) {
       case SPELL_CHARM: MANUAL_SPELL(g, spell_charm); break;
       case SPELL_CREATE_WATER: MANUAL_SPELL(g, spell_create_water); break;
@@ -173,7 +183,7 @@ int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
       case ART_ABUNDANT_STEP: MANUAL_SPELL(g, art_abundant_step); break;
     }
 
-  if (IS_SET(SINFO.routines, MAG_AFFECTSV))
+  if (SINFO.routines.test(MAG_AFFECTSV))
     mag_affectsv(g, level, caster, cvict, spellnum);
 
   return (1);
@@ -195,13 +205,13 @@ int call_magic(GameWorld *g, struct char_data *caster, struct char_data *cvict,
  */
 void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::string_view argument)
 {
-  int i, k;
+  int i;
   struct char_data *tch = nullptr;
   struct obj_data *tobj = nullptr;
 
   std::string arg = take_arg(argument);
 
-  k = generic_find(g, arg, FIND_CHAR_ROOM | FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &tch, &tobj);
+  std::optional<find_flag> k = generic_find(g, arg, FIND_CHAR_ROOM | FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &tch, &tobj);
 
   switch (obj_get_type_flag(obj)) {
     case ITEM_STAFF:
@@ -218,7 +228,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
         obj_set_value(obj, VAL_STAFF_CHARGES, obj_get_value(obj, VAL_STAFF_CHARGES) - 1);
         char_aff_set(ch, AFF_NEXTNOACTION, true);
         /* Level to cast spell at. */
-        k = obj_get_value(obj, VAL_STAFF_LEVEL) ? obj_get_value(obj, VAL_STAFF_LEVEL) : DEFAULT_STAFF_LVL;
+        const int level = obj_get_value(obj, VAL_STAFF_LEVEL) ? obj_get_value(obj, VAL_STAFF_LEVEL) : DEFAULT_STAFF_LVL;
 
         /*
        * Problem : Area/mass spells on staves can cause crashes.
@@ -229,11 +239,11 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
         if (spell_has_routine(g, obj_get_value(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
           i = count_members(room_people(g, char_get_in_room(ch)));
           while (i-- > 0)
-            call_magic(g, ch, nullptr, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF);
+            call_magic(g, ch, nullptr, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), level, CAST_STAFF);
         } else {
           for (char_data *vict : room_people(g, char_get_in_room(ch))) {
             if (ch != vict)
-              call_magic(g, ch, vict, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF);
+              call_magic(g, ch, vict, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), level, CAST_STAFF);
           }
         }
       }
@@ -256,7 +266,7 @@ void mag_objectmagic(GameWorld *g, struct char_data *ch, struct obj_data *obj, s
           act(g, obj_get_action_description(obj), false, ch, obj, tobj, TO_ROOM);
         else
           act(g, "$n points $p at $P.", true, ch, obj, tobj, TO_ROOM);
-      } else if (IS_SET(g->spell_info[obj_get_value(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
+      } else if (g->spell_info[obj_get_value(obj, VAL_WAND_SPELL)].routines.intersects(MAG_AREAS | MAG_MASSES)) {
         /* Wands with area spells don't need to be pointed. */
         act(g, "You point $p outward.", false, ch, obj, nullptr, TO_CHAR);
         act(g, "$n points $p outward.", true, ch, obj, nullptr, TO_ROOM);
@@ -353,7 +363,7 @@ int skill_type(GameWorld *g, int snum)
 }
 
 /* Assign the spells on boot up */
-static void spello(GameWorld *g, int spl, std::string_view name, int max_mana, int min_mana, int mana_change, int minpos, int targets, int violent, int routines, int save_flags, int comp_flags, std::string_view wearoff, int cmspell_level, int school, int domain)
+static void spello(GameWorld *g, int spl, std::string_view name, int max_mana, int min_mana, int mana_change, int minpos, flag_set<spell_target> targets, int violent, flag_set<mag_routine> routines, int save_flags, int comp_flags, std::string_view wearoff, int cmspell_level, int school, int domain)
 {
   int i;
 
@@ -399,9 +409,9 @@ static void unused_spell(GameWorld *g, int spl)
   g->spell_info[spl].ki_min       = 0;
   g->spell_info[spl].ki_change    = 0;
   g->spell_info[spl].min_position = 0;
-  g->spell_info[spl].targets      = 0;
+  g->spell_info[spl].targets      = {};
   g->spell_info[spl].violent      = 0;
-  g->spell_info[spl].routines     = 0;
+  g->spell_info[spl].routines     = {};
   g->spell_info[spl].name         = unused_spellname;
   g->spell_info[spl].skilltype    = SKTYPE_NONE;
   g->spell_info[spl].flags        = 0;
@@ -414,7 +424,7 @@ static void unused_spell(GameWorld *g, int spl)
 
 static void skillo(GameWorld *g, int skill, std::string_view name, int flags)
 {
-  spello(g, skill, name, 0, 0, 0, 0, 0, 0, 0, 0, 0, {}, 0, 0, 0);
+  spello(g, skill, name, 0, 0, 0, 0, {}, 0, {}, 0, 0, {}, 0, 0, 0);
   g->spell_info[skill].skilltype = SKTYPE_SKILL;
   g->spell_info[skill].flags     = flags;
 }
@@ -990,33 +1000,33 @@ void mag_assign_spells(GameWorld *g)
    */
 
   spello(g, SPELL_FIRE_BREATH, "fire breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, true, 0, 0, 0,
+         TAR_IGNORE, true, {}, 0, 0,
          {},
          0, 0, 0);
 
   spello(g, SPELL_GAS_BREATH, "gas breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, true, 0, 0, 0,
+         TAR_IGNORE, true, {}, 0, 0,
          {},
          0, 0, 0);
 
   spello(g, SPELL_FROST_BREATH, "frost breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, true, 0, 0, 0,
+         TAR_IGNORE, true, {}, 0, 0,
          {},
          0, 0, 0);
 
   spello(g, SPELL_ACID_BREATH, "acid breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, true, 0, 0, 0,
+         TAR_IGNORE, true, {}, 0, 0,
          {},
          0, 0, 0);
 
   spello(g, SPELL_LIGHTNING_BREATH, "lightning breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, true, 0, 0, 0,
+         TAR_IGNORE, true, {}, 0, 0,
          {},
          0, 0, 0);
 
   /* you might want to name this one something more fitting to your theme -Welcor*/
   spello(g, SPELL_DG_AFFECT, "Script-inflicted", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, true, 0, 0, 0,
+         TAR_IGNORE, true, {}, 0, 0,
          {},
          0, 0, 0);
 
@@ -1195,7 +1205,7 @@ void mag_assign_spells(GameWorld *g)
   skillo(g, SKILL_BLESSEDHAMMER, "blessed hammer", SKFLAG_INTMOD | SKFLAG_NEEDTRAIN | SKFLAG_TIER1);
 }
 
-bool spell_has_routine(GameWorld *g, int spellnum, int flag)
+bool spell_has_routine(GameWorld *g, int spellnum, flag_set<mag_routine> routines)
 {
-  return IS_SET(g->spell_info[spellnum].routines, flag);
+  return g->spell_info[spellnum].routines.intersects(routines);
 }

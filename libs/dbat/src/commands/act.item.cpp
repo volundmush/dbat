@@ -1616,7 +1616,7 @@ namespace {
   }
 
   /* put all <container>, or put all.<object> <container> */
-  void put_all(GameWorld *g, struct char_data *ch, const std::string &what, int dotmode, struct obj_data *cont)
+  void put_all(GameWorld *g, struct char_data *ch, const std::string &what, find_dots dotmode, struct obj_data *cont)
   {
     bool found = false;
     for (obj_data *item : char_inventory(g, ch)) {
@@ -1660,8 +1660,8 @@ ACMD(do_put)
   int howmany          = counted ? parse_int(arg1) : 1;
   std::string &theobj  = counted ? arg2 : arg1;
   std::string &thecont = counted ? arg3 : arg2;
-  int obj_dotmode      = find_all_dots(theobj);
-  int cont_dotmode     = find_all_dots(thecont);
+  find_dots obj_dotmode      = find_all_dots(theobj);
+  find_dots cont_dotmode     = find_all_dots(thecont);
 
   if (theobj.empty()) {
     send_to_char(g, ch, "Put what in what?\r\n");
@@ -1773,7 +1773,7 @@ namespace {
            obj_get_vnum(g, cont) > 599 && obj_get_vnum(g, cont) < 604;
   }
 
-  void perform_get_from_container(GameWorld *g, struct char_data *ch, struct obj_data *obj, struct obj_data *cont, int mode)
+  void perform_get_from_container(GameWorld *g, struct char_data *ch, struct obj_data *obj, struct obj_data *cont, std::optional<find_flag> mode)
   {
     if (mode != FIND_OBJ_INV && mode != FIND_OBJ_EQUIP && !can_take_obj(g, ch, obj))
       return;
@@ -1797,9 +1797,9 @@ namespace {
     taken(g, ch, obj);
   }
 
-  void get_from_container(GameWorld *g, struct char_data *ch, struct obj_data *cont, std::string arg, int mode, int howmany)
+  void get_from_container(GameWorld *g, struct char_data *ch, struct obj_data *cont, std::string arg, std::optional<find_flag> mode, int howmany)
   {
-    int dotmode = find_all_dots(arg);
+    find_dots dotmode = find_all_dots(arg);
 
     if (obj_val_flagged(cont, CONT_CLOSED)) {
       act(g, "$p is closed.", false, ch, cont, nullptr, TO_CHAR);
@@ -1856,7 +1856,7 @@ namespace {
       send_to_char(g, ch, "You can't take {} {}.\r\n", AN(arg), arg);
       return;
     }
-    int dotmode = find_all_dots(arg);
+    find_dots dotmode = find_all_dots(arg);
 
     if (dotmode == FIND_INDIV) {
       if (std::string_view descword = find_exdesc_keywords(arg, room_get_ex_description(g, here)); !descword.empty()) {
@@ -1901,7 +1901,7 @@ namespace {
   {
     struct char_data *tmp_char;
     struct obj_data *cont;
-    int mode = generic_find(g, from, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &tmp_char, &cont);
+    std::optional<find_flag> mode = generic_find(g, from, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &tmp_char, &cont);
     if (!cont)
       send_to_char(g, ch, "You don't have {} {}.\r\n", AN(from), from);
     else if (obj_get_type_flag(cont) == ITEM_VEHICLE)
@@ -1913,10 +1913,10 @@ namespace {
   }
 
   /* get <things> all.<containers>, or all of them: those carried, then those in the room */
-  void get_from_all(GameWorld *g, struct char_data *ch, const std::string &what, const std::string &from, int dotmode, int amount)
+  void get_from_all(GameWorld *g, struct char_data *ch, const std::string &what, const std::string &from, find_dots dotmode, int amount)
   {
     bool found = false;
-    auto from_each = [&](obj_data *cont, int mode) {
+    auto from_each = [&](obj_data *cont, std::optional<find_flag> mode) {
       if (!char_can_see_obj(g, ch, cont) || (dotmode != FIND_ALL && !isname(from, obj_get_name(cont))))
         return;
       if (obj_get_type_flag(cont) == ITEM_CONTAINER) {
@@ -1993,7 +1993,7 @@ ACMD(do_get)
     arg1   = arg2;
     arg2   = arg3;
   }
-  int cont_dotmode = find_all_dots(arg2);
+  find_dots cont_dotmode = find_all_dots(arg2);
   if (cont_dotmode == FIND_INDIV) {
     get_from_one(g, ch, arg1, arg2, amount);
     return;
@@ -2217,7 +2217,7 @@ ACMD(do_drop)
     return;
   }
 
-  int dotmode = find_all_dots(arg);
+  find_dots dotmode = find_all_dots(arg);
   /* Can't junk or donate all */
   if (dotmode == FIND_ALL && (subcmd == SCMD_JUNK || subcmd == SCMD_DONATE)) {
     send_to_char(g, ch, subcmd == SCMD_JUNK ? "Go to the dump if you want to junk EVERYTHING!\r\n" : "Go do the donation room if you want to donate EVERYTHING!\r\n");
@@ -2439,7 +2439,7 @@ ACMD(do_give)
   struct char_data *vict = give_find_vict(g, ch, take_arg(rest));
   if (!vict)
     return;
-  int dotmode = find_all_dots(arg);
+  find_dots dotmode = find_all_dots(arg);
   if (dotmode == FIND_INDIV) {
     struct obj_data *obj = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
     if (!obj)
@@ -3302,7 +3302,7 @@ ACMD(do_wear)
     send_to_char(g, ch, "Wear what?\r\n");
     return;
   }
-  int dotmode = find_all_dots(arg1);
+  find_dots dotmode = find_all_dots(arg1);
   if (!arg2.empty() && dotmode != FIND_INDIV) {
     send_to_char(g, ch, "You can't specify the same body location for more than one item!\r\n");
     return;
@@ -3451,7 +3451,7 @@ ACMD(do_remove)
     return;
   }
 
-  int dotmode = find_all_dots(arg);
+  find_dots dotmode = find_all_dots(arg);
   if (dotmode == FIND_ALLDOT && arg.empty()) {
     send_to_char(g, ch, "Remove all of what?\r\n");
     return;

@@ -3,6 +3,8 @@
 #include <string>
 #include <string_view>
 
+#include "dbat/search.hpp"
+
 struct GameWorld;
 struct char_data;
 struct obj_data;
@@ -30,8 +32,8 @@ parsed<struct obj_data *> find_in_room(GameWorld *g, struct char_data *ch, std::
 parsed<struct obj_data *> find_inside(GameWorld *g, struct char_data *ch, std::string &word, struct obj_data *container, std::string_view why);
 
 /* Someone ch can see, where FIND_CHAR_ROOM or FIND_CHAR_WORLD says; find_player only finds players. */
-parsed<struct char_data *> find_char(GameWorld *g, struct char_data *ch, std::string &word, int where, std::string_view why);
-parsed<struct char_data *> find_player(GameWorld *g, struct char_data *ch, std::string &word, int where, std::string_view why);
+parsed<struct char_data *> find_char(GameWorld *g, struct char_data *ch, std::string &word, find_flag where, std::string_view why);
+parsed<struct char_data *> find_player(GameWorld *g, struct char_data *ch, std::string &word, find_flag where, std::string_view why);
 
 void send_rejection(GameWorld *g, struct char_data *ch, const std::string &why);
 
