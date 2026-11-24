@@ -289,7 +289,7 @@ ACMD(do_eavesdrop)
   struct room_direction_data *exit = char_get_exit(g, ch, dir);
   if (!exit)
     send_to_char(g, ch, "There is not a room there...\r\n");
-  else if (IS_SET(exit->exit_info, EX_CLOSED) && !exit_keyword(exit).empty())
+  else if (exit->exit_info.test(EX_CLOSED) && !exit_keyword(exit).empty())
     send_to_char(g, ch, "The {} is closed.\r\n", fname(exit_keyword(exit)));
   else {
     char_set_listenroom(ch, exit->to_room);

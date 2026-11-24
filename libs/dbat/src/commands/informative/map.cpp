@@ -240,7 +240,7 @@ namespace {
   }
 
   /* An exit's mark beside the small map: shut, open, or blank where there's none to see. */
-  std::string_view exit_mark(GameWorld *g, struct char_data *ch, int dir, std::string_view shut, std::string_view open, int shut_flag = EX_CLOSED)
+  std::string_view exit_mark(GameWorld *g, struct char_data *ch, int dir, std::string_view shut, std::string_view open, exit_flag shut_flag = EX_CLOSED)
   {
     if (!exit_visible(g, ch, dir))
       return "   ";
@@ -372,7 +372,7 @@ ACMD(do_scan)
 
     /* and the room past it */
     struct room_direction_data *far = char_get_exit2(g, ch, i);
-    if (!far || !far->to_room || far->to_room == NOWHERE || IS_SET(far->exit_info, EX_CLOSED))
+    if (!far || !far->to_room || far->to_room == NOWHERE || far->exit_info.test(EX_CLOSED))
       continue;
     if (room_is_dark(g, far->to_room))
       send_to_char(g, ch, "{}<-> {}Far {}: Too dark to tell! {}<->{}\r\n", QMAG, QCYN, dirnames[i], QMAG, QNRM);

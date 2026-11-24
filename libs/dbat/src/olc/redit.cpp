@@ -212,7 +212,7 @@ namespace {
     write_to_output(g, d,
                     "@g1@n) Exit to     \t\t: @c{:d}\r\n@g2@n) Description \t\t:-\r\n@y{}\r\n@g3@n) Door name   \t\t: @y{}\r\n@g4@n) Key         \t\t: @c{:d}\r\n@g5@n) Door flags  \t\t: @c{}\r\n@g6@n) Purge exit.\r\n@g7@n) DC Lock\t\t: @c{:d}\r\n@g8@n) DC Hide     \t\t: @c{:d}\r\n@g9@n) DC Skill\t\t: @c{}\r\n@gA@n) DC Move\t\t: @c{:d}\r\n@gB@n) Skill Fail Save Type\t\t: @c{:d}\r\n@gC@n) DC Skill Save\t\t: @c{:d}\r\n@gD@n) Minor Fail Dest. Room\t: @c{:d}\r\n@gE@n) Major Fail Dest. Room\t: @c{:d}@n\r\nEnter choice, 0 to quit : ",
                     e.to_room, !e.general_description.empty() ? e.general_description : "<NONE>", !e.keyword.empty() ? e.keyword : "<NONE>", e.key,
-                    sprintbit(e.exit_info, exit_bits), e.dclock, e.dchide, e.dcskill != 0 ? g->spell_info[e.dcskill].name : "<NONE>", e.dcmove,
+                    flag_mask_names(e.exit_info), e.dclock, e.dchide, e.dcskill != 0 ? g->spell_info[e.dcskill].name : "<NONE>", e.dcmove,
                     e.failsavetype, e.dcfailsave, e.failroom, e.totalfailroom);
     asking = mode::exit_menu;
   }
@@ -221,7 +221,7 @@ namespace {
   {
     clear_screen(g, d);
     olc_list_columns(g, d, exit_bits, NUM_EXIT_FLAGS, 1, "", 2);
-    write_to_output(g, d, "\r\nExit flags: @c{}@n\r\nEnter exit flags, 0 to quit : ", sprintbit(exit().exit_info, exit_bits));
+    write_to_output(g, d, "\r\nExit flags: @c{}@n\r\nEnter exit flags, 0 to quit : ", flag_mask_names(exit().exit_info));
     asking = mode::exit_flags;
   }
 
@@ -309,7 +309,7 @@ namespace {
         } else if (number == 0)
           exit_menu(g, d);
         else {
-          TOGGLE_BIT(exit().exit_info, 1U << (number - 1));
+          exit().exit_info.toggle(static_cast<exit_flag>(number - 1)); /* 1 to NUM_EXIT_FLAGS */
           exit_flag_menu(g, d);
         }
         return;

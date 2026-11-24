@@ -4833,7 +4833,7 @@ std::string_view obj_fname_for(GameWorld *g, const struct obj_data *obj, const s
 
 bool char_can_go(GameWorld *g, const struct char_data *ch, int door)
 {
-  return (char_get_exit(g, ch, door) && (char_get_exit(g, ch, door)->to_room != NOWHERE) && !IS_SET(char_get_exit(g, ch, door)->exit_info, EX_CLOSED));
+  return (char_get_exit(g, ch, door) && (char_get_exit(g, ch, door)->to_room != NOWHERE) && !char_get_exit(g, ch, door)->exit_info.test(EX_CLOSED));
 }
 
 bool char_is_roshi(const struct char_data *ch)

@@ -68,7 +68,13 @@ const house_field house_fields[] = {
     {"Mode", [](house_control_rec &h, io::fields &f) { return read_number(h.mode, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.mode); }},
     {"Owner", [](house_control_rec &h, io::fields &f) { return read_number(h.owner, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.owner); }},
     {"Paid", [](house_control_rec &h, io::fields &f) { return read_number(h.last_payment, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.last_payment); }},
-    {"Bits", [](house_control_rec &h, io::fields &f) { return read_number(h.bitvector, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.bitvector); }},
+    {"Bits", [](house_control_rec &h, io::fields &f) {
+       long bits = 0;
+       if (!read_number(bits, f))
+         return false;
+       h.bitvector = house_flags_from_number(bits);
+       return true;
+     }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, house_flags_number(h.bitvector)); }},
     {"BuiltBy", [](house_control_rec &h, io::fields &f) { return read_number(h.builtby, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.builtby); }},
     {"Guests",
      [](house_control_rec &h, io::fields &f) {

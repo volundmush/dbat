@@ -48,7 +48,7 @@ struct shop_data {
   std::string message_buy{};            /* Message when player buys item	*/
   std::string message_sell{};           /* Message when player sells item	*/
   int temper1{};                        /* How does keeper react if no money	*/
-  bitvector_t bitvector{};              /* Can attack? Use bank? Cast here?	*/
+  flag_set<shop_flag> bitvector;        /* Can attack? Use bank? Cast here?	*/
   mob_vnum keeper{};                    /* The mobile who owns the shop (vnum)	*/
   flag_set<trade_flag> with_who;        /* whom the shop won't trade with */
   std::vector<room_vnum> in_room{};     /* Where is the shop?			*/
@@ -88,9 +88,6 @@ constexpr int OPER_AND         = 3;
 constexpr int OPER_NOT         = 4;
 constexpr int MAX_OPER         = 4;
 
-constexpr int WILL_START_FIGHT = (1 << 0);
-constexpr int WILL_BANK_MONEY  = (1 << 1);
-constexpr int WILL_ALLOW_STEAL = (1 << 2);
 
 constexpr int MIN_OUTSIDE_BANK = 5000;
 constexpr int MAX_OUTSIDE_BANK = 15000;
@@ -111,7 +108,6 @@ constexpr int MAX_OUTSIDE_BANK = 15000;
 /* The traders' names: quirk, one fewer than NUM_TRADERS, so the last trader, as the editors' menus list it, is
    the "\n" that ended them */
 constexpr int NUM_TRADER_NAMES = NUM_TRADERS - 1;
-extern const name_table shop_bits; /* NUM_SHOP_FLAGS of them */
 
 // functions
 bool shop_producing(GameWorld *g, struct obj_data *item, struct shop_data *shop);

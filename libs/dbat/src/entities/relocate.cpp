@@ -50,8 +50,7 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
         obj_vnum hnum          = obj_get_value(object, 0);
         struct obj_data *house = read_object(g, hnum);
         obj_to_room(g, house, obj_get_value(object, 6));
-        obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));
-        obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_LOCKED));
+        obj_set_container_flags(object, obj_container_flags(object) | CONT_CLOSED | CONT_LOCKED);
       }
     }
     if (obj_get_type_flag(object) == ITEM_HATCH && obj_get_value(object, 0) > 1 && obj_get_vnum(g, object) > 19199) {
@@ -75,8 +74,7 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
             obj_set_short_description(vehicle, nick2);
             obj_set_description(vehicle, nick3);
           }
-          obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));
-          obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_LOCKED));
+          obj_set_container_flags(object, obj_container_flags(object) | CONT_CLOSED | CONT_LOCKED);
         } else {
           mud_log("Hatch load: Hatch with no vehicle load room: #{:d}!", obj_get_vnum(g, object));
         }

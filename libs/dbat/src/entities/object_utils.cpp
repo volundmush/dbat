@@ -441,9 +441,21 @@ bool obj_aff_flagged(const struct obj_data *obj, aff_flag flag)
   return obj->bitvector.test(flag);
 }
 
-bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag)
+bool obj_val_flagged(const struct obj_data *obj, container_flag flag)
 {
-  return (IS_SET(obj_get_value((obj), VAL_CONTAINER_FLAGS), (flag)));
+  return obj_container_flags(obj).test(flag);
+}
+
+flag_set<container_flag> obj_container_flags(const struct obj_data *obj)
+{
+  flag_set<container_flag> flags;
+  flags.set_word(0, static_cast<bitvector_t>(obj_get_value(obj, VAL_CONTAINER_FLAGS)));
+  return flags;
+}
+
+void obj_set_container_flags(struct obj_data *obj, const flag_set<container_flag> &flags)
+{
+  obj_set_value(obj, VAL_CONTAINER_FLAGS, static_cast<int>(flags.word(0)));
 }
 
 bool obj_extra_flagged(const struct obj_data *obj, extra_flag flag)

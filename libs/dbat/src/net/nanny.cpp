@@ -1101,7 +1101,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, std::string_v
   */
     if (selfdelete_fastwipe)
       if ((player_i = get_ptable_by_name(g, char_get_name(d->character))) >= 0) {
-        SET_BIT(g->player_table[player_i].flags, PINDEX_SELFDELETE);
+        g->player_table[player_i].flags.set(PINDEX_SELFDELETE);
         remove_player(g, player_i);
       }
     delete_aliases(char_get_name(d->character));

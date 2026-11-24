@@ -1413,7 +1413,7 @@ static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_d
 
   /* Need a local buffer. */
   {
-    std::string buf1 = sprintbit(shop_get_bitvector(shop), shop_bits);
+    std::string buf1 = flag_mask_names(shop_get_bitvector(shop));
     send_to_char(g, ch, "Bits:       {}\r\n", buf1);
   }
 }

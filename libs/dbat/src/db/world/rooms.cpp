@@ -36,7 +36,7 @@
 namespace {
 
 /* An exit's door, as its first number gives it */
-long door_flags(int door)
+flag_set<exit_flag> door_flags(int door)
 {
   switch (door) {
     case 1:
@@ -48,20 +48,20 @@ long door_flags(int door)
     case 4:
       return EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
     default:
-      return 0;
+      return {};
   }
 }
 
 /* An exit's door, as a number for the file: the reverse of door_flags() */
-int door_number(long exit_info)
+int door_number(const flag_set<exit_flag> &exit_info)
 {
-  if (!IS_SET(exit_info, EX_ISDOOR))
+  if (!exit_info.test(EX_ISDOOR))
     return 0;
-  if (IS_SET(exit_info, EX_SECRET) && IS_SET(exit_info, EX_PICKPROOF))
+  if (exit_info.test(EX_SECRET) && exit_info.test(EX_PICKPROOF))
     return 4;
-  if (IS_SET(exit_info, EX_SECRET))
+  if (exit_info.test(EX_SECRET))
     return 3;
-  if (IS_SET(exit_info, EX_PICKPROOF))
+  if (exit_info.test(EX_PICKPROOF))
     return 2;
   return 1;
 }

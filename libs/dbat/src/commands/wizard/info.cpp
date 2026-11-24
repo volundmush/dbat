@@ -341,7 +341,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
     else
       buf1 = str_format("@c{:>5d}@n", room_get_dir_option(rm, i)->to_room);
 
-    buf2 = sprintbit(room_get_dir_option(rm, i)->exit_info, exit_bits);
+    buf2 = flag_mask_names(room_get_dir_option(rm, i)->exit_info);
 
     send_to_char(g, ch, "Exit @c{:<5}@n:  To: [{}], Key: [{:>5d}], Keywrd: {}, Type: {}\r\n  DC Lock: [{:>2d}], DC Hide: [{:>2d}], DC Skill: [{:>4}], DC Move: [{:>2d}]\r\n{}",
                  dirs[i], buf1,
@@ -469,7 +469,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
       send_to_char(g, ch, "Spell: {:d}, - Hitpoints: {:d}\r\n", obj_get_value(j, VAL_TRAP_SPELL), obj_get_value(j, VAL_TRAP_HITPOINTS));
       break;
     case ITEM_CONTAINER:
-      buf = sprintbit(obj_get_value(j, VAL_CONTAINER_FLAGS), container_bits);
+      buf = flag_mask_names(obj_container_flags(j));
       send_to_char(g, ch, "Weight capacity: {:d}, Lock Type: {}, Key Num: {:d}, Corpse: {}\r\n",
                    obj_get_value(j, VAL_CONTAINER_CAPACITY), buf, obj_get_value(j, VAL_CONTAINER_KEY),
                    YESNO(obj_get_value(j, VAL_CONTAINER_CORPSE)));
@@ -1364,7 +1364,7 @@ ACMD(do_plist)
                    CCCYN(g, ch, C_NRM), CCNRM(g, ch, C_NRM));
 
   for (i = 0; i <= g->top_of_p_table; i++) {
-    if (IS_SET(g->player_table[i].flags, PINDEX_DELETED)) {
+    if (g->player_table[i].flags.test(PINDEX_DELETED)) {
       buf += str_format("[{:>3d}] <DELETED> --Will be removed next boot.\r\n", g->player_table[i].id);
       continue;
     }

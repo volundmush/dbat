@@ -31,7 +31,7 @@ void room_set_flag(GameWorld *g, room_vnum room, room_flag flag, bool on);
 bool room_flagged(const struct room_data *room, room_flag flag);
 void room_set_flag(struct room_data *room, room_flag flag, bool on);
 bool room_toggle_flag(struct room_data *room, room_flag flag);
-bool room_exit_flagged(const struct room_direction_data *ex, bitvector_t flag);
+bool room_exit_flagged(const struct room_direction_data *ex, exit_flag flag);
 
 struct room_direction_data *room_get_dir_option(GameWorld *g, room_vnum room, int i);
 void room_set_dir_option(GameWorld *g, room_vnum room, int i, struct room_direction_data *v); /* as below */

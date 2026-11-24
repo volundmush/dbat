@@ -386,8 +386,22 @@ inline void longer_help_table(GameWorld *g)
   g->help_table = {{"AAA", "a\n", 0, 0}, {"FIXTURE", "f\n", 0, 5}, {"FIXTUREB", "fb\n", 0, 0}, {"FIXTUREC", "fc\n", 0, 0}, {"ZZZ", "z\n", 0, 0}};
 }
 
+/* An exit's flags as either tree holds them: the masks or'ed together, or a flag_set */
+using exit_flags = std::remove_cv_t<decltype(EX_ISDOOR | EX_CLOSED)>;
+
+/* Container flags as the int value VAL_CONTAINER_FLAGS holds, from the masks or the typed flags */
+template <class... F> int cont_value(F... flags)
+{
+  if constexpr ((std::is_integral_v<F> && ...))
+    return static_cast<int>((0u | ... | flags));
+  else {
+    flag_set<std::common_type_t<F...>> set{flags...};
+    return static_cast<int>(set.word(0));
+  }
+}
+
 /* ... with a room in every direction from the arena, of this sector and ground effect, through exits like so */
-inline void surrounded(GameWorld *g, int sect, int geffect = 0, int exit_info = 0, const char *keyword = "door")
+inline void surrounded(GameWorld *g, int sect, int geffect = 0, exit_flags exit_info = {}, const char *keyword = "door")
 {
   static constexpr room_vnum around[NUM_OF_DIRS] = {51, 52, 53, 54, 55, 56, 81, 82, 83, 84, 85, 86};
   for (int dir = 0; dir < NUM_OF_DIRS; dir++) {

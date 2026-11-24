@@ -198,7 +198,7 @@ namespace {
     clear_screen(g, d);
     for (int i = 0; i < NUM_SHOP_FLAGS; i++)
       write_to_output(g, d, "@g{:>2d}@n) {:<20.20}   {}", i + 1, shop_bits[i], (i + 1) % 2 ? "" : "\r\n");
-    write_to_output(g, d, "\r\nCurrent Shop Flags : @c{}@n\r\nEnter choice : ", sprintbit(shop.bitvector, shop_bits));
+    write_to_output(g, d, "\r\nCurrent Shop Flags : @c{}@n\r\nEnter choice : ", flag_mask_names(shop.bitvector));
     asking = mode::shop_flags;
   }
 
@@ -229,7 +229,7 @@ namespace {
                     number, keeper ? mob_index_of(g, shop.keeper)->vnum : -1, keeper ? char_get_sdesc(mob_proto_of(g, shop.keeper)) : "None",
                     shop.open1, shop.close1, shop.open2, shop.close2, shop.profit_buy, shop.profit_sell, shop.no_such_item1,
                     shop.no_such_item2, shop.missing_cash1, shop.missing_cash2, shop.do_not_buy, shop.message_buy, shop.message_sell,
-                    flag_names(shop.with_who), sprintbit(shop.bitvector, shop_bits));
+                    flag_names(shop.with_who), flag_mask_names(shop.bitvector));
     asking = mode::main_menu;
   }
 
@@ -410,7 +410,7 @@ namespace {
         return;
       case mode::shop_flags:
         if (int flag = LIMIT(n, 0, NUM_SHOP_FLAGS); flag > 0) {
-          shop.bitvector ^= 1U << (flag - 1);
+          shop.bitvector.toggle(static_cast<shop_flag>(flag - 1)); /* 1 to NUM_SHOP_FLAGS */
           flags_menu(g, d);
           return;
         }

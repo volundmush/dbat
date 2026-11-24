@@ -77,9 +77,18 @@ auto ready_only(GameWorld *g)
  * from vars(t) and runs. after(result) says whether to stop there. Returns the last run's result, or nothing if none
  * ran.
  */
-template <class Test, class Vars, class After>
-std::optional<run_result> fire(GameWorld *g, owner_ptr owner, bitvector_t type, Test &&test, Vars &&vars, After &&after)
+/* The kind of owner each family's triggers are for */
+template <class E> struct trig_owner;
+template <> struct trig_owner<mob_trig> { using type = char_data; };
+template <> struct trig_owner<obj_trig> { using type = obj_data; };
+template <> struct trig_owner<wld_trig> { using type = room_data; };
+
+template <class Owner, class Types, class Test, class Vars, class After>
+std::optional<run_result> fire(GameWorld *g, Owner *owner, Types types, Test &&test, Vars &&vars, After &&after)
 {
+  using E = trig_family_t<Types>;
+  static_assert(std::is_same_v<Owner, typename trig_owner<E>::type>, "a dispatcher fires its own kind's trigger types");
+  const flag_set<E> type = types;
   struct script_data *sc = *script_slot(owner);
   if (!script_has_type(sc, type))
     return std::nullopt;
@@ -87,7 +96,7 @@ std::optional<run_result> fire(GameWorld *g, owner_ptr owner, bitvector_t type, 
   std::optional<run_result> last;
   /* a trigger removed by an earlier one stays in memory until the pulse ends, and runs no more */
   for (trig_data *t = sc->trig_list; t; t = t->next) {
-    if (!(t->trigger_type & type) || !test(t))
+    if (!trig_word_has(t->trigger_type, type) || !test(t))
       continue;
     vars(t);
     last = script_driver(g, owner, t, TRIG_NEW);
@@ -295,7 +304,7 @@ bool greet_mtrigger(GameWorld *g, char_data *actor, int dir)
     /* every greeting runs, and any one of them can stop the actor */
     fire(g, ch, MTRIG_GREET | MTRIG_GREET_ALL,
          [&](trig_data *t) {
-           return ((IS_SET(t->trigger_type, MTRIG_GREET) && char_can_see(g, ch, actor)) || IS_SET(t->trigger_type, MTRIG_GREET_ALL)) &&
+           return ((trig_word_has(t->trigger_type, MTRIG_GREET) && char_can_see(g, ch, actor)) || trig_word_has(t->trigger_type, MTRIG_GREET_ALL)) &&
                   ready(g, t) && chance(g, t);
          },
          [&](trig_data *t) {
@@ -768,7 +777,7 @@ int enter_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int d
 }
 
 /* The room the actor is in, if it has triggers of type and there is an actor */
-static room_data *actor_room_with(GameWorld *g, char_data *actor, bitvector_t type)
+static room_data *actor_room_with(GameWorld *g, char_data *actor, wld_trig type)
 {
   if (!actor || !script_has_type(room_get_script(g, char_get_in_room(actor)), type))
     return nullptr;

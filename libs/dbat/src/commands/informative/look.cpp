@@ -193,7 +193,7 @@ namespace {
   bool exit_seen_by_immortal(GameWorld *g, struct char_data *ch, struct room_direction_data *exit, const std::string &dir, int door, std::string &line)
   {
     line = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", dir, exit->to_room, room_get_name(g, exit->to_room));
-    if (!IS_SET(exit->exit_info, EX_ISDOOR) && !IS_SET(exit->exit_info, EX_SECRET))
+    if (!exit->exit_info.test(EX_ISDOOR) && !exit->exit_info.test(EX_SECRET))
       return true;
     /* This exit has a door - tell all about it, if it has a keyword to name it by */
     if (exit_keyword(exit).empty()) {
@@ -202,20 +202,20 @@ namespace {
       return false;
     }
     std::string argh = str_format("{} ", !str_eq_nocase(fname(exit_keyword(exit)), "undefined") ? fname(exit_keyword(exit)) : "opening");
-    line += str_format("                    The {}{} {} {} {}{}.\r\n", IS_SET(exit->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+    line += str_format("                    The {}{} {} {} {}{}.\r\n", exit->exit_info.test(EX_SECRET) ? "@rsecret@w " : "",
                        (!exit_keyword(exit).empty() && !str_eq_nocase(fname(exit_keyword(exit)), "undefined")) ? fname(exit_keyword(exit)) : "opening",
-                       until_nul(argh).contains("s ") ? "are" : "is", IS_SET(exit->exit_info, EX_CLOSED) ? "closed" : "open",
-                       IS_SET(exit->exit_info, EX_LOCKED) ? "and locked" : "and unlocked", IS_SET(exit->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
+                       until_nul(argh).contains("s ") ? "are" : "is", exit->exit_info.test(EX_CLOSED) ? "closed" : "open",
+                       exit->exit_info.test(EX_LOCKED) ? "and locked" : "and unlocked", exit->exit_info.test(EX_PICKPROOF) ? " (pickproof)" : "");
     return true;
   }
 
   /* What a mortal is told of an exit: where an open one goes, or that a door is closed, if they can see it. */
   std::string exit_seen_by_mortal(GameWorld *g, struct char_data *ch, struct room_direction_data *exit, const std::string &dir, bool has_light)
   {
-    if (!IS_SET(exit->exit_info, EX_CLOSED))
+    if (!exit->exit_info.test(EX_CLOSED))
       return str_format("@c{:<9} @D-@w {}\r\n", dir,
                         room_is_dark(g, exit->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, exit->to_room));
-    if (CONFIG_DISP_CLOSED_DOORS && !IS_SET(exit->exit_info, EX_SECRET))
+    if (CONFIG_DISP_CLOSED_DOORS && !exit->exit_info.test(EX_SECRET))
       return str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", dir, exit_keyword(exit).empty() ? "opening" : fname(exit_keyword(exit)));
     return {};
   }

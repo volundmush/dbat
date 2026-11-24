@@ -42,6 +42,8 @@ template <flag_family E> class flag_set {
 
 public:
   constexpr flag_set() = default;
+  /* this one flag set: a lone flag is a set of one wherever a set is wanted */
+  constexpr flag_set(E flag) { set(flag); }
   /* these flags set */
   constexpr flag_set(std::initializer_list<E> flags)
   {
@@ -120,6 +122,15 @@ private:
   std::array<bitvector_t, FLAG_WORDS> words_{};
 };
 
+/* Flags together, as the masks they replace were or'ed: EX_ISDOOR | EX_CLOSED. The result is a set, never a flag,
+   so it can't stand in for one (two flags or'ed as ints made a third) */
+template <flag_family E> constexpr flag_set<E> operator|(flag_set<E> set, E flag)
+{
+  set.set(flag);
+  return set;
+}
+template <flag_family E> constexpr flag_set<E> operator|(E a, E b) { return flag_set<E>{a, b}; }
+
 /* Flag i of the family, if there is one */
 template <flag_family E> constexpr std::optional<E> flag_from_index(long long i)
 {
@@ -151,6 +162,24 @@ template <flag_family E> std::string flag_names(const flag_set<E> &set)
   for (std::size_t i = 0; i < names.size() && i < FLAG_BITS; i++)
     if (set.test_bit(i) && !names[i].empty()) {
       out += names[i];
+      out += ' ';
+    }
+  if (out.empty())
+    return "None ";
+  out.pop_back();
+  return out;
+}
+
+/* What sprintbit() gave, for the single-word families: the names of word 0's bits, each followed by a space but the
+   last ("None " if none are set), a bit past the names as UNDEFINED and one with an empty name as its empty name */
+template <flag_family E> std::string flag_mask_names(const flag_set<E> &set)
+{
+  const name_table &names = flag_traits<E>::names;
+  std::string out;
+  std::size_t nr = 0;
+  for (bitvector_t w = set.word(0); w; w >>= 1, nr++)
+    if (w & 1) {
+      out += nr < names.size() ? names[nr] : std::string_view("UNDEFINED");
       out += ' ';
     }
   if (out.empty())

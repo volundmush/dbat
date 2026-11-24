@@ -557,7 +557,7 @@ namespace {
     {"", "put all", false, SETUP(), false, 1},
     {"", "put pebble bag", false, SETUP(), false, 1},
     {"with a pebble", "put pebble pebble", false, SETUP(pebbles(g, att, 1);), false, 1},
-    {"with a closed bag", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att, 100, {}, CONT_CLOSED);), false, 1},
+    {"with a closed bag", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att, 100, {}, cont_value(CONT_CLOSED));), false, 1},
     {"with a bag", "put pebble bag", false, SETUP(bag(g, att);), false, 1},
     {"with a bag", "put bag bag", false, SETUP(bag(g, att);), false, 1},
     {"with two bags", "put 2.bag bag", false, SETUP(bag(g, att); bag(g, att);), false, 1},
@@ -589,7 +589,7 @@ namespace {
     {"with a pebble, in a full house", "put pebble chest", false, SETUP(pebbles(g, att, 1); stuffed(g, 150);), false, 1},
     {"with a pebble and a bag, in a full house", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att); stuffed(g, 150);), false, 1},
     {"with a pebble, by a portal", "put pebble portal", false, SETUP(pebbles(g, att, 1); here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{0, 300}}});), false, 1},
-    {"with a pebble, by a closed portal", "put pebble portal", false, SETUP(pebbles(g, att, 1); here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{0, 300}, {1, CONT_CLOSED}}});), false, 1},
+    {"with a pebble, by a closed portal", "put pebble portal", false, SETUP(pebbles(g, att, 1); here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{0, 300}, {1, cont_value(CONT_CLOSED)}}});), false, 1},
     {"with a pebble, by a vehicle", "put pebble car", false, SETUP(pebbles(g, att, 1); here(g, {.name = "car", .type = ITEM_VEHICLE, .values = {{0, 300}}});), false, 1},
 
     /* get */
@@ -629,8 +629,8 @@ namespace {
     {"with a pebble", "get pebble pebble", false, SETUP(pebbles(g, att, 1);), false, 1},
     {"by a car", "get pebble car", false, SETUP(here(g, {.name = "car", .type = ITEM_VEHICLE});), false, 1},
     {"by a portal", "get pebble portal", false, SETUP(here(g, {.name = "portal", .type = ITEM_PORTAL});), false, 1},
-    {"by a closeable portal", "get pebble portal", false, SETUP(here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{1, CONT_CLOSEABLE}}});), false, 1},
-    {"with a closed bag", "get pebble bag", false, SETUP(inside(g, bag(g, att, 100, {}, CONT_CLOSED), {});), false, 1},
+    {"by a closeable portal", "get pebble portal", false, SETUP(here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{1, cont_value(CONT_CLOSEABLE)}}});), false, 1},
+    {"with a closed bag", "get pebble bag", false, SETUP(inside(g, bag(g, att, 100, {}, cont_value(CONT_CLOSED)), {});), false, 1},
     {"by a pebble in the chest", "get pebble chest", false, SETUP(inside(g, cast.chest, {});), false, 1},
     {"by a fixed pebble in the chest", "get pebble chest", false, SETUP(obj_wear_set(inside(g, cast.chest, {}), ITEM_WEAR_TAKE, false);), false, 1},
     {"with a bag of pebbles", "get 2 pebble bag", false, SETUP({ obj_data *b = bag(g, att); for (int i = 0; i < 3; i++) inside(g, b, {}); }), false, 1},

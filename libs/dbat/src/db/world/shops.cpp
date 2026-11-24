@@ -210,7 +210,7 @@ io::loaded<void> read_shop(GameWorld *g, io::text_reader &in, shop_vnum vnum)
     return std::unexpected(in.fail(str_format("shop #{:d}: expected its flags, got '{}'", vnum, line.value_or(""))));
   if (scanned == 1) {
     long flags      = io::c_atol(*line);
-    shop->bitvector = static_cast<bitvector_t>(flags);
+    shop->bitvector.set_word(0, static_cast<bitvector_t>(flags));
     keeper          = static_cast<uint32_t>(static_cast<unsigned long long>(flags) >> 32);
   }
   line    = in.line();
@@ -328,7 +328,7 @@ bool save_shops(GameWorld *g, struct zone_data *zone)
               or_if_empty(shop_get_missing_cash2(shop), "%s Ke?!"),
               or_if_empty(shop_get_message_buy(shop), "%s Ke?! %d?"),
               or_if_empty(shop_get_message_sell(shop), "%s Ke?! %d?"), shop_get_temper(shop),
-              static_cast<int>(shop_get_bitvector(shop)), /* as signed, as always */
+              static_cast<int>(shop_get_bitvector(shop).word(0)), /* as signed, as always */
               shop_get_keeper(shop) == NOBODY ? -1 : mob_index_of(g, shop_get_keeper(shop))->vnum);
     for (int i = 0; i < SW_ARRAY_MAX; i++)
       out.print("{}{:d}", i ? " " : "", static_cast<int>(shop_get_with_who(shop).word(static_cast<std::size_t>(i))));

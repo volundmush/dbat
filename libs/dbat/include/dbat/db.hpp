@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
+#include "dbat/flag_set.hpp"
 #include "dbat/io/load_error.hpp"
 
 /* arbitrary constants used by index_boot() (must be unique) */
@@ -95,11 +96,24 @@ constexpr int DB_BOOT_GLD = 7;
 #define ASSEMBLIES_FILE LIB_ETC "assemblies" /* for assemblies system 	*/
 #define LEVEL_CONFIG    LIB_ETC "levels"     /* set various level values  */
 
-/* new bitvector data for use in player_index_element */
-constexpr int PINDEX_DELETED    = (1 << 0); /* deleted player	*/
-constexpr int PINDEX_NODELETE   = (1 << 1); /* protected player	*/
-constexpr int PINDEX_SELFDELETE = (1 << 2); /* player is selfdeleting*/
-constexpr int PINDEX_NOWIZLIST  = (1 << 3); /* Player shouldn't be on wizlist*/
+/* A player index entry's flags (player_index_element::flags), saved in the index as letters */
+extern const name_table pindex_bits; /* flag_count<pindex_flag> of them */
+enum class pindex_flag : uint8_t {
+  deleted    = 0, /* deleted player	*/
+  nodelete   = 1, /* protected player	*/
+  selfdelete = 2, /* player is selfdeleting*/
+  nowizlist  = 3, /* Player shouldn't be on wizlist*/
+  count_     = 4,
+};
+template <> struct flag_traits<pindex_flag> {
+  static constexpr const name_table &names = pindex_bits;
+};
+
+/* The old names, until every use says pindex_flag:: */
+constexpr pindex_flag PINDEX_DELETED    = pindex_flag::deleted;
+constexpr pindex_flag PINDEX_NODELETE   = pindex_flag::nodelete;
+constexpr pindex_flag PINDEX_SELFDELETE = pindex_flag::selfdelete;
+constexpr pindex_flag PINDEX_NOWIZLIST  = pindex_flag::nowizlist;
 
 // global variables
 

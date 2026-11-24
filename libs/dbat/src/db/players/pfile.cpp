@@ -796,22 +796,22 @@ void save_char(GameWorld *g, struct char_data *ch)
     save_index              = true;
     g->player_table[id].played = char_get_lastpl(ch);
   }
-  i = g->player_table[id].flags;
+  const flag_set<pindex_flag> old_flags = g->player_table[id].flags;
   if (char_plr_flagged(ch, PLR_DELETED))
-    SET_BIT(g->player_table[id].flags, PINDEX_DELETED);
+    g->player_table[id].flags.set(PINDEX_DELETED);
   else
-    REMOVE_BIT(g->player_table[id].flags, PINDEX_DELETED);
+    g->player_table[id].flags.reset(PINDEX_DELETED);
   if (char_plr_flagged(ch, PLR_NODELETE) || char_plr_flagged(ch, PLR_CRYO))
-    SET_BIT(g->player_table[id].flags, PINDEX_NODELETE);
+    g->player_table[id].flags.set(PINDEX_NODELETE);
   else
-    REMOVE_BIT(g->player_table[id].flags, PINDEX_NODELETE);
+    g->player_table[id].flags.reset(PINDEX_NODELETE);
 
   if (char_plr_flagged(ch, PLR_FROZEN) || char_plr_flagged(ch, PLR_NOWIZLIST))
-    SET_BIT(g->player_table[id].flags, PINDEX_NOWIZLIST);
+    g->player_table[id].flags.set(PINDEX_NOWIZLIST);
   else
-    REMOVE_BIT(g->player_table[id].flags, PINDEX_NOWIZLIST);
+    g->player_table[id].flags.reset(PINDEX_NOWIZLIST);
 
-  if (g->player_table[id].flags != i || save_index)
+  if (g->player_table[id].flags != old_flags || save_index)
     save_player_index(g);
 }
 

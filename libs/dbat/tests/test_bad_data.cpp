@@ -600,7 +600,7 @@ static void check_old_binary_houses_are_read(void)
   const house_control_rec &h = file->houses[0];
   CHECK(h.vnum == 300 && h.atrium == 301 && h.exit_num == -1 && h.built_on == 1000 && h.mode == 3);
   CHECK(h.owner == 42 && h.num_of_guests == MAX_GUESTS && h.guests[0] == 5 && h.last_payment == 2000);
-  CHECK(h.bitvector == 6 && h.builtby == 77 && h.spare7 == 8);
+  CHECK(house_flags_number(h.bitvector) == 6 && h.builtby == 77 && h.spare7 == 8);
 
   /* written as text and read again, it is the same */
   g->house_control[0] = h;
@@ -1029,6 +1029,25 @@ static void check_act_split(void)
   delete ch;
 }
 
+/* flag_mask_names() against sprintbit(), for a single-word family: word 0 only, UNDEFINED past the names */
+template <class E> static int flag_mask_mismatches(const name_table &table)
+{
+  int mismatches = 0;
+  uint64_t state = 88172645463325252ULL;
+  for (int round = 0; round < 2000; round++) {
+    state ^= state << 13; state ^= state >> 7; state ^= state << 17;
+    bitvector_t word = round % 3 == 0 ? 0 : round % 3 == 1 ? static_cast<bitvector_t>(state) & 0x3f : static_cast<bitvector_t>(state);
+    flag_set<E> set;
+    set.set_word(0, word);
+    mismatches += flag_mask_names(set) != sprintbit(word, table);
+  }
+  return mismatches;
+}
+
+/* Flags or'ed together are a set of them, never a flag */
+static_assert((EX_ISDOOR | EX_CLOSED | EX_LOCKED).word(0) == 0b111 && (CONT_CLOSED | CONT_LOCKED).word(0) == 0b1100);
+static_assert(!std::is_convertible_v<decltype(EX_ISDOOR | EX_CLOSED), exit_flag>);
+
 static void check_flag_sets(void)
 {
   CHECK(flag_set_mismatches<room_flag>(room_bits) == 0);
@@ -1040,6 +1059,23 @@ static void check_flag_sets(void)
   CHECK(flag_set_mismatches<extra_flag>(extra_bits) == 0);
   CHECK(flag_set_mismatches<wear_flag>(wear_bits) == 0);
   CHECK(flag_set_mismatches<trade_flag>(trade_letters) == 0);
+  CHECK(flag_mask_mismatches<exit_flag>(exit_bits) == 0);
+  CHECK(flag_mask_mismatches<container_flag>(container_bits) == 0);
+  CHECK(flag_mask_mismatches<shop_flag>(shop_bits) == 0);
+  CHECK(flag_mask_mismatches<house_flag>(house_bits) == 0);
+  CHECK(flag_mask_mismatches<mob_trig>(trig_types) == 0);
+  CHECK(flag_mask_mismatches<obj_trig>(otrig_types) == 0);
+  CHECK(flag_mask_mismatches<wld_trig>(wtrig_types) == 0);
+  /* a trigger's types word is named by the table of what it is for, any other number as a mob's */
+  for (bitvector_t word : {0u, 0x80001u, 0xFFFFFFFFu, 0x40000u}) {
+    CHECK(trig_type_names(OBJ_TRIGGER, word) == sprintbit(word, otrig_types));
+    CHECK(trig_type_names(WLD_TRIGGER, word) == sprintbit(word, wtrig_types));
+    CHECK(trig_type_names(MOB_TRIGGER, word) == sprintbit(word, trig_types));
+    CHECK(trig_type_names(7, word) == sprintbit(word, trig_types));
+  }
+  /* a house's flags are a long in the files: every value comes back, negative or past 32 bits */
+  for (long n : {0L, 6L, -1L, 0x7fffffffL, 0x80000000L, 0x123456789abL, -0x123456789abL})
+    CHECK(house_flags_number(house_flags_from_number(n)) == n);
 
   /* by number and by name, as get_flag_by_name() found them */
   CHECK(flag_from_index<room_flag>(-1) == std::nullopt);
@@ -2808,7 +2844,7 @@ static void check_shop_flags_spill_into_the_keeper(void)
   g = th_boot();
   shop_data *shop = *g->shops.all().begin();
   CHECK(shop_get_keeper(shop) == NOBODY);
-  CHECK(shop_get_bitvector(shop) == 0xFFFFFFFFu);
+  CHECK(shop_get_bitvector(shop).word(0) == 0xFFFFFFFFu);
   th_shutdown(g);
 }
 

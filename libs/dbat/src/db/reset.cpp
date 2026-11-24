@@ -386,22 +386,16 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
           } else
             switch (ZCMD2.arg3) {
               case 0:
-                REMOVE_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
-                           EX_LOCKED);
-                REMOVE_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
-                           EX_CLOSED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(EX_LOCKED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(EX_CLOSED);
                 break;
               case 1:
-                SET_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
-                        EX_CLOSED);
-                REMOVE_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
-                           EX_LOCKED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(EX_CLOSED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(EX_LOCKED);
                 break;
               case 2:
-                SET_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
-                        EX_LOCKED);
-                SET_BIT(room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info,
-                        EX_CLOSED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(EX_LOCKED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(EX_CLOSED);
                 break;
             }
           last_cmd = 1;

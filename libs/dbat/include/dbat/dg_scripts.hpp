@@ -298,14 +298,19 @@ room_vnum obj_room(obj_data *obj);
 /* the virtual number of trigger t */
 trig_vnum trig_get_vnum(GameWorld *g, const trig_data *t);
 
-/* true if script sc exists and has a trigger of the given type */
-static inline bool script_has_type(const struct script_data *sc, bitvector_t type)
+/* true if script sc exists and has a trigger of one of these types */
+template <trig_family E> bool script_has_type(const struct script_data *sc, const flag_set<E> &types)
 {
-  return sc && (sc->types & type);
+  return sc && trig_word_has(sc->types, types);
+}
+template <trig_family E> bool script_has_type(const struct script_data *sc, E type)
+{
+  return script_has_type(sc, flag_set<E>{type});
 }
 
-/* true if trigger t is of the given type, not already running, and compiles (which it logs, once, if it doesn't) */
-bool trigger_ready(GameWorld *g, trig_data *t, bitvector_t type);
+/* true if trigger t has any of the types in word (its types word, of whatever family), isn't already running, and
+   compiles (which it logs, once, if it doesn't) */
+bool trigger_ready(GameWorld *g, trig_data *t, bitvector_t word);
 
 /*
  * The trigger currently being run by script_driver(), so errors can say which

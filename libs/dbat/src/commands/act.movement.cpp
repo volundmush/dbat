@@ -1181,20 +1181,25 @@ namespace {
   enum class change { set, clear, toggle };
 
   /* A container's flag, or the door's, in that room that way, changed */
-  void change_door(GameWorld *g, room_vnum room, struct obj_data *obj, int door, change how, int cont_bit, int ex_bit)
+  template <class Flags, class Flag> void change_flag(Flags &flags, change how, Flag flag)
+  {
+    if (how == change::set)
+      flags.set(flag);
+    else if (how == change::clear)
+      flags.reset(flag);
+    else
+      flags.toggle(flag);
+  }
+
+  void change_door(GameWorld *g, room_vnum room, struct obj_data *obj, int door, change how, container_flag cont_bit, exit_flag ex_bit)
   {
     if (obj) {
-      int flags = obj_get_value(obj, VAL_CONTAINER_FLAGS);
-      obj_set_value(obj, VAL_CONTAINER_FLAGS, how == change::set ? flags | cont_bit : how == change::clear ? flags & ~cont_bit : flags ^ cont_bit);
+      flag_set<container_flag> flags = obj_container_flags(obj);
+      change_flag(flags, how, cont_bit);
+      obj_set_container_flags(obj, flags);
       return;
     }
-    auto &info = room_get_dir_option(g, room, door)->exit_info;
-    if (how == change::set)
-      SET_BIT(info, ex_bit);
-    else if (how == change::clear)
-      REMOVE_BIT(info, ex_bit);
-    else
-      TOGGLE_BIT(info, ex_bit);
+    change_flag(room_get_dir_option(g, room, door)->exit_info, how, ex_bit);
   }
 
   /* What open, close, unlock and lock do, and what's said of a ship's hatch opened or closed: from inside (seen
@@ -1202,7 +1207,8 @@ namespace {
      and what the other side hears */
   struct door_change {
     change how;
-    int cont_bit, ex_bit;
+    container_flag cont_bit;
+    exit_flag ex_bit;
     bool always_say_obj;
     std::string_view inside_ship[3], outside_ship[3];
     std::string_view you, they, inside_heard, outside_heard; /* you: none for a ship's hatch */
@@ -1364,7 +1370,7 @@ static bool ok_pick(GameWorld *g, struct char_data *ch, obj_vnum keynum, int pic
 
 namespace {
   /* Whether obj, or else the door, has a flag: the container's, or the exit's */
-  bool door_flagged(GameWorld *g, struct char_data *ch, struct obj_data *obj, int door, int cont_flag, int ex_flag)
+  bool door_flagged(GameWorld *g, struct char_data *ch, struct obj_data *obj, int door, container_flag cont_flag, exit_flag ex_flag)
   {
     return obj ? obj_val_flagged(obj, cont_flag) : room_exit_flagged(char_get_exit(g, ch, door), ex_flag);
   }

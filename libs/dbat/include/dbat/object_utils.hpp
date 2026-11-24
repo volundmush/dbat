@@ -25,7 +25,10 @@ struct index_data *obj_index_of(GameWorld *g, obj_vnum vnum);
 // =============================================================================
 
 bool obj_aff_flagged(const struct obj_data *obj, aff_flag flag);
-bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag);
+bool obj_val_flagged(const struct obj_data *obj, container_flag flag);
+/* A container's (or portal's, vehicle's, hatch's, window's) flags: value VAL_CONTAINER_FLAGS, as one word */
+flag_set<container_flag> obj_container_flags(const struct obj_data *obj);
+void obj_set_container_flags(struct obj_data *obj, const flag_set<container_flag> &flags);
 bool obj_extra_flagged(const struct obj_data *obj, extra_flag flag);
 void obj_extra_set(struct obj_data *obj, extra_flag flag, bool on);
 bool obj_extra_toggle(struct obj_data *obj, extra_flag flag);

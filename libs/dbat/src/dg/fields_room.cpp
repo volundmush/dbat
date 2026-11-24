@@ -30,7 +30,7 @@ result exit_field(const field_query &q, room_data *r)
   if (!exit)
     return "";
   if (!q.has_arg() || str_eq_nocase(q.subfield, "bits"))
-    return sprintbit(exit->exit_info, exit_bits);
+    return flag_mask_names(exit->exit_info);
   if (str_eq_nocase(q.subfield, "vnum"))
     return number(exit->to_room);
   if (str_eq_nocase(q.subfield, "key"))

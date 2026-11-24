@@ -105,7 +105,7 @@ void rooms(GameWorld *g)
     for (int d = 0; d < NUM_OF_DIRS; d++)
       if (const room_direction_data *e = r->dir_option[d].get())
         file_print(out, "  exit {:d} to {:d} key {:d} info {:d} dc {:d} {:d} {:d} {:d} save {:d} {:d} fail {:d} {:d} {} {}\n",
-                   d, e->to_room, e->key, e->exit_info, e->dclock, e->dchide, e->dcskill, e->dcmove, e->failsavetype,
+                   d, e->to_room, e->key, static_cast<int16_t>(e->exit_info.word(0)), e->dclock, e->dchide, e->dcskill, e->dcmove, e->failsavetype,
                    e->dcfailsave, e->failroom, e->totalfailroom, text(e->keyword), text(e->general_description));
     ex_descs(r->ex_description);
     scripts(r->proto_script);
@@ -261,7 +261,7 @@ void houses(GameWorld *g)
       guests += str_format(" {:d}", h.guests[j]);
     file_print(out, "house {:d} atrium {:d} exit {:d} built {:d} mode {:d} owner {:d} paid {:d} bits {:d} by {:d} guests{}\n",
                h.vnum, h.atrium, h.exit_num, (long long)h.built_on, h.mode, h.owner, (long long)h.last_payment,
-               h.bitvector, h.builtby, guests);
+               house_flags_number(h.bitvector), h.builtby, guests);
   }
 }
 

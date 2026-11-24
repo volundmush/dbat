@@ -234,11 +234,11 @@ namespace {
       const trig_data *trig = index->proto;
       send_to_char(g, ch, "{:>4d}) [@g{:>5d}@n] @[1]{:<45.45} ", ++counter, index->vnum, trig->name);
       if (trig->attach_type == OBJ_TRIGGER)
-        send_to_char(g, ch, "obj @y{}@n\r\n", sprintbit(trig->trigger_type, otrig_types));
+        send_to_char(g, ch, "obj @y{}@n\r\n", trig_type_names(trig->attach_type, trig->trigger_type));
       else if (trig->attach_type == WLD_TRIGGER)
-        send_to_char(g, ch, "wld @y{}@n\r\n", sprintbit(trig->trigger_type, wtrig_types));
+        send_to_char(g, ch, "wld @y{}@n\r\n", trig_type_names(trig->attach_type, trig->trigger_type));
       else
-        send_to_char(g, ch, "mob @y{}@n\r\n", sprintbit(trig->trigger_type, trig_types));
+        send_to_char(g, ch, "mob @y{}@n\r\n", trig_type_names(trig->attach_type, trig->trigger_type));
     }
     /* quirk: listing a zone, the range is -1 to -1 */
     if (counter == 0)

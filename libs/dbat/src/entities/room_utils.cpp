@@ -120,9 +120,9 @@ bool room_flagged(GameWorld *g, room_vnum loc, room_flag flag)
   return r && room_flagged(r, flag);
 }
 
-bool room_exit_flagged(const struct room_direction_data *ex, bitvector_t flag)
+bool room_exit_flagged(const struct room_direction_data *ex, exit_flag flag)
 {
-  return (IS_SET((ex)->exit_info, (flag)));
+  return ((ex)->exit_info.test((flag)));
 }
 
 /* Field accessors (formerly accessor macros). */

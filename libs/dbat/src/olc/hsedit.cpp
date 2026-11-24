@@ -30,9 +30,6 @@
 #include "dbat/olc/commands.hpp"
 
 namespace {
-  static constexpr std::string_view house_flags_entries[] = {"!GUEST", "FREE", "!IMM", "IMP_ONLY", "RENTFREE", "SAVE_!RENT", "!SAVE"};
-  static constexpr name_table house_flags(house_flags_entries);
-
   static constexpr std::string_view house_types_entries[] = {"PLAYER_OWNED", "IMM_OWNED", "CLAN_OWNED", "UNOWNED"};
   static constexpr name_table house_types(house_types_entries);
 
@@ -120,7 +117,7 @@ namespace {
                             number, zone->number, house.owner, player_name_or(g, house.owner, "(NOBODY)"), house.atrium,
                             house.exit_num >= 0 && house.exit_num <= 11 ? dirs[house.exit_num] : "NONE", house_types[house.mode],
                             menu_date(house.built_on, "Unknown"), menu_date(house.last_payment, "None"), list_guests(g, house),
-                            sprintbit(house.bitvector, house_flags)));
+                            flag_mask_names(house.bitvector)));
     asking = mode::main_menu;
   }
 
@@ -178,11 +175,11 @@ namespace {
   {
     clear_screen(g, d);
     for (int flag = 0; flag < HOUSE_NUM_FLAGS; flag++) {
-      send_to_char(g, d->character, "@g{:>2d}@D)@y {:<20.20} @n", flag + 1, house_flags[flag]);
+      send_to_char(g, d->character, "@g{:>2d}@D)@y {:<20.20} @n", flag + 1, house_bits[static_cast<std::size_t>(flag)]);
       if (flag % 2)
         send_to_char(g, d->character, "\r\n");
     }
-    send_to_char(g, d->character, "\r\nHouse flags: @g{}@n\r\nEnter house flags, 0 to quit : ", sprintbit(house.bitvector, house_flags));
+    send_to_char(g, d->character, "\r\nHouse flags: @g{}@n\r\nEnter house flags, 0 to quit : ", flag_mask_names(house.bitvector));
     asking = mode::flags;
   }
 
@@ -522,7 +519,7 @@ namespace {
         }
         if (number_given == 0)
           break;
-        house.bitvector ^= 1L << (number_given - 1);
+        house.bitvector.toggle(static_cast<house_flag>(number_given - 1)); /* 1 to HOUSE_NUM_FLAGS */
         flags_menu(g, d);
         return;
     }

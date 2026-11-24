@@ -369,13 +369,26 @@ constexpr extra_flag ITEM_NOSTEAL               = extra_flag::nosteal;
 
 constexpr int NUM_ITEM_FLAGS = static_cast<int>(flag_count<extra_flag>);
 
-/* Container flags - value[1] */
-constexpr bitvector_t CONT_CLOSEABLE = (1u << 0); /* Container can be closed	*/
-constexpr bitvector_t CONT_PICKPROOF = (1u << 1); /* Container is pickproof	*/
-constexpr bitvector_t CONT_CLOSED    = (1u << 2); /* Container is closed		*/
-constexpr bitvector_t CONT_LOCKED    = (1u << 3); /* Container is locked		*/
+/* Container flags: value[1] (VAL_CONTAINER_FLAGS), as one word; obj_container_flags() reads them */
+extern const name_table container_bits; /* NUM_CONT_FLAGS of them */
+enum class container_flag : uint8_t {
+  closeable = 0, /* Container can be closed	*/
+  pickproof = 1, /* Container is pickproof	*/
+  closed    = 2, /* Container is closed		*/
+  locked    = 3, /* Container is locked		*/
+  count_    = 4,
+};
+template <> struct flag_traits<container_flag> {
+  static constexpr const name_table &names = container_bits;
+};
 
-constexpr int NUM_CONT_FLAGS = 4;
+/* The old names, until every use says container_flag:: */
+constexpr container_flag CONT_CLOSEABLE = container_flag::closeable;
+constexpr container_flag CONT_PICKPROOF = container_flag::pickproof;
+constexpr container_flag CONT_CLOSED    = container_flag::closed;
+constexpr container_flag CONT_LOCKED    = container_flag::locked;
+
+constexpr int NUM_CONT_FLAGS = static_cast<int>(flag_count<container_flag>);
 
 /* object-related structures ******************************************/
 constexpr int NUM_OBJ_VAL_POSITIONS = 16;
@@ -646,7 +659,6 @@ constexpr int TW_ARRAY_MAX = 4;
 
 extern const name_table wear_where; /* NUM_WEARS of them */
 extern const name_table item_types; /* NUM_ITEM_TYPES of them */
-extern const name_table container_bits; /* NUM_CONT_FLAGS of them */
 
 extern const name_table drinks; /* NUM_LIQ_TYPES of them */
 extern const name_table drinknames; /* NUM_LIQ_TYPES of them */

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "dbat/consts/shopflags.hpp"
 #include "dbat/consts/tradeflags.hpp"
 #include "dbat/consts/types.hpp"
 
@@ -26,8 +27,8 @@ int shop_get_bank(const struct shop_data *shop);
 void shop_set_bank(struct shop_data *shop, int v);
 int shop_get_temper(const struct shop_data *shop);
 void shop_set_temper(struct shop_data *shop, int v);
-bitvector_t shop_get_bitvector(const struct shop_data *shop);
-void shop_set_bitvector(struct shop_data *shop, bitvector_t v);
+const flag_set<shop_flag> &shop_get_bitvector(const struct shop_data *shop);
+flag_set<shop_flag> &shop_get_bitvector(struct shop_data *shop);
 int shop_get_lastsort(const struct shop_data *shop);
 void shop_set_lastsort(struct shop_data *shop, int v);
 float shop_get_profit_buy(const struct shop_data *shop);

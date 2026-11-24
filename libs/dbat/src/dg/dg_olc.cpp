@@ -66,7 +66,7 @@ namespace {
   void trigger_editor::edit_new()
   {
     trig.name         = "new trigger";
-    trig.trigger_type = MTRIG_GREET;
+    trig.trigger_type = trig_word(flag_set<mob_trig>{MTRIG_GREET});
     trig.narg         = 100;
     script            = "%echo% This trigger commandlist is not complete!\r\n";
     changed           = false;
@@ -97,7 +97,7 @@ namespace {
     clear_screen(g, d);
     write_to_output(g, d,
                     "Trigger Editor [@c{:d}@n]\r\n\r\n@g1@n) Name         : @y{}\r\n@g2@n) Intended for : @y{}\r\n@g3@n) Trigger types: @y{}\r\n@g4@n) Numeric Arg  : @y{:d}\r\n@g5@n) Arguments    : @y{}\r\n@g6@n) Commands:\r\n@c{}\r\n@gW@n) Copy Trigger\r\n@gZ@n) Wiznet\r\n@gQ@n) Quit\r\nEnter Choice :",
-                    vnum, trig.name, attach, sprintbit(trig.trigger_type, types_for(trig.attach_type)), trig.narg, trig.arglist, script);
+                    vnum, trig.name, attach, trig_type_names(trig.attach_type, trig.trigger_type), trig.narg, trig.arglist, script);
     asking = mode::main_menu;
   }
 
@@ -108,7 +108,7 @@ namespace {
     clear_screen(g, d);
     for (int i = 0; i < NUM_TRIG_TYPE_FLAGS; i++)
       write_to_output(g, d, "@g{:>2d}@n) {:<20.20}  {}", i + 1, types[i], (i + 1) % 2 ? "" : "\r\n");
-    write_to_output(g, d, "\r\nCurrent types : @c{}@n\r\nEnter type (0 to quit) : ", sprintbit(trig.trigger_type, types));
+    write_to_output(g, d, "\r\nCurrent types : @c{}@n\r\nEnter type (0 to quit) : ", trig_type_names(trig.attach_type, trig.trigger_type));
     asking = mode::types;
   }
 
@@ -223,7 +223,7 @@ namespace {
         if (const int i = parse_int(line); i == 0)
           break;
         else if (i > 0 && i <= NUM_TRIG_TYPE_FLAGS)
-          TOGGLE_BIT(trig.trigger_type, 1U << (i - 1));
+          trig.trigger_type ^= bitvector_t{1} << (i - 1); /* the word, read as what the trigger is for */
         changed = true; /* quirk: a number out of range too */
         types_menu(g, d);
         return;

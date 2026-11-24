@@ -262,9 +262,9 @@ run_result script_driver(GameWorld *g, owner_ptr go, trig_data *trig, int mode)
   return result;
 }
 
-bool trigger_ready(GameWorld *g, trig_data *t, bitvector_t type)
+bool trigger_ready(GameWorld *g, trig_data *t, bitvector_t word)
 {
-  if (!(t->trigger_type & type) || t->run.running())
+  if (!(t->trigger_type & word) || t->run.running())
     return false;
   if (t->program && t->program->runs())
     return true;

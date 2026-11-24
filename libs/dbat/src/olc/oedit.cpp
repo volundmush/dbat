@@ -276,7 +276,7 @@ namespace {
   {
     clear_screen(g, d);
     write_to_output(g, d, "@g1@n) CLOSEABLE\r\n@g2@n) PICKPROOF\r\n@g3@n) CLOSED\r\n@g4@n) LOCKED\r\nContainer flags: @c{}@n\r\nEnter flag, 0 to quit : ",
-                    sprintbit(obj_get_value(&e.obj, 1), container_bits));
+                    flag_mask_names(obj_container_flags(&e.obj)));
   }
 
   void liquid_menu(GameWorld *g, struct descriptor_data *d, object_editor &)

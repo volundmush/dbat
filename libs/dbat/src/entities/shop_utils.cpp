@@ -84,14 +84,14 @@ void shop_set_temper(struct shop_data *shop, int v)
   shop->temper1 = v;
 }
 
-bitvector_t shop_get_bitvector(const struct shop_data *shop)
+const flag_set<shop_flag> &shop_get_bitvector(const struct shop_data *shop)
 {
   return shop->bitvector;
 }
 
-void shop_set_bitvector(struct shop_data *shop, bitvector_t v)
+flag_set<shop_flag> &shop_get_bitvector(struct shop_data *shop)
 {
-  shop->bitvector = v;
+  return shop->bitvector;
 }
 
 int shop_get_lastsort(const struct shop_data *shop)
@@ -266,10 +266,10 @@ void shop_buy_set_keywords(struct shop_buy_data *buy, std::string_view v)
 
 bool shop_uses_bank(const struct shop_data *shop)
 {
-  return IS_SET(shop->bitvector, WILL_BANK_MONEY);
+  return shop->bitvector.test(WILL_BANK_MONEY);
 }
 
 bool shop_allows_steal(const struct shop_data *shop)
 {
-  return IS_SET(shop->bitvector, WILL_ALLOW_STEAL);
+  return shop->bitvector.test(WILL_ALLOW_STEAL);
 }

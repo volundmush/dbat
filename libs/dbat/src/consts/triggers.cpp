@@ -1,3 +1,4 @@
+#include <string>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/triggers.hpp"
@@ -76,3 +77,12 @@ static constexpr std::string_view wtrig_types_entries[] = {
     "Time"};
 static_assert(std::size(wtrig_types_entries) == NUM_WTRIG_TYPES);
 constinit const name_table wtrig_types(wtrig_types_entries);
+
+std::string trig_type_names(int attach_type, bitvector_t word)
+{
+  switch (attach_type) {
+    case OBJ_TRIGGER: return flag_mask_names(flag_set<obj_trig>::from_words(std::span(&word, 1)));
+    case WLD_TRIGGER: return flag_mask_names(flag_set<wld_trig>::from_words(std::span(&word, 1)));
+    default: return flag_mask_names(flag_set<mob_trig>::from_words(std::span(&word, 1)));
+  }
+}

@@ -48,7 +48,7 @@ static bool mail_recip_ok(GameWorld *g, std::string_view name)
   int player_i, ret = false;
 
   if ((player_i = get_ptable_by_name(g, name)) >= 0) {
-    if (!IS_SET(g->player_table[player_i].flags, PINDEX_DELETED))
+    if (!g->player_table[player_i].flags.test(PINDEX_DELETED))
       ret = true;
   }
   return ret;

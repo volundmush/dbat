@@ -49,27 +49,32 @@ static void dg_letter_value(GameWorld *g, struct script_data *sc, trig_data *tri
 static EVENTFUNC(trig_wait_event);
 
 /* By id, because a trigger can purge any object at all, including the next one in the list. */
-static void run_object_triggers(GameWorld *g, bitvector_t type, void (*run)(GameWorld *g, obj_data *obj))
+static void run_object_triggers(GameWorld *g, obj_trig type, void (*run)(GameWorld *g, obj_data *obj))
 {
   obj_data *obj;
   long *ids;
   size_t count = 0;
 
   for (obj_data *thing : each_obj(g))
-    if (obj_get_script(thing) && IS_SET(obj_get_script(thing)->types, type))
+    if (obj_get_script(thing) && trig_word_has(obj_get_script(thing)->types, type))
       count++;
   if (!count)
     return;
   ids   = new long[count]();
   count = 0;
   for (obj_data *item : each_obj(g))
-    if (obj_get_script(item) && IS_SET(obj_get_script(item)->types, type))
+    if (obj_get_script(item) && trig_word_has(obj_get_script(item)->types, type))
       ids[count++] = obj_get_id(item);
   for (size_t i = 0; i < count; i++)
-    if ((obj = find_obj(g, ids[i])) && obj_get_script(obj) && IS_SET(obj_get_script(obj)->types, type))
+    if ((obj = find_obj(g, ids[i])) && obj_get_script(obj) && trig_word_has(obj_get_script(obj)->types, type))
       run(g, obj);
   delete[] ids;
 }
+
+/* A mob's script was asked for these by the room types' names, which are the same bits */
+static_assert(std::to_underlying(MTRIG_RANDOM) == std::to_underlying(WTRIG_RANDOM) &&
+              std::to_underlying(MTRIG_GLOBAL) == std::to_underlying(WTRIG_GLOBAL) &&
+              std::to_underlying(MTRIG_TIME) == std::to_underlying(WTRIG_TIME));
 
 /* checks every PULSE_SCRIPT for random triggers */
 void script_trigger_check(GameWorld *g)
@@ -81,9 +86,9 @@ void script_trigger_check(GameWorld *g)
     if (char_get_script(ch)) {
       sc = char_get_script(ch);
 
-      if (IS_SET(sc->types, WTRIG_RANDOM) &&
+      if (trig_word_has(sc->types, MTRIG_RANDOM) &&
           (!is_empty(g, room_get_zone(g, char_get_in_room(ch))) ||
-           IS_SET(sc->types, WTRIG_GLOBAL)))
+           trig_word_has(sc->types, MTRIG_GLOBAL)))
         random_mtrigger(g, ch);
     }
   }
@@ -95,9 +100,9 @@ void script_trigger_check(GameWorld *g)
       room = room_of(g, nr);
       sc   = room_get_script(room);
 
-      if (IS_SET(sc->types, WTRIG_RANDOM) &&
+      if (trig_word_has(sc->types, WTRIG_RANDOM) &&
           (!is_empty(g, room_get_zone(room)) ||
-           IS_SET(sc->types, WTRIG_GLOBAL)))
+           trig_word_has(sc->types, WTRIG_GLOBAL)))
         random_wtrigger(g, room);
     }
   }
@@ -112,9 +117,9 @@ void check_time_triggers(GameWorld *g)
     if (char_get_script(ch)) {
       sc = char_get_script(ch);
 
-      if (IS_SET(sc->types, WTRIG_TIME) &&
+      if (trig_word_has(sc->types, MTRIG_TIME) &&
           (!is_empty(g, room_get_zone(g, char_get_in_room(ch))) ||
-           IS_SET(sc->types, WTRIG_GLOBAL)))
+           trig_word_has(sc->types, MTRIG_GLOBAL)))
         time_mtrigger(g, ch);
     }
   }
@@ -126,9 +131,9 @@ void check_time_triggers(GameWorld *g)
       room = room_of(g, nr);
       sc   = room_get_script(room);
 
-      if (IS_SET(sc->types, WTRIG_TIME) &&
+      if (trig_word_has(sc->types, WTRIG_TIME) &&
           (!is_empty(g, room_get_zone(room)) ||
-           IS_SET(sc->types, WTRIG_GLOBAL)))
+           trig_word_has(sc->types, WTRIG_GLOBAL)))
         time_wtrigger(g, room);
     }
   }

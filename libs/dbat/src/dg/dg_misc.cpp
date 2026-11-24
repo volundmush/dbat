@@ -362,7 +362,9 @@ bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, std::string_
       break;
     case 2: { /* flags       */
       std::string flags(value);
-      newexit->exit_info = (int16_t)io::ascii_flags(flags, 0, "asciiflag_conv");
+      /* quirk: the field was 16 bits, so a letter past p is dropped and p (bit 15) reads as every bit from 15 up */
+      const auto word = static_cast<int16_t>(io::ascii_flags(flags, 0, "asciiflag_conv"));
+      newexit->exit_info.set_word(0, static_cast<bitvector_t>(word));
       break;
     }
     case 3: /* key         */

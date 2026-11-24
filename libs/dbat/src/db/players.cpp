@@ -36,17 +36,18 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-bool pindex_flagged(const player_index_element &entry, int flag)
+static constexpr std::string_view pindex_bits_entries[] = {"DELETED", "NODELETE", "SELFDELETE", "NOWIZLIST"};
+static_assert(std::size(pindex_bits_entries) == flag_count<pindex_flag>);
+constinit const name_table pindex_bits(pindex_bits_entries);
+
+bool pindex_flagged(const player_index_element &entry, pindex_flag flag)
 {
-  return IS_SET(entry.flags, flag);
+  return entry.flags.test(flag);
 }
 
-void pindex_set_flag(player_index_element &entry, int flag, bool on)
+void pindex_set_flag(player_index_element &entry, pindex_flag flag, bool on)
 {
-  if (on)
-    SET_BIT(entry.flags, flag);
-  else
-    REMOVE_BIT(entry.flags, flag);
+  entry.flags.set(flag, on);
 }
 
 /* The player index, plrfiles/index: a line for each player,
@@ -94,7 +95,7 @@ void build_player_index(GameWorld *g)
     p.last        = last;
     p.played      = played;
     p.name        = name;
-    p.flags       = io::ascii_flags(bits, 0, "asciiflag_conv");
+    p.flags.set_word(0, io::ascii_flags(bits, 0, "asciiflag_conv"));
     g->top_idnum  = MAX(g->top_idnum, p.id);
   }
   g->top_of_p_file = g->top_of_p_table = i - 1;
@@ -133,7 +134,7 @@ void save_player_index(GameWorld *g)
     const player_index_element &p = g->player_table[i];
     if (p.name.empty())
       continue;
-    out.print("{:d} {} {:d} {} {:d} {:d} {:d} {:d} {:d}\n", p.id, p.name, p.level, flag_letters(p.flags),
+    out.print("{:d} {} {:d} {} {:d} {:d} {:d} {:d} {:d}\n", p.id, p.name, p.level, flag_letters(p.flags.word(0)),
               static_cast<long long>(p.last), p.admlevel, p.ship, p.shiproom, static_cast<long long>(p.played));
   }
   out.write("~\n");
@@ -224,13 +225,13 @@ void clean_pfiles(GameWorld *g)
      * We only want to go further if the player isn't protected
      * from deletion and hasn't already been deleted.
      */
-    if (!IS_SET(g->player_table[i].flags, PINDEX_NODELETE) &&
+    if (!g->player_table[i].flags.test(PINDEX_NODELETE) &&
         !g->player_table[i].name.empty()) {
       /*
        * If the player is already flagged for deletion, then go
        * ahead and get rid of him.
        */
-      if (IS_SET(g->player_table[i].flags, PINDEX_DELETED)) {
+      if (g->player_table[i].flags.test(PINDEX_DELETED)) {
         remove_player(g, i);
       } else {
         /*

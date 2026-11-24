@@ -10,7 +10,7 @@
 
 namespace {
   /* ... the way south, to room 300, a door of these flags (and the way back too), named so, opened by this key */
-  struct room_direction_data *door_south(GameWorld *g, int flags, const char *keyword = "door", obj_vnum key = -1, bool back = true)
+  struct room_direction_data *door_south(GameWorld *g, exit_flags flags, const char *keyword = "door", obj_vnum key = -1, bool back = true)
   {
     struct room_direction_data *exit = room_get_dir_option(g, ARENA, SOUTH);
     exit->exit_info                  = flags;
@@ -97,7 +97,7 @@ namespace {
      as asked; att aboard by the hatch, or by the ship */
   void ship_at(GameWorld *g, struct char_data *att, obj_vnum vnum, bool aboard, bool in_space = false, bool closed = true, bool locked = false)
   {
-    int flags = CONT_CLOSEABLE | (closed ? CONT_CLOSED : 0) | (locked ? CONT_LOCKED : 0);
+    int flags = cont_value(CONT_CLOSEABLE) | (closed ? cont_value(CONT_CLOSED) : 0) | (locked ? cont_value(CONT_LOCKED) : 0);
     room_stock(g, 81);
     struct obj_data *ship = thing_named(g, "ship", ITEM_VEHICLE, {{VAL_PORTAL_DEST, 81}, {VAL_CONTAINER_FLAGS, flags}, {VAL_KEY_KEYCODE, 1}}, vnum);
     struct obj_data *hatch = read_object(g, 70);
@@ -360,7 +360,7 @@ namespace {
     {"by a closed door", "unlock door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED, "door", 72);), false, 1},
     {"with the key, by a closed door", "lock door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED, "door", 72); keyed(g, att, 72);), false, 1},
     {"with the key, by a locked door", "lock door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED | EX_LOCKED, "door", 72); keyed(g, att, 72);), false, 1},
-    {"by a wall", "open wall", false, SETUP(door_south(g, 0, "wall");), false, 1},
+    {"by a wall", "open wall", false, SETUP(door_south(g, {}, "wall");), false, 1},
     {"unskilled, by a locked door", "pick door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED | EX_LOCKED, "door", 72);), false, 1},
     {"skilled without a kit, by a locked door", "pick door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED | EX_LOCKED, "door", 72); char_set_skills_base(att, SKILL_OPEN_LOCK, 100);), false, 1},
     {"with a broken kit, by a locked door", "pick door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED | EX_LOCKED, "door", 72); char_set_skills_base(att, SKILL_OPEN_LOCK, 100); obj_extra_set(carries_as(g, att, 18, "kit"), ITEM_BROKEN, true);), false, 1},
@@ -371,12 +371,12 @@ namespace {
     {"a poor picker, by a locked door", "pick door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED | EX_LOCKED, "door", 72); picker(g, att, 1);), false, 2},
     {"a picker, by a hard lock", "pick door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED | EX_LOCKED, "door", 72)->dclock = 1; picker(g, att);), false, 2},
     {"a picker, by an unlocked door", "pick door", false, SETUP(door_south(g, EX_ISDOOR | EX_CLOSED, "door", 72); picker(g, att);), false, 1},
-    {"with a closed bag", "open bag", false, SETUP(obj_set_value(holding(g, att, "bag", ITEM_CONTAINER), VAL_CONTAINER_FLAGS, CONT_CLOSEABLE | CONT_CLOSED);), false, 1},
-    {"with an open bag", "close bag", false, SETUP(obj_set_value(holding(g, att, "bag", ITEM_CONTAINER), VAL_CONTAINER_FLAGS, CONT_CLOSEABLE);), false, 1},
-    {"with a locked bag", "unlock bag", false, SETUP(obj_set_value(holding(g, att, "bag", ITEM_CONTAINER), VAL_CONTAINER_FLAGS, CONT_CLOSEABLE | CONT_CLOSED | CONT_LOCKED); keyed(g, att, 0);), false, 1},
-    {"with a closed bag and its key", "lock bag", false, SETUP({ obj_data *b = holding(g, att, "bag", ITEM_CONTAINER); obj_set_value(b, VAL_CONTAINER_FLAGS, CONT_CLOSEABLE | CONT_CLOSED); obj_set_value(b, VAL_KEY_KEYCODE, 72); } keyed(g, att, 72);), false, 1},
-    {"a picker, with a locked bag", "pick bag", false, SETUP({ obj_data *b = holding(g, att, "bag", ITEM_CONTAINER); obj_set_value(b, VAL_CONTAINER_FLAGS, CONT_CLOSEABLE | CONT_CLOSED | CONT_LOCKED); obj_set_value(b, VAL_KEY_KEYCODE, 72); } picker(g, att);), false, 4},
-    {"by a closed chest", "open chest", false, SETUP(obj_set_value(cast.chest, VAL_CONTAINER_FLAGS, CONT_CLOSEABLE | CONT_CLOSED);), false, 1},
+    {"with a closed bag", "open bag", false, SETUP(obj_set_value(holding(g, att, "bag", ITEM_CONTAINER), VAL_CONTAINER_FLAGS, cont_value(CONT_CLOSEABLE, CONT_CLOSED));), false, 1},
+    {"with an open bag", "close bag", false, SETUP(obj_set_value(holding(g, att, "bag", ITEM_CONTAINER), VAL_CONTAINER_FLAGS, cont_value(CONT_CLOSEABLE));), false, 1},
+    {"with a locked bag", "unlock bag", false, SETUP(obj_set_value(holding(g, att, "bag", ITEM_CONTAINER), VAL_CONTAINER_FLAGS, cont_value(CONT_CLOSEABLE, CONT_CLOSED, CONT_LOCKED)); keyed(g, att, 0);), false, 1},
+    {"with a closed bag and its key", "lock bag", false, SETUP({ obj_data *b = holding(g, att, "bag", ITEM_CONTAINER); obj_set_value(b, VAL_CONTAINER_FLAGS, cont_value(CONT_CLOSEABLE, CONT_CLOSED)); obj_set_value(b, VAL_KEY_KEYCODE, 72); } keyed(g, att, 72);), false, 1},
+    {"a picker, with a locked bag", "pick bag", false, SETUP({ obj_data *b = holding(g, att, "bag", ITEM_CONTAINER); obj_set_value(b, VAL_CONTAINER_FLAGS, cont_value(CONT_CLOSEABLE, CONT_CLOSED, CONT_LOCKED)); obj_set_value(b, VAL_KEY_KEYCODE, 72); } picker(g, att);), false, 4},
+    {"by a closed chest", "open chest", false, SETUP(obj_set_value(cast.chest, VAL_CONTAINER_FLAGS, cont_value(CONT_CLOSEABLE, CONT_CLOSED));), false, 1},
     {"with a rock", "open rock", false, SETUP(holding(g, att, "rock");), false, 1},
     {"with an unclosable bag", "close bag", false, SETUP(holding(g, att, "bag", ITEM_CONTAINER);), false, 1},
 
@@ -413,7 +413,7 @@ namespace {
     {"by a portal", "enter portal", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, 300}});), false, 1},
     {"with a portal", "enter portal", false, SETUP(obj_set_value(holding(g, att, "portal", ITEM_PORTAL), VAL_PORTAL_DEST, 300);), false, 1},
     {"wearing a portal", "enter portal", false, SETUP(obj_set_type_flag(scouter_on(g, att), ITEM_PORTAL); obj_set_name(char_get_equipment(att, WEAR_EYE), "portal"); obj_set_value(char_get_equipment(att, WEAR_EYE), VAL_PORTAL_DEST, 300);), false, 1},
-    {"by a closed portal", "enter portal", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, 300}, {VAL_CONTAINER_FLAGS, CONT_CLOSED}});), false, 1},
+    {"by a closed portal", "enter portal", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, 300}, {VAL_CONTAINER_FLAGS, cont_value(CONT_CLOSED)}});), false, 1},
     {"by a portal to nowhere", "enter portal", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, NOWHERE}});), false, 1},
     {"by a portal to a gone room", "enter portal", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, 31999}});), false, 1},
     {"by a rock", "enter rock", false, SETUP(thing_named(g, "rock", ITEM_OTHER);), false, 1},
@@ -434,7 +434,7 @@ namespace {
     {"indoors", "leave", false, SETUP(room_set_flag(g, ARENA, ROOM_INDOORS, true); room_set_flag(g, 300, ROOM_INDOORS, true);), false, 1},
     {"indoors, by a way out", "leave", false, SETUP(room_set_flag(g, ARENA, ROOM_INDOORS, true);), false, 1},
     {"by a portal out", "leave", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, 300}});), false, 1},
-    {"by a closed portal out", "leave", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, 300}, {VAL_CONTAINER_FLAGS, CONT_CLOSED}});), false, 1},
+    {"by a closed portal out", "leave", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, 300}, {VAL_CONTAINER_FLAGS, cont_value(CONT_CLOSED)}});), false, 1},
     {"by a portal out to nowhere", "leave", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, NOWHERE}});), false, 1},
     {"by a portal out to a gone room", "leave", false, SETUP(thing_named(g, "portal", ITEM_PORTAL, {{VAL_PORTAL_DEST, 31999}});), false, 1},
     {"by a hatch to no ship", "leave", false, SETUP(thing_named(g, "hatch", ITEM_HATCH, {{VAL_HATCH_DEST, 72}});), false, 1},

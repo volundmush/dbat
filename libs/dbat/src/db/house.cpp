@@ -31,6 +31,10 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
+static constexpr std::string_view house_bits_entries[] = {"!GUEST", "FREE", "!IMM", "IMP_ONLY", "RENTFREE", "SAVE_!RENT", "!SAVE"};
+static_assert(std::size(house_bits_entries) == HOUSE_NUM_FLAGS);
+constinit const name_table house_bits(house_bits_entries);
+
 static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int quiet);
 
 /* local globals */

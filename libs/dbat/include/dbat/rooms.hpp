@@ -13,7 +13,7 @@ struct room_direction_data {
   std::string general_description; /* When look DIR; empty for none */
   std::string keyword;             /* for open/close; empty for none */
 
-  int16_t exit_info{};       /* Exit info			*/
+  flag_set<exit_flag> exit_info; /* Exit info			*/
   obj_vnum key{};            /* Key's number (-1 for no key)		*/
   room_vnum to_room{};       /* Where direction leads (NOWHERE)	*/
   int dclock{};              /* DC to pick the lock			*/
