@@ -4,6 +4,7 @@ add_library(dbat::dbat ALIAS dbat)
 target_compile_features(dbat PUBLIC cxx_std_26)
 
 option(DBAT_WERROR "Treat warnings as errors (the debug and asan presets turn this on)" OFF)
+option(DBAT_CONVERSION_WARNINGS "Warn on implicit conversions and C-style casts, without failing the build on them; the debug, asan and fuzz presets turn this on, and tools/check-conversions.py keeps their count from rising" OFF)
 
 # Flags shared by every source file in the server.
 set(DBAT_CXX_FLAGS
@@ -20,6 +21,10 @@ set(DBAT_CXX_FLAGS
                              -Wformat-signedness -Wcast-align=strict -Wimplicit-fallthrough=5 -Wuseless-cast>
     $<$<CXX_COMPILER_ID:Clang>:-Wcast-align -Wimplicit-fallthrough>
     $<$<BOOL:${DBAT_WERROR}>:-Werror>
+    # not errors yet, while the existing ones are fixed: tools/check-conversions.py ratchets their count
+    $<$<BOOL:${DBAT_CONVERSION_WARNINGS}>:-Wconversion -Wsign-conversion -Wold-style-cast
+                                          -Wno-error=conversion -Wno-error=sign-conversion -Wno-error=old-style-cast>
+    $<$<AND:$<BOOL:${DBAT_CONVERSION_WARNINGS}>,$<CXX_COMPILER_ID:GNU>>:-Wno-error=float-conversion>
     CACHE INTERNAL "")
 target_compile_options(dbat PRIVATE ${DBAT_CXX_FLAGS})
 

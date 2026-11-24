@@ -6,7 +6,7 @@
       "name": "debug",
       "displayName": "Debug (GCC, -O0)",
       "binaryDir": "${sourceDir}/build",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_CXX_COMPILER": "g++", "CMAKE_CXX_FLAGS": "-D_GLIBCXX_ASSERTIONS", "DBAT_WERROR": "ON" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_CXX_COMPILER": "g++", "CMAKE_CXX_FLAGS": "-D_GLIBCXX_ASSERTIONS", "DBAT_WERROR": "ON", "DBAT_CONVERSION_WARNINGS": "ON" }
     },
     {
       "name": "release",
@@ -23,7 +23,8 @@
         "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_CXX_FLAGS": "-O1 -D_GLIBCXX_ASSERTIONS -fsanitize=address,undefined,float-cast-overflow -fno-sanitize-recover=undefined,float-cast-overflow",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined,float-cast-overflow",
-        "DBAT_WERROR": "ON"
+        "DBAT_WERROR": "ON",
+        "DBAT_CONVERSION_WARNINGS": "ON"
       }
     },
     {
@@ -44,9 +45,10 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_CXX_FLAGS": "-O1 -fsanitize=fuzzer-no-link,address,undefined,float-cast-overflow -fno-sanitize-recover=undefined,float-cast-overflow -DDBAT_FUZZ",
+        "CMAKE_CXX_FLAGS": "-O1 -D_GLIBCXX_ASSERTIONS -fsanitize=fuzzer-no-link,address,undefined,float-cast-overflow -fno-sanitize-recover=undefined,float-cast-overflow -DDBAT_FUZZ",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined,float-cast-overflow",
-        "DBAT_FUZZ": "ON"
+        "DBAT_FUZZ": "ON",
+        "DBAT_CONVERSION_WARNINGS": "ON"
       }
     }
   ],
