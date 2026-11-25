@@ -1,7 +1,6 @@
 #include "dbat/guild_utils.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/guild.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/game_world.hpp"
 
 room_vnum guild_get_vnum(const struct guild_data *guild)

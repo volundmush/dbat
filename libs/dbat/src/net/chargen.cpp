@@ -848,16 +848,16 @@ static void state_android(GameWorld *g, struct descriptor_data *d, std::string_v
 {
   switch (first_char(arg)) {
     case '1':
-      char_plr_set(d->character, PLR_ABSORB, true);
+      char_plr_set(d->character, player_flag::absorb, true);
       write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your liking.\r\n\r\n");
       write_to_output(g, d, "\r\n@WQuestion (@G1@W out of @g10@W)");
       break;
     case '2':
-      char_plr_set(d->character, PLR_REPAIR, true);
+      char_plr_set(d->character, player_flag::repair, true);
       write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your linking.\r\n\r\n");
       break;
     case '3':
-      char_plr_set(d->character, PLR_SENSEM, true);
+      char_plr_set(d->character, player_flag::sensem, true);
       write_to_output(g, d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer or your stats contrary to your liking.\r\n\r\n");
       break;
     default:
@@ -1027,7 +1027,7 @@ static const question questions[] = {
      {{.text = "Ask someone with more experience what to do.", .pl = dice(5, 25), .st = dice(8, 50), .ki = dice(6, 50)},
       {.text = "Jump in with some nice classic pushups!", .pl = dice(5, 55), .st = dice(8, 40), .ki = dice(6, 40)},
       {.text = "Search for something magical to increase my strength.", .pl = dice(5, 125), .st = dice(8, 50), .ki = dice(6, 40)},
-      {.text = "Practice my favorite skills instead of working just on my body.", .pl = dice(5, 65), .st = dice(8, 65), .ki = dice(6, 65), .flag = PLR_SKILLP},
+      {.text = "Practice my favorite skills instead of working just on my body.", .pl = dice(5, 65), .st = dice(8, 65), .ki = dice(6, 65), .flag = player_flag::skillp},
       {.text = "Spar with a friend so we can both improve our abilities.", .pl = dice(5, 75), .st = dice(8, 100), .ki = dice(6, 75)}}},
     {CON_Q2, false, "@wYou are faced with the strongest opponent you have ever\r\nfaced in your life. You both have beat each other to the\r\nlimits of both your strengths. A situation has presented \r\nan opportunity to win the fight, what do you do?\r\n",
      {{.text = "Kill my opponent in a very brutal fashion!", .alignment = -200},
@@ -1386,7 +1386,7 @@ static void apply_draft(GameWorld *g, struct descriptor_data *d)
   }
   if (dr.forget) {
     char_set_practice_points(g, ch, char_get_practice_points(g, ch) + (200));
-    char_plr_set(ch, PLR_FORGET, true);
+    char_plr_set(ch, player_flag::forget, true);
   }
   if (char_is_mutant(ch)) {
     if (char_get_genome(ch, 0) == 3)

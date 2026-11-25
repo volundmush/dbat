@@ -69,9 +69,9 @@ void headbutt_knockout(strike_shot &s, int where)
 
   if (where != 2)
     return;
-  if (!char_aff_flagged(vict, AFF_KNOCKED) &&
+  if (!char_aff_flagged(vict, aff_flag::knocked) &&
       (rand_number(s.g, 1, 7) >= 4 && (getCurPL(s.g, vict) > getCurPL(s.g, s.ch) / 5) &&
-       !char_aff_flagged(vict, AFF_SANCTUARY))) {
+       !char_aff_flagged(vict, aff_flag::sanctuary))) {
     act_triple(s.g, {"@C$N@W is knocked out!@n", "@WYou are knocked out!@n", "@C$N@W is knocked out!@n", true}, s.ch,
                nullptr, vict);
     setStatusKnockedOut(vict);
@@ -199,7 +199,7 @@ void aqua_barrier(ki_shot &s)
 {
   struct char_data *ch = s.ch;
 
-  if (!char_aff_flagged(ch, AFF_SANCTUARY))
+  if (!char_aff_flagged(ch, aff_flag::sanctuary))
     return;
   if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 100)
     char_set_barrier(ch, char_get_barrier(ch) + (s.dmg * 0.1));
@@ -220,7 +220,7 @@ void water_razor_drain(ki_shot &s, ki_outcome how)
   if (how != ki_outcome::hit)
     return;
   int64_t reduction = s.pl_before - getCurPL(g, vict);
-  if ((!char_is_npc(vict) && !char_aff_flagged(vict, AFF_SPIRIT)) || (char_is_npc(vict) && getCurPL(g, vict) > 0)) {
+  if ((!char_is_npc(vict) && !char_aff_flagged(vict, aff_flag::spirit)) || (char_is_npc(vict) && getCurPL(g, vict) > 0)) {
     decCurKI(g, vict, reduction, 0);
     decCurST(g, vict, reduction, 0);
   }
@@ -241,9 +241,9 @@ void water_spikes_knockout(ki_shot &s)
 {
   struct char_data *vict = s.vict;
 
-  if (s.where == 2 && !char_aff_flagged(vict, AFF_KNOCKED) &&
+  if (s.where == 2 && !char_aff_flagged(vict, aff_flag::knocked) &&
       (rand_number(s.g, 1, 3) >= 2 && (getCurPL(s.g, vict) > getCurPL(s.g, s.ch) / 5) &&
-       !char_aff_flagged(vict, AFF_SANCTUARY))) {
+       !char_aff_flagged(vict, aff_flag::sanctuary))) {
     act_triple(s.g, {"@C$N@W is knocked out!@n", "@WYou are knocked out!@n", "@C$N@W is knocked out!@n", true}, s.ch,
                nullptr, vict);
     setStatusKnockedOut(vict);
@@ -265,10 +265,10 @@ void koteiru_freeze(ki_shot &s, ki_outcome how)
 
   if (how != ki_outcome::hit || getCurPL(s.g, vict) <= 1)
     return;
-  if (rand_number(s.g, 1, 4) == 1 && !char_aff_flagged(vict, AFF_FROZEN) && !char_is_demon(vict)) {
-    act(s.g, "@CYour body completely freezes!@n", true, vict, nullptr, nullptr, TO_CHAR);
-    act(s.g, "@c$n's@C body completely freezes!@n", true, vict, nullptr, nullptr, TO_ROOM);
-    char_aff_set(vict, AFF_FROZEN, true);
+  if (rand_number(s.g, 1, 4) == 1 && !char_aff_flagged(vict, aff_flag::frozen) && !char_is_demon(vict)) {
+    act(s.g, "@CYour body completely freezes!@n", true, vict, nullptr, nullptr, act_to::actor);
+    act(s.g, "@c$n's@C body completely freezes!@n", true, vict, nullptr, nullptr, act_to::room);
+    char_aff_set(vict, aff_flag::frozen, true);
   }
 }
 
@@ -640,7 +640,7 @@ void beast_at_victim(GameWorld *g, char_data *ch, char_data *vict, const beast_a
 
   if (prob < perc - 20) {
     if (getCurST(g, vict) > 0) { /* with no stamina left, they can only be missed */
-      if (atk.parries && pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
+      if (atk.parries && pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, mob_flag::dummy))) {
         act_triple(g, atk.parry, ch, nullptr, vict);
         improve_skill(g, vict, SKILL_PARRY, 0);
         pcost(g, ch, 0, stcost / 2);
@@ -710,7 +710,7 @@ void perform_beast(GameWorld *g, char_data *ch, std::string_view argument, const
   /* who they name, else who they're fighting if they're here, else an object here */
   struct char_data *vict = nullptr;
   struct obj_data *obj   = nullptr;
-  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_room))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch))
       vict = char_get_fighting(g, ch);
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)))))
@@ -724,7 +724,7 @@ void perform_beast(GameWorld *g, char_data *ch, std::string_view argument, const
   if (!can_kill(g, ch, nullptr, obj, 0)) /* which refuses a broken object */
     return;
   int64_t dmg = getCurPL(g, ch) / 10000 + char_get_aff_abils_str(ch);
-  act(g, atk.obj_to_room, true, ch, obj, nullptr, TO_ROOM);
+  act(g, atk.obj_to_room, true, ch, obj, nullptr, act_to::room);
   hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
   pcost(g, ch, 0, stcost);
 }
@@ -823,11 +823,11 @@ ACMD(do_lightgrenade)
     attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
   if (!check_points(g, ch, getMaxKI(g, ch) * minimum, 0))
     return;
-  if (room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::peaceful)) {
     send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }
-  if (arg.empty() || !(targ = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(targ = get_char_vis(g, ch, arg, nullptr, find_flag::char_room))) {
     if (!char_get_fighting(g, ch) || char_get_in_room(char_get_fighting(g, ch)) != char_get_in_room(ch)) {
       send_to_char(g, ch, "Nobody around here by that name.\r\n");
       return;
@@ -846,9 +846,9 @@ ACMD(do_lightgrenade)
   int64_t dmg = damtype(g, ch, 57, skill, attperc);
 
   for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (vict == ch || char_mob_flagged(vict, MOB_NOKILL))
+    if (vict == ch || char_mob_flagged(vict, mob_flag::nokill))
       continue;
-    if (char_aff_flagged(vict, AFF_GROUP) &&
+    if (char_aff_flagged(vict, aff_flag::group) &&
         (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict))) {
       if (vict == targ)
         send_to_char(g, ch, "Leave the group if you want to murder them.\r\n");
@@ -882,7 +882,7 @@ ACMD(do_lightgrenade)
       continue;
     }
     act_triple(g, vict == targ ? hit : caught, ch, nullptr, vict);
-    if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(g, 1, 4) == 4)
+    if (!char_aff_flagged(vict, aff_flag::flying) && char_get_position(vict) == POS_STANDING && rand_number(g, 1, 4) == 4)
       handle_knockdown(g, vict);
     if (vict == targ)
       hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
@@ -911,9 +911,9 @@ ACMD(do_energize)
     send_to_char(g, ch, "You learn the basics for energizing thrown weapons! Now use the energize command again.\r\n");
     return;
   }
-  bool on = !char_prf_flagged(g, ch, PRF_ENERGIZE);
+  bool on = !char_prf_flagged(g, ch, pref_flag::energize);
   send_to_char(g, ch, "{}\r\n", on ? "You start focusing your latent ki into your fingertips." : "You stop focusing ki into your fingertips.");
-  char_prf_set(g, ch, PRF_ENERGIZE, on);
+  char_prf_set(g, ch, pref_flag::energize, on);
 }
 
 ACMD(do_breath)
@@ -1020,7 +1020,7 @@ ACMD(do_combine)
     send_to_char(g, ch, "You need to have the minimum of 5{} ki charged to combine.\r\n", "%");
 
   if (!leader) {
-    struct char_data *vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM);
+    struct char_data *vict = get_char_vis(g, ch, arg2, nullptr, find_flag::char_room);
     if (!vict) {
       send_to_char(g, ch, "Who will your combined attack be targeting?\r\n");
       return;
@@ -1032,7 +1032,7 @@ ACMD(do_combine)
     char_set_combine(ch, attack);
     bool readied = false;
     for (char_data *fol : char_followers(g, ch))
-      if (char_aff_flagged(fol, AFF_GROUP) && char_get_combine(fol) != -1 && char_get_charge(fol) >= getMaxKI(g, fol) * 0.05) {
+      if (char_aff_flagged(fol, aff_flag::group) && char_get_combine(fol) != -1 && char_get_charge(fol) >= getMaxKI(g, fol) * 0.05) {
         readied = true;
         break;
       }
@@ -1047,7 +1047,7 @@ ACMD(do_combine)
     send_to_char(g, ch, "You do not have the minimum 5{} ki charged.\r\n", "%");
     return;
   }
-  act(g, "@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, nullptr, nullptr, act_to::room);
   tell_group(g, ch, [&](struct char_data *to) {
     send_to_char(g, to, "@BCOMBINE@c: @Y{}@C has prepared to combine a @c'@G{}@c'@C with the next group attack!@n\r\n", get_i_name(to, ch), attack_names[attack]);
   });
@@ -1087,7 +1087,7 @@ ACMD(do_seishou)
 namespace {
 
 /* A thrown object's weapon level adds a share of its damage, and later a flat amount */
-constexpr extra_flag THROW_LEVEL_FLAGS[] = {ITEM_WEAPLVL1, ITEM_WEAPLVL2, ITEM_WEAPLVL3, ITEM_WEAPLVL4, ITEM_WEAPLVL5};
+constexpr extra_flag THROW_LEVEL_FLAGS[] = {extra_flag::weaplvl1, extra_flag::weaplvl2, extra_flag::weaplvl3, extra_flag::weaplvl4, extra_flag::weaplvl5};
 constexpr double THROW_LEVEL_SHARE[]  = {0.1, 0.2, 0.3, 0.4, 0.5};
 constexpr int THROW_LEVEL_BONUS[]     = {1000, 5000, 10000, 16000, 25000};
 
@@ -1200,7 +1200,7 @@ void throw_object(GameWorld *g, struct char_data *ch, std::string_view argument,
     send_to_char(g, ch, "You do not have enough stamina to do it...\r\n");
     return;
   }
-  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+  if (obj_extra_flagged(obj, extra_flag::broken)) {
     send_to_char(g, ch, "That is broken and useless to throw!\r\n");
     return;
   }
@@ -1230,7 +1230,7 @@ void throw_object(GameWorld *g, struct char_data *ch, std::string_view argument,
     damage += room_get_gravity(g, here) * (room_get_gravity(g, here) / 2);
   }
   int odam = throw_wear(g, obj);
-  if (!obj_extra_flagged(obj, ITEM_THROW)) {
+  if (!obj_extra_flagged(obj, extra_flag::throw_)) {
     penalty    = 15;
     multithrow = false;
     damage     = damage * 0.45;
@@ -1258,7 +1258,7 @@ void throw_object(GameWorld *g, struct char_data *ch, std::string_view argument,
     char_set_combo(ch, -1);
     char_set_combhits(ch, 0);
     int stcost = ((getEffMaxPL(g, ch) / 200) + weight);
-    char_aff_set(vict, AFF_ZANZOKEN, false);
+    char_aff_set(vict, aff_flag::zanzoken, false);
     pcost(g, ch, 0, stcost / 2);
     pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
     obj_from_char(g, obj);
@@ -1267,7 +1267,7 @@ void throw_object(GameWorld *g, struct char_data *ch, std::string_view argument,
   }
 
   if (perc - (perc2 / 10) < prob) {
-    if (obj_extra_flagged(obj, ITEM_ICE) && char_is_demon(vict)) {
+    if (obj_extra_flagged(obj, extra_flag::ice) && char_is_demon(vict)) {
       act_triple_vict_last(g, THROWN_MELTS, ch, obj, vict);
       decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + weight), 0);
       extract_obj(g, obj);
@@ -1275,7 +1275,7 @@ void throw_object(GameWorld *g, struct char_data *ch, std::string_view argument,
     }
     act_triple_vict_last(g, perc2 > 0 ? THROWN_DODGED : THROWN_MISSES, ch, obj, vict);
     decCurST(g, ch, ((getEffMaxPL(g, ch) / 100) + weight), 0);
-    if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE))
+    if (!obj_extra_flagged(obj, extra_flag::unbreakable))
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (odam / 2));
     char_set_lastattack(ch, -50);
     hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
@@ -1285,7 +1285,7 @@ void throw_object(GameWorld *g, struct char_data *ch, std::string_view argument,
     return;
   }
 
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ENERGIZE) && (getCurKI(g, ch)) >= getMaxKI(g, ch) * 0.02) {
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::energize) && (getCurKI(g, ch)) >= getMaxKI(g, ch) * 0.02) {
     damage += (damage * (0.0016 * char_get_skill(ch, SKILL_ENERGIZE)));
     act_triple_vict_last(g, THROWN_ENERGIZED, ch, obj, vict);
     if (getMaxKI(g, ch) * 0.02 > 0)
@@ -1295,27 +1295,27 @@ void throw_object(GameWorld *g, struct char_data *ch, std::string_view argument,
     improve_skill(g, ch, SKILL_ENERGIZE, 0);
   } else
     act_triple_vict_last(g, THROWN[kind], ch, obj, vict);
-  if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE))
+  if (!obj_extra_flagged(obj, extra_flag::unbreakable))
     obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (odam));
   char_set_lastattack(ch, -50);
   /* quirk: the wear counts twice here */
-  if ((obj_get_value(obj, VAL_ALL_HEALTH) - odam) <= 0 && !obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
+  if ((obj_get_value(obj, VAL_ALL_HEALTH) - odam) <= 0 && !obj_extra_flagged(obj, extra_flag::unbreakable)) {
     act_triple_vict_last(g, THROWN_BREAKS, ch, obj, vict);
-    obj_extra_toggle(obj, ITEM_BROKEN);
+    obj_extra_toggle(obj, extra_flag::broken);
   } else if (char_get_aff_abils_dex(ch) >= axion_dice(g, 0)) {
     act_triple(g, char_is_android(vict) || char_is_mechanical(vict) ? THROWN_METAL : char_is_majin(vict) ? THROWN_GOO : THROWN_BLOOD,
                ch, nullptr, vict);
-    if (obj_extra_flagged(obj, ITEM_ICE) && !char_is_android(vict) && !char_is_icer(vict)) {
+    if (obj_extra_flagged(obj, extra_flag::ice) && !char_is_android(vict) && !char_is_icer(vict)) {
       decCurST(g, vict, (getMaxST(g, vict) * .005) + weight, 0);
-      act(g, "@mYou lose some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, TO_NOTVICT);
+      act(g, "@mYou lose some stamina to the @ccold@m!@n", true, ch, nullptr, vict, act_to::vict);
+      act(g, "@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, act_to::actor);
+      act(g, "@C$N@m loses some stamina to the @ccold@m!@n", true, ch, nullptr, vict, act_to::notvict);
     }
     damage *= calc_critical(g, ch, 0);
   }
-  if (obj_extra_flagged(obj, ITEM_HOT) && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
+  if (obj_extra_flagged(obj, extra_flag::hot) && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
     act_triple(g, THROWN_BURNS, ch, nullptr, vict);
-    char_aff_set(vict, AFF_BURNED, true);
+    char_aff_set(vict, aff_flag::burned, true);
     damage += damage * 0.4;
   }
   if (char_get_preference(ch) == PREFERENCE_KI)
@@ -1349,9 +1349,9 @@ constexpr act_msgs FLUNG_HITS    = {"@WThrown through the air, YOU fly at @c$N@W
 /* Names who is hurt next, to a and b, and to them */
 void throw_banner(GameWorld *g, struct char_data *a, struct char_data *b, struct char_data *who)
 {
-  act(g, "@W--@R$N@W--@n", true, a, nullptr, who, TO_CHAR);
-  act(g, "@W--@R$N@W--@n", true, b, nullptr, who, TO_CHAR);
-  act(g, "@W--@RYOU@W--@n", true, who, nullptr, nullptr, TO_CHAR);
+  act(g, "@W--@R$N@W--@n", true, a, nullptr, who, act_to::actor);
+  act(g, "@W--@R$N@W--@n", true, b, nullptr, who, act_to::actor);
+  act(g, "@W--@RYOU@W--@n", true, who, nullptr, nullptr, act_to::actor);
 }
 
 void throw_character(GameWorld *g, struct char_data *ch, struct char_data *tch, struct char_data *vict)
@@ -1425,12 +1425,12 @@ ACMD(do_throw)
     return;
   }
   struct obj_data *obj  = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
-  struct char_data *tch = obj ? nullptr : get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  struct char_data *tch = obj ? nullptr : get_char_vis(g, ch, arg, nullptr, find_flag::char_room);
   if (!obj && !tch) {
     send_to_char(g, ch, "You do not have that object or character to throw!\r\n");
     return;
   }
-  struct char_data *vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM);
+  struct char_data *vict = get_char_vis(g, ch, arg2, nullptr, find_flag::char_room);
   if (!vict) {
     struct char_data *foe = char_get_fighting(g, ch);
     if (!foe || char_get_in_room(foe) != char_get_in_room(ch)) {
@@ -1454,8 +1454,8 @@ namespace {
 
 void selfd_calms(GameWorld *g, struct char_data *ch)
 {
-  act(g, "@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", true, ch, nullptr, nullptr, act_to::actor);
+  act(g, "@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", true, ch, nullptr, nullptr, act_to::room);
 }
 
 /* The blast: the charge, 60% of the base PL and the base ST (half again for a wide one), all spent */
@@ -1490,7 +1490,7 @@ constexpr act_msgs SELFD_CAUGHT = {"@r$N@R is caught in the explosion!@n", "@RYo
 
 } // namespace
 
-/* The first time, starts to glow; the next, calms down, unless primed (PLR_SELFD2), when it explodes on whoever is
+/* The first time, starts to glow; the next, calms down, unless primed (player_flag::selfd2), when it explodes on whoever is
    grappled, or else on everyone around */
 ACMD(do_selfd)
 {
@@ -1500,7 +1500,7 @@ ACMD(do_selfd)
     send_to_char(g, ch, "You can not use self destruct in the arena.\r\n");
     return;
   }
-  if (char_aff_flagged(ch, AFF_SPIRIT)) {
+  if (char_aff_flagged(ch, aff_flag::spirit)) {
     send_to_char(g, ch, "You are already dead!\r\n");
     return;
   }
@@ -1515,21 +1515,21 @@ ACMD(do_selfd)
   if (!char_get_skill(ch, SKILL_SELFD))
     char_set_skills_base(ch, SKILL_SELFD, rand_number(g, 10, 20));
 
-  if (!char_plr_flagged(ch, PLR_SELFD)) {
-    act(g, "@RYour body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. Your aura begins to burn around your body at the same time in a violent fashion!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@R$n's body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. $n's aura begins to burn around $s body at the same time in a violent fashion!@n", true, ch, nullptr, nullptr, TO_ROOM);
-    char_plr_set(ch, PLR_SELFD, true);
+  if (!char_plr_flagged(ch, player_flag::selfd)) {
+    act(g, "@RYour body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. Your aura begins to burn around your body at the same time in a violent fashion!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@R$n's body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. $n's aura begins to burn around $s body at the same time in a violent fashion!@n", true, ch, nullptr, nullptr, act_to::room);
+    char_plr_set(ch, player_flag::selfd, true);
     return;
   }
-  if (!char_plr_flagged(ch, PLR_SELFD2)) {
+  if (!char_plr_flagged(ch, player_flag::selfd2)) {
     selfd_calms(g, ch);
-    char_plr_set(ch, PLR_SELFD, false);
+    char_plr_set(ch, player_flag::selfd, false);
     return;
   }
   if (char_get_grappling(g, ch) != nullptr && !can_kill(g, ch, char_get_grappling(g, ch), nullptr, 3)) {
     selfd_calms(g, ch);
     send_to_char(g, ch, "You can't kill them, the immortals won't allow it!\r\n");
-    char_plr_set(ch, PLR_SELFD, false);
+    char_plr_set(ch, player_flag::selfd, false);
     return;
   }
 
@@ -1537,13 +1537,13 @@ ACMD(do_selfd)
     int64_t dmg = selfd_blast(g, ch, false);
     act_triple(g, SELFD_ON_ONE, ch, nullptr, tch);
     hurt(g, 0, 0, ch, tch, nullptr, dmg, 1);
-    char_plr_set(ch, PLR_SELFD, false);
-    char_plr_set(ch, PLR_SELFD2, false);
-    if (char_plr_flagged(ch, PLR_IMMORTAL))
+    char_plr_set(ch, player_flag::selfd, false);
+    char_plr_set(ch, player_flag::selfd2, false);
+    if (char_plr_flagged(ch, player_flag::immortal))
       char_set_con_sdcooldown(ch, 600);
     if ((char_is_majin(ch) || char_is_bio(ch)) && getCurLFPercent(ch) > 0.5) {
       decCurLFPercent(g, ch, 2, -1);
-      char_plr_set(ch, PLR_GOOP, true);
+      char_plr_set(ch, player_flag::goop, true);
       char_set_gooptime(ch, 70);
     } else
       die(g, ch, nullptr);
@@ -1552,19 +1552,19 @@ ACMD(do_selfd)
   }
 
   int64_t dmg = selfd_blast(g, ch, true);
-  act(g, "@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n", true, ch, nullptr, nullptr, act_to::actor);
+  act(g, "@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n", true, ch, nullptr, nullptr, act_to::room);
   for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (vict == ch || !can_kill(g, ch, vict, nullptr, 3) || char_mob_flagged(vict, MOB_NOKILL))
+    if (vict == ch || !can_kill(g, ch, vict, nullptr, 3) || char_mob_flagged(vict, mob_flag::nokill))
       continue;
     act_triple(g, SELFD_CAUGHT, ch, nullptr, vict);
     hurt(g, 0, 0, ch, vict, nullptr, dmg, 1);
   }
-  if (char_plr_flagged(ch, PLR_IMMORTAL))
+  if (char_plr_flagged(ch, player_flag::immortal))
     char_set_con_sdcooldown(ch, 600);
   die(g, ch, nullptr); /* quirk: before the flags are cleared, unlike above */
-  char_plr_set(ch, PLR_SELFD, false);
-  char_plr_set(ch, PLR_SELFD2, false);
+  char_plr_set(ch, player_flag::selfd, false);
+  char_plr_set(ch, player_flag::selfd2, false);
   selfd_learns(g, ch);
 }
 
@@ -1603,7 +1603,7 @@ ACMD(do_spiral)
     return;
   int skill = init_skill(g, ch, SKILL_SPIRAL);
 
-  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_room);
   if (!vict && !(vict = char_get_fighting(g, ch))) {
     send_to_char(g, ch, "Nothing around here by that name.");
     return;
@@ -1613,10 +1613,10 @@ ACMD(do_spiral)
   if (handle_defender(g, vict, ch))
     vict = char_get_defender(g, vict);
 
-  char_plr_set(ch, PLR_SPIRAL, true);
+  char_plr_set(ch, player_flag::spiral, true);
   improve_skill(g, ch, SKILL_SPIRAL, 0);
-  act(g, "@mFlying to a spot above your intended target you begin to move so fast all that can be seen of you are trails of color. You focus your movements into a vortex and prepare to attack!@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@w$n@m flies to a spot above and begins to move so fast all that can be seen of $m are trails of color. Suddenly $e focuses $s movements into a spinning vortex and you lose track of $s movements entirely!@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@mFlying to a spot above your intended target you begin to move so fast all that can be seen of you are trails of color. You focus your movements into a vortex and prepare to attack!@n", true, ch, nullptr, nullptr, act_to::actor);
+  act(g, "@w$n@m flies to a spot above and begins to move so fast all that can be seen of $m are trails of color. Suddenly $e focuses $s movements into a spinning vortex and you lose track of $s movements entirely!@n", true, ch, nullptr, nullptr, act_to::room);
   handle_spiral(g, ch, vict, skill, true);
   handle_cooldown(g, ch, 8);
 }

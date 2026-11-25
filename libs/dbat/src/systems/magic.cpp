@@ -104,13 +104,13 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++) {
     af[i].type      = spellnum;
-    af[i].bitvector = AFF_DONTUSE;
+    af[i].bitvector = aff_flag::dontuse;
     af[i].modifier  = 0;
     af[i].location  = APPLY_NONE;
   }
 
   if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
-    if (IS_SET(g->spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
+    if (g->spell_info[spellnum].save_flags.intersects(mag_save::partial | mag_save::none)) {
       send_to_char(g, victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
       return;
     }
@@ -148,7 +148,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       break;
 
     case SPELL_BLINDNESS:
-      if (char_mob_flagged(victim, MOB_NOBLIND)) {
+      if (char_mob_flagged(victim, mob_flag::noblind)) {
         send_to_char(g, ch, "You fail.\r\n");
         return;
       }
@@ -156,12 +156,12 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       af[0].location  = APPLY_ACCURACY;
       af[0].modifier  = -4;
       af[0].duration  = 2;
-      af[0].bitvector = AFF_BLIND;
+      af[0].bitvector = aff_flag::blind;
 
       af[1].location  = APPLY_AC;
       af[1].modifier  = -4;
       af[1].duration  = 2;
-      af[1].bitvector = AFF_BLIND;
+      af[1].bitvector = aff_flag::blind;
 
       to_room = "$n seems to be blinded!";
       to_vict = "You have been blinded!";
@@ -171,12 +171,12 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       af[0].location  = APPLY_ACCURACY;
       af[0].duration  = 1 + (level / 2);
       af[0].modifier  = -1;
-      af[0].bitvector = AFF_CURSE;
+      af[0].bitvector = aff_flag::curse;
 
       af[1].location  = APPLY_WILL;
       af[1].duration  = 1 + (level / 2);
       af[1].modifier  = -1;
-      af[1].bitvector = AFF_CURSE;
+      af[1].bitvector = aff_flag::curse;
 
       accum_duration = true;
       accum_affect   = true;
@@ -188,12 +188,12 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       af[0].location  = APPLY_STR;
       af[0].duration  = -1;
       af[0].modifier  = -6;
-      af[0].bitvector = AFF_CURSE;
+      af[0].bitvector = aff_flag::curse;
 
       af[1].location  = APPLY_ACCURACY;
       af[1].duration  = -1;
       af[1].modifier  = -4;
-      af[1].bitvector = AFF_CURSE;
+      af[1].bitvector = aff_flag::curse;
 
       accum_duration = false;
       accum_affect   = false;
@@ -203,21 +203,21 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
     case SPELL_DETECT_ALIGN:
       af[0].duration  = 12 + level;
-      af[0].bitvector = AFF_DETECT_ALIGN;
+      af[0].bitvector = aff_flag::detect_align;
       accum_duration  = true;
       to_vict         = "Your eyes tingle.";
       break;
 
     case SPELL_SEE_INVIS:
       af[0].duration  = 12 + level;
-      af[0].bitvector = AFF_DETECT_INVIS;
+      af[0].bitvector = aff_flag::detect_invis;
       accum_duration  = true;
       to_vict         = "Your eyes tingle.";
       break;
 
     case SPELL_DETECT_MAGIC:
       af[0].duration  = 12 + level;
-      af[0].bitvector = AFF_DETECT_MAGIC;
+      af[0].bitvector = aff_flag::detect_magic;
       accum_duration  = true;
       to_vict         = "Your eyes tingle.";
       break;
@@ -233,7 +233,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
     case SPELL_DARKVISION:
       af[0].duration  = 12 + level;
-      af[0].bitvector = AFF_INFRAVISION;
+      af[0].bitvector = aff_flag::infravision;
       accum_duration  = true;
       to_vict         = "Your eyes glow red.";
       to_room         = "$n's eyes glow red.";
@@ -246,7 +246,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       af[0].duration  = 12 + (level / 4);
       af[0].modifier  = 4;
       af[0].location  = APPLY_AC;
-      af[0].bitvector = AFF_INVISIBLE;
+      af[0].bitvector = aff_flag::invisible;
       accum_duration  = true;
       to_vict         = "You vanish.";
       to_room         = "$n slowly fades out of existence.";
@@ -257,21 +257,21 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
       af[0].location  = APPLY_STR;
       af[0].duration  = level;
       af[0].modifier  = -2;
-      af[0].bitvector = AFF_POISON;
+      af[0].bitvector = aff_flag::poison;
       to_vict         = "You feel very sick.";
       to_room         = "$n gets violently ill!";
       break;
 
     case SPELL_PROT_FROM_EVIL:
       af[0].duration  = 24;
-      af[0].bitvector = AFF_PROTECT_GOOD;
+      af[0].bitvector = aff_flag::protect_good;
       accum_duration  = true;
       to_vict         = "You feel invulnerable!";
       break;
 
     case SPELL_SANCTUARY:
       af[0].duration  = 4;
-      af[0].bitvector = AFF_SANCTUARY;
+      af[0].bitvector = aff_flag::sanctuary;
 
       accum_duration = true;
       to_vict        = "A white aura momentarily surrounds you.";
@@ -281,15 +281,15 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
     case SPELL_SLEEP:
       if (!CONFIG_PK_ALLOWED && !char_is_npc(ch) && !char_is_npc(victim))
         return;
-      if (char_mob_flagged(victim, MOB_NOSLEEP))
+      if (char_mob_flagged(victim, mob_flag::nosleep))
         return;
 
       af[0].duration  = 4 + (level / 4);
-      af[0].bitvector = AFF_SLEEP;
+      af[0].bitvector = aff_flag::sleep;
 
       if (char_get_position(victim) > POS_SLEEPING) {
         send_to_char(g, victim, "You feel very sleepy...  Zzzz......\r\n");
-        act(g, "$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
+        act(g, "$n goes to sleep.", true, victim, nullptr, nullptr, act_to::room);
         char_set_position(victim, POS_SLEEPING);
       }
       break;
@@ -297,15 +297,15 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
     case SPELL_HAYASA:
       if (!CONFIG_PK_ALLOWED && !char_is_npc(ch) && !char_is_npc(victim))
         return;
-      if (char_mob_flagged(victim, MOB_NOSLEEP))
+      if (char_mob_flagged(victim, mob_flag::nosleep))
         return;
 
       af[0].duration  = 4 + (level / 4);
-      af[0].bitvector = AFF_SLEEP;
+      af[0].bitvector = aff_flag::sleep;
 
       if (char_get_position(victim) > POS_SLEEPING) {
         send_to_char(g, victim, "You feel very sleepy...  Zzzz......\r\n");
-        act(g, "$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
+        act(g, "$n goes to sleep.", true, victim, nullptr, nullptr, act_to::room);
         char_set_position(victim, POS_SLEEPING);
       }
       break;
@@ -322,13 +322,13 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
     case SPELL_SENSE_LIFE:
       to_vict         = "Your feel your awareness improve.";
       af[0].duration  = level;
-      af[0].bitvector = AFF_SENSE_LIFE;
+      af[0].bitvector = aff_flag::sense_life;
       accum_duration  = true;
       break;
 
     case SPELL_WATERWALK:
       af[0].duration  = 24;
-      af[0].bitvector = AFF_WATERWALK;
+      af[0].bitvector = aff_flag::waterwalk;
       accum_duration  = true;
       to_vict         = "You feel webbing between your toes.";
       break;
@@ -362,13 +362,13 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
   }
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-    if (af[i].bitvector != AFF_DONTUSE || (af[i].location != APPLY_NONE))
+    if (af[i].bitvector != aff_flag::dontuse || (af[i].location != APPLY_NONE))
       affect_join(g, victim, af + i, accum_duration, false, accum_affect, false);
 
   if (!to_vict.empty())
-    act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
+    act(g, to_vict, false, victim, nullptr, ch, act_to::actor);
   if (!to_room.empty())
-    act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
+    act(g, to_room, true, victim, nullptr, ch, act_to::room);
 }
 
 /*
@@ -409,7 +409,7 @@ void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum)
   if (ch == nullptr)
     return;
 
-  if (!char_aff_flagged(ch, AFF_GROUP))
+  if (!char_aff_flagged(ch, aff_flag::group))
     return;
   if (char_get_master(g, ch) != nullptr)
     k = char_get_master(g, ch);
@@ -419,14 +419,14 @@ void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum)
     tch = fol;
     if (char_get_in_room(tch) != char_get_in_room(ch))
       continue;
-    if (!char_aff_flagged(tch, AFF_GROUP))
+    if (!char_aff_flagged(tch, aff_flag::group))
       continue;
     if (ch == tch)
       continue;
     perform_mag_groups(g, level, ch, tch, spellnum);
   }
 
-  if ((k != ch) && char_aff_flagged(k, AFF_GROUP))
+  if ((k != ch) && char_aff_flagged(k, aff_flag::group))
     perform_mag_groups(g, level, ch, k, spellnum);
   perform_mag_groups(g, level, ch, ch, spellnum);
 }
@@ -475,9 +475,9 @@ void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
   }
 
   if (!to_char.empty())
-    act(g, to_char, false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, to_char, false, ch, nullptr, nullptr, act_to::actor);
   if (!to_room.empty())
-    act(g, to_room, false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, to_room, false, ch, nullptr, nullptr, act_to::room);
 
   for (char_data *tch : room_people(g, char_get_in_room(ch))) {
 
@@ -490,11 +490,11 @@ void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum)
 
     if (tch == ch)
       continue;
-    if (char_adm_flagged(tch, ADM_NODAMAGE))
+    if (char_adm_flagged(tch, admin_flag::nodamage))
       continue;
     if (!CONFIG_PK_ALLOWED && !char_is_npc(ch) && !char_is_npc(tch))
       continue;
-    if (!char_is_npc(ch) && char_is_npc(tch) && char_aff_flagged(tch, AFF_CHARM))
+    if (!char_is_npc(ch) && char_is_npc(tch) && char_aff_flagged(tch, aff_flag::charm))
       continue;
 
     /* Doesn't matter if they die here so we don't check. -gg 6/24/98 */
@@ -524,7 +524,7 @@ void mag_points(GameWorld *g, int level, struct char_data *ch, struct char_data 
     case SPELL_HEAL:
       healing = 100 + dice(g, 3, 8);
       send_to_char(g, victim, "A warm feeling floods your body.\r\n");
-      if (char_aff_flagged(ch, AFF_CDEATH)) {
+      if (char_aff_flagged(ch, aff_flag::cdeath)) {
         send_to_char(g, ch, "Your nerves settle slightly\r\n");
       }
       break;
@@ -593,9 +593,9 @@ void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_da
 
   affect_from_char(g, victim, spell);
   if (!to_vict.empty())
-    act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
+    act(g, to_vict, false, victim, nullptr, ch, act_to::actor);
   if (!to_room.empty())
-    act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
+    act(g, to_room, true, victim, nullptr, ch, act_to::room);
 }
 
 void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_data *obj,
@@ -608,17 +608,17 @@ void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_da
 
   switch (spellnum) {
     case SPELL_BLESS:
-      if (!obj_extra_flagged(obj, ITEM_BLESS) &&
+      if (!obj_extra_flagged(obj, extra_flag::bless) &&
           (obj_get_weight(obj) <= 5 * level)) {
-        obj_extra_set(obj, ITEM_BLESS, true);
+        obj_extra_set(obj, extra_flag::bless, true);
         to_char = "$p glows briefly.";
       }
       break;
     case SPELL_INVISIBLE:
-      /* quirk: reads ITEM_INVISIBLE alone, meant ITEM_NOINVIS or ITEM_INVISIBLE: their numbers or-ed as bits, 4 | 5 is
+      /* quirk: reads extra_flag::invisible alone, meant extra_flag::noinvis or extra_flag::invisible: their numbers or-ed as bits, 4 | 5 is
          5, so an item that can't be made invisible still can */
-      if (!obj_extra_flagged(obj, ITEM_INVISIBLE)) {
-        obj_extra_set(obj, ITEM_INVISIBLE, true);
+      if (!obj_extra_flagged(obj, extra_flag::invisible)) {
+        obj_extra_set(obj, extra_flag::invisible, true);
         to_char = "$p vanishes.";
       }
       break;
@@ -632,8 +632,8 @@ void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_da
       }
       break;
     case SPELL_REMOVE_CURSE:
-      if (obj_extra_flagged(obj, ITEM_NODROP)) {
-        obj_extra_set(obj, ITEM_NODROP, false);
+      if (obj_extra_flagged(obj, extra_flag::nodrop)) {
+        obj_extra_set(obj, extra_flag::nodrop, false);
         if (obj_get_type_flag(obj) == ITEM_WEAPON)
           obj_set_value(obj, VAL_WEAPON_DAMSIZE, obj_get_value(obj, VAL_WEAPON_DAMSIZE) + 1);
         to_char = "$p briefly glows blue.";
@@ -653,12 +653,12 @@ void mag_alter_objs(GameWorld *g, int level, struct char_data *ch, struct obj_da
   if (to_char.empty())
     send_to_char(g, ch, CONFIG_NOEFFECT);
   else
-    act(g, to_char, true, ch, obj, nullptr, TO_CHAR);
+    act(g, to_char, true, ch, obj, nullptr, act_to::actor);
 
   if (!to_room.empty())
-    act(g, to_room, true, ch, obj, nullptr, TO_ROOM);
+    act(g, to_room, true, ch, obj, nullptr, act_to::room);
   else if (!to_char.empty())
-    act(g, to_char, true, ch, obj, nullptr, TO_ROOM);
+    act(g, to_char, true, ch, obj, nullptr, act_to::room);
 }
 
 void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
@@ -687,8 +687,8 @@ void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
   }
   add_unique_id(g, tobj);
   obj_to_char(g, tobj, ch);
-  act(g, "$n creates $p.", false, ch, tobj, nullptr, TO_ROOM);
-  act(g, "You create $p.", false, ch, tobj, nullptr, TO_CHAR);
+  act(g, "$n creates $p.", false, ch, tobj, nullptr, act_to::room);
+  act(g, "You create $p.", false, ch, tobj, nullptr, act_to::actor);
   load_otrigger(g, tobj);
 }
 
@@ -705,13 +705,13 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++) {
     af[i].type      = spellnum;
-    af[i].bitvector = AFF_DONTUSE;
+    af[i].bitvector = aff_flag::dontuse;
     af[i].modifier  = 0;
     af[i].location  = APPLY_NONE;
   }
 
   if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
-    if (IS_SET(g->spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
+    if (g->spell_info[spellnum].save_flags.intersects(mag_save::partial | mag_save::none)) {
       send_to_char(g, victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
       return;
     }
@@ -720,21 +720,21 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
   switch (spellnum) {
     case SPELL_PARALYZE:
       af[0].duration  = level / 2;
-      af[0].bitvector = AFF_PARALYZE;
+      af[0].bitvector = aff_flag::paralyze;
       accum_duration  = false;
       to_vict         = "You feel your limbs freeze!";
       to_room         = "$n suddenly freezes in place!";
       break;
     case ART_STUNNING_FIST:
       af[0].duration  = 1;
-      af[0].bitvector = AFF_STUNNED;
+      af[0].bitvector = aff_flag::stunned;
       accum_duration  = false;
       to_vict         = "You are in a stunned daze!";
       to_room         = "$n is stunned.";
       break;
     case ART_EMPTY_BODY:
       af[0].duration  = char_get_ki(ch) / 10;
-      af[0].bitvector = AFF_ETHEREAL;
+      af[0].bitvector = aff_flag::ethereal;
       accum_duration  = false;
       to_vict         = "You switch to the ethereal plane.";
       to_room         = "$n disappears.";
@@ -745,7 +745,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
         return;
       }
       af[0].duration  = MAX(6, 20 - level);
-      af[0].bitvector = AFF_CDEATH;
+      af[0].bitvector = aff_flag::cdeath;
       accum_duration  = false;
       to_vict         = "You feel death closing in.";
       break;
@@ -759,7 +759,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
       break;
     case SPELL_DAZE:
       if (char_get_race_level(victim) < 5)
-        af[0].bitvector = AFF_NEXTNOACTION;
+        af[0].bitvector = aff_flag::nextnoaction;
       accum_duration = false;
       to_vict        = "You are struck dumb by a flash of bright light!";
       to_room        = "$n is struck dumb by a flash of bright light!";
@@ -774,21 +774,21 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
     case SPELL_SUMMON_MONSTER_VIII:
     case SPELL_SUMMON_MONSTER_IX:
       af[0].duration  = level;
-      af[0].bitvector = AFF_SUMMONED;
+      af[0].bitvector = aff_flag::summoned;
       accum_duration  = false;
       to_vict         = "You are summoned to assist $N!";
       to_room         = "$n appears, ready for action.";
       break;
 
     case SPELL_FLARE:
-      if (char_mob_flagged(victim, MOB_NOBLIND)) {
+      if (char_mob_flagged(victim, mob_flag::noblind)) {
         send_to_char(g, ch, "You fail.\r\n");
         return;
       }
       af[0].location  = APPLY_ACCURACY;
       af[0].modifier  = -1;
       af[0].duration  = 2;
-      af[0].bitvector = AFF_BLIND;
+      af[0].bitvector = aff_flag::blind;
 
       to_room = "$n seems to be dazzled!";
       to_vict = "You have been dazzled!";
@@ -796,7 +796,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
 
     case SPELL_FIRE_SHIELD:
       af[0].duration  = level * 5;
-      af[0].bitvector = AFF_FIRE_SHIELD;
+      af[0].bitvector = aff_flag::fire_shield;
       to_room         = "$n is engulfed in a firey shield!";
       to_vict         = "You are engulfed in a firey shield!";
       break;
@@ -823,7 +823,7 @@ void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_dat
   }
 
   if (!to_vict.empty())
-    act(g, to_vict, false, victim, nullptr, ch, TO_CHAR);
+    act(g, to_vict, false, victim, nullptr, ch, act_to::actor);
   if (!to_room.empty())
-    act(g, to_room, true, victim, nullptr, ch, TO_ROOM);
+    act(g, to_room, true, victim, nullptr, ch, act_to::room);
 }

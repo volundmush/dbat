@@ -51,13 +51,8 @@
 #include "dbat/utils.hpp"
 #include "harness.hpp"
 
-/* A trigger type as the bit a types word holds it at, on either tree (the masks, or the typed flags); and several */
-template <auto Type> constexpr bitvector_t bit_of = [] {
-  if constexpr (std::is_integral_v<decltype(Type)>)
-    return static_cast<bitvector_t>(Type);
-  else
-    return bitvector_t{1} << std::to_underlying(Type);
-}();
+/* A trigger type (or an object command's place) as the bit a word holds it at; and several */
+template <auto Type> requires std::is_enum_v<decltype(Type)> constexpr bitvector_t bit_of = bitvector_t{1} << std::to_underlying(Type);
 template <auto... Types> constexpr bitvector_t bits_of = (bitvector_t{0} | ... | bit_of<Types>);
 
 namespace {
@@ -367,33 +362,33 @@ namespace {
     snprintf(cmd, sizeof(cmd), "%s", first_word(words).c_str());
 
     switch (type) {
-      case bit_of<MTRIG_RANDOM>: random_mtrigger(g, mob); return "ran";
-      case bit_of<MTRIG_COMMAND>: return str_format("{:d}", (int)command_mtrigger(g, s.actor, cmd, arg));
-      case bit_of<MTRIG_SPEECH>: speech_mtrigger(g, s.actor, text); return "ran";
-      case bit_of<MTRIG_ACT>: { /* as act() sends it, ending in a line break */
+      case bit_of<mob_trig::random>: random_mtrigger(g, mob); return "ran";
+      case bit_of<mob_trig::command>: return str_format("{:d}", (int)command_mtrigger(g, s.actor, cmd, arg));
+      case bit_of<mob_trig::speech>: speech_mtrigger(g, s.actor, text); return "ran";
+      case bit_of<mob_trig::act>: { /* as act() sends it, ending in a line break */
         char line[MAX_INPUT_LENGTH + 2];
         snprintf(line, sizeof(line), "%s\r\n", words.c_str());
         act_mtrigger(g, mob, line, s.actor, s.witness, s.prop, nullptr, "");
         return "ran";
       }
-      case bit_of<MTRIG_DEATH>: return str_format("{:d}", death_mtrigger(g, mob, s.actor));
-      case bit_of<MTRIG_GREET>:
-      case bit_of<MTRIG_GREET_ALL>: return str_format("{:d}", (int)greet_mtrigger(g, s.actor, 0));
-      case bit_of<MTRIG_ENTRY>: return str_format("{:d}", entry_mtrigger(g, mob));
-      case bit_of<MTRIG_RECEIVE>: return s.prop ? str_format("{:d}", receive_mtrigger(g, mob, s.actor, s.prop)) : "no prop";
-      case bit_of<MTRIG_FIGHT>: set_fighting(g, mob, s.actor); fight_mtrigger(g, mob); return "ran";
-      case bit_of<MTRIG_HITPRCNT>: set_fighting(g, mob, s.actor); hitprcnt_mtrigger(g, mob); return "ran";
-      case bit_of<MTRIG_BRIBE>: bribe_mtrigger(g, mob, s.actor, std::max(s.t.narg, 1)); return "ran";
-      case bit_of<MTRIG_LOAD>: load_mtrigger(g, mob); return "ran";
-      case bit_of<MTRIG_MEMORY>:
+      case bit_of<mob_trig::death>: return str_format("{:d}", death_mtrigger(g, mob, s.actor));
+      case bit_of<mob_trig::greet>:
+      case bit_of<mob_trig::greet_all>: return str_format("{:d}", (int)greet_mtrigger(g, s.actor, 0));
+      case bit_of<mob_trig::entry>: return str_format("{:d}", entry_mtrigger(g, mob));
+      case bit_of<mob_trig::receive>: return s.prop ? str_format("{:d}", receive_mtrigger(g, mob, s.actor, s.prop)) : "no prop";
+      case bit_of<mob_trig::fight>: set_fighting(g, mob, s.actor); fight_mtrigger(g, mob); return "ran";
+      case bit_of<mob_trig::hitprcnt>: set_fighting(g, mob, s.actor); hitprcnt_mtrigger(g, mob); return "ran";
+      case bit_of<mob_trig::bribe>: bribe_mtrigger(g, mob, s.actor, std::max(s.t.narg, 1)); return "ran";
+      case bit_of<mob_trig::load>: load_mtrigger(g, mob); return "ran";
+      case bit_of<mob_trig::memory>:
         greet_memory_mtrigger(g, s.actor);
         if (owner_here(g, s))
           entry_memory_mtrigger(g, owner_mob(g, s));
         return "ran";
-      case bit_of<MTRIG_CAST>: return str_format("{:d}", cast_mtrigger(g, s.actor, mob, CAST_SPELL));
-      case bit_of<MTRIG_LEAVE>: return str_format("{:d}", leave_mtrigger(g, s.actor, 0));
-      case bit_of<MTRIG_DOOR>: return str_format("{:d}", door_mtrigger(g, s.actor, 0, 0));
-      case bit_of<MTRIG_TIME>: time_mtrigger(g, mob); return "ran";
+      case bit_of<mob_trig::cast>: return str_format("{:d}", cast_mtrigger(g, s.actor, mob, CAST_SPELL));
+      case bit_of<mob_trig::leave>: return str_format("{:d}", leave_mtrigger(g, s.actor, 0));
+      case bit_of<mob_trig::door>: return str_format("{:d}", door_mtrigger(g, s.actor, 0, 0));
+      case bit_of<mob_trig::time>: time_mtrigger(g, mob); return "ran";
       default: return "";
     }
   }
@@ -406,19 +401,19 @@ namespace {
     snprintf(cmd, sizeof(cmd), "%s", first_word(words).c_str());
 
     switch (type) {
-      case bit_of<OTRIG_RANDOM>: random_otrigger(g, obj); return "ran";
-      case bit_of<OTRIG_COMMAND>: return str_format("{:d}", (int)command_otrigger(g, s.actor, cmd, arg));
-      case bit_of<OTRIG_TIMER>: timer_otrigger(g, obj); return "ran";
-      case bit_of<OTRIG_GET>: return str_format("{:d}", get_otrigger(g, obj, s.actor));
-      case bit_of<OTRIG_DROP>: return str_format("{:d}", drop_otrigger(g, obj, s.actor));
-      case bit_of<OTRIG_GIVE>: return str_format("{:d}", give_otrigger(g, obj, s.actor, s.witness));
-      case bit_of<OTRIG_WEAR>: return str_format("{:d}", wear_otrigger(g, obj, s.actor, 0));
-      case bit_of<OTRIG_REMOVE>: return str_format("{:d}", remove_otrigger(g, obj, s.actor));
-      case bit_of<OTRIG_LOAD>: return str_format("{:d}", (int)load_otrigger(g, obj));
-      case bit_of<OTRIG_CAST>: return str_format("{:d}", cast_otrigger(g, s.actor, obj, CAST_SPELL));
-      case bit_of<OTRIG_LEAVE>: return str_format("{:d}", (int)leave_otrigger(g, room_of(g, s.room), s.actor, 0));
-      case bit_of<OTRIG_CONSUME>: return str_format("{:d}", consume_otrigger(g, obj, s.actor, OCMD_EAT));
-      case bit_of<OTRIG_TIME>: time_otrigger(g, obj); return "ran";
+      case bit_of<obj_trig::random>: random_otrigger(g, obj); return "ran";
+      case bit_of<obj_trig::command>: return str_format("{:d}", (int)command_otrigger(g, s.actor, cmd, arg));
+      case bit_of<obj_trig::timer>: timer_otrigger(g, obj); return "ran";
+      case bit_of<obj_trig::get>: return str_format("{:d}", get_otrigger(g, obj, s.actor));
+      case bit_of<obj_trig::drop>: return str_format("{:d}", drop_otrigger(g, obj, s.actor));
+      case bit_of<obj_trig::give>: return str_format("{:d}", give_otrigger(g, obj, s.actor, s.witness));
+      case bit_of<obj_trig::wear>: return str_format("{:d}", wear_otrigger(g, obj, s.actor, 0));
+      case bit_of<obj_trig::remove>: return str_format("{:d}", remove_otrigger(g, obj, s.actor));
+      case bit_of<obj_trig::load>: return str_format("{:d}", (int)load_otrigger(g, obj));
+      case bit_of<obj_trig::cast>: return str_format("{:d}", cast_otrigger(g, s.actor, obj, CAST_SPELL));
+      case bit_of<obj_trig::leave>: return str_format("{:d}", (int)leave_otrigger(g, room_of(g, s.room), s.actor, 0));
+      case bit_of<obj_trig::consume>: return str_format("{:d}", consume_otrigger(g, obj, s.actor, consume_cmd::eat));
+      case bit_of<obj_trig::time>: time_otrigger(g, obj); return "ran";
       default: return "";
     }
   }
@@ -432,16 +427,16 @@ namespace {
     snprintf(cmd, sizeof(cmd), "%s", first_word(words).c_str());
 
     switch (type) {
-      case bit_of<WTRIG_RANDOM>: random_wtrigger(g, room); return "ran";
-      case bit_of<WTRIG_COMMAND>: return str_format("{:d}", command_wtrigger(g, s.actor, cmd, arg));
-      case bit_of<WTRIG_SPEECH>: speech_wtrigger(g, s.actor, text); return "ran";
-      case bit_of<WTRIG_RESET>: reset_wtrigger(g, room); return "ran";
-      case bit_of<WTRIG_ENTER>: return str_format("{:d}", enter_wtrigger(g, room, s.actor, 0));
-      case bit_of<WTRIG_DROP>: return s.prop ? str_format("{:d}", drop_wtrigger(g, s.prop, s.actor)) : "no prop";
-      case bit_of<WTRIG_CAST>: return str_format("{:d}", cast_wtrigger(g, s.actor, s.witness, nullptr, CAST_SPELL));
-      case bit_of<WTRIG_LEAVE>: return str_format("{:d}", leave_wtrigger(g, room, s.actor, 0));
-      case bit_of<WTRIG_DOOR>: return str_format("{:d}", door_wtrigger(g, s.actor, 0, 0));
-      case bit_of<WTRIG_TIME>: time_wtrigger(g, room); return "ran";
+      case bit_of<wld_trig::random>: random_wtrigger(g, room); return "ran";
+      case bit_of<wld_trig::command>: return str_format("{:d}", command_wtrigger(g, s.actor, cmd, arg));
+      case bit_of<wld_trig::speech>: speech_wtrigger(g, s.actor, text); return "ran";
+      case bit_of<wld_trig::reset>: reset_wtrigger(g, room); return "ran";
+      case bit_of<wld_trig::enter>: return str_format("{:d}", enter_wtrigger(g, room, s.actor, 0));
+      case bit_of<wld_trig::drop>: return s.prop ? str_format("{:d}", drop_wtrigger(g, s.prop, s.actor)) : "no prop";
+      case bit_of<wld_trig::cast>: return str_format("{:d}", cast_wtrigger(g, s.actor, s.witness, nullptr, CAST_SPELL));
+      case bit_of<wld_trig::leave>: return str_format("{:d}", leave_wtrigger(g, room, s.actor, 0));
+      case bit_of<wld_trig::door>: return str_format("{:d}", door_wtrigger(g, s.actor, 0, 0));
+      case bit_of<wld_trig::time>: time_wtrigger(g, room); return "ran";
       default: return "";
     }
   }
@@ -499,9 +494,9 @@ namespace {
     if (t.attach == OBJ_TRIGGER) { /* where the object would be for its triggers to fire */
       struct obj_data *obj = owner_obj(g, s);
       obj_from_char(g, obj);
-      bool carried = (t.types & bits_of<OTRIG_DROP, OTRIG_GIVE, OTRIG_WEAR, OTRIG_REMOVE, OTRIG_CONSUME>) ||
-                     ((t.types & bit_of<OTRIG_COMMAND>) && (t.narg & bit_of<OCMD_INVEN>));
-      int pos = (t.types & bit_of<OTRIG_COMMAND>) && !(t.narg & bits_of<OCMD_INVEN, OCMD_ROOM>) ? find_eq_pos(g, s.actor, obj) : -1;
+      bool carried = (t.types & bits_of<obj_trig::drop, obj_trig::give, obj_trig::wear, obj_trig::remove, obj_trig::consume>) ||
+                     ((t.types & bit_of<obj_trig::command>) && (t.narg & bit_of<ocmd_where::inven>));
+      int pos = (t.types & bit_of<obj_trig::command>) && !(t.narg & bits_of<ocmd_where::inven, ocmd_where::room>) ? find_eq_pos(g, s.actor, obj) : -1;
       if (pos >= 0)
         equip_char(g, s.actor, obj, pos);
       else if (carried)
@@ -540,12 +535,12 @@ namespace {
       run_queue(g);
     }
     /* and as the game's own pulse finds random and time triggers */
-    if ((t.types & bit_of<MTRIG_RANDOM>) && owner_here(g, s)) {
+    if ((t.types & bit_of<mob_trig::random>) && owner_here(g, s)) {
       file_print(stdout, "-- the random check\n");
       script_trigger_check(g);
       run_queue(g);
     }
-    if ((t.types & bit_of<MTRIG_TIME>) && owner_here(g, s)) {
+    if ((t.types & bit_of<mob_trig::time>) && owner_here(g, s)) {
       file_print(stdout, "-- the time check\n");
       check_time_triggers(g);
       run_queue(g);

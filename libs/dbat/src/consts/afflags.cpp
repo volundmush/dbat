@@ -84,5 +84,5 @@ static constexpr std::string_view affected_bits_entries[] = {
         "STARPHASE",
         "SPECIAL POSE",
         "SHADOW STITCH"};
-static_assert(std::size(affected_bits_entries) == NUM_AFF_FLAGS);
+static_assert(std::size(affected_bits_entries) == flag_count<aff_flag>);
 constinit const name_table affected_bits(affected_bits_entries);

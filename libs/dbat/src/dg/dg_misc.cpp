@@ -54,14 +54,14 @@ static std::optional<std::string_view> take_quote_piece(std::string_view &rest)
 /* spells) as the spell system is designed to have a character caster, */
 /* and this cast routine may overlook certain issues.                  */
 /* LIMITATION: a target MUST exist for the spell unless the spell is   */
-/* set to TAR_IGNORE. Also, group spells are not permitted             */
+/* set to spell_target::ignore. Also, group spells are not permitted             */
 /* cast a spell; can be called by mobiles, objects and rooms, and no   */
 /* level check is required. Note that mobs should generally use the    */
 /* normal 'cast' command (which must be patched to allow mobs to cast  */
 /* spells) as the spell system is designed to have a character caster, */
 /* and this cast routine may overlook certain issues.                  */
 /* LIMITATION: a target MUST exist for the spell unless the spell is   */
-/* set to TAR_IGNORE. Also, group spells are not permitted             */
+/* set to spell_target::ignore. Also, group spells are not permitted             */
 /* code borrowed from do_cast() */
 void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd)
 {
@@ -98,8 +98,8 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
 
   /* spellnum = search_block(s, spells, 0); */
   std::string spell_name(*spell);
-  spellnum = find_skill_num(g, spell_name, SKTYPE_SPELL);
-  if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE || (!IS_SET(skill_type(g, spellnum), SKTYPE_SPELL)))) {
+  spellnum = find_skill_num(g, spell_name, skill_kind::spell);
+  if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE || (!skill_type(g, spellnum).test(skill_kind::spell)))) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_cast: invalid spell name ({})",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
@@ -108,21 +108,21 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
   /* Find the target */
   if (!rest.empty())
     victim = take_arg(rest);
-  if (SINFO.targets.test(TAR_IGNORE)) {
+  if (SINFO.targets.test(spell_target::ignore)) {
     target = true;
   } else if (victim && !victim->empty()) {
     if (!target &&
-        (SINFO.targets.test(TAR_CHAR_ROOM) ||
-         SINFO.targets.test(TAR_CHAR_WORLD))) {
+        (SINFO.targets.test(spell_target::char_room) ||
+         SINFO.targets.test(spell_target::char_world))) {
       if ((tch = get_char(g, *victim)) != nullptr)
         target = true;
     }
 
     if (!target &&
-        (SINFO.targets.test(TAR_OBJ_INV) ||
-         SINFO.targets.test(TAR_OBJ_EQUIP) ||
-         SINFO.targets.test(TAR_OBJ_ROOM) ||
-         SINFO.targets.test(TAR_OBJ_WORLD))) {
+        (SINFO.targets.test(spell_target::obj_inv) ||
+         SINFO.targets.test(spell_target::obj_equip) ||
+         SINFO.targets.test(spell_target::obj_room) ||
+         SINFO.targets.test(spell_target::obj_world))) {
       if ((tobj = get_obj(g, *victim)) != nullptr)
         target = true;
     }
@@ -134,7 +134,7 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
     }
   }
 
-  if (SINFO.routines.test(MAG_GROUPS)) {
+  if (SINFO.routines.test(mag_routine::groups)) {
     script_log(g, "Trigger: {}, VNum {:d}. dg_cast: group spells not permitted ({})",
                trig->name, trig_get_vnum(g, trig), cmd);
     return;
@@ -210,7 +210,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
 
   if (!type) { /* search affect_types now */
     i = 0;
-    while (i < NUM_AFF_FLAGS) {
+    while (std::cmp_less(i, flag_count<aff_flag>)) {
       if (str_eq_nocase(affected_bits[i], property)) {
         type = AFFECT_TYPE;
         break;
@@ -245,7 +245,7 @@ void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data 
 
   if (type == APPLY_TYPE) {
     af.location  = i;
-    af.bitvector = AFF_DONTUSE;
+    af.bitvector = aff_flag::dontuse;
   } else {
     af.location  = 0;
     af.bitvector = *flag_from_index<aff_flag>(i); /* found among the affects' names above */
@@ -258,24 +258,24 @@ static void send_char_pos(GameWorld *g, struct char_data *ch, int dam)
 {
   switch (char_get_position(ch)) {
     case POS_MORTALLYW:
-      act(g, "$n is mortally wounded, and will die soon, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n is mortally wounded, and will die soon, if not aided.", true, ch, nullptr, nullptr, act_to::room);
       send_to_char(g, ch, "You are mortally wounded, and will die soon, if not aided.\r\n");
       break;
     case POS_INCAP:
-      act(g, "$n is incapacitated and will slowly die, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n is incapacitated and will slowly die, if not aided.", true, ch, nullptr, nullptr, act_to::room);
       send_to_char(g, ch, "You are incapacitated and will slowly die, if not aided.\r\n");
       break;
     case POS_STUNNED:
-      act(g, "$n is stunned, but will probably regain consciousness again.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n is stunned, but will probably regain consciousness again.", true, ch, nullptr, nullptr, act_to::room);
       send_to_char(g, ch, "You're stunned, but will probably regain consciousness again.\r\n");
       break;
     case POS_DEAD:
-      act(g, "$n is dead!  R.I.P.", false, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n is dead!  R.I.P.", false, ch, nullptr, nullptr, act_to::room);
       send_to_char(g, ch, "You are dead!  Sorry...\r\n");
       break;
     default: /* >= POSITION SLEEPING */
       if (dam > (getEffMaxPL(g, ch) >> 2))
-        act(g, "That really did HURT!", false, ch, nullptr, nullptr, TO_CHAR);
+        act(g, "That really did HURT!", false, ch, nullptr, nullptr, act_to::actor);
       if (getCurPL(g, ch) < (getEffMaxPL(g, ch) >> 2))
         send_to_char(g, ch, "@rYou wish that your wounds would stop BLEEDING so much!@n\r\n");
   }
@@ -283,10 +283,10 @@ static void send_char_pos(GameWorld *g, struct char_data *ch, int dam)
 
 /* Used throughout the xxxcmds.c files for checking if a char
  * can be targetted
- * - allow_gods is false when called by %force%, for instance,
- * while true for %teleport%.  -- Welcor
+ * - gods is refuse when called by %force%, for instance,
+ * while allow for %teleport%.  -- Welcor
  */
-bool valid_dg_target(GameWorld *g, struct char_data *ch, int bitvector)
+bool valid_dg_target(GameWorld *g, struct char_data *ch, dg_gods gods)
 {
   if (char_get_in_room(ch) == NOWHERE)
     return false; /* on the way out of the game, such as someone who has just quit */
@@ -294,10 +294,10 @@ bool valid_dg_target(GameWorld *g, struct char_data *ch, int bitvector)
     return true; /* all npcs are allowed as targets */
   else if (char_get_admlevel(ch) < ADMLVL_IMMORT)
     return true; /* as well as all mortals */
-  else if (!IS_SET(bitvector, DG_ALLOW_GODS) &&
-           (char_get_admlevel(ch) >= 2 && !char_prf_flagged(g, ch, PRF_TEST))) /* LVL_GOD has the advance command. Can't allow them to be forced. */
+  else if (gods == dg_gods::refuse &&
+           (char_get_admlevel(ch) >= 2 && !char_prf_flagged(g, ch, pref_flag::test))) /* LVL_GOD has the advance command. Can't allow them to be forced. */
     return false;                                                           /* but not always the highest gods */
-  else if (!char_prf_flagged(g, ch, PRF_NOHASSLE) || char_prf_flagged(g, ch, PRF_TEST))
+  else if (!char_prf_flagged(g, ch, pref_flag::nohassle) || char_prf_flagged(g, ch, pref_flag::test))
     return true; /* the ones in between as allowed as long as they have no-hassle off.   */
   else
     return false; /* The rest are gods with nohassle on... */
@@ -305,7 +305,7 @@ bool valid_dg_target(GameWorld *g, struct char_data *ch, int bitvector)
 
 void script_damage(GameWorld *g, struct char_data *vict, int dam)
 {
-  if (char_adm_flagged(vict, ADM_NODAMAGE) && (dam > 0)) {
+  if (char_adm_flagged(vict, admin_flag::nodamage) && (dam > 0)) {
     send_to_char(g, vict, "Being the cool immortal you are, you sidestep a trap, obviously placed to kill you.\r\n");
     return;
   }

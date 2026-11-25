@@ -26,7 +26,6 @@
 #include "dbat/olc/session.hpp"
 #include "dbat/act.wizard.hpp"
 #include "dbat/modify.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/room_utils.hpp"
@@ -66,7 +65,7 @@ namespace {
   void trigger_editor::edit_new()
   {
     trig.name         = "new trigger";
-    trig.trigger_type = trig_word(flag_set<mob_trig>{MTRIG_GREET});
+    trig.trigger_type = trig_word(flag_set<mob_trig>{mob_trig::greet});
     trig.narg         = 100;
     script            = "%echo% This trigger commandlist is not complete!\r\n";
     changed           = false;

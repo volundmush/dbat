@@ -4,7 +4,7 @@
 #include "dbat/flag_set.hpp"
 #include "dbat/name_table.hpp"
 
-extern const name_table admin_bits; /* NUM_ADMFLAGS of them */
+extern const name_table admin_bits; /* flag_count<admin_flag> of them */
 
 /* ADM flags - define admin privs for chars, char_data.admflags */
 enum class admin_flag : uint8_t {
@@ -33,26 +33,3 @@ template <> struct flag_traits<admin_flag> {
   static constexpr const name_table &names = admin_bits;
 };
 
-/* The old names, until every use says admin_flag:: */
-constexpr admin_flag ADM_TELLALL      = admin_flag::tellall;
-constexpr admin_flag ADM_SEEINV       = admin_flag::seeinv;
-constexpr admin_flag ADM_SEESECRET    = admin_flag::seesecret;
-constexpr admin_flag ADM_KNOWWEATHER  = admin_flag::knowweather;
-constexpr admin_flag ADM_FULLWHERE    = admin_flag::fullwhere;
-constexpr admin_flag ADM_MONEY        = admin_flag::money;
-constexpr admin_flag ADM_EATANYTHING  = admin_flag::eatanything;
-constexpr admin_flag ADM_NOPOISON     = admin_flag::nopoison;
-constexpr admin_flag ADM_WALKANYWHERE = admin_flag::walkanywhere;
-constexpr admin_flag ADM_NOKEYS       = admin_flag::nokeys;
-constexpr admin_flag ADM_INSTANTKILL  = admin_flag::instantkill;
-constexpr admin_flag ADM_NOSTEAL      = admin_flag::nosteal;
-constexpr admin_flag ADM_TRANSALL     = admin_flag::transall;
-constexpr admin_flag ADM_SWITCHMORTAL = admin_flag::switchmortal;
-constexpr admin_flag ADM_FORCEMASS    = admin_flag::forcemass;
-constexpr admin_flag ADM_ALLHOUSES    = admin_flag::allhouses;
-constexpr admin_flag ADM_NODAMAGE     = admin_flag::nodamage;
-constexpr admin_flag ADM_ALLSHOPS     = admin_flag::allshops;
-constexpr admin_flag ADM_CEDIT        = admin_flag::cedit;
-
-constexpr int NUM_ADMFLAGS = static_cast<int>(flag_count<admin_flag>);
-constexpr int AD_ARRAY_MAX = 4;

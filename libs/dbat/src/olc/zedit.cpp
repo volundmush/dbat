@@ -322,7 +322,7 @@ namespace {
   void zone_editor::flag_menu(GameWorld *g, struct descriptor_data *d)
   {
     clear_screen(g, d);
-    olc_list_columns(g, d, zone_bits, NUM_ZONE_FLAGS, 1, " ", 2);
+    olc_list_columns(g, d, zone_bits, flag_count<zone_flag>, 1, " ", 2);
     write_to_output(g, d, "\r\nZone flags: @c{}@n\r\nEnter Zone flags, 0 to quit : ", flag_names(edit.zone_flags));
     asking = mode::zone_flags;
   }
@@ -713,7 +713,7 @@ namespace {
       }
 
       case mode::zone_flags:
-        if (n < 0 || n > NUM_ZONE_FLAGS) {
+        if (n < 0 || std::cmp_greater(n, flag_count<zone_flag>)) {
           write_to_output(g, d, "That is not a valid choice!\r\n");
           flag_menu(g, d);
         } else if (n == 0)

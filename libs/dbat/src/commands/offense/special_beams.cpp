@@ -40,7 +40,7 @@ int honoo_flames(ki_shot &s, int hitspot)
     s.dmg -= s.dmg * 0.4;
   else if (char_get_bonuses(s.vict, BONUS_FIREPRONE))
     s.dmg += s.dmg * 0.4;
-  char_aff_set(s.vict, AFF_ASHED, true);
+  char_aff_set(s.vict, aff_flag::ashed, true);
   return hitspot;
 }
 
@@ -71,7 +71,7 @@ void honoo_paid(ki_shot &s, ki_outcome how)
     honoo_evaporate(s);
   else if (how == ki_outcome::hit) {
     honoo_evaporate(s);
-    char_aff_set(s.vict, AFF_ASHED, false);
+    char_aff_set(s.vict, aff_flag::ashed, false);
   }
 }
 
@@ -90,8 +90,8 @@ bool honoo_at_object(ki_shot &s)
   s.dmg = damtype(g, s.ch, 21, s.skill, s.attperc) / 10;
   if (obj_get_vnum(g, s.obj) == 79)
     s.dmg *= 3;
-  act(g, s.attack->obj_to_char, false, s.ch, s.obj, nullptr, TO_CHAR);
-  act(g, s.attack->obj_to_room, false, s.ch, s.obj, nullptr, TO_ROOM);
+  act(g, s.attack->obj_to_char, false, s.ch, s.obj, nullptr, act_to::actor);
+  act(g, s.attack->obj_to_room, false, s.ch, s.obj, nullptr, act_to::room);
   hurt(g, 0, 0, s.ch, nullptr, s.obj, s.dmg, 0);
   pcost(g, s.ch, s.attperc, 0);
   return true;
@@ -109,10 +109,10 @@ void psychic_blast_mind(ki_shot &s)
       char_set_charge(vict, 0);
     send_to_char(g, vict, "@RYou lose some of your charged ki!@n\r\n");
   }
-  if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-    act(g, "@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
-    act(g, "@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, TO_ROOM);
-    char_aff_set(vict, AFF_SHOCKED, true);
+  if (!char_aff_flagged(vict, aff_flag::shocked) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, aff_flag::sanctuary)) {
+    act(g, "@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, act_to::actor);
+    act(g, "@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, act_to::room);
+    char_aff_set(vict, aff_flag::shocked, true);
   }
 }
 
@@ -125,16 +125,16 @@ void sure_shot(ki_shot &, int &prob)
 /* A kousengan hits a victim under sanctuary harder */
 void kousengan_sanctuary(ki_shot &s)
 {
-  if (char_aff_flagged(s.vict, AFF_SANCTUARY))
+  if (char_aff_flagged(s.vict, aff_flag::sanctuary))
     s.dmg *= calc_critical(s.g, s.ch, 1);
 }
 
 void kousengan_burn(ki_shot &s)
 {
-  if (!char_aff_flagged(s.vict, AFF_BURNED) && rand_number(s.g, 1, 4) == 3 && !char_is_demon(s.vict)) {
+  if (!char_aff_flagged(s.vict, aff_flag::burned) && rand_number(s.g, 1, 4) == 3 && !char_is_demon(s.vict)) {
     send_to_char(s.g, s.vict, "@RYou are burned by the attack!@n\r\n");
     send_to_char(s.g, s.ch, "@RThey are burned by the attack!@n\r\n");
-    char_aff_set(s.vict, AFF_BURNED, true);
+    char_aff_set(s.vict, aff_flag::burned, true);
   }
 }
 

@@ -416,21 +416,21 @@ static void check_admin_levels(GameWorld *g, struct char_data *ch)
 {
   admin_set(g, ch, ADMLVL_VICE);
   CHECK(char_get_admlevel(ch) == ADMLVL_VICE);
-  CHECK(char_adm_flagged(ch, ADM_ALLSHOPS));
-  CHECK(!char_adm_flagged(ch, ADM_TRANSALL));
+  CHECK(char_adm_flagged(ch, admin_flag::allshops));
+  CHECK(!char_adm_flagged(ch, admin_flag::transall));
 
   admin_set(g, ch, ADMLVL_GRGOD);
-  CHECK(char_adm_flagged(ch, ADM_TRANSALL));
-  CHECK(!char_adm_flagged(ch, ADM_CEDIT));
+  CHECK(char_adm_flagged(ch, admin_flag::transall));
+  CHECK(!char_adm_flagged(ch, admin_flag::cedit));
 
   admin_set(g, ch, ADMLVL_IMPL);
   CHECK(char_get_admlevel(ch) == ADMLVL_IMPL);
-  CHECK(char_adm_flagged(ch, ADM_CEDIT));
+  CHECK(char_adm_flagged(ch, admin_flag::cedit));
 
   admin_set(g, ch, ADMLVL_NONE);
   CHECK(char_get_admlevel(ch) == ADMLVL_NONE);
-  CHECK(!char_adm_flagged(ch, ADM_CEDIT));
-  CHECK(!char_adm_flagged(ch, ADM_ALLSHOPS));
+  CHECK(!char_adm_flagged(ch, admin_flag::cedit));
+  CHECK(!char_adm_flagged(ch, admin_flag::allshops));
 }
 
 /* iedit used to cut the object list, and to leave a freed working copy in it on disconnect. */
@@ -600,11 +600,11 @@ static void check_awkward_commands(GameWorld *g, struct char_data *ch)
   th_take_output(g, ch);
   char_set_skills_base(ch, SKILL_HAYASA, 0);
 
-  char_plr_set(ch, PLR_NOSHOUT, true);
+  char_plr_set(ch, player_flag::noshout, true);
   th_type(g, ch, "gemote waves");
   CHECK(saw(ch, "You cannot gemote"));
   th_take_output(g, ch);
-  char_plr_set(ch, PLR_NOSHOUT, false);
+  char_plr_set(ch, player_flag::noshout, false);
 
   /* an NPC has no scouter, and used to be assumed to have one */
   {
@@ -861,9 +861,9 @@ static void check_scripts_ignore_whoever_has_left(GameWorld *g, struct char_data
 {
   room_vnum room = char_get_in_room(ch);
 
-  CHECK(valid_dg_target(g, ch, DG_ALLOW_GODS));
+  CHECK(valid_dg_target(g, ch, dg_gods::allow));
   char_set_in_room(ch, NOWHERE);
-  CHECK(!valid_dg_target(g, ch, DG_ALLOW_GODS));
+  CHECK(!valid_dg_target(g, ch, dg_gods::allow));
   char_set_in_room(ch, room);
 }
 

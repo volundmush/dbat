@@ -92,6 +92,6 @@ void assign_rooms(GameWorld *g)
 
   if (CONFIG_DTS_ARE_DUMPS)
     for (room_vnum i : g->rooms.vnums())
-      if (room_flagged(g, i, ROOM_DEATH))
+      if (room_flagged(g, i, room_flag::death))
         room_set_func(g, i, dump);
 }

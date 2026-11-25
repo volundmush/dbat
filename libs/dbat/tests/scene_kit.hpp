@@ -62,13 +62,10 @@ inline void clear_arena(GameWorld *g, struct char_data *a, struct char_data *b, 
     }
 }
 
-/* The type of a family's flags, as Flag has it: its enum class (room_flag), or int on a base from before the family
-   was typed, so a helper taking flags builds on both trees cmdcompare compares */
-template <auto Flag> using flag_type_of = std::remove_cv_t<decltype(Flag)>;
 
 /* A sword in att's hands for throwing (steel, slashing, three pounds, at full health), made into what is asked */
 inline struct obj_data *missile(GameWorld *g, struct char_data *att, int damtype = TYPE_SLASH - TYPE_HIT,
-                                int material = MATERIAL_STEEL, std::optional<flag_type_of<ITEM_GLOW>> flag = std::nullopt)
+                                int material = MATERIAL_STEEL, std::optional<extra_flag> flag = std::nullopt)
 {
   struct obj_data *obj = read_object(g, 301);
 
@@ -84,12 +81,12 @@ inline struct obj_data *missile(GameWorld *g, struct char_data *att, int damtype
 inline void group(GameWorld *g, struct char_data *leader, struct char_data *follower)
 {
   add_follower(g, follower, leader);
-  char_aff_set(leader, AFF_GROUP, true);
-  char_aff_set(follower, AFF_GROUP, true);
+  char_aff_set(leader, aff_flag::group, true);
+  char_aff_set(follower, aff_flag::group, true);
 }
 
 /* att wields a sword made into this damage type in pos, in place of whatever was there */
-inline struct obj_data *wield(GameWorld *g, struct char_data *att, int damtype, int pos = WEAR_WIELD1, std::optional<flag_type_of<ITEM_GLOW>> flag = std::nullopt)
+inline struct obj_data *wield(GameWorld *g, struct char_data *att, int damtype, int pos = WEAR_WIELD1, std::optional<extra_flag> flag = std::nullopt)
 {
   if (char_get_equipment(att, pos))
     extract_obj(g, unequip_char(g, att, pos));
@@ -121,7 +118,7 @@ inline void dual(GameWorld *g, struct char_data *att, int damtype, int mastery =
 
 inline void two_handed(struct char_data *att, int mastery)
 {
-  char_plr_set(att, PLR_THANDW, true);
+  char_plr_set(att, player_flag::thandw, true);
   char_set_skills_base(att, SKILL_TWOHAND, mastery);
 }
 
@@ -213,7 +210,7 @@ inline void lasting(GameWorld *g, struct char_data *att, const char *skill)
 {
   for (int i = 0; i < SKILL_TABLE_SIZE; i++)
     if (name_set(g->spell_info[i].name) && str_eq_nocase(skill_name(g, i), skill)) {
-      assign_affect(g, att, AFF_INFUSE, i, 5, 0, 0, 0, 0, 0, 0);
+      assign_affect(g, att, aff_flag::infuse, i, 5, 0, 0, 0, 0, 0, 0);
       return;
     }
 }
@@ -234,7 +231,7 @@ inline void the_dead(GameWorld *g, struct char_data *att, const char *alive = ""
 {
   for (char_data *c : room_people(g, char_get_in_room(att)))
     if (!char_is_npc(c))
-      char_aff_set(c, AFF_SPIRIT, char_get_name(c) != std::string_view(alive));
+      char_aff_set(c, aff_flag::spirit, char_get_name(c) != std::string_view(alive));
 }
 
 /* ... with the first other player there snooping them, and `then` done to that snooper */
@@ -287,7 +284,7 @@ inline struct obj_data *carries_as(GameWorld *g, struct char_data *att, obj_vnum
 inline struct obj_data *gardening(GameWorld *g, struct char_data *att, int skill, obj_vnum seedling = 250)
 {
   char_set_skills_base(att, SKILL_GARDENING, skill);
-  room_set_flag(g, ARENA, ROOM_GARDEN1, true);
+  room_set_flag(g, ARENA, room_flag::garden1, true);
   if (seedling < 0)
     return nullptr;
   struct obj_data *plant = read_object(g, 70);
@@ -369,7 +366,7 @@ inline struct obj_data *at_duel_table(GameWorld *g, struct char_data *att, int c
     struct obj_data *card = read_object(g, 70);
     obj_set_name(card, "card");
     obj_set_weight(card, 0);
-    obj_extra_set(card, ITEM_ANTI_HIEROPHANT, true);
+    obj_extra_set(card, extra_flag::anti_hierophant, true);
     obj_to_obj(g, card, box);
   }
   return table;
@@ -386,22 +383,14 @@ inline void longer_help_table(GameWorld *g)
   g->help_table = {{"AAA", "a\n", 0, 0}, {"FIXTURE", "f\n", 0, 5}, {"FIXTUREB", "fb\n", 0, 0}, {"FIXTUREC", "fc\n", 0, 0}, {"ZZZ", "z\n", 0, 0}};
 }
 
-/* An exit's flags as either tree holds them: the masks or'ed together, or a flag_set */
-using exit_flags = std::remove_cv_t<decltype(EX_ISDOOR | EX_CLOSED)>;
-
-/* Container flags as the int value VAL_CONTAINER_FLAGS holds, from the masks or the typed flags */
-template <class... F> int cont_value(F... flags)
+/* Container flags as the int value VAL_CONTAINER_FLAGS holds */
+template <std::same_as<container_flag>... F> int cont_value(F... flags)
 {
-  if constexpr ((std::is_integral_v<F> && ...))
-    return static_cast<int>((0u | ... | flags));
-  else {
-    flag_set<std::common_type_t<F...>> set{flags...};
-    return static_cast<int>(set.word(0));
-  }
+  return static_cast<int>(flag_set<container_flag>{flags...}.word(0));
 }
 
 /* ... with a room in every direction from the arena, of this sector and ground effect, through exits like so */
-inline void surrounded(GameWorld *g, int sect, int geffect = 0, exit_flags exit_info = {}, const char *keyword = "door")
+inline void surrounded(GameWorld *g, int sect, int geffect = 0, flag_set<exit_flag> exit_info = {}, const char *keyword = "door")
 {
   static constexpr room_vnum around[NUM_OF_DIRS] = {51, 52, 53, 54, 55, 56, 81, 82, 83, 84, 85, 86};
   for (int dir = 0; dir < NUM_OF_DIRS; dir++) {
@@ -433,7 +422,7 @@ inline struct obj_data *thing_here(GameWorld *g, const char *name, int type, std
 inline void described(ex_desc_list *list, const char *keyword) { list->push_back({keyword, "You see it closely.\r\n"}); }
 
 /* ... a scouter on ch's eye (item70), flagged as asked and tuned to freq */
-inline struct obj_data *scouter_on(GameWorld *g, struct char_data *ch, std::optional<flag_type_of<ITEM_GLOW>> flag = std::nullopt, int freq = 0)
+inline struct obj_data *scouter_on(GameWorld *g, struct char_data *ch, std::optional<extra_flag> flag = std::nullopt, int freq = 0)
 {
   struct obj_data *obj = read_object(g, 70);
   obj_set_name(obj, "scouter");
@@ -493,7 +482,7 @@ inline void empowered(struct char_data *ch, int64_t pl)
 inline void repair_model(struct char_data *att)
 {
   char_set_race(att, RACE_ANDROID);
-  char_plr_set(att, PLR_REPAIR, true);
+  char_plr_set(att, player_flag::repair, true);
 }
 
 /* ... carrying item70 as an item of another number, named so */
@@ -524,7 +513,7 @@ inline void enchanted(struct obj_data *obj)
     obj_get_affected(obj)[i].modifier = affects[i].second;
   }
   obj_get_affected(obj)[2].specific = SKILL_PUNCH;
-  obj_aff_set(obj, AFF_INFRAVISION, true);
+  obj_aff_set(obj, aff_flag::infravision, true);
 }
 
 /* ... with the medical supplies a construction kit makes in the world, which the fixture lacks */
@@ -543,7 +532,7 @@ inline void dragon_balls(GameWorld *g, struct char_data *att, std::initializer_l
   for (int star : stars) {
     struct obj_data *ball = holding_as(g, att, "ball", 19 + star);
     if (star == forged)
-      obj_extra_set(ball, ITEM_FORGED, true);
+      obj_extra_set(ball, extra_flag::forged, true);
   }
 }
 
@@ -609,7 +598,7 @@ inline void crowded(GameWorld *g, struct char_data *att)
 
 inline void fireshielded(struct char_data *victim)
 {
-  char_aff_set(victim, AFF_FIRESHIELD, true);
+  char_aff_set(victim, aff_flag::fireshield, true);
   char_set_skills_base(victim, SKILL_FIRESHIELD, 80);
 }
 

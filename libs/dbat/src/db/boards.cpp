@@ -91,7 +91,7 @@ static void announce_new_post(GameWorld *g, obj_vnum vnum)
     return;
 
   for (descriptor_data *d : each_desc(g)) {
-    if (!desc_is_playing(d) || char_plr_flagged(d->character, PLR_WRITING))
+    if (!desc_is_playing(d) || char_plr_flagged(d->character, player_flag::writing))
       continue;
     if (sb->admin_only && char_get_admlevel(d->character) < 1)
       continue;
@@ -569,7 +569,7 @@ void show_board(GameWorld *g, obj_vnum board_vnum, struct char_data *ch)
 {
   struct board_info *board;
   struct obj_data *obj;
-  bool oldest_first = char_prf_flagged(g, ch, PRF_VIEWORDER);
+  bool oldest_first = char_prf_flagged(g, ch, pref_flag::vieworder);
   std::string name;
   int count = 0;
 
@@ -636,7 +636,7 @@ void board_display_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, 
     send_to_char(g, ch, "You must specify the (positive) number of the message to be read!\r\n");
     return;
   }
-  if (!(msg = nth_message(board, arg, char_prf_flagged(g, ch, PRF_VIEWORDER)))) {
+  if (!(msg = nth_message(board, arg, char_prf_flagged(g, ch, pref_flag::vieworder)))) {
     send_to_char(g, ch, "That message exists only in your imagination.\r\n");
     return;
   }
@@ -663,7 +663,7 @@ static void start_post(GameWorld *g, struct board_info *board, struct board_msg 
 {
   board->num_messages = MAX(board->num_messages + 1, 1);
   add_message_head(board, msg);
-  char_plr_set(ch, PLR_WRITING, true);
+  char_plr_set(ch, player_flag::writing, true);
   string_write(char_get_desc(ch), &msg->data, MAX_MESSAGE_LENGTH, board->vnum + BOARD_MAGIC);
   announce_new_post(g, board->vnum);
 }
@@ -693,7 +693,7 @@ void write_board_message(GameWorld *g, obj_vnum board_vnum, struct char_data *ch
     send_to_char(g, ch, "Your subject can only be 45 characters long(including colorcode).\r\n");
     return;
   }
-  act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, act_to::room);
   delete_doubledollar(subject);
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n");
@@ -721,7 +721,7 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
     send_to_char(g, ch, "You are not holy enough to respond to this board.\r\n");
     return;
   }
-  if (char_prf_flagged(g, ch, PRF_VIEWORDER))
+  if (char_prf_flagged(g, ch, pref_flag::vieworder))
     mnum = (board->num_messages - mnum) + 1;
   if (mnum < 1 || mnum > board->num_messages || !(other = nth_message(board, mnum, false))) {
     send_to_char(g, ch, "You can only respond to an actual message.\r\n");
@@ -733,7 +733,7 @@ void board_respond(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, int 
   msg     = new_message(g, ch, subject.c_str());
 
   send_to_char(g, ch, "Write your message.  (/s saves /h for help)\r\n\r\n");
-  act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, act_to::room);
 
   msg->data = str_format("\t@D------- @cQuoted message @D-------@w\r\n{}\t@D   ------- @cEnd Quote @D-------@w\r\n", other->data);
   write_to_output(g, char_get_desc(ch), msg->data);
@@ -776,7 +776,7 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
     send_to_char(g, ch, "You must specify the (positive) number of the message to be read!\r\n");
     return;
   }
-  if (char_prf_flagged(g, ch, PRF_VIEWORDER))
+  if (char_prf_flagged(g, ch, pref_flag::vieworder))
     arg = board->num_messages - arg + 1;
   if (!(msg = nth_message(board, arg, false))) {
     send_to_char(g, ch, "That message exists only in your imagination.\r\n");
@@ -786,7 +786,7 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
     mud_log("Board doesn't exists! Weird.");
     return;
   }
-  if (!obj_extra_flagged(obj, ITEM_CBOARD) && char_get_admlevel(ch) < board->remove_lvl && msg->name != char_get_name(ch)) {
+  if (!obj_extra_flagged(obj, extra_flag::cboard) && char_get_admlevel(ch) < board->remove_lvl && msg->name != char_get_name(ch)) {
     send_to_char(g, ch, "You can't remove other people's messages.\r\n");
     return;
   }
@@ -800,6 +800,6 @@ void remove_board_msg(GameWorld *g, obj_vnum board_vnum, struct char_data *ch, i
   board->num_messages--;
   send_to_char(g, ch, "Message removed.\r\n");
   buf = str_format("$n just removed message {:d}.", arg);
-  act(g, buf, false, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, false, ch, nullptr, nullptr, act_to::room);
   save_board(g, board);
 }

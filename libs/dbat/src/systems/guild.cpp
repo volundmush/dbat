@@ -45,17 +45,17 @@ static int calculate_skill_cost(GameWorld *g, struct char_data *ch, int skill)
 {
   int cost = 0;
 
-  if (IS_SET(g->spell_info[skill].flags, SKFLAG_TIER2)) {
+  if (g->spell_info[skill].flags.test(skill_flag::tier2)) {
     cost = 8;
-  } else if (IS_SET(g->spell_info[skill].flags, SKFLAG_TIER3)) {
+  } else if (g->spell_info[skill].flags.test(skill_flag::tier3)) {
     cost = 15;
-  } else if (IS_SET(g->spell_info[skill].flags, SKFLAG_TIER4)) {
+  } else if (g->spell_info[skill].flags.test(skill_flag::tier4)) {
     if (char_get_skills_base(ch, skill) == 0) {
       cost = 200;
     } else {
       cost = 25;
     }
-  } else if (IS_SET(g->spell_info[skill].flags, SKFLAG_TIER5)) {
+  } else if (g->spell_info[skill].flags.test(skill_flag::tier5)) {
     if (char_get_skills_base(ch, skill) == 0) {
       cost = 300;
     } else {
@@ -151,7 +151,7 @@ ACMD(do_teach)
     return;
   }
 
-  skill = find_skill_num(g, arg, SKTYPE_SKILL);
+  skill = find_skill_num(g, arg, skill_kind::skill);
 
   if (skill < 0 || skill >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
@@ -170,7 +170,7 @@ ACMD(do_teach)
     return;
   }
 
-  if (!(vict = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(g, ch, arg2, nullptr, find_flag::char_room))) {
     send_to_char(g, ch, "@wTeach who?@n\r\n");
     send_to_char(g, ch, "@wSyntax: teach (skill) (target)@n\r\n");
     return;
@@ -219,9 +219,9 @@ ACMD(do_teach)
     tochar  = str_format("@YYou instruct @y$N@Y in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
     tovict  = str_format("@y$n@Y instructs you in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
     toother = str_format("@y$n@Y instructs @y$N@Y in the finer points of @C{}@Y.@n\r\n", g->spell_info[skill].name);
-    act(g, tochar, true, ch, nullptr, vict, TO_CHAR);
-    act(g, tovict, true, ch, nullptr, vict, TO_VICT);
-    act(g, toother, true, ch, nullptr, vict, TO_NOTVICT);
+    act(g, tochar, true, ch, nullptr, vict, act_to::actor);
+    act(g, tovict, true, ch, nullptr, vict, act_to::vict);
+    act(g, toother, true, ch, nullptr, vict, act_to::notvict);
     char_set_skills_base(vict, skill, char_get_skills_base(vict, skill) + 1);
     if (free == false) {
       char_set_practice_points(g, vict, char_get_practice_points(g, vict) - (cost));
@@ -244,15 +244,15 @@ static int compare_spells(const void *x, const void *y, void *world)
   return g->spell_info[a].name.compare(g->spell_info[b].name);
 }
 
-std::string print_skills_by_type(GameWorld *g, struct char_data *ch, int sktype, std::string_view argument)
+std::string print_skills_by_type(GameWorld *g, struct char_data *ch, flag_set<skill_kind> sktype, std::string_view argument)
 {
-  int i, t, known, count = 0, canknow = 0;
+  int i, known, count = 0, canknow = 0;
   std::string buf, buf2;
 
   std::string arg = take_arg(argument);
 
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
-    t = g->spell_info[i].skilltype;
+    flag_set<skill_kind> t = g->spell_info[i].skilltype;
 
     if (t != sktype)
       continue;
@@ -268,10 +268,10 @@ std::string print_skills_by_type(GameWorld *g, struct char_data *ch, int sktype,
 
     if (known == 0) continue;
 
-    if (t & SKTYPE_LANG) {
+    if (t.test(skill_kind::lang)) {
       buf += str_format("{:<20}  ({})\r\n",
                         g->spell_info[i].name, char_get_skills_base(ch, i) ? "known" : "unknown");
-    } else if (t & SKTYPE_SKILL) {
+    } else if (t.test(skill_kind::skill)) {
       if (char_get_skills_mod(ch, i))
         buf2 = str_format(" (base {:d} + bonus {:d})", char_get_skills_base(ch, i), char_get_skills_mod(ch, i));
       else
@@ -382,7 +382,7 @@ void list_skills(GameWorld *g, struct char_data *ch, std::string_view arg)
 
   buf2 += "\r\nYou know the following skills:     @CKnown@D/@cPrac. Max@n\r\n@w-------------------------------------------------------@n\r\n";
 
-  buf2 += str_format("{}", print_skills_by_type(g, ch, SKTYPE_SKILL, arg));
+  buf2 += str_format("{}", print_skills_by_type(g, ch, skill_kind::skill, arg));
 
   if (slots == false) {
     buf2 += str_format("\r\n@DSkill Slots@W: @M{:d}@W/@m{:d}", slot_count(ch), char_get_skill_slots(ch));
@@ -423,9 +423,9 @@ static bool is_guild_ok_char(GameWorld *g, struct char_data *keeper, struct char
     return (false);
   }
 
-  if ((char_is_good(ch) && guild_trade_flagged(guild_nr, TRADE_NOGOOD)) ||
-      (char_is_evil(ch) && guild_trade_flagged(guild_nr, TRADE_NOEVIL)) ||
-      (char_is_neutral(ch) && guild_trade_flagged(guild_nr, TRADE_NONEUTRAL))) {
+  if ((char_is_good(ch) && guild_trade_flagged(guild_nr, trade_flag::nogood)) ||
+      (char_is_evil(ch) && guild_trade_flagged(guild_nr, trade_flag::noevil)) ||
+      (char_is_neutral(ch) && guild_trade_flagged(guild_nr, trade_flag::noneutral))) {
     buf = str_format("{} {}",
                      char_get_name(ch), MSG_TRAINER_DISLIKE_ALIGN);
     do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
@@ -435,32 +435,32 @@ static bool is_guild_ok_char(GameWorld *g, struct char_data *keeper, struct char
   if (char_is_npc(ch))
     return (false);
 
-  if ((char_is_roshi(ch) && guild_trade_flagged(guild_nr, TRADE_NOWIZARD)) ||
-      (char_is_piccolo(ch) && guild_trade_flagged(guild_nr, TRADE_NOCLERIC)) ||
-      (char_is_krane(ch) && guild_trade_flagged(guild_nr, TRADE_NOROGUE)) ||
-      (char_is_nail(ch) && guild_trade_flagged(guild_nr, TRADE_NOFIGHTER)) ||
-      (char_is_ginyu(ch) && guild_trade_flagged(guild_nr, TRADE_NOPALADIN)) ||
-      (char_is_frieza(ch) && guild_trade_flagged(guild_nr, TRADE_NOSORCERER)) ||
-      (char_is_tapion(ch) && guild_trade_flagged(guild_nr, TRADE_NODRUID)) ||
-      (char_is_andsix(ch) && guild_trade_flagged(guild_nr, TRADE_NOBARD)) ||
-      (char_is_dabura(ch) && guild_trade_flagged(guild_nr, TRADE_NORANGER)) ||
-      (char_is_bardock(ch) && guild_trade_flagged(guild_nr, TRADE_NOMONK)) ||
-      (char_is_kabito(ch) && guild_trade_flagged(guild_nr, TRADE_NOBARBARIAN)) ||
-      (char_is_jinto(ch) && guild_trade_flagged(guild_nr, TRADE_NOARCANE_ARCHER)) ||
-      (char_is_tsuna(ch) && guild_trade_flagged(guild_nr, TRADE_NOARCANE_TRICKSTER)) ||
-      (char_is_kurzak(ch) && guild_trade_flagged(guild_nr, TRADE_NOARCHMAGE)) ||
-      (char_is_assassin(ch) && guild_trade_flagged(guild_nr, TRADE_NOASSASSIN)) ||
-      (char_is_blackguard(ch) && guild_trade_flagged(guild_nr, TRADE_NOBLACKGUARD)) ||
-      (char_is_dragon_disciple(ch) && guild_trade_flagged(guild_nr, TRADE_NODRAGON_DISCIPLE)) ||
-      (char_is_duelist(ch) && guild_trade_flagged(guild_nr, TRADE_NODUELIST)) ||
-      (char_is_dwarven_defender(ch) && guild_trade_flagged(guild_nr, TRADE_NODWARVEN_DEFENDER)) ||
-      (char_is_eldritch_knight(ch) && guild_trade_flagged(guild_nr, TRADE_NOELDRITCH_KNIGHT)) ||
-      (char_is_hierophant(ch) && guild_trade_flagged(guild_nr, TRADE_NOHIEROPHANT)) ||
-      (char_is_horizon_walker(ch) && guild_trade_flagged(guild_nr, TRADE_NOHORIZON_WALKER)) ||
-      (char_is_loremaster(ch) && guild_trade_flagged(guild_nr, TRADE_NOLOREMASTER)) ||
-      (char_is_mystic_theurge(ch) && guild_trade_flagged(guild_nr, TRADE_NOMYSTIC_THEURGE)) ||
-      (char_is_shadowdancer(ch) && guild_trade_flagged(guild_nr, TRADE_NOSHADOWDANCER)) ||
-      (char_is_thaumaturgist(ch) && guild_trade_flagged(guild_nr, TRADE_NOTHAUMATURGIST))) {
+  if ((char_is_roshi(ch) && guild_trade_flagged(guild_nr, trade_flag::nowizard)) ||
+      (char_is_piccolo(ch) && guild_trade_flagged(guild_nr, trade_flag::nocleric)) ||
+      (char_is_krane(ch) && guild_trade_flagged(guild_nr, trade_flag::norogue)) ||
+      (char_is_nail(ch) && guild_trade_flagged(guild_nr, trade_flag::nofighter)) ||
+      (char_is_ginyu(ch) && guild_trade_flagged(guild_nr, trade_flag::nopaladin)) ||
+      (char_is_frieza(ch) && guild_trade_flagged(guild_nr, trade_flag::nosorcerer)) ||
+      (char_is_tapion(ch) && guild_trade_flagged(guild_nr, trade_flag::nodruid)) ||
+      (char_is_andsix(ch) && guild_trade_flagged(guild_nr, trade_flag::nobard)) ||
+      (char_is_dabura(ch) && guild_trade_flagged(guild_nr, trade_flag::noranger)) ||
+      (char_is_bardock(ch) && guild_trade_flagged(guild_nr, trade_flag::nomonk)) ||
+      (char_is_kabito(ch) && guild_trade_flagged(guild_nr, trade_flag::nobarbarian)) ||
+      (char_is_jinto(ch) && guild_trade_flagged(guild_nr, trade_flag::noarcane_archer)) ||
+      (char_is_tsuna(ch) && guild_trade_flagged(guild_nr, trade_flag::noarcane_trickster)) ||
+      (char_is_kurzak(ch) && guild_trade_flagged(guild_nr, trade_flag::noarchmage)) ||
+      (char_is_assassin(ch) && guild_trade_flagged(guild_nr, trade_flag::noassassin)) ||
+      (char_is_blackguard(ch) && guild_trade_flagged(guild_nr, trade_flag::noblackguard)) ||
+      (char_is_dragon_disciple(ch) && guild_trade_flagged(guild_nr, trade_flag::nodragon_disciple)) ||
+      (char_is_duelist(ch) && guild_trade_flagged(guild_nr, trade_flag::noduelist)) ||
+      (char_is_dwarven_defender(ch) && guild_trade_flagged(guild_nr, trade_flag::nodwarven_defender)) ||
+      (char_is_eldritch_knight(ch) && guild_trade_flagged(guild_nr, trade_flag::noeldritch_knight)) ||
+      (char_is_hierophant(ch) && guild_trade_flagged(guild_nr, trade_flag::nohierophant)) ||
+      (char_is_horizon_walker(ch) && guild_trade_flagged(guild_nr, trade_flag::nohorizon_walker)) ||
+      (char_is_loremaster(ch) && guild_trade_flagged(guild_nr, trade_flag::noloremaster)) ||
+      (char_is_mystic_theurge(ch) && guild_trade_flagged(guild_nr, trade_flag::nomystic_theurge)) ||
+      (char_is_shadowdancer(ch) && guild_trade_flagged(guild_nr, trade_flag::noshadowdancer)) ||
+      (char_is_thaumaturgist(ch) && guild_trade_flagged(guild_nr, trade_flag::nothaumaturgist))) {
 
     buf = str_format("{} {}",
                      char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
@@ -468,59 +468,59 @@ static bool is_guild_ok_char(GameWorld *g, struct char_data *keeper, struct char
     return (false);
   }
 
-  if ((!char_is_roshi(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYWIZARD)) ||
-      (!char_is_piccolo(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYCLERIC)) ||
-      (!char_is_krane(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYROGUE)) ||
-      (!char_is_bardock(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYMONK)) ||
-      (!char_is_ginyu(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYPALADIN)) ||
-      (!char_is_nail(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYFIGHTER)) ||
-      (!char_is_frieza(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYSORCERER)) ||
-      (!char_is_tapion(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYDRUID)) ||
-      (!char_is_andsix(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYBARD)) ||
-      (!char_is_dabura(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYRANGER)) ||
-      (!char_is_kabito(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYBARBARIAN)) ||
-      (!char_is_jinto(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYARCANE_ARCHER)) ||
-      (!char_is_tsuna(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYARCANE_TRICKSTER)) ||
-      (!char_is_kurzak(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYARCHMAGE)) ||
-      (!char_is_assassin(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYASSASSIN)) ||
-      (!char_is_blackguard(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYBLACKGUARD)) ||
-      (!char_is_dragon_disciple(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYDRAGON_DISCIPLE)) ||
-      (!char_is_duelist(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYDUELIST)) ||
-      (!char_is_dwarven_defender(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYDWARVEN_DEFENDER)) ||
-      (!char_is_eldritch_knight(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYELDRITCH_KNIGHT)) ||
-      (!char_is_hierophant(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYHIEROPHANT)) ||
-      (!char_is_horizon_walker(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYHORIZON_WALKER)) ||
-      (!char_is_loremaster(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYLOREMASTER)) ||
-      (!char_is_mystic_theurge(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYMYSTIC_THEURGE)) ||
-      (!char_is_shadowdancer(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYSHADOWDANCER)) ||
-      (!char_is_thaumaturgist(ch) && guild_trade_flagged(guild_nr, TRADE_ONLYTHAUMATURGIST))) {
+  if ((!char_is_roshi(ch) && guild_trade_flagged(guild_nr, trade_flag::onlywizard)) ||
+      (!char_is_piccolo(ch) && guild_trade_flagged(guild_nr, trade_flag::onlycleric)) ||
+      (!char_is_krane(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyrogue)) ||
+      (!char_is_bardock(ch) && guild_trade_flagged(guild_nr, trade_flag::onlymonk)) ||
+      (!char_is_ginyu(ch) && guild_trade_flagged(guild_nr, trade_flag::onlypaladin)) ||
+      (!char_is_nail(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyfighter)) ||
+      (!char_is_frieza(ch) && guild_trade_flagged(guild_nr, trade_flag::onlysorcerer)) ||
+      (!char_is_tapion(ch) && guild_trade_flagged(guild_nr, trade_flag::onlydruid)) ||
+      (!char_is_andsix(ch) && guild_trade_flagged(guild_nr, trade_flag::onlybard)) ||
+      (!char_is_dabura(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyranger)) ||
+      (!char_is_kabito(ch) && guild_trade_flagged(guild_nr, trade_flag::onlybarbarian)) ||
+      (!char_is_jinto(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyarcane_archer)) ||
+      (!char_is_tsuna(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyarcane_trickster)) ||
+      (!char_is_kurzak(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyarchmage)) ||
+      (!char_is_assassin(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyassassin)) ||
+      (!char_is_blackguard(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyblackguard)) ||
+      (!char_is_dragon_disciple(ch) && guild_trade_flagged(guild_nr, trade_flag::onlydragon_disciple)) ||
+      (!char_is_duelist(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyduelist)) ||
+      (!char_is_dwarven_defender(ch) && guild_trade_flagged(guild_nr, trade_flag::onlydwarven_defender)) ||
+      (!char_is_eldritch_knight(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyeldritch_knight)) ||
+      (!char_is_hierophant(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyhierophant)) ||
+      (!char_is_horizon_walker(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyhorizon_walker)) ||
+      (!char_is_loremaster(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyloremaster)) ||
+      (!char_is_mystic_theurge(ch) && guild_trade_flagged(guild_nr, trade_flag::onlymystic_theurge)) ||
+      (!char_is_shadowdancer(ch) && guild_trade_flagged(guild_nr, trade_flag::onlyshadowdancer)) ||
+      (!char_is_thaumaturgist(ch) && guild_trade_flagged(guild_nr, trade_flag::onlythaumaturgist))) {
     buf = str_format("{} {}",
                      char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
     do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
     return (false);
   }
 
-  if ((char_is_human(ch) && guild_trade_flagged(guild_nr, TRADE_NOHUMAN)) ||
-      (char_is_saiyan(ch) && guild_trade_flagged(guild_nr, TRADE_NOSAIYAN)) ||
-      (char_is_icer(ch) && guild_trade_flagged(guild_nr, TRADE_NOICER)) ||
-      (char_is_konatsu(ch) && guild_trade_flagged(guild_nr, TRADE_NOKONATSU)) ||
-      (char_is_namek(ch) && guild_trade_flagged(guild_nr, TRADE_NONAMEK)) ||
-      (char_is_mutant(ch) && guild_trade_flagged(guild_nr, TRADE_NOMUTANT)) ||
-      (char_is_kanassan(ch) && guild_trade_flagged(guild_nr, TRADE_NOKANASSAN)) ||
-      (char_is_android(ch) && guild_trade_flagged(guild_nr, TRADE_NOANDROID)) ||
-      (char_is_bio(ch) && guild_trade_flagged(guild_nr, TRADE_NOBIO)) ||
-      (char_is_demon(ch) && guild_trade_flagged(guild_nr, TRADE_NODEMON)) ||
-      (char_is_majin(ch) && guild_trade_flagged(guild_nr, TRADE_NOMAJIN)) ||
-      (char_is_kai(ch) && guild_trade_flagged(guild_nr, TRADE_NOKAI)) ||
-      (char_is_truffle(ch) && guild_trade_flagged(guild_nr, TRADE_NOTRUFFLE)) ||
-      (char_is_hoshijin(ch) && guild_trade_flagged(guild_nr, TRADE_NOGOBLIN)) ||
-      (char_is_animal(ch) && guild_trade_flagged(guild_nr, TRADE_NOANIMAL)) ||
-      (char_is_saiba(ch) && guild_trade_flagged(guild_nr, TRADE_NOORC)) ||
-      (char_is_serpent(ch) && guild_trade_flagged(guild_nr, TRADE_NOSNAKE)) ||
-      (char_is_ogre(ch) && guild_trade_flagged(guild_nr, TRADE_NOTROLL)) ||
-      (char_is_halfbreed(ch) && guild_trade_flagged(guild_nr, TRADE_NOHALFBREED)) ||
-      (char_is_yardratian(ch) && guild_trade_flagged(guild_nr, TRADE_NOMINOTAUR)) ||
-      (char_is_arlian(ch) && guild_trade_flagged(guild_nr, TRADE_NOKOBOLD))) {
+  if ((char_is_human(ch) && guild_trade_flagged(guild_nr, trade_flag::nohuman)) ||
+      (char_is_saiyan(ch) && guild_trade_flagged(guild_nr, trade_flag::nosaiyan)) ||
+      (char_is_icer(ch) && guild_trade_flagged(guild_nr, trade_flag::noicer)) ||
+      (char_is_konatsu(ch) && guild_trade_flagged(guild_nr, trade_flag::nokonatsu)) ||
+      (char_is_namek(ch) && guild_trade_flagged(guild_nr, trade_flag::nonamek)) ||
+      (char_is_mutant(ch) && guild_trade_flagged(guild_nr, trade_flag::nomutant)) ||
+      (char_is_kanassan(ch) && guild_trade_flagged(guild_nr, trade_flag::nokanassan)) ||
+      (char_is_android(ch) && guild_trade_flagged(guild_nr, trade_flag::noandroid)) ||
+      (char_is_bio(ch) && guild_trade_flagged(guild_nr, trade_flag::nobio)) ||
+      (char_is_demon(ch) && guild_trade_flagged(guild_nr, trade_flag::nodemon)) ||
+      (char_is_majin(ch) && guild_trade_flagged(guild_nr, trade_flag::nomajin)) ||
+      (char_is_kai(ch) && guild_trade_flagged(guild_nr, trade_flag::nokai)) ||
+      (char_is_truffle(ch) && guild_trade_flagged(guild_nr, trade_flag::notruffle)) ||
+      (char_is_hoshijin(ch) && guild_trade_flagged(guild_nr, trade_flag::nogoblin)) ||
+      (char_is_animal(ch) && guild_trade_flagged(guild_nr, trade_flag::noanimal)) ||
+      (char_is_saiba(ch) && guild_trade_flagged(guild_nr, trade_flag::noorc)) ||
+      (char_is_serpent(ch) && guild_trade_flagged(guild_nr, trade_flag::nosnake)) ||
+      (char_is_ogre(ch) && guild_trade_flagged(guild_nr, trade_flag::notroll)) ||
+      (char_is_halfbreed(ch) && guild_trade_flagged(guild_nr, trade_flag::nohalfbreed)) ||
+      (char_is_yardratian(ch) && guild_trade_flagged(guild_nr, trade_flag::nominotaur)) ||
+      (char_is_arlian(ch) && guild_trade_flagged(guild_nr, trade_flag::nokobold))) {
     buf = str_format("{} {}",
                      char_get_name(ch), MSG_TRAINER_DISLIKE_RACE);
     do_tell(g, keeper, buf.c_str(), g->cmd_tell, 0);
@@ -576,7 +576,7 @@ static void what_does_guild_know(GameWorld *g, struct guild_data *guild_nr, stru
   /* Need to check if trainer can train doesnt do it now ??? */
   for (sortpos = 0; sortpos < SKILL_TABLE_SIZE; sortpos++) {
     i = sortpos; /* spell_sort_info[sortpos]; */
-    if (does_guild_know(g, guild_nr, i) && skill_type(g, i) == SKTYPE_SKILL) {
+    if (does_guild_know(g, guild_nr, i) && skill_type(g, i) == skill_kind::skill) {
       for (canknow = 0, k = 0, j = 0; j < NUM_CLASSES; j++)
         if (char_get_class_ranks(ch, j) > 0 && (g->spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
           k = g->spell_info[i].can_learn_skill[j];
@@ -608,7 +608,7 @@ static void what_does_guild_know(GameWorld *g, struct guild_data *guild_nr, stru
 
     for (sortpos = 0; sortpos < SKILL_TABLE_SIZE; sortpos++) {
       i = sortpos; /* spell_sort_info[sortpos]; */
-      if (does_guild_know(g, guild_nr, i) && IS_SET(skill_type(g, i), SKTYPE_LANG)) {
+      if (does_guild_know(g, guild_nr, i) && skill_type(g, i).test(skill_kind::lang)) {
         //if (GET_LEVEL(ch) >= spell_info[i].min_level[(int) GET_CLASS(ch)]) {
         for (canknow = 0, j = 0; j < NUM_CLASSES; j++)
           if (g->spell_info[i].can_learn_skill[j] > canknow)
@@ -662,14 +662,14 @@ static bool prereq_pass(GameWorld *g, struct char_data *ch, int snum)
       send_to_char(g, ch, "You can not train that skill until you at least have trained focus to Skill LVL 30.");
       return false;
     }
-  } else if (IS_SET(g->spell_info[snum].flags, SKFLAG_TIER2) || IS_SET(g->spell_info[snum].flags, SKFLAG_TIER3)) {
+  } else if (g->spell_info[snum].flags.test(skill_flag::tier2) || g->spell_info[snum].flags.test(skill_flag::tier3)) {
     if (snum != 530 && snum != 531) {
       if (char_get_skills_base(ch, SKILL_TSUIHIDAN) < 40 || char_get_skills_base(ch, SKILL_RENZO) < 40 || char_get_skills_base(ch, SKILL_SHOGEKIHA) < 40) {
         send_to_char(g, ch, "You can not train that skill until you at least have trained Tsuihidan, Renzokou Energy Dan, and Shogekiha to Skill LVL 40.");
         return false;
       }
     }
-  } else if (IS_SET(g->spell_info[snum].flags, SKFLAG_TIER4)) {
+  } else if (g->spell_info[snum].flags.test(skill_flag::tier4)) {
     if (char_is_roshi(ch) && (char_get_skills_base(ch, SKILL_KAMEHAMEHA) < 40 || char_get_skills_base(ch, SKILL_KIENZAN) < 40)) {
       send_to_char(g, ch, "You can not train that skill until you at least have trained Kamehameha and Kienzan to Skill LVL 40.");
       return false;
@@ -710,7 +710,7 @@ static bool prereq_pass(GameWorld *g, struct char_data *ch, int snum)
       send_to_char(g, ch, "You can not train that skill until you at least have trained Star Breaker to Skill LVL 40.");
       return false;
     }
-  } else if (IS_SET(g->spell_info[snum].flags, SKFLAG_TIER5)) {
+  } else if (g->spell_info[snum].flags.test(skill_flag::tier5)) {
     if (char_get_skills_base(ch, SKILL_FOCUS) < 60 || char_get_skills_base(ch, SKILL_CONCENTRATION) < 80) {
       send_to_char(g, ch, "You can not train that skill until you at least have trained focus to Skill LVL 60 and concentration to Skill LVL 80.");
       return false;
@@ -731,7 +731,7 @@ static void handle_forget(GameWorld *g, struct char_data *keeper, struct guild_d
     return;
   }
 
-  skill_num = find_skill_num(g, text, SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text, skill_kind::skill);
 
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
@@ -780,7 +780,7 @@ static void handle_grand(GameWorld *g, struct char_data *keeper, struct guild_da
     return;
   }
 
-  skill_num = find_skill_num(g, text, SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text, skill_kind::skill);
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
@@ -836,12 +836,12 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
     return;
   }
 
-  if (char_aff_flagged(ch, AFF_SHOCKED)) {
+  if (char_aff_flagged(ch, aff_flag::shocked)) {
     send_to_char(g, ch, "You can not practice while your mind is shocked!\r\n");
     return;
   }
 
-  skill_num = find_skill_num(g, text, SKTYPE_SKILL);
+  skill_num = find_skill_num(g, text, skill_kind::skill);
   if (skill_num < 0 || skill_num >= SKILL_TABLE_SIZE) {
     send_to_char(g, ch, "@MThat is not a valid skill!@n\r\n");
     return;
@@ -864,7 +864,7 @@ static void handle_practice(GameWorld *g, struct char_data *keeper, struct guild
   }
 
   /**** Can the player learn the skill if the GM knows it?  ****/
-  if (IS_SET(g->spell_info[skill_num].skilltype, SKTYPE_SKILL)) {
+  if (g->spell_info[skill_num].skilltype.test(skill_kind::skill)) {
     for (learntype = 0, i = 0; i < NUM_CLASSES; i++)
       if (g->spell_info[skill_num].can_learn_skill[i] > learntype)
         learntype = g->spell_info[skill_num].can_learn_skill[i];
@@ -1097,8 +1097,8 @@ static void handle_study(GameWorld *g, struct char_data *keeper, struct guild_da
   char_set_gold(ch, char_get_gold(ch) - (goldcost));
   char_set_practice_points(g, ch, char_get_practice_points(g, ch) + (25));
 
-  act(g, "@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, TO_CHAR);
-  act(g, "@c$N@W spends time lecturing @C$n@W on various subjects.@n", true, ch, nullptr, keeper, TO_ROOM);
+  act(g, "@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, act_to::actor);
+  act(g, "@c$N@W spends time lecturing @C$n@W on various subjects.@n", true, ch, nullptr, keeper, act_to::room);
   send_to_char(g, ch, "@wYou have gained {:d} practice sessions in exchange for {} EXP and {} zenni.\r\n", reward, add_commas(expcost), add_commas(goldcost));
 }
 

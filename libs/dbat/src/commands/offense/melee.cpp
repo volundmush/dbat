@@ -43,9 +43,9 @@ void uppercut_knockout(strike_shot &s, int where)
 
   if (where != 2)
     return;
-  if (!char_aff_flagged(vict, AFF_KNOCKED) &&
+  if (!char_aff_flagged(vict, aff_flag::knocked) &&
       (rand_number(s.g, 1, 8) >= 7 && (getCurPL(s.g, vict) > getCurPL(s.g, s.ch) / 5) &&
-       !char_aff_flagged(vict, AFF_SANCTUARY))) {
+       !char_aff_flagged(vict, aff_flag::sanctuary))) {
     act_triple(s.g, {"@C$N@W is knocked out!@n", "@WYou are knocked out!@n", "@C$N@W is knocked out!@n", true}, s.ch,
                nullptr, vict);
     setStatusKnockedOut(vict);
@@ -61,7 +61,7 @@ int roundhouse_cooldown(strike_shot &s)
 /* A roundhouse to the head can knock a standing victim down */
 void roundhouse_knockdown(strike_shot &s, int where)
 {
-  if (where == 2 && !char_aff_flagged(s.vict, AFF_FLYING) && char_get_position(s.vict) == POS_STANDING &&
+  if (where == 2 && !char_aff_flagged(s.vict, aff_flag::flying) && char_get_position(s.vict) == POS_STANDING &&
       rand_number(s.g, 1, 8) >= 7)
     handle_knockdown(s.g, s.vict);
 }

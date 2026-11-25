@@ -33,7 +33,7 @@ namespace {
   }
 
   /* ... a token of this stat, flagged as asked */
-  struct obj_data *token(GameWorld *g, struct char_data *att, int stat = APPLY_STR, std::optional<flag_type_of<ITEM_GLOW>> flag = ITEM_TOKEN)
+  struct obj_data *token(GameWorld *g, struct char_data *att, int stat = APPLY_STR, std::optional<extra_flag> flag = extra_flag::token)
   {
     struct obj_data *obj = holding(g, att, "token");
     if (flag)
@@ -44,11 +44,11 @@ namespace {
   }
 
   /* ... a ring with slots so, and its affects at these locations */
-  struct obj_data *ring(GameWorld *g, struct char_data *att, std::initializer_list<flag_type_of<ITEM_GLOW>> slots, std::initializer_list<int> stats = {})
+  struct obj_data *ring(GameWorld *g, struct char_data *att, std::initializer_list<extra_flag> slots, std::initializer_list<int> stats = {})
   {
     struct obj_data *obj = holding(g, att, "ring");
-    obj_wear_set(obj, ITEM_WEAR_FINGER, true);
-    for (flag_type_of<ITEM_GLOW> slot : slots)
+    obj_wear_set(obj, wear_flag::finger, true);
+    for (extra_flag slot : slots)
       obj_extra_set(obj, slot, true);
     int i = 0;
     for (int stat : stats) {
@@ -80,17 +80,17 @@ namespace {
   {
     struct obj_data *obj = read_object(g, vnum);
     if (forged)
-      obj_extra_set(obj, ITEM_FORGED, true);
+      obj_extra_set(obj, extra_flag::forged, true);
     obj_to_char(g, obj, att);
     return obj;
   }
 
   /* ... fishing at the arena, of this water, with a pole baited so */
-  struct obj_data *angler(GameWorld *g, struct char_data *att, int bait = 5, bool fresh = true, std::optional<flag_type_of<ROOM_DARK>> planet = ROOM_EARTH)
+  struct obj_data *angler(GameWorld *g, struct char_data *att, int bait = 5, bool fresh = true, std::optional<room_flag> planet = room_flag::earth)
   {
-    room_set_flag(g, ARENA, ROOM_FISHING, true);
+    room_set_flag(g, ARENA, room_flag::fishing, true);
     if (fresh)
-      room_set_flag(g, ARENA, ROOM_FISHFRESH, true);
+      room_set_flag(g, ARENA, room_flag::fishfresh, true);
     if (planet)
       room_set_flag(g, ARENA, *planet, true);
     struct obj_data *pole = wearing(g, att, "pole", WEAR_WIELD2, ITEM_FISHPOLE);
@@ -102,7 +102,7 @@ namespace {
   /* ... cast already, the fish so, and a pulse of fishing played */
   void fishing(GameWorld *g, struct char_data *att, int state, int distance, int accuracy = 50)
   {
-    char_plr_set(att, PLR_FISHING, true);
+    char_plr_set(att, player_flag::fishing, true);
     char_set_fishstate(att, state);
     char_set_accuracy_mod(att, distance);
     char_set_accuracy(att, accuracy);
@@ -142,7 +142,7 @@ namespace {
     room_set_geffect(g, ARENA, 3);
     struct obj_data *ruby = holding_as(g, att, "ruby", 6600);
     if (hot)
-      obj_extra_set(ruby, ITEM_HOT, true);
+      obj_extra_set(ruby, extra_flag::hot, true);
   }
 
   void tsuna(GameWorld *g, struct char_data *att, int style = 100)
@@ -188,7 +188,7 @@ namespace {
     {"a musician", "song teleport", false, SETUP(musician(g, att);), false, 1},
     {"a middling musician", "song teleport earth", false, SETUP(musician(g, att, 60);), false, 1},
     {"a drained musician", "song teleport earth", false, SETUP(musician(g, att); drained(g, att);), false, 1},
-    {"a dead musician", "song teleport earth", false, SETUP(musician(g, att); char_aff_set(att, AFF_SPIRIT, true);), false, 1},
+    {"a dead musician", "song teleport earth", false, SETUP(musician(g, att); char_aff_set(att, aff_flag::spirit, true);), false, 1},
     {"a musician", "song teleport mars", false, SETUP(musician(g, att);), false, 1},
     {"a musician", "song teleport earth", false, SETUP(musician(g, att);), false, 1},
     {"a musician", "song teleport frigid", false, SETUP(musician(g, att);), false, 1},
@@ -214,7 +214,7 @@ namespace {
     {"playing the Shadow Stitch Minuet, following another group", "song", false, SETUP(musician(g, att); group(g, cast.helper, att); group(g, cast.android, victim); playing(g, att, SONG_SHADOW_STITCH);), false, 2},
     {"playing the Shadow Stitch Minuet, drained", "song", false, SETUP(musician(g, att); drained(g, att); playing(g, att, SONG_SHADOW_STITCH);), false, 1},
     {"playing the Song of Shielding", "song", false, SETUP(musician(g, att); group(g, att, victim); playing(g, att, SONG_SHIELDING);), false, 2},
-    {"playing the Song of Shielding, the victim shielded", "song", false, SETUP(musician(g, att); group(g, att, victim); char_set_barrier(victim, getMaxKI(g, victim)); char_aff_set(victim, AFF_SANCTUARY, true); playing(g, att, SONG_SHIELDING);), false, 1},
+    {"playing the Song of Shielding, the victim shielded", "song", false, SETUP(musician(g, att); group(g, att, victim); char_set_barrier(victim, getMaxKI(g, victim)); char_aff_set(victim, aff_flag::sanctuary, true); playing(g, att, SONG_SHIELDING);), false, 1},
     {"playing the Song of Shielding, drained", "song", false, SETUP(musician(g, att); group(g, att, victim); drained(g, att); playing(g, att, SONG_SHIELDING);), false, 1},
     {"playing the melody to Earth", "song", false, SETUP(musician(g, att); group(g, att, victim); playing(g, att, SONG_TELEPORT_EARTH);), false, 2},
     {"playing the melody to Vegeta", "song", false, SETUP(musician(g, att); group(g, att, victim); playing(g, att, SONG_TELEPORT_VEGETA);), false, 1},
@@ -284,29 +284,29 @@ namespace {
     {"banked", "rpp 13 a very long description that goes on and on and on well past sixty letters", false, SETUP(char_set_rbank(att, 10);), false, 1},
     {"instilling", "instill", false, SETUP(), false, 1},
     {"instilling", "instill token", false, SETUP(token(g, att);), false, 1},
-    {"instilling without the token", "instill token ring", false, SETUP(ring(g, att, {ITEM_SLOT1});), false, 1},
+    {"instilling without the token", "instill token ring", false, SETUP(ring(g, att, {extra_flag::slot1});), false, 1},
     {"instilling into nothing", "instill token ring", false, SETUP(token(g, att);), false, 1},
-    {"instilling a plain thing", "instill token ring", false, SETUP(token(g, att, APPLY_STR, std::nullopt); ring(g, att, {ITEM_SLOT1});), false, 1},
-    {"instilling a forgery", "instill token ring", false, SETUP(obj_extra_set(token(g, att), ITEM_FORGED, true); ring(g, att, {ITEM_SLOT1});), false, 1},
+    {"instilling a plain thing", "instill token ring", false, SETUP(token(g, att, APPLY_STR, std::nullopt); ring(g, att, {extra_flag::slot1});), false, 1},
+    {"instilling a forgery", "instill token ring", false, SETUP(obj_extra_set(token(g, att), extra_flag::forged, true); ring(g, att, {extra_flag::slot1});), false, 1},
     {"instilling into a plain thing", "instill token ring", false, SETUP(token(g, att); holding(g, att, "ring");), false, 1},
     {"instilling into a ring without slots", "instill token ring", false, SETUP(token(g, att); ring(g, att, {});), false, 1},
-    {"instilling into a filled ring", "instill token ring", false, SETUP(token(g, att); ring(g, att, {ITEM_SLOT1, ITEM_SLOTS_FILLED});), false, 1},
-    {"instilling into a full ring", "instill token ring", false, SETUP(token(g, att, APPLY_STR); ring(g, att, {ITEM_SLOT1}, {APPLY_DEX, APPLY_CON, APPLY_INT, APPLY_WIS, APPLY_CHA, APPLY_AGE});), false, 1},
-    {"instilling into a full ring of the stat", "instill token ring", false, SETUP(token(g, att, APPLY_CON); ring(g, att, {ITEM_SLOT1}, {APPLY_DEX, APPLY_STR, APPLY_INT, APPLY_WIS, APPLY_CHA, APPLY_CON});), false, 1},
-    {"instilling into a ring of one slot", "instill token ring", false, SETUP(token(g, att); ring(g, att, {ITEM_SLOT1}, {APPLY_DEX});), false, 1},
-    {"instilling into a ring of two slots", "instill token ring", false, SETUP(token(g, att); ring(g, att, {ITEM_SLOT2}, {APPLY_DEX, APPLY_STR});), false, 1},
-    {"instilling into a ring of two slots, one filled", "instill token ring", false, SETUP(token(g, att); ring(g, att, {ITEM_SLOT2, ITEM_SLOT_ONE}, {APPLY_DEX, APPLY_INT, APPLY_WIS});), false, 1},
-    {"instilling into a ring of the stat", "instill token ring", false, SETUP(token(g, att, APPLY_DEX); ring(g, att, {ITEM_SLOT1}, {APPLY_DEX});), false, 1},
-    {"instilling into a bare ring", "instill token ring", false, SETUP(token(g, att); ring(g, att, {ITEM_SLOT1});), false, 1},
-    {"instilling into a ring of five stats", "instill token ring", false, SETUP(token(g, att); ring(g, att, {ITEM_SLOT1}, {APPLY_DEX, APPLY_CON, APPLY_INT, APPLY_WIS, APPLY_CHA});), false, 1},
-    {"instilling into a ring of five stats, the last its", "instill token ring", false, SETUP(token(g, att, APPLY_CHA); ring(g, att, {ITEM_SLOT1}, {APPLY_DEX, APPLY_CON, APPLY_INT, APPLY_WIS, APPLY_CHA});), false, 1},
+    {"instilling into a filled ring", "instill token ring", false, SETUP(token(g, att); ring(g, att, {extra_flag::slot1, extra_flag::slots_filled});), false, 1},
+    {"instilling into a full ring", "instill token ring", false, SETUP(token(g, att, APPLY_STR); ring(g, att, {extra_flag::slot1}, {APPLY_DEX, APPLY_CON, APPLY_INT, APPLY_WIS, APPLY_CHA, APPLY_AGE});), false, 1},
+    {"instilling into a full ring of the stat", "instill token ring", false, SETUP(token(g, att, APPLY_CON); ring(g, att, {extra_flag::slot1}, {APPLY_DEX, APPLY_STR, APPLY_INT, APPLY_WIS, APPLY_CHA, APPLY_CON});), false, 1},
+    {"instilling into a ring of one slot", "instill token ring", false, SETUP(token(g, att); ring(g, att, {extra_flag::slot1}, {APPLY_DEX});), false, 1},
+    {"instilling into a ring of two slots", "instill token ring", false, SETUP(token(g, att); ring(g, att, {extra_flag::slot2}, {APPLY_DEX, APPLY_STR});), false, 1},
+    {"instilling into a ring of two slots, one filled", "instill token ring", false, SETUP(token(g, att); ring(g, att, {extra_flag::slot2, extra_flag::slot_one}, {APPLY_DEX, APPLY_INT, APPLY_WIS});), false, 1},
+    {"instilling into a ring of the stat", "instill token ring", false, SETUP(token(g, att, APPLY_DEX); ring(g, att, {extra_flag::slot1}, {APPLY_DEX});), false, 1},
+    {"instilling into a bare ring", "instill token ring", false, SETUP(token(g, att); ring(g, att, {extra_flag::slot1});), false, 1},
+    {"instilling into a ring of five stats", "instill token ring", false, SETUP(token(g, att); ring(g, att, {extra_flag::slot1}, {APPLY_DEX, APPLY_CON, APPLY_INT, APPLY_WIS, APPLY_CHA});), false, 1},
+    {"instilling into a ring of five stats, the last its", "instill token ring", false, SETUP(token(g, att, APPLY_CHA); ring(g, att, {extra_flag::slot1}, {APPLY_DEX, APPLY_CON, APPLY_INT, APPLY_WIS, APPLY_CHA});), false, 1},
     {"a fighter", "arena", false, SETUP(moved(g, att, 17850);), false, 1},
     {"a spectator", "arena", false, SETUP(), false, 1},
-    {"a spectator", "arena stop", false, SETUP(char_prf_set(g, att, PRF_ARENAWATCH, true);), false, 1},
+    {"a spectator", "arena stop", false, SETUP(char_prf_set(g, att, pref_flag::arenawatch, true);), false, 1},
     {"far from the arena", "arena look", false, SETUP(), false, 1},
     {"at the arena", "arena look", false, SETUP(moved(g, att, 17875);), false, 1},
-    {"at the arena, watching no one", "arena look", false, SETUP(moved(g, att, 17875); char_prf_set(g, att, PRF_ARENAWATCH, true); char_set_arenawatch(att, -5);), false, 1},
-    {"at the arena, watching a fighter", "arena look", false, SETUP(moved(g, att, 17875); moved(g, victim, 17850); char_prf_set(g, att, PRF_ARENAWATCH, true); char_set_arenawatch(att, char_get_idnum(victim));), false, 1},
+    {"at the arena, watching no one", "arena look", false, SETUP(moved(g, att, 17875); char_prf_set(g, att, pref_flag::arenawatch, true); char_set_arenawatch(att, -5);), false, 1},
+    {"at the arena, watching a fighter", "arena look", false, SETUP(moved(g, att, 17875); moved(g, victim, 17850); char_prf_set(g, att, pref_flag::arenawatch, true); char_set_arenawatch(att, char_get_idnum(victim));), false, 1},
     {"at the empty arena", "arena scan", false, SETUP(moved(g, att, 17875);), false, 1},
     {"at the arena, a fighter in it", "arena scan", false, SETUP(moved(g, att, 17875); moved(g, victim, 17850);), false, 1},
     {"at the arena", "arena -3", false, SETUP(moved(g, att, 17875);), false, 1},
@@ -315,15 +315,15 @@ namespace {
 
     /* misc/techniques.cpp */
     {"unskilled", "spiritcontrol", false, SETUP(), false, 1},
-    {"in control", "spiritcontrol", false, SETUP(char_set_skills_base(att, SKILL_SPIRITCONTROL, 50); char_aff_set(att, AFF_SPIRITCONTROL, true);), false, 1},
+    {"in control", "spiritcontrol", false, SETUP(char_set_skills_base(att, SKILL_SPIRITCONTROL, 50); char_aff_set(att, aff_flag::spiritcontrol, true);), false, 1},
     {"tired", "spiritcontrol", false, SETUP(char_set_skills_base(att, SKILL_SPIRITCONTROL, 50); tired(g, att, 0);), false, 1},
     {"able", "spiritcontrol", false, SETUP(char_set_skills_base(att, SKILL_SPIRITCONTROL, 50);), false, 1},
     {"hiding a tail", "tailhide", false, SETUP(), false, 1},
     {"a saiyan, hiding a tail", "tailhide", false, SETUP(char_set_race(att, RACE_SAIYAN);), false, 1},
-    {"a halfbreed, showing a tail", "tailhide", false, SETUP(char_set_race(att, RACE_HALFBREED); char_plr_set(att, PLR_TAILHIDE, true);), false, 1},
+    {"a halfbreed, showing a tail", "tailhide", false, SETUP(char_set_race(att, RACE_HALFBREED); char_plr_set(att, player_flag::tailhide, true);), false, 1},
     {"stopping a tail", "nogrow", false, SETUP(), false, 1},
     {"a saiyan, stopping a tail", "nogrow", false, SETUP(char_set_race(att, RACE_SAIYAN);), false, 1},
-    {"a saiyan, growing a tail", "nogrow", false, SETUP(char_set_race(att, RACE_SAIYAN); char_plr_set(att, PLR_NOGROW, true);), false, 1},
+    {"a saiyan, growing a tail", "nogrow", false, SETUP(char_set_race(att, RACE_SAIYAN); char_plr_set(att, player_flag::nogrow, true);), false, 1},
     {"unskilled", "multiform split", false, SETUP(), false, 1},
     {"able", "multiform", false, SETUP(char_set_skills_base(att, SKILL_MULTIFORM, 100);), false, 1},
     {"able", "multiform merge", false, SETUP(char_set_skills_base(att, SKILL_MULTIFORM, 100);), false, 1},
@@ -343,12 +343,12 @@ namespace {
     {"a dull arlian woman, hurt", "moondust", false, SETUP(char_set_race(att, RACE_ARLIAN); char_set_sex(att, SEX_FEMALE); group(g, att, victim); char_set_aff_abils_wis(att, 1); decCurHealth(g, att, getMaxPL(g, att) / 2, 1);), false, 4},
     {"a human", "shell", false, SETUP(), false, 1},
     {"an arlian woman", "shell", false, SETUP(char_set_race(att, RACE_ARLIAN); char_set_sex(att, SEX_FEMALE);), false, 1},
-    {"an arlian, shelled", "shell", false, SETUP(char_set_race(att, RACE_ARLIAN); char_aff_set(att, AFF_SHELL, true);), false, 1},
+    {"an arlian, shelled", "shell", false, SETUP(char_set_race(att, RACE_ARLIAN); char_aff_set(att, aff_flag::shell, true);), false, 1},
     {"an arlian, tired", "shell", false, SETUP(char_set_race(att, RACE_ARLIAN); tired(g, att, 1);), false, 1},
     {"an arlian", "shell", false, SETUP(char_set_race(att, RACE_ARLIAN); char_set_aff_abils_con(att, 100);), false, 1},
     {"a weak arlian", "shell", false, SETUP(char_set_race(att, RACE_ARLIAN); char_set_aff_abils_con(att, 1);), false, 2},
     {"a human", "liquefy", false, SETUP(), false, 1},
-    {"a majin, liquid", "liquefy", false, SETUP(char_set_race(att, RACE_MAJIN); char_aff_set(att, AFF_LIQUEFIED, true);), false, 1},
+    {"a majin, liquid", "liquefy", false, SETUP(char_set_race(att, RACE_MAJIN); char_aff_set(att, aff_flag::liquefied, true);), false, 1},
     {"a majin", "liquefy", false, SETUP(char_set_race(att, RACE_MAJIN);), false, 1},
     {"a drained majin", "liquefy hide", false, SETUP(char_set_race(att, RACE_MAJIN); drained(g, att);), false, 1},
     {"a majin", "liquefy melt", false, SETUP(char_set_race(att, RACE_MAJIN);), false, 1},
@@ -400,13 +400,13 @@ namespace {
     {"a demon", "ashcloud 3", false, SETUP(ashes(g, att); char_set_aff_abils_con(att, 1);), false, 2},
     {"a demon, by the frail", "ashcloud 3", false, SETUP(ashes(g, att); char_set_aff_abils_con(victim, 1); char_set_aff_abils_con(cast.helper, 1);), false, 4},
     {"in burning ash", "ashcloud", false, SETUP(struct obj_data *cloud = read_object(g, 1306); obj_set_cost(cloud, 2); obj_to_room(g, cloud, ARENA); char_set_aff_abils_con(att, 1); ash_burn(g, att);), false, 4},
-    {"in burning ash, eyes shut", "ashcloud", false, SETUP(struct obj_data *cloud = read_object(g, 1306); obj_to_room(g, cloud, ARENA); char_set_aff_abils_con(att, 1); char_plr_set(att, PLR_EYEC, true); ash_burn(g, att);), false, 1},
+    {"in burning ash, eyes shut", "ashcloud", false, SETUP(struct obj_data *cloud = read_object(g, 1306); obj_to_room(g, cloud, ARENA); char_set_aff_abils_con(att, 1); char_plr_set(att, player_flag::eyec, true); ash_burn(g, att);), false, 1},
     {"an icer in burning ash", "ashcloud", false, SETUP(struct obj_data *cloud = read_object(g, 1306); obj_to_room(g, cloud, ARENA); char_set_race(att, RACE_ICER); char_set_aff_abils_con(att, 1); ash_burn(g, att);), false, 1},
     {"unskilled", "healingglow", false, SETUP(), false, 1},
     {"a healer", "healingglow namek", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 50);), false, 1},
     {"a master healer", "healingglow nobody", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 100);), false, 1},
-    {"a healer, glowing", "healingglow", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 50); char_aff_set(att, AFF_HEALGLOW, true);), false, 1},
-    {"a master healer, the victim glowing", "healingglow namek", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 100); char_aff_set(victim, AFF_HEALGLOW, true);), false, 1},
+    {"a healer, glowing", "healingglow", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 50); char_aff_set(att, aff_flag::healglow, true);), false, 1},
+    {"a master healer, the victim glowing", "healingglow namek", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 100); char_aff_set(victim, aff_flag::healglow, true);), false, 1},
     {"a healer, fighting", "healingglow", true, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 50);), false, 1},
     {"a master healer, the victim fighting", "healingglow namek", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 100); set_fighting(g, victim, cast.helper);), false, 1},
     {"a drained healer", "healingglow", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 50); drained(g, att);), false, 1},
@@ -415,14 +415,14 @@ namespace {
     {"a master healer", "healingglow namek", false, SETUP(char_set_skills_base(att, SKILL_HEALGLOW, 100);), false, 4},
     {"unskilled", "metamorph", false, SETUP(), false, 1},
     {"a saint", "metamorph", false, SETUP(char_set_skills_base(att, SKILL_METAMORPH, 50); char_set_alignment(att, 500);), false, 1},
-    {"dark already", "metamorph", false, SETUP(char_set_skills_base(att, SKILL_METAMORPH, 50); char_aff_set(att, AFF_METAMORPH, true);), false, 1},
+    {"dark already", "metamorph", false, SETUP(char_set_skills_base(att, SKILL_METAMORPH, 50); char_aff_set(att, aff_flag::metamorph, true);), false, 1},
     {"drained", "metamorph", false, SETUP(char_set_skills_base(att, SKILL_METAMORPH, 50); drained(g, att);), false, 1},
     {"wise", "metamorph", false, SETUP(char_set_skills_base(att, SKILL_METAMORPH, 50); char_set_aff_abils_wis(att, 40);), false, 2},
     {"very wise", "metamorph", false, SETUP(char_set_skills_base(att, SKILL_METAMORPH, 50); char_set_aff_abils_wis(att, 60);), false, 1},
     {"foolish", "metamorph", false, SETUP(char_set_skills_base(att, SKILL_METAMORPH, 50); char_set_aff_abils_wis(att, 5);), false, 4},
-    {"not Anubis, watching the arena", "shimmer earth", false, SETUP(char_prf_set(g, att, PRF_ARENAWATCH, true);), false, 1},
-    {"Anubis, piloting", "shimmer namek", false, SETUP(named(att, "Anubis"); char_plr_set(att, PLR_PILOTING, true);), false, 1},
-    {"Anubis, in a tank", "shimmer namek", false, SETUP(named(att, "Anubis"); char_plr_set(att, PLR_HEALT, true);), false, 1},
+    {"not Anubis, watching the arena", "shimmer earth", false, SETUP(char_prf_set(g, att, pref_flag::arenawatch, true);), false, 1},
+    {"Anubis, piloting", "shimmer namek", false, SETUP(named(att, "Anubis"); char_plr_set(att, player_flag::piloting, true);), false, 1},
+    {"Anubis, in a tank", "shimmer namek", false, SETUP(named(att, "Anubis"); char_plr_set(att, player_flag::healt, true);), false, 1},
     {"Anubis, in a pocket dimension", "shimmer namek", false, SETUP(named(att, "Anubis"); moved(g, att, 19810);), false, 1},
     {"Anubis", "shimmer", false, SETUP(named(att, "Anubis");), false, 1},
     {"Anubis, drained", "shimmer namek", false, SETUP(named(att, "Anubis"); drained(g, att);), false, 1},
@@ -441,10 +441,10 @@ namespace {
     {"Anubis, the victim away", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim);), false, 1},
     {"Anubis, grappling the victim", "shimmer namek", false, SETUP(named(att, "Anubis"); grappled_by(victim, att);), false, 1},
     {"Anubis, the victim immortal", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); char_set_admlevel(victim, 1);), false, 1},
-    {"Anubis, the victim protected", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); room_set_flag(g, 300, ROOM_NOINSTANT, true);), false, 1},
-    {"Anubis, grappling the dead", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); grappled_by(cast.helper, att); char_aff_set(cast.helper, AFF_SPIRIT, true);), false, 1},
-    {"Anubis, dragging the dead", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); char_set_drag(att, cast.helper); char_set_dragged(cast.helper, att); char_aff_set(cast.helper, AFF_SPIRIT, true);), false, 1},
-    {"Anubis, held by the dead", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); grappled_by(att, cast.helper); char_aff_set(cast.helper, AFF_SPIRIT, true);), false, 1},
+    {"Anubis, the victim protected", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); room_set_flag(g, 300, room_flag::noinstant, true);), false, 1},
+    {"Anubis, grappling the dead", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); grappled_by(cast.helper, att); char_aff_set(cast.helper, aff_flag::spirit, true);), false, 1},
+    {"Anubis, dragging the dead", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); char_set_drag(att, cast.helper); char_set_dragged(cast.helper, att); char_aff_set(cast.helper, aff_flag::spirit, true);), false, 1},
+    {"Anubis, held by the dead", "shimmer namek", false, SETUP(named(att, "Anubis"); away(g, victim); grappled_by(att, cast.helper); char_aff_set(cast.helper, aff_flag::spirit, true);), false, 1},
     {"a human", "channel", false, SETUP(), false, 1},
     {"a demon, drained", "channel", false, SETUP(ruby_ready(g, att); drained(g, att);), false, 1},
     {"a demon without a ruby", "channel", false, SETUP(char_set_race(att, RACE_DEMON); char_set_skills_base(att, SKILL_STYLE, 100);), false, 1},
@@ -467,7 +467,7 @@ namespace {
     {"a poor tsuna", "hydromancy spike", false, SETUP(tsuna(g, att, 10);), false, 4},
     {"a tsuna", "hydromancy flood", false, SETUP(tsuna(g, att);), false, 1},
     {"a tsuna", "hydromancy flood north", false, SETUP(tsuna(g, att);), false, 1},
-    {"a tsuna, by rooms", "hydromancy flood north", false, SETUP(tsuna(g, att); surrounded(g, SECT_FIELD); char_set_race(cast.helper, RACE_KANASSAN); char_aff_set(att, AFF_FLYING, true);), false, 4},
+    {"a tsuna, by rooms", "hydromancy flood north", false, SETUP(tsuna(g, att); surrounded(g, SECT_FIELD); char_set_race(cast.helper, RACE_KANASSAN); char_aff_set(att, aff_flag::flying, true);), false, 4},
     {"a tsuna, by rooms, the victim balanced", "hydromancy flood north", false, SETUP(tsuna(g, att); surrounded(g, SECT_FIELD); char_set_skills_base(victim, SKILL_BALANCE, 100);), false, 2},
     {"a tsuna, by rooms, the victim a newbie", "hydromancy flood north", false, SETUP(tsuna(g, att); surrounded(g, SECT_FIELD); char_set_class_level(victim, 1);), false, 1},
     {"a poor tsuna, by rooms", "hydromancy flood north", false, SETUP(tsuna(g, att, 10); surrounded(g, SECT_FIELD);), false, 4},
@@ -479,9 +479,9 @@ namespace {
     {"Levanthoth, dull", "kanso namek", false, SETUP(named(att, "Levanthoth"); char_set_aff_abils_intel(att, 5);), false, 2},
     {"Levanthoth, clever", "kanso namek", false, SETUP(named(att, "Levanthoth"); char_set_aff_abils_intel(att, 100); char_set_aff_abils_wis(att, 100); char_set_conditions(g, att, THIRST, 47);), false, 4},
     {"Levanthoth, clever, both a little thirsty", "kanso namek", false, SETUP(named(att, "Levanthoth"); char_set_aff_abils_intel(att, 100); char_set_conditions(g, att, THIRST, 10); char_set_conditions(g, victim, THIRST, 24);), false, 2},
-    {"Levanthoth, clever, the victim parched", "kanso namek", false, SETUP(named(att, "Levanthoth"); char_set_aff_abils_intel(att, 100); char_set_conditions(g, victim, THIRST, 0); char_aff_set(victim, AFF_PARA, true);), false, 2},
+    {"Levanthoth, clever, the victim parched", "kanso namek", false, SETUP(named(att, "Levanthoth"); char_set_aff_abils_intel(att, 100); char_set_conditions(g, victim, THIRST, 0); char_aff_set(victim, aff_flag::para, true);), false, 2},
     {"unskilled", "hayasa", false, SETUP(), false, 1},
-    {"fast already", "hayasa", false, SETUP(char_set_skills_base(att, SKILL_HAYASA, 50); char_aff_set(att, AFF_HAYASA, true);), false, 1},
+    {"fast already", "hayasa", false, SETUP(char_set_skills_base(att, SKILL_HAYASA, 50); char_aff_set(att, aff_flag::hayasa, true);), false, 1},
     {"drained", "hayasa", false, SETUP(char_set_skills_base(att, SKILL_HAYASA, 50); drained(g, att);), false, 1},
     {"a master", "hayasa", false, SETUP(char_set_skills_base(att, SKILL_HAYASA, 100);), false, 2},
     {"an expert", "hayasa", false, SETUP(char_set_skills_base(att, SKILL_HAYASA, 85);), false, 2},
@@ -493,13 +493,13 @@ namespace {
     {"with forged silk", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att, 16703, true);), false, 1},
     {"with silk", "ensnare", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att);), false, 1},
     {"with silk", "ensnare nobody", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att);), false, 1},
-    {"with silk, the victim ensnared", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_aff_set(victim, AFF_ENSNARED, true);), false, 1},
+    {"with silk, the victim ensnared", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_aff_set(victim, aff_flag::ensnared, true);), false, 1},
     {"with silk, the victim armless", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_set_limb_condition(victim, 0, 0); char_set_limb_condition(victim, 1, 0);), false, 1},
     {"clumsy, with silk", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 1); silk(g, att);), false, 2},
     {"with silk", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att);), false, 4},
-    {"with silk, the victim zanzoken", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_aff_set(victim, AFF_ZANZOKEN, true);), false, 1},
-    {"with silk, both zanzoken", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_aff_set(victim, AFF_ZANZOKEN, true); char_aff_set(att, AFF_ZANZOKEN, true);), false, 4},
-    {"with silk, zanzoken", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_aff_set(att, AFF_ZANZOKEN, true);), false, 1},
+    {"with silk, the victim zanzoken", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_aff_set(victim, aff_flag::zanzoken, true);), false, 1},
+    {"with silk, both zanzoken", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_aff_set(victim, aff_flag::zanzoken, true); char_aff_set(att, aff_flag::zanzoken, true);), false, 4},
+    {"with silk, zanzoken", "ensnare namek", false, SETUP(char_set_skills_base(att, SKILL_ENSNARE, 100); silk(g, att); char_aff_set(att, aff_flag::zanzoken, true);), false, 1},
     {"a human", "adrenaline pl 10", false, SETUP(), false, 1},
     {"a bio of arlian genes", "adrenaline", false, SETUP(char_set_race(att, RACE_BIO); char_set_genome(att, 1, 6);), false, 1},
     {"a bio of other genes", "adrenaline pl 10", false, SETUP(char_set_race(att, RACE_BIO); char_set_genome(att, 0, 2); char_set_genome(att, 1, 3);), false, 1},
@@ -512,7 +512,7 @@ namespace {
     {"an arlian", "adrenaline st 10", false, SETUP(char_set_race(att, RACE_ARLIAN);), false, 1},
     {"unskilled", "fireshield", false, SETUP(), false, 1},
     {"shielded", "fireshield", false, SETUP(fireshielded(att);), false, 1},
-    {"in a barrier", "fireshield", false, SETUP(char_set_skills_base(att, SKILL_FIRESHIELD, 80); char_aff_set(att, AFF_SANCTUARY, true);), false, 1},
+    {"in a barrier", "fireshield", false, SETUP(char_set_skills_base(att, SKILL_FIRESHIELD, 80); char_aff_set(att, aff_flag::sanctuary, true);), false, 1},
     {"underwater", "fireshield", false, SETUP(char_set_skills_base(att, SKILL_FIRESHIELD, 80); room_set_sector_type(g, ARENA, SECT_UNDERWATER);), false, 1},
     {"drained", "fireshield", false, SETUP(char_set_skills_base(att, SKILL_FIRESHIELD, 80); drained(g, att);), false, 1},
     {"able", "fireshield", false, SETUP(char_set_skills_base(att, SKILL_FIRESHIELD, 100);), false, 2},
@@ -525,19 +525,19 @@ namespace {
     {"drained", "warppool earth", false, SETUP(char_set_skills_base(att, SKILL_WARP, 100); drained(g, att);), false, 1},
     {"on land", "warppool earth", false, SETUP(char_set_skills_base(att, SKILL_WARP, 100);), false, 1},
     {"at sea by Frigid", "warppool earth", false, SETUP(at_sea(g, att, 4600);), false, 2},
-    {"at sea by Earth", "warppool earth", false, SETUP(at_sea(g, att, 850); room_set_flag(g, 850, ROOM_EARTH, true);), false, 1},
-    {"at sea by Earth", "warppool frigid", false, SETUP(at_sea(g, att, 850); room_set_flag(g, 4609, ROOM_FRIGID, true);), false, 1},
-    {"at sea by Kanassa", "warppool kanassa", false, SETUP(at_sea(g, att, 15100); room_set_flag(g, 15100, ROOM_KANASSA, true);), false, 1},
+    {"at sea by Earth", "warppool earth", false, SETUP(at_sea(g, att, 850); room_set_flag(g, 850, room_flag::earth, true);), false, 1},
+    {"at sea by Earth", "warppool frigid", false, SETUP(at_sea(g, att, 850); room_set_flag(g, 4609, room_flag::frigid, true);), false, 1},
+    {"at sea by Kanassa", "warppool kanassa", false, SETUP(at_sea(g, att, 15100); room_set_flag(g, 15100, room_flag::kanassa, true);), false, 1},
     {"at sea by Kanassa", "warppool namek", false, SETUP(at_sea(g, att, 15100);), false, 1},
-    {"at sea by Namek", "warppool namek", false, SETUP(at_sea(g, att, ARENA); room_set_flag(g, ARENA, ROOM_NAMEK, true); room_set_sector_type(g, ARENA, SECT_WATER_NOSWIM);), false, 1},
-    {"at sea by Aether", "warppool aether", false, SETUP(at_sea(g, att, 12252); room_set_flag(g, 12252, ROOM_AETHER, true);), false, 1},
+    {"at sea by Namek", "warppool namek", false, SETUP(at_sea(g, att, ARENA); room_set_flag(g, ARENA, room_flag::namek, true); room_set_sector_type(g, ARENA, SECT_WATER_NOSWIM);), false, 1},
+    {"at sea by Aether", "warppool aether", false, SETUP(at_sea(g, att, 12252); room_set_flag(g, 12252, room_flag::aether, true);), false, 1},
     {"at sea by Aether", "warppool kanassa", false, SETUP(at_sea(g, att, 12252);), false, 1},
-    {"at sea by Frigid", "warppool frigid", false, SETUP(at_sea(g, att, 4609); room_set_flag(g, 4609, ROOM_FRIGID, true);), false, 1},
+    {"at sea by Frigid", "warppool frigid", false, SETUP(at_sea(g, att, 4609); room_set_flag(g, 4609, room_flag::frigid, true);), false, 1},
     {"at sea by Frigid", "warppool aether", false, SETUP(at_sea(g, att, 4609);), false, 1},
     {"at sea", "warppool mars", false, SETUP(at_sea(g, att, 13155);), false, 1},
     {"clumsy at sea", "warppool namek", false, SETUP(at_sea(g, att, 4600); char_set_skills_base(att, SKILL_WARP, 1);), false, 2},
     {"unskilled", "hyoga north", false, SETUP(), false, 1},
-    {"able, in peace", "hyoga north", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); room_set_flag(g, ARENA, ROOM_PEACEFUL, true);), false, 1},
+    {"able, in peace", "hyoga north", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); room_set_flag(g, ARENA, room_flag::peaceful, true);), false, 1},
     {"able, in space", "hyoga north", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); room_set_sector_type(g, ARENA, SECT_SPACE);), false, 1},
     {"able, in the air", "hyoga north", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); room_set_sector_type(g, ARENA, SECT_FLYING);), false, 1},
     {"able", "hyoga", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100);), false, 1},
@@ -556,18 +556,18 @@ namespace {
     {"able, by rooms", "hyoga w", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); surrounded(g, SECT_FIELD);), false, 1},
     {"able, by rooms", "hyoga u", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); surrounded(g, SECT_FIELD);), false, 1},
     {"able, by rooms", "hyoga d", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); surrounded(g, SECT_FIELD);), false, 1},
-    {"able, by a peaceful room", "hyoga n", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); surrounded(g, SECT_FIELD); room_set_flag(g, 51, ROOM_PEACEFUL, true);), false, 1},
+    {"able, by a peaceful room", "hyoga n", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); surrounded(g, SECT_FIELD); room_set_flag(g, 51, room_flag::peaceful, true);), false, 1},
     {"able, by a wall", "hyoga n", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); surrounded(g, SECT_FIELD); struct obj_data *wall = read_object(g, 79); obj_set_cost(wall, SOUTH); obj_to_room(g, wall, 51);), false, 1},
     {"able, by a wall the other way", "hyoga n", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 100); surrounded(g, SECT_FIELD); struct obj_data *wall = read_object(g, 79); obj_set_cost(wall, EAST); obj_to_room(g, wall, 51);), false, 1},
     {"clumsy, by rooms", "hyoga n", false, SETUP(char_set_skills_base(att, SKILL_HYOGA_KABE, 20); spirited(att, 10000000); surrounded(g, SECT_FIELD);), false, 4},
     {"unskilled", "dimizu", false, SETUP(), false, 1},
     {"able, flooded", "dimizu", false, SETUP(char_set_skills_base(att, SKILL_DIMIZU, 100); room_set_geffect(g, ARENA, -3);), false, 1},
     {"able, underwater", "dimizu", false, SETUP(char_set_skills_base(att, SKILL_DIMIZU, 100); room_set_sector_type(g, ARENA, SECT_UNDERWATER);), false, 1},
-    {"able, in space", "dimizu", false, SETUP(char_set_skills_base(att, SKILL_DIMIZU, 100); room_set_flag(g, ARENA, ROOM_SPACE, true);), false, 1},
+    {"able, in space", "dimizu", false, SETUP(char_set_skills_base(att, SKILL_DIMIZU, 100); room_set_flag(g, ARENA, room_flag::space, true);), false, 1},
     {"able, drained", "dimizu", false, SETUP(char_set_skills_base(att, SKILL_DIMIZU, 100); drained(g, att);), false, 1},
     {"able", "dimizu", false, SETUP(char_set_skills_base(att, SKILL_DIMIZU, 100);), false, 2},
     {"clumsy", "dimizu", false, SETUP(char_set_skills_base(att, SKILL_DIMIZU, 1);), false, 2},
-    {"dead", "stake", false, SETUP(char_aff_set(att, AFF_SPIRIT, true);), false, 1},
+    {"dead", "stake", false, SETUP(char_aff_set(att, aff_flag::spirit, true);), false, 1},
     {"in an immortal room", "stake", false, SETUP(moved(g, att, 5);), false, 1},
     {"alive", "stake", false, SETUP(), false, 1},
 
@@ -576,23 +576,23 @@ namespace {
     {"at the shop, poor", "restring item70", false, SETUP(moved(g, att, 180);), false, 1},
     {"at the shop", "restring nothing", false, SETUP(moved(g, att, 180); char_set_gold(att, 6000);), false, 1},
     {"at the shop", "restring item70", false, SETUP(moved(g, att, 180); char_set_gold(att, 6000); holding(g, att, "item70");), false, 1},
-    {"at the shop, with a custom piece", "restring item70", false, SETUP(moved(g, att, 180); char_set_gold(att, 6000); obj_extra_set(holding(g, att, "item70"), ITEM_CUSTOM, true);), false, 1},
+    {"at the shop, with a custom piece", "restring item70", false, SETUP(moved(g, att, 180); char_set_gold(att, 6000); obj_extra_set(holding(g, att, "item70"), extra_flag::custom, true);), false, 1},
     {"a mob at the shop restringing", "restring", false, SETUP(room_stock(g, 180); struct char_data *mob = read_mobile(g, 310); char_to_room(g, mob, 180); char_set_gold(mob, 6000); obj_to_char(g, read_object(g, 70), mob); command_interpreter(g, mob, "restring item70");), false, 1},
     {"fishing", "fish", false, SETUP(), false, 1},
     {"fishing", "fish reel", false, SETUP(), false, 1},
-    {"fishing already", "fish cast", false, SETUP(char_plr_set(att, PLR_FISHING, true);), false, 1},
+    {"fishing already", "fish cast", false, SETUP(char_plr_set(att, player_flag::fishing, true);), false, 1},
     {"away from water", "fish cast", false, SETUP(), false, 1},
-    {"by water, flying", "fish cast", false, SETUP(angler(g, att); char_aff_set(att, AFF_FLYING, true);), false, 1},
+    {"by water, flying", "fish cast", false, SETUP(angler(g, att); char_aff_set(att, aff_flag::flying, true);), false, 1},
     {"by water, fighting", "fish cast", true, SETUP(angler(g, att);), false, 1},
-    {"by water without a pole", "fish cast", false, SETUP(room_set_flag(g, ARENA, ROOM_FISHING, true);), false, 1},
-    {"by water with a stick", "fish cast", false, SETUP(room_set_flag(g, ARENA, ROOM_FISHING, true); wearing(g, att, "stick", WEAR_WIELD2, ITEM_OTHER);), false, 1},
+    {"by water without a pole", "fish cast", false, SETUP(room_set_flag(g, ARENA, room_flag::fishing, true);), false, 1},
+    {"by water with a stick", "fish cast", false, SETUP(room_set_flag(g, ARENA, room_flag::fishing, true); wearing(g, att, "stick", WEAR_WIELD2, ITEM_OTHER);), false, 1},
     {"by water, unbaited", "fish cast", false, SETUP(angler(g, att, 0);), false, 1},
     {"by water", "fish cast", false, SETUP(angler(g, att);), false, 1},
     {"not fishing", "fish hook", false, SETUP(), false, 1},
-    {"fishing, nothing biting", "fish hook", false, SETUP(char_plr_set(att, PLR_FISHING, true); char_set_fishstate(att, FISH_NOFISH);), false, 1},
-    {"fishing, reeling", "fish hook", false, SETUP(char_plr_set(att, PLR_FISHING, true); char_set_fishstate(att, FISH_REELING);), false, 1},
-    {"fishing, hooked", "fish hook", false, SETUP(char_plr_set(att, PLR_FISHING, true); char_set_fishstate(att, FISH_HOOKED);), false, 1},
-    {"fishing, a bite", "fish hook", false, SETUP(char_plr_set(att, PLR_FISHING, true); char_set_fishstate(att, FISH_BITE); char_set_accuracy(att, 60);), false, 4},
+    {"fishing, nothing biting", "fish hook", false, SETUP(char_plr_set(att, player_flag::fishing, true); char_set_fishstate(att, FISH_NOFISH);), false, 1},
+    {"fishing, reeling", "fish hook", false, SETUP(char_plr_set(att, player_flag::fishing, true); char_set_fishstate(att, FISH_REELING);), false, 1},
+    {"fishing, hooked", "fish hook", false, SETUP(char_plr_set(att, player_flag::fishing, true); char_set_fishstate(att, FISH_HOOKED);), false, 1},
+    {"fishing, a bite", "fish hook", false, SETUP(char_plr_set(att, player_flag::fishing, true); char_set_fishstate(att, FISH_BITE); char_set_accuracy(att, 60);), false, 4},
     {"without a pole", "fish apply worm", false, SETUP(), false, 1},
     {"with a stick", "fish apply worm", false, SETUP(wearing(g, att, "stick", WEAR_WIELD2, ITEM_OTHER);), false, 1},
     {"with a baited pole", "fish apply worm", false, SETUP(angler(g, att);), false, 1},
@@ -601,9 +601,9 @@ namespace {
     {"with a pole and a stone", "fish apply worm", false, SETUP(angler(g, att, 0); holding(g, att, "worm");), false, 1},
     {"with a pole and bait", "fish apply worm", false, SETUP(angler(g, att, 0); obj_set_cost(holding(g, att, "worm", ITEM_FISHBAIT), 7);), false, 1},
     {"not fishing", "fish stop", false, SETUP(), false, 1},
-    {"fishing", "fish stop", false, SETUP(char_plr_set(att, PLR_FISHING, true);), false, 1},
+    {"fishing", "fish stop", false, SETUP(char_plr_set(att, player_flag::fishing, true);), false, 1},
     {"fishing out of water", "fish stop", false, SETUP(fishing(g, att, FISH_NOFISH, 40);), false, 1},
-    {"fishing without a pole", "fish stop", false, SETUP(room_set_flag(g, ARENA, ROOM_FISHING, true); fishing(g, att, FISH_NOFISH, 40);), false, 1},
+    {"fishing without a pole", "fish stop", false, SETUP(room_set_flag(g, ARENA, room_flag::fishing, true); fishing(g, att, FISH_NOFISH, 40);), false, 1},
     {"fishing, waiting", "fish stop", false, SETUP(angler(g, att); fishing(g, att, FISH_NOFISH, 40);), false, 8},
     {"fishing in the sea, waiting", "fish stop", false, SETUP(angler(g, att, 5, false); fishing(g, att, FISH_NOFISH, 40);), false, 8},
     {"fishing, a bite", "fish stop", false, SETUP(angler(g, att); fishing(g, att, FISH_BITE, 40);), false, 6},
@@ -612,13 +612,13 @@ namespace {
     {"fishing, reeling, middling", "fish stop", false, SETUP(angler(g, att); fishing(g, att, FISH_REELING, 2, 50);), false, 4},
     {"fishing, reeling, poor", "fish stop", false, SETUP(angler(g, att); fishing(g, att, FISH_REELING, 2, 10);), false, 4},
     {"fishing, reeling, a long while", "fish stop", false, SETUP(angler(g, att); fishing(g, att, FISH_REELING, 40, 90);), false, 200},
-    {"fishing in earth's fresh water, landing it, unstocked", "fish stop", false, SETUP(room_set_flag(g, ARENA, ROOM_FISHING, true); room_set_flag(g, ARENA, ROOM_FISHFRESH, true); room_set_flag(g, ARENA, ROOM_EARTH, true); obj_set_value(wearing(g, att, "pole", WEAR_WIELD2, ITEM_FISHPOLE), 0, 5); fishing(g, att, FISH_REELING, 0, 100);), false, 1},
+    {"fishing in earth's fresh water, landing it, unstocked", "fish stop", false, SETUP(room_set_flag(g, ARENA, room_flag::fishing, true); room_set_flag(g, ARENA, room_flag::fishfresh, true); room_set_flag(g, ARENA, room_flag::earth, true); obj_set_value(wearing(g, att, "pole", WEAR_WIELD2, ITEM_FISHPOLE), 0, 5); fishing(g, att, FISH_REELING, 0, 100);), false, 1},
     {"fishing in earth's fresh water, landing it", "fish stop", false, SETUP(angler(g, att); fishing(g, att, FISH_REELING, 0, 100);), false, 6},
     {"fishing in earth's fresh water, landing it clumsily", "fish stop", false, SETUP(angler(g, att, 0); fishing(g, att, FISH_REELING, 0, 50);), false, 6},
     {"fishing in earth's fresh water, landing it badly", "fish stop", false, SETUP(angler(g, att, 0); fishing(g, att, FISH_REELING, 0, 1);), false, 6},
-    {"fishing in aether's fresh water, landing it", "fish stop", false, SETUP(angler(g, att, 200, true, ROOM_AETHER); fishing(g, att, FISH_REELING, 0, 100);), false, 4},
+    {"fishing in aether's fresh water, landing it", "fish stop", false, SETUP(angler(g, att, 200, true, room_flag::aether); fishing(g, att, FISH_REELING, 0, 100);), false, 4},
     {"fishing in earth's sea, landing it", "fish stop", false, SETUP(angler(g, att, 100, false); fishing(g, att, FISH_REELING, 0, 100);), false, 4},
-    {"fishing in namek's sea, landing it", "fish stop", false, SETUP(angler(g, att, 100, false, ROOM_NAMEK); fishing(g, att, FISH_REELING, 0, 100);), false, 4},
+    {"fishing in namek's sea, landing it", "fish stop", false, SETUP(angler(g, att, 100, false, room_flag::namek); fishing(g, att, FISH_REELING, 0, 100);), false, 4},
     {"fishing nowhere in particular, landing it", "fish stop", false, SETUP(angler(g, att, 5, false, std::nullopt); fishing(g, att, FISH_REELING, 0, 100);), false, 2},
     {"unskilled", "extract plant", false, SETUP(), false, 1},
     {"an extractor", "extract", false, SETUP(char_set_skills_base(att, SKILL_EXTRACT, 100);), false, 1},
@@ -709,10 +709,10 @@ namespace {
     {"on a field", "dig bury stone", false, SETUP(room_set_sector_type(g, ARENA, SECT_FIELD);), false, 1},
     {"on a field", "dig bury stone", false, SETUP(room_set_sector_type(g, ARENA, SECT_FIELD); holding(g, att, "stone");), false, 1},
     {"in a desert", "dig bury stone", false, SETUP(room_set_sector_type(g, ARENA, SECT_DESERT); holding(g, att, "stone");), false, 1},
-    {"on a hill, by a buried thing", "dig bury stone", false, SETUP(room_set_sector_type(g, ARENA, SECT_HILLS); holding(g, att, "stone"); obj_extra_set(thing_here(g, "box", ITEM_OTHER), ITEM_BURIED, true);), false, 1},
+    {"on a hill, by a buried thing", "dig bury stone", false, SETUP(room_set_sector_type(g, ARENA, SECT_HILLS); holding(g, att, "stone"); obj_extra_set(thing_here(g, "box", ITEM_OTHER), extra_flag::buried, true);), false, 1},
     {"in a forest", "dig uncover", false, SETUP(room_set_sector_type(g, ARENA, SECT_FOREST);), false, 1},
-    {"in a forest, by a buried thing", "dig uncover", false, SETUP(room_set_sector_type(g, ARENA, SECT_FOREST); obj_extra_set(thing_here(g, "box", ITEM_OTHER), ITEM_BURIED, true);), false, 1},
-    {"in a desert, by a buried thing", "dig uncover", false, SETUP(room_set_sector_type(g, ARENA, SECT_DESERT); obj_extra_set(thing_here(g, "box", ITEM_OTHER), ITEM_BURIED, true);), false, 1},
+    {"in a forest, by a buried thing", "dig uncover", false, SETUP(room_set_sector_type(g, ARENA, SECT_FOREST); obj_extra_set(thing_here(g, "box", ITEM_OTHER), extra_flag::buried, true);), false, 1},
+    {"in a desert, by a buried thing", "dig uncover", false, SETUP(room_set_sector_type(g, ARENA, SECT_DESERT); obj_extra_set(thing_here(g, "box", ITEM_OTHER), extra_flag::buried, true);), false, 1},
     {"on a mountain", "dig around", false, SETUP(room_set_sector_type(g, ARENA, SECT_MOUNTAIN);), false, 1},
     {"unskilled", "silk", false, SETUP(), false, 1},
     {"a spinner", "silk", false, SETUP(char_set_skills_base(att, SKILL_SILK, 100);), false, 1},
@@ -782,12 +782,12 @@ namespace {
     {"feeding, an android by", "feed android senzu", false, SETUP(char_from_room(g, cast.android); char_to_room(g, cast.android, ARENA);), false, 1},
     {"feeding without a bean", "feed namek senzu", false, SETUP(), false, 1},
     {"feeding a stone", "feed namek senzu", false, SETUP(holding(g, att, "senzu");), false, 1},
-    {"feeding a fake bean", "feed namek senzu", false, SETUP(obj_extra_set(holding(g, att, "senzu", ITEM_POTION), ITEM_FORGED, true);), false, 1},
-    {"feeding a broken bean", "feed namek senzu", false, SETUP(obj_extra_set(holding(g, att, "senzu", ITEM_POTION), ITEM_BROKEN, true);), false, 1},
+    {"feeding a fake bean", "feed namek senzu", false, SETUP(obj_extra_set(holding(g, att, "senzu", ITEM_POTION), extra_flag::forged, true);), false, 1},
+    {"feeding a broken bean", "feed namek senzu", false, SETUP(obj_extra_set(holding(g, att, "senzu", ITEM_POTION), extra_flag::broken, true);), false, 1},
     {"feeding the fighting", "feed namek senzu", false, SETUP(holding(g, att, "senzu", ITEM_POTION); set_fighting(g, victim, cast.helper);), false, 1},
     {"feeding a stranger", "feed namek senzu", false, SETUP(holding(g, att, "senzu", ITEM_POTION);), false, 1},
     {"feeding a follower, ungrouped", "feed namek senzu", false, SETUP(holding(g, att, "senzu", ITEM_POTION); add_follower(g, victim, att);), false, 1},
-    {"feeding another's follower", "feed namek senzu", false, SETUP(holding(g, att, "senzu", ITEM_POTION); group(g, cast.helper, victim); char_aff_set(att, AFF_GROUP, true);), false, 1},
+    {"feeding another's follower", "feed namek senzu", false, SETUP(holding(g, att, "senzu", ITEM_POTION); group(g, cast.helper, victim); char_aff_set(att, aff_flag::group, true);), false, 1},
     {"feeding the group", "feed namek senzu", false, SETUP(holding(g, att, "senzu", ITEM_POTION); group(g, att, victim);), false, 1},
     {"decapitating", "decapitate", false, SETUP(), false, 1},
     {"decapitating", "decapitate corpse", false, SETUP(), false, 1},

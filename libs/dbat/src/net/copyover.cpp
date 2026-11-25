@@ -105,11 +105,11 @@ static void copyover_recover_player(GameWorld *g, const folded_player &p)
   char_make_player_specials(d->character);
   char_set_desc(d->character, d);
 
-  if ((player_i = load_char(g, p.name, d->character)) >= 0 && !char_plr_flagged(d->character, PLR_DELETED)) {
+  if ((player_i = load_char(g, p.name, d->character)) >= 0 && !char_plr_flagged(d->character, player_flag::deleted)) {
     char_set_pfilepos(d->character, player_i);
-    char_plr_set(d->character, PLR_WRITING, false);
-    char_plr_set(d->character, PLR_MAILING, false);
-    char_plr_set(d->character, PLR_CRYO, false);
+    char_plr_set(d->character, player_flag::writing, false);
+    char_plr_set(d->character, player_flag::mailing, false);
+    char_plr_set(d->character, player_flag::cryo, false);
     userLoad(d, p.user.c_str());
   } else
     fOld = false;
@@ -125,7 +125,7 @@ static void copyover_recover_player(GameWorld *g, const folded_player &p)
     char_set_load_room(g, d->character, set_loadroom);
     d->connected = CON_PLAYING;
     look_at_room(g, char_get_in_room(d->character), d->character, 0);
-    if (char_aff_flagged(d->character, AFF_HAYASA)) {
+    if (char_aff_flagged(d->character, aff_flag::hayasa)) {
       char_set_speedboost(d->character, char_get_speedcalc(g, d->character) * 0.5);
     }
   }

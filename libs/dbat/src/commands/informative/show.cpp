@@ -13,7 +13,6 @@
 #include "dbat/consts/time.hpp"
 #include "dbat/help.hpp"
 #include "dbat/command.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/random.hpp"
@@ -153,7 +152,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
      * hide objects starting with . from non-holylighted people 
      * Idea from Elaseth of TBA 
      */
-      if (obj_get_description(obj).starts_with('.') && (char_is_npc(ch) || !char_prf_flagged(g, ch, PRF_HOLYLIGHT)))
+      if (obj_get_description(obj).starts_with('.') && (char_is_npc(ch) || !char_prf_flagged(g, ch, pref_flag::holylight)))
         return;
       if (obj_get_type_flag(obj) == ITEM_VEHICLE && char_get_in_room(ch) == obj_get_value(obj, 0)) {
         return;
@@ -164,11 +163,11 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
       if (obj_get_sitting(g, obj) && char_get_admlevel(ch) >= 1) {
         send_to_char(g, ch, "@D(@YBeing Used@D)@w");
       }
-      if (obj_get_type_flag(obj) == ITEM_PLANT && (room_flagged(g, obj_get_in_room(obj), ROOM_GARDEN1) || room_flagged(g, obj_get_in_room(obj), ROOM_GARDEN2))) {
+      if (obj_get_type_flag(obj) == ITEM_PLANT && (room_flagged(g, obj_get_in_room(obj), room_flag::garden1) || room_flagged(g, obj_get_in_room(obj), room_flag::garden2))) {
         see_plant(g, obj, ch);
         return;
       }
-      if (obj_extra_flagged(obj, ITEM_BURIED)) {
+      if (obj_extra_flagged(obj, extra_flag::buried)) {
         std::string bury;
         if (!obj_is_corpse(obj)) {
           if (obj_get_weight(obj) < 10) {
@@ -199,7 +198,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
         send_to_char(g, ch, "@wA @cG@Cl@wa@cc@Ci@wa@cl @wW@ca@Cl@wl @D[@C{}@D]@w is blocking access to the @G{}@w direction", add_commas(obj_get_weight(obj)), dirs[obj_get_cost(obj)]);
       } else {
         send_to_char(g, ch, "@w");
-        if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS)) {
+        if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::roomflags)) {
           if (obj_get_posted_to(g, obj) == nullptr) {
             send_to_char(g, ch, "@D[@G{:d}@D]@w ", obj_get_vnum(g, obj));
             if (obj_get_script(obj) && !obj_get_proto_script(obj).empty())
@@ -219,29 +218,29 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
           }
           send_to_char(g, ch, "{}@w, has been posted here.@n", obj_get_short_description(obj));
         } else {
-          if (!obj_extra_flagged(obj, ITEM_BURIED)) {
+          if (!obj_extra_flagged(obj, extra_flag::buried)) {
             send_to_char(g, ch, "{}@n", obj_get_description(obj));
           }
         }
 
         if (obj_get_type_flag(obj) == ITEM_VEHICLE) {
-          if (!obj_val_flagged(obj, CONT_CLOSED) && obj_get_vnum(g, obj) > 19199)
+          if (!obj_val_flagged(obj, container_flag::closed) && obj_get_vnum(g, obj) > 19199)
             send_to_char(g, ch, "\r\n@c...its outer hatch is open@n");
-          else if (!obj_val_flagged(obj, CONT_CLOSED) && obj_get_vnum(g, obj) <= 19199)
+          else if (!obj_val_flagged(obj, container_flag::closed) && obj_get_vnum(g, obj) <= 19199)
             send_to_char(g, ch, "\r\n@c...its door is open@n");
         }
         if (obj_get_type_flag(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
-          if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_extra_flagged(obj, ITEM_SHEATH))
+          if (!obj_val_flagged(obj, container_flag::closed) && !obj_extra_flagged(obj, extra_flag::sheath))
             send_to_char(g, ch, ". @D[@G-open-@D]@n");
-          else if (!obj_extra_flagged(obj, ITEM_SHEATH))
+          else if (!obj_extra_flagged(obj, extra_flag::sheath))
             send_to_char(g, ch, ". @D[@rclosed@D]@n");
         }
         if (obj_get_type_flag(obj) == ITEM_HATCH) {
-          if (!obj_val_flagged(obj, CONT_CLOSED))
+          if (!obj_val_flagged(obj, container_flag::closed))
             send_to_char(g, ch, ", it is open");
-          else if (obj_val_flagged(obj, CONT_CLOSED))
+          else if (obj_val_flagged(obj, container_flag::closed))
             send_to_char(g, ch, ", it is closed");
-          if (obj_val_flagged(obj, CONT_LOCKED))
+          if (obj_val_flagged(obj, container_flag::locked))
             send_to_char(g, ch, " and locked@n");
           else
             send_to_char(g, ch, "@n");
@@ -255,13 +254,13 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
       break;
 
     case SHOW_OBJ_SHORT:
-      if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS)) {
+      if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::roomflags)) {
         send_to_char(g, ch, "[{:d}] ", obj_get_vnum(g, obj));
         if (obj_get_script(obj) && !obj_get_proto_script(obj).empty())
           send_to_char(g, ch, "[T{:d}] ", obj_get_proto_script(obj).front());
       }
 
-      if (char_prf_flagged(g, ch, PRF_IHEALTH)) {
+      if (char_prf_flagged(g, ch, pref_flag::ihealth)) {
         send_to_char(g, ch, "@D<@gH@D: @C{:d}@D>@w {}", obj_get_value(obj, VAL_ALL_HEALTH), obj_get_short_description(obj));
       } else {
         send_to_char(g, ch, "{}", obj_get_short_description(obj));
@@ -307,10 +306,10 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
       if (obj_get_vnum(g, obj) == 3423) {
         send_to_char(g, ch, " @D[@B{:d}@D/@B24 Inks@D]@n", obj_get_value(obj, 6));
       }
-      if (obj_extra_flagged(obj, ITEM_THROW)) {
+      if (obj_extra_flagged(obj, extra_flag::throw_)) {
         send_to_char(g, ch, " @D[@RThrow Only@D]@n");
       }
-      if (obj_get_type_flag(obj) == ITEM_PLANT && !obj_extra_flagged(obj, ITEM_MATURE)) {
+      if (obj_get_type_flag(obj) == ITEM_PLANT && !obj_extra_flagged(obj, extra_flag::mature)) {
         if (obj_get_value(obj, VAL_WATERLEVEL) < -9) {
           send_to_char(g, ch, "@D[@RDead@D]@n");
         } else {
@@ -340,12 +339,12 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
         }
       }
       if (obj_get_type_flag(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
-        if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_extra_flagged(obj, ITEM_SHEATH))
+        if (!obj_val_flagged(obj, container_flag::closed) && !obj_extra_flagged(obj, extra_flag::sheath))
           send_to_char(g, ch, " @D[@G-open-@D]@n");
-        else if (!obj_extra_flagged(obj, ITEM_SHEATH))
+        else if (!obj_extra_flagged(obj, extra_flag::sheath))
           send_to_char(g, ch, " @D[@rclosed@D]@n");
       }
-      if (obj_extra_flagged(obj, ITEM_DUPLICATE)) {
+      if (obj_extra_flagged(obj, extra_flag::duplicate)) {
         send_to_char(g, ch, " @D[@YDuplicate@D]@n");
       }
       break;
@@ -543,41 +542,41 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 {
   int found = false;
 
-  if (obj_extra_flagged(obj, ITEM_INVISIBLE)) {
+  if (obj_extra_flagged(obj, extra_flag::invisible)) {
     send_to_char(g, ch, " (invisible)");
     found++;
   }
-  if (obj_extra_flagged(obj, ITEM_BLESS) && char_aff_flagged(ch, AFF_DETECT_ALIGN)) {
+  if (obj_extra_flagged(obj, extra_flag::bless) && char_aff_flagged(ch, aff_flag::detect_align)) {
     send_to_char(g, ch, " ..It glows blue!");
     found++;
   }
-  if (obj_extra_flagged(obj, ITEM_MAGIC) && char_aff_flagged(ch, AFF_DETECT_MAGIC)) {
+  if (obj_extra_flagged(obj, extra_flag::magic) && char_aff_flagged(ch, aff_flag::detect_magic)) {
     send_to_char(g, ch, " ..It glows yellow!");
     found++;
   }
-  if (obj_extra_flagged(obj, ITEM_GLOW)) {
+  if (obj_extra_flagged(obj, extra_flag::glow)) {
     send_to_char(g, ch, " @D(@GGlowing@D)@n");
     found++;
   }
-  if (obj_extra_flagged(obj, ITEM_HOT)) {
+  if (obj_extra_flagged(obj, extra_flag::hot)) {
     send_to_char(g, ch, " @D(@RHOT@D)@n");
     found++;
   }
-  if (obj_extra_flagged(obj, ITEM_HUM)) {
+  if (obj_extra_flagged(obj, extra_flag::hum)) {
     send_to_char(g, ch, " @D(@RHumming@D)@n");
     found++;
   }
-  if (obj_extra_flagged(obj, ITEM_SLOT2)) {
-    if (obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED))
+  if (obj_extra_flagged(obj, extra_flag::slot2)) {
+    if (obj_extra_flagged(obj, extra_flag::slot_one) && !obj_extra_flagged(obj, extra_flag::slots_filled))
       send_to_char(g, ch, " @D[@m1/2 Tokens@D]@n");
-    else if (obj_extra_flagged(obj, ITEM_SLOTS_FILLED))
+    else if (obj_extra_flagged(obj, extra_flag::slots_filled))
       send_to_char(g, ch, " @D[@m2/2 Tokens@D]@n");
     else
       send_to_char(g, ch, " @D[@m0/2 Tokens@D]@n");
     found++;
   }
-  if (obj_extra_flagged(obj, ITEM_SLOT1)) {
-    if (obj_extra_flagged(obj, ITEM_SLOTS_FILLED))
+  if (obj_extra_flagged(obj, extra_flag::slot1)) {
+    if (obj_extra_flagged(obj, extra_flag::slots_filled))
       send_to_char(g, ch, " @D[@m1/1 Tokens@D]@n");
     else
       send_to_char(g, ch, " @D[@m0/1 Tokens@D]@n");
@@ -588,13 +587,13 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
     send_to_char(g, ch, " {:d} meters away", num);
     found++;
   }
-  if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
+  if (obj_extra_flagged(obj, extra_flag::custom)) {
     send_to_char(g, ch, " @D(@YCUSTOM@D)@n");
   }
-  if (obj_extra_flagged(obj, ITEM_RESTRING)) {
+  if (obj_extra_flagged(obj, extra_flag::restring)) {
     send_to_char(g, ch, " @D(@R{}@D)@n", char_get_admlevel(ch) > 0 ? obj_get_name(obj) : "*");
   }
-  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+  if (obj_extra_flagged(obj, extra_flag::broken)) {
     if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL || obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL || obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
       send_to_char(g, ch, ", and appears to be twisted and broken.");
     } else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_WOOD) {
@@ -616,7 +615,7 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
         struct obj_data *obj2 = obj_get_posted_to(g, obj);
         std::string dvnum;
         dvnum = str_format("@D[@G{:d}@D] @w", obj_get_vnum(g, obj2));
-        send_to_char(g, ch, "\n...{}{} has been posted to it.", char_prf_flagged(g, ch, PRF_ROOMFLAGS) ? dvnum.c_str() : "", obj_get_short_description(obj2));
+        send_to_char(g, ch, "\n...{}{} has been posted to it.", char_prf_flagged(g, ch, pref_flag::roomflags) ? dvnum.c_str() : "", obj_get_short_description(obj2));
       }
     }
     found++;
@@ -640,11 +639,11 @@ void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, i
     d   = i;
     if (CONFIG_STACK_OBJS) {
       auto stacks = [&](obj_data *j) {
-        return ((str_eq_nocase(obj_get_short_description(j), obj_get_short_description(i)) && str_eq_nocase(obj_get_description(j), obj_get_description(i))) && (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN)))) &&
+        return ((str_eq_nocase(obj_get_short_description(j), obj_get_short_description(i)) && str_eq_nocase(obj_get_description(j), obj_get_description(i))) && (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, extra_flag::broken) && obj_extra_flagged(i, extra_flag::broken)) || (!obj_extra_flagged(j, extra_flag::broken) && !obj_extra_flagged(i, extra_flag::broken)))) &&
                ((!obj_get_sitting(g, j) && !obj_get_sitting(g, i))) &&
                (obj_get_value(j, 6) == obj_get_value(i, 6)) &&
                ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL))) &&
-               ((!obj_extra_flagged(j, ITEM_DUPLICATE) && !obj_extra_flagged(i, ITEM_DUPLICATE)) || (obj_extra_flagged(j, ITEM_DUPLICATE) && obj_extra_flagged(i, ITEM_DUPLICATE))) &&
+               ((!obj_extra_flagged(j, extra_flag::duplicate) && !obj_extra_flagged(i, extra_flag::duplicate)) || (obj_extra_flagged(j, extra_flag::duplicate) && obj_extra_flagged(i, extra_flag::duplicate))) &&
                (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0) &&
                (!obj_get_fellow_wall(g, j) && !obj_get_fellow_wall(g, i)) &&
                ((obj_get_value(j, 0) == obj_get_value(i, 0) && obj_get_vnum(g, j) == 255 && obj_get_vnum(g, i) == 255) || (obj_get_vnum(g, j) != 255 && obj_get_vnum(g, i) != 255));
@@ -659,7 +658,7 @@ void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, i
             d = j;
         }
     }
-    if ((char_can_see_obj(g, ch, d) && ((!obj_get_description(d).starts_with('.') && !obj_get_short_description(d).starts_with('.')) || char_prf_flagged(g, ch, PRF_HOLYLIGHT))) || (obj_get_type_flag(d) == ITEM_LIGHT)) {
+    if ((char_can_see_obj(g, ch, d) && ((!obj_get_description(d).starts_with('.') && !obj_get_short_description(d).starts_with('.')) || char_prf_flagged(g, ch, pref_flag::holylight))) || (obj_get_type_flag(d) == ITEM_LIGHT)) {
       if (num > 1)
         send_to_char(g, ch, "@D(@Rx@Y{:>2d}@D)@n ", num);
       show_obj_to_char(g, d, ch, mode);
@@ -740,63 +739,63 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
   if (!char_get_ddesc(i).empty()) {
     send_to_char(g, ch, "{}", char_get_ddesc(i));
   }
-  if (!char_mob_flagged(i, MOB_JUSTDESC)) {
+  if (!char_mob_flagged(i, mob_flag::justdesc)) {
     bringdesc(g, ch, i);
   }
   send_to_char(g, ch, "\r\n");
   if (!char_is_npc(i)) {
-    if (char_get_limb_condition(i, (1) - 1) >= 50 && !char_plr_flagged(i, PLR_CRARM)) {
+    if (char_get_limb_condition(i, (1) - 1) >= 50 && !char_plr_flagged(i, player_flag::crarm)) {
       send_to_char(g, ch, "            @D[@cRight Arm   @D: @G{:>2d}{}@D/@g100{}        @D]@n\r\n", char_get_limb_condition(i, (1) - 1), "%", "%");
-    } else if (char_get_limb_condition(i, (1) - 1) > 0 && !char_plr_flagged(i, PLR_CRARM)) {
+    } else if (char_get_limb_condition(i, (1) - 1) > 0 && !char_plr_flagged(i, player_flag::crarm)) {
       send_to_char(g, ch, "            @D[@cRight Arm   @D: @rBroken @y{:>2d}{}@D/@g100{} @D]@n\r\n", char_get_limb_condition(i, (1) - 1), "%", "%");
-    } else if (char_get_limb_condition(i, (1) - 1) > 0 && char_plr_flagged(i, PLR_CRARM)) {
+    } else if (char_get_limb_condition(i, (1) - 1) > 0 && char_plr_flagged(i, player_flag::crarm)) {
       send_to_char(g, ch, "            @D[@cRight Arm   @D: @cCybernetic @G{:>2d}{}@D/@G100{}@D]@n\r\n", char_get_limb_condition(i, (1) - 1), "%", "%");
     } else if (char_get_limb_condition(i, (1) - 1) <= 0) {
       send_to_char(g, ch, "            @D[@cRight Arm   @D: @rMissing.            @D]@n\r\n");
     }
-    if (char_get_limb_condition(i, (2) - 1) >= 50 && !char_plr_flagged(i, PLR_CLARM)) {
+    if (char_get_limb_condition(i, (2) - 1) >= 50 && !char_plr_flagged(i, player_flag::clarm)) {
       send_to_char(g, ch, "            @D[@cLeft Arm    @D: @G{:>2d}{}@D/@g100{}        @D]@n\r\n", char_get_limb_condition(i, (2) - 1), "%", "%");
-    } else if (char_get_limb_condition(i, (2) - 1) > 0 && !char_plr_flagged(i, PLR_CLARM)) {
+    } else if (char_get_limb_condition(i, (2) - 1) > 0 && !char_plr_flagged(i, player_flag::clarm)) {
       send_to_char(g, ch, "            @D[@cLeft Arm    @D: @rBroken @y{:>2d}{}@D/@g100{} @D]@n\r\n", char_get_limb_condition(i, (2) - 1), "%", "%");
-    } else if (char_get_limb_condition(i, (2) - 1) > 0 && char_plr_flagged(i, PLR_CLARM)) {
+    } else if (char_get_limb_condition(i, (2) - 1) > 0 && char_plr_flagged(i, player_flag::clarm)) {
       send_to_char(g, ch, "            @D[@cLeft Arm    @D: @cCybernetic @G{:>2d}{}@D/@G100{}@D]@n\r\n", char_get_limb_condition(i, (2) - 1), "%", "%");
     } else if (char_get_limb_condition(i, (2) - 1) <= 0) {
       send_to_char(g, ch, "            @D[@cLeft Arm    @D: @rMissing.            @D]@n\r\n");
     }
-    if (char_get_limb_condition(i, (3) - 1) >= 50 && !char_plr_flagged(i, PLR_CLARM)) {
+    if (char_get_limb_condition(i, (3) - 1) >= 50 && !char_plr_flagged(i, player_flag::clarm)) {
       send_to_char(g, ch, "            @D[@cRight Leg   @D: @G{:>2d}{}@D/@g100{}        @D]@n\r\n", char_get_limb_condition(i, (3) - 1), "%", "%");
-    } else if (char_get_limb_condition(i, (3) - 1) > 0 && !char_plr_flagged(i, PLR_CRLEG)) {
+    } else if (char_get_limb_condition(i, (3) - 1) > 0 && !char_plr_flagged(i, player_flag::crleg)) {
       send_to_char(g, ch, "            @D[@cRight Leg   @D: @rBroken @y{:>2d}{}@D/@g100{} @D]@n\r\n", char_get_limb_condition(i, (3) - 1), "%", "%");
-    } else if (char_get_limb_condition(i, (3) - 1) > 0 && char_plr_flagged(i, PLR_CRLEG)) {
+    } else if (char_get_limb_condition(i, (3) - 1) > 0 && char_plr_flagged(i, player_flag::crleg)) {
       send_to_char(g, ch, "            @D[@cRight Leg   @D: @cCybernetic @G{:>2d}{}@D/@G100{}@D]@n\r\n", char_get_limb_condition(i, (3) - 1), "%", "%");
     } else if (char_get_limb_condition(i, (3) - 1) <= 0) {
       send_to_char(g, ch, "            @D[@cRight Leg   @D: @rMissing.            @D]@n\r\n");
     }
-    if (char_get_limb_condition(i, (4) - 1) >= 50 && !char_plr_flagged(i, PLR_CLLEG)) {
+    if (char_get_limb_condition(i, (4) - 1) >= 50 && !char_plr_flagged(i, player_flag::clleg)) {
       send_to_char(g, ch, "            @D[@cLeft Leg    @D: @G{:>2d}{}@D/@g100{}        @D]@n\r\n", char_get_limb_condition(i, (4) - 1), "%", "%");
-    } else if (char_get_limb_condition(i, (4) - 1) > 0 && !char_plr_flagged(i, PLR_CLLEG)) {
+    } else if (char_get_limb_condition(i, (4) - 1) > 0 && !char_plr_flagged(i, player_flag::clleg)) {
       send_to_char(g, ch, "            @D[@cLeft Leg    @D: @rBroken @y{:>2d}{}@D/@g100{} @D]@n\r\n", char_get_limb_condition(i, (4) - 1), "%", "%");
-    } else if (char_get_limb_condition(i, (4) - 1) > 0 && char_plr_flagged(i, PLR_CLLEG)) {
+    } else if (char_get_limb_condition(i, (4) - 1) > 0 && char_plr_flagged(i, player_flag::clleg)) {
       send_to_char(g, ch, "            @D[@cLeft Leg    @D: @cCybernetic @G{:>2d}{}@D/@G100{}@D]@n\r\n", char_get_limb_condition(i, (4) - 1), "%", "%");
     } else if (char_get_limb_condition(i, (4) - 1) <= 0) {
       send_to_char(g, ch, "            @D[@cLeft Leg    @D: @rMissing.             @D]@n\r\n");
     }
-    if (char_plr_flagged(i, PLR_HEAD)) {
+    if (char_plr_flagged(i, player_flag::head)) {
       send_to_char(g, ch, "            @D[@cHead        @D: @GHas.                 @D]@n\r\n");
     }
-    if (!char_plr_flagged(i, PLR_HEAD)) {
+    if (!char_plr_flagged(i, player_flag::head)) {
       send_to_char(g, ch, "            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
     }
-    if (((char_is_saiyan(i) || char_is_halfbreed(i)) && char_plr_flagged(i, PLR_STAIL)) && !char_plr_flagged(i, PLR_TAILHIDE)) {
+    if (((char_is_saiyan(i) || char_is_halfbreed(i)) && char_plr_flagged(i, player_flag::stail)) && !char_plr_flagged(i, player_flag::tailhide)) {
       send_to_char(g, ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
     }
-    if ((char_is_saiyan(i) || char_is_halfbreed(i)) && (!char_plr_flagged(i, PLR_STAIL)) && (!char_plr_flagged(i, PLR_TAILHIDE))) {
+    if ((char_is_saiyan(i) || char_is_halfbreed(i)) && (!char_plr_flagged(i, player_flag::stail)) && (!char_plr_flagged(i, player_flag::tailhide))) {
       send_to_char(g, ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
     }
-    if ((char_is_icer(i) || char_is_bio(i)) && char_plr_flagged(i, PLR_TAIL)) {
+    if ((char_is_icer(i) || char_is_bio(i)) && char_plr_flagged(i, player_flag::tail)) {
       send_to_char(g, ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
     }
-    if ((char_is_icer(i) || char_is_bio(i)) && !char_plr_flagged(i, PLR_TAIL)) {
+    if ((char_is_icer(i) || char_is_bio(i)) && !char_plr_flagged(i, player_flag::tail)) {
       send_to_char(g, ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
     }
   }
@@ -811,7 +810,7 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
   }
   send_to_char(g, ch, "\r\n");
 
-  if ((!char_plr_flagged(i, PLR_DISGUISED) && (readIntro(ch, i) == 1 && !char_is_npc(i)))) {
+  if ((!char_plr_flagged(i, player_flag::disguised) && (readIntro(ch, i) == 1 && !char_is_npc(i)))) {
     if (char_get_sex(i) == SEX_NEUTRAL)
       send_to_char(g, ch, "{} appears to be {} {}, ", get_i_name(ch, i), AN(juggleRaceName(i, true)), juggleRaceName(i, false));
     else
@@ -832,25 +831,25 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
     send_to_char(g, ch, "is {} sized, and\r\n", size_names[get_size(i)]);
   }
   if (!char_is_npc(i)) {
-    if (!char_plr_flagged(i, PLR_OOZARU) && (!char_is_icer(i) || !char_is_transformed(i)) && char_get_genome(i, 0) < 11) {
+    if (!char_plr_flagged(i, player_flag::oozaru) && (!char_is_icer(i) || !char_is_transformed(i)) && char_get_genome(i, 0) < 11) {
       send_to_char(g, ch, "is {} sized, about {:d}cm tall,\r\nabout {:d}kg heavy,", size_names[get_size(i)], char_get_pc_height(g, i), char_get_pc_weight(g, i));
-    } else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS1)) {
+    } else if (char_is_icer(i) && char_plr_flagged(i, player_flag::trans1)) {
       int num1 = char_get_pc_height(g, i) * 3;
       int num2 = char_get_pc_weight(g, i) * 4;
       send_to_char(g, ch, "is {} sized, about {:d}cm tall,\r\nabout {:d}kg heavy,", size_names[get_size(i)], num1, num2);
-    } else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS2)) {
+    } else if (char_is_icer(i) && char_plr_flagged(i, player_flag::trans2)) {
       int num1 = char_get_pc_height(g, i) * 3;
       int num2 = char_get_pc_weight(g, i) * 4;
       send_to_char(g, ch, "is {} sized, about {:d}cm tall,\r\nabout {:d}kg heavy,", size_names[get_size(i)], num1, num2);
-    } else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS3)) {
+    } else if (char_is_icer(i) && char_plr_flagged(i, player_flag::trans3)) {
       int num1 = char_get_pc_height(g, i) * 1.5;
       int num2 = char_get_pc_weight(g, i) * 2;
       send_to_char(g, ch, "is {} sized, about {:d}cm tall,\r\nabout {:d}kg heavy,", size_names[get_size(i)], num1, num2);
-    } else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS4)) {
+    } else if (char_is_icer(i) && char_plr_flagged(i, player_flag::trans4)) {
       int num1 = char_get_pc_height(g, i) * 2;
       int num2 = char_get_pc_weight(g, i) * 3;
       send_to_char(g, ch, "is {} sized, about {:d}cm tall,\r\nabout {:d}kg heavy,", size_names[get_size(i)], num1, num2);
-    } else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
+    } else if (char_plr_flagged(i, player_flag::oozaru) || char_get_genome(i, 0) == 11) {
       int num1 = char_get_pc_height(g, i) * 10;
       int num2 = char_get_pc_weight(g, i) * 50;
       send_to_char(g, ch, "is {} sized, about {:d}cm tall,\r\nabout {:d}kg heavy,", size_names[get_size(i)], num1, num2);
@@ -896,18 +895,18 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
     if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)))
       found = true;
 
-  if (found && (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_NOEQSEE))) {
+  if (found && (!char_is_npc(ch) && !char_prf_flagged(g, ch, pref_flag::noeqsee))) {
     send_to_char(g, ch, "\r\n"); /* act() does capitalization. */
-    if (!char_plr_flagged(i, PLR_DISGUISED)) {
-      act(g, "$n is using:", false, i, nullptr, ch, TO_VICT);
+    if (!char_plr_flagged(i, player_flag::disguised)) {
+      act(g, "$n is using:", false, i, nullptr, ch, act_to::vict);
     } else {
-      act(g, "The disguised person is using:", false, i, nullptr, ch, TO_VICT);
+      act(g, "The disguised person is using:", false, i, nullptr, ch, act_to::vict);
     }
     for (j = 0; j < NUM_WEARS; j++)
       if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
         send_to_char(g, ch, "{}", wear_where[j]);
         show_obj_to_char(g, char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
-        if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
+        if (obj_extra_flagged(char_get_equipment(i, j), extra_flag::sheath)) {
           struct obj_data *sheath = char_get_equipment(i, j);
           for (obj_data *thing : obj_contents(g, sheath)) {
             if (thing) {
@@ -916,10 +915,10 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
             }
           }
         }
-      } else if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)) && (!char_plr_flagged(i, PLR_THANDW))) {
+      } else if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)) && (!char_plr_flagged(i, player_flag::thandw))) {
         send_to_char(g, ch, "{}", wear_where[j]);
         show_obj_to_char(g, char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
-        if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
+        if (obj_extra_flagged(char_get_equipment(i, j), extra_flag::sheath)) {
           struct obj_data *sheath = char_get_equipment(i, j);
           for (obj_data *item : obj_contents(g, sheath)) {
             if (item) {
@@ -928,20 +927,20 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
             }
           }
         }
-      } else if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)) && (char_plr_flagged(i, PLR_THANDW))) {
+      } else if (char_get_equipment(i, j) && char_can_see_obj(g, ch, char_get_equipment(i, j)) && (char_plr_flagged(i, player_flag::thandw))) {
         send_to_char(g, ch, "@c<@CWielded by B. Hands@c>@n ");
         show_obj_to_char(g, char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
       }
   }
-  if (ch != i && ((char_get_skill(ch, SKILL_KEEN) && char_aff_flagged(ch, AFF_SNEAK)) || char_get_admlevel(ch))) {
+  if (ch != i && ((char_get_skill(ch, SKILL_KEEN) && char_aff_flagged(ch, aff_flag::sneak)) || char_get_admlevel(ch))) {
     found = false;
-    act(g, "\r\nYou attempt to peek at $s inventory:", false, i, nullptr, ch, TO_VICT);
+    act(g, "\r\nYou attempt to peek at $s inventory:", false, i, nullptr, ch, act_to::vict);
     if (char_can_see(g, i, ch))
-      act(g, "$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
+      act(g, "$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, act_to::vict);
     if (char_get_skill(ch, SKILL_KEEN) > axion_dice(g, 0) && (!char_is_npc(i) || char_get_admlevel(ch) > 1)) {
       for (obj_data *tmp_obj : char_inventory(g, i)) {
         if (char_can_see_obj(g, ch, tmp_obj) &&
-            (char_adm_flagged(ch, ADM_SEEINV) || (rand_number(g, 0, 20) < char_get_level(ch)))) {
+            (char_adm_flagged(ch, admin_flag::seeinv) || (rand_number(g, 0, 20) < char_get_level(ch)))) {
           show_obj_to_char(g, tmp_obj, ch, SHOW_OBJ_SHORT);
           found = true;
         }
@@ -950,9 +949,9 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
     } else if (char_is_npc(i) && char_get_admlevel(ch) < 2) {
       return;
     } else {
-      act(g, "You are unsure about $s inventory.", false, i, nullptr, ch, TO_VICT);
+      act(g, "You are unsure about $s inventory.", false, i, nullptr, ch, act_to::vict);
       if (char_can_see(g, i, ch))
-        act(g, "$n didn't seem to get a good enough look.", true, ch, nullptr, i, TO_VICT);
+        act(g, "$n didn't seem to get a good enough look.", true, ch, nullptr, i, act_to::vict);
       improve_skill(g, ch, SKILL_KEEN, 1);
       return;
     }
@@ -978,7 +977,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       "!FIGHTING!",
       " is standing here"};
 
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS) && char_is_npc(i))
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::roomflags) && char_is_npc(i))
     send_to_char(g, ch, "@D[@G{:d}@D]@w {}", char_get_mob_vnum(g, i), char_get_script(i) ? "[TRIG] " : "");
 
   if (char_is_npc(i) && !char_get_ldesc(i).empty() && char_get_position(i) == char_get_mob_specials_default_pos(i) && !char_get_fighting(g, i)) {
@@ -987,57 +986,57 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     if (char_is_npc(i)) {
       double health = char_get_health(i);
       if (health <= 0.1) {
-        act(g, "@R...Should be DEAD soon.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...Should be DEAD soon.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health <= 0.2) {
-        act(g, "@R...Is on $s last leg.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...Is on $s last leg.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health <= 0.3) {
-        act(g, "@R...Is absolutely covered in wounds.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...Is absolutely covered in wounds.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health <= 0.4) {
-        act(g, "@R...$s body is in terrible shape.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...$s body is in terrible shape.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health <= 0.5) {
-        act(g, "@R...Blood is seeping from the wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...Blood is seeping from the wounds on $s body.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health <= 0.6) {
-        act(g, "@R...Horrible wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...Horrible wounds on $s body.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health <= 0.7) {
-        act(g, "@R...Quite a few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...Quite a few wounds on $s body.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health <= 0.8) {
-        act(g, "@R...Many wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...Many wounds on $s body.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health <= 0.9) {
-        act(g, "@R...A few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...A few wounds on $s body.@w", true, i, nullptr, ch, act_to::vict);
       } else if (health < 1.0) {
-        act(g, "@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
+        act(g, "@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, act_to::vict);
       }
     }
 
     if (char_get_listenroom(i) > 0) {
       std::string eaves = str_format("@w...$e is spying on everything to the @c{}@w.", dirs[char_get_eavesdir(i)]);
-      act(g, eaves, true, i, nullptr, ch, TO_VICT);
+      act(g, eaves, true, i, nullptr, ch, act_to::vict);
     }
-    if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
-      act(g, "...$e is in the air!", false, i, nullptr, ch, TO_VICT);
-    if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 2)
-      act(g, "...$e is high in the air!", false, i, nullptr, ch, TO_VICT);
-    if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
-      act(g, "...$e has a barrier around $s body!", false, i, nullptr, ch, TO_VICT);
-    if (char_aff_flagged(i, AFF_FIRESHIELD))
-      act(g, "...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, nullptr, ch, TO_VICT);
-    if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
-      act(g, "...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", false, i, nullptr, ch, TO_VICT);
-    if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
-      act(g, "...$e is spinning in a vortex!", false, i, nullptr, ch, TO_VICT);
+    if (char_aff_flagged(i, aff_flag::flying) && char_get_altitude(i) == 1)
+      act(g, "...$e is in the air!", false, i, nullptr, ch, act_to::vict);
+    if (char_aff_flagged(i, aff_flag::flying) && char_get_altitude(i) == 2)
+      act(g, "...$e is high in the air!", false, i, nullptr, ch, act_to::vict);
+    if (char_aff_flagged(i, aff_flag::sanctuary) && !char_get_skill(i, SKILL_AQUA_BARRIER))
+      act(g, "...$e has a barrier around $s body!", false, i, nullptr, ch, act_to::vict);
+    if (char_aff_flagged(i, aff_flag::fireshield))
+      act(g, "...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, nullptr, ch, act_to::vict);
+    if (char_aff_flagged(i, aff_flag::sanctuary) && char_get_skill(i, SKILL_AQUA_BARRIER))
+      act(g, "...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", false, i, nullptr, ch, act_to::vict);
+    if (!char_is_npc(i) && char_plr_flagged(i, player_flag::spiral))
+      act(g, "...$e is spinning in a vortex!", false, i, nullptr, ch, act_to::vict);
     if (char_get_charge(i))
-      act(g, "...$e has a bright %s aura around $s body!", false, i, nullptr, ch, TO_VICT);
-    if (char_aff_flagged(i, AFF_METAMORPH))
-      act(g, "@w...$e has a dark, @rred@w aura and menacing presence.", false, i, nullptr, ch, TO_VICT);
-    if (char_aff_flagged(i, AFF_HAYASA))
-      act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
-    if (char_aff_flagged(i, AFF_BLIND))
-      act(g, "...$e is groping around blindly!", false, i, nullptr, ch, TO_VICT);
+      act(g, "...$e has a bright %s aura around $s body!", false, i, nullptr, ch, act_to::vict);
+    if (char_aff_flagged(i, aff_flag::metamorph))
+      act(g, "@w...$e has a dark, @rred@w aura and menacing presence.", false, i, nullptr, ch, act_to::vict);
+    if (char_aff_flagged(i, aff_flag::hayasa))
+      act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, act_to::vict);
+    if (char_aff_flagged(i, aff_flag::blind))
+      act(g, "...$e is groping around blindly!", false, i, nullptr, ch, act_to::vict);
     if (affected_by_spell(i, SPELL_FAERIE_FIRE))
-      act(g, "@m...$e @mis outlined with purple fire!@m", false, i, nullptr, ch, TO_VICT);
+      act(g, "@m...$e @mis outlined with purple fire!@m", false, i, nullptr, ch, act_to::vict);
     if (!char_get_feature(i).empty()) {
       std::string woo = str_format("@C{}@n", char_get_feature(i));
-      act(g, woo, false, i, nullptr, ch, TO_VICT);
+      act(g, woo, false, i, nullptr, ch, act_to::vict);
     }
 
     return;
@@ -1068,15 +1067,15 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   else if (char_is_npc(i))
     send_to_char(g, ch, "@w{}", upper_first(char_get_sdesc(i)));
   else if (!char_is_npc(i)) {
-    if (char_is_majin(i) && char_aff_flagged(i, AFF_LIQUEFIED)) {
+    if (char_is_majin(i) && char_aff_flagged(i, aff_flag::liquefied)) {
       send_to_char(g, ch, "@wSeveral blobs of {} colored goo spread out here.@n\n", skin_types[(int)char_get_skin(i)]);
       return;
     }
     if ((char_get_admlevel(ch) > 0 || char_get_admlevel(i) > 0) || char_is_npc(ch)) {
       send_to_char(g, ch, "@w{}", char_get_alias(i));
-    } else if ((!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
+    } else if ((!char_plr_flagged(i, player_flag::disguised) && readIntro(ch, i) == 1)) {
       send_to_char(g, ch, "@w{}", get_i_name(ch, i));
-    } else if (!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
+    } else if (!char_plr_flagged(i, player_flag::disguised) && readIntro(ch, i) != 1) {
       if (char_get_distfea(i) == DISTFEA_EYE) {
         send_to_char(g, ch, "@wA {} eyed {} {}", eye_types[(int)char_get_eye(i)], char_mafe(i), juggleRaceName(i, false));
       } else if (char_get_distfea(i) == DISTFEA_HAIR) {
@@ -1106,7 +1105,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
           } else {
             height = "short";
           }
-        } else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
+        } else if (char_plr_flagged(i, player_flag::oozaru) || char_get_genome(i, 0) == 11) {
           if (char_get_pc_height(g, i) * 10 > 2000) {
             height = "very tall";
           } else if (char_get_pc_height(g, i) * 10 > 1800) {
@@ -1142,7 +1141,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
           } else {
             height = "welterweight";
           }
-        } else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
+        } else if (char_plr_flagged(i, player_flag::oozaru) || char_get_genome(i, 0) == 11) {
           if (char_get_pc_weight(g, i) * 50 > 6000) {
             height = "very heavy";
           } else if (char_get_pc_weight(g, i) * 50 > 5000) {
@@ -1175,15 +1174,15 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   }
 
   if (!char_is_npc(i) || !char_get_fighting(g, i)) {
-    if (char_aff_flagged(i, AFF_INVISIBLE)) {
+    if (char_aff_flagged(i, aff_flag::invisible)) {
       send_to_char(g, ch, ", is invisible");
       count = true;
     }
-    if (char_aff_flagged(i, AFF_ETHEREAL)) {
+    if (char_aff_flagged(i, aff_flag::ethereal)) {
       send_to_char(g, ch, ", has a halo");
       count = true;
     }
-    if (char_aff_flagged(i, AFF_HIDE) && i != ch) {
+    if (char_aff_flagged(i, aff_flag::hide) && i != ch) {
       send_to_char(g, ch, ", is hiding");
       if (char_get_skill(i, SKILL_HIDE) && !char_is_npc(ch) && i != ch) {
         improve_skill(g, i, SKILL_HIDE, 1);
@@ -1194,11 +1193,11 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       send_to_char(g, ch, ", has a blank stare");
       count = true;
     }
-    if (!char_is_npc(i) && char_plr_flagged(i, PLR_WRITING)) {
+    if (!char_is_npc(i) && char_plr_flagged(i, player_flag::writing)) {
       send_to_char(g, ch, ", is writing");
       count = true;
     }
-    if (!char_is_npc(i) && char_prf_flagged(g, i, PRF_BUILDWALK)) {
+    if (!char_is_npc(i) && char_prf_flagged(g, i, pref_flag::buildwalk)) {
       send_to_char(g, ch, ", is buildwalking");
       count = true;
     }
@@ -1239,10 +1238,10 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       count = true;
     }
     if (!char_is_npc(ch) && !char_is_npc(i) && char_get_fighting(g, i)) {
-      if (!char_plr_flagged(i, PLR_SPAR) || (char_plr_flagged(i, PLR_SPAR) && (!char_plr_flagged(char_get_fighting(g, i), PLR_SPAR) || char_is_npc(char_get_fighting(g, i))))) {
+      if (!char_plr_flagged(i, player_flag::spar) || (char_plr_flagged(i, player_flag::spar) && (!char_plr_flagged(char_get_fighting(g, i), player_flag::spar) || char_is_npc(char_get_fighting(g, i))))) {
         send_to_char(g, ch, ", is here fighting ");
       }
-      if (char_plr_flagged(i, PLR_SPAR) && char_plr_flagged(char_get_fighting(g, i), PLR_SPAR)) {
+      if (char_plr_flagged(i, player_flag::spar) && char_plr_flagged(char_get_fighting(g, i), player_flag::spar)) {
         send_to_char(g, ch, ", is here sparring ");
       }
       if (char_get_fighting(g, i) == ch) {
@@ -1260,29 +1259,29 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
   }
   if (char_get_sits(g, i)) {
     chair = char_get_sits(g, i);
-    if (char_plr_flagged(i, PLR_HEALT)) {
+    if (char_plr_flagged(i, player_flag::healt)) {
       send_to_char(g, ch, "@w is floating inside a healing tank.");
     } else if (count == true) {
       send_to_char(g, ch, ",@w and{} on {}.", positions[(int)char_get_position(i)], obj_get_short_description(chair));
     } else if (count == false) {
       send_to_char(g, ch, "@w{} on {}.", positions[(int)char_get_position(i)], obj_get_short_description(chair));
     }
-  } else if (!char_plr_flagged(i, PLR_PILOTING) && !char_get_sits(g, i) && (!char_is_npc(i) || !char_get_fighting(g, i))) {
+  } else if (!char_plr_flagged(i, player_flag::piloting) && !char_get_sits(g, i) && (!char_is_npc(i) || !char_get_fighting(g, i))) {
     if (count == true) {
       send_to_char(g, ch, "@w, and{}.", positions[(int)char_get_position(i)]);
     }
     if (count == false) {
       send_to_char(g, ch, "@w{}.", positions[(int)char_get_position(i)]);
     }
-  } else if (char_plr_flagged(i, PLR_PILOTING)) {
+  } else if (char_plr_flagged(i, player_flag::piloting)) {
     send_to_char(g, ch, "@w, is sitting in the pilot's chair.\r\n");
   } else {
 
     if (char_get_fighting(g, i) && !char_is_npc(ch) && !char_is_npc(i)) {
-      if (!char_plr_flagged(i, PLR_SPAR)) {
+      if (!char_plr_flagged(i, player_flag::spar)) {
         send_to_char(g, ch, ", is here fighting ");
       }
-      if (char_plr_flagged(i, PLR_SPAR)) {
+      if (char_plr_flagged(i, player_flag::spar)) {
         send_to_char(g, ch, ", is here sparring ");
       }
       if (char_get_fighting(g, i) == ch)
@@ -1298,13 +1297,13 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     }
   }
 
-  if (char_aff_flagged(ch, AFF_DETECT_ALIGN)) {
+  if (char_aff_flagged(ch, aff_flag::detect_align)) {
     if (char_is_evil(i))
       send_to_char(g, ch, " (@rRed@[3] Aura)");
     else if (char_is_good(i))
       send_to_char(g, ch, " (@bBlue@[3] Aura)");
   }
-  if (!char_is_npc(i) && char_prf_flagged(g, i, PRF_AFK))
+  if (!char_is_npc(i) && char_prf_flagged(g, i, pref_flag::afk))
     send_to_char(g, ch, " @D(@RAFK@D)");
   else if (!char_is_npc(i) && char_get_timer(i) > 3)
     send_to_char(g, ch, " @D(@RIDLE@D)");
@@ -1312,68 +1311,68 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
 
   if (char_get_listenroom(i) > 0) {
     std::string eaves = str_format("@w...$e is spying on everything to the @c{}@w.", dirs[char_get_eavesdir(i)]);
-    act(g, eaves, true, i, nullptr, ch, TO_VICT);
+    act(g, eaves, true, i, nullptr, ch, act_to::vict);
   }
   if (!char_is_npc(i)) {
-    if (char_plr_flagged(i, PLR_FISHING)) {
-      act(g, "@w...$e is @Cfishing@w.@n", true, i, nullptr, ch, TO_VICT);
+    if (char_plr_flagged(i, player_flag::fishing)) {
+      act(g, "@w...$e is @Cfishing@w.@n", true, i, nullptr, ch, act_to::vict);
     }
   }
-  if (char_plr_flagged(i, PLR_AURALIGHT)) {
+  if (char_plr_flagged(i, player_flag::auralight)) {
     std::string bloom = str_format("...is surrounded by a bright {} aura.@n", aura_types[char_get_aura(i)]);
-    act(g, bloom, true, i, nullptr, ch, TO_VICT);
+    act(g, bloom, true, i, nullptr, ch, act_to::vict);
   }
-  if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
-    act(g, "@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_FIRESHIELD))
-    act(g, "@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, nullptr, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_HEALGLOW))
-    act(g, "@w...$e has a serene @Cblue@Y glow@w around $s body.", true, i, nullptr, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_EARMOR))
-    act(g, "@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", true, i, nullptr, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
-    act(g, "@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", true, i, nullptr, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
-    act(g, "@w...$e is in the air!", true, i, nullptr, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 2)
-    act(g, "@w...$e is high in the air!", true, i, nullptr, ch, TO_VICT);
+  if (char_aff_flagged(i, aff_flag::sanctuary) && !char_get_skill(i, SKILL_AQUA_BARRIER))
+    act(g, "@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, act_to::vict);
+  if (char_aff_flagged(i, aff_flag::fireshield))
+    act(g, "@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, nullptr, ch, act_to::vict);
+  if (char_aff_flagged(i, aff_flag::healglow))
+    act(g, "@w...$e has a serene @Cblue@Y glow@w around $s body.", true, i, nullptr, ch, act_to::vict);
+  if (char_aff_flagged(i, aff_flag::earmor))
+    act(g, "@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", true, i, nullptr, ch, act_to::vict);
+  if (char_aff_flagged(i, aff_flag::sanctuary) && char_get_skill(i, SKILL_AQUA_BARRIER))
+    act(g, "@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", true, i, nullptr, ch, act_to::vict);
+  if (char_aff_flagged(i, aff_flag::flying) && char_get_altitude(i) == 1)
+    act(g, "@w...$e is in the air!", true, i, nullptr, ch, act_to::vict);
+  if (char_aff_flagged(i, aff_flag::flying) && char_get_altitude(i) == 2)
+    act(g, "@w...$e is high in the air!", true, i, nullptr, ch, act_to::vict);
   if (char_get_kaioken(i) > 0)
-    act(g, "@w...@r$e has a red aura around $s body!", true, i, nullptr, ch, TO_VICT);
-  if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
-    act(g, "@w...$e is spinning in a vortex!", false, i, nullptr, ch, TO_VICT);
+    act(g, "@w...@r$e has a red aura around $s body!", true, i, nullptr, ch, act_to::vict);
+  if (!char_is_npc(i) && char_plr_flagged(i, player_flag::spiral))
+    act(g, "@w...$e is spinning in a vortex!", false, i, nullptr, ch, act_to::vict);
   if (char_is_transformed(i) && !char_is_android(i) && !char_is_saiyan(i) && !char_is_halfbreed(i))
-    act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
+    act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, act_to::vict);
   if (char_get_charge(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
     std::string aura;
     aura = str_format("@w...$e has a @Ybright@w {} aura around $s body!", aura_types[char_get_aura(i)]);
-    act(g, aura, true, i, nullptr, ch, TO_VICT);
+    act(g, aura, true, i, nullptr, ch, act_to::vict);
   }
-  if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act(g, "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
-  if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
+  if (!char_plr_flagged(i, player_flag::oozaru) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
+    act(g, "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, act_to::vict);
+  if (!char_plr_flagged(i, player_flag::oozaru) && char_get_charge(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
     std::string aura;
     aura = str_format("@w...$e has a @Ybright@w {} aura around $s body!", aura_types[char_get_aura(i)]);
-    act(g, aura, true, i, nullptr, ch, TO_VICT);
+    act(g, aura, true, i, nullptr, ch, act_to::vict);
   }
-  if (!char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
-  if (char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act(g, "@w...$e is in the form of a @rgreat ape@w!", true, i, nullptr, ch, TO_VICT);
-  if (is_affected(i, AFF_KYODAIKA))
-    act(g, "@w...$e has expanded $s body size@w!", true, i, nullptr, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_HAYASA))
-    act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
-  if (char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act(g, "@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
+  if (!char_plr_flagged(i, player_flag::oozaru) && !char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
+    act(g, "@w...$e has energy crackling around $s body!", true, i, nullptr, ch, act_to::vict);
+  if (char_plr_flagged(i, player_flag::oozaru) && char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
+    act(g, "@w...$e is in the form of a @rgreat ape@w!", true, i, nullptr, ch, act_to::vict);
+  if (is_affected(i, aff_flag::kyodaika))
+    act(g, "@w...$e has expanded $s body size@w!", true, i, nullptr, ch, act_to::vict);
+  if (char_aff_flagged(i, aff_flag::hayasa))
+    act(g, "@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, act_to::vict);
+  if (char_plr_flagged(i, player_flag::oozaru) && !char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
+    act(g, "@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, act_to::vict);
   if (!char_get_feature(i).empty()) {
     std::string woo = str_format("@C{}@n", char_get_feature(i));
-    act(g, woo, false, i, nullptr, ch, TO_VICT);
+    act(g, woo, false, i, nullptr, ch, act_to::vict);
   }
 
   if (!char_get_rdisplay(i).empty()) {
     if (char_get_rdisplay(i) != "Empty") {
       std::string rdis = str_format("...{}", char_get_rdisplay(i));
-      act(g, rdis, false, i, nullptr, ch, TO_VICT);
+      act(g, rdis, false, i, nullptr, ch, act_to::vict);
     }
   }
 }
@@ -1384,7 +1383,7 @@ void list_char_to_char(GameWorld *g, const id_list &list, struct char_data *ch)
   int num;
 
   for (char_data *i : char_list(g, list)) {
-    if (char_aff_flagged(i, AFF_HIDE) && roll_resisted(g, i, SKILL_HIDE, ch, SKILL_SPOT)) {
+    if (char_aff_flagged(i, aff_flag::hide) && roll_resisted(g, i, SKILL_HIDE, ch, SKILL_SPOT)) {
       if (char_get_skill(i, SKILL_HIDE) && !char_is_npc(ch) && i != ch) {
         improve_skill(g, i, SKILL_HIDE, 1);
       }
@@ -1396,7 +1395,7 @@ void list_char_to_char(GameWorld *g, const id_list &list, struct char_data *ch)
   for (char_data *i : char_list(g, list)) {
     /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
-    if ((ch == i) || (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_HOLYLIGHT) && char_is_npc(i) && char_get_ldesc(i).starts_with('.')))
+    if ((ch == i) || (!char_is_npc(ch) && !char_prf_flagged(g, ch, pref_flag::holylight) && char_is_npc(i) && char_get_ldesc(i).starts_with('.')))
       continue;
     if (is_hidden(i))
       continue;
@@ -1429,7 +1428,7 @@ void list_char_to_char(GameWorld *g, const id_list &list, struct char_data *ch)
       send_to_char(g, ch, "@n");
     } /* processed a character we can see */
     else if (room_is_dark(g, char_get_in_room(ch)) && !char_can_see_in_dark(g, ch) &&
-             char_aff_flagged(i, AFF_INFRAVISION))
+             char_aff_flagged(i, aff_flag::infravision))
       send_to_char(g, ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
   } /* loop through all characters in room */
 }

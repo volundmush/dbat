@@ -19,7 +19,6 @@
 #include "dbat/consts/time.hpp"
 #include "dbat/help.hpp"
 #include "dbat/command.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/random.hpp"
@@ -118,21 +117,21 @@ namespace {
   };
 
   constexpr who_flag WHO_FLAGS[] = {
-      {PRF_DEAF,      " (DEAF)"           },
-      {PRF_NOTELL,    " (NO TELL)"        },
-      {PRF_NOGOSS,    " (NO OOC)"         },
-      {PLR_NOSHOUT,   " (MUTED)"          },
-      {PRF_HIDE,      " (WH)"             },
-      {PRF_BUILDWALK, " (Buildwalking)"   },
-      {PRF_AFK,       " (AFK)"            },
-      {PLR_FISHING,   " (@BFISHING@n)", true},
-      {PRF_NOWIZ,     " (NO WIZ)"         },
+      {pref_flag::deaf,      " (DEAF)"           },
+      {pref_flag::notell,    " (NO TELL)"        },
+      {pref_flag::nogoss,    " (NO OOC)"         },
+      {player_flag::noshout,   " (MUTED)"          },
+      {pref_flag::hide,      " (WH)"             },
+      {pref_flag::buildwalk, " (Buildwalking)"   },
+      {pref_flag::afk,       " (AFK)"            },
+      {player_flag::fishing,   " (@BFISHING@n)", true},
+      {pref_flag::nowiz,     " (NO WIZ)"         },
   };
 
   void who_line(GameWorld *g, struct char_data *ch, descriptor_data *d, struct char_data *tch)
   {
     std::string_view line_color = "@w";
-    std::string usr        = str_format("@W(@R{}@W){}", char_get_user(tch), char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
+    std::string usr        = str_format("@W(@R{}@W){}", char_get_user(tch), char_plr_flagged(tch, player_flag::biogr) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
     send_to_char(g, ch, "{}               @D<@C{:<12}@D> {}@w{}", line_color,
                  char_get_admlevel(ch) > 0 || char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch),
                  char_get_admlevel(ch) > 0 ? usr.c_str() : "", line_color);
@@ -143,14 +142,14 @@ namespace {
       send_to_char(g, ch, " (Snoop: {})", char_get_name(d->snooping->character));
     if (char_get_invis_level(g, tch))
       send_to_char(g, ch, " (i{:d})", char_get_invis_level(g, tch));
-    else if (char_aff_flagged(tch, AFF_INVISIBLE))
+    else if (char_aff_flagged(tch, aff_flag::invisible))
       send_to_char(g, ch, " (invis)");
 
-    if (char_plr_flagged(tch, PLR_MAILING))
+    if (char_plr_flagged(tch, player_flag::mailing))
       send_to_char(g, ch, " (mailing)");
     else if (d->olc)
       send_to_char(g, ch, " (OLC)");
-    else if (char_plr_flagged(tch, PLR_WRITING))
+    else if (char_plr_flagged(tch, player_flag::writing))
       send_to_char(g, ch, " (writing)");
     if (d->original)
       send_to_char(g, ch, " (out of body)");
@@ -175,7 +174,7 @@ ACMD(do_who)
   auto in_view = [&](struct char_data *tch) {
     return char_can_see(g, ch, tch) && char_get_level(tch) >= 0 && char_get_level(tch) <= CONFIG_LEVEL_CAP;
   };
-  auto hidden = [&](struct char_data *tch) { return char_prf_flagged(g, tch, PRF_HIDE) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT; };
+  auto hidden = [&](struct char_data *tch) { return char_prf_flagged(g, tch, pref_flag::hide) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT; };
 
   send_to_char(g, ch, "\r\n      @r{@b===============  @D[  @DD@wr@ca@Cg@Y(@R*@Y)@Wn@cB@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh@n  @D]  @b===============@r}      @n\r\n");
 
@@ -297,9 +296,9 @@ ACMD(do_users)
         continue;
       if (!char_can_see(g, ch, tch) || char_get_level(tch) < low || char_get_level(tch) > high)
         continue;
-      if (char_prf_flagged(g, tch, PRF_HIDE) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT)
+      if (char_prf_flagged(g, tch, pref_flag::hide) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT)
         continue;
-      if (outlaws && !char_plr_flagged(tch, PLR_KILLER) && !char_plr_flagged(tch, PLR_THIEF))
+      if (outlaws && !char_plr_flagged(tch, player_flag::killer) && !char_plr_flagged(tch, player_flag::thief))
         continue;
       if (char_get_invis_level(g, tch) > char_get_admlevel(ch))
         continue;
@@ -396,16 +395,16 @@ namespace {
 
   /* The first that a room is on; failing them all, it's unknown. */
   constexpr planet PLANETS[] = {
-      {"@GEarth@n",   flagged<ROOM_EARTH>  },
-      {"@CFrigid@n",  flagged<ROOM_FRIGID> },
-      {"@YVegeta@n",  flagged<ROOM_VEGETA> },
-      {"@MKonack@n",  flagged<ROOM_KONACK> },
-      {"@gNamek@n",   flagged<ROOM_NAMEK>  },
-      {"@mAether@n",  flagged<ROOM_AETHER> },
-      {"@mArlia@n",   flagged<ROOM_ARLIA>  },
+      {"@GEarth@n",   flagged<room_flag::earth>  },
+      {"@CFrigid@n",  flagged<room_flag::frigid> },
+      {"@YVegeta@n",  flagged<room_flag::vegeta> },
+      {"@MKonack@n",  flagged<room_flag::konack> },
+      {"@gNamek@n",   flagged<room_flag::namek>  },
+      {"@mAether@n",  flagged<room_flag::aether> },
+      {"@mArlia@n",   flagged<room_flag::arlia>  },
       {"@CZenith@n",  room_planet_zenith   },
-      {"@YYardrat@n", flagged<ROOM_YARDRAT>},
-      {"@cKanassa@n", flagged<ROOM_KANASSA>},
+      {"@YYardrat@n", flagged<room_flag::yardrat>},
+      {"@cKanassa@n", flagged<room_flag::kanassa>},
   };
 
   std::string_view planet_name(GameWorld *g, room_vnum room)
@@ -463,7 +462,7 @@ ACMD(do_where)
   std::string_view rest = argument;
   std::string arg       = take_arg(rest);
 
-  if (char_adm_flagged(ch, ADM_FULLWHERE) || char_get_admlevel(ch) > 4)
+  if (char_adm_flagged(ch, admin_flag::fullwhere) || char_get_admlevel(ch) > 4)
     perform_immort_where(g, ch, arg);
   else
     perform_mortal_where(g, ch, arg);

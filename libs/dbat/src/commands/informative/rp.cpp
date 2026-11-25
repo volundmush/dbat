@@ -15,7 +15,6 @@
 #include "dbat/consts/time.hpp"
 #include "dbat/help.hpp"
 #include "dbat/command.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/random.hpp"
@@ -81,8 +80,8 @@ ACMD(do_mimic)
       send_to_char(g, ch, "You are not imitating another race.\r\n");
       return;
     }
-    act(g, "@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, nullptr, nullptr, act_to::room);
     char_set_mimic(ch, 0);
     /* quirk: goes on, to be told that "stop" is no race */
   }
@@ -108,15 +107,15 @@ ACMD(do_mimic)
   }
   if (prob < perc) {
     decCurKI(g, ch, cost, 0);
-    act(g, "@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", true, ch, nullptr, nullptr, act_to::room);
     return;
   }
   char_set_mimic(ch, race);
   decCurKI(g, ch, cost, 0);
   std::string buf = str_format("@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be {} @M{}!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
   send_to_char(g, ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be {} {}.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
-  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, act_to::room);
 }
 
 ACMD(do_kyodaika)
@@ -128,16 +127,16 @@ ACMD(do_kyodaika)
     return;
   }
 
-  if (!is_affected(ch, AFF_KYODAIKA)) {
-    act(g, "@GYou growl as your body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
+  if (!is_affected(ch, aff_flag::kyodaika)) {
+    act(g, "@GYou growl as your body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_char(g, ch, "@cStrength@D: @C+5\r\n@cSpeed@D: @c-2@n\r\n");
-    assign_affect(g, ch, AFF_KYODAIKA, 0, -1, 5, 0, 0, 0, 0, -2);
+    assign_affect(g, ch, aff_flag::kyodaika, 0, -1, 5, 0, 0, 0, 0, -2);
   } else {
-    act(g, "@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@GYou growl as your body shrinks to its normal size!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_char(g, ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
-    remove_affect(g, ch, AFF_KYODAIKA);
+    remove_affect(g, ch, aff_flag::kyodaika);
   }
   save_char(g, ch);
 }
@@ -160,7 +159,7 @@ ACMD(do_table)
     return;
 
   std::string buf = str_format("$n looks at {} on {}.\r\n", obj_get_short_description(*card), obj_get_short_description(*table));
-  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, act_to::room);
   send_to_char(g, ch, "{}", obj_get_action_description(*card));
 }
 
@@ -185,7 +184,7 @@ namespace {
     return find_carried(g, ch, what, "You don't have a case.\r\n");
   }
 
-  bool is_card(struct obj_data *obj) { return obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT); }
+  bool is_card(struct obj_data *obj) { return obj_extra_flagged(obj, extra_flag::anti_hierophant); }
 } // namespace
 
 ACMD(do_draw)
@@ -203,7 +202,7 @@ ACMD(do_draw)
   }
   obj_from_obj(g, card);
   obj_to_char(g, card, ch);
-  act(g, "$n draws a card from $s $p.\r\n", true, ch, *box, nullptr, TO_ROOM);
+  act(g, "$n draws a card from $s $p.\r\n", true, ch, *box, nullptr, act_to::room);
   send_to_char(g, ch, "You draw a card.\r\n{}\r\n", obj_get_action_description(card));
 }
 
@@ -239,7 +238,7 @@ ACMD(do_shuffle)
     }
   }
   send_to_char(g, ch, "You shuffle the cards carefully.\r\n");
-  act(g, "$n shuffles their deck.", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "$n shuffles their deck.", true, ch, nullptr, nullptr, act_to::room);
   send_to_room(g, char_get_in_room(ch), "There were {:d} cards in the deck.\r\n", total);
 }
 
@@ -255,28 +254,28 @@ ACMD(do_hand)
       count += 1;
       send_to_char(g, ch, "{}\r\n", obj_get_short_description(card));
     }
-    act(g, "$n looks at $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "$n looks at $s hand.", true, ch, nullptr, nullptr, act_to::room);
     if (count == 0) {
       send_to_char(g, ch, "No cards.");
-      act(g, "There were no cards.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "There were no cards.", true, ch, nullptr, nullptr, act_to::room);
     } else if (count > 7) {
-      act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, act_to::room);
     } else {
-      act(g, str_format("There are {:d} cards in the hand.", count), true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, str_format("There are {:d} cards in the hand.", count), true, ch, nullptr, nullptr, act_to::room);
     }
   } else if (str_eq_nocase("show", arg)) {
     send_to_char(g, ch, "You show off your hand to the room.\r\n");
-    act(g, "@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, act_to::room);
     for (obj_data *card : char_inventory(g, ch) | std::views::filter(is_card)) {
       count += 1;
-      act(g, "$p", true, ch, card, nullptr, TO_ROOM);
+      act(g, "$p", true, ch, card, nullptr, act_to::room);
     }
     if (count == 0)
-      act(g, "No cards.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "No cards.", true, ch, nullptr, nullptr, act_to::room);
     if (count > 7) {
-      act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "You have more than seven cards in your hand.", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "$n has more than seven cards in $s hand.", true, ch, nullptr, nullptr, act_to::room);
     }
   } else {
     send_to_char(g, ch, "Syntax: hand (look | show)\r\n");
@@ -301,7 +300,7 @@ ACMD(do_post)
     send_to_char(g, ch, "You can only post notepaper.\r\n");
     return;
   }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_GARDEN1) || room_flagged(g, char_get_in_room(ch), ROOM_GARDEN2)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::garden1) || room_flagged(g, char_get_in_room(ch), room_flag::garden2)) {
     send_to_char(g, ch, "You can not post on things in a garden.\r\n");
     return;
   }
@@ -311,8 +310,8 @@ ACMD(do_post)
       send_to_char(g, ch, "You are not near any general structure you can post it on.\r\n");
       return;
     }
-    act(g, "@WYou post $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_ROOM);
+    act(g, "@WYou post $p@W on a nearby structure.@n", true, ch, obj, nullptr, act_to::actor);
+    act(g, "@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, nullptr, act_to::room);
     obj_from_char(g, obj);
     obj_to_room(g, obj, char_get_in_room(ch));
     obj_set_posttype(obj, 1);
@@ -332,7 +331,7 @@ ACMD(do_post)
   }
   std::string buf = str_format("@C$n@W posts {}@W on {}@W.@n", obj_get_short_description(obj), obj_get_short_description(obj2));
   send_to_char(g, ch, "@WYou post {}@W on {}@W.@n\r\n", obj_get_short_description(obj), obj_get_short_description(obj2));
-  act(g, buf, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, true, ch, nullptr, nullptr, act_to::room);
   obj_from_char(g, obj);
   obj_to_room(g, obj, char_get_in_room(ch));
   obj_set_posttype(obj, 2);
@@ -368,8 +367,8 @@ ACMD(do_play)
     return;
   }
 
-  act(g, "You play $p on your table.", true, ch, *card, nullptr, TO_CHAR);
-  act(g, "$n plays $p on $s table.", true, ch, *card, nullptr, TO_ROOM);
+  act(g, "You play $p on your table.", true, ch, *card, nullptr, act_to::actor);
+  act(g, "$n plays $p on $s table.", true, ch, *card, nullptr, act_to::room);
   obj_from_char(g, *card);
   obj_to_obj(g, *card, table);
 }
@@ -453,7 +452,7 @@ ACMD(do_showoff)
   auto obj = find_carried(g, ch, arg, "You don't seem to have that.\r\n");
   if (reject(g, ch, obj))
     return;
-  auto vict = find_player(g, ch, arg2, FIND_CHAR_ROOM, "There is no such person around.\r\n");
+  auto vict = find_player(g, ch, arg2, find_flag::char_room, "There is no such person around.\r\n");
   if (reject(g, ch, vict))
     return;
   act_triple(g, SHOWOFF, ch, *obj, *vict);
@@ -582,7 +581,7 @@ ACMD(do_intro)
     return;
   }
 
-  auto found = find_player(g, ch, arg, FIND_CHAR_ROOM, "There is no such person.\r\n");
+  auto found = find_player(g, ch, arg, find_flag::char_room, "There is no such person.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;

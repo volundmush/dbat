@@ -1,5 +1,4 @@
 #pragma once
-#include "dbat/flags.hpp"
 #include "dbat/zones.hpp"
 
 int zone_get_min_level(GameWorld *g, struct zone_data *zone);

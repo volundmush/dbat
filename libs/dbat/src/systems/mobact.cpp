@@ -63,11 +63,11 @@ void mobile_activity(GameWorld *g)
       continue;
 
     /* Examine call for special procedure */
-    if (char_mob_flagged(ch, MOB_SPEC) && !g->no_specials) {
+    if (char_mob_flagged(ch, mob_flag::spec) && !g->no_specials) {
       if (mob_index_of(g, char_get_nr(ch))->func == nullptr) {
         mud_log("SYSERR: {} (#{:d}): Attempting to call non-existing mob function.",
                 char_get_name(ch), char_get_mob_vnum(g, ch));
-        char_mob_set(ch, MOB_SPEC, false);
+        char_mob_set(ch, mob_flag::spec, false);
       } else {
         if ((mob_index_of(g, char_get_nr(ch))->func)(g, ch, ch, 0, ""))
           continue; /* go to next char */
@@ -79,7 +79,7 @@ void mobile_activity(GameWorld *g)
       continue;
 
     /* Scavenger (picking up objects) */
-    if (char_is_humanoid(ch) && !char_get_fighting(g, ch) && char_is_awake(ch) && !char_mob_flagged(ch, MOB_NOSCAVENGER) && !char_mob_flagged(ch, MOB_NOKILL) && (!player_present(g, ch) || axion_dice(g, 0) > 118))
+    if (char_is_humanoid(ch) && !char_get_fighting(g, ch) && char_is_awake(ch) && !char_mob_flagged(ch, mob_flag::noscavenger) && !char_mob_flagged(ch, mob_flag::nokill) && (!player_present(g, ch) || axion_dice(g, 0) > 118))
       if (room_get_contents(g, char_get_in_room(ch)) && rand_number(g, 1, 100) >= 95) {
         max      = 1;
         best_obj = nullptr;
@@ -88,22 +88,22 @@ void mobile_activity(GameWorld *g)
             best_obj = obj;
             max      = obj_get_cost(obj);
           }
-        if (best_obj != nullptr && char_can_get_obj(g, ch, best_obj) && obj_get_type_flag(best_obj) != ITEM_BED && !obj_get_posted_to(g, best_obj) && !obj_extra_flagged(best_obj, ITEM_NOPICKUP)) {
+        if (best_obj != nullptr && char_can_get_obj(g, ch, best_obj) && obj_get_type_flag(best_obj) != ITEM_BED && !obj_get_posted_to(g, best_obj) && !obj_extra_flagged(best_obj, extra_flag::nopickup)) {
           switch (rand_number(g, 1, 5)) {
             case 1:
-              act(g, "$n@W says, '@CFinders keepers, losers weepers.@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
+              act(g, "$n@W says, '@CFinders keepers, losers weepers.@W'@n", true, ch, nullptr, nullptr, act_to::room);
               break;
             case 2:
-              act(g, "$n@W says, '@CPeople always leaving their garbage JUST LYING AROUND. The nerve....@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
+              act(g, "$n@W says, '@CPeople always leaving their garbage JUST LYING AROUND. The nerve....@W'@n", true, ch, nullptr, nullptr, act_to::room);
               break;
             case 3:
-              act(g, "$n@W says, '@CWho would leave this here? Oh well..@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
+              act(g, "$n@W says, '@CWho would leave this here? Oh well..@W'@n", true, ch, nullptr, nullptr, act_to::room);
               break;
             case 4:
-              act(g, "$n@W says, '@CI always wanted one of these.@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
+              act(g, "$n@W says, '@CI always wanted one of these.@W'@n", true, ch, nullptr, nullptr, act_to::room);
               break;
             case 5:
-              act(g, "$n@W looks around quickly to see if anyone is paying attention.@n", true, ch, nullptr, nullptr, TO_ROOM);
+              act(g, "$n@W looks around quickly to see if anyone is paying attention.@n", true, ch, nullptr, nullptr, act_to::room);
               break;
           }
           perform_get_from_room(g, ch, best_obj);
@@ -111,14 +111,14 @@ void mobile_activity(GameWorld *g)
       }
 
     /* Mob Movement */
-    if (!char_mob_flagged(ch, MOB_SENTINEL) && (char_get_position(ch) == POS_STANDING) && !char_get_fighting(g, ch) &&
-        (!char_aff_flagged(ch, AFF_TAMED)) && !char_get_absorbby(g, ch) &&
+    if (!char_mob_flagged(ch, mob_flag::sentinel) && (char_get_position(ch) == POS_STANDING) && !char_get_fighting(g, ch) &&
+        (!char_aff_flagged(ch, aff_flag::tamed)) && !char_get_absorbby(g, ch) &&
         ((door = rand_number(g, 0, 18)) < NUM_OF_DIRS) && char_can_go(g, ch, door) &&
-        !room_flagged(g, char_get_exit(g, ch, door)->to_room, ROOM_NOMOB) &&
-        !room_flagged(g, char_get_exit(g, ch, door)->to_room, ROOM_DEATH) &&
-        (!char_mob_flagged(ch, MOB_STAY_ZONE) ||
+        !room_flagged(g, char_get_exit(g, ch, door)->to_room, room_flag::nomob) &&
+        !room_flagged(g, char_get_exit(g, ch, door)->to_room, room_flag::death) &&
+        (!char_mob_flagged(ch, mob_flag::stay_zone) ||
          (room_get_zone(g, char_get_exit(g, ch, door)->to_room) == room_get_zone(g, char_get_in_room(ch))))) {
-      if (rand_number(g, 1, 2) == 2 && !char_is_affected(ch, AFF_PARALYZE) && block_calc(g, ch)) {
+      if (rand_number(g, 1, 2) == 2 && !char_is_affected(ch, aff_flag::paralyze) && block_calc(g, ch)) {
         perform_move(g, ch, door, 1);
       }
     }
@@ -128,13 +128,13 @@ void mobile_activity(GameWorld *g)
       if (char_get_fighting(g, ch)) {
         continue;
       }
-      if (char_mob_flagged(ch, MOB_NOKILL)) {
+      if (char_mob_flagged(ch, mob_flag::nokill)) {
         continue;
       }
       if (obj_get_vnum(g, hugeatk) == 82 || obj_get_vnum(g, hugeatk) == 83) {
         if (obj_get_user(g, hugeatk) != nullptr) {
-          act(g, "@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, obj_get_user(g, hugeatk), TO_ROOM);
-          act(g, "@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, obj_get_user(g, hugeatk), TO_VICT);
+          act(g, "@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, obj_get_user(g, hugeatk), act_to::room);
+          act(g, "@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, obj_get_user(g, hugeatk), act_to::vict);
           if (char_is_humanoid(ch)) {
             std::string tar = str_format("{}", char_get_name(obj_get_user(g, hugeatk)));
             do_punch(g, ch, tar, 0, 0);
@@ -147,7 +147,7 @@ void mobile_activity(GameWorld *g)
     }
 
     /* Aggressive Mobs */
-    if (char_mob_flagged(ch, MOB_AGGRESSIVE) && !char_is_affected(ch, AFF_PARALYZE)) {
+    if (char_mob_flagged(ch, mob_flag::aggressive) && !char_is_affected(ch, aff_flag::paralyze)) {
       int spot_roll = rand_number(g, 1, char_get_level(ch) + 10);
       found         = false;
       for (char_data *vict : room_people(g, char_get_in_room(ch))) {
@@ -161,17 +161,17 @@ void mobile_activity(GameWorld *g)
           continue;
         else if (char_is_npc(vict))
           continue;
-        else if (char_prf_flagged(g, vict, PRF_NOHASSLE))
+        else if (char_prf_flagged(g, vict, pref_flag::nohassle))
           continue;
-        else if (char_mob_flagged(ch, MOB_AGGR_EVIL) && char_get_alignment(vict) < 50)
+        else if (char_mob_flagged(ch, mob_flag::aggr_evil) && char_get_alignment(vict) < 50)
           continue;
-        else if (char_mob_flagged(ch, MOB_AGGR_GOOD) && char_get_alignment(vict) > -50)
+        else if (char_mob_flagged(ch, mob_flag::aggr_good) && char_get_alignment(vict) > -50)
           continue;
         else if (char_get_level(vict) < 5)
           continue;
-        else if (char_aff_flagged(vict, AFF_HIDE) && char_get_skill(vict, SKILL_HIDE) > spot_roll)
+        else if (char_aff_flagged(vict, aff_flag::hide) && char_get_skill(vict, SKILL_HIDE) > spot_roll)
           continue;
-        else if (char_aff_flagged(vict, AFF_SNEAK) && char_get_skill(vict, SKILL_MOVE_SILENTLY) > spot_roll)
+        else if (char_aff_flagged(vict, aff_flag::sneak) && char_get_skill(vict, SKILL_MOVE_SILENTLY) > spot_roll)
           continue;
         else if (char_get_aggtimer(ch) < 8)
           char_set_aggtimer(ch, char_get_aggtimer(ch) + 1);
@@ -179,38 +179,38 @@ void mobile_activity(GameWorld *g)
           char_set_aggtimer(ch, 0);
           std::string tar = str_format("{}", char_get_name(vict));
           if (char_is_humanoid(ch)) {
-            if (!char_aff_flagged(vict, AFF_HIDE) && !char_aff_flagged(vict, AFF_SNEAK)) {
-              act(g, "@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch, nullptr, vict, TO_VICT);
-              act(g, "@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true, ch, nullptr, vict, TO_NOTVICT);
+            if (!char_aff_flagged(vict, aff_flag::hide) && !char_aff_flagged(vict, aff_flag::sneak)) {
+              act(g, "@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch, nullptr, vict, act_to::vict);
+              act(g, "@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true, ch, nullptr, vict, act_to::notvict);
             } else {
-              act(g, "@C$n@w notices YOU.\n@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch, nullptr, vict, TO_VICT);
-              act(g, "@C$n@w notices @c$N@w.\n@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true, ch, nullptr, vict, TO_NOTVICT);
+              act(g, "@C$n@w notices YOU.\n@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch, nullptr, vict, act_to::vict);
+              act(g, "@C$n@w notices @c$N@w.\n@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true, ch, nullptr, vict, act_to::notvict);
             }
-            if (char_aff_flagged(vict, AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
+            if (char_aff_flagged(vict, aff_flag::flying) && !char_aff_flagged(ch, aff_flag::flying) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
               do_fly(g, ch, "", 0, 0);
               continue;
             }
-            if (!char_aff_flagged(vict, AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
+            if (!char_aff_flagged(vict, aff_flag::flying) && char_aff_flagged(ch, aff_flag::flying)) {
               do_fly(g, ch, "", 0, 0);
               continue;
             }
             do_punch(g, ch, tar, 0, 0);
           }
           if (!char_is_humanoid(ch)) {
-            if (char_aff_flagged(vict, AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
+            if (char_aff_flagged(vict, aff_flag::flying) && !char_aff_flagged(ch, aff_flag::flying) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
               do_fly(g, ch, "", 0, 0);
               continue;
             }
-            if (!char_aff_flagged(vict, AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
+            if (!char_aff_flagged(vict, aff_flag::flying) && char_aff_flagged(ch, aff_flag::flying)) {
               do_fly(g, ch, "", 0, 0);
               continue;
             }
-            if (!char_aff_flagged(vict, AFF_HIDE) && !char_aff_flagged(vict, AFF_SNEAK)) {
-              act(g, "@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict, TO_VICT);
-              act(g, "@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict, TO_NOTVICT);
+            if (!char_aff_flagged(vict, aff_flag::hide) && !char_aff_flagged(vict, aff_flag::sneak)) {
+              act(g, "@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict, act_to::vict);
+              act(g, "@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict, act_to::notvict);
             } else {
-              act(g, "@C$n@w notices YOU.\n@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict, TO_VICT);
-              act(g, "@C$n@w notices @c$N@w.\n@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict, TO_NOTVICT);
+              act(g, "@C$n@w notices YOU.\n@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict, act_to::vict);
+              act(g, "@C$n@w notices @c$N@w.\n@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict, act_to::notvict);
             }
             do_bite(g, ch, tar, 0, 0);
           }
@@ -239,14 +239,14 @@ void mobile_activity(GameWorld *g)
     }
 
     /* Be helpful */ /* - temporarily disabled by the first false check */
-    if (false && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
+    if (false && char_is_humanoid(ch) && !char_mob_flagged(ch, mob_flag::nokill)) {
       int done = false;
       for (char_data *ally : room_people(g, char_get_in_room(ch))) {
         if (ally == ch)
           continue;
         if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && done == false) {
           if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(g, ally) < getCurPL(g, ch) * 0.6 && axion_dice(g, 0) >= 90) {
-            act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, TO_ROOM);
+            act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, act_to::room);
             std::string buf = str_format("{}", char_get_name(ally));
             if (char_get_class(ch) == CLASS_KABITO || char_get_class(ch) == CLASS_NAIL) {
               do_heal(g, ch, buf, 0, 0);
@@ -269,14 +269,14 @@ void mobile_activity(GameWorld *g)
     }
 
     /* Help those under attack! */ /* - temporarily disabled by the first false check */
-    if (false && !char_get_fighting(g, ch) && rand_number(g, 1, 20) >= 14 && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
+    if (false && !char_get_fighting(g, ch) && rand_number(g, 1, 20) >= 14 && char_is_humanoid(ch) && !char_mob_flagged(ch, mob_flag::nokill)) {
       int done = false;
       for (char_data *ally : room_people(g, char_get_in_room(ch))) {
         if (ally == ch)
           continue;
         if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && done == false) {
           if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(g, ally) < getCurPL(g, ch) * 0.6 && axion_dice(g, 0) >= 70) {
-            act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, TO_ROOM);
+            act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, act_to::room);
             std::string buf = str_format("{}", char_get_name(ally));
             if (char_get_class(ch) == CLASS_KABITO || char_get_class(ch) == CLASS_NAIL) {
               do_heal(g, ch, buf.c_str(), 0, 0);
@@ -322,12 +322,12 @@ void mobile_activity(GameWorld *g)
     }
 
     /* Mob Memory */
-    if (char_is_humanoid(ch) && char_get_mob_specials_memory(ch) && !char_mob_flagged(ch, MOB_DUMMY) && !char_is_affected(ch, AFF_PARALYZE)) {
+    if (char_is_humanoid(ch) && char_get_mob_specials_memory(ch) && !char_mob_flagged(ch, mob_flag::dummy) && !char_is_affected(ch, aff_flag::paralyze)) {
       found = false;
       for (char_data *vict : room_people(g, char_get_in_room(ch))) {
         if (found)
           break;
-        if (char_is_npc(vict) || !char_can_see(g, ch, vict) || char_prf_flagged(g, vict, PRF_NOHASSLE))
+        if (char_is_npc(vict) || !char_can_see(g, ch, vict) || char_prf_flagged(g, vict, pref_flag::nohassle))
           continue;
         if (char_get_fighting(g, ch))
           continue;
@@ -336,7 +336,7 @@ void mobile_activity(GameWorld *g)
 
         if (char_get_mob_specials_memory(ch).contains(char_get_idnum(vict))) {
           found = true;
-          act(g, "'Hey!  You're the fiend that attacked me!!!', exclaims $n.", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "'Hey!  You're the fiend that attacked me!!!', exclaims $n.", false, ch, nullptr, nullptr, act_to::room);
           std::string tar = str_format("{}", char_get_name(vict));
           do_punch(g, ch, tar, 0, 0);
         }
@@ -348,9 +348,9 @@ void mobile_activity(GameWorld *g)
     }
 
     /* Helper Mobs */
-    if (char_mob_flagged(ch, MOB_HELPER) &&
-        !char_aff_flagged(ch, AFF_BLIND) &&
-        !char_aff_flagged(ch, AFF_CHARM)) {
+    if (char_mob_flagged(ch, mob_flag::helper) &&
+        !char_aff_flagged(ch, aff_flag::blind) &&
+        !char_aff_flagged(ch, aff_flag::charm)) {
       found = false;
       for (char_data *vict : room_people(g, char_get_in_room(ch))) {
         if (found)
@@ -361,7 +361,7 @@ void mobile_activity(GameWorld *g)
           continue;
 
         if (char_is_humanoid(vict)) {
-          act(g, "$n jumps to the aid of $N!", false, ch, nullptr, vict, TO_ROOM);
+          act(g, "$n jumps to the aid of $N!", false, ch, nullptr, vict, act_to::room);
           std::string tar = str_format("{}", char_get_name(char_get_fighting(g, vict)));
           do_punch(g, ch, tar.c_str(), 0, 0);
           found = true;
@@ -398,11 +398,11 @@ void mobile_activity(GameWorld *g)
           break;
         if (vict == ch)
           continue;
-        if (char_mob_flagged(ch, MOB_WIMPY) && char_is_awake(vict))
+        if (char_mob_flagged(ch, mob_flag::wimpy) && char_is_awake(vict))
           continue;
         if (!char_is_humanoid(vict))
           continue;
-        if (char_is_npc(vict) && char_mob_flagged(vict, MOB_NOKILL))
+        if (char_is_npc(vict) && char_mob_flagged(vict, mob_flag::nokill))
           continue;
         if (char_get_mob_vnum(g, ch) == char_get_mob_vnum(g, vict))
           continue;
@@ -424,7 +424,7 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
 
   int message = 1;
 
-  if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
+  if (room_flagged(g, char_get_in_room(ch), room_flag::space)) { /* In space.... nobody cares. */
     return;
   }
 
@@ -442,130 +442,130 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
     message = rand_number(g, 1, 12);
     switch (message) { /* Display the appropriate message. */
       case 1:
-        act(g, "@C$n@W growls viciously at @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W growls viciously at you!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W growls viciously at @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W growls viciously at you!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 2:
-        act(g, "@C$n@W snaps $s jaws at @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W snaps $s jaws at you!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W snaps $s jaws at @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W snaps $s jaws at you!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 3:
-        act(g, "@C$n@W is panting heavily from $s struggle with @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W is panting heavily from $s struggle with you!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W is panting heavily from $s struggle with @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W is panting heavily from $s struggle with you!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 4:
-        act(g, "@C$n@W circles around @c$N@W trying to get a better position!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W circles around you trying to find a weak spot!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W circles around @c$N@W trying to get a better position!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W circles around you trying to find a weak spot!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 5:
-        act(g, "@C$n@W jumps up slightly in an attempt to threaten @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W jumps up slightly in an attempt to threaten you!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W jumps up slightly in an attempt to threaten @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W jumps up slightly in an attempt to threaten you!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 6:
-        act(g, "@C$n@W turns sideways while facing @c$N@W in an attempt to appear larger and more threatening!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W turns sideways while facing you in an attempt to appear larger and more threatening!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W turns sideways while facing @c$N@W in an attempt to appear larger and more threatening!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W turns sideways while facing you in an attempt to appear larger and more threatening!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 7:
-        act(g, "@C$n@W roars with the full power of its lungs at @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W roars with the full power of its lungs at you!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W roars with the full power of its lungs at @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W roars with the full power of its lungs at you!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 8:
-        act(g, "@C$n@W staggers from the strain of fighting.@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W staggers from the strain of fighting.@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W staggers from the strain of fighting.@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W staggers from the strain of fighting.@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 9:
-        act(g, "@C$n@W slumps down for a moment before regaining $s guard against @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W slumps down for a moment before regaining $s guard against you!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W slumps down for a moment before regaining $s guard against @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W slumps down for a moment before regaining $s guard against you!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 10:
-        act(g, "@C$n's@W eyes dart around as $e seems to look for safe places to run.@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n's@W eyes dart around as $e seems to look for safe places to run.@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n's@W eyes dart around as $e seems to look for safe places to run.@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n's@W eyes dart around as $e seems to look for safe places to run.@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 11:
-        act(g, "@C$n@W jumps past @c$N@W before turning and facing $M again!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W jumps past you before turning and facing you again!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W jumps past @c$N@W before turning and facing $M again!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W jumps past you before turning and facing you again!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       default:
-        act(g, "@C$n@W watches @c$N@W with a threatening gaze while $e looks for a weakness!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W watches you with a threatening gaze while $e looks for a weakness!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W watches @c$N@W with a threatening gaze while $e looks for a weakness!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W watches you with a threatening gaze while $e looks for a weakness!@n", true, ch, nullptr, vict, act_to::vict);
         break;
     }
   } else if (!char_is_humanoid(ch)) { /* Animal under water */
     message = rand_number(g, 1, 7);
     switch (message) {
       case 1:
-        act(g, "@C$n@W snaps $s jaws at @c$N@W which causes a torrent of bubbles to float upward!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W snaps $s jaws at you which causes a torrent of bubbles to float upward!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W snaps $s jaws at @c$N@W which causes a torrent of bubbles to float upward!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W snaps $s jaws at you which causes a torrent of bubbles to float upward!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 2:
-        act(g, "@C$n@W thrashes around in the water!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W thrashes around in the water!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W thrashes around in the water!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W thrashes around in the water!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 3:
-        act(g, "@C$n@W swims past @c$N@W before turning and facing $M again!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W swims past you before turning and facing you again!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W swims past @c$N@W before turning and facing $M again!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W swims past you before turning and facing you again!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 4:
-        act(g, "@C$n@W begins to slowly circle @c$N@W while looking for an opening!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W begins to slowly circle you while looking for an opening!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W begins to slowly circle @c$N@W while looking for an opening!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W begins to slowly circle you while looking for an opening!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 5:
-        act(g, "@C$n@W swims backward in an attempt to gain a safe distance from @C$N's@W aggression.@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W swims backward in an attempt to gain a safe distance from you.@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W swims backward in an attempt to gain a safe distance from @C$N's@W aggression.@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W swims backward in an attempt to gain a safe distance from you.@n", true, ch, nullptr, vict, act_to::vict);
         break;
       case 6:
-        act(g, "@C$n@W swims toward the side of @C$N@W in an attempt to flank $M!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W swims toward the side of you in an attempt to flank you!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W swims toward the side of @C$N@W in an attempt to flank $M!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W swims toward the side of you in an attempt to flank you!@n", true, ch, nullptr, vict, act_to::vict);
         break;
       default:
-        act(g, "@C$n@W swims upward before darting down past @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        act(g, "@C$n@W swims upward before darting down past you!@n", true, ch, nullptr, vict, TO_VICT);
+        act(g, "@C$n@W swims upward before darting down past @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+        act(g, "@C$n@W swims upward before darting down past you!@n", true, ch, nullptr, vict, act_to::vict);
         break;
     }
-  } else if (!char_mob_flagged(ch, MOB_DUMMY)) { /* They are intelligent */
+  } else if (!char_mob_flagged(ch, mob_flag::dummy)) { /* They are intelligent */
     message = rand_number(g, 1, 10);
     if (!room_sunken(g, char_get_in_room(ch))) {
-      if (char_aff_flagged(ch, AFF_FLYING)) { /* They are flying */
+      if (char_aff_flagged(ch, aff_flag::flying)) { /* They are flying */
         switch (message) {
           case 1:
-            act(g, "@C$n@W flies around @c$N@W slowly while looking for an opening!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W flies around you slowly while looking for an opening!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W flies around @c$N@W slowly while looking for an opening!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W flies around you slowly while looking for an opening!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 2:
-            act(g, "@C$n@W floats slowly while scowling at @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W floats slowly while scowling at you!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W floats slowly while scowling at @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W floats slowly while scowling at you!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 3:
-            act(g, "@C$n@W spits at @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W spits at you!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W spits at @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W spits at you!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 4:
-            act(g, "@C$n@W looks at @c$N@W as if $e is weighing $s options.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W looks at you as if $e is weighing $s options.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W looks at @c$N@W as if $e is weighing $s options.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W looks at you as if $e is weighing $s options.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 5:
-            act(g, "@C$n@W scowls at @c$N@W while changing $s position carefully!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W scowls at you while changing $s position carefully!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W scowls at @c$N@W while changing $s position carefully!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W scowls at you while changing $s position carefully!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 6:
-            act(g, "@C$n@W flips backward a short way away from @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W flips backward a short way away from you!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W flips backward a short way away from @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W flips backward a short way away from you!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 7:
-            act(g, "@C$n@W moves slowly to the side of @c$N@W while watching $M carefully.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W moves slowly to the side of you while watching you carefully.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W moves slowly to the side of @c$N@W while watching $M carefully.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W moves slowly to the side of you while watching you carefully.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 8:
-            act(g, "@C$n@W flexes $s arms in an attempt to threaten @C$N@W.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W flexes $s arms threaten in an attempt to threaten you@W.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W flexes $s arms in an attempt to threaten @C$N@W.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W flexes $s arms threaten in an attempt to threaten you@W.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 9:
-            act(g, "@C$n@W raises an arm in front of $s body as a defense.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W raises an arm in front of $s body as a defense.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W raises an arm in front of $s body as a defense.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W raises an arm in front of $s body as a defense.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           default:
-            act(g, "@C$n@W feints a punch toward @c$N@W that misses by a mile.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W feints a punch toward you that misses by a mile.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W feints a punch toward @c$N@W that misses by a mile.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W feints a punch toward you that misses by a mile.@n", true, ch, nullptr, vict, act_to::vict);
             break;
         }
 
@@ -573,61 +573,61 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
         message = rand_number(g, 1, 13);
         switch (message) {
           case 1:
-            act(g, "@C$n@W shuffles around @c$N@W slowly while looking for an opening!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W shuffles around you slowly while looking for an opening!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W shuffles around @c$N@W slowly while looking for an opening!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W shuffles around you slowly while looking for an opening!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 2:
-            act(g, "@C$n@W scowls @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W scowls at you!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W scowls @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W scowls at you!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 3:
             if (char_is_android(ch)) {
-              act(g, "@C$n@W has sparks come off them that land on @c$N@W!@n@n", true, ch, nullptr, vict, TO_NOTVICT);
-              act(g, "@C$n@W has sparks come off them that land on you!@n", true, ch, nullptr, vict, TO_VICT);
+              act(g, "@C$n@W has sparks come off them that land on @c$N@W!@n@n", true, ch, nullptr, vict, act_to::notvict);
+              act(g, "@C$n@W has sparks come off them that land on you!@n", true, ch, nullptr, vict, act_to::vict);
             } else {
-              act(g, "@C$n@W spits at @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-              act(g, "@C$n@W spits at you!@n", true, ch, nullptr, vict, TO_VICT);
+              act(g, "@C$n@W spits at @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+              act(g, "@C$n@W spits at you!@n", true, ch, nullptr, vict, act_to::vict);
             }
             break;
           case 4:
-            act(g, "@C$n@W looks at @c$N@W as if $e is weighing $s options.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W looks at you as if $e is weighing $s options.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W looks at @c$N@W as if $e is weighing $s options.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W looks at you as if $e is weighing $s options.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 5:
-            act(g, "@C$n@W scowls at @c$N@W while changing $s position carefully!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W scowls at you while changing $s position carefully!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W scowls at @c$N@W while changing $s position carefully!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W scowls at you while changing $s position carefully!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 6:
-            act(g, "@C$n@W flips backward a short way away from @c$N@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W flips backward a short way away from you!@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W flips backward a short way away from @c$N@W!@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W flips backward a short way away from you!@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 7:
-            act(g, "@C$n@W moves slowly to the side of @c$N@W while watching $M carefully.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W moves slowly to the side of you while watching you carefully.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W moves slowly to the side of @c$N@W while watching $M carefully.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W moves slowly to the side of you while watching you carefully.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 8:
-            act(g, "@C$n@W crouches down cautiously.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W crouches down cautiously.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W crouches down cautiously.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W crouches down cautiously.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 9:
-            act(g, "@C$n@W moves $s feet slowly to achieve a better balance.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W moves $s feet slowly to achieve a better balance.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W moves $s feet slowly to achieve a better balance.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W moves $s feet slowly to achieve a better balance.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 10:
-            act(g, "@C$n@W leaps to a more defensible spot.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W leaps to a more defensible spot.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W leaps to a more defensible spot.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W leaps to a more defensible spot.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 11:
-            act(g, "@C$n@W runs a short distance away before skidding to a halt and resuming $s fighting stance.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W runs a short distance away before skidding to a halt and resuming $s fighting stance.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W runs a short distance away before skidding to a halt and resuming $s fighting stance.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W runs a short distance away before skidding to a halt and resuming $s fighting stance.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           case 12:
-            act(g, "@C$n@W stands up to $s full height and glares at @C$N@W with burning eyes.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W stands up to $s full height and glares at you with intense burning eyes.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W stands up to $s full height and glares at @C$N@W with burning eyes.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W stands up to $s full height and glares at you with intense burning eyes.@n", true, ch, nullptr, vict, act_to::vict);
             break;
           default:
-            act(g, "@C$n@W feints a punch toward @c$N@W that misses by a mile.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            act(g, "@C$n@W feints a punch toward you that misses by a mile.@n", true, ch, nullptr, vict, TO_VICT);
+            act(g, "@C$n@W feints a punch toward @c$N@W that misses by a mile.@n", true, ch, nullptr, vict, act_to::notvict);
+            act(g, "@C$n@W feints a punch toward you that misses by a mile.@n", true, ch, nullptr, vict, act_to::vict);
             break;
         }
       }
@@ -640,11 +640,11 @@ static void mob_taunt(GameWorld *g, struct char_data *ch)
 /* make ch remember victim */
 void remember(GameWorld *g, struct char_data *ch, struct char_data *victim)
 {
-  if (!char_is_npc(ch) || char_is_npc(victim) || char_prf_flagged(g, victim, PRF_NOHASSLE))
+  if (!char_is_npc(ch) || char_is_npc(victim) || char_prf_flagged(g, victim, pref_flag::nohassle))
     return;
 
   bool present = char_get_mob_specials_memory(ch).contains(char_get_idnum(victim));
-  if (!present && !char_mob_flagged(ch, MOB_SPAR) && !char_plr_flagged(victim, PLR_SPAR))
+  if (!present && !char_mob_flagged(ch, mob_flag::spar) && !char_plr_flagged(victim, player_flag::spar))
     char_mob_memory_slot(ch)->add(char_get_idnum(victim));
 }
 

@@ -627,7 +627,7 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
       break;
   }
   char_set_cooldown(mob, 0);
-  if (char_get_gold(mob) <= 0 && !char_mob_flagged(mob, MOB_DUMMY)) {
+  if (char_get_gold(mob) <= 0 && !char_mob_flagged(mob, mob_flag::dummy)) {
     if (char_get_level(mob) < 4) {
       char_set_gold(mob, char_get_level(mob) * rand_number(g, 1, 2));
     } else if (char_get_level(mob) < 10) {
@@ -657,7 +657,7 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
         char_set_gold(mob, 1);
     }
   }
-  if (char_get_exp(mob) <= 0 && !char_mob_flagged(mob, MOB_DUMMY)) {
+  if (char_get_exp(mob) <= 0 && !char_mob_flagged(mob, mob_flag::dummy)) {
     char_set_exp(mob, (int64_t)char_get_level(mob) * base);
     char_set_exp(mob, char_get_exp(mob) * .9);
     char_set_exp(mob, char_get_exp(mob) + (char_get_level(mob) / 2));
@@ -714,10 +714,10 @@ struct char_data *read_mobile(GameWorld *g, mob_vnum nr)
   char_set_hometown(mob, NOWHERE);
 
   if (char_is_humanoid(mob)) {
-    char_mob_set(mob, MOB_RARM, true);
-    char_mob_set(mob, MOB_LARM, true);
-    char_mob_set(mob, MOB_RLEG, true);
-    char_mob_set(mob, MOB_LLEG, true);
+    char_mob_set(mob, mob_flag::rarm, true);
+    char_mob_set(mob, mob_flag::larm, true);
+    char_mob_set(mob, mob_flag::rleg, true);
+    char_mob_set(mob, mob_flag::lleg, true);
   }
 
   mob_index_of(g, i)->number++;

@@ -30,7 +30,7 @@ void mob_class_in_range(char_data *mob, mob_vnum vnum);
 void infravision_unless_human(char_data *mob);
 /* A mob flagged to autobalance starts with no experience, armor or damage dice, which autobalancing gives it */
 void autobalance_starts_bare(char_data *mob);
-/* MOB_NOTDEADYET marks a mob being extracted, so no prototype has it */
+/* mob_flag::notdeadyet marks a mob being extracted, so no prototype has it */
 void not_dead_yet_cleared(char_data *mob, mob_vnum vnum);
 
 /* A portal or hatch with no lock or hide DC has 20 for both */

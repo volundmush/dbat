@@ -19,7 +19,6 @@
 #include "dbat/descriptor_utils.hpp"
 #include "dbat/dg_scripts.hpp"
 #include "dbat/extract.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/game_world.hpp"
 #include "dbat/genolc.hpp"
 #include "dbat/genwld.hpp"
@@ -180,7 +179,7 @@ namespace {
       write_to_output(g, d,
                       "-- Room number : [@c{:d}@n]  \tRoom zone: [@c{:d}@n]\r\n@g1@n) Name        : @y{}\r\n@g2@n) Description :\r\n@y{}@g3@n) Room flags  : @c{}\r\n@g4@n) Sector type : @c{}\r\n{}@gH@n) Extra descriptions menu\r\n@gW@n) Copy Room\r\n@gX@n) Delete Room\r\n@gS@n) Script      : @c{}\r\n@gZ@n) Wiznet      :\r\n@gQ@n) Quit\r\nEnter choice : ",
                       vnum, zone->number, room.name, room.description, flag_names(room.room_flags),
-                      sprinttype(room.sector_type, sector_types), exits, !script.triggers.empty() ? "Set." : "Not Set.");
+                      type_name(sector_types, room.sector_type), exits, !script.triggers.empty() ? "Set." : "Not Set.");
     }
     asking = mode::main_menu;
   }
@@ -188,7 +187,7 @@ namespace {
   void room_editor::flag_menu(GameWorld *g, struct descriptor_data *d)
   {
     clear_screen(g, d);
-    olc_list_columns(g, d, room_bits, NUM_ROOM_FLAGS, 1, "", 2);
+    olc_list_columns(g, d, room_bits, flag_count<room_flag>, 1, "", 2);
     write_to_output(g, d, "\r\nRoom flags: @c{}@n\r\nEnter room flags, 0 to quit : ", flag_names(room.room_flags));
     asking = mode::flags;
   }
@@ -220,7 +219,7 @@ namespace {
   void room_editor::exit_flag_menu(GameWorld *g, struct descriptor_data *d)
   {
     clear_screen(g, d);
-    olc_list_columns(g, d, exit_bits, NUM_EXIT_FLAGS, 1, "", 2);
+    olc_list_columns(g, d, exit_bits, flag_count<exit_flag>, 1, "", 2);
     write_to_output(g, d, "\r\nExit flags: @c{}@n\r\nEnter exit flags, 0 to quit : ", flag_mask_names(exit().exit_info));
     asking = mode::exit_flags;
   }
@@ -262,7 +261,7 @@ namespace {
         return;
 
       case mode::flags:
-        if (number < 0 || number > NUM_ROOM_FLAGS) {
+        if (number < 0 || std::cmp_greater(number, flag_count<room_flag>)) {
           write_to_output(g, d, "That is not a valid choice!\r\n");
           flag_menu(g, d);
         } else if (number == 0)
@@ -303,13 +302,13 @@ namespace {
         return;
 
       case mode::exit_flags:
-        if (number < 0 || number > NUM_EXIT_FLAGS) {
+        if (number < 0 || std::cmp_greater(number, flag_count<exit_flag>)) {
           write_to_output(g, d, "That's not a valid choice!\r\n");
           exit_flag_menu(g, d);
         } else if (number == 0)
           exit_menu(g, d);
         else {
-          exit().exit_info.toggle(static_cast<exit_flag>(number - 1)); /* 1 to NUM_EXIT_FLAGS */
+          exit().exit_info.toggle(static_cast<exit_flag>(number - 1)); /* 1 to flag_count<exit_flag> */
           exit_flag_menu(g, d);
         }
         return;
@@ -321,7 +320,7 @@ namespace {
 
       case mode::exit_skill: {
         std::string name(line);
-        exit().dcskill = std::max(find_skill_num(g, name, SKTYPE_SKILL), 0);
+        exit().dcskill = std::max(find_skill_num(g, name, skill_kind::skill), 0);
         exit_menu(g, d);
         return;
       }
@@ -352,7 +351,7 @@ namespace {
       leave_olc(g, d);
       if (char_get_admlevel(ch) < 1) {
         write_to_output(g, d, "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");
-        act(g, "@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n", true, ch, nullptr, nullptr, act_to::room);
         obj_to_char(g, read_object(g, REMODEL_DROID), ch);
       }
       return;
@@ -366,7 +365,7 @@ namespace {
       if (is_mortal(d)) {
         write_to_output(g, d, "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
         act(g, "@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", true, ch, nullptr,
-            nullptr, TO_ROOM);
+            nullptr, act_to::room);
       } else
         write_to_output(g, d, "Room saved to disk.\r\n");
     } else
@@ -543,7 +542,7 @@ ACMD(do_oasis_redit)
     buf2 = take_arg(rest);
   }
 
-  if (!builder && !room_flagged(g, char_get_in_room(ch), ROOM_CANREMODEL)) {
+  if (!builder && !room_flagged(g, char_get_in_room(ch), room_flag::canremodel)) {
     send_to_char(g, ch, "You can not remodel this room.\r\n");
     return;
   }
@@ -560,8 +559,8 @@ ACMD(do_oasis_redit)
       send_to_char(g, ch, "You do not have a R.A.D. Remodeling Assistance Droid.\r\n");
       return;
     }
-    act(g, "@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", true, ch, nullptr, nullptr, act_to::room);
     extract_obj(g, droid);
   }
 

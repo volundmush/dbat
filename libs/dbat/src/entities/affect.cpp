@@ -179,18 +179,18 @@ bool affect_is_loadable(const struct affected_type *af)
 {
   constexpr int MAX_LOADED_MODIFIER = 100000000; /* far past any real one, and too small to overflow a stat */
 
-  return af->type >= 0 && af->type < SKILL_TABLE_SIZE && std::to_underlying(af->bitvector) < NUM_AFF_FLAGS &&
+  return af->type >= 0 && af->type < SKILL_TABLE_SIZE && std::to_underlying(af->bitvector) < flag_count<aff_flag> &&
          af->location >= 0 && af->location <= APPLY_ALL_STATS && abs(af->modifier) <= MAX_LOADED_MODIFIER;
 }
 
 static void affect_modify(GameWorld *g, struct char_data *ch, int loc, int mod, int spec, aff_flag bitv, bool add)
 {
   if (add) {
-    if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
+    if (bitv != aff_flag::infravision || !char_is_android(ch)) {
       char_aff_set(ch, bitv, true);
     }
   } else {
-    if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
+    if (bitv != aff_flag::infravision || !char_is_android(ch)) {
       char_aff_set(ch, bitv, false);
     }
     mod = -mod;
@@ -203,7 +203,7 @@ void affect_modify_ar(GameWorld *g, struct char_data *ch, int loc, int mod, int 
 {
   /* every bit the object sets, those past the affects too, as the file had them */
   for (std::size_t n = 0; n < FLAG_BITS; n++)
-    if (bitv.test_bit(n) && (n != std::to_underlying(AFF_INFRAVISION) || !char_is_android(ch)))
+    if (bitv.test_bit(n) && (n != std::to_underlying(aff_flag::infravision) || !char_is_android(ch)))
       char_get_affected_by(ch).set_bit(n, add);
   if (!add)
     mod = -mod;

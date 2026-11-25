@@ -14,7 +14,6 @@
 #include "dbat/consts/auction.hpp"
 #include "dbat/consts/aligns.hpp"
 #include "dbat/utils.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/config.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
@@ -340,7 +339,7 @@ namespace {
       send_to_char(g, ch, "Syntax: rpp 14 (obj name)\r\n");
       return 0;
     }
-    if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
+    if (obj_extra_flagged(obj, extra_flag::custom)) {
       send_to_char(g, ch, "You can not restring a custom piece. Why? Cause I say so. :P\r\n");
       return 0;
     }
@@ -421,13 +420,13 @@ ACMD(do_commune)
   decCurKI(g, ch, cost, 0);
   if (prob < perc) {
     reveal_hiding(g, ch, 0);
-    act(g, "@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", true, ch, nullptr, nullptr, act_to::room);
   } else {
     decCurST(g, ch, cost, 0); /* quirk: it takes stamina, while saying it replenishes it */
     reveal_hiding(g, ch, 0);
-    act(g, "@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", true, ch, nullptr, nullptr, act_to::room);
   }
   char_set_wait(ch, PULSE_2SEC);
 }
@@ -451,7 +450,7 @@ ACMD(do_pose)
   std::string_view refusal {};
   if (getCurST(g, ch) < getMaxST(g, ch) / 40)
     refusal = "You do not have enough stamina to pull off such an exciting pose!\r\n";
-  else if (is_affected(ch, AFF_SPECIAL_POSE))
+  else if (is_affected(ch, aff_flag::special_pose))
     refusal = "You are already feeling good and confident from a previous pose.\r\n";
   else if (char_get_fighting(g, ch))
     refusal = "You are too busy to pose right now!\r\n";
@@ -471,14 +470,14 @@ ACMD(do_pose)
 
   reveal_hiding(g, ch, 0);
   if (prob < perc) {
-    act(g, "@WYou attempt to strike an awe inspiring pose, but end up falling on your face!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@WYou attempt to strike an awe inspiring pose, but end up falling on your face!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@C$n@W attempts to strike an awe inspiring pose, but ends up falling on $s face!@n", true, ch, nullptr, nullptr, act_to::room);
   } else {
     const auto &pose = POSES[rand_number(g, 1, 4) - 1];
-    act(g, pose.to_char, true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, pose.to_room, true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, pose.to_char, true, ch, nullptr, nullptr, act_to::actor);
+    act(g, pose.to_room, true, ch, nullptr, nullptr, act_to::room);
     send_to_char(g, ch, "@WYou feel your confidence increase! @G+8 Str @Wand@G +8 Agl!@n\r\n");
-    assign_affect(g, ch, AFF_SPECIAL_POSE, SKILL_POSE, -1, 8, 0, 0, 8, 0, 0);
+    assign_affect(g, ch, aff_flag::special_pose, SKILL_POSE, -1, 8, 0, 0, 8, 0, 0);
     save_char(g, ch);
     int64_t before = getMaxLF(g, ch);
     incCurLF(g, ch, getMaxLF(g, ch) - before, true); /* quirk: always nothing, measured after as well as before */

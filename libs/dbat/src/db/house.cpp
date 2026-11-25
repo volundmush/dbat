@@ -69,9 +69,9 @@ static void House_save(GameWorld *g, const id_list &list, io::text_writer &out, 
    * saved whatever it is. That is how the old recursion along the list behaved, and what the house files hold. */
   for (std::size_t i = 0; i < ids.size(); i++) {
     struct obj_data *obj = obj_by_id(g, ids[i]);
-    if (obj && obj_extra_flagged(obj, ITEM_NORENT) && i + 1 < ids.size())
+    if (obj && obj_extra_flagged(obj, extra_flag::norent) && i + 1 < ids.size())
       obj = obj_by_id(g, ids[++i]);
-    else if (obj && obj_extra_flagged(obj, ITEM_NORENT))
+    else if (obj && obj_extra_flagged(obj, extra_flag::norent))
       obj = nullptr;
     if (obj)
       saved.push_back(obj);
@@ -112,7 +112,7 @@ static void House_crashsave(GameWorld *g, room_vnum vnum)
   bool saved = out.commit();
   House_restore_weight(g, room_get_contents(g, vnum));
   if (saved) /* otherwise leave it flagged so the next pass tries again */
-    room_set_flag(g, vnum, ROOM_HOUSE_CRASH, false);
+    room_set_flag(g, vnum, room_flag::house_crash, false);
 }
 
 /* Delete a house save file */
@@ -172,7 +172,7 @@ io::loaded<void> House_boot(GameWorld *g)
       continue; /* this vnum is already a house -- skip */
 
     g->house_control[g->num_of_houses++] = temp_house;
-    room_set_flag(g, temp_house.vnum, ROOM_HOUSE, true);
+    room_set_flag(g, temp_house.vnum, room_flag::house, true);
     House_load(g, temp_house.vnum);
   }
 
@@ -298,7 +298,7 @@ static void hcontrol_build_house(GameWorld *g, struct char_data *ch, std::string
 
   g->house_control[g->num_of_houses++] = temp_house;
 
-  room_set_flag(g, real_house, ROOM_HOUSE, true);
+  room_set_flag(g, real_house, room_flag::house, true);
   House_crashsave(g, virt_house);
 
   send_to_char(g, ch, "House built.  Mazel tov!\r\n");
@@ -321,13 +321,13 @@ static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, std::stri
   if (!room_of(g, real_atrium = g->house_control[i].atrium))
     mud_log("SYSERR: House {:d} had invalid atrium {:d}!", parse_int(arg), g->house_control[i].atrium);
   else
-    room_set_flag(g, real_atrium, ROOM_ATRIUM, false);
+    room_set_flag(g, real_atrium, room_flag::atrium, false);
 
   if (!room_of(g, real_house = g->house_control[i].vnum))
     mud_log("SYSERR: House {:d} had invalid vnum {:d}!", parse_int(arg), g->house_control[i].vnum);
   else {
-    room_set_flag(g, real_house, ROOM_HOUSE, false);
-    room_set_flag(g, real_house, ROOM_HOUSE_CRASH, false);
+    room_set_flag(g, real_house, room_flag::house, false);
+    room_set_flag(g, real_house, room_flag::house_crash, false);
   }
 
   House_delete_file(g->house_control[i].vnum);
@@ -341,13 +341,13 @@ static void hcontrol_destroy_house(GameWorld *g, struct char_data *ch, std::stri
   House_save_control(g);
 
   /*
-   * Now, reset the ROOM_ATRIUM flag on all existing houses' atriums,
+   * Now, reset the room_flag::atrium flag on all existing houses' atriums,
    * just in case the house we just deleted shared an atrium with another
    * house.  --JE 9/19/94
    */
   for (i = 0; i < g->num_of_houses; i++)
     if (room_of(g, real_atrium = g->house_control[i].atrium))
-      room_set_flag(g, real_atrium, ROOM_ATRIUM, true);
+      room_set_flag(g, real_atrium, room_flag::atrium, true);
 }
 
 static void hcontrol_pay_house(GameWorld *g, struct char_data *ch, std::string_view arg)
@@ -397,7 +397,7 @@ ACMD(do_house)
   std::string_view rest = argument;
   arg                   = take_arg(rest);
 
-  if (!room_flagged(g, char_get_in_room(ch), ROOM_HOUSE))
+  if (!room_flagged(g, char_get_in_room(ch), room_flag::house))
     send_to_char(g, ch, "You must be in your house to set guests.\r\n");
   else if ((i = find_house(g, char_get_in_room(ch))) == NOWHERE)
     send_to_char(g, ch, "Um.. this house seems to be screwed up.\r\n");
@@ -448,7 +448,7 @@ bool House_can_enter(GameWorld *g, struct char_data *ch, room_vnum house)
 {
   int i, j;
 
-  if (char_adm_flagged(ch, ADM_ALLHOUSES) || (i = find_house(g, house)) == NOWHERE)
+  if (char_adm_flagged(ch, admin_flag::allhouses) || (i = find_house(g, house)) == NOWHERE)
     return true;
 
   switch (g->house_control[i].mode) {

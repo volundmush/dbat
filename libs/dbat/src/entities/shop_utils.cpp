@@ -1,6 +1,5 @@
 #include "dbat/shop_utils.hpp"
 #include "dbat/shop.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/game_world.hpp"
 #include "dbat/stringutils.hpp"
 
@@ -266,10 +265,10 @@ void shop_buy_set_keywords(struct shop_buy_data *buy, std::string_view v)
 
 bool shop_uses_bank(const struct shop_data *shop)
 {
-  return shop->bitvector.test(WILL_BANK_MONEY);
+  return shop->bitvector.test(shop_flag::bank_money);
 }
 
 bool shop_allows_steal(const struct shop_data *shop)
 {
-  return shop->bitvector.test(WILL_ALLOW_STEAL);
+  return shop->bitvector.test(shop_flag::allow_steal);
 }

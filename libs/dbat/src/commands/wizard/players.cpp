@@ -147,9 +147,9 @@ namespace {
       if (tch == ch)
         continue;
       if (char_get_admlevel(tch) >= char_get_invis_level(g, ch) && char_get_admlevel(tch) < level)
-        act(g, "You blink and suddenly realize that $n is gone.", false, ch, nullptr, tch, TO_VICT);
+        act(g, "You blink and suddenly realize that $n is gone.", false, ch, nullptr, tch, act_to::vict);
       if (char_get_admlevel(tch) < char_get_invis_level(g, ch) && char_get_admlevel(tch) >= level)
-        act(g, "You suddenly realize that $n is standing beside you.", false, ch, nullptr, tch, TO_VICT);
+        act(g, "You suddenly realize that $n is standing beside you.", false, ch, nullptr, tch, act_to::vict);
     }
     char_set_invis_level(g, ch, level);
     send_to_char(g, ch, "Your invisibility level is {:d}.\r\n", level);
@@ -168,14 +168,14 @@ ACMD(do_approve)
     send_to_char(g, ch, "What player do you want to approve as having an acceptable bio?\r\n");
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, "That player is not in the game.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_world, "That player is not in the game.\r\n");
   if (reject(g, ch, found))
     return;
-  if (char_plr_flagged(*found, PLR_BIOGR)) {
+  if (char_plr_flagged(*found, player_flag::biogr)) {
     send_to_char(g, ch, "They have already been approved. If this was made in error inform Iovan.\r\n");
     return;
   }
-  char_plr_set(*found, PLR_BIOGR, true);
+  char_plr_set(*found, player_flag::biogr, true);
   send_to_char(g, ch, "They have now been approved.\r\n");
 }
 
@@ -298,7 +298,7 @@ ACMD(do_hell)
     return;
   }
 
-  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD);
+  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world);
   if (!vict) {
     lockWrite(g, ch, arg);
     return;
@@ -325,7 +325,7 @@ ACMD(do_advance)
   level                 = take_arg(rest);
 
   if (!name.empty()) {
-    if (!(victim = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
+    if (!(victim = get_char_vis(g, ch, name, nullptr, find_flag::char_world))) {
       send_to_char(g, ch, "That player is not here.\r\n");
       return;
     }
@@ -375,7 +375,7 @@ ACMD(do_advance)
         "body dissolves to the elements of time and space itself.\r\n\r\n"
         "Suddenly a silent explosion of light snaps you back to reality.\r\n\r\n"
         "You feel slightly different.",
-        false, ch, nullptr, victim, TO_VICT);
+        false, ch, nullptr, victim, act_to::vict);
   }
 
   send_to_char(g, ch, CONFIG_OK);
@@ -425,7 +425,7 @@ ACMD(do_restore)
     send_to_char(g, ch, "Okay.\r\n");
     return;
   }
-  auto found = find_char(g, ch, buf, FIND_CHAR_WORLD, CONFIG_NOPERSON);
+  auto found = find_char(g, ch, buf, find_flag::char_world, CONFIG_NOPERSON);
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -487,12 +487,12 @@ namespace {
 
   bool pardon(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
-    if (!char_plr_flagged(vict, PLR_THIEF) && !char_plr_flagged(vict, PLR_KILLER)) {
+    if (!char_plr_flagged(vict, player_flag::thief) && !char_plr_flagged(vict, player_flag::killer)) {
       send_to_char(g, ch, "Your victim is not flagged.\r\n");
       return false;
     }
-    char_plr_set(vict, PLR_THIEF, false);
-    char_plr_set(vict, PLR_KILLER, false);
+    char_plr_set(vict, player_flag::thief, false);
+    char_plr_set(vict, player_flag::killer, false);
     send_to_char(g, ch, "Pardoned.\r\n");
     send_to_char(g, vict, "You have been pardoned by the Gods!\r\n");
     mudlog(g, LOG_BRF, wiz_log_level(g, ch), true, "(GC) {} pardoned by {}", char_get_name(vict), char_get_name(ch));
@@ -501,7 +501,7 @@ namespace {
 
   bool notitle(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
-    long result = char_plr_toggle(vict, PLR_NOTITLE);
+    long result = char_plr_toggle(vict, player_flag::notitle);
     mudlog(g, LOG_NRM, wiz_log_level(g, ch), true, "(GC) Notitle {} for {} by {}.", ONOFF(result), char_get_name(vict), char_get_name(ch));
     send_to_char(g, ch, "(GC) Notitle {} for {} by {}.\r\n", ONOFF(result), char_get_name(vict), char_get_name(ch));
     return true;
@@ -509,7 +509,7 @@ namespace {
 
   bool squelch(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
-    long result = char_plr_toggle(vict, PLR_NOSHOUT);
+    long result = char_plr_toggle(vict, player_flag::noshout);
     mudlog(g, LOG_BRF, wiz_log_level(g, ch), true, "(GC) Squelch {} for {} by {}.", ONOFF(result), char_get_name(vict), char_get_name(ch));
     send_to_char(g, ch, "(GC) Mute turned {} for {} by {}.\r\n", ONOFF(result), char_get_name(vict), char_get_name(ch));
     send_to_all(g, "@D[@RMUTE@D] @C{}@W has had mute turned @r{}@W by @C{}@W.\r\n", char_get_name(vict), ONOFF(result), char_get_name(ch));
@@ -523,24 +523,24 @@ namespace {
       refusal = "Oh, yeah, THAT'S real smart...\r\n";
     else if (char_get_admlevel(ch) <= char_get_admlevel(vict))
       refusal = "Pfft...\r\n";
-    else if (char_plr_flagged(vict, PLR_FROZEN))
+    else if (char_plr_flagged(vict, player_flag::frozen))
       refusal = "Your victim is already pretty cold.\r\n";
     if (!refusal.empty()) {
       send_to_char(g, ch, refusal);
       return false;
     }
-    char_plr_set(vict, PLR_FROZEN, true);
+    char_plr_set(vict, player_flag::frozen, true);
     char_set_freeze_level(g, vict, char_get_admlevel(ch));
     send_to_char(g, vict, "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
     send_to_char(g, ch, "Frozen.\r\n");
-    act(g, "A sudden cold wind conjured from nowhere freezes $n!", false, vict, nullptr, nullptr, TO_ROOM);
+    act(g, "A sudden cold wind conjured from nowhere freezes $n!", false, vict, nullptr, nullptr, act_to::room);
     mudlog(g, LOG_BRF, wiz_log_level(g, ch), true, "(GC) {} frozen by {}.", char_get_name(vict), char_get_name(ch));
     return true;
   }
 
   bool thaw(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
-    if (!char_plr_flagged(vict, PLR_FROZEN)) {
+    if (!char_plr_flagged(vict, player_flag::frozen)) {
       send_to_char(g, ch, "Sorry, your victim is not morbidly encased in ice at the moment.\r\n");
       return false;
     }
@@ -549,10 +549,10 @@ namespace {
       return false;
     }
     mudlog(g, LOG_BRF, wiz_log_level(g, ch), true, "(GC) {} un-frozen by {}.", char_get_name(vict), char_get_name(ch));
-    char_plr_set(vict, PLR_FROZEN, false);
+    char_plr_set(vict, player_flag::frozen, false);
     send_to_char(g, vict, "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
     send_to_char(g, ch, "Thawed.\r\n");
-    act(g, "A sudden fireball conjured from nowhere thaws $n!", false, vict, nullptr, nullptr, TO_ROOM);
+    act(g, "A sudden fireball conjured from nowhere thaws $n!", false, vict, nullptr, nullptr, act_to::room);
     return true;
   }
 
@@ -590,7 +590,7 @@ ACMD(do_wizutil)
     send_to_char(g, ch, "Yes, but for whom?!?\r\n");
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, "There is no such player.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_world, "There is no such player.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -727,15 +727,15 @@ namespace {
 
   /* Matched exactly, then by prefix, in this order. */
   constexpr set_field SET_FIELDS[] = {
-      {"brief", ADMLVL_GOD, PC, BINARY, pref<PRF_BRIEF>},
-      {"invstart", ADMLVL_GOD, PC, BINARY, act_flag<PLR_INVSTART>},
+      {"brief", ADMLVL_GOD, PC, BINARY, pref<pref_flag::brief>},
+      {"invstart", ADMLVL_GOD, PC, BINARY, act_flag<player_flag::invstart>},
       {"title", ADMLVL_GOD, PC, MISC, [](setting &s) {
          set_title(s.g, s.vict, s.val.c_str());
          send_to_char(s.g, s.ch, "{}'s title is now: {}\r\n", char_get_name(s.vict), char_get_title(s.vict));
          return true;
        }},
       {"nosummon", ADMLVL_GRGOD, PC, BINARY, [](setting &s) {
-         pref<PRF_SUMMONABLE>(s);
+         pref<pref_flag::summonable>(s);
          send_to_char(s.g, s.ch, "Nosummon {} for {}.\r\n", ONOFF(!s.on), char_get_name(s.vict));
          return true;
        }},
@@ -765,19 +765,19 @@ namespace {
          char_set_invis_level(s.g, s.vict, s.clamp(0, char_get_admlevel(s.vict)));
          return true;
        }},
-      {"nohassle", ADMLVL_VICE, PC, BINARY, [](setting &s) { return !s.not_godly_enough() && pref<PRF_NOHASSLE>(s); }},
+      {"nohassle", ADMLVL_VICE, PC, BINARY, [](setting &s) { return !s.not_godly_enough() && pref<pref_flag::nohassle>(s); }},
       {"frozen", ADMLVL_FREEZE, PC, BINARY, [](setting &s) {
          if (s.ch == s.vict && s.on)
            return s.says("Better not -- could be a long winter!\r\n", false);
-         return act_flag<PLR_FROZEN>(s);
+         return act_flag<player_flag::frozen>(s);
        }},
       {"practices", ADMLVL_BUILDER, PC, NUMBER, practices},
       {"lessons", ADMLVL_IMPL, PC, NUMBER, practices},
       {"drunk", ADMLVL_GOD, BOTH, MISC, condition<0>},
       {"hunger", ADMLVL_BUILDER, BOTH, MISC, condition<1>},
       {"thirst", ADMLVL_BUILDER, BOTH, MISC, condition<2>},
-      {"killer", ADMLVL_GOD, PC, BINARY, act_flag<PLR_KILLER>},
-      {"thief", ADMLVL_GOD, PC, BINARY, act_flag<PLR_THIEF>},
+      {"killer", ADMLVL_GOD, PC, BINARY, act_flag<player_flag::killer>},
+      {"thief", ADMLVL_GOD, PC, BINARY, act_flag<player_flag::thief>},
       {"level", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) {
          if (!char_is_npc(s.vict) && s.value > 100)
            return s.says("You can't do that.\r\n", false);
@@ -793,9 +793,9 @@ namespace {
          char_to_room(s.g, s.vict, rnum);
          return true;
        }},
-      {"roomflag", ADMLVL_VICE, PC, BINARY, pref<PRF_ROOMFLAGS>},
-      {"siteok", ADMLVL_VICE, PC, BINARY, act_flag<PLR_SITEOK>},
-      {"deleted", ADMLVL_IMPL, PC, BINARY, act_flag<PLR_DELETED>},
+      {"roomflag", ADMLVL_VICE, PC, BINARY, pref<pref_flag::roomflags>},
+      {"siteok", ADMLVL_VICE, PC, BINARY, act_flag<player_flag::siteok>},
+      {"deleted", ADMLVL_IMPL, PC, BINARY, act_flag<player_flag::deleted>},
       {"class", ADMLVL_VICE, BOTH, MISC, [](setting &s) {
          int sensei = sensei_find(s.val.c_str());
          if (sensei == CLASS_UNDEFINED)
@@ -803,11 +803,11 @@ namespace {
          char_set_class(s.vict, sensei);
          return true;
        }},
-      {"nowizlist", ADMLVL_GOD, PC, BINARY, act_flag<PLR_NOWIZLIST>},
-      {"quest", ADMLVL_GOD, PC, BINARY, pref<PRF_QUEST>},
+      {"nowizlist", ADMLVL_GOD, PC, BINARY, act_flag<player_flag::nowizlist>},
+      {"quest", ADMLVL_GOD, PC, BINARY, pref<pref_flag::quest>},
       {"loadroom", ADMLVL_VICE, PC, MISC, [](setting &s) {
          if (str_eq_nocase(s.val, "off")) {
-           char_plr_set(s.vict, PLR_LOADROOM, false);
+           char_plr_set(s.vict, player_flag::loadroom, false);
            char_set_load_room(s.g, s.vict, NOWHERE);
            return true;
          }
@@ -816,12 +816,12 @@ namespace {
          room_vnum room = parse_int(s.val);
          if (!room_of(s.g, room))
            return s.says("That room does not exist!\r\n", false);
-         char_plr_set(s.vict, PLR_LOADROOM, true);
+         char_plr_set(s.vict, player_flag::loadroom, true);
          char_set_load_room(s.g, s.vict, room);
          send_to_char(s.g, s.ch, "{} will enter at room #{:d}.\r\n", char_get_name(s.vict), char_get_load_room(s.g, s.vict));
          return true;
        }},
-      {"color", ADMLVL_GOD, PC, BINARY, pref<PRF_COLOR>},
+      {"color", ADMLVL_GOD, PC, BINARY, pref<pref_flag::color>},
       {"idnum", ADMLVL_IMPL, PC, NUMBER, [](setting &s) {
          if (char_get_idnum(s.ch) == 0 || char_is_npc(s.vict))
            return false;
@@ -835,7 +835,7 @@ namespace {
            return s.says("NO.\r\n", false);
          return true;
        }},
-      {"nodelete", ADMLVL_GOD, PC, BINARY, act_flag<PLR_NODELETE>},
+      {"nodelete", ADMLVL_GOD, PC, BINARY, act_flag<player_flag::nodelete>},
       {"sex", ADMLVL_VICE, BOTH, MISC, [](setting &s) {
          int sex = search_block(s.val, genders, false);
          if (sex < 0)
@@ -902,7 +902,7 @@ namespace {
       {"aura", ADMLVL_IMMORT, BOTH, NUMBER, [](setting &s) { char_set_aura(s.vict, s.clamp(0, 8)); return s.logged("aura"); }},
       {"trp", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) { return s.says("Use the reward command.\r\n", true); }},
       {"boost", ADMLVL_GRGOD, BOTH, NUMBER, [](setting &s) { char_set_boosts(s.vict, s.clamp(-1000, 1000)); return true; }},
-      {"multi", ADMLVL_IMPL, PC, BINARY, act_flag<PLR_MULTP>},
+      {"multi", ADMLVL_IMPL, PC, BINARY, act_flag<player_flag::multp>},
       {"deaths", ADMLVL_BUILDER, BOTH, NUMBER, [](setting &s) { char_set_dcount(s.vict, s.clamp(-1000, 1000)); return s.logged("death count"); }},
       {"user", ADMLVL_IMPL, PC, MISC, [](setting &s) { return s.says("No.", true); }},
       {"phase", ADMLVL_IMMORT, PC, NUMBER, [](setting &s) {
@@ -1004,12 +1004,12 @@ ACMD(do_set)
   struct char_data *vict = nullptr;
   int player_i           = 0;
   if (is_player) {
-    if (!(vict = get_player_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
+    if (!(vict = get_player_vis(g, ch, name, nullptr, find_flag::char_world))) {
       send_to_char(g, ch, "There is no such player.\r\n");
       return;
     }
   } else if (!is_file) {
-    if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
+    if (!(vict = get_char_vis(g, ch, name, nullptr, find_flag::char_world))) {
       send_to_char(g, ch, "There is no such creature.\r\n");
       return;
     }
@@ -1056,7 +1056,7 @@ ACMD(do_chown)
     send_to_char(g, ch, "Syntax: chown <object> <character>.\r\n");
     return;
   }
-  auto found = find_char(g, ch, buf3, FIND_CHAR_WORLD, "No one by that name here.\r\n");
+  auto found = find_char(g, ch, buf3, find_flag::char_world, "No one by that name here.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *victim = *found;
@@ -1088,9 +1088,9 @@ ACMD(do_chown)
     return;
   } /* quirk: if something came off but can't be found, the gestures are made with nothing */
 
-  act(g, "@n$n makes a magical gesture and $p@n flies from $N to $m.", false, ch, obj, victim, TO_NOTVICT);
-  act(g, "@n$n makes a magical gesture and $p@n flies away from you to $m.", false, ch, obj, victim, TO_VICT);
-  act(g, "@nYou make a magical gesture and $p@n flies away from $N to you.", false, ch, obj, victim, TO_CHAR);
+  act(g, "@n$n makes a magical gesture and $p@n flies from $N to $m.", false, ch, obj, victim, act_to::notvict);
+  act(g, "@n$n makes a magical gesture and $p@n flies away from you to $m.", false, ch, obj, victim, act_to::vict);
+  act(g, "@nYou make a magical gesture and $p@n flies away from $N to you.", false, ch, obj, victim, act_to::actor);
   obj_from_char(g, obj);
   obj_to_char(g, obj, ch);
   save_char(g, ch);

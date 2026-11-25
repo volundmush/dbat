@@ -37,8 +37,8 @@ namespace {
 /* to the user, then to the room, of something they do to themselves */
 void act_self(GameWorld *g, const act_msgs &m, struct char_data *ch)
 {
-  act(g, m.to_char, true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, m.to_room, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, m.to_char, true, ch, nullptr, nullptr, act_to::actor);
+  act(g, m.to_room, true, ch, nullptr, nullptr, act_to::room);
 }
 
 /* What it costs: a twentieth of the user's max ki */
@@ -59,7 +59,7 @@ bool has_ki_for(GameWorld *g, struct char_data *ch, int64_t cost, std::string_vi
 /* Another to focus on, in the room: or no one, having been told why */
 struct char_data *focus_target(GameWorld *g, struct char_data *ch, std::string &name, std::string_view who, int kill_flag)
 {
-  struct char_data *vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM);
+  struct char_data *vict = get_char_vis(g, ch, name, nullptr, find_flag::char_room);
 
   if (!vict) {
     send_to_char(g, ch, "{}", who);
@@ -164,7 +164,7 @@ void focus_buff_on(GameWorld *g, struct char_data *ch, std::string &name, const 
     if (self)
       act_self(g, b.self_fail, ch);
     else if (b.vict_fail_unnamed) {
-      act(g, b.vict_fail.to_char, true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, b.vict_fail.to_char, true, ch, nullptr, nullptr, act_to::actor);
       act_triple(g, {{}, b.vict_fail.to_vict, b.vict_fail.to_room, true}, ch, nullptr, vict);
     } else
       act_triple(g, b.vict_fail, ch, nullptr, vict);
@@ -201,7 +201,7 @@ void kai_learns_from_another(GameWorld *g, struct char_data *ch, struct char_dat
 {
   if (self)
     return;
-  if ((char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+  if ((char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict)) && char_aff_flagged(ch, aff_flag::group) && char_aff_flagged(vict, aff_flag::group)) {
     if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(g, 1, 3) == 3) {
       char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
     }
@@ -244,23 +244,23 @@ void bless_level(GameWorld *g, struct char_data *ch, struct char_data *target, b
 void blessed(GameWorld *g, struct char_data *ch, struct char_data *target, bool self)
 {
   kai_learns_from_another(g, ch, target, self);
-  if (char_aff_flagged(target, AFF_CURSE)) {
+  if (char_aff_flagged(target, aff_flag::curse)) {
     send_to_char(g, target, "Your cursing was nullified!\r\n");
-    null_affect(g, target, AFF_CURSE);
+    null_affect(g, target, aff_flag::curse);
   }
 }
 
 void cursed(GameWorld *g, struct char_data *ch, struct char_data *target, bool self)
 {
-  if (char_aff_flagged(target, AFF_BLESS)) {
+  if (char_aff_flagged(target, aff_flag::bless)) {
     send_to_char(g, target, "Your blessing was nullified!\r\n");
-    null_affect(g, target, AFF_BLESS);
+    null_affect(g, target, aff_flag::bless);
   }
 }
 
 constexpr focus_buff TOUGH = {
     .skill              = SKILL_TSKIN,
-    .aff                = AFF_STONESKIN,
+    .aff                = aff_flag::stoneskin,
     .who                = "Focus your ki into who's skin?\r\n",
     .self_has           = "You already have tough skin!\r\n",
     .vict_has           = "They already have tough skin!\r\n",
@@ -275,7 +275,7 @@ constexpr focus_buff TOUGH = {
 
 constexpr focus_buff MIGHT = {
     .skill          = SKILL_MIGHT,
-    .aff            = AFF_MIGHT,
+    .aff            = aff_flag::might,
     .who            = "Focus your ki into who's muscles?\r\n",
     .self_has       = "You already have mighty muscles!\r\n",
     .vict_has       = "They already have mighty muscles!\r\n",
@@ -296,7 +296,7 @@ constexpr focus_buff MIGHT = {
 
 constexpr focus_buff ENLIGHTEN = {
     .skill       = SKILL_ENLIGHTEN,
-    .aff         = AFF_ENLIGHTEN,
+    .aff         = aff_flag::enlighten,
     .who         = "Focus your ki into who's mind?\r\n",
     .self_has    = "You already have superior wisdom!\r\n",
     .vict_has    = "They already have superior wisdom!\r\n",
@@ -314,7 +314,7 @@ constexpr focus_buff ENLIGHTEN = {
 
 constexpr focus_buff GENIUS = {
     .skill       = SKILL_GENIUS,
-    .aff         = AFF_GENIUS,
+    .aff         = aff_flag::genius,
     .who         = "Focus your ki into who's mind?\r\n",
     .self_has    = "You already have superior intelligence!\r\n",
     .vict_has    = "They already have superior intelligence!\r\n",
@@ -332,7 +332,7 @@ constexpr focus_buff GENIUS = {
 
 constexpr focus_buff FLEX = {
     .skill       = SKILL_FLEX,
-    .aff         = AFF_FLEX,
+    .aff         = aff_flag::flex,
     .who         = "Focus your ki into who's limbs?\r\n",
     .self_has    = "You already have superior agility!\r\n",
     .vict_has    = "They already have superior agility!\r\n",
@@ -351,7 +351,7 @@ constexpr focus_buff FLEX = {
 
 constexpr focus_buff BLESS = {
     .skill             = SKILL_BLESS,
-    .aff               = AFF_BLESS,
+    .aff               = aff_flag::bless,
     .who               = "Bless who?\r\n",
     .self_has          = "You already are blessed!\r\n",
     .vict_has          = "They already have been blessed!\r\n",
@@ -369,7 +369,7 @@ constexpr focus_buff BLESS = {
 
 constexpr focus_buff CURSE = {
     .skill             = SKILL_CURSE,
-    .aff               = AFF_CURSE,
+    .aff               = aff_flag::curse,
     .kill_flag         = 0,
     .who               = "Curse who?\r\n",
     .self_has          = "You already are cursed!\r\n", /* never: do_focus turns the cursed away */
@@ -396,7 +396,7 @@ void wither(GameWorld *g, struct char_data *ch, std::string &name)
 {
   if (!know_skill(g, ch, SKILL_WITHER))
     return;
-  struct char_data *vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_ROOM);
+  struct char_data *vict = get_char_vis(g, ch, name, nullptr, find_flag::char_room);
   if (!vict) {
     send_to_char(g, ch, "Focus your ki into who's muscles?\r\n");
     return;
@@ -407,7 +407,7 @@ void wither(GameWorld *g, struct char_data *ch, std::string &name)
   }
   if (!can_kill(g, ch, vict, nullptr, 2))
     return;
-  if (is_affected(vict, AFF_WITHER)) { /* quirk: never so of a wither, whose affects are on strength and speed */
+  if (is_affected(vict, aff_flag::wither)) { /* quirk: never so of a wither, whose affects are on strength and speed */
     send_to_char(g, ch, "They already have been withered!\r\n");
     return;
   }
@@ -420,7 +420,7 @@ void wither(GameWorld *g, struct char_data *ch, std::string &name)
     return;
   }
   decCurKI(g, ch, focus_cost(g, ch), 0);
-  assign_affect(g, vict, AFF_WITHER, SKILL_WITHER, -1, -3, 0, 0, 0, 0, -3);
+  assign_affect(g, vict, aff_flag::wither, SKILL_WITHER, -1, -3, 0, 0, 0, 0, -3);
   save_char(g, vict);
   reveal_hiding(g, ch, 0);
   act_triple(g, {"You focus ki into $N's body, and succeed in withering it!", "$n focuses ki into your body, and succeeds in withering it!", "$n focuses ki into $N's body, and succeeds in withering it!", true}, ch, nullptr, vict);
@@ -433,15 +433,15 @@ void yoikominminken(GameWorld *g, struct char_data *ch, std::string &name)
   struct char_data *vict = focus_target(g, ch, name, "Use Yoikominminken on who?\r\n", 0);
   if (!vict)
     return;
-  if (char_aff_flagged(vict, AFF_SLEEP)) {
+  if (char_aff_flagged(vict, aff_flag::sleep)) {
     send_to_char(g, ch, "They already have been put to sleep!\r\n");
     return;
   }
-  if (char_plr_flagged(vict, PLR_EYEC)) {
+  if (char_plr_flagged(vict, player_flag::eyec)) {
     send_to_char(g, ch, "Their eyes are closed!\r\n");
     return;
   }
-  if (char_aff_flagged(vict, AFF_BLIND)) {
+  if (char_aff_flagged(vict, aff_flag::blind)) {
     send_to_char(g, ch, "They appear to be blind!\r\n");
     return;
   }
@@ -460,13 +460,13 @@ void yoikominminken(GameWorld *g, struct char_data *ch, std::string &name)
     return;
   }
   int duration = rand_number(g, 1, 2);
-  assign_affect(g, vict, AFF_SLEEP, SKILL_YOIK, duration, 0, 0, 0, 0, 0, 0);
+  assign_affect(g, vict, aff_flag::sleep, SKILL_YOIK, duration, 0, 0, 0, 0, 0, 0);
   decCurKI(g, ch, focus_cost(g, ch), 0);
   reveal_hiding(g, ch, 0);
   act_triple(g, {"You focus ki while moving your hands in lulling patterns, putting $N to sleep!", "$n focuses ki while moving $s hands in a lulling pattern, before you realise it you are asleep!", "$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", true}, ch, nullptr, vict);
   char_set_position(vict, POS_SLEEPING);
-  if (char_aff_flagged(vict, AFF_FLYING)) {
-    char_aff_set(vict, AFF_FLYING, false);
+  if (char_aff_flagged(vict, aff_flag::flying)) {
+    char_aff_set(vict, aff_flag::flying, false);
     char_set_altitude(vict, 0);
   }
 }
@@ -526,7 +526,7 @@ void cure(GameWorld *g, struct char_data *ch, std::string &name)
   if (!self && !(vict = focus_target(g, ch, name, "cure who?\r\n", 2)))
     return;
   struct char_data *target = self ? ch : vict;
-  if (!char_aff_flagged(target, AFF_POISON)) {
+  if (!char_aff_flagged(target, aff_flag::poison)) {
     send_to_char(g, ch, self ? "You are not poisoned!\r\n" : "They are not poisoned!\r\n");
     return;
   }
@@ -548,7 +548,7 @@ void cure(GameWorld *g, struct char_data *ch, std::string &name)
     act_self(g, {"You focus ki and aim a pulsing light at your body. You feel the poison in your blood disappear!", {}, "$n focuses ki and aims a pulsing light at $s body. $n smiles."}, ch);
   else
     act_triple(g, {"You focus ki and aim a pulsing light at $N's body. $e is cured.", "$n focuses ki and aims a pulsing light at your body. You have been cured of your poison!", "$n focuses ki and aims a pulsing light at $N's body. $N smiles.", true}, ch, nullptr, vict);
-  null_affect(g, target, AFF_POISON);
+  null_affect(g, target, aff_flag::poison);
 }
 
 void poison(GameWorld *g, struct char_data *ch, std::string &name)
@@ -558,11 +558,11 @@ void poison(GameWorld *g, struct char_data *ch, std::string &name)
   struct char_data *vict = focus_target(g, ch, name, "Poison who?\r\n", 0);
   if (!vict)
     return;
-  if (char_is_npc(vict) && char_mob_flagged(vict, MOB_NOPOISON)) {
+  if (char_is_npc(vict) && char_mob_flagged(vict, mob_flag::nopoison)) {
     send_to_char(g, ch, "You get the feeling that this being is immune to poison.\r\n");
     return;
   }
-  if (char_aff_flagged(vict, AFF_POISON)) {
+  if (char_aff_flagged(vict, aff_flag::poison)) {
     send_to_char(g, ch, "They already have been poisoned!\r\n");
     return;
   }
@@ -589,7 +589,7 @@ void poison(GameWorld *g, struct char_data *ch, std::string &name)
     do_charge(g, vict, "release", 0, 0);
   }
   int duration = char_get_aff_abils_intel(ch) / 20;
-  assign_affect(g, vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
+  assign_affect(g, vict, aff_flag::poison, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
 }
 
 struct focus_kind {
@@ -625,11 +625,11 @@ ACMD(do_focus)
     send_to_char(g, ch, "Yes but what do you want to focus?\r\n");
     return;
   }
-  if (char_plr_flagged(ch, PLR_HEALT)) {
+  if (char_plr_flagged(ch, player_flag::healt)) {
     send_to_char(g, ch, "You are inside a healing tank!\r\n");
     return;
   }
-  if (char_aff_flagged(ch, AFF_CURSE)) {
+  if (char_aff_flagged(ch, aff_flag::curse)) {
     send_to_char(g, ch, "You are cursed and can't focus!\r\n");
     return;
   }

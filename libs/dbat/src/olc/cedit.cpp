@@ -49,10 +49,6 @@ enum cedit_type {
   CT_TEXT,   /* std::string, several lines ending in '~' in the file, may be empty */
 };
 
-constexpr int CO_NOBLANK      = (1 << 0); /* no blank line after it in the file */
-constexpr int CO_OLD_ADMLEVEL = (1 << 1); /* the file may hold an old-style level (level_cap and up) */
-constexpr int CO_RANGE        = (1 << 2); /* min/max apply */
-
 /* Where an option is in a config_data, as the type it has there */
 template <class T> using config_field = T &(*)(struct config_data &);
 using any_config_field                = std::variant<config_field<int>, config_field<uint16_t>, config_field<float>, config_field<std::string>>;
@@ -63,8 +59,10 @@ struct cedit_option {
   enum cedit_type type{};
   any_config_field field; /* of the type its cedit_type says */
   std::string_view section{};  /* starts this section of the file */
-  unsigned flags{};
-  int min{}, max{};      /* with CO_RANGE */
+  bool noblank{};        /* no blank line after it in the file */
+  bool old_admlevel{};   /* the file may hold an old-style level (level_cap and up) */
+  bool range{};          /* min/max apply */
+  int min{}, max{};      /* with range */
   char menu{}, choice{}; /* the submenu (its main menu key) and the key in it; 0 if not edited */
   std::string_view label{};   /* menu text, padded, before the ": " */
   std::string_view suffix{};  /* menu text after the value */
@@ -88,7 +86,7 @@ struct cedit_option {
 #define MSG(f)        .type = CT_MSG, .field = FIELD(f, std::string)
 #define STR(f)        .type = CT_STR, .field = FIELD(f, std::string)
 #define TEXT(f)       .type = CT_TEXT, .field = FIELD(f, std::string)
-#define RANGE(lo, hi) .flags = CO_RANGE, .min = (lo), .max = (hi)
+#define RANGE(lo, hi) .range = true, .min = (lo), .max = (hi)
 #define MENU(m, c, l) .menu = (m), .choice = (c), .label = (l)
 
 static const struct cedit_option cedit_options[] = {
@@ -117,7 +115,7 @@ static const struct cedit_option cedit_options[] = {
      MENU('G', 'K', "Tics before PC is autosaved "),
      .prompt = "Enter the number of tics before PC's are automatically rented and forced to quit : "},
     {.key = "idle_max_level", .comment = "* Admin level and above of players whom are immune to idle penalties.\n", INT(play.idle_max_level),
-     .flags  = CO_OLD_ADMLEVEL, MENU('G', 'L', "Level Immune To IDLE        "),
+     .old_admlevel = true, MENU('G', 'L', "Level Immune To IDLE        "),
      .prompt = "Enter the level a player must be to become immune to IDLE : "},
     {.key = "dts_are_dumps", .comment = "* Should the items in death traps be junked automatically?\n", BOOL(play.dts_are_dumps),
      MENU('G', 'M', "Death Traps Junk Items      ")},
@@ -154,7 +152,7 @@ static const struct cedit_option cedit_options[] = {
      MENU('G', '4', "OK Message Text         "), .prompt = "Enter the OK message : "},
     {.key = "noperson", .comment = "* Text sent to players when noone is available.\n", MSG(play.NOPERSON),
      MENU('G', '5', "NOPERSON Message Text   "), .prompt = "Enter the NOPERSON message : "},
-    {.key = "noeffect", .comment = "* Text sent to players when an effect fails.\n", MSG(play.NOEFFECT), .flags = CO_NOBLANK,
+    {.key = "noeffect", .comment = "* Text sent to players when an effect fails.\n", MSG(play.NOEFFECT), .noblank = true,
      MENU('G', '6', "NOEFFECT Message Text   "), .prompt = "Enter the NOEFFECT message : "},
 
     /* Rent and crashsave options: menu C */
@@ -192,9 +190,9 @@ static const struct cedit_option cedit_options[] = {
      .comment = "* The virtual numbers of the donation rooms.  Note: Add donation rooms\n"
      "* sequentially (1 & 2 before 3). If you don't, you might not be able to\n"
      "* donate. Use -1 for 'no such room'.\n",
-     ROOM(room_nums.donation_room_1), .flags = CO_NOBLANK, MENU('R', '1', "Donation Room #1    "),
+     ROOM(room_nums.donation_room_1), .noblank = true, MENU('R', '1', "Donation Room #1    "),
      .prompt = "Enter the vnum for donation room #1 : "},
-    {.key = "donation_room_2", .comment = {}, ROOM(room_nums.donation_room_2), .flags = CO_NOBLANK,
+    {.key = "donation_room_2", .comment = {}, ROOM(room_nums.donation_room_2), .noblank = true,
      MENU('R', '2', "Donation Room #2    "), .prompt = "Enter the vnum for donation room #2 : "},
     {.key = "donation_room_3", .comment = {}, ROOM(room_nums.donation_room_3),
      MENU('R', '3', "Donation Room #3    "), .prompt = "Enter the vnum for donation room #3 : "},
@@ -244,7 +242,7 @@ static const struct cedit_option cedit_options[] = {
      "* someone immorts, or is promoted to a higher (or lower) god level?\n",
      BOOL(autowiz.use_autowiz), .section = "Autowiz Options", MENU('A', 'A', "Use the autowiz        ")},
     {.key = "min_wizlist_lev", .comment = "* If yes, what is the lowest level which should be on the wizlist?\n",
-     INT(autowiz.min_wizlist_lev), .flags = CO_RANGE | CO_OLD_ADMLEVEL, .min = 0, .max = ADMLVL_IMPL,
+     INT(autowiz.min_wizlist_lev), .old_admlevel = true, .range = true, .min = 0, .max = ADMLVL_IMPL,
      MENU('A', 'B', "Minimum wizlist level  "),
      .prompt = "Enter the minimum level for players to appear on the wizlist : "},
 
@@ -328,7 +326,7 @@ io::loaded<void> config_load_option(GameWorld *g, std::string_view tag, std::str
     case CT_ROOM:
     case CT_METHOD: {
       int num = static_cast<int>(io::c_atol(value)); /* as atoi() */
-      if ((o->flags & CO_OLD_ADMLEVEL) && num >= CONFIG_LEVEL_CAP)
+      if (o->old_admlevel && num >= CONFIG_LEVEL_CAP)
         num += 1 - CONFIG_LEVEL_CAP;
       o->in<int>(c) = num;
       break;
@@ -384,7 +382,7 @@ bool save_config(GameWorld *g, struct zone_data *)
       case CT_STR: out.print("{} = {}\n", o.key, without_cr(o.in<std::string>(c))); break;
       case CT_TEXT: out.print("{} = \n{}~\n", o.key, without_cr(o.in<std::string>(c))); break;
     }
-    if (!(o.flags & CO_NOBLANK))
+    if (!o.noblank)
       out.write("\n");
   }
 
@@ -588,7 +586,7 @@ namespace {
         std::optional<int> read = whole_number(text);
         if (!read)
           break;
-        if ((o.flags & CO_RANGE) && (*read < o.min || *read > o.max)) {
+        if (o.range && (*read < o.min || *read > o.max)) {
           if (o.max == INT_MAX)
             write_to_output(g, d, "Please enter a number {:d} or higher.\r\n", o.min);
           else

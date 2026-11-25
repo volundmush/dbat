@@ -196,11 +196,11 @@ ACMD(do_instill)
     return;
   struct obj_data *token = *found_token, *obj = *found_obj;
 
-  if (!obj_extra_flagged(token, ITEM_TOKEN)) {
+  if (!obj_extra_flagged(token, extra_flag::token)) {
     send_to_char(g, ch, "That is not a token.\r\n");
     return;
   }
-  if (obj_extra_flagged(token, ITEM_FORGED)) {
+  if (obj_extra_flagged(token, extra_flag::forged)) {
     send_to_char(g, ch, "That token is a forgery!\r\n");
     return;
   }
@@ -208,11 +208,11 @@ ACMD(do_instill)
     send_to_char(g, ch, "You can only instill tokens into equipment.\r\n");
     return;
   }
-  if (!obj_extra_flagged(obj, ITEM_SLOT1) && !obj_extra_flagged(obj, ITEM_SLOT2)) {
+  if (!obj_extra_flagged(obj, extra_flag::slot1) && !obj_extra_flagged(obj, extra_flag::slot2)) {
     send_to_char(g, ch, "That piece of equipment does not have any slots.\r\n");
     return;
   }
-  if (obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
+  if (obj_extra_flagged(obj, extra_flag::slots_filled)) {
     send_to_char(g, ch, "That piece of equipment has already had its token slots filled. This can not be reversed.");
     return;
   }
@@ -226,17 +226,17 @@ ACMD(do_instill)
     return;
   }
 
-  act(g, "@GYou instill the token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, nullptr, TO_CHAR);
-  act(g, "@g$n@G instills a token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, nullptr, TO_ROOM);
+  act(g, "@GYou instill the token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, nullptr, act_to::actor);
+  act(g, "@g$n@G instills a token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, nullptr, act_to::room);
   int raise = obj_get_affected(token)[0].modifier;
   extract_obj(g, token);
 
-  if (obj_extra_flagged(obj, ITEM_SLOT1))
-    obj_extra_set(obj, ITEM_SLOTS_FILLED, true);
-  else if (!obj_extra_flagged(obj, ITEM_SLOT_ONE))
-    obj_extra_set(obj, ITEM_SLOT_ONE, true);
+  if (obj_extra_flagged(obj, extra_flag::slot1))
+    obj_extra_set(obj, extra_flag::slots_filled, true);
+  else if (!obj_extra_flagged(obj, extra_flag::slot_one))
+    obj_extra_set(obj, extra_flag::slot_one, true);
   else
-    obj_extra_set(obj, ITEM_SLOTS_FILLED, true);
+    obj_extra_set(obj, extra_flag::slots_filled, true);
 
   /* Raise the stat where the equipment already has it, or add it in the first empty place */
   if (same != affects.end()) {
@@ -262,7 +262,7 @@ ACMD(do_arena)
   }
   if (str_eq_nocase(arg, "stop")) {
     send_to_char(g, ch, "You stop viewing what's going on in the arena.\r\n");
-    char_prf_set(g, ch, PRF_ARENAWATCH, false);
+    char_prf_set(g, ch, pref_flag::arenawatch, false);
     char_set_arenawatch(ch, -1);
     return;
   }
@@ -272,7 +272,7 @@ ACMD(do_arena)
   }
 
   if (str_eq_nocase(arg, "look")) {
-    if (!char_prf_flagged(g, ch, PRF_ARENAWATCH)) {
+    if (!char_prf_flagged(g, ch, pref_flag::arenawatch)) {
       send_to_char(g, ch, "You are not even watching anyone in the arena.\r\n");
       return;
     }
@@ -287,7 +287,7 @@ ACMD(do_arena)
     for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING || !char_in_arena(g, d->character))
         continue;
-      act(g, str_format("@YFighter Number@D: @w{:d}, $N.@n", char_get_idnum(d->character)), true, ch, nullptr, d->character, TO_CHAR);
+      act(g, str_format("@YFighter Number@D: @w{:d}, $N.@n", char_get_idnum(d->character)), true, ch, nullptr, d->character, act_to::actor);
       found = true;
     }
     if (!found)
@@ -307,9 +307,9 @@ ACMD(do_arena)
     send_to_char(g, ch, "A fighter with such a number was not found in the arena.\r\n");
     return;
   }
-  act(g, "@wYou start watching the action surrounding that particular fighter in the arena.@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@C$n@w starts watching the action in the arena.@n", true, ch, nullptr, nullptr, TO_ROOM);
-  char_prf_set(g, ch, PRF_ARENAWATCH, true);
+  act(g, "@wYou start watching the action surrounding that particular fighter in the arena.@n", true, ch, nullptr, nullptr, act_to::actor);
+  act(g, "@C$n@w starts watching the action in the arena.@n", true, ch, nullptr, nullptr, act_to::room);
+  char_prf_set(g, ch, pref_flag::arenawatch, true);
   char_set_arenawatch(ch, num);
 }
 

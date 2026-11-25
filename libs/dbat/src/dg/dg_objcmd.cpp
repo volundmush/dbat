@@ -122,11 +122,11 @@ static room_vnum find_obj_target_room(GameWorld *g, obj_data *obj, std::string_v
     return NOWHERE;
 
   /* a room has been found.  Check for permission */
-  if (room_flagged(g, location, ROOM_GODROOM) ||
+  if (room_flagged(g, location, room_flag::godroom) ||
 #ifdef ROOM_IMPROOM
       room_flagged(g, location, ROOM_IMPROOM) ||
 #endif
-      room_flagged(g, location, ROOM_PRIVATE))
+      room_flagged(g, location, room_flag::private_))
     return NOWHERE;
 
   return location;
@@ -144,8 +144,8 @@ static OCMD(do_oecho)
 
   else if ((room = obj_room(obj)) != NOWHERE) {
     if (room_get_people(g, room)) {
-      sub_write(g, text, first_char(g, room_get_people(g, room)), TO_ROOM);
-      sub_write(g, text, first_char(g, room_get_people(g, room)), TO_CHAR);
+      sub_write(g, text, first_char(g, room_get_people(g, room)), act_to::room);
+      sub_write(g, text, first_char(g, room_get_people(g, room)), act_to::actor);
     }
   }
 
@@ -170,7 +170,7 @@ static OCMD(do_oforce)
       obj_log(g, obj, "oforce called by object in NOWHERE");
     else {
       for (char_data *tch : room_people(g, room)) {
-        if (valid_dg_target(g, tch, 0)) {
+        if (valid_dg_target(g, tch, dg_gods::refuse)) {
           command_interpreter(g, tch, line);
         }
       }
@@ -179,7 +179,7 @@ static OCMD(do_oforce)
 
   else {
     if ((ch = get_char_by_obj(g, obj, arg1))) {
-      if (valid_dg_target(g, ch, 0)) {
+      if (valid_dg_target(g, ch, dg_gods::refuse)) {
         command_interpreter(g, ch, line);
       }
     }
@@ -225,13 +225,13 @@ static OCMD(do_osend)
 
   if ((ch = get_char_by_obj(g, obj, name))) {
     if (subcmd == SCMD_OSEND)
-      sub_write(g, msg, ch, TO_CHAR);
+      sub_write(g, msg, ch, act_to::actor);
     else if (subcmd == SCMD_OECHOAROUND) {
       std::string text(msg);
 
       if (std::string_view who = char_get_name(ch); !who.empty()) /* empty for a mob with no short description */
         search_replace(text, who, "$n");
-      act(g, text, true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, text, true, ch, nullptr, nullptr, act_to::room);
     }
   }
 
@@ -325,7 +325,7 @@ static OCMD(do_otransform)
 static OCMD(do_dupe)
 {
 
-  obj_extra_set(obj, ITEM_DUPLICATE, true);
+  obj_extra_set(obj, extra_flag::duplicate, true);
 }
 
 /* purge all objects an npcs in room, or specified object or mob */
@@ -431,7 +431,7 @@ static OCMD(do_oteleport)
       obj_log(g, obj, "oteleport target is itself");
 
     for (char_data *tch : room_people(g, rm)) {
-      if (!valid_dg_target(g, tch, DG_ALLOW_GODS))
+      if (!valid_dg_target(g, tch, dg_gods::allow))
         continue;
       char_from_room(g, tch);
       char_to_room(g, tch, target);
@@ -441,7 +441,7 @@ static OCMD(do_oteleport)
 
   else {
     if ((ch = get_char_by_obj(g, obj, arg1))) {
-      if (valid_dg_target(g, ch, DG_ALLOW_GODS)) {
+      if (valid_dg_target(g, ch, dg_gods::allow)) {
         char_from_room(g, ch);
         char_to_room(g, ch, target);
         enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
@@ -598,8 +598,8 @@ static OCMD(do_oasound)
   for (door = 0; door < NUM_OF_DIRS; door++) {
     const room_direction_data *exit = room_get_dir_option(g, room, door);
     if (exit != nullptr && exit->to_room != NOWHERE && exit->to_room != room && room_get_people(g, exit->to_room)) {
-      sub_write(g, text, first_char(g, room_get_people(g, exit->to_room)), TO_ROOM);
-      sub_write(g, text, first_char(g, room_get_people(g, exit->to_room)), TO_CHAR);
+      sub_write(g, text, first_char(g, room_get_people(g, exit->to_room)), act_to::room);
+      sub_write(g, text, first_char(g, room_get_people(g, exit->to_room)), act_to::actor);
     }
   }
 }

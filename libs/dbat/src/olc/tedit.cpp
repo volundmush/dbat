@@ -50,7 +50,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
         for (descriptor_data *i : each_desc(g)) {
           if (!desc_is_playing(i))
             continue;
-          if (char_plr_flagged(i->character, PLR_WRITING))
+          if (char_plr_flagged(i->character, player_flag::writing))
             continue;
           if (g->NEWSUPDATE > char_get_lastpl(i->character))
             send_to_char(g, i->character, "\r\n@GA news entry has been made by {}, type 'news {:d}' to see it.@n\r\n", char_get_name(d->character), g->TOP_OF_NEWS);
@@ -60,7 +60,7 @@ void news_string_cleanup(GameWorld *g, struct descriptor_data *d, int terminator
       break;
     case STRINGADD_ABORT:
       write_to_output(g, d, "Edit aborted.\r\n");
-      act(g, "$n stops editing the news.", true, d->character, nullptr, nullptr, TO_ROOM);
+      act(g, "$n stops editing the news.", true, d->character, nullptr, nullptr, act_to::room);
       break;
     default:
       mud_log("SYSERR: news_string_cleanup: Unknown terminator status.");
@@ -116,7 +116,7 @@ namespace {
       g->NEWSUPDATE = game_now(g);
       save_mud_time(g, &g->time_info);
       for (descriptor_data *i : each_desc(g))
-        if (desc_is_playing(i) && !char_plr_flagged(i->character, PLR_WRITING) && g->NEWSUPDATE > char_get_lastpl(i->character))
+        if (desc_is_playing(i) && !char_plr_flagged(i->character, player_flag::writing) && g->NEWSUPDATE > char_get_lastpl(i->character))
           send_to_char(g, i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
       do_reboot(g, d->character, "all", 0, 0);
     }
@@ -132,7 +132,7 @@ namespace {
       save(g, d, *d->str);
     else if (action == STRINGADD_ABORT) {
       write_to_output(g, d, "Edit aborted.\r\n");
-      act(g, "$n stops editing some scrolls.", true, d->character, nullptr, nullptr, TO_ROOM);
+      act(g, "$n stops editing some scrolls.", true, d->character, nullptr, nullptr, act_to::room);
     } else
       mud_log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
 
@@ -214,7 +214,7 @@ ACMD(do_tedit)
 
   string_write(char_get_desc(ch), fields[l].buffer, fields[l].size, 0);
 
-  act(g, "$n begins editing a text file.", true, ch, nullptr, nullptr, TO_ROOM);
-  char_plr_set(ch, PLR_WRITING, true);
+  act(g, "$n begins editing a text file.", true, ch, nullptr, nullptr, act_to::room);
+  char_plr_set(ch, player_flag::writing, true);
   desc_set_connected(char_get_desc(ch), CON_TEDIT);
 }

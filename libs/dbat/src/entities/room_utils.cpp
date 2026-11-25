@@ -37,7 +37,7 @@ int cook_element(GameWorld *g, room_vnum room)
   return (found);
 }
 
-/* Rules (unless overridden by ROOM_DARK):
+/* Rules (unless overridden by room_flag::dark):
  *
  * Inside and City rooms are always lit.
  * Outside rooms are dark at sunset and night.  */
@@ -54,17 +54,17 @@ bool room_is_dark(GameWorld *g, room_vnum room)
   if (cook_element(g, room))
     return (false);
 
-  if (room_flagged(g, room, ROOM_NOINSTANT) && room_flagged(g, room, ROOM_DARK)) {
+  if (room_flagged(g, room, room_flag::noinstant) && room_flagged(g, room, room_flag::dark)) {
     return (true);
   }
-  if (room_flagged(g, room, ROOM_NOINSTANT) && !room_flagged(g, room, ROOM_DARK)) {
+  if (room_flagged(g, room, room_flag::noinstant) && !room_flagged(g, room, room_flag::dark)) {
     return (false);
   }
 
-  if (room_flagged(g, room, ROOM_DARK))
+  if (room_flagged(g, room, room_flag::dark))
     return (true);
 
-  if (room_flagged(g, room, ROOM_INDOORS))
+  if (room_flagged(g, room, room_flag::indoors))
     return (false);
 
   if (room_sect(g, room) == SECT_INSIDE || room_sect(g, room) == SECT_CITY || room_sect(g, room) == SECT_IMPORTANT || room_sect(g, room) == SECT_SHOP)

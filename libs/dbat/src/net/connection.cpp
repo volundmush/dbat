@@ -103,7 +103,7 @@ static void set_color(GameWorld *g, struct descriptor_data *d)
     char_make_player_specials(d->character);
     char_set_desc(d->character, d);
   }
-  char_prf_set(g, d->character, PRF_COLOR, true);
+  char_prf_set(g, d->character, pref_flag::color, true);
   write_to_output(g, d, g->GREETANSI);
   write_to_output(g, d, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
   write_to_output(g, d, "@D                 ---(@CPeak Logon Count Today@W: @w{:>4d}@D)---@n\r\n", g->PCOUNT);
@@ -190,14 +190,14 @@ void close_socket(GameWorld *g, struct descriptor_data *d)
     char_set_desc(d->character, nullptr);
 
     /* Plug memory leak, from Eric Green. */
-    if (!char_is_npc(d->character) && char_plr_flagged(d->character, PLR_MAILING) && d->str) {
+    if (!char_is_npc(d->character) && char_plr_flagged(d->character, player_flag::mailing) && d->str) {
       d->str = nullptr; /* the letter being written, in d->draft */
     }
     if (desc_is_playing(d) || desc_get_connected(d) == CON_DISCONNECT) {
       struct char_data *link_challenged = d->original ? d->original : d->character;
 
       /* We are guaranteed to have a person. */
-      act(g, "$n has lost $s link.", true, link_challenged, nullptr, nullptr, TO_ROOM);
+      act(g, "$n has lost $s link.", true, link_challenged, nullptr, nullptr, act_to::room);
       save_char(g, link_challenged);
       mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, link_challenged)), true, "Closing link to: {}.", char_get_name(link_challenged));
     } else {

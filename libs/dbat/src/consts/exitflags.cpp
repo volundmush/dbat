@@ -8,5 +8,5 @@ static constexpr std::string_view exit_bits_entries[] = {
     "LOCKED",
     "PICKPROOF",
     "SECRET"};
-static_assert(std::size(exit_bits_entries) == NUM_EXIT_FLAGS);
+static_assert(std::size(exit_bits_entries) == flag_count<exit_flag>);
 constinit const name_table exit_bits(exit_bits_entries);

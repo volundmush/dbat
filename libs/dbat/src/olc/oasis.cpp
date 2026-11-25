@@ -44,7 +44,7 @@
  */
 void clear_screen(GameWorld *g, struct descriptor_data *d)
 {
-  if (char_prf_flagged(g, d->character, PRF_CLS))
+  if (char_prf_flagged(g, d->character, pref_flag::cls))
     write_to_output(g, d, "[H[J");
 }
 

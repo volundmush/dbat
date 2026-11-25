@@ -5,7 +5,7 @@
 #include "dbat/flag_set.hpp"
 #include "dbat/name_table.hpp"
 
-extern const name_table affected_bits; /* NUM_AFF_FLAGS of them */
+extern const name_table affected_bits; /* flag_count<aff_flag> of them */
 
 /* Affect bits: used in char_data.affected_by */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
@@ -95,88 +95,5 @@ template <> struct flag_traits<aff_flag> {
   static constexpr const name_table &names = affected_bits;
 };
 
-/* The old names, until every use says aff_flag:: */
-constexpr aff_flag AFF_DONTUSE        = aff_flag::dontuse;
-constexpr aff_flag AFF_BLIND          = aff_flag::blind;
-constexpr aff_flag AFF_INVISIBLE      = aff_flag::invisible;
-constexpr aff_flag AFF_DETECT_ALIGN   = aff_flag::detect_align;
-constexpr aff_flag AFF_DETECT_INVIS   = aff_flag::detect_invis;
-constexpr aff_flag AFF_DETECT_MAGIC   = aff_flag::detect_magic;
-constexpr aff_flag AFF_SENSE_LIFE     = aff_flag::sense_life;
-constexpr aff_flag AFF_WATERWALK      = aff_flag::waterwalk;
-constexpr aff_flag AFF_SANCTUARY      = aff_flag::sanctuary;
-constexpr aff_flag AFF_GROUP          = aff_flag::group;
-constexpr aff_flag AFF_CURSE          = aff_flag::curse;
-constexpr aff_flag AFF_INFRAVISION    = aff_flag::infravision;
-constexpr aff_flag AFF_POISON         = aff_flag::poison;
-constexpr aff_flag AFF_WEAKENED_STATE = aff_flag::weakened_state;
-constexpr aff_flag AFF_PROTECT_GOOD   = aff_flag::protect_good;
-constexpr aff_flag AFF_SLEEP          = aff_flag::sleep;
-constexpr aff_flag AFF_NOTRACK        = aff_flag::notrack;
-constexpr aff_flag AFF_UNDEAD         = aff_flag::undead;
-constexpr aff_flag AFF_PARALYZE       = aff_flag::paralyze;
-constexpr aff_flag AFF_SNEAK          = aff_flag::sneak;
-constexpr aff_flag AFF_HIDE           = aff_flag::hide;
-constexpr aff_flag AFF_UNUSED20       = aff_flag::unused20;
-constexpr aff_flag AFF_CHARM          = aff_flag::charm;
-constexpr aff_flag AFF_FLYING         = aff_flag::flying;
-constexpr aff_flag AFF_WATERBREATH    = aff_flag::waterbreath;
-constexpr aff_flag AFF_ANGELIC        = aff_flag::angelic;
-constexpr aff_flag AFF_ETHEREAL       = aff_flag::ethereal;
-constexpr aff_flag AFF_MAGICONLY      = aff_flag::magiconly;
-constexpr aff_flag AFF_NEXTPARTIAL    = aff_flag::nextpartial;
-constexpr aff_flag AFF_NEXTNOACTION   = aff_flag::nextnoaction;
-constexpr aff_flag AFF_STUNNED        = aff_flag::stunned;
-constexpr aff_flag AFF_TAMED          = aff_flag::tamed;
-constexpr aff_flag AFF_CDEATH         = aff_flag::cdeath;
-constexpr aff_flag AFF_SPIRIT         = aff_flag::spirit;
-constexpr aff_flag AFF_STONESKIN      = aff_flag::stoneskin;
-constexpr aff_flag AFF_SUMMONED       = aff_flag::summoned;
-constexpr aff_flag AFF_CELESTIAL      = aff_flag::celestial;
-constexpr aff_flag AFF_FIENDISH       = aff_flag::fiendish;
-constexpr aff_flag AFF_FIRE_SHIELD    = aff_flag::fire_shield;
-constexpr aff_flag AFF_LOW_LIGHT      = aff_flag::low_light;
-constexpr aff_flag AFF_ZANZOKEN       = aff_flag::zanzoken;
-constexpr aff_flag AFF_KNOCKED        = aff_flag::knocked;
-constexpr aff_flag AFF_MIGHT          = aff_flag::might;
-constexpr aff_flag AFF_FLEX           = aff_flag::flex;
-constexpr aff_flag AFF_GENIUS         = aff_flag::genius;
-constexpr aff_flag AFF_BLESS          = aff_flag::bless;
-constexpr aff_flag AFF_BURNT          = aff_flag::burnt;
-constexpr aff_flag AFF_BURNED         = aff_flag::burned;
-constexpr aff_flag AFF_MBREAK         = aff_flag::mbreak;
-constexpr aff_flag AFF_HASS           = aff_flag::hass;
-constexpr aff_flag AFF_FUTURE         = aff_flag::future;
-constexpr aff_flag AFF_PARA           = aff_flag::para;
-constexpr aff_flag AFF_INFUSE         = aff_flag::infuse;
-constexpr aff_flag AFF_ENLIGHTEN      = aff_flag::enlighten;
-constexpr aff_flag AFF_FROZEN         = aff_flag::frozen;
-constexpr aff_flag AFF_FIRESHIELD     = aff_flag::fireshield;
-constexpr aff_flag AFF_ENSNARED       = aff_flag::ensnared;
-constexpr aff_flag AFF_HAYASA         = aff_flag::hayasa;
-constexpr aff_flag AFF_PURSUIT        = aff_flag::pursuit;
-constexpr aff_flag AFF_WITHER         = aff_flag::wither;
-constexpr aff_flag AFF_HYDROZAP       = aff_flag::hydrozap;
-constexpr aff_flag AFF_POSITION       = aff_flag::position;
-constexpr aff_flag AFF_SHOCKED        = aff_flag::shocked;
-constexpr aff_flag AFF_METAMORPH      = aff_flag::metamorph;
-constexpr aff_flag AFF_HEALGLOW       = aff_flag::healglow;
-constexpr aff_flag AFF_EARMOR         = aff_flag::earmor;
-constexpr aff_flag AFF_ECHAINS        = aff_flag::echains;
-constexpr aff_flag AFF_WUNJO          = aff_flag::wunjo;
-constexpr aff_flag AFF_POTENT         = aff_flag::potent;
-constexpr aff_flag AFF_ASHED          = aff_flag::ashed;
-constexpr aff_flag AFF_PUKED          = aff_flag::puked;
-constexpr aff_flag AFF_LIQUEFIED      = aff_flag::liquefied;
-constexpr aff_flag AFF_SHELL          = aff_flag::shell;
-constexpr aff_flag AFF_IMMUNITY       = aff_flag::immunity;
-constexpr aff_flag AFF_SPIRITCONTROL  = aff_flag::spiritcontrol;
-constexpr aff_flag AFF_KYODAIKA       = aff_flag::kyodaika;
-constexpr aff_flag AFF_STARPHASE      = aff_flag::starphase;
-constexpr aff_flag AFF_SPECIAL_POSE   = aff_flag::special_pose;
-constexpr aff_flag AFF_SHADOW_STITCH  = aff_flag::shadow_stitch;
 
-constexpr int NUM_AFF_FLAGS = static_cast<int>(flag_count<aff_flag>);
-
-constexpr int AF_ARRAY_MAX = 4;
 

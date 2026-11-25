@@ -48,7 +48,7 @@ void blessed_hammer_steady(ki_shot &, int &prob)
 /* The blessed hammer bites harder on the protected */
 void blessed_hammer_sanctuary(ki_shot &s)
 {
-  if (char_aff_flagged(s.vict, AFF_SANCTUARY)) {
+  if (char_aff_flagged(s.vict, aff_flag::sanctuary)) {
     s.dmg *= calc_critical(s.g, s.ch, 1);
   }
 }
@@ -56,10 +56,10 @@ void blessed_hammer_sanctuary(ki_shot &s)
 /* and can burn anyone but a demon */
 void blessed_hammer_burn(ki_shot &s)
 {
-  if (!char_aff_flagged(s.vict, AFF_BURNED) && rand_number(s.g, 1, 4) == 3 && !char_is_demon(s.vict)) {
+  if (!char_aff_flagged(s.vict, aff_flag::burned) && rand_number(s.g, 1, 4) == 3 && !char_is_demon(s.vict)) {
     send_to_char(s.g, s.vict, "@RYou are burned by the attack!@n\r\n");
     send_to_char(s.g, s.ch, "@RThey are burned by the attack!@n\r\n");
-    char_aff_set(s.vict, AFF_BURNED, true);
+    char_aff_set(s.vict, aff_flag::burned, true);
   }
 }
 
@@ -87,8 +87,8 @@ void kiball_volley(ki_shot &s, int &)
 void kiball_volley_message(ki_shot &s)
 {
   if (s.landings > 1) {
-    act(s.g, "@CYour expertise has allowed you to fire multiple shots in a row!@n", true, s.ch, nullptr, s.vict, TO_CHAR);
-    act(s.g, "@C$n's@C expertise has allowed $m to fire multiple shots in a row!@n", true, s.ch, nullptr, s.vict, TO_ROOM);
+    act(s.g, "@CYour expertise has allowed you to fire multiple shots in a row!@n", true, s.ch, nullptr, s.vict, act_to::actor);
+    act(s.g, "@C$n's@C expertise has allowed $m to fire multiple shots in a row!@n", true, s.ch, nullptr, s.vict, act_to::room);
   }
 }
 
@@ -228,7 +228,7 @@ void genki_gather(GameWorld *g, struct char_data *ch)
     if (friend_char == ch) {
       continue;
     }
-    if (char_aff_flagged(friend_char, AFF_GROUP) && (char_get_master(g, friend_char) == ch || char_get_master(g, ch) == friend_char || char_get_master(g, friend_char) == char_get_master(g, ch))) {
+    if (char_aff_flagged(friend_char, aff_flag::group) && (char_get_master(g, friend_char) == ch || char_get_master(g, ch) == friend_char || char_get_master(g, friend_char) == char_get_master(g, ch))) {
       char_set_charge(ch, char_get_charge(ch) + ((getCurKI(g, ch)) / 10));
       decCurKI(g, ch, getCurKI(g, ch) / 20, 0);
     }
@@ -277,7 +277,7 @@ void form_charged_ball(GameWorld *g, struct char_data *ch, std::string_view argu
     attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
   if (!check_points(g, ch, getMaxKI(g, ch) * minimum, 0))
     return;
-  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_room))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(g, ch);
     } else {
@@ -293,8 +293,8 @@ void form_charged_ball(GameWorld *g, struct char_data *ch, std::string_view argu
   prob = init_skill(g, ch, b.skill);
   perc = rand_number(g, 1, 115);
   if (prob < perc - 20) {
-    act(g, b.fail_to_char, true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, b.fail_to_room, true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, b.fail_to_char, true, ch, nullptr, nullptr, act_to::actor);
+    act(g, b.fail_to_room, true, ch, nullptr, nullptr, act_to::room);
     hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
     pcost(g, ch, attperc, 0);
     if (b.cooldown)
@@ -324,9 +324,9 @@ void form_charged_ball(GameWorld *g, struct char_data *ch, std::string_view argu
   obj_set_user(obj, ch);
   obj_set_distance(obj, dista);
   pcost(g, ch, attperc, 0);
-  act(g, b.formed.to_char, b.formed.hide, ch, nullptr, vict, TO_CHAR);
-  act(g, b.formed.to_vict, b.formed.hide, ch, nullptr, vict, TO_VICT);
-  act(g, b.formed.to_room, b.formed.hide, ch, nullptr, vict, TO_NOTVICT);
+  act(g, b.formed.to_char, b.formed.hide, ch, nullptr, vict, act_to::actor);
+  act(g, b.formed.to_vict, b.formed.hide, ch, nullptr, vict, act_to::vict);
+  act(g, b.formed.to_room, b.formed.hide, ch, nullptr, vict, act_to::notvict);
   if (b.cooldown)
     handle_cooldown(g, ch, b.cooldown);
   improve_skill(g, ch, b.skill, 2);

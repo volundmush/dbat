@@ -225,13 +225,13 @@ void clean_pfiles(GameWorld *g)
      * We only want to go further if the player isn't protected
      * from deletion and hasn't already been deleted.
      */
-    if (!g->player_table[i].flags.test(PINDEX_NODELETE) &&
+    if (!g->player_table[i].flags.test(pindex_flag::nodelete) &&
         !g->player_table[i].name.empty()) {
       /*
        * If the player is already flagged for deletion, then go
        * ahead and get rid of him.
        */
-      if (g->player_table[i].flags.test(PINDEX_DELETED)) {
+      if (g->player_table[i].flags.test(pindex_flag::deleted)) {
         remove_player(g, i);
       } else {
         /*

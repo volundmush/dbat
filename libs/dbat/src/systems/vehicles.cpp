@@ -441,7 +441,7 @@ static void drive_into_vehicle(GameWorld *g, struct char_data *ch, struct obj_da
     send_to_char(g, ch, "@wMy, we are in a clever mood today, aren't we.\r\n");
   } else {
     is_going_to = obj_get_value(vehicle_in_out, 0);
-    if (!room_flagged(g, is_going_to, ROOM_VEHICLE)) {
+    if (!room_flagged(g, is_going_to, room_flag::vehicle)) {
       send_to_char(g, ch, "@wThat ship can't carry other ships.");
     } else {
       buf = str_format("{} @wenters {}.\n\r", obj_get_short_description(vehicle),
@@ -452,7 +452,7 @@ static void drive_into_vehicle(GameWorld *g, struct char_data *ch, struct obj_da
       obj_to_room(g, vehicle, is_going_to);
       is_in = obj_get_in_room(vehicle);
       if (char_get_desc(ch) != nullptr)
-        act(g, "", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "", true, ch, nullptr, nullptr, act_to::room);
       send_to_char(g, ch, "@wThe ship flies onward:\r\n");
       look_at_room(g, obj_get_in_room(vehicle), ch, 0);
       buf = str_format("{} @wenters.\r\n", obj_get_short_description(vehicle));
@@ -480,7 +480,7 @@ static void drive_outof_vehicle(GameWorld *g, struct char_data *ch, struct obj_d
     obj_to_room(g, vehicle, obj_get_in_room(vehicle_in_out));
 
     if (char_get_desc(ch) != nullptr)
-      act(g, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr, act_to::room);
     send_to_char(g, ch, "@wThe ship flies onward:\r\n");
     look_at_room(g, obj_get_in_room(vehicle), ch, 0);
     int door;
@@ -502,14 +502,14 @@ void drive_in_direction(GameWorld *g, struct char_data *ch, struct obj_data *veh
 
   if (!obj_get_exit(g, vehicle, dir) || obj_get_exit(g, vehicle, dir)->to_room == NOWHERE) {
     send_to_char(g, ch, "@wApparently {} doesn't exist there.\r\n", dirs[dir]);
-  } else if (obj_get_exit(g, vehicle, dir)->exit_info.test(EX_CLOSED)) {
+  } else if (obj_get_exit(g, vehicle, dir)->exit_info.test(exit_flag::closed)) {
     /* But the door is closed */
     if (!exit_keyword(obj_get_exit(g, vehicle, dir)).empty())
       send_to_char(g, ch, "@wThe {} seems to be closed.\r\n", fname(exit_keyword(obj_get_exit(g, vehicle, dir))));
     else
       send_to_char(g, ch, "@wIt seems to be closed.\r\n");
 
-  } else if (!room_flagged(g, obj_get_exit(g, vehicle, dir)->to_room, ROOM_VEHICLE) && !room_flagged(g, obj_get_exit(g, vehicle, dir)->to_room, ROOM_SPACE)) {
+  } else if (!room_flagged(g, obj_get_exit(g, vehicle, dir)->to_room, room_flag::vehicle) && !room_flagged(g, obj_get_exit(g, vehicle, dir)->to_room, room_flag::space)) {
     /* But the vehicle can't go that way*/
     send_to_char(g, ch, "@wThe ship can't fit there!\r\n");
   } else {
@@ -544,7 +544,7 @@ void drive_in_direction(GameWorld *g, struct char_data *ch, struct obj_data *veh
     is_in = obj_get_in_room(vehicle);
 
     if (char_get_desc(ch) != nullptr)
-      act(g, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr, act_to::room);
     send_to_char(g, ch, "@wThe ship flies onward:\r\n");
     look_at_room(g, is_in, ch, 0);
     if (controls) {
@@ -580,7 +580,7 @@ ACMD(do_warp)
     send_to_char(g, ch, "You have no arms!\r\n");
     return;
   }
-  if (!char_plr_flagged(ch, PLR_PILOTING)) {
+  if (!char_plr_flagged(ch, player_flag::piloting)) {
     send_to_char(g, ch, "@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
     return;
   }
@@ -601,7 +601,7 @@ ACMD(do_warp)
     send_to_char(g, ch, "Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
     return;
   }
-  if (room_flagged(g, !obj_get_in_room(vehicle), ROOM_SPACE)) {
+  if (room_flagged(g, !obj_get_in_room(vehicle), room_flag::space)) {
     send_to_char(g, ch, "Your ship needs to be in space to utilize its Instant Travel Warp Accelerator.\r\n");
     return;
   }
@@ -614,8 +614,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, 40979);
@@ -625,8 +625,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, 42880);
@@ -636,8 +636,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, 30889);
@@ -647,8 +647,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, 27065);
@@ -658,8 +658,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, 32365);
@@ -669,8 +669,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, 41959);
@@ -684,8 +684,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, char_get_radar1(ch));
@@ -699,8 +699,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, char_get_radar2(ch));
@@ -714,8 +714,8 @@ ACMD(do_warp)
       send_to_char(g, ch, "Your ship is already there!\r\n");
       return;
     }
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, obj_get_in_room(vehicle), "{} @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(g, vehicle);
     obj_to_room(g, vehicle, char_get_radar3(ch));
@@ -742,15 +742,15 @@ ACMD(do_drive)
   }
 
   if (str_eq_nocase(arg3, "unready") && !char_is_npc(ch)) {
-    if (!char_plr_flagged(ch, PLR_PILOTING)) {
+    if (!char_plr_flagged(ch, player_flag::piloting)) {
       send_to_char(g, ch, "You are already not flying the ship!\r\n");
       return;
     }
-    if (char_plr_flagged(ch, PLR_PILOTING)) {
-      act(g, "@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
+    if (char_plr_flagged(ch, player_flag::piloting)) {
+      act(g, "@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, act_to::room);
       send_to_char(g, ch, "@wYou stand up from the pilot's seat.\r\n");
       char_set_position(ch, POS_STANDING);
-      char_plr_set(ch, PLR_PILOTING, false);
+      char_plr_set(ch, player_flag::piloting, false);
       return;
     }
   }
@@ -759,7 +759,7 @@ ACMD(do_drive)
       send_to_char(g, ch, "@wYou have nothing to control here!\r\n");
       return;
     }
-    if (char_plr_flagged(ch, PLR_PILOTING)) {
+    if (char_plr_flagged(ch, player_flag::piloting)) {
       send_to_char(g, ch, "@wYou are already piloting the ship, try [pilot unready].\r\n");
       return;
     }
@@ -778,7 +778,7 @@ ACMD(do_drive)
       if (d->character == ch) {
         continue;
       }
-      if (char_plr_flagged(d->character, PLR_PILOTING) && char_get_in_room(d->character) == char_get_in_room(ch)) {
+      if (char_plr_flagged(d->character, player_flag::piloting) && char_get_in_room(d->character) == char_get_in_room(ch)) {
         send_to_char(g, ch, "@w{} is already piloting the ship!\r\n", char_get_name(d->character));
         count = 1;
         return;
@@ -789,17 +789,17 @@ ACMD(do_drive)
     }
   }
   if (confirmed == true) {
-    char_plr_set(ch, PLR_PILOTING, true);
-    act(g, "@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
+    char_plr_set(ch, player_flag::piloting, true);
+    act(g, "@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, act_to::room);
     char_set_position(ch, POS_SITTING);
     send_to_char(g, ch, "@wYou take a seat in the pilot's chair.\r\n");
     return;
   }
-  if (!char_plr_flagged(ch, PLR_PILOTING)) {
+  if (!char_plr_flagged(ch, player_flag::piloting)) {
     send_to_char(g, ch, "@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
   } else if (char_get_position(ch) < POS_SLEEPING) {
     send_to_char(g, ch, "@wYou can't see anything but stars!\r\n");
-  } else if (char_aff_flagged(ch, AFF_BLIND)) {
+  } else if (char_aff_flagged(ch, aff_flag::blind)) {
     send_to_char(g, ch, "@wYou can't see a damned thing, you're blind!\r\n");
   } else if (room_is_dark(g, char_get_in_room(ch)) && !char_can_see_in_dark(g, ch)) {
     send_to_char(g, ch, "@wIt is pitch black...\r\n");
@@ -808,8 +808,8 @@ ACMD(do_drive)
   } else if (invalid_align(ch, controls) ||
              invalid_class(ch, controls) ||
              invalid_race(ch, controls)) {
-    act(g, "@wYou are zapped by $p@w and instantly step away from it.", false, ch, controls, nullptr, TO_CHAR);
-    act(g, "@w$n@w is zapped by $p@w and instantly steps away from it.", false, ch, controls, nullptr, TO_ROOM);
+    act(g, "@wYou are zapped by $p@w and instantly step away from it.", false, ch, controls, nullptr, act_to::actor);
+    act(g, "@w$n@w is zapped by $p@w and instantly steps away from it.", false, ch, controls, nullptr, act_to::room);
   } else if (!(vehicle = find_vehicle_by_vnum(g, obj_get_value(controls, 0)))) {
     send_to_char(g, ch, "@wYou can't find anything to pilot.\r\n");
   } else {
@@ -835,7 +835,7 @@ ACMD(do_drive)
     } else if (is_abbrev(arg, "out") && !obj_get_exit(g, vehicle, OUTDIR)) {
       drive_outof_vehicle(g, ch, vehicle);
     } else {
-      if (!obj_val_flagged(vehicle, CONT_CLOSED)) {
+      if (!obj_val_flagged(vehicle, container_flag::closed)) {
         send_to_char(g, ch, "@wThe hatch is open, are you insane!?\r\n");
         return;
       }
@@ -1036,17 +1036,17 @@ ACMD(do_drive)
         std::string buf3;
 
         /* For Earth */
-        act(g, "@wYou set the controls to descend.@n", false, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@C$n @wmanipulates the ship controls.@n", false, ch, nullptr, nullptr, TO_ROOM);
-        act(g, "@RThe ship rocks and shakes as it descends through the atmosphere!@n", false, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@RThe ship rocks and shakes as it descends through the atmosphere!@n", false, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "@wYou set the controls to descend.@n", false, ch, nullptr, nullptr, act_to::actor);
+        act(g, "@C$n @wmanipulates the ship controls.@n", false, ch, nullptr, nullptr, act_to::room);
+        act(g, "@RThe ship rocks and shakes as it descends through the atmosphere!@n", false, ch, nullptr, nullptr, act_to::actor);
+        act(g, "@RThe ship rocks and shakes as it descends through the atmosphere!@n", false, ch, nullptr, nullptr, act_to::room);
         if (land_location <= 50) {
-          act(g, "@wThe ship has landed.@n", false, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@wThe ship has landed.@n", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "@wThe ship has landed.@n", false, ch, nullptr, nullptr, act_to::actor);
+          act(g, "@wThe ship has landed.@n", false, ch, nullptr, nullptr, act_to::room);
         }
         if (land_location > 50) {
-          act(g, "@wThe ship slams into the ground and forms a small crater!@n", false, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@wThe ship slams into the ground and forms a small crater!@n", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "@wThe ship slams into the ground and forms a small crater!@n", false, ch, nullptr, nullptr, act_to::actor);
+          act(g, "@wThe ship slams into the ground and forms a small crater!@n", false, ch, nullptr, nullptr, act_to::room);
           obj_from_room(g, vehicle);
           obj_to_room(g, vehicle, land_location);
         } else if (obj_get_in_room(vehicle) == 50) {
@@ -1072,8 +1072,8 @@ ACMD(do_drive)
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, 18995);
           } else {
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_ROOM);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::actor);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::room);
           }
         }
         /* For Zenith */
@@ -1109,8 +1109,8 @@ ACMD(do_drive)
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, 18212);
           } else {
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_ROOM);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::actor);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::room);
           }
         }
 
@@ -1129,8 +1129,8 @@ ACMD(do_drive)
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, 14006);
           } else {
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_ROOM);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::actor);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::room);
           }
         }
 
@@ -1149,8 +1149,8 @@ ACMD(do_drive)
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, 12005);
           } else {
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_ROOM);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::actor);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::room);
           }
         }
 
@@ -1169,8 +1169,8 @@ ACMD(do_drive)
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, 16068);
           } else {
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_ROOM);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::actor);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::room);
           }
         }
 
@@ -1189,8 +1189,8 @@ ACMD(do_drive)
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, 4262);
           } else {
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_ROOM);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::actor);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::room);
           }
         }
         /* For Namek */
@@ -1208,8 +1208,8 @@ ACMD(do_drive)
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, 11627);
           } else {
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_ROOM);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::actor);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::room);
           }
         }
         /* For Konack */
@@ -1227,8 +1227,8 @@ ACMD(do_drive)
             obj_from_room(g, vehicle);
             obj_to_room(g, vehicle, 8198);
           } else {
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_CHAR);
-            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, TO_ROOM);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::actor);
+            act(g, "@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr, act_to::room);
           }
         } else {
           send_to_char(g, ch, "@wYou are not where you can land, you need to be in a planet's low orbit.@n\r\n");
@@ -1249,38 +1249,38 @@ ACMD(do_drive)
       } else if (str_eq_nocase(arg, "launch")) {
         int lnum       = 0;
         room_vnum rnum = 0;
-        if (room_flagged(g, obj_get_in_room(vehicle), ROOM_EARTH)) {
+        if (room_flagged(g, obj_get_in_room(vehicle), room_flag::earth)) {
           lnum = 1;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_FRIGID)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::frigid)) {
           lnum = 2;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_KONACK)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::konack)) {
           lnum = 3;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_VEGETA)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::vegeta)) {
           lnum = 4;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_NAMEK)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::namek)) {
           lnum = 5;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_AETHER)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::aether)) {
           lnum = 6;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_YARDRAT)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::yardrat)) {
           lnum = 7;
         } else if (room_planet_zenith(g, obj_get_in_room(vehicle))) {
           lnum = 8;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_CERRIA)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::cerria)) {
           lnum = 11;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_KANASSA)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::kanassa)) {
           lnum = 9;
-        } else if (room_flagged(g, obj_get_in_room(vehicle), ROOM_ARLIA)) {
+        } else if (room_flagged(g, obj_get_in_room(vehicle), room_flag::arlia)) {
           lnum = 10;
         } else {
           send_to_char(g, ch, "@wYou are not on a planet.@n\r\n");
           return;
         }
-        act(g, "@wYou set the controls to launch.@n", false, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@C$n @wmanipulates the ship controls.@n", false, ch, nullptr, nullptr, TO_ROOM);
-        act(g, "@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, TO_ROOM);
-        act(g, "@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "@wYou set the controls to launch.@n", false, ch, nullptr, nullptr, act_to::actor);
+        act(g, "@C$n @wmanipulates the ship controls.@n", false, ch, nullptr, nullptr, act_to::room);
+        act(g, "@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, act_to::actor);
+        act(g, "@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, act_to::room);
+        act(g, "@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, act_to::actor);
+        act(g, "@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, act_to::room);
         send_to_room(g, obj_get_in_room(vehicle), "@R{} @Rshudders before blasting off into the sky!@n", obj_get_short_description(vehicle));
         if (lnum == 1) {
           rnum = 50;
@@ -1340,7 +1340,7 @@ ACMD(do_drive)
           return;
         }
 
-        if (!room_flagged(g, obj_get_in_room(vehicle), ROOM_SPACE)) {
+        if (!room_flagged(g, obj_get_in_room(vehicle), room_flag::space)) {
           send_to_char(g, ch, "@wYou need to be in space to launch a marker buoy.\r\n");
           return;
         }
@@ -1350,8 +1350,8 @@ ACMD(do_drive)
           return;
         }
         if (char_get_radar1(ch) <= 0 && str_eq_nocase(arg2, "1")) {
-          act(g, "@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr, act_to::actor);
+          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, act_to::room);
           char_set_radar1(ch, obj_get_in_room(vehicle));
         }
         if (char_get_radar2(ch) > 0 && str_eq_nocase(arg2, "2")) {
@@ -1359,8 +1359,8 @@ ACMD(do_drive)
           return;
         }
         if (char_get_radar2(ch) <= 0 && str_eq_nocase(arg2, "2")) {
-          act(g, "@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr, act_to::actor);
+          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, act_to::room);
           char_set_radar2(ch, obj_get_in_room(vehicle));
         }
         if (char_get_radar3(ch) > 0 && str_eq_nocase(arg2, "3")) {
@@ -1368,8 +1368,8 @@ ACMD(do_drive)
           return;
         }
         if (char_get_radar3(ch) <= 0 && str_eq_nocase(arg2, "3")) {
-          act(g, "@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr, act_to::actor);
+          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, act_to::room);
           char_set_radar3(ch, obj_get_in_room(vehicle));
         }
       } else if (str_eq_nocase(arg, "deactivate")) {
@@ -1387,8 +1387,8 @@ ACMD(do_drive)
           return;
         }
         if (char_get_radar1(ch) > 0 && str_eq_nocase(arg2, "1")) {
-          act(g, "@wYou enter buoy one's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "@wYou enter buoy one's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr, act_to::actor);
+          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, act_to::room);
           char_set_radar1(ch, 0);
         }
         if (char_get_radar2(ch) <= 0 && str_eq_nocase(arg2, "2")) {
@@ -1396,8 +1396,8 @@ ACMD(do_drive)
           return;
         }
         if (char_get_radar2(ch) > 0 && str_eq_nocase(arg2, "2")) {
-          act(g, "@wYou enter buoy two's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "@wYou enter buoy two's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr, act_to::actor);
+          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, act_to::room);
           char_set_radar2(ch, 0);
         }
         if (char_get_radar3(ch) <= 0 && str_eq_nocase(arg2, "3")) {
@@ -1405,8 +1405,8 @@ ACMD(do_drive)
           return;
         }
         if (char_get_radar3(ch) > 0 && str_eq_nocase(arg2, "3")) {
-          act(g, "@wYou enter buoy three's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
-          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "@wYou enter buoy three's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr, act_to::actor);
+          act(g, "@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, act_to::room);
           char_set_radar3(ch, 0);
         }
       } else {

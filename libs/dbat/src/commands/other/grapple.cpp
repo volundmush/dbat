@@ -11,7 +11,6 @@
 #include "dbat/consts/auction.hpp"
 #include "dbat/consts/aligns.hpp"
 #include "dbat/utils.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/config.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
@@ -80,22 +79,22 @@ namespace {
    */
   bool zanzoken_escape(GameWorld *g, struct char_data *ch, struct char_data *vict, const zanzoken_msgs &msgs, int64_t cost)
   {
-    if (!(((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
+    if (!(((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, aff_flag::zanzoken)) &&
           getCurST(g, vict) >= 1 && char_get_position(vict) != POS_SLEEPING))
       return false;
-    if (!char_aff_flagged(ch, AFF_ZANZOKEN) || char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, vict) + rand_number(g, 1, 5)) {
+    if (!char_aff_flagged(ch, aff_flag::zanzoken) || char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, vict) + rand_number(g, 1, 5)) {
       reveal_hiding(g, ch, 0);
       act_triple(g, msgs.dodged, ch, nullptr, vict);
-      char_aff_set(ch, AFF_ZANZOKEN, false);
-      char_aff_set(vict, AFF_ZANZOKEN, false);
+      char_aff_set(ch, aff_flag::zanzoken, false);
+      char_aff_set(vict, aff_flag::zanzoken, false);
       decCurST(g, ch, cost, 0);
       char_set_wait(ch, PULSE_4SEC);
       return true;
     }
     reveal_hiding(g, ch, 0);
     act_triple(g, msgs.caught, ch, nullptr, vict);
-    char_aff_set(vict, AFF_ZANZOKEN, false);
-    char_aff_set(ch, AFF_ZANZOKEN, false);
+    char_aff_set(vict, aff_flag::zanzoken, false);
+    char_aff_set(ch, aff_flag::zanzoken, false);
     return false;
   }
 
@@ -153,7 +152,7 @@ namespace {
   /* Why ch can't grapple at all just now, if they can't */
   std::string_view cannot_grapple(GameWorld *g, struct char_data *ch)
   {
-    if (char_plr_flagged(ch, PLR_THANDW))
+    if (char_plr_flagged(ch, player_flag::thandw))
       return "Your are too busy wielding your weapon with two hands!\r\n";
     if (char_get_absorbing(g, ch))
       return "You are currently absorbing from someone!\r\n";
@@ -192,7 +191,7 @@ ACMD(do_grapple)
     send_to_char(g, ch, "Syntax: grapple (target) (hold | choke | grab)\r\n");
     return;
   }
-  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_room);
   if (!vict && !(vict = char_get_fighting(g, ch))) {
     send_to_char(g, ch, "That target isn't here.\r\n");
     return;
@@ -200,7 +199,7 @@ ACMD(do_grapple)
   if (!can_kill(g, ch, vict, nullptr, 0))
     return;
   std::string_view refusal {};
-  if (char_aff_flagged(vict, AFF_KNOCKED))
+  if (char_aff_flagged(vict, aff_flag::knocked))
     refusal = "They are unconcious. What would be the point?\r\n";
   else if (char_get_grappled(g, vict) || char_get_absorbby(g, vict))
     refusal = "They are currently in someone else's grasp!\r\n";
@@ -275,7 +274,7 @@ ACMD(do_trip)
   if (perc == 0)
     perc = char_get_level(ch) + rand_number(g, 1, 10);
 
-  struct char_data *vict = arg.empty() ? nullptr : get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  struct char_data *vict = arg.empty() ? nullptr : get_char_vis(g, ch, arg, nullptr, find_flag::char_room);
   if (!vict) {
     struct char_data *foe = char_get_fighting(g, ch);
     if (!foe || char_get_in_room(foe) != char_get_in_room(ch)) {
@@ -287,11 +286,11 @@ ACMD(do_trip)
   if (!can_kill(g, ch, vict, nullptr, 0))
     return;
   std::string_view refusal {};
-  if (char_aff_flagged(vict, AFF_FLYING))
+  if (char_aff_flagged(vict, aff_flag::flying))
     refusal = "They are flying and are not on their feet!\r\n";
   else if (char_get_position(vict) == POS_SITTING)
     refusal = "They are not on their feet!\r\n";
-  else if (char_plr_flagged(vict, PLR_HEALT))
+  else if (char_plr_flagged(vict, player_flag::healt))
     refusal = "They are inside a healing tank!\r\n";
   if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
@@ -335,18 +334,18 @@ ACMD(do_rip)
     send_to_char(g, ch, "Rip the tail off who?\r\n");
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "That target isn't here.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_room, "That target isn't here.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
-  if (!char_plr_flagged(vict, PLR_TAIL) && !char_plr_flagged(vict, PLR_STAIL)) {
+  if (!char_plr_flagged(vict, player_flag::tail) && !char_plr_flagged(vict, player_flag::stail)) {
     send_to_char(g, ch, "They do not have a tail to rip off!\r\n");
     return;
   }
   if (ch == vict) {
     reveal_hiding(g, ch, 0);
-    act(g, "@rYou grab your own tail and yank it off!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@R$n@r grabs $s own tail and yanks it off!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@rYou grab your own tail and yank it off!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@R$n@r grabs $s own tail and yanks it off!@n", true, ch, nullptr, nullptr, act_to::room);
     char_lose_tail(g, vict);
     return;
   }
@@ -382,12 +381,12 @@ ACMD(do_drag)
   if (struct char_data *dragged = char_get_drag(g, ch)) {
     char_set_drag(ch, nullptr);
     char_set_dragged(dragged, nullptr);
-    act(g, "@wYou stop dragging @C$N@W.@n", true, ch, nullptr, dragged, TO_CHAR);
-    act(g, "@C$n@W stops dragging @c$N@W.@n", true, ch, nullptr, dragged, TO_ROOM);
+    act(g, "@wYou stop dragging @C$N@W.@n", true, ch, nullptr, dragged, act_to::actor);
+    act(g, "@C$n@W stops dragging @c$N@W.@n", true, ch, nullptr, dragged, act_to::room);
     return;
   }
   std::string_view refusal {};
-  if (char_plr_flagged(ch, PLR_PILOTING))
+  if (char_plr_flagged(ch, player_flag::piloting))
     refusal = "You are busy piloting a ship!\r\n";
   else if (char_get_carrying(g, ch))
     refusal = "You are busy carrying someone at the moment.\r\n";
@@ -401,7 +400,7 @@ ACMD(do_drag)
     send_to_char(g, ch, refusal);
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "Drag who?\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_room, "Drag who?\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -409,7 +408,7 @@ ACMD(do_drag)
     refusal = "You can't drag yourself.\r\n";
   else if (char_get_dragged(g, vict))
     refusal = "They are already being dragged!\r\n";
-  else if (char_is_npc(vict) && char_mob_flagged(vict, MOB_NOKILL))
+  else if (char_is_npc(vict) && char_mob_flagged(vict, mob_flag::nokill))
     refusal = "They are not to be touched!\r\n";
   if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
@@ -423,15 +422,15 @@ ACMD(do_drag)
     return;
   }
   if (char_get_pc_weight(g, vict) + char_get_carry_weight(vict) > getMaxCarryWeight(g, ch)) {
-    act(g, "@wYou try to grab and pull @C$N@W with you, but $E is too heavy!@n", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", true, ch, nullptr, vict, TO_ROOM);
+    act(g, "@wYou try to grab and pull @C$N@W with you, but $E is too heavy!@n", true, ch, nullptr, vict, act_to::actor);
+    act(g, "@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", true, ch, nullptr, vict, act_to::room);
     return;
   }
   act_triple(g, {"@wYou grab and start dragging @C$N@W.@n", {}, "@C$n@W grabs and starts dragging @c$N@W.@n", true}, ch, nullptr, vict);
   char_set_drag(ch, vict);
   char_set_dragged(vict, ch);
   /* quirk: the roll is never 0, so whoever isn't knocked out or magically asleep always feels it */
-  if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SLEEP) && rand_number(g, 1, 3)) {
+  if (!char_aff_flagged(vict, aff_flag::knocked) && !char_aff_flagged(vict, aff_flag::sleep) && rand_number(g, 1, 3)) {
     send_to_char(g, vict, "You feel your sleeping body being moved.\r\n");
     if (char_is_npc(vict) && !char_get_fighting(g, vict))
       set_fighting(g, vict, ch);
@@ -446,8 +445,8 @@ ACMD(do_stop)
     send_to_char(g, ch, "You are not even fighting!\r\n");
     return;
   }
-  act(g, "@CYou move out of your fighting posture.@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@c$n@C moves out of $s fighting posture.@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@CYou move out of your fighting posture.@n", true, ch, nullptr, nullptr, act_to::actor);
+  act(g, "@c$n@C moves out of $s fighting posture.@n", true, ch, nullptr, nullptr, act_to::room);
   stop_fighting(g, ch);
   char_set_wait(ch, PULSE_2SEC);
 }
@@ -459,9 +458,9 @@ namespace {
 
   void tell_of_hold(GameWorld *g, const act_msgs &m, struct char_data *holder, struct char_data *held)
   {
-    act(g, m.to_room, m.hide, holder, nullptr, held, TO_NOTVICT);
-    act(g, m.to_vict, m.hide, holder, nullptr, held, TO_VICT);
-    act(g, m.to_char, m.hide, holder, nullptr, held, TO_CHAR);
+    act(g, m.to_room, m.hide, holder, nullptr, held, act_to::notvict);
+    act(g, m.to_vict, m.hide, holder, nullptr, held, act_to::vict);
+    act(g, m.to_char, m.hide, holder, nullptr, held, act_to::actor);
   }
 
   /* After a failed try, a one in three chance of hurting the holder enough to break free if it knocks them out */
@@ -535,8 +534,8 @@ ACMD(do_escape)
     }
     if (char_get_grap(grappler) == 4) {
       act_triple(g, {"@c$N@M flexes with all $S might and causes your body to explode outward into gooey chunks!@n", "@MYou flex with all your might and cause @C$n's@M body to explode outward into gooey chunks!@n", "@c$N@M flexes with all $S might and causes @C$n's@M body to explode outward into gooey chunks!@n", true}, grappler, nullptr, ch);
-      act(g, "@MYou reform your body mere moments later.@n", true, grappler, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@M reforms $s body mere moments later.", true, grappler, nullptr, nullptr, TO_ROOM);
+      act(g, "@MYou reform your body mere moments later.@n", true, grappler, nullptr, nullptr, act_to::actor);
+      act(g, "@C$n@M reforms $s body mere moments later.", true, grappler, nullptr, nullptr, act_to::room);
     } else
       tell_of_hold(g, BROKE_LOOSE, grappler, ch);
     fight_back(g, ch, grappler);
@@ -568,7 +567,7 @@ ACMD(do_block)
       send_to_char(g, ch, "You want to block who?\r\n");
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "You do not see the target here.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_room, "You do not see the target here.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -603,7 +602,7 @@ namespace {
     /* quirk: a worn key is called a key, a carried one that can't be stolen isn't */
     if (worn && obj_get_type_flag(obj) == ITEM_KEY)
       return KEYS;
-    if (obj_extra_flagged(obj, ITEM_NOSTEAL))
+    if (obj_extra_flagged(obj, extra_flag::nosteal))
       return CANT;
     if (obj_get_type_flag(obj) == ITEM_KEY)
       return KEYS;
@@ -641,7 +640,7 @@ namespace {
   {
     if (char_is_npc(vict))
       return;
-    char_plr_set(vict, PLR_STOLEN, true);
+    char_plr_set(vict, player_flag::stolen, true);
     mudlog(g, LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(g, ch)), true, "THEFT: {} has stolen {}@n from {}", char_get_name(ch), what, char_get_name(vict));
   }
 
@@ -672,7 +671,7 @@ namespace {
     if (axion_dice(g, 0) > prob) {
       send_to_char(g, ch, "You think that your movements might have been a bit obvious.\r\n");
       reveal_hiding(g, ch, 0);
-      act(g, "@R$n@r just stole zenni from @R$N@r!@n", true, ch, nullptr, vict, TO_ROOM);
+      act(g, "@R$n@r just stole zenni from @R$N@r!@n", true, ch, nullptr, vict, act_to::room);
       send_to_char(g, vict, "You feel like something may be missing...\r\n");
       if (char_is_npc(vict) && rand_number(g, 1, 3) == 3)
         set_fighting(g, vict, ch);
@@ -688,7 +687,7 @@ namespace {
     while (eq_pos < NUM_WEARS && !(char_get_equipment(vict, eq_pos) && isname(arg, obj_get_name(char_get_equipment(vict, eq_pos))) && char_can_see_obj(g, ch, char_get_equipment(vict, eq_pos))))
       eq_pos++;
     if (eq_pos == NUM_WEARS) {
-      act(g, "$E isn't wearing that item.", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "$E isn't wearing that item.", false, ch, nullptr, vict, act_to::actor);
       return;
     }
     struct obj_data *obj = char_get_equipment(vict, eq_pos);
@@ -707,11 +706,11 @@ namespace {
       caught_stealing(g, ch, vict, true);
       return;
     }
-    act(g, "You unequip $p and steal it.", false, ch, obj, vict, TO_CHAR);
+    act(g, "You unequip $p and steal it.", false, ch, obj, vict, act_to::actor);
     if (axion_dice(g, 0) > prob) {
       send_to_char(g, ch, "You think that your movements might have been a bit obvious.\r\n");
       reveal_hiding(g, ch, 0);
-      act(g, "@R$n@r just stole $p@r from @R$N@r!@n", true, ch, obj, vict, TO_ROOM);
+      act(g, "@R$n@r just stole $p@r from @R$N@r!@n", true, ch, obj, vict, act_to::room);
       send_to_char(g, vict, "You feel your body being disturbed.\r\n");
       improve_skill(g, vict, SKILL_SPOT, 1);
     }
@@ -732,14 +731,14 @@ namespace {
       caught_stealing(g, ch, vict, true);
       return;
     }
-    act(g, "You steal $p from $N.", false, ch, obj, vict, TO_CHAR);
+    act(g, "You steal $p from $N.", false, ch, obj, vict, act_to::actor);
     obj_from_char(g, obj);
     obj_to_char(g, obj, ch);
     theft_logged(g, ch, vict, obj_get_short_description(obj));
     if (axion_dice(g, 0) > prob) {
       reveal_hiding(g, ch, 0);
       send_to_char(g, ch, "You think that your movements might have been a bit obvious.\r\n");
-      act(g, "@R$n@r just stole $p@r from @R$N@r!@n", true, ch, obj, vict, TO_ROOM);
+      act(g, "@R$n@r just stole $p@r from @R$N@r!@n", true, ch, obj, vict, act_to::room);
       send_to_char(g, vict, "You feel like something may be missing...\r\n");
       if (char_is_npc(vict) && rand_number(g, 1, 3) == 3)
         set_fighting(g, vict, ch);
@@ -771,7 +770,7 @@ ACMD(do_steal)
     send_to_char(g, ch, "An important basic of theft is actually having a victim!\r\n");
     return;
   }
-  auto found = find_char(g, ch, arg2, FIND_CHAR_ROOM, "Steal what from who?\r\n");
+  auto found = find_char(g, ch, arg2, find_flag::char_room, "Steal what from who?\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -784,7 +783,7 @@ ACMD(do_steal)
   std::string_view refusal {};
   if (char_get_level(ch) <= 8)
     refusal = "You are trapped inside the newbie shield until level 9 and can't piss off those bigger and better than you. Awww...\r\n";
-  else if (char_mob_flagged(vict, MOB_NOKILL) && char_get_admlevel(ch) == ADMLVL_NONE)
+  else if (char_mob_flagged(vict, mob_flag::nokill) && char_get_admlevel(ch) == ADMLVL_NONE)
     refusal = "That isn't such a good idea...\r\n";
   else if (getCurST(g, ch) < (getMaxST(g, ch) / 40) + char_get_carry_weight(ch))
     refusal = "You do not have enough stamina.\r\n";

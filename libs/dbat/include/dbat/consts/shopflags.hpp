@@ -20,7 +20,3 @@ template <> struct flag_traits<shop_flag> {
 };
 static_assert(flag_count<shop_flag> == NUM_SHOP_FLAGS);
 
-/* The old names, until every use says shop_flag:: */
-constexpr shop_flag WILL_START_FIGHT = shop_flag::start_fight;
-constexpr shop_flag WILL_BANK_MONEY  = shop_flag::bank_money;
-constexpr shop_flag WILL_ALLOW_STEAL = shop_flag::allow_steal;

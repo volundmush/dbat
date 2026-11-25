@@ -30,8 +30,8 @@ void open_session(GameWorld *g, struct descriptor_data *d, std::unique_ptr<olc_s
 void begin_editing(GameWorld *g, struct descriptor_data *d, int state)
 {
   desc_set_connected(d, state);
-  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-  char_plr_set(d->character, PLR_WRITING, true);
+  act(g, "$n starts using OLC.", true, d->character, nullptr, nullptr, act_to::room);
+  char_plr_set(d->character, player_flag::writing, true);
 }
 
 void leave_olc(GameWorld *g, struct descriptor_data *d)
@@ -39,8 +39,8 @@ void leave_olc(GameWorld *g, struct descriptor_data *d)
   if (!d->olc)
     return;
   if (d->character) {
-    char_plr_set(d->character, PLR_WRITING, false);
-    act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
+    char_plr_set(d->character, player_flag::writing, false);
+    act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, act_to::room);
     d->olc->log_leaving(g, d);
     desc_set_connected(d, CON_PLAYING);
   }

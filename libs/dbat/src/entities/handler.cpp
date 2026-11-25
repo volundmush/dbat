@@ -32,7 +32,7 @@ static void update_objects(GameWorld *g, const id_list &list, int use);
 static void update_object(GameWorld *g, struct obj_data *obj, int use)
 {
   /* dont update objects with a timer trigger */
-  if (!script_has_type(obj_get_script(obj), OTRIG_TIMER) && (obj_get_timer(obj) > 0))
+  if (!script_has_type(obj_get_script(obj), obj_trig::timer) && (obj_get_timer(obj) > 0))
     obj_set_timer(obj, obj_get_timer(obj) - (use));
   update_objects(g, obj_get_contains(obj), use);
 }
@@ -57,10 +57,10 @@ void update_char_objects(GameWorld *g, struct char_data *ch)
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, 3);
         if (j == 1) {
           send_to_char(g, ch, "Your light begins to flicker and fade.\r\n");
-          act(g, "$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, act_to::room);
         } else if (j == 0) {
           send_to_char(g, ch, "Your light sputters out and dies.\r\n");
-          act(g, "$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
+          act(g, "$n's light sputters out and dies.", false, ch, nullptr, nullptr, act_to::room);
           room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
         }
       } else if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT && obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS) > 0) {

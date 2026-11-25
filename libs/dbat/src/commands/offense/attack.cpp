@@ -156,7 +156,7 @@ void off_hand_follows(GameWorld *g, struct char_data *ch, struct char_data *vict
 
 bool slash_face_mastery(const weapon_shot &s)
 {
-  return s.main && !char_is_npc(s.ch) && char_plr_flagged(s.ch, PLR_THANDW) && char_get_skills_base(s.ch, SKILL_TWOHAND) >= 100;
+  return s.main && !char_is_npc(s.ch) && char_plr_flagged(s.ch, player_flag::thandw) && char_get_skills_base(s.ch, SKILL_TWOHAND) >= 100;
 }
 
 bool brawl_face_mastery(const weapon_shot &s)
@@ -219,7 +219,7 @@ int take_up(GameWorld *g, struct char_data *ch, const weapon_style &style)
   return skill;
 }
 
-constexpr extra_flag LEVEL_FLAGS[] = {ITEM_WEAPLVL1, ITEM_WEAPLVL2, ITEM_WEAPLVL3, ITEM_WEAPLVL4, ITEM_WEAPLVL5};
+constexpr extra_flag LEVEL_FLAGS[] = {extra_flag::weaplvl1, extra_flag::weaplvl2, extra_flag::weaplvl3, extra_flag::weaplvl4, extra_flag::weaplvl5};
 constexpr double LEVEL_SHARE[] = {0.05, 0.1, 0.2, 0.3, 0.5}; /* the damage a weapon's level adds */
 constexpr int GUN_COSTS[]      = {0, 0, 2, 4, 6, 12};         /* zenni a shot, by the gun's level */
 constexpr double SPEAR_REACH[] = {0.04, 0.08, 0.12, 0.2, 0.25}; /* a spear's level adds this, two-handed */
@@ -253,7 +253,7 @@ bool weapon_defended(weapon_shot &s, int prob, int perc, int pry, int blk, int d
   if (prob >= perc - 20)
     return false;
   if ((getCurST(g, vict)) > 0) {
-    if (pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
+    if (pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, mob_flag::dummy))) {
       act_triple(g, WEAPON_PARRIED, ch, nullptr, vict);
       if (!s.style->gun)
         handle_disarm(g, ch, vict);
@@ -365,7 +365,7 @@ constexpr act_msgs FIRESHIELD_BURNS = {"@c$N's@W fireshield burns your weapon!@n
 /* A fireshield burns the weapon that hit it, unless its wielder is fireproof (when, if tells, the victim hears so) */
 void fireshield_burns(GameWorld *g, struct char_data *ch, struct char_data *vict, struct obj_data *weapon, bool tells)
 {
-  if (getCurPL(g, vict) <= 0 || char_aff_flagged(vict, AFF_SPIRIT) || !char_aff_flagged(vict, AFF_FIRESHIELD))
+  if (getCurPL(g, vict) <= 0 || char_aff_flagged(vict, aff_flag::spirit) || !char_aff_flagged(vict, aff_flag::fireshield))
     return;
   if (!char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
     act_triple(g, FIRESHIELD_BURNS, ch, nullptr, vict);
@@ -401,8 +401,8 @@ void strain_broken_arm(GameWorld *g, struct char_data *ch)
       send_to_char(g, ch, "{}", a.strained);
       char_set_limb_condition(ch, a.arm, char_get_limb_condition(ch, a.arm) - (rand_number(g, 3, 5)));
       if (char_get_limb_condition(ch, a.arm) < 0) {
-        act(g, a.to_char, true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, a.to_room, true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, a.to_char, true, ch, nullptr, nullptr, act_to::actor);
+        act(g, a.to_room, true, ch, nullptr, nullptr, act_to::room);
       }
       return;
     }
@@ -575,13 +575,13 @@ ACMD(do_attack)
     }
     if (!can_kill(g, ch, nullptr, obj, 0))
       return;
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+    if (obj_extra_flagged(obj, extra_flag::broken)) {
       send_to_char(g, ch, "It is broken already!\r\n");
       return;
     }
     int64_t dmg = ((getCurPL(g, ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act(g, "@WYou attack $p@W as hard as you can!@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@C$n@W attacks $p@W extremely hard!@n", true, ch, obj, nullptr, TO_ROOM);
+    act(g, "@WYou attack $p@W as hard as you can!@n", true, ch, obj, nullptr, act_to::actor);
+    act(g, "@C$n@W attacks $p@W extremely hard!@n", true, ch, obj, nullptr, act_to::room);
     hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
     if (!style.gun)
       pcost(g, ch, 0, stcost);
@@ -598,7 +598,7 @@ ACMD(do_attack)
   int avo = index / 4;
   handle_defense(g, vict, &pry, &blk, &dge);
   prob -= avo;
-  if (char_plr_flagged(ch, PLR_THANDW))
+  if (char_plr_flagged(ch, player_flag::thandw))
     perc += 15;
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   if (!tech_handle_zanzoken(g, ch, vict, "attack")) {
@@ -613,9 +613,9 @@ ACMD(do_attack)
     return;
   s.dmg = damtype(g, ch, -1, skill, 0);
   weapon_bonuses(s);
-  if (char_plr_flagged(ch, PLR_THANDW))
+  if (char_plr_flagged(ch, player_flag::thandw))
     s.dmg += s.dmg * 1.2;
-  if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_THANDW) && !style.gun) {
+  if (!char_is_npc(ch) && char_plr_flagged(ch, player_flag::thandw) && !style.gun) {
     if (char_get_skills_base(ch, SKILL_TWOHAND) >= 100)
       s.dmg += s.dmg * 0.5;
     else if (char_get_skills_base(ch, SKILL_TWOHAND) >= 75)
@@ -631,7 +631,7 @@ ACMD(do_attack)
   int roll   = roll_hitloc(g, ch, vict, skill);
   s.beforepl = getCurPL(g, vict);
   aim(s, roll);
-  if (char_plr_flagged(ch, PLR_THANDW) && gun && s.hitspot != 4 && boom_headshot(g, ch)) {
+  if (char_plr_flagged(ch, player_flag::thandw) && gun && s.hitspot != 4 && boom_headshot(g, ch)) {
     s.hitspot = 4;
     send_to_char(g, ch, "@GBoom headshot!@n\r\n");
   }
@@ -646,7 +646,7 @@ ACMD(do_attack)
     pcost(g, ch, 0, stcost);
     damage_weapon(g, ch, weapon, vict);
   }
-  if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_THANDW))
+  if (!char_is_npc(ch) && char_plr_flagged(ch, player_flag::thandw))
     learn_or_practise(g, ch, SKILL_TWOHAND, true, "@GYou learn the very basics of two-handing your weapon!@n\r\n");
   if (struct obj_data *off = char_get_equipment(ch, WEAR_WIELD2)) {
     learn_or_practise(g, ch, SKILL_DUALWIELD, obj_get_type_flag(off) != ITEM_LIGHT, "@GYou learn the very basics of dual-wielding!@n\r\n");

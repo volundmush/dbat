@@ -20,7 +20,7 @@ constexpr int C_CMP = C_ON; /* Compatibility hack */
 
 #define COLOR_CHOICES(ch) (char_is_npc(ch) ? nullptr : char_get_player_specials(ch) ? char_get_player_specials(ch)->color_choices \
                                                                            : nullptr)
-#define _clrlevel(g, ch)  (!char_is_npc(ch) ? (char_prf_flagged(g, (ch), PRF_COLOR) ? 1 : 0) : 0)
+#define _clrlevel(g, ch)  (!char_is_npc(ch) ? (char_prf_flagged(g, (ch), pref_flag::color) ? 1 : 0) : 0)
 #define clr(g, ch, lvl)   (_clrlevel(g, ch) >= (lvl))
 #define CCNRM(g, ch, lvl) (clr(g, (ch), (lvl)) ? KNRM : KNUL)
 #define CCRED(g, ch, lvl) (clr(g, (ch), (lvl)) ? KRED : KNUL)

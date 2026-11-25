@@ -99,7 +99,7 @@ void assemblySaveAssemblies(GameWorld *g)
   io::text_writer out(ASSEMBLIES_FILE);
   for (long i = 0; i < g->g_lNumAssemblies; i++) {
     ASSEMBLY *pAssembly = g->g_pAssemblyTable + i;
-    out.print("Vnum                #{:d} {}\n", pAssembly->lVnum, sprinttype(pAssembly->uchAssemblyType, AssemblyTypes));
+    out.print("Vnum                #{:d} {}\n", pAssembly->lVnum, type_name(AssemblyTypes, pAssembly->uchAssemblyType));
     for (long j = 0; j < pAssembly->lNumComponents; j++)
       out.print("Component           #{:d} {:d} {:d}\n", pAssembly->pComponents[j].lVnum,
                 (pAssembly->pComponents[j].bExtract ? 1 : 0), (pAssembly->pComponents[j].bInRoom ? 1 : 0));
@@ -134,7 +134,7 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter)
       send_to_char(g, pCharacter, "[-----] ***RESERVED***\r\n");
       mud_log("SYSERR: assemblyListToChar(): Invalid vnum #{:d} in assembly table.", g->g_pAssemblyTable[i].lVnum);
     } else {
-      szAssmType = sprinttype(g->g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes);
+      szAssmType = type_name(AssemblyTypes, g->g_pAssemblyTable[i].uchAssemblyType);
       szBuffer   = str_format("[{:>5d}] {} ({})\r\n", g->g_pAssemblyTable[i].lVnum,
                               obj_get_short_description(obj_proto_of(g, lRnum)), szAssmType);
       send_to_char(g, pCharacter, szBuffer);

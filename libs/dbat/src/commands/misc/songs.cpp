@@ -53,7 +53,7 @@
 
 bool grouped_with(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  if (!char_aff_flagged(ch, AFF_GROUP) || !char_aff_flagged(vict, AFF_GROUP))
+  if (!char_aff_flagged(ch, aff_flag::group) || !char_aff_flagged(vict, aff_flag::group))
     return false;
   return ch == char_get_master(g, vict) || char_get_master(g, ch) == vict || char_get_master(g, ch) == char_get_master(g, vict);
 }
@@ -108,7 +108,7 @@ namespace {
     if (getCurKI(g, ch) > 0)
       return false;
     send_to_char(g, ch, OUT_OF_KI);
-    act(g, STOPS, true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, STOPS, true, ch, nullptr, nullptr, act_to::room);
     char_set_powerattack(ch, 0);
     return true;
   }
@@ -129,9 +129,9 @@ namespace {
   void play_safety(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill)
   {
     if (vict != ch)
-      act(g, "@CYour skillfully playing of the Song of Safety has an effect on @c$N@C.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@CYour skillfully playing of the Song of Safety has an effect on @c$N@C.@n", true, ch, nullptr, vict, act_to::actor);
     else
-      act(g, "@CYour skillfully playing of the Song of Safety has an effect on your own body@C.@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@CYour skillfully playing of the Song of Safety has an effect on your own body@C.@n", true, ch, nullptr, vict, act_to::actor);
     int64_t restore = (10 * skill) + ((getMaxKI(g, ch) * 0.0004) * skill);
     incCurHealth(g, vict, restore, true);
     incCurST(g, vict, restore * .5, true);
@@ -145,8 +145,8 @@ namespace {
       }
     }
     if (vict != ch)
-      act(g, "@c$n's@C soothing Song of Safety has recovered some of your powerlevel, stamina, and limb condition.", true, ch, nullptr, vict, TO_VICT);
-    act(g, "@c$n@C continues playing $s ocarina!@n", true, ch, nullptr, vict, TO_NOTVICT);
+      act(g, "@c$n's@C soothing Song of Safety has recovered some of your powerlevel, stamina, and limb condition.", true, ch, nullptr, vict, act_to::vict);
+    act(g, "@c$n@C continues playing $s ocarina!@n", true, ch, nullptr, vict, act_to::notvict);
     improve_skill(g, ch, SKILL_MYSTICMUSIC, 2);
     decCurKI(g, ch, (getMaxKI(g, ch) * .0003) + skill, 0);
   }
@@ -162,23 +162,23 @@ namespace {
     if (!char_is_npc(vict))
       char_set_wait(vict, PULSE_2SEC);
     else
-      assign_affect(g, vict, AFF_SHADOW_STITCH, SKILL_MYSTICMUSIC, -1, 0, 0, 0, 0, 0, -2);
+      assign_affect(g, vict, aff_flag::shadow_stitch, SKILL_MYSTICMUSIC, -1, 0, 0, 0, 0, 0, -2);
   }
 
   void play_shielding(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill)
   {
     if (vict != ch) {
-      act(g, "@CYour triumphant and soaring music has powered a barrier around @c$N@C!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@c$n's@C triumphant and soaring music has powered a barrier around you!@n", true, ch, nullptr, vict, TO_VICT);
+      act(g, "@CYour triumphant and soaring music has powered a barrier around @c$N@C!@n", true, ch, nullptr, vict, act_to::actor);
+      act(g, "@c$n's@C triumphant and soaring music has powered a barrier around you!@n", true, ch, nullptr, vict, act_to::vict);
     } else {
-      act(g, "@CYour triumphant and soaring music has powered a barrier around yourself@C!@n", true, ch, nullptr, vict, TO_CHAR);
+      act(g, "@CYour triumphant and soaring music has powered a barrier around yourself@C!@n", true, ch, nullptr, vict, act_to::actor);
     }
-    act(g, "@c$n's@C triumphant and soaring music has powered a barrier around @c$N@C!@n", true, ch, nullptr, vict, TO_NOTVICT);
+    act(g, "@c$n's@C triumphant and soaring music has powered a barrier around @c$N@C!@n", true, ch, nullptr, vict, act_to::notvict);
     char_set_barrier(vict, char_get_barrier(vict) + (((getMaxKI(g, ch) * 0.005) * (skill * 0.25)) + skill));
     if (char_get_barrier(vict) >= getMaxKI(g, vict) * 0.75)
       char_set_barrier(vict, getMaxKI(g, vict) * 0.75);
-    if (!char_aff_flagged(vict, AFF_SANCTUARY))
-      char_aff_set(vict, AFF_SANCTUARY, true);
+    if (!char_aff_flagged(vict, aff_flag::sanctuary))
+      char_aff_set(vict, aff_flag::sanctuary, true);
     decCurKI(g, ch, getPercentOfMaxKI(g, ch, .02) + skill, 0);
   }
 
@@ -201,18 +201,18 @@ namespace {
 
     if (!held_instrument(g, ch)) {
       send_to_char(g, ch, "You do not have an instrument.\r\n");
-      act(g, STOPS, true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, STOPS, true, ch, nullptr, nullptr, act_to::room);
       char_set_powerattack(ch, 0);
       return;
     }
 
     if (skill <= diceroll) {
-      act(g, "@CYou mess up a portion of the song, but continue playing.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@c$n@C messes up a portion of $s song, but continues to play.@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@CYou mess up a portion of the song, but continue playing.@n", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "@c$n@C messes up a portion of $s song, but continues to play.@n", true, ch, nullptr, nullptr, act_to::room);
       return;
     }
-    act(g, "@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, str_format("@c$n@C continues playing @y'@Y{}@y'@C.@n", song_name(song)), true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@CYou continue playing your song.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, str_format("@c$n@C continues playing @y'@Y{}@y'@C.@n", song_name(song)), true, ch, nullptr, nullptr, act_to::room);
 
     const destination *teleport = destination_of(song);
     for (char_data *vict : room_people(g, char_get_in_room(ch))) {
@@ -254,7 +254,7 @@ namespace {
     act(g,
         str_format("@CFinally as the last of your comrades has been teleported you teleport yourself to {} and stop your song.@n",
                    teleport->planet),
-        true, ch, nullptr, nullptr, TO_CHAR);
+        true, ch, nullptr, nullptr, act_to::actor);
   }
 
   /* What song NAME plays */
@@ -303,8 +303,8 @@ ACMD(do_song)
   }
 
   if (char_get_powerattack(ch)) {
-    act(g, "@cYou stop playing your ocarina.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@c$n stops playing their ocarina.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@cYou stop playing your ocarina.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@c$n stops playing their ocarina.@n", true, ch, nullptr, nullptr, act_to::room);
     char_set_powerattack(ch, 0);
     return;
   }
@@ -344,7 +344,7 @@ ACMD(do_song)
       send_to_char(g, ch, "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
       return;
     }
-    if (char_aff_flagged(ch, AFF_SPIRIT)) {
+    if (char_aff_flagged(ch, aff_flag::spirit)) {
       send_to_char(g, ch, "Not while you're dead!\r\n");
       return;
     }
@@ -355,8 +355,8 @@ ACMD(do_song)
     }
     char_set_powerattack(ch, to->song);
   }
-  act(g, t.to_char, true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, t.to_room, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, t.to_char, true, ch, nullptr, nullptr, act_to::actor);
+  act(g, t.to_room, true, ch, nullptr, nullptr, act_to::room);
   if (t.song)
     char_set_powerattack(ch, t.song);
   decCurKI(g, ch, cost, 0);

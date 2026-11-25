@@ -69,7 +69,7 @@ namespace {
 
   void stop_fishing(struct char_data *ch)
   {
-    char_plr_set(ch, PLR_FISHING, false);
+    char_plr_set(ch, player_flag::fishing, false);
     char_set_accuracy_mod(ch, 0);
     char_set_fishstate(ch, FISH_NOFISH);
   }
@@ -81,16 +81,16 @@ namespace {
     obj_vnum first;
   };
   constexpr fishing_water FISHING_WATERS[] = {
-    {true, ROOM_EARTH, 1000},
-    {true, ROOM_AETHER, 1012},
-    {false, ROOM_EARTH, 1004},
-    {false, ROOM_NAMEK, 1008},
+    {true, room_flag::earth, 1000},
+    {true, room_flag::aether, 1012},
+    {false, room_flag::earth, 1004},
+    {false, room_flag::namek, 1008},
   };
 
   void catch_fish(GameWorld *g, struct char_data *ch, int quality)
   {
     room_vnum here = char_get_in_room(ch);
-    bool fresh     = room_flagged(g, here, ROOM_FISHFRESH);
+    bool fresh     = room_flagged(g, here, room_flag::fishfresh);
     obj_vnum num   = 1000;
     auto water     = std::ranges::find_if(FISHING_WATERS, [&](const fishing_water &w) { return w.fresh == fresh && room_flagged(g, here, w.planet); });
     if (water != std::end(FISHING_WATERS)) {
@@ -103,8 +103,8 @@ namespace {
       send_to_imm(g, "Error: Fish success with no fish! Report to Iovan!\r\n");
       return;
     }
-    act(g, "@CYou manage to pull a $p@C from the water and onto the ground in front of you!@n", true, ch, fish, nullptr, TO_CHAR);
-    act(g, "@c$n@C manages to pull a $p@C from the water and onto the ground in front of $m!@n", true, ch, fish, nullptr, TO_ROOM);
+    act(g, "@CYou manage to pull a $p@C from the water and onto the ground in front of you!@n", true, ch, fish, nullptr, act_to::actor);
+    act(g, "@c$n@C manages to pull a $p@C from the water and onto the ground in front of $m!@n", true, ch, fish, nullptr, act_to::room);
 
     if (quality <= 0 && rand_number(g, 1, 20) >= 17)
       quality += rand_number(g, 2, 7);
@@ -165,42 +165,42 @@ namespace {
         char_set_accuracy_mod(ch, char_get_accuracy_mod(ch) - rand_number(g, 5, 8));
       else
         char_set_accuracy_mod(ch, char_get_accuracy_mod(ch) - rand_number(g, 1, 4));
-      act(g, "@CYou reel the line on your pole some.@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@c$n@C reels the line on $s pole slowly.@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@CYou reel the line on your pole some.@n", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "@c$n@C reels the line on $s pole slowly.@n", true, ch, nullptr, nullptr, act_to::room);
       send_to_char(g, ch, "@D[@wDistance@D: @Y{:d}@D]@n\r\n", char_get_accuracy_mod(ch) > 0 ? char_get_accuracy_mod(ch) : 0);
     } else if (state == FISH_REELING && rand_number(g, 1, 58) <= 55) {
-      act(g, "@CYou struggle as the fish fights against your attempts to reel it in!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@c$n@C struggles with the fish on the end of $s pole!@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@CYou struggle as the fish fights against your attempts to reel it in!@n", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "@c$n@C struggles with the fish on the end of $s pole!@n", true, ch, nullptr, nullptr, act_to::room);
     } else if (state == FISH_REELING || (state == FISH_HOOKED && rand_number(g, 1, 20) >= 12)) { /* Lose the fish */
-      act(g, "@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, act_to::room);
       char_set_accuracy_mod(ch, 0);
       char_set_fishstate(ch, FISH_NOFISH);
-      char_plr_set(ch, PLR_FISHING, false);
+      char_plr_set(ch, player_flag::fishing, false);
       if (state == FISH_REELING && has_pole(ch)) /* the bait goes with a fish that was being reeled */
         obj_set_value(char_get_equipment(ch, WEAR_WIELD2), 0, 0);
     } else if (state == FISH_BITE && rand_number(g, 1, 20) >= 12) {
-      act(g, "@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
+      act(g, "@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, act_to::actor);
       char_set_fishstate(ch, FISH_NOFISH);
     } else if (state != FISH_HOOKED && state != FISH_BITE &&
-               ((room_flagged(g, char_get_in_room(ch), ROOM_FISHFRESH) && rand_number(g, 1, 10) >= 8) ||
-                (!room_flagged(g, char_get_in_room(ch), ROOM_FISHFRESH) && rand_number(g, 1, 20) >= 18))) {
-      act(g, "@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr, TO_CHAR);
+               ((room_flagged(g, char_get_in_room(ch), room_flag::fishfresh) && rand_number(g, 1, 10) >= 8) ||
+                (!room_flagged(g, char_get_in_room(ch), room_flag::fishfresh) && rand_number(g, 1, 20) >= 18))) {
+      act(g, "@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr, act_to::actor);
       char_set_fishstate(ch, FISH_BITE);
     }
   }
 
   void fish_cast(GameWorld *g, struct char_data *ch)
   {
-    if (char_plr_flagged(ch, PLR_FISHING)) {
+    if (char_plr_flagged(ch, player_flag::fishing)) {
       send_to_char(g, ch, "You are already fishing! Syntax: fish stop\r\n");
       return;
     }
-    if (!room_flagged(g, char_get_in_room(ch), ROOM_FISHING)) {
+    if (!room_flagged(g, char_get_in_room(ch), room_flag::fishing)) {
       send_to_char(g, ch, "This is not an area you can fish at.\r\n");
       return;
     }
-    if (char_aff_flagged(ch, AFF_FLYING)) {
+    if (char_aff_flagged(ch, aff_flag::flying)) {
       send_to_char(g, ch, "You can't fish while flying.\r\n");
       return;
     }
@@ -222,16 +222,16 @@ namespace {
       return;
     }
     reveal_hiding(g, ch, 0);
-    act(g, "@CYou pull your arm back and then spring it forward, casting the baited line. A moment later there is a splash as the hook enters the water.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@CYou pull your arm back and then spring it forward, casting the baited line. A moment later there is a splash as the hook enters the water.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n", true, ch, nullptr, nullptr, act_to::room);
     char_set_accuracy_mod(ch, rand_number(g, 30, 80));
-    char_plr_set(ch, PLR_FISHING, true);
+    char_plr_set(ch, player_flag::fishing, true);
     send_to_char(g, ch, "@D[@wDistance@D: @Y{:d}@D]@n\r\n", char_get_accuracy_mod(ch));
   }
 
   void fish_hook(GameWorld *g, struct char_data *ch)
   {
-    if (!char_plr_flagged(ch, PLR_FISHING)) {
+    if (!char_plr_flagged(ch, player_flag::fishing)) {
       send_to_char(g, ch, NOT_EVEN);
       return;
     }
@@ -248,14 +248,14 @@ namespace {
     }
     if (axion_dice(g, -18) > char_get_accuracy(ch)) {
       reveal_hiding(g, ch, 0);
-      act(g, "@CYou pull hard but the fish spits the hook out a second before you pull! You return to waiting for a bite...@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@c$n@C pulls hard on $s fishing line, but a moment later $e frowns and returns to fishing.@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@CYou pull hard but the fish spits the hook out a second before you pull! You return to waiting for a bite...@n", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "@c$n@C pulls hard on $s fishing line, but a moment later $e frowns and returns to fishing.@n", true, ch, nullptr, nullptr, act_to::room);
       char_set_fishstate(ch, FISH_NOFISH);
       return;
     }
     reveal_hiding(g, ch, 0);
-    act(g, "@CYou pull hard on your line and feel that you have managed to hook the fish and start reeling it in!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@c$n@C pulls hard on $s fishing line and starts to struggle with the fish on the other end!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@CYou pull hard on your line and feel that you have managed to hook the fish and start reeling it in!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@c$n@C pulls hard on $s fishing line and starts to struggle with the fish on the other end!@n", true, ch, nullptr, nullptr, act_to::room);
     char_set_fishstate(ch, FISH_REELING);
   }
 
@@ -287,21 +287,21 @@ namespace {
       return;
     }
     reveal_hiding(g, ch, 0);
-    act(g, "@CYou carefully apply the $p@C to your hook.@n", true, ch, bait, nullptr, TO_CHAR);
-    act(g, "@c$n@C carefully applies $p@C to $s fishing pole's hook.@n", true, ch, bait, nullptr, TO_ROOM);
+    act(g, "@CYou carefully apply the $p@C to your hook.@n", true, ch, bait, nullptr, act_to::actor);
+    act(g, "@c$n@C carefully applies $p@C to $s fishing pole's hook.@n", true, ch, bait, nullptr, act_to::room);
     obj_set_value(pole, 0, obj_get_cost(bait));
     extract_obj(g, bait);
   }
 
   void fish_stop(GameWorld *g, struct char_data *ch)
   {
-    if (!char_plr_flagged(ch, PLR_FISHING)) {
+    if (!char_plr_flagged(ch, player_flag::fishing)) {
       send_to_char(g, ch, NOT_EVEN);
       return;
     }
     reveal_hiding(g, ch, 0);
-    act(g, "@CYou reel in your line and stop fishing.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@c$n@C reels in $s fishing line and stops fishing.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@CYou reel in your line and stop fishing.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@c$n@C reels in $s fishing line and stops fishing.@n", true, ch, nullptr, nullptr, act_to::room);
     stop_fishing(ch);
   }
 
@@ -361,15 +361,15 @@ namespace {
 
     decCurKI(g, ch, cost, 0);
     if (skill < chance) {
-      act(g, "@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, but unfortunately the ink explodes into a mess instead!@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n", true, ch, obj, nullptr, TO_ROOM);
+      act(g, "@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, but unfortunately the ink explodes into a mess instead!@n", true, ch, obj, nullptr, act_to::actor);
+      act(g, "@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n", true, ch, obj, nullptr, act_to::room);
       improve_skill(g, ch, SKILL_EXTRACT, 0);
       extract_obj(g, obj);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
-    act(g, "@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, and manage to get every last drop of ink into it.@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n", true, ch, obj, nullptr, TO_ROOM);
+    act(g, "@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, and manage to get every last drop of ink into it.@n", true, ch, obj, nullptr, act_to::actor);
+    act(g, "@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n", true, ch, obj, nullptr, act_to::room);
     extract_obj(g, obj);
     obj_set_value(bottle, 6, obj_get_value(bottle, 6) + rand_number(g, 4, 6));
     if (obj_get_value(bottle, 6) >= 24) { /* A full bottle is sealed with ki */
@@ -378,8 +378,8 @@ namespace {
       obj_set_value(filled, 6, 24);
       obj_to_char(g, filled, ch);
       decCurKI(g, ch, 0, 0);
-      act(g, "@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n", true, ch, filled, nullptr, TO_CHAR);
-      act(g, "@GAs the last of the ink fills the bottle @g$n@G infuses a final burst of ki into the bottle.@n ", true, ch, filled, nullptr, TO_ROOM);
+      act(g, "@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n", true, ch, filled, nullptr, act_to::actor);
+      act(g, "@GAs the last of the ink fills the bottle @g$n@G infuses a final burst of ki into the bottle.@n ", true, ch, filled, nullptr, act_to::room);
     } else {
       send_to_char(g, ch, "You will need to fill the bottle before giving it a final infusion of ki to complete the process.\r\n");
     }
@@ -393,17 +393,17 @@ namespace {
   struct rune_effect {
     std::string_view name{};
     double per_skill; /* duration, per point of runic */
-    aff_flag affect;  /* AFF_DONTUSE: Gebo, which teaches instead */
+    aff_flag affect;  /* aff_flag::dontuse: Gebo, which teaches instead */
     int spell;
     std::string_view gained{};
   };
-  constexpr rune_effect KENAZ   = {"Kenaz", 0.16, AFF_INFRAVISION, SKILL_RUNIC, "@GYou can now see in the dark!"};
-  constexpr rune_effect ALGIZ   = {"Algiz", 0.05, AFF_EARMOR, SKILL_PUNCH, "@GYou now have Ethereal Armor!"};
-  constexpr rune_effect OAGAZ   = {"Oagaz", 0.04, AFF_ECHAINS, SKILL_KNEE, "@GYou now are protected by Ethereal Chains!"};
-  constexpr rune_effect LAGUZ   = {"Laguz", 0.04, AFF_WATERBREATH, SKILL_SBC, "@GYou now have water breathing!"};
-  constexpr rune_effect WUNJO   = {"Wunjo", 0.08, AFF_WUNJO, SKILL_SLAM, "@GYou are now blessed with a deeper understanding of things you experience!"};
-  constexpr rune_effect PURISAZ = {"Purisaz", 0.06, AFF_POTENT, SKILL_HEELDROP, "@GYou feel as if your inner energy is more potent!"};
-  constexpr rune_effect GEBO    = {"Gebo", 0, AFF_DONTUSE, 0, {}};
+  constexpr rune_effect KENAZ   = {"Kenaz", 0.16, aff_flag::infravision, SKILL_RUNIC, "@GYou can now see in the dark!"};
+  constexpr rune_effect ALGIZ   = {"Algiz", 0.05, aff_flag::earmor, SKILL_PUNCH, "@GYou now have Ethereal Armor!"};
+  constexpr rune_effect OAGAZ   = {"Oagaz", 0.04, aff_flag::echains, SKILL_KNEE, "@GYou now are protected by Ethereal Chains!"};
+  constexpr rune_effect LAGUZ   = {"Laguz", 0.04, aff_flag::waterbreath, SKILL_SBC, "@GYou now have water breathing!"};
+  constexpr rune_effect WUNJO   = {"Wunjo", 0.08, aff_flag::wunjo, SKILL_SLAM, "@GYou are now blessed with a deeper understanding of things you experience!"};
+  constexpr rune_effect PURISAZ = {"Purisaz", 0.06, aff_flag::potent, SKILL_HEELDROP, "@GYou feel as if your inner energy is more potent!"};
+  constexpr rune_effect GEBO    = {"Gebo", 0, aff_flag::dontuse, 0, {}};
 
   struct rune {
     std::string_view word{};
@@ -428,11 +428,11 @@ namespace {
   void write_rune(GameWorld *g, struct char_data *ch, struct char_data *vict, const rune &r, const rune_effect &effect, struct obj_data *bottle,
                   int inkcost, int skill, int64_t cost)
   {
-    std::string_view flash = effect.affect != AFF_DONTUSE ? "" : " The rune flashes out of existence immediately!";
+    std::string_view flash = effect.affect != aff_flag::dontuse ? "" : " The rune flashes out of existence immediately!";
     decCurKI(g, ch, cost, 0);
     if (vict == ch) {
-      act(g, str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on your skin!{}@n", effect.name, flash), true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on $s skin.{}@n", effect.name, flash), true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on your skin!{}@n", effect.name, flash), true, ch, nullptr, nullptr, act_to::actor);
+      act(g, str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on $s skin.{}@n", effect.name, flash), true, ch, nullptr, nullptr, act_to::room);
     } else {
       std::string to_char = str_format("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@C{}@D'@B rune on @b$N's@B skin!{}@n", effect.name, flash);
       std::string to_vict = str_format("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@C{}@D'@B rune on @RYOUR@B skin.{}@n", effect.name, flash);
@@ -441,7 +441,7 @@ namespace {
     }
     send_to_char(g, ch, "@D[@B{:d}@b ink used.@D]@n\r\n", inkcost);
 
-    if (effect.affect == AFF_DONTUSE) {
+    if (effect.affect == aff_flag::dontuse) {
       char_set_practice_points(g, vict, char_get_practice_points(g, vict) + 125);
       send_to_char(g, vict, "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
     } else {
@@ -504,7 +504,7 @@ namespace {
       return;
     }
     auto carried = char_inventory(g, ch);
-    auto silk = std::ranges::find_if(carried, [&](obj_data *o) { return valid_silk(g, o) && !obj_extra_flagged(o, ITEM_FORGED); });
+    auto silk = std::ranges::find_if(carried, [&](obj_data *o) { return valid_silk(g, o) && !obj_extra_flagged(o, extra_flag::forged); });
     if (silk == carried.end()) {
       send_to_char(g, ch, "You do not have an acceptable bundle of silk in your inventory!\r\n");
       return;
@@ -516,8 +516,8 @@ namespace {
       return;
     }
     if (prob <= perc) {
-      act(g, "@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", true, ch, obj, nullptr, TO_ROOM);
+      act(g, "@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", true, ch, obj, nullptr, act_to::actor);
+      act(g, "@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", true, ch, obj, nullptr, act_to::room);
       extract_obj(g, obj);
       char_set_wait(ch, PULSE_4SEC);
       return;
@@ -540,8 +540,8 @@ namespace {
       obj_get_affected(weaved)[2].location = 3;
       obj_get_affected(weaved)[2].modifier = grade.intel;
     }
-    act(g, "@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, nullptr, TO_CHAR);
-    act(g, "@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, nullptr, TO_ROOM);
+    act(g, "@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, nullptr, act_to::actor);
+    act(g, "@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, nullptr, act_to::room);
     do_get(g, ch, piece->keyword, 0, 0);
     extract_obj(g, obj);
     char_set_wait(ch, PULSE_4SEC);
@@ -562,15 +562,15 @@ namespace {
     if (super_chance > superoll) {
       struct obj_data *obj = read_object(g, 16708);
       obj_to_room(g, obj, char_get_in_room(ch));
-      act(g, "@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n", true, ch, obj, nullptr, TO_CHAR);
+      act(g, "@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n", true, ch, obj, nullptr, act_to::actor);
       send_to_char(g, ch, "@YIt's SUPER grand!@n\r\n");
-      act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, TO_ROOM);
+      act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, act_to::room);
       decCurKI(g, ch, cost, 0);
       return;
     }
     if (prob <= perc) {
-      act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You end up making a poorly formed puddle of goo...@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@C$n@W seems to concentrate for a moment before spitting out a poorly formed puddle of goo...@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You end up making a poorly formed puddle of goo...@n", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "@C$n@W seems to concentrate for a moment before spitting out a poorly formed puddle of goo...@n", true, ch, nullptr, nullptr, act_to::room);
       decCurKI(g, ch, cost, 0);
       improve_skill(g, ch, SKILL_SILK, 1);
       return;
@@ -578,8 +578,8 @@ namespace {
     const silk_bundle &bundle = *std::ranges::find_if(SILK_BUNDLES, [&](const silk_bundle &b) { return prob >= b.min_skill; });
     struct obj_data *obj      = read_object(g, bundle.vnum);
     obj_to_room(g, obj, char_get_in_room(ch));
-    act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, TO_ROOM);
+    act(g, "@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, nullptr, act_to::actor);
+    act(g, "@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, nullptr, act_to::room);
     decCurKI(g, ch, cost, 0);
   }
 
@@ -702,7 +702,7 @@ ACMD(do_restring)
   if (reject(g, ch, found))
     return;
   struct obj_data *obj = *found;
-  if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
+  if (obj_extra_flagged(obj, extra_flag::custom)) {
     send_to_char(g, ch, "You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
     return;
   }
@@ -734,9 +734,9 @@ ACMD(do_fish)
 void fish_update(GameWorld *g)
 {
   for (char_data *ch : each_char(g)) {
-    if (!char_plr_flagged(ch, PLR_FISHING))
+    if (!char_plr_flagged(ch, player_flag::fishing))
       continue;
-    if (!room_flagged(g, char_get_in_room(ch), ROOM_FISHING) || !has_pole(ch))
+    if (!room_flagged(g, char_get_in_room(ch), room_flag::fishing) || !has_pole(ch))
       stop_fishing(ch);
     else
       fish_tick(g, ch);
@@ -824,7 +824,7 @@ ACMD(do_runic)
   else
     inkcost += 2;
 
-  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "You can't seem to find that person.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_room, "You can't seem to find that person.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -833,8 +833,8 @@ ACMD(do_runic)
     return;
   }
   if (skill + bonus < axion_dice(g, 0) && rand_number(g, 1, 5) == 5) {
-    act(g, "@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up destroying the ink bottle!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before a look of panic dons $s face. Just at that moment the bottle of ink explodes! Strange...@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up destroying the ink bottle!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before a look of panic dons $s face. Just at that moment the bottle of ink explodes! Strange...@n", true, ch, nullptr, nullptr, act_to::room);
     extract_obj(g, bottle);
     improve_skill(g, ch, SKILL_RUNIC, 1);
     decCurKI(g, ch, cost, 0);
@@ -843,8 +843,8 @@ ACMD(do_runic)
   }
   if (skill + bonus < axion_dice(g, 0)) {
     decCurKI(g, ch, cost, 0);
-    act(g, "@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up evaporating some ink!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before some ink evaporates. Strange...@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up evaporating some ink!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before some ink evaporates. Strange...@n", true, ch, nullptr, nullptr, act_to::room);
     improve_skill(g, ch, SKILL_RUNIC, 1);
     obj_set_value(bottle, 6, std::max(obj_get_value(bottle, 6) - rand_number(g, 1, 3), 0));
     char_set_wait(ch, PULSE_3SEC);
@@ -918,8 +918,8 @@ ACMD(do_resize)
     send_to_char(g, ch, size == SIZE_SMALL ? "The equipment is already small sized.\r\n" : "The equipment is already medium sized.\r\n");
     return;
   }
-  act(g, "@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, nullptr, TO_CHAR);
-  act(g, "@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, nullptr, TO_ROOM);
+  act(g, "@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, nullptr, act_to::actor);
+  act(g, "@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, nullptr, act_to::room);
   obj_set_size(obj, size);
   decCurST(g, ch, obj_get_weight(obj) + (getMaxST(g, ch) / 40), 0);
 }
@@ -957,7 +957,7 @@ ACMD(do_bury)
 
   struct obj_data *fobj = nullptr; /* the last buried here */
   for (obj_data *buried : room_contents(g, char_get_in_room(ch)))
-    if (obj_extra_flagged(buried, ITEM_BURIED))
+    if (obj_extra_flagged(buried, extra_flag::buried))
       fobj = buried;
 
   if (str_eq_nocase(arg, "bury")) {
@@ -974,15 +974,15 @@ ACMD(do_bury)
       return;
     }
     if (!sand) {
-      act(g, "@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n", true, ch, obj, nullptr, TO_ROOM);
+      act(g, "@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n", true, ch, obj, nullptr, act_to::actor);
+      act(g, "@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n", true, ch, obj, nullptr, act_to::room);
     } else {
-      act(g, "@YYou start digging in a spot of soft sand. Once you have an appropriately sized hole you drop @G$p@Y in and then cover it.@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n", true, ch, obj, nullptr, TO_ROOM);
+      act(g, "@YYou start digging in a spot of soft sand. Once you have an appropriately sized hole you drop @G$p@Y in and then cover it.@n", true, ch, obj, nullptr, act_to::actor);
+      act(g, "@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n", true, ch, obj, nullptr, act_to::room);
     }
     obj_from_char(g, obj);
     obj_to_room(g, obj, char_get_in_room(ch));
-    obj_extra_set(obj, ITEM_BURIED, true);
+    obj_extra_set(obj, extra_flag::buried, true);
     return;
   }
   if (!str_eq_nocase(arg, "uncover")) {
@@ -994,13 +994,13 @@ ACMD(do_bury)
     return;
   }
   if (!sand) {
-    act(g, "@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, TO_CHAR);
-    act(g, "@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, TO_ROOM);
+    act(g, "@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, act_to::actor);
+    act(g, "@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, act_to::room);
   } else {
-    act(g, "@YYou slowly dig and reveal @G$p@Y buried in the sand! You pull it out and set it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, TO_CHAR);
-    act(g, "@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, TO_ROOM);
+    act(g, "@YYou slowly dig and reveal @G$p@Y buried in the sand! You pull it out and set it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, act_to::actor);
+    act(g, "@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", true, ch, fobj, nullptr, act_to::room);
   }
-  obj_extra_set(fobj, ITEM_BURIED, false);
+  obj_extra_set(fobj, extra_flag::buried, false);
 }
 
 /* This determines of an object is a suitable bundle of silk or not */
@@ -1084,8 +1084,8 @@ ACMD(do_cook)
   }
   gather_ingredients(g, ch, d, true);
   if (skill < prob) {
-    act(g, "@wYou screw up the preparation of the recipe and end up wasting the ingredients!@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@C$n@w starts to prepare some food, but ends up ruining the ingredients instead!@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@wYou screw up the preparation of the recipe and end up wasting the ingredients!@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@C$n@w starts to prepare some food, but ends up ruining the ingredients instead!@n", true, ch, nullptr, nullptr, act_to::room);
     improve_skill(g, ch, SKILL_COOKING, 0);
     char_set_wait(ch, PULSE_2SEC);
     return;
@@ -1098,8 +1098,8 @@ ACMD(do_cook)
     psbonus += 1;
     expbonus += 3;
   }
-  act(g, "@wYou carefully prepare the ingredients and then start cooking them. After a while of patience  and skillful care you successfully make @D'@C$p@D'@w!@n", true, ch, meal, nullptr, TO_CHAR);
-  act(g, "@C$n@w carefully prepares some ingredients and starts cooking them. After a while of patience and skillful care $e succeeds in making @D'@C$p@D'@w!@n", true, ch, meal, nullptr, TO_ROOM);
+  act(g, "@wYou carefully prepare the ingredients and then start cooking them. After a while of patience  and skillful care you successfully make @D'@C$p@D'@w!@n", true, ch, meal, nullptr, act_to::actor);
+  act(g, "@C$n@w carefully prepares some ingredients and starts cooking them. After a while of patience and skillful care $e succeeds in making @D'@C$p@D'@w!@n", true, ch, meal, nullptr, act_to::room);
   improve_skill(g, ch, SKILL_COOKING, 0);
 
   if (psbonus > 0 && skill * 0.10 > 0)
@@ -1124,7 +1124,7 @@ ACMD(do_feed)
     send_to_char(g, ch, "Feed a senzu to whom?\r\n");
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "That target isn't here.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_room, "That target isn't here.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -1140,11 +1140,11 @@ ACMD(do_feed)
     send_to_char(g, ch, "You can only feed senzu beans.\r\n");
     return;
   }
-  if (obj_extra_flagged(obj, ITEM_FORGED)) {
+  if (obj_extra_flagged(obj, extra_flag::forged)) {
     send_to_char(g, ch, "They can't swallow that, it is fake!\r\n");
     return;
   }
-  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+  if (obj_extra_flagged(obj, extra_flag::broken)) {
     send_to_char(g, ch, "They can't swallow that, it is broken!\r\n");
     return;
   }
@@ -1185,11 +1185,11 @@ ACMD(do_spoil)
   struct obj_data *weapon = char_get_equipment(ch, WEAR_WIELD1) ? char_get_equipment(ch, WEAR_WIELD1) : char_get_equipment(ch, WEAR_WIELD2);
   int damtype             = weapon ? obj_get_value(weapon, VAL_WEAPON_DAMTYPE) : -1;
   if (damtype == TYPE_SLASH - TYPE_HIT || damtype == TYPE_PIERCE - TYPE_HIT || damtype == TYPE_STAB - TYPE_HIT) {
-    act(g, "@C$n@W reaches down and @rcuts@W the head off of @R$p@W!@n", true, ch, obj, nullptr, TO_ROOM);
-    act(g, "@WYou reach down and @rcut@W the head off of @R$p@W!@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W reaches down and @rcuts@W the head off of @R$p@W!@n", true, ch, obj, nullptr, act_to::room);
+    act(g, "@WYou reach down and @rcut@W the head off of @R$p@W!@n", true, ch, obj, nullptr, act_to::actor);
   } else {
-    act(g, "@C$n@W reaches down and @rtears@W the head off of @R$p@W!@n", true, ch, obj, nullptr, TO_ROOM);
-    act(g, "@WYou reach down and @rtear@W the head off of @R$p@W!@n", true, ch, obj, nullptr, TO_CHAR);
+    act(g, "@C$n@W reaches down and @rtears@W the head off of @R$p@W!@n", true, ch, obj, nullptr, act_to::room);
+    act(g, "@WYou reach down and @rtear@W the head off of @R$p@W!@n", true, ch, obj, nullptr, act_to::actor);
   }
   obj_set_value(obj, VAL_CORPSE_HEAD, 0);
 
@@ -1205,8 +1205,8 @@ ACMD(do_spoil)
   obj_set_short_description(head, str_format("@wThe bloody head of {}@w@n", part));
 
   obj_set_type_flag(head, ITEM_OTHER);
-  obj_wear_set(head, ITEM_WEAR_TAKE, true);
-  obj_extra_set(head, ITEM_UNIQUE_SAVE, true);
+  obj_wear_set(head, wear_flag::take, true);
+  obj_extra_set(head, extra_flag::unique_save, true);
   obj_set_value(head, 0, 0);
   obj_set_value(head, 1, 0);
   obj_set_value(head, 2, 0);

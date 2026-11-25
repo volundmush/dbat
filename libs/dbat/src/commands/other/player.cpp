@@ -15,7 +15,6 @@
 #include "dbat/consts/auction.hpp"
 #include "dbat/consts/aligns.hpp"
 #include "dbat/utils.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/config.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
@@ -66,14 +65,14 @@ ACMD(do_spar)
 {
   if (char_is_npc(ch))
     return;
-  if (char_plr_flagged(ch, PLR_SPAR)) {
-    act(g, "@wYou cease your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@C$n@w ceases $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
+  if (char_plr_flagged(ch, player_flag::spar)) {
+    act(g, "@wYou cease your sparring stance.@n", false, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@C$n@w ceases $s sparring stance.@n", false, ch, nullptr, nullptr, act_to::room);
   } else {
-    act(g, "@wYou move into your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@C$n@w moves into $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@wYou move into your sparring stance.@n", false, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@C$n@w moves into $s sparring stance.@n", false, ch, nullptr, nullptr, act_to::room);
   }
-  char_plr_toggle(ch, PLR_SPAR);
+  char_plr_toggle(ch, player_flag::spar);
 }
 
 namespace {
@@ -81,7 +80,7 @@ namespace {
   std::string_view cannot_quit(GameWorld *g, struct char_data *ch)
   {
     room_vnum room = char_get_in_room(ch);
-    if (room_flagged(g, room, ROOM_PAST))
+    if (room_flagged(g, room, room_flag::past))
       return "This is the past, you can't quit here!\r\n";
     if (room >= 2002 && room <= 2011)
       return "You can't quit in the arena!\r\n";
@@ -136,7 +135,7 @@ ACMD(do_quit)
     send_to_char(g, ch, "You die before your time...\r\n");
     die(g, ch, nullptr);
   } else {
-    act(g, "$n has left the game.", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "$n has left the game.", true, ch, nullptr, nullptr, act_to::room);
     mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, ch)), true, "{} has quit the game.", char_get_name(ch));
     send_to_char(g, ch, "Goodbye, friend.. Come back soon!\r\n");
     if (char_get_followers(ch) || char_get_master(g, ch))
@@ -211,7 +210,7 @@ ACMD(do_visible)
 {
   if (char_get_admlevel(ch))
     perform_immort_vis(g, ch);
-  else if (char_aff_flagged(ch, AFF_INVISIBLE)) {
+  else if (char_aff_flagged(ch, aff_flag::invisible)) {
     appear(g, ch);
     send_to_char(g, ch, "You break the spell of invisibility.\r\n");
   } else
@@ -225,7 +224,7 @@ ACMD(do_title)
 
   if (char_is_npc(ch))
     send_to_char(g, ch, "Your title is fine... go away.\r\n");
-  else if (char_plr_flagged(ch, PLR_NOTITLE))
+  else if (char_plr_flagged(ch, player_flag::notitle))
     send_to_char(g, ch, "You can't title yourself -- you shouldn't have abused it!\r\n");
   else if (text.contains("(") || text.contains(")"))
     send_to_char(g, ch, "Titles can't contain the ( or ) characters.\r\n");
@@ -241,13 +240,13 @@ namespace {
   /* vict joins ch's group, if they will */
   bool perform_group(GameWorld *g, struct char_data *ch, struct char_data *vict)
   {
-    if (char_aff_flagged(vict, AFF_GROUP) || !char_can_see(g, ch, vict))
+    if (char_aff_flagged(vict, aff_flag::group) || !char_can_see(g, ch, vict))
       return false;
     if (char_get_bonuses(vict, BONUS_LONER) > 0) {
-      act(g, "$n is the loner type and refuses to be in your group.", true, vict, nullptr, ch, TO_VICT);
+      act(g, "$n is the loner type and refuses to be in your group.", true, vict, nullptr, ch, act_to::vict);
       return false;
     }
-    char_aff_set(vict, AFF_GROUP, true);
+    char_aff_set(vict, aff_flag::group, true);
     act_triple(g, {ch != vict ? "$N is now a member of your group." : "", "You are now a member of $n's group.", "$N is now a member of $n's group."}, ch, nullptr, vict);
     return true;
   }
@@ -266,7 +265,7 @@ namespace {
 
   void print_group(GameWorld *g, struct char_data *ch)
   {
-    if (!char_aff_flagged(ch, AFF_GROUP)) {
+    if (!char_aff_flagged(ch, aff_flag::group)) {
       send_to_char(g, ch, "But you are not the member of a group!\r\n");
       return;
     }
@@ -274,21 +273,21 @@ namespace {
     struct char_data *k = char_get_master(g, ch) ? char_get_master(g, ch) : ch;
     /* quirk: the leader is measured two ways, so between them gets no line, and when both hold, the red one */
     std::string buf;
-    if (char_aff_flagged(k, AFF_GROUP)) {
+    if (char_aff_flagged(k, aff_flag::group)) {
       send_to_char(g, ch, "@D----------------@n\r\n");
       if (getCurPL(g, k) > getEffMaxPL(g, k) / 10)
         buf = group_line(g, k, 'L', false);
       if (getCurPL(g, k) <= (getEffMaxPL(g, k) - getCurCarriedWeight(k)) / 10)
         buf = group_line(g, k, 'L', true);
-      act(g, buf, false, ch, nullptr, k, TO_CHAR);
+      act(g, buf, false, ch, nullptr, k, act_to::actor);
     }
     for (char_data *fol : char_followers(g, k)) {
-      if (!char_aff_flagged(fol, AFF_GROUP))
+      if (!char_aff_flagged(fol, aff_flag::group))
         continue;
       send_to_char(g, ch, "@D----------------@n\r\n");
       bool low = getCurPL(g, fol) <= (getEffMaxPL(g, fol) - getCurCarriedWeight(fol)) / 10;
       buf      = group_line(g, fol, 'F', low);
-      act(g, buf, false, ch, nullptr, fol, TO_CHAR);
+      act(g, buf, false, ch, nullptr, fol, act_to::actor);
     }
     send_to_char(g, ch, "@D----------------@n\r\n");
   }
@@ -308,7 +307,7 @@ ACMD(do_group)
     return;
   }
   if (char_get_master(g, ch)) {
-    act(g, "You cannot enroll group members without being head of a group.", false, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "You cannot enroll group members without being head of a group.", false, ch, nullptr, nullptr, act_to::actor);
     return;
   }
   if (str_eq_nocase(buf, "all")) {
@@ -320,18 +319,18 @@ ACMD(do_group)
       send_to_char(g, ch, "Everyone following you is already in your group.\r\n");
     return;
   }
-  struct char_data *vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM);
+  struct char_data *vict = get_char_vis(g, ch, buf, nullptr, find_flag::char_room);
   if (!vict)
     send_to_char(g, ch, CONFIG_NOPERSON);
   else if (char_get_master(g, vict) != ch && vict != ch)
-    act(g, "$N must follow you to enter your group.", false, ch, nullptr, vict, TO_CHAR);
-  else if (char_aff_flagged(vict, AFF_GROUP)) {
+    act(g, "$N must follow you to enter your group.", false, ch, nullptr, vict, act_to::actor);
+  else if (char_aff_flagged(vict, aff_flag::group)) {
     kicked_out(g, ch, vict);
-    char_aff_set(vict, AFF_GROUP, false);
+    char_aff_set(vict, aff_flag::group, false);
   } else {
-    if (!char_aff_flagged(ch, AFF_GROUP)) {
+    if (!char_aff_flagged(ch, aff_flag::group)) {
       send_to_char(g, ch, "You form a group, with you as leader.\r\n");
-      char_aff_set(ch, AFF_GROUP, true);
+      char_aff_set(ch, aff_flag::group, true);
     }
     perform_group(g, ch, vict);
   }
@@ -343,25 +342,25 @@ ACMD(do_ungroup)
   std::string buf       = take_arg(rest);
 
   if (buf.empty()) {
-    if (char_get_master(g, ch) || !char_aff_flagged(ch, AFF_GROUP)) {
+    if (char_get_master(g, ch) || !char_aff_flagged(ch, aff_flag::group)) {
       send_to_char(g, ch, "But you lead no group!\r\n");
       return;
     }
     for (char_data *fol : char_followers(g, ch)) {
-      if (!char_aff_flagged(fol, AFF_GROUP))
+      if (!char_aff_flagged(fol, aff_flag::group))
         continue;
-      char_aff_set(fol, AFF_GROUP, false);
-      act(g, "$N has disbanded the group.", true, fol, nullptr, ch, TO_CHAR);
+      char_aff_set(fol, aff_flag::group, false);
+      act(g, "$N has disbanded the group.", true, fol, nullptr, ch, act_to::actor);
       char_set_combatexpertise(fol, 0);
-      if (!char_aff_flagged(fol, AFF_CHARM))
+      if (!char_aff_flagged(fol, aff_flag::charm))
         stop_follower(g, fol);
     }
-    char_aff_set(ch, AFF_GROUP, false);
+    char_aff_set(ch, aff_flag::group, false);
     char_set_combatexpertise(ch, 0);
     send_to_char(g, ch, "You disband the group.\r\n");
     return;
   }
-  auto found = find_char(g, ch, buf, FIND_CHAR_ROOM, "There is no such person!\r\n");
+  auto found = find_char(g, ch, buf, find_flag::char_room, "There is no such person!\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *tch = *found;
@@ -369,14 +368,14 @@ ACMD(do_ungroup)
     send_to_char(g, ch, "That person is not following you!\r\n");
     return;
   }
-  if (!char_aff_flagged(tch, AFF_GROUP)) {
+  if (!char_aff_flagged(tch, aff_flag::group)) {
     send_to_char(g, ch, "That person isn't in your group.\r\n");
     return;
   }
-  char_aff_set(tch, AFF_GROUP, false);
+  char_aff_set(tch, aff_flag::group, false);
   char_set_combatexpertise(tch, 0);
   kicked_out(g, ch, tch);
-  if (!char_aff_flagged(tch, AFF_CHARM))
+  if (!char_aff_flagged(tch, aff_flag::charm))
     stop_follower(g, tch);
 }
 
@@ -403,9 +402,9 @@ ACMD(do_split)
 
   /* Everyone in the group here shares: the leader, and the players following them (but ch, counted with the leader) */
   struct char_data *k = char_get_master(g, ch) ? char_get_master(g, ch) : ch;
-  auto shares_here    = [&](struct char_data *fol) { return char_aff_flagged(fol, AFF_GROUP) && !char_is_npc(fol) && fol != ch && char_get_in_room(fol) == char_get_in_room(ch); };
-  int num             = (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) ? 1 : 0) + std::ranges::count_if(char_followers(g, k), shares_here);
-  if (num <= 0 || !char_aff_flagged(ch, AFF_GROUP)) {
+  auto shares_here    = [&](struct char_data *fol) { return char_aff_flagged(fol, aff_flag::group) && !char_is_npc(fol) && fol != ch && char_get_in_room(fol) == char_get_in_room(ch); };
+  int num             = (char_aff_flagged(k, aff_flag::group) && char_get_in_room(k) == char_get_in_room(ch) ? 1 : 0) + std::ranges::count_if(char_followers(g, k), shares_here);
+  if (num <= 0 || !char_aff_flagged(ch, aff_flag::group)) {
     send_to_char(g, ch, "With whom do you wish to share your gold?\r\n");
     return;
   }
@@ -415,7 +414,7 @@ ACMD(do_split)
   std::string msg = str_format("{} splits {:d} zenni; you receive {:d}.\r\n", char_get_name(ch), amount, share);
   if (rest)
     msg += str_format("{:d} zenni {} not splitable, so {} keeps the money.\r\n", rest, rest == 1 ? "was" : "were", char_get_name(ch));
-  if (char_aff_flagged(k, AFF_GROUP) && char_get_in_room(k) == char_get_in_room(ch) && !char_is_npc(k) && k != ch) {
+  if (char_aff_flagged(k, aff_flag::group) && char_get_in_room(k) == char_get_in_room(ch) && !char_is_npc(k) && k != ch) {
     char_set_gold(k, char_get_gold(k) + share);
     send_to_char(g, k, "{}", msg);
   }
@@ -438,7 +437,7 @@ namespace {
     char letter;
     pref_flag flag;
   };
-  constexpr prompt_part PROMPT_PARTS[] = {{'p', PRF_DISPHP}, {'s', PRF_DISPMOVE}, {'k', PRF_DISPKI}, {'t', PRF_DISPTNL}, {'f', PRF_FURY}, {'h', PRF_DISTIME}, {'g', PRF_DISGOLD}, {'l', PRF_DISPRAC}, {'m', PRF_DISHUTH}, {'c', PRF_DISPERC}};
+  constexpr prompt_part PROMPT_PARTS[] = {{'p', pref_flag::disphp}, {'s', pref_flag::dispmove}, {'k', pref_flag::dispki}, {'t', pref_flag::disptnl}, {'f', pref_flag::fury}, {'h', pref_flag::distime}, {'g', pref_flag::disgold}, {'l', pref_flag::disprac}, {'m', pref_flag::dishuth}, {'c', pref_flag::disperc}};
 } // namespace
 
 ACMD(do_display)
@@ -463,7 +462,7 @@ ACMD(do_display)
         send_to_char(g, ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
         return;
       }
-      if (part->flag == PRF_FURY && !char_is_halfbreed(ch))
+      if (part->flag == pref_flag::fury && !char_is_halfbreed(ch))
         send_to_char(g, ch, "Only halfbreeds use fury.\r\n");
       char_prf_toggle(g, ch, part->flag);
     }
@@ -548,11 +547,11 @@ namespace {
 
   void afk_announce(GameWorld *g, struct char_data *ch)
   {
-    if (char_prf_flagged(g, ch, PRF_AFK)) {
-      act(g, "$n has gone AFK.", true, ch, nullptr, nullptr, TO_ROOM);
+    if (char_prf_flagged(g, ch, pref_flag::afk)) {
+      act(g, "$n has gone AFK.", true, ch, nullptr, nullptr, act_to::room);
       return;
     }
-    act(g, "$n has come back from AFK.", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "$n has come back from AFK.", true, ch, nullptr, nullptr, act_to::room);
     if (has_mail(g, char_get_idnum(ch)))
       send_to_char(g, ch, "You have mail waiting.\r\n");
   }
@@ -568,18 +567,18 @@ namespace {
   void buildwalk_log(GameWorld *g, struct char_data *ch)
   {
     mudlog(g, LOG_CMP, char_get_level(ch), true, "OLC: {} turned buildwalk {}. Allowed zone {:d}",
-           char_get_name(ch), char_prf_flagged(g, ch, PRF_BUILDWALK) ? "on" : "off", char_get_olc_zone(g, ch));
+           char_get_name(ch), char_prf_flagged(g, ch, pref_flag::buildwalk) ? "on" : "off", char_get_olc_zone(g, ch));
   }
 
   bool cannot_hide(GameWorld *g, struct char_data *ch)
   {
     bool ki_user = char_get_preference(ch) == PREFERENCE_KI;
     if ((char_get_charge(ch) > 0 && !ki_user) || (char_get_charge(ch) > getMaxKI(g, ch) * 0.1 && ki_user) ||
-        char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
+        char_plr_flagged(ch, player_flag::powerup) || char_aff_flagged(ch, aff_flag::flying)) {
       send_to_char(g, ch, "You stand out too much to hide right now!\r\n");
       return true;
     }
-    if (char_plr_flagged(ch, PLR_HEALT)) {
+    if (char_plr_flagged(ch, player_flag::healt)) {
       send_to_char(g, ch, "You are inside a healing tank!\r\n");
       return true;
     }
@@ -609,62 +608,62 @@ namespace {
       send_to_char(g, ch, "You are not an immortal.\r\n");
       return true;
     }
-    char_prf_toggle(g, ch, PRF_TEST);
-    send_to_char(g, ch, "Okay. Testing is now: {}\r\n", char_prf_flagged(g, ch, PRF_TEST) ? "On" : "Off");
-    if (char_prf_flagged(g, ch, PRF_TEST))
+    char_prf_toggle(g, ch, pref_flag::test);
+    send_to_char(g, ch, "Okay. Testing is now: {}\r\n", char_prf_flagged(g, ch, pref_flag::test) ? "On" : "Off");
+    if (char_prf_flagged(g, ch, pref_flag::test))
       send_to_char(g, ch, "Make sure to remove nohassle as well.\r\n");
     return true;
   }
 
   constexpr gen_toggle GEN_TOGGLES[] = {
-      {SCMD_NOSUMMON, prf<PRF_SUMMONABLE>, "You are now safe from summoning by other players.\r\n", "You may now be summoned by other players.\r\n"},
-      {SCMD_NOHASSLE, prf<PRF_NOHASSLE>, "Nohassle disabled.\r\n", "Nohassle enabled.\r\n"},
-      {SCMD_BRIEF, prf<PRF_BRIEF>, "Brief mode off.\r\n", "Brief mode on.\r\n"},
-      {SCMD_COMPACT, prf<PRF_COMPACT>, "Compact mode off.\r\n", "Compact mode on.\r\n"},
-      {SCMD_NOTELL, prf<PRF_NOTELL>, "You can now hear tells.\r\n", "You are now deaf to tells.\r\n"},
-      {SCMD_NOAUCTION, prf<PRF_NOAUCT>, "You can now hear newbie.\r\n", "You are now deaf to newbie.\r\n"},
-      {SCMD_DEAF, prf<PRF_DEAF>, "You can now hear shouts.\r\n", "You are now deaf to shouts.\r\n"},
-      {SCMD_NOGOSSIP, prf<PRF_NOGOSS>, "You can now hear ooc.\r\n", "You are now deaf to ooc.\r\n"},
-      {SCMD_NOGRATZ, prf<PRF_NOGRATZ>, "You can now hear the congratulation messages.\r\n", "You are now deaf to the congratulation messages.\r\n"},
-      {SCMD_NOWIZ, prf<PRF_NOWIZ>, "You can now hear the Wiz-channel.\r\n", "You are now deaf to the Wiz-channel.\r\n"},
-      {SCMD_QUEST, prf<PRF_QUEST>, "You are no longer part of the Quest.\r\n", "Okay, you are part of the Quest!\r\n"},
-      {SCMD_ROOMFLAGS, prf<PRF_ROOMFLAGS>, "You will no longer see the room flags.\r\n", "You will now see the room flags.\r\n"},
-      {SCMD_NOREPEAT, prf<PRF_NOREPEAT>, "You will now have your communication repeated.\r\n", "You will no longer have your communication repeated.\r\n"},
-      {SCMD_HOLYLIGHT, prf<PRF_HOLYLIGHT>, "HolyLight mode off.\r\n", "HolyLight mode on.\r\n"},
+      {SCMD_NOSUMMON, prf<pref_flag::summonable>, "You are now safe from summoning by other players.\r\n", "You may now be summoned by other players.\r\n"},
+      {SCMD_NOHASSLE, prf<pref_flag::nohassle>, "Nohassle disabled.\r\n", "Nohassle enabled.\r\n"},
+      {SCMD_BRIEF, prf<pref_flag::brief>, "Brief mode off.\r\n", "Brief mode on.\r\n"},
+      {SCMD_COMPACT, prf<pref_flag::compact>, "Compact mode off.\r\n", "Compact mode on.\r\n"},
+      {SCMD_NOTELL, prf<pref_flag::notell>, "You can now hear tells.\r\n", "You are now deaf to tells.\r\n"},
+      {SCMD_NOAUCTION, prf<pref_flag::noauct>, "You can now hear newbie.\r\n", "You are now deaf to newbie.\r\n"},
+      {SCMD_DEAF, prf<pref_flag::deaf>, "You can now hear shouts.\r\n", "You are now deaf to shouts.\r\n"},
+      {SCMD_NOGOSSIP, prf<pref_flag::nogoss>, "You can now hear ooc.\r\n", "You are now deaf to ooc.\r\n"},
+      {SCMD_NOGRATZ, prf<pref_flag::nogratz>, "You can now hear the congratulation messages.\r\n", "You are now deaf to the congratulation messages.\r\n"},
+      {SCMD_NOWIZ, prf<pref_flag::nowiz>, "You can now hear the Wiz-channel.\r\n", "You are now deaf to the Wiz-channel.\r\n"},
+      {SCMD_QUEST, prf<pref_flag::quest>, "You are no longer part of the Quest.\r\n", "Okay, you are part of the Quest!\r\n"},
+      {SCMD_ROOMFLAGS, prf<pref_flag::roomflags>, "You will no longer see the room flags.\r\n", "You will now see the room flags.\r\n"},
+      {SCMD_NOREPEAT, prf<pref_flag::norepeat>, "You will now have your communication repeated.\r\n", "You will no longer have your communication repeated.\r\n"},
+      {SCMD_HOLYLIGHT, prf<pref_flag::holylight>, "HolyLight mode off.\r\n", "HolyLight mode on.\r\n"},
       {SCMD_SLOWNS, slow_nameserver, "Nameserver_is_slow changed to NO; IP addresses will now be resolved.\r\n",
        "Nameserver_is_slow changed to YES; sitenames will no longer be resolved.\r\n"},
-      {SCMD_AUTOEXIT, prf<PRF_AUTOEXIT>, "Autoexits disabled.\r\n", "Autoexits enabled.\r\n"},
+      {SCMD_AUTOEXIT, prf<pref_flag::autoexit>, "Autoexits disabled.\r\n", "Autoexits enabled.\r\n"},
       {SCMD_TRACK, track_doors, "Will no longer track through doors.\r\n", "Will now track through doors.\r\n"},
-      {SCMD_BUILDWALK, prf<PRF_BUILDWALK>, "Buildwalk Off.\r\n", "Buildwalk On.\r\n", immortals_only, buildwalk_log},
-      {SCMD_AFK, prf<PRF_AFK>, "AFK flag is now off.\r\n", "AFK flag is now on.\r\n", nullptr, afk_announce},
-      {SCMD_AUTOASSIST, prf<PRF_AUTOASSIST>, "You will no longer Auto-Assist.\r\n", "You will now Auto-Assist.\r\n"},
-      {SCMD_AUTOLOOT, prf<PRF_AUTOLOOT>, "Autoloot disabled.\r\n", "Autoloot enabled.\r\n"},
-      {SCMD_AUTOGOLD, prf<PRF_AUTOGOLD>, "Autogold disabled.\r\n", "Autogold enabled.\r\n"},
-      {SCMD_CLS, prf<PRF_CLS>, "Will no longer clear screen in OLC.\r\n", "Will now clear screen in OLC.\r\n"},
-      {SCMD_AUTOSPLIT, prf<PRF_AUTOSPLIT>, "Autosplit disabled.\r\n", "Autosplit enabled.\r\n"},
-      {SCMD_AUTOSAC, prf<PRF_AUTOSAC>, "Autosac disabled.\r\n", "Autosac enabled.\r\n"},
-      {SCMD_SNEAK, aff<AFF_SNEAK>, "You will no longer attempt to be sneaky.\r\n", "You will try to move as silently as you can.\r\n"},
-      {SCMD_HIDE, aff<AFF_HIDE>, "You will no longer attempt to stay hidden.\r\n", "You will try to stay hidden.\r\n", cannot_hide},
-      {SCMD_AUTOMEM, prf<PRF_AUTOMEM>, "You will no longer automatically memorize spells in your list.\r\n",
+      {SCMD_BUILDWALK, prf<pref_flag::buildwalk>, "Buildwalk Off.\r\n", "Buildwalk On.\r\n", immortals_only, buildwalk_log},
+      {SCMD_AFK, prf<pref_flag::afk>, "AFK flag is now off.\r\n", "AFK flag is now on.\r\n", nullptr, afk_announce},
+      {SCMD_AUTOASSIST, prf<pref_flag::autoassist>, "You will no longer Auto-Assist.\r\n", "You will now Auto-Assist.\r\n"},
+      {SCMD_AUTOLOOT, prf<pref_flag::autoloot>, "Autoloot disabled.\r\n", "Autoloot enabled.\r\n"},
+      {SCMD_AUTOGOLD, prf<pref_flag::autogold>, "Autogold disabled.\r\n", "Autogold enabled.\r\n"},
+      {SCMD_CLS, prf<pref_flag::cls>, "Will no longer clear screen in OLC.\r\n", "Will now clear screen in OLC.\r\n"},
+      {SCMD_AUTOSPLIT, prf<pref_flag::autosplit>, "Autosplit disabled.\r\n", "Autosplit enabled.\r\n"},
+      {SCMD_AUTOSAC, prf<pref_flag::autosac>, "Autosac disabled.\r\n", "Autosac enabled.\r\n"},
+      {SCMD_SNEAK, aff<aff_flag::sneak>, "You will no longer attempt to be sneaky.\r\n", "You will try to move as silently as you can.\r\n"},
+      {SCMD_HIDE, aff<aff_flag::hide>, "You will no longer attempt to stay hidden.\r\n", "You will try to stay hidden.\r\n", cannot_hide},
+      {SCMD_AUTOMEM, prf<pref_flag::automem>, "You will no longer automatically memorize spells in your list.\r\n",
        "You will automatically memorize spells in your list.\r\n"},
-      {SCMD_VIEWORDER, prf<PRF_VIEWORDER>, "Viewing newest board messages at top of list.\r\n", "Viewing newest board messages at bottom of list.\r\n"},
-      {SCMD_NOCOMPRESS, prf<PRF_NOCOMPRESS>, "Compression will be used if your client supports it.\r\n",
+      {SCMD_VIEWORDER, prf<pref_flag::vieworder>, "Viewing newest board messages at top of list.\r\n", "Viewing newest board messages at bottom of list.\r\n"},
+      {SCMD_NOCOMPRESS, prf<pref_flag::nocompress>, "Compression will be used if your client supports it.\r\n",
        "Compression will not be used even if your client supports it.\r\n", compression_disabled},
       {SCMD_TEST, nullptr, "", "", test_mode},
-      {SCMD_WHOHIDE, prf<PRF_HIDE>, "You are no longer hidden from view on the who list and public channels.\r\n",
+      {SCMD_WHOHIDE, prf<pref_flag::hide>, "You are no longer hidden from view on the who list and public channels.\r\n",
        "You are now hidden from view on the who list and public channels.\r\n"},
-      {SCMD_NMWARN, prf<PRF_NMWARN>, "You will now be told that you have mail on prompt.\r\n", "You will no longer be told that you have mail on prompt.\r\n"},
-      {SCMD_HINTS, prf<PRF_HINTS>, "You will no longer receive automatic hints.\r\n", "You will now receive automatic hints.\r\n"},
-      {SCMD_NODEC, prf<PRF_NODEC>, "Screen Reader Friendly Mode Deactivated.\r\n", "Screen Reader Friendly Mode Activated..\r\n"},
-      {SCMD_NOEQSEE, prf<PRF_NOEQSEE>, "You will now see equipment when looking at someone.\r\n", "You will no longer see equipment when looking at someone.\r\n"},
-      {SCMD_NOMUSIC, prf<PRF_NOMUSIC>, "You will now listen to the music channel.\r\n", "You will no longer listen to the music channel.\r\n"},
-      {SCMD_NOPARRY, prf<PRF_NOPARRY>, "You will now parry attacks.\r\n", "You will no longer parry attacks.\r\n"},
-      {SCMD_LKEEP, prf<PRF_LKEEP>, "You will no longer keep cybernetic limbs with death.\r\n", "You will now keep cybernetic limbs with death.\r\n"},
-      {SCMD_CARVE, prf<PRF_CARVE>, "You will no longer worry about acquiring steaks from animals.\r\n", "You will now acquire steaks from animal if you can.\r\n"},
-      {SCMD_NOGIVE, prf<PRF_NOGIVE>, "You will now accept things being given to you.\r\n", "You will no longer accept things being given to you.\r\n"},
-      {SCMD_INSTRUCT, prf<PRF_INSTRUCT>, "You will no longer instruct those you spar with.\r\n", "You will now instruct those you spar with.\r\n"},
-      {SCMD_GHEALTH, prf<PRF_GHEALTH>, "You will no longer view group health.\r\n", "You will now view group health.\r\n"},
-      {SCMD_IHEALTH, prf<PRF_IHEALTH>, "You will no longer view item health.\r\n", "You will now view item health.\r\n"},
+      {SCMD_NMWARN, prf<pref_flag::nmwarn>, "You will now be told that you have mail on prompt.\r\n", "You will no longer be told that you have mail on prompt.\r\n"},
+      {SCMD_HINTS, prf<pref_flag::hints>, "You will no longer receive automatic hints.\r\n", "You will now receive automatic hints.\r\n"},
+      {SCMD_NODEC, prf<pref_flag::nodec>, "Screen Reader Friendly Mode Deactivated.\r\n", "Screen Reader Friendly Mode Activated..\r\n"},
+      {SCMD_NOEQSEE, prf<pref_flag::noeqsee>, "You will now see equipment when looking at someone.\r\n", "You will no longer see equipment when looking at someone.\r\n"},
+      {SCMD_NOMUSIC, prf<pref_flag::nomusic>, "You will now listen to the music channel.\r\n", "You will no longer listen to the music channel.\r\n"},
+      {SCMD_NOPARRY, prf<pref_flag::noparry>, "You will now parry attacks.\r\n", "You will no longer parry attacks.\r\n"},
+      {SCMD_LKEEP, prf<pref_flag::lkeep>, "You will no longer keep cybernetic limbs with death.\r\n", "You will now keep cybernetic limbs with death.\r\n"},
+      {SCMD_CARVE, prf<pref_flag::carve>, "You will no longer worry about acquiring steaks from animals.\r\n", "You will now acquire steaks from animal if you can.\r\n"},
+      {SCMD_NOGIVE, prf<pref_flag::nogive>, "You will now accept things being given to you.\r\n", "You will no longer accept things being given to you.\r\n"},
+      {SCMD_INSTRUCT, prf<pref_flag::instruct>, "You will no longer instruct those you spar with.\r\n", "You will now instruct those you spar with.\r\n"},
+      {SCMD_GHEALTH, prf<pref_flag::ghealth>, "You will no longer view group health.\r\n", "You will now view group health.\r\n"},
+      {SCMD_IHEALTH, prf<pref_flag::ihealth>, "You will no longer view item health.\r\n", "You will now view item health.\r\n"},
   };
 
   static_assert([] {

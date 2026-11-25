@@ -16,8 +16,8 @@ namespace {
     int type                                          = -1;
     int64_t weight                                    = 1;
     std::initializer_list<std::pair<int, int>> values = {};
-    std::initializer_list<flag_type_of<ITEM_GLOW>> flags                  = {}; /* extra flags */
-    std::initializer_list<flag_type_of<ITEM_WEAR_TAKE>> wear = {}; /* wear flags */
+    std::initializer_list<extra_flag> flags                  = {}; /* extra flags */
+    std::initializer_list<wear_flag> wear = {}; /* wear flags */
   };
 
   struct obj_data *make(GameWorld *g, const made &m)
@@ -31,9 +31,9 @@ namespace {
       obj_set_type_flag(obj, m.type);
     for (auto [i, v] : m.values)
       obj_set_value(obj, i, v);
-    for (flag_type_of<ITEM_GLOW> flag : m.flags)
+    for (extra_flag flag : m.flags)
       obj_extra_set(obj, flag, true);
-    for (flag_type_of<ITEM_WEAR_TAKE> flag : m.wear)
+    for (wear_flag flag : m.wear)
       obj_wear_set(obj, flag, true);
     return obj;
   }
@@ -79,7 +79,7 @@ namespace {
   /* ... in a room of so many more things, in a house */
   void stuffed(GameWorld *g, int count)
   {
-    room_set_flag(g, ARENA, ROOM_HOUSE, true);
+    room_set_flag(g, ARENA, room_flag::house, true);
     for (int i = 0; i < count; i++)
       here(g, {.name = "clutter"});
   }
@@ -103,8 +103,8 @@ namespace {
   {
     for (char_data *c : room_people(g, ARENA))
       if (char_is_npc(c) && isname("dummy", char_get_alias(c))) {
-        char_mob_set(c, MOB_LARM, true);
-        char_mob_set(c, MOB_RARM, true);
+        char_mob_set(c, mob_flag::larm, true);
+        char_mob_set(c, mob_flag::rarm, true);
         return c;
       }
     return nullptr;
@@ -186,16 +186,16 @@ namespace {
   }
 
   /* ... a furniture capsule of this vnum, in a house unless `where` says otherwise */
-  void furniture(GameWorld *g, struct char_data *att, obj_vnum vnum, std::initializer_list<flag_type_of<ROOM_DARK>> flags = {ROOM_HOUSE})
+  void furniture(GameWorld *g, struct char_data *att, obj_vnum vnum, std::initializer_list<room_flag> flags = {room_flag::house})
   {
     carry(g, att, {.name = "capsule", .vnum = vnum});
-    for (flag_type_of<ROOM_DARK> flag : flags)
+    for (room_flag flag : flags)
       room_set_flag(g, ARENA, flag, true);
     stock(g, {19090, 19091, 19092, 19093, 11});
   }
 
   /* auction: selling a rock for this much (said before the line, and the pulses of it played `calls` times) */
-  struct obj_data *rock(GameWorld *g, struct char_data *ch, std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {})
+  struct obj_data *rock(GameWorld *g, struct char_data *ch, std::initializer_list<extra_flag> flags = {})
   {
     return carry(g, ch, {.name = "rock", .flags = flags});
   }
@@ -293,14 +293,14 @@ namespace {
   }
 
   /* put and get: a bag, of this capacity, flagged so */
-  struct obj_data *bag(GameWorld *g, struct char_data *att, int capacity = 100, std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {}, int closed = 0)
+  struct obj_data *bag(GameWorld *g, struct char_data *att, int capacity = 100, std::initializer_list<extra_flag> flags = {}, int closed = 0)
   {
     return carry(g, att, {.name = "bag", .type = ITEM_CONTAINER, .values = {{0, capacity}, {1, closed}}, .flags = flags});
   }
 
   struct obj_data *sheath(GameWorld *g, struct char_data *att, int holds, int swords)
   {
-    struct obj_data *obj = make(g, {.name = "sheath", .type = ITEM_CONTAINER, .weight = holds, .values = {{0, 100}}, .flags = {ITEM_SHEATH}});
+    struct obj_data *obj = make(g, {.name = "sheath", .type = ITEM_CONTAINER, .weight = holds, .values = {{0, 100}}, .flags = {extra_flag::sheath}});
     for (int i = 0; i < swords; i++)
       obj_to_obj(g, read_object(g, 301), obj);
     obj_to_char(g, obj, att);
@@ -309,7 +309,7 @@ namespace {
 
   /* drink: a flask of this liquid, so full of so much */
   struct obj_data *flask(GameWorld *g, struct char_data *att, int liquid = LIQ_WATER, int full = 10, int capacity = 10,
-                         std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {}, int poison = 0, const char *name = "flask")
+                         std::initializer_list<extra_flag> flags = {}, int poison = 0, const char *name = "flask")
   {
     return carry(g, att, {.name = name, .type = ITEM_DRINKCON, .weight = 12, .values = {{0, capacity}, {1, full}, {2, liquid}, {3, poison}}, .flags = flags});
   }
@@ -334,14 +334,14 @@ namespace {
   }
 
   /* eat: food, so nourishing */
-  struct obj_data *bread(GameWorld *g, struct char_data *att, int food = 10, std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {}, int poison = 0,
+  struct obj_data *bread(GameWorld *g, struct char_data *att, int food = 10, std::initializer_list<extra_flag> flags = {}, int poison = 0,
                          int type = ITEM_FOOD, int64_t weight = 2)
   {
     return carry(g, att, {.name = "bread", .type = type, .weight = weight, .values = {{0, food}, {1, 10}, {2, 5}, {3, poison}, {6, 10}}, .flags = flags});
   }
 
   /* wear: something that goes there */
-  struct obj_data *wearable(GameWorld *g, struct char_data *att, const char *name, flag_type_of<ITEM_WEAR_TAKE> wear, std::initializer_list<flag_type_of<ITEM_GLOW>> flags = {},
+  struct obj_data *wearable(GameWorld *g, struct char_data *att, const char *name, wear_flag wear, std::initializer_list<extra_flag> flags = {},
                             int level = 0, int type = -1)
   {
     struct obj_data *obj = make(g, {.name = name, .type = type, .flags = flags, .wear = {wear}});
@@ -353,9 +353,9 @@ namespace {
   /* ... one of everything */
   void wardrobe(GameWorld *g, struct char_data *att)
   {
-    for (flag_type_of<ITEM_WEAR_TAKE> wear : {ITEM_WEAR_FINGER, ITEM_WEAR_NECK, ITEM_WEAR_BODY, ITEM_WEAR_HEAD, ITEM_WEAR_LEGS, ITEM_WEAR_FEET,
-                     ITEM_WEAR_HANDS, ITEM_WEAR_ARMS, ITEM_WEAR_SHIELD, ITEM_WEAR_ABOUT, ITEM_WEAR_WAIST, ITEM_WEAR_WRIST,
-                     ITEM_WEAR_HOLD, ITEM_WEAR_PACK, ITEM_WEAR_EAR, ITEM_WEAR_SH, ITEM_WEAR_EYE})
+    for (wear_flag wear : {wear_flag::finger, wear_flag::neck, wear_flag::body, wear_flag::head, wear_flag::legs, wear_flag::feet,
+                     wear_flag::hands, wear_flag::arms, wear_flag::shield, wear_flag::about, wear_flag::waist, wear_flag::wrist,
+                     wear_flag::hold, wear_flag::pack, wear_flag::ear, wear_flag::sh, wear_flag::eye})
       wearable(g, att, "garment", wear);
   }
 
@@ -397,7 +397,7 @@ namespace {
     {"by a house, keyless", "pack house yes", false, SETUP(house(g, att, 18850, false); pebbles(g, att, 1);), false, 1},
     {"by a house, with its key", "pack house yes", false, SETUP(house(g, att, 18850, true);), false, 1},
     {"by the first house, with its key", "pack house yes", false, SETUP(house(g, att, 18802, true);), false, 1},
-    {"by a copied house, with its key", "pack house yes", false, SETUP(obj_extra_set(house(g, att, 18850, true), ITEM_DUPLICATE, true);), false, 1},
+    {"by a copied house, with its key", "pack house yes", false, SETUP(obj_extra_set(house(g, att, 18850, true), extra_flag::duplicate, true);), false, 1},
     {"by a big house, with its key", "pack house yes", false, SETUP(house(g, att, 18950, true);), false, 1},
     {"by a grand house, with its key", "pack house yes", false, SETUP(house(g, att, 19150, true);), false, 1},
     {"by an odd house, with its key", "pack house yes", false, SETUP(house(g, att, 19050, true);), false, 1},
@@ -420,9 +420,9 @@ namespace {
     {"", "deploy capsule", false, SETUP(), false, 1},
     {"with a rock", "deploy rock", false, SETUP(carry(g, att, {.name = "rock"});), false, 1},
     {"with a furniture capsule, outdoors", "deploy capsule", false, SETUP(furniture(g, att, 19080, {});), false, 1},
-    {"with a furniture capsule, on a ship", "deploy capsule", false, SETUP(furniture(g, att, 19080, {ROOM_HOUSE, ROOM_SHIP});), false, 1},
-    {"with a furniture capsule, in a garden", "deploy capsule", false, SETUP(furniture(g, att, 19080, {ROOM_HOUSE, ROOM_GARDEN1});), false, 1},
-    {"with a furniture capsule, in a big garden", "deploy capsule", false, SETUP(furniture(g, att, 19080, {ROOM_HOUSE, ROOM_GARDEN2});), false, 1},
+    {"with a furniture capsule, on a ship", "deploy capsule", false, SETUP(furniture(g, att, 19080, {room_flag::house, room_flag::ship});), false, 1},
+    {"with a furniture capsule, in a garden", "deploy capsule", false, SETUP(furniture(g, att, 19080, {room_flag::house, room_flag::garden1});), false, 1},
+    {"with a furniture capsule, in a big garden", "deploy capsule", false, SETUP(furniture(g, att, 19080, {room_flag::house, room_flag::garden2});), false, 1},
     {"with a bed capsule", "deploy capsule", false, SETUP(furniture(g, att, 19080);), false, 1},
     {"with a chair capsule", "deploy capsule", false, SETUP(furniture(g, att, 19081);), false, 1},
     {"with a table capsule", "deploy capsule", false, SETUP(furniture(g, att, 19082);), false, 1},
@@ -442,9 +442,9 @@ namespace {
     {"two-handing nothing, armless", "twohand", false, SETUP(unarmed(g, att); two_handed(att, 50); armless(att);), false, 1},
 
     /* auction: there's no such command, so the setup calls it */
-    {"in the time chamber", "auction", false, SETUP(room_set_flag(g, ARENA, ROOM_HBTC, true); rock(g, att); auction(g, att, "rock 10");), false, 1},
-    {"in the past", "auction", false, SETUP(room_set_flag(g, ARENA, ROOM_PAST, true); rock(g, att); auction(g, att, "rock 10");), false, 1},
-    {"hidden", "auction", false, SETUP(char_prf_set(g, att, PRF_HIDE, true); rock(g, att); auction(g, att, "rock 10");), false, 1},
+    {"in the time chamber", "auction", false, SETUP(room_set_flag(g, ARENA, room_flag::hbtc, true); rock(g, att); auction(g, att, "rock 10");), false, 1},
+    {"in the past", "auction", false, SETUP(room_set_flag(g, ARENA, room_flag::past, true); rock(g, att); auction(g, att, "rock 10");), false, 1},
+    {"hidden", "auction", false, SETUP(char_prf_set(g, att, pref_flag::hide, true); rock(g, att); auction(g, att, "rock 10");), false, 1},
     {"asking for nothing", "auction", false, SETUP(auction(g, att, "");), false, 1},
     {"cancelling nothing", "auction", false, SETUP(auction(g, att, "cancel");), false, 1},
     {"stopping nothing", "auction", false, SETUP(auction(g, att, "stop");), false, 1},
@@ -454,7 +454,7 @@ namespace {
     {"selling an item", "auction", false, SETUP(rock(g, att); auction(g, att, "item 10");), false, 1},
     {"selling a rock, at no price", "auction", false, SETUP(rock(g, att); auction(g, att, "rock");), false, 1},
     {"selling a rock, for nothing", "auction", false, SETUP(rock(g, att); auction(g, att, "rock 0");), false, 1},
-    {"selling an unsellable rock", "auction", false, SETUP(rock(g, att, {ITEM_NOSELL}); auction(g, att, "rock 10");), false, 1},
+    {"selling an unsellable rock", "auction", false, SETUP(rock(g, att, {extra_flag::nosell}); auction(g, att, "rock 10");), false, 1},
     {"selling a corpse", "auction", false, SETUP(obj_set_value(rock(g, att), VAL_CONTAINER_CORPSE, 1); auction(g, att, "rock 10");), false, 1},
     {"selling a rock, unbought", "auction", false, SETUP(rock(g, att); auction(g, att, "rock 10"); calls(g, 5);), false, 1},
     {"selling a rock, bought", "auction", false, SETUP(rock(g, att); auction(g, att, "rock 10"); auction_set_buyer(g, victim); g->curbid = 20; calls(g, 5);), false, 1},
@@ -474,13 +474,13 @@ namespace {
     {"selling a rock, asking about it", "auction", false, SETUP(rock(g, att); auction(g, att, "rock 10"); auction(g, att, "stats"); auction(g, att, "cancel");), false, 1},
     {"selling a rock, asked about by the poor", "auction", false, SETUP(rock(g, att); auction(g, att, "rock 10"); char_set_gold(victim, 499); auction(g, victim, "stats"); auction(g, att, "cancel");), false, 1},
     {"selling a rock, asked about", "auction", false, SETUP(rock(g, att); auction(g, att, "rock 10"); char_set_gold(victim, 500); auction(g, victim, "identify"); auction(g, att, "cancel");), false, 1},
-    {"selling a rock, heard in the past", "auction", false, SETUP(room_set_flag(g, 300, ROOM_PAST, true); away(g, victim); rock(g, att); auction(g, att, "rock 10"); auction(g, att, "cancel");), false, 1},
-    {"selling a rock, heard in the time chamber", "auction", false, SETUP(room_set_flag(g, 300, ROOM_HBTC, true); away(g, victim); rock(g, att); auction(g, att, "rock 10"); auction(g, att, "cancel");), false, 1},
+    {"selling a rock, heard in the past", "auction", false, SETUP(room_set_flag(g, 300, room_flag::past, true); away(g, victim); rock(g, att); auction(g, att, "rock 10"); auction(g, att, "cancel");), false, 1},
+    {"selling a rock, heard in the time chamber", "auction", false, SETUP(room_set_flag(g, 300, room_flag::hbtc, true); away(g, victim); rock(g, att); auction(g, att, "rock 10"); auction(g, att, "cancel");), false, 1},
 
     /* bid */
     {"", "bid", false, SETUP(), false, 1},
-    {"with a scouter, in the time chamber", "bid", false, SETUP(bidder(g, att); room_set_flag(g, ARENA, ROOM_HBTC, true);), false, 1},
-    {"with a scouter, in the past", "bid", false, SETUP(bidder(g, att); room_set_flag(g, ARENA, ROOM_PAST, true);), false, 1},
+    {"with a scouter, in the time chamber", "bid", false, SETUP(bidder(g, att); room_set_flag(g, ARENA, room_flag::hbtc, true);), false, 1},
+    {"with a scouter, in the past", "bid", false, SETUP(bidder(g, att); room_set_flag(g, ARENA, room_flag::past, true);), false, 1},
     {"with a scouter", "bid", false, SETUP(bidder(g, att);), false, 1},
     {"with a scouter", "bid list", false, SETUP(bidder(g, att);), false, 1},
     {"with a scouter, lots up", "bid list", false, SETUP(bidder(g, att); lots(g, att, victim);), false, 1},
@@ -495,13 +495,13 @@ namespace {
     {"an appraiser, a worn lot", "bid appraise 1", false, SETUP(appraiser(g, att); obj_set_value(lot(g, 99999, -1, 10, 60), VAL_ALL_HEALTH, 60);), false, 1},
     {"an appraiser, a battered lot", "bid appraise 1", false, SETUP(appraiser(g, att); obj_set_value(lot(g, 99999, -1, 10, 60), VAL_ALL_HEALTH, 10);), false, 1},
     {"an appraiser, a ruined lot", "bid appraise 1", false, SETUP(appraiser(g, att); obj_set_value(lot(g, 99999, -1, 10, 60), VAL_ALL_HEALTH, 0);), false, 1},
-    {"an appraiser, an enchanted lot", "bid appraise 1", false, SETUP(appraiser(g, att); enchanted(lot(g, 99999, -1, 10, 60, {.name = "lot", .wear = {ITEM_WEAR_FINGER, ITEM_WEAR_NECK}}));), false, 1},
+    {"an appraiser, an enchanted lot", "bid appraise 1", false, SETUP(appraiser(g, att); enchanted(lot(g, 99999, -1, 10, 60, {.name = "lot", .wear = {wear_flag::finger, wear_flag::neck}}));), false, 1},
     {"an appraiser, a plain weapon", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON});), false, 1},
-    {"an appraiser, a weapon of the first grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {ITEM_WEAPLVL1}});), false, 1},
-    {"an appraiser, a weapon of the second grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {ITEM_WEAPLVL2}});), false, 1},
-    {"an appraiser, a weapon of the third grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {ITEM_WEAPLVL3}});), false, 1},
-    {"an appraiser, a weapon of the fourth grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {ITEM_WEAPLVL4}});), false, 1},
-    {"an appraiser, a weapon of the fifth grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {ITEM_WEAPLVL5}});), false, 1},
+    {"an appraiser, a weapon of the first grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {extra_flag::weaplvl1}});), false, 1},
+    {"an appraiser, a weapon of the second grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {extra_flag::weaplvl2}});), false, 1},
+    {"an appraiser, a weapon of the third grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {extra_flag::weaplvl3}});), false, 1},
+    {"an appraiser, a weapon of the fourth grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {extra_flag::weaplvl4}});), false, 1},
+    {"an appraiser, a weapon of the fifth grade", "bid appraise 1", false, SETUP(appraiser(g, att); lot(g, 99999, -1, 10, 60, {.name = "lot", .type = ITEM_WEAPON, .flags = {extra_flag::weaplvl5}});), false, 1},
     {"a middling appraiser, lots up", "bid appraise 2", false, SETUP(appraiser(g, att, 50); lots(g, att, victim);), false, 4},
     {"with a scouter, lots up", "bid 1", false, SETUP(bidder(g, att); lots(g, att, victim);), false, 1},
     {"with a scouter, lots up", "bid 99 10", false, SETUP(bidder(g, att); lots(g, att, victim);), false, 1},
@@ -525,7 +525,7 @@ namespace {
     {"", "build nothing", false, SETUP(), false, 1},
     {"", "build chest", false, SETUP(), false, 1},
     {"with the parts of a lamp", "build lamp", false, SETUP(named_proto(g, 5000, "lamp"); assemblyCreate(g, 5000, SCMD_BAKE); assemblyAddComponent(g, 5000, 301, true, false); parts(g, att);), false, 1},
-    {"with the parts, in space", "build chest", false, SETUP(parts(g, att); room_set_flag(g, ARENA, ROOM_SPACE, true);), false, 1},
+    {"with the parts, in space", "build chest", false, SETUP(parts(g, att); room_set_flag(g, ARENA, room_flag::space, true);), false, 1},
     {"with the parts, unskilled", "build chest", false, SETUP(parts(g, att, 0);), false, 2},
     {"with the parts, middling", "build chest", false, SETUP(parts(g, att, 50); toolkit(g, att);), false, 4},
     {"with the parts and a toolkit", "build chest", false, SETUP(parts(g, att); toolkit(g, att);), false, 8},
@@ -557,7 +557,7 @@ namespace {
     {"", "put all", false, SETUP(), false, 1},
     {"", "put pebble bag", false, SETUP(), false, 1},
     {"with a pebble", "put pebble pebble", false, SETUP(pebbles(g, att, 1);), false, 1},
-    {"with a closed bag", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att, 100, {}, cont_value(CONT_CLOSED));), false, 1},
+    {"with a closed bag", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att, 100, {}, cont_value(container_flag::closed));), false, 1},
     {"with a bag", "put pebble bag", false, SETUP(bag(g, att);), false, 1},
     {"with a bag", "put bag bag", false, SETUP(bag(g, att);), false, 1},
     {"with two bags", "put 2.bag bag", false, SETUP(bag(g, att); bag(g, att);), false, 1},
@@ -570,26 +570,26 @@ namespace {
     {"with a bag", "put all bag", false, SETUP(bag(g, att);), false, 1},
     {"bare, with a bag", "put all bag", false, SETUP(bare(g, att); bag(g, att);), false, 1},
     {"with a pebble", "put pebble chest", false, SETUP(pebbles(g, att, 1);), false, 1},
-    {"with a pebble and a forged bag", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att, 100, {ITEM_FORGED});), false, 1},
+    {"with a pebble and a forged bag", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att, 100, {extra_flag::forged});), false, 1},
     {"with a pebble and a sheath", "put pebble sheath", false, SETUP(pebbles(g, att, 1); sheath(g, att, 1, 0);), false, 1},
     {"with a sword and a sheath", "put sword sheath", false, SETUP(missile(g, att); sheath(g, att, 1, 0);), false, 1},
     {"with a sword and a full sheath", "put sword sheath", false, SETUP(missile(g, att); sheath(g, att, 1, 1);), false, 1},
     {"with a sword and a full double sheath", "put sword sheath", false, SETUP(missile(g, att); sheath(g, att, 2, 2);), false, 1},
     {"with a pebble and a bag that holds nothing", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att, 0);), false, 1},
     {"with a pebble, by a duel table", "put pebble table", false, SETUP(pebbles(g, att, 1); here(g, {.name = "table", .vnum = 601, .type = ITEM_CONTAINER, .values = {{0, 100}}});), false, 1},
-    {"with a pebble and a card case", "put pebble case", false, SETUP(pebbles(g, att, 1); carry(g, att, {.name = "case", .type = ITEM_CONTAINER, .values = {{0, 100}}, .flags = {ITEM_CARDCASE}});), false, 1},
+    {"with a pebble and a card case", "put pebble case", false, SETUP(pebbles(g, att, 1); carry(g, att, {.name = "case", .type = ITEM_CONTAINER, .values = {{0, 100}}, .flags = {extra_flag::cardcase}});), false, 1},
     {"with a pebble and a card binder", "put pebble binder", false, SETUP(pebbles(g, att, 1); carry(g, att, {.name = "binder", .vnum = 683, .type = ITEM_CONTAINER, .values = {{0, 100}}});), false, 1},
-    {"with a card and a card case", "put card case", false, SETUP(carry(g, att, {.name = "card", .flags = {ITEM_ANTI_HIEROPHANT}}); carry(g, att, {.name = "case", .vnum = 697, .type = ITEM_CONTAINER, .values = {{0, 100}}});), false, 1},
+    {"with a card and a card case", "put card case", false, SETUP(carry(g, att, {.name = "card", .flags = {extra_flag::anti_hierophant}}); carry(g, att, {.name = "case", .vnum = 697, .type = ITEM_CONTAINER, .values = {{0, 100}}});), false, 1},
     {"with a pebble and a small bag", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att, 1);), false, 1},
-    {"with a cursed pebble", "put pebble chest", false, SETUP(carry(g, att, {.flags = {ITEM_NODROP}});), false, 1},
-    {"with a cursed pebble and a bag", "put pebble bag", false, SETUP(carry(g, att, {.flags = {ITEM_NODROP}}); bag(g, att);), false, 1},
-    {"with a cursed pebble and a cursed bag", "put pebble bag", false, SETUP(carry(g, att, {.flags = {ITEM_NODROP}}); bag(g, att, 100, {ITEM_NODROP});), false, 1},
+    {"with a cursed pebble", "put pebble chest", false, SETUP(carry(g, att, {.flags = {extra_flag::nodrop}});), false, 1},
+    {"with a cursed pebble and a bag", "put pebble bag", false, SETUP(carry(g, att, {.flags = {extra_flag::nodrop}}); bag(g, att);), false, 1},
+    {"with a cursed pebble and a cursed bag", "put pebble bag", false, SETUP(carry(g, att, {.flags = {extra_flag::nodrop}}); bag(g, att, 100, {extra_flag::nodrop});), false, 1},
     {"with a dragon ball and a bag", "put ball bag", false, SETUP(dragon_balls(g, att, {3}); bag(g, att);), false, 1},
-    {"with a fleeting pebble and a bag", "put pebble bag", false, SETUP(carry(g, att, {.flags = {ITEM_NORENT}}); bag(g, att);), false, 1},
+    {"with a fleeting pebble and a bag", "put pebble bag", false, SETUP(carry(g, att, {.flags = {extra_flag::norent}}); bag(g, att);), false, 1},
     {"with a pebble, in a full house", "put pebble chest", false, SETUP(pebbles(g, att, 1); stuffed(g, 150);), false, 1},
     {"with a pebble and a bag, in a full house", "put pebble bag", false, SETUP(pebbles(g, att, 1); bag(g, att); stuffed(g, 150);), false, 1},
     {"with a pebble, by a portal", "put pebble portal", false, SETUP(pebbles(g, att, 1); here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{0, 300}}});), false, 1},
-    {"with a pebble, by a closed portal", "put pebble portal", false, SETUP(pebbles(g, att, 1); here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{0, 300}, {1, cont_value(CONT_CLOSED)}}});), false, 1},
+    {"with a pebble, by a closed portal", "put pebble portal", false, SETUP(pebbles(g, att, 1); here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{0, 300}, {1, cont_value(container_flag::closed)}}});), false, 1},
     {"with a pebble, by a vehicle", "put pebble car", false, SETUP(pebbles(g, att, 1); here(g, {.name = "car", .type = ITEM_VEHICLE, .values = {{0, 300}}});), false, 1},
 
     /* get */
@@ -606,22 +606,22 @@ namespace {
     {"in an empty room", "get all", false, SETUP(swept(g);), false, 1},
     {"by a sign", "get sign", false, SETUP(described(room_ex_description_slot(room_of(g, ARENA)), "sign");), false, 1},
     {"by a sign and a signpost", "get sig", false, SETUP(described(room_ex_description_slot(room_of(g, ARENA)), "signpost"); here(g, {.name = "sig"});), false, 1},
-    {"by a fixed pebble", "get pebble", false, SETUP(obj_wear_set(here(g, {}), ITEM_WEAR_TAKE, false);), false, 1},
+    {"by a fixed pebble", "get pebble", false, SETUP(obj_wear_set(here(g, {}), wear_flag::take, false);), false, 1},
     {"crowded, by a stone", "get stone", false, SETUP(crowded(g, att); here(g, {.name = "stone"});), false, 1},
     {"laden, by a pebble", "get stone", false, SETUP(laden(g, att); here(g, {.name = "stone"});), false, 1},
     {"in heavy gravity, by a pebble", "get pebble", false, SETUP(room_set_gravity(g, ARENA, (int)getMaxCarryWeight(g, att)); here(g, {});), false, 1},
     {"by an occupied seat", "get seat", false, SETUP({ obj_data *seat = here(g, {.name = "seat"}); char_set_sits(victim, seat); obj_set_sitting(seat, victim); }), false, 1},
-    {"by a buried pebble", "get pebble", false, SETUP(here(g, {.flags = {ITEM_BURIED}});), false, 1},
-    {"in a garden, by a sprout", "get sprout", false, SETUP(room_set_flag(g, ARENA, ROOM_GARDEN1, true); here(g, {.name = "sprout", .type = ITEM_PLANT});), false, 1},
-    {"in a big garden, by a sprout", "get sprout", false, SETUP(room_set_flag(g, ARENA, ROOM_GARDEN2, true); here(g, {.name = "sprout", .type = ITEM_PLANT});), false, 1},
-    {"by a hot pebble", "get pebble", false, SETUP(here(g, {.flags = {ITEM_HOT}});), false, 1},
-    {"fireproof, by a hot pebble", "get pebble", false, SETUP(char_set_bonuses(att, BONUS_FIREPROOF, 1); here(g, {.flags = {ITEM_HOT}});), false, 1},
-    {"fireprone, by a hot pebble", "get pebble", false, SETUP(char_set_bonuses(att, BONUS_FIREPRONE, 1); here(g, {.flags = {ITEM_HOT}});), false, 1},
-    {"a demon, by a hot pebble", "get pebble", false, SETUP(char_set_race(att, RACE_DEMON); here(g, {.flags = {ITEM_HOT}});), false, 1},
+    {"by a buried pebble", "get pebble", false, SETUP(here(g, {.flags = {extra_flag::buried}});), false, 1},
+    {"in a garden, by a sprout", "get sprout", false, SETUP(room_set_flag(g, ARENA, room_flag::garden1, true); here(g, {.name = "sprout", .type = ITEM_PLANT});), false, 1},
+    {"in a big garden, by a sprout", "get sprout", false, SETUP(room_set_flag(g, ARENA, room_flag::garden2, true); here(g, {.name = "sprout", .type = ITEM_PLANT});), false, 1},
+    {"by a hot pebble", "get pebble", false, SETUP(here(g, {.flags = {extra_flag::hot}});), false, 1},
+    {"fireproof, by a hot pebble", "get pebble", false, SETUP(char_set_bonuses(att, BONUS_FIREPROOF, 1); here(g, {.flags = {extra_flag::hot}});), false, 1},
+    {"fireprone, by a hot pebble", "get pebble", false, SETUP(char_set_bonuses(att, BONUS_FIREPRONE, 1); here(g, {.flags = {extra_flag::hot}});), false, 1},
+    {"a demon, by a hot pebble", "get pebble", false, SETUP(char_set_race(att, RACE_DEMON); here(g, {.flags = {extra_flag::hot}});), false, 1},
     {"by a zenni", "get zenni", false, SETUP(zenni_here(g, 1);), false, 1},
     {"by zenni", "get zenni", false, SETUP(zenni_here(g, 100);), false, 1},
     {"rich, by zenni", "get zenni", false, SETUP(char_set_gold(att, char_gold_carry(att) - 10); zenni_here(g, 100);), false, 1},
-    {"grouped, splitting, by zenni", "get zenni", false, SETUP(group(g, att, cast.helper); char_prf_set(g, att, PRF_AUTOSPLIT, true); zenni_here(g, 100);), false, 1},
+    {"grouped, splitting, by zenni", "get zenni", false, SETUP(group(g, att, cast.helper); char_prf_set(g, att, pref_flag::autosplit, true); zenni_here(g, 100);), false, 1},
     {"grouped, not splitting, by zenni", "get zenni", false, SETUP(group(g, att, cast.helper); zenni_here(g, 100);), false, 1},
     {"with a bag", "get pebble bag", false, SETUP(inside(g, bag(g, att), {});), false, 1},
     {"with a bag", "get nothing bag", false, SETUP(inside(g, bag(g, att), {});), false, 1},
@@ -629,10 +629,10 @@ namespace {
     {"with a pebble", "get pebble pebble", false, SETUP(pebbles(g, att, 1);), false, 1},
     {"by a car", "get pebble car", false, SETUP(here(g, {.name = "car", .type = ITEM_VEHICLE});), false, 1},
     {"by a portal", "get pebble portal", false, SETUP(here(g, {.name = "portal", .type = ITEM_PORTAL});), false, 1},
-    {"by a closeable portal", "get pebble portal", false, SETUP(here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{1, cont_value(CONT_CLOSEABLE)}}});), false, 1},
-    {"with a closed bag", "get pebble bag", false, SETUP(inside(g, bag(g, att, 100, {}, cont_value(CONT_CLOSED)), {});), false, 1},
+    {"by a closeable portal", "get pebble portal", false, SETUP(here(g, {.name = "portal", .type = ITEM_PORTAL, .values = {{1, cont_value(container_flag::closeable)}}});), false, 1},
+    {"with a closed bag", "get pebble bag", false, SETUP(inside(g, bag(g, att, 100, {}, cont_value(container_flag::closed)), {});), false, 1},
     {"by a pebble in the chest", "get pebble chest", false, SETUP(inside(g, cast.chest, {});), false, 1},
-    {"by a fixed pebble in the chest", "get pebble chest", false, SETUP(obj_wear_set(inside(g, cast.chest, {}), ITEM_WEAR_TAKE, false);), false, 1},
+    {"by a fixed pebble in the chest", "get pebble chest", false, SETUP(obj_wear_set(inside(g, cast.chest, {}), wear_flag::take, false);), false, 1},
     {"with a bag of pebbles", "get 2 pebble bag", false, SETUP({ obj_data *b = bag(g, att); for (int i = 0; i < 3; i++) inside(g, b, {}); }), false, 1},
     {"with a bag of pebbles", "get all bag", false, SETUP({ obj_data *b = bag(g, att); for (int i = 0; i < 3; i++) inside(g, b, {}); }), false, 1},
     {"with a bag of pebbles", "get all.pebble bag", false, SETUP({ obj_data *b = bag(g, att); for (int i = 0; i < 3; i++) inside(g, b, {}); }), false, 1},
@@ -640,8 +640,8 @@ namespace {
     {"with a bag of pebbles", "get all.rock bag", false, SETUP(inside(g, bag(g, att), {});), false, 1},
     {"with an empty bag", "get all bag", false, SETUP(bag(g, att);), false, 1},
     {"crowded, with a bag", "get pebble bag", false, SETUP(inside(g, bag(g, att), {}); crowded(g, att);), false, 1},
-    {"with a hot pebble in a bag", "get pebble bag", false, SETUP(inside(g, bag(g, att), {.flags = {ITEM_HOT}});), false, 1},
-    {"fireprone, with a hot pebble in a bag", "get pebble bag", false, SETUP(char_set_bonuses(att, BONUS_FIREPRONE, 1); inside(g, bag(g, att), {.flags = {ITEM_HOT}});), false, 1},
+    {"with a hot pebble in a bag", "get pebble bag", false, SETUP(inside(g, bag(g, att), {.flags = {extra_flag::hot}});), false, 1},
+    {"fireprone, with a hot pebble in a bag", "get pebble bag", false, SETUP(char_set_bonuses(att, BONUS_FIREPRONE, 1); inside(g, bag(g, att), {.flags = {extra_flag::hot}});), false, 1},
     {"with zenni in a bag", "get zenni bag", false, SETUP(obj_to_obj(g, create_money(g, 50), bag(g, att));), false, 1},
     {"with a sword in a sheath", "get sword sheath", false, SETUP(sheath(g, att, 1, 1);), false, 1},
     {"at a duel table", "get card case", false, SETUP(at_duel_table(g, att, 1);), false, 1},
@@ -659,8 +659,8 @@ namespace {
 
     /* drop, junk and donate */
     {"armless", "drop pebble", false, SETUP(armless(att); pebbles(g, att, 1);), false, 1},
-    {"in a garden", "drop pebble", false, SETUP(room_set_flag(g, ARENA, ROOM_GARDEN1, true); pebbles(g, att, 1);), false, 1},
-    {"in a big garden", "drop pebble", false, SETUP(room_set_flag(g, ARENA, ROOM_GARDEN2, true); pebbles(g, att, 1);), false, 1},
+    {"in a garden", "drop pebble", false, SETUP(room_set_flag(g, ARENA, room_flag::garden1, true); pebbles(g, att, 1);), false, 1},
+    {"in a big garden", "drop pebble", false, SETUP(room_set_flag(g, ARENA, room_flag::garden2, true); pebbles(g, att, 1);), false, 1},
     {"", "drop", false, SETUP(), false, 1},
     {"", "junk", false, SETUP(), false, 1},
     {"", "donate", false, SETUP(), false, 4},
@@ -694,21 +694,21 @@ namespace {
     {"an immortal with a pebble", "drop pebble", false, SETUP(pebbles(g, att, 1); admin_set(g, att, ADMLVL_IMMORT);), false, 1},
     {"with a soul", "drop soul", false, SETUP(carry(g, att, {.name = "soul", .vnum = 17});), false, 1},
     {"with another soul", "junk soul", false, SETUP(carry(g, att, {.name = "soul", .vnum = 17998});), false, 1},
-    {"with a dragon ball, in space", "drop ball", false, SETUP(dragon_balls(g, att, {1}); room_set_flag(g, ARENA, ROOM_SPACE, true);), false, 1},
-    {"with a fleeting dragon ball", "drop ball", false, SETUP(obj_extra_set(holding_as(g, att, "ball", 22), ITEM_NORENT, true);), false, 1},
-    {"with a fleeting dragon ball", "junk ball", false, SETUP(obj_extra_set(holding_as(g, att, "ball", 22), ITEM_NORENT, true); room_set_flag(g, ARENA, ROOM_NOINSTANT, true);), false, 1},
-    {"with a dragon ball, in a protected place", "drop ball", false, SETUP(dragon_balls(g, att, {2}); room_set_flag(g, ARENA, ROOM_NOINSTANT, true);), false, 1},
-    {"with a dragon ball, on a ship", "drop ball", false, SETUP(dragon_balls(g, att, {4}); room_set_flag(g, ARENA, ROOM_SHIP, true);), false, 1},
-    {"with a dragon ball, at home", "drop ball", false, SETUP(dragon_balls(g, att, {5}); room_set_flag(g, ARENA, ROOM_HOUSE, true);), false, 1},
+    {"with a dragon ball, in space", "drop ball", false, SETUP(dragon_balls(g, att, {1}); room_set_flag(g, ARENA, room_flag::space, true);), false, 1},
+    {"with a fleeting dragon ball", "drop ball", false, SETUP(obj_extra_set(holding_as(g, att, "ball", 22), extra_flag::norent, true);), false, 1},
+    {"with a fleeting dragon ball", "junk ball", false, SETUP(obj_extra_set(holding_as(g, att, "ball", 22), extra_flag::norent, true); room_set_flag(g, ARENA, room_flag::noinstant, true);), false, 1},
+    {"with a dragon ball, in a protected place", "drop ball", false, SETUP(dragon_balls(g, att, {2}); room_set_flag(g, ARENA, room_flag::noinstant, true);), false, 1},
+    {"with a dragon ball, on a ship", "drop ball", false, SETUP(dragon_balls(g, att, {4}); room_set_flag(g, ARENA, room_flag::ship, true);), false, 1},
+    {"with a dragon ball, at home", "drop ball", false, SETUP(dragon_balls(g, att, {5}); room_set_flag(g, ARENA, room_flag::house, true);), false, 1},
     {"with a dragon ball", "drop ball", false, SETUP(dragon_balls(g, att, {7});), false, 1},
-    {"with a cursed pebble", "drop pebble", false, SETUP(carry(g, att, {.flags = {ITEM_NODROP}});), false, 1},
-    {"an immortal with a cursed pebble", "drop pebble", false, SETUP(carry(g, att, {.flags = {ITEM_NODROP}}); admin_set(g, att, ADMLVL_IMMORT);), false, 1},
-    {"with a keepsake", "junk pebble", false, SETUP(carry(g, att, {.flags = {ITEM_NODONATE}});), false, 1},
-    {"with a keepsake, by the donation rooms", "donate pebble", false, SETUP(carry(g, att, {.flags = {ITEM_NODONATE}}); CONFIG_DON_ROOM_1 = 300;), false, 4},
-    {"with a keepsake", "drop pebble", false, SETUP(carry(g, att, {.flags = {ITEM_NODONATE}});), false, 1},
+    {"with a cursed pebble", "drop pebble", false, SETUP(carry(g, att, {.flags = {extra_flag::nodrop}});), false, 1},
+    {"an immortal with a cursed pebble", "drop pebble", false, SETUP(carry(g, att, {.flags = {extra_flag::nodrop}}); admin_set(g, att, ADMLVL_IMMORT);), false, 1},
+    {"with a keepsake", "junk pebble", false, SETUP(carry(g, att, {.flags = {extra_flag::nodonate}});), false, 1},
+    {"with a keepsake, by the donation rooms", "donate pebble", false, SETUP(carry(g, att, {.flags = {extra_flag::nodonate}}); CONFIG_DON_ROOM_1 = 300;), false, 4},
+    {"with a keepsake", "drop pebble", false, SETUP(carry(g, att, {.flags = {extra_flag::nodonate}});), false, 1},
     {"with a pebble, by lava", "drop pebble", false, SETUP(pebbles(g, att, 1); room_set_geffect(g, ARENA, 6);), false, 1},
-    {"with a hard pebble, by lava", "drop pebble", false, SETUP(carry(g, att, {.flags = {ITEM_UNBREAKABLE}}); room_set_geffect(g, ARENA, 6);), false, 1},
-    {"an immortal with a hard pebble, by lava", "drop pebble", false, SETUP(carry(g, att, {.flags = {ITEM_UNBREAKABLE}}); room_set_geffect(g, ARENA, 6); admin_set(g, att, ADMLVL_IMMORT);), false, 1},
+    {"with a hard pebble, by lava", "drop pebble", false, SETUP(carry(g, att, {.flags = {extra_flag::unbreakable}}); room_set_geffect(g, ARENA, 6);), false, 1},
+    {"an immortal with a hard pebble, by lava", "drop pebble", false, SETUP(carry(g, att, {.flags = {extra_flag::unbreakable}}); room_set_geffect(g, ARENA, 6); admin_set(g, att, ADMLVL_IMMORT);), false, 1},
     {"with a pebble", "junk pebble", false, SETUP(pebbles(g, att, 1);), false, 1},
     {"with a pebble, by the donation rooms", "donate pebble", false, SETUP(pebbles(g, att, 1); CONFIG_DON_ROOM_1 = 300;), false, 4},
 
@@ -744,23 +744,23 @@ namespace {
     {"with pebbles", "give all namek", false, SETUP(pebbles(g, att, 3);), false, 1},
     {"an immortal with pebbles", "give all.pebble namek", false, SETUP(pebbles(g, att, 3); carry(g, att, {.name = "rock"}); admin_set(g, att, ADMLVL_IMMORT);), false, 1},
     {"with pebbles", "give all. namek", false, SETUP(pebbles(g, att, 3);), false, 1},
-    {"with a cursed pebble", "give pebble namek", false, SETUP(carry(g, att, {.flags = {ITEM_NODROP}});), false, 1},
+    {"with a cursed pebble", "give pebble namek", false, SETUP(carry(g, att, {.flags = {extra_flag::nodrop}});), false, 1},
     {"with a pebble, to the crowded", "give pebble namek", false, SETUP(pebbles(g, att, 1); crowded(g, victim);), false, 1},
-    {"with a forged pebble", "give pebble dummy", false, SETUP(carry(g, att, {.flags = {ITEM_FORGED}});), false, 1},
-    {"with a forged pebble", "give pebble namek", false, SETUP(carry(g, att, {.flags = {ITEM_FORGED}});), false, 1},
+    {"with a forged pebble", "give pebble dummy", false, SETUP(carry(g, att, {.flags = {extra_flag::forged}});), false, 1},
+    {"with a forged pebble", "give pebble namek", false, SETUP(carry(g, att, {.flags = {extra_flag::forged}});), false, 1},
     {"with a pebble, to the laden", "give pebble namek", false, SETUP(pebbles(g, att, 1); laden(g, victim);), false, 1},
     {"with a pebble, in heavy gravity", "give pebble namek", false, SETUP(pebbles(g, att, 1); room_set_gravity(g, ARENA, (int)getMaxCarryWeight(g, victim));), false, 1},
-    {"with a pebble, to the unwilling", "give pebble namek", false, SETUP(pebbles(g, att, 1); char_prf_set(g, victim, PRF_NOGIVE, true);), false, 1},
+    {"with a pebble, to the unwilling", "give pebble namek", false, SETUP(pebbles(g, att, 1); char_prf_set(g, victim, pref_flag::nogive, true);), false, 1},
     {"with a pebble, to an unwilling dummy", "give pebble dummy", false, SETUP(pebbles(g, att, 1);), false, 1},
-    {"with a hot pebble", "give pebble namek", false, SETUP(carry(g, att, {.flags = {ITEM_HOT}});), false, 1},
-    {"with a hot pebble, to the fireproof", "give pebble namek", false, SETUP(carry(g, att, {.flags = {ITEM_HOT}}); char_set_bonuses(victim, BONUS_FIREPROOF, 1);), false, 1},
-    {"with a hot pebble, to the fireprone", "give pebble namek", false, SETUP(carry(g, att, {.flags = {ITEM_HOT}}); char_set_bonuses(victim, BONUS_FIREPRONE, 1);), false, 1},
-    {"with a hot pebble, to a demon", "give pebble namek", false, SETUP(carry(g, att, {.flags = {ITEM_HOT}}); char_set_race(victim, RACE_DEMON);), false, 1},
+    {"with a hot pebble", "give pebble namek", false, SETUP(carry(g, att, {.flags = {extra_flag::hot}});), false, 1},
+    {"with a hot pebble, to the fireproof", "give pebble namek", false, SETUP(carry(g, att, {.flags = {extra_flag::hot}}); char_set_bonuses(victim, BONUS_FIREPROOF, 1);), false, 1},
+    {"with a hot pebble, to the fireprone", "give pebble namek", false, SETUP(carry(g, att, {.flags = {extra_flag::hot}}); char_set_bonuses(victim, BONUS_FIREPRONE, 1);), false, 1},
+    {"with a hot pebble, to a demon", "give pebble namek", false, SETUP(carry(g, att, {.flags = {extra_flag::hot}}); char_set_race(victim, RACE_DEMON);), false, 1},
 
     /* drink and sip */
     {"an android", "drink", false, SETUP(char_set_race(att, RACE_ANDROID);), false, 1},
     {"never thirsty", "drink", false, SETUP(thirsty(g, att, -1);), false, 1},
-    {"in a healing tank", "drink", false, SETUP(thirsty(g, att); char_plr_set(att, PLR_HEALT, true);), false, 1},
+    {"in a healing tank", "drink", false, SETUP(thirsty(g, att); char_plr_set(att, player_flag::healt, true);), false, 1},
     {"starving", "drink", false, SETUP(thirsty(g, att, 10, 0);), false, 1},
     {"a starving namek", "drink", false, SETUP(thirsty(g, att, 10, 0); char_set_race(att, RACE_NAMEK);), false, 1},
     {"a starving mutant", "drink", false, SETUP(thirsty(g, att, 10, 0); char_set_genome(att, 0, 3);), false, 1},
@@ -788,8 +788,8 @@ namespace {
     {"with a pebble", "drink pebble", false, SETUP(thirsty(g, att); pebbles(g, att, 1);), false, 1},
     {"by a flask", "drink flask", false, SETUP(thirsty(g, att); here(g, {.name = "flask", .type = ITEM_DRINKCON, .values = {{0, 10}, {1, 10}}});), false, 1},
     {"by a fountain", "drink fountain", false, SETUP(thirsty(g, att); here(g, {.name = "fountain", .type = ITEM_FOUNTAIN, .values = {{0, -1}, {1, 10}}});), false, 1},
-    {"with a broken flask", "drink flask", false, SETUP(thirsty(g, att); flask(g, att, LIQ_WATER, 10, 10, {ITEM_BROKEN});), false, 1},
-    {"with a fake flask", "drink flask", false, SETUP(thirsty(g, att); flask(g, att, LIQ_WATER, 10, 10, {ITEM_FORGED});), false, 1},
+    {"with a broken flask", "drink flask", false, SETUP(thirsty(g, att); flask(g, att, LIQ_WATER, 10, 10, {extra_flag::broken});), false, 1},
+    {"with a fake flask", "drink flask", false, SETUP(thirsty(g, att); flask(g, att, LIQ_WATER, 10, 10, {extra_flag::forged});), false, 1},
     {"drunk, with a flask", "drink flask", false, SETUP(thirsty(g, att, 10, 20, 11); flask(g, att);), false, 1},
     {"drunk and parched, with a flask", "drink flask", false, SETUP(thirsty(g, att, 0, 20, 11); flask(g, att);), false, 1},
     {"with an empty flask", "drink flask", false, SETUP(thirsty(g, att); flask(g, att, LIQ_WATER, 0);), false, 1},
@@ -821,8 +821,8 @@ namespace {
     /* eat and taste */
     {"an android", "eat bread", false, SETUP(char_set_race(att, RACE_ANDROID);), false, 1},
     {"never hungry", "eat bread", false, SETUP(conditions(g, att, -1, 20);), false, 1},
-    {"in a healing tank", "eat bread", false, SETUP(conditions(g, att, 10, 20); char_plr_set(att, PLR_HEALT, true);), false, 1},
-    {"poisoned", "eat bread", false, SETUP(conditions(g, att, 10, 20); char_aff_set(att, AFF_POISON, true);), false, 1},
+    {"in a healing tank", "eat bread", false, SETUP(conditions(g, att, 10, 20); char_plr_set(att, player_flag::healt, true);), false, 1},
+    {"poisoned", "eat bread", false, SETUP(conditions(g, att, 10, 20); char_aff_set(att, aff_flag::poison, true);), false, 1},
     {"", "eat", false, SETUP(conditions(g, att, 10, 20);), false, 1},
     {"", "eat bread", false, SETUP(conditions(g, att, 10, 20);), false, 1},
     {"parched, with bread", "eat bread", false, SETUP(conditions(g, att, 10, 1); bread(g, att);), false, 1},
@@ -835,7 +835,7 @@ namespace {
     {"a majin with a good candy", "eat candy", false, SETUP(conditions(g, att, 10, 20); char_set_race(att, RACE_MAJIN); carry(g, att, {.name = "candy", .vnum = 93, .type = ITEM_FOOD});), false, 1},
     {"a majin with a better candy", "eat candy", false, SETUP(conditions(g, att, 10, 20); char_set_race(att, RACE_MAJIN); carry(g, att, {.name = "candy", .vnum = 94, .type = ITEM_FOOD});), false, 1},
     {"a majin with the best candy", "eat candy", false, SETUP(conditions(g, att, 10, 20); char_set_race(att, RACE_MAJIN); carry(g, att, {.name = "candy", .vnum = 95, .type = ITEM_FOOD});), false, 1},
-    {"a majin with a fake candy", "eat candy", false, SETUP(conditions(g, att, 10, 20); char_set_race(att, RACE_MAJIN); carry(g, att, {.name = "candy", .vnum = 94, .type = ITEM_FOOD, .flags = {ITEM_FORGED}});), false, 1},
+    {"a majin with a fake candy", "eat candy", false, SETUP(conditions(g, att, 10, 20); char_set_race(att, RACE_MAJIN); carry(g, att, {.name = "candy", .vnum = 94, .type = ITEM_FOOD, .flags = {extra_flag::forged}});), false, 1},
     {"with a candy", "eat candy", false, SETUP(conditions(g, att, 10, 20); carry(g, att, {.name = "candy", .vnum = 93, .type = ITEM_FOOD});), false, 1},
     {"a majin at level 100 with a candy", "eat candy", false, SETUP(conditions(g, att, 10, 20); char_set_race(att, RACE_MAJIN); char_set_class_level(att, 100); carry(g, att, {.name = "candy", .vnum = 93, .type = ITEM_FOOD});), false, 1},
     {"full, with bread", "eat bread", false, SETUP(conditions(g, att, 48, 20); bread(g, att);), false, 1},
@@ -844,7 +844,7 @@ namespace {
     {"hurt, with bread", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att);), false, 1},
     {"hurt, with a big loaf", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att, 10, {}, 0, ITEM_FOOD, 6);), false, 1},
     {"hurt, with a treat", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att, 10, {}, 0, ITEM_YUM);), false, 1},
-    {"hurt, with a sweet loaf", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att, 10, {ITEM_ONLY_WIZARD}); /* as eating reads it: extra flag 33, meant as type YUM */), false, 1},
+    {"hurt, with a sweet loaf", "eat bread", false, SETUP(conditions(g, att, 10, 20); decCurHealthPercent(g, att, 0.5, 1); bread(g, att, 10, {extra_flag::only_wizard}); /* as eating reads it: extra flag 33, meant as type YUM */), false, 1},
     {"watching the dummy eat", "eat", false, SETUP(command_interpreter(g, dummy(g), "eat bread");), false, 1},
     {"refreshed, with bread", "eat bread", false, SETUP(conditions(g, att, 10, 20); char_set_foodr(att, 2); bread(g, att);), false, 1},
     {"with a described loaf", "eat bread", false, SETUP(conditions(g, att, 10, 20); obj_set_action_description(bread(g, att), "It is stale.");), false, 1},
@@ -885,8 +885,8 @@ namespace {
     {"with a jug", "fill jug", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug");), false, 1},
     {"with a jug", "fill jug fountain", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug");), false, 1},
     {"with a jug, by a rock", "fill jug rock", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug"); here(g, {.name = "rock"});), false, 1},
-    {"with a jug, by a broken fountain", "fill jug fountain", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug"); here(g, {.name = "fountain", .type = ITEM_FOUNTAIN, .values = {{0, -1}, {1, 10}}, .flags = {ITEM_BROKEN}});), false, 1},
-    {"with a jug, by a broken rock", "fill jug rock", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug"); here(g, {.name = "rock", .values = {{1, 5}}, .flags = {ITEM_BROKEN}});), false, 1},
+    {"with a jug, by a broken fountain", "fill jug fountain", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug"); here(g, {.name = "fountain", .type = ITEM_FOUNTAIN, .values = {{0, -1}, {1, 10}}, .flags = {extra_flag::broken}});), false, 1},
+    {"with a jug, by a broken rock", "fill jug rock", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug"); here(g, {.name = "rock", .values = {{1, 5}}, .flags = {extra_flag::broken}});), false, 1},
     {"with a jug, by a dry fountain", "fill jug fountain", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug"); here(g, {.name = "fountain", .type = ITEM_FOUNTAIN, .values = {{0, -1}, {1, 0}}});), false, 1},
     {"with a jug, by a fountain", "fill jug fountain", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug"); here(g, {.name = "fountain", .type = ITEM_FOUNTAIN, .values = {{0, -1}, {1, 10}}});), false, 1},
     {"with a jug, by a small fountain", "fill jug fountain", false, SETUP(flask(g, att, LIQ_WATER, 0, 20, {}, 0, "jug"); here(g, {.name = "fountain", .type = ITEM_FOUNTAIN, .values = {{0, 50}, {1, 10}}});), false, 1},
@@ -896,62 +896,62 @@ namespace {
     {"", "wear all.ring finger", false, SETUP(), false, 1},
     {"empty-handed", "wear all", false, SETUP(unarmed(g, att);), false, 1},
     {"with a wardrobe", "wear all", false, SETUP(wardrobe(g, att);), false, 1},
-    {"with rings beyond them", "wear all", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER, {}, 50); wearable(g, att, "ring", ITEM_WEAR_FINGER, {ITEM_BROKEN}); wearable(g, att, "ring", ITEM_WEAR_FINGER, {ITEM_FORGED});), false, 1},
-    {"with armor beyond them", "wear all", false, SETUP(wearable(g, att, "plate", ITEM_WEAR_BODY, {}, 0, ITEM_ARMOR); obj_set_value(first_obj(g, char_get_inventory(att)), VAL_ARMOR_SKILL, 0);), false, 1},
-    {"with rings", "wear all.ring", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER); wearable(g, att, "ring", ITEM_WEAR_FINGER); wearable(g, att, "ring", ITEM_WEAR_FINGER); pebbles(g, att, 1);), false, 1},
-    {"with rings", "wear all.", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"with rings", "wear all.band", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"with a ring beyond them", "wear all.ring", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER, {}, 50);), false, 1},
+    {"with rings beyond them", "wear all", false, SETUP(wearable(g, att, "ring", wear_flag::finger, {}, 50); wearable(g, att, "ring", wear_flag::finger, {extra_flag::broken}); wearable(g, att, "ring", wear_flag::finger, {extra_flag::forged});), false, 1},
+    {"with armor beyond them", "wear all", false, SETUP(wearable(g, att, "plate", wear_flag::body, {}, 0, ITEM_ARMOR); obj_set_value(first_obj(g, char_get_inventory(att)), VAL_ARMOR_SKILL, 0);), false, 1},
+    {"with rings", "wear all.ring", false, SETUP(wearable(g, att, "ring", wear_flag::finger); wearable(g, att, "ring", wear_flag::finger); wearable(g, att, "ring", wear_flag::finger); pebbles(g, att, 1);), false, 1},
+    {"with rings", "wear all.", false, SETUP(wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"with rings", "wear all.band", false, SETUP(wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"with a ring beyond them", "wear all.ring", false, SETUP(wearable(g, att, "ring", wear_flag::finger, {}, 50);), false, 1},
     {"with pebbles", "wear all.pebble", false, SETUP(pebbles(g, att, 2);), false, 1},
-    {"with plates of armor", "wear all.plate", false, SETUP(wearable(g, att, "plate", ITEM_WEAR_BODY, {}, 0, ITEM_ARMOR); obj_set_value(first_obj(g, char_get_inventory(att)), VAL_ARMOR_SKILL, 0);), false, 1},
+    {"with plates of armor", "wear all.plate", false, SETUP(wearable(g, att, "plate", wear_flag::body, {}, 0, ITEM_ARMOR); obj_set_value(first_obj(g, char_get_inventory(att)), VAL_ARMOR_SKILL, 0);), false, 1},
     {"", "wear ring", false, SETUP(), false, 1},
-    {"with a broken ring", "wear ring", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER, {ITEM_BROKEN});), false, 1},
-    {"with a fake ring", "wear ring", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER, {ITEM_FORGED});), false, 1},
-    {"with a ring beyond them", "wear ring", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER, {}, 50);), false, 1},
-    {"with a ring", "wear ring", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"with a ring", "wear ring finger", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"with a ring", "wear ring elbow", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"with a ring", "wear ring ELBOW", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"with a ring", "wear ring !elbow", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"with a ring", "wear ring body", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
+    {"with a broken ring", "wear ring", false, SETUP(wearable(g, att, "ring", wear_flag::finger, {extra_flag::broken});), false, 1},
+    {"with a fake ring", "wear ring", false, SETUP(wearable(g, att, "ring", wear_flag::finger, {extra_flag::forged});), false, 1},
+    {"with a ring beyond them", "wear ring", false, SETUP(wearable(g, att, "ring", wear_flag::finger, {}, 50);), false, 1},
+    {"with a ring", "wear ring", false, SETUP(wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"with a ring", "wear ring finger", false, SETUP(wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"with a ring", "wear ring elbow", false, SETUP(wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"with a ring", "wear ring ELBOW", false, SETUP(wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"with a ring", "wear ring !elbow", false, SETUP(wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"with a ring", "wear ring body", false, SETUP(wearable(g, att, "ring", wear_flag::finger);), false, 1},
     {"with a pebble", "wear pebble", false, SETUP(pebbles(g, att, 1);), false, 1},
-    {"with a plate of armor", "wear plate", false, SETUP(wearable(g, att, "plate", ITEM_WEAR_BODY, {}, 0, ITEM_ARMOR); obj_set_value(first_obj(g, char_get_inventory(att)), VAL_ARMOR_SKILL, 0);), false, 1},
-    {"with a ring, without fingers", "wear ring", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER); char_body_set(att, WEAR_FINGER_R, false);), false, 1},
-    {"with a ring, without fingers", "wear ring finger", false, SETUP(wearable(g, att, "ring", ITEM_WEAR_FINGER); char_body_set(att, WEAR_FINGER_R, false);), false, 1},
-    {"wearing a ring, with another", "wear ring", false, SETUP(worn(g, att, {.name = "band", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R); wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"wearing two rings, with another", "wear ring", false, SETUP(worn(g, att, {.name = "band", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R); worn(g, att, {.name = "band", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_L); wearable(g, att, "ring", ITEM_WEAR_FINGER);), false, 1},
-    {"wearing a hat, with another", "wear hat", false, SETUP(worn(g, att, {.name = "cap", .wear = {ITEM_WEAR_HEAD}}, WEAR_HEAD); wearable(g, att, "hat", ITEM_WEAR_HEAD);), false, 1},
-    {"armed, with a great sword", "wield sword", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); wearable(g, att, "sword", ITEM_WEAR_WIELD, {ITEM_2H}, 0, ITEM_WEAPON);), false, 1},
-    {"with a great sword", "wield sword", false, SETUP(unarmed(g, att); wearable(g, att, "sword", ITEM_WEAR_WIELD, {ITEM_2H}, 0, ITEM_WEAPON);), false, 1},
-    {"two-handing, with a shield", "wear shield", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50); wearable(g, att, "shield", ITEM_WEAR_SHIELD);), false, 1},
-    {"holding a great sword, with a shield", "wear shield", false, SETUP(unarmed(g, att); equip_char(g, att, make(g, {.name = "claymore", .type = ITEM_WEAPON, .flags = {ITEM_2H}, .wear = {ITEM_WEAR_WIELD}}), WEAR_WIELD1); wearable(g, att, "shield", ITEM_WEAR_SHIELD);), false, 1},
-    {"armed, with a custom sword", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", ITEM_WEAR_WIELD, {ITEM_CUSTOM}, 0, ITEM_WEAPON);), false, 1},
-    {"a novice, with a custom sword", "wield blade", false, SETUP(unarmed(g, att); char_set_class_level(att, 19); wearable(g, att, "blade", ITEM_WEAR_WIELD, {ITEM_CUSTOM}, 0, ITEM_WEAPON);), false, 1},
+    {"with a plate of armor", "wear plate", false, SETUP(wearable(g, att, "plate", wear_flag::body, {}, 0, ITEM_ARMOR); obj_set_value(first_obj(g, char_get_inventory(att)), VAL_ARMOR_SKILL, 0);), false, 1},
+    {"with a ring, without fingers", "wear ring", false, SETUP(wearable(g, att, "ring", wear_flag::finger); char_body_set(att, WEAR_FINGER_R, false);), false, 1},
+    {"with a ring, without fingers", "wear ring finger", false, SETUP(wearable(g, att, "ring", wear_flag::finger); char_body_set(att, WEAR_FINGER_R, false);), false, 1},
+    {"wearing a ring, with another", "wear ring", false, SETUP(worn(g, att, {.name = "band", .wear = {wear_flag::finger}}, WEAR_FINGER_R); wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"wearing two rings, with another", "wear ring", false, SETUP(worn(g, att, {.name = "band", .wear = {wear_flag::finger}}, WEAR_FINGER_R); worn(g, att, {.name = "band", .wear = {wear_flag::finger}}, WEAR_FINGER_L); wearable(g, att, "ring", wear_flag::finger);), false, 1},
+    {"wearing a hat, with another", "wear hat", false, SETUP(worn(g, att, {.name = "cap", .wear = {wear_flag::head}}, WEAR_HEAD); wearable(g, att, "hat", wear_flag::head);), false, 1},
+    {"armed, with a great sword", "wield sword", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); wearable(g, att, "sword", wear_flag::wield, {extra_flag::two_handed}, 0, ITEM_WEAPON);), false, 1},
+    {"with a great sword", "wield sword", false, SETUP(unarmed(g, att); wearable(g, att, "sword", wear_flag::wield, {extra_flag::two_handed}, 0, ITEM_WEAPON);), false, 1},
+    {"two-handing, with a shield", "wear shield", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50); wearable(g, att, "shield", wear_flag::shield);), false, 1},
+    {"holding a great sword, with a shield", "wear shield", false, SETUP(unarmed(g, att); equip_char(g, att, make(g, {.name = "claymore", .type = ITEM_WEAPON, .flags = {extra_flag::two_handed}, .wear = {wear_flag::wield}}), WEAR_WIELD1); wearable(g, att, "shield", wear_flag::shield);), false, 1},
+    {"armed, with a custom sword", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", wear_flag::wield, {extra_flag::custom}, 0, ITEM_WEAPON);), false, 1},
+    {"a novice, with a custom sword", "wield blade", false, SETUP(unarmed(g, att); char_set_class_level(att, 19); wearable(g, att, "blade", wear_flag::wield, {extra_flag::custom}, 0, ITEM_WEAPON);), false, 1},
 
     /* wield, and grab or hold */
     {"", "wield", false, SETUP(), false, 1},
     {"", "wield blade", false, SETUP(), false, 1},
     {"with a pebble", "wield pebble", false, SETUP(pebbles(g, att, 1);), false, 1},
-    {"with a heavy blade", "wield blade", false, SETUP(unarmed(g, att); carry(g, att, {.name = "blade", .type = ITEM_WEAPON, .weight = getEffMaxPL(g, att) / 200 + char_get_aff_abils_str(att) * 50 + 1, .wear = {ITEM_WEAR_WIELD}});), false, 1},
-    {"holding a great sword in the off hand, with a blade", "wield blade", false, SETUP(unarmed(g, att); equip_char(g, att, make(g, {.name = "claymore", .type = ITEM_WEAPON, .flags = {ITEM_2H}, .wear = {ITEM_WEAR_WIELD}}), WEAR_WIELD2); wearable(g, att, "blade", ITEM_WEAR_WIELD, {}, 0, ITEM_WEAPON);), false, 1},
-    {"with a broken blade", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", ITEM_WEAR_WIELD, {ITEM_BROKEN}, 0, ITEM_WEAPON);), false, 1},
-    {"with a fake blade", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", ITEM_WEAR_WIELD, {ITEM_FORGED}, 0, ITEM_WEAPON);), false, 1},
-    {"with a blade beyond them", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", ITEM_WEAR_WIELD, {}, 50, ITEM_WEAPON);), false, 1},
-    {"two-handing, with a blade", "wield blade", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50); wearable(g, att, "blade", ITEM_WEAR_WIELD, {}, 0, ITEM_WEAPON);), false, 1},
-    {"with a blade", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", ITEM_WEAR_WIELD, {}, 0, ITEM_WEAPON);), false, 1},
-    {"armed, with a blade", "wield blade", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); wearable(g, att, "blade", ITEM_WEAR_WIELD, {}, 0, ITEM_WEAPON);), false, 1},
-    {"dual wielding, with a blade", "wield blade", false, SETUP(dual(g, att, TYPE_SLASH - TYPE_HIT); wearable(g, att, "blade", ITEM_WEAR_WIELD, {}, 0, ITEM_WEAPON);), false, 1},
-    {"with wieldable armor", "wield plate", false, SETUP(unarmed(g, att); wearable(g, att, "plate", ITEM_WEAR_WIELD, {}, 0, ITEM_ARMOR); obj_set_value(first_obj(g, char_get_inventory(att)), VAL_WEAPON_SKILL, SKILL_SWORD);), false, 1},
+    {"with a heavy blade", "wield blade", false, SETUP(unarmed(g, att); carry(g, att, {.name = "blade", .type = ITEM_WEAPON, .weight = getEffMaxPL(g, att) / 200 + char_get_aff_abils_str(att) * 50 + 1, .wear = {wear_flag::wield}});), false, 1},
+    {"holding a great sword in the off hand, with a blade", "wield blade", false, SETUP(unarmed(g, att); equip_char(g, att, make(g, {.name = "claymore", .type = ITEM_WEAPON, .flags = {extra_flag::two_handed}, .wear = {wear_flag::wield}}), WEAR_WIELD2); wearable(g, att, "blade", wear_flag::wield, {}, 0, ITEM_WEAPON);), false, 1},
+    {"with a broken blade", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", wear_flag::wield, {extra_flag::broken}, 0, ITEM_WEAPON);), false, 1},
+    {"with a fake blade", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", wear_flag::wield, {extra_flag::forged}, 0, ITEM_WEAPON);), false, 1},
+    {"with a blade beyond them", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", wear_flag::wield, {}, 50, ITEM_WEAPON);), false, 1},
+    {"two-handing, with a blade", "wield blade", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50); wearable(g, att, "blade", wear_flag::wield, {}, 0, ITEM_WEAPON);), false, 1},
+    {"with a blade", "wield blade", false, SETUP(unarmed(g, att); wearable(g, att, "blade", wear_flag::wield, {}, 0, ITEM_WEAPON);), false, 1},
+    {"armed, with a blade", "wield blade", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); wearable(g, att, "blade", wear_flag::wield, {}, 0, ITEM_WEAPON);), false, 1},
+    {"dual wielding, with a blade", "wield blade", false, SETUP(dual(g, att, TYPE_SLASH - TYPE_HIT); wearable(g, att, "blade", wear_flag::wield, {}, 0, ITEM_WEAPON);), false, 1},
+    {"with wieldable armor", "wield plate", false, SETUP(unarmed(g, att); wearable(g, att, "plate", wear_flag::wield, {}, 0, ITEM_ARMOR); obj_set_value(first_obj(g, char_get_inventory(att)), VAL_WEAPON_SKILL, SKILL_SWORD);), false, 1},
     {"", "hold", false, SETUP(), false, 1},
     {"", "grab torch", false, SETUP(), false, 1},
-    {"with a torch beyond them", "hold torch", false, SETUP(wearable(g, att, "torch", ITEM_WEAR_HOLD, {}, 50, ITEM_LIGHT);), false, 1},
-    {"two-handing, with a torch", "hold torch", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50); wearable(g, att, "torch", ITEM_WEAR_HOLD, {}, 0, ITEM_LIGHT);), false, 1},
-    {"with a torch", "hold torch", false, SETUP(obj_set_value(wearable(g, att, "torch", ITEM_WEAR_HOLD, {}, 0, ITEM_LIGHT), VAL_LIGHT_HOURS, 5);), false, 1},
-    {"with an everlasting torch", "hold torch", false, SETUP(obj_set_value(wearable(g, att, "torch", ITEM_WEAR_HOLD, {}, 0, ITEM_LIGHT), VAL_LIGHT_HOURS, -1);), false, 1},
-    {"with a burnt torch", "hold torch", false, SETUP(wearable(g, att, "torch", ITEM_WEAR_HOLD, {}, 0, ITEM_LIGHT);), false, 1},
-    {"holding something, with a torch", "hold torch", false, SETUP(dual(g, att, TYPE_SLASH - TYPE_HIT); obj_set_value(wearable(g, att, "torch", ITEM_WEAR_HOLD, {}, 0, ITEM_LIGHT), VAL_LIGHT_HOURS, 5);), false, 1},
+    {"with a torch beyond them", "hold torch", false, SETUP(wearable(g, att, "torch", wear_flag::hold, {}, 50, ITEM_LIGHT);), false, 1},
+    {"two-handing, with a torch", "hold torch", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50); wearable(g, att, "torch", wear_flag::hold, {}, 0, ITEM_LIGHT);), false, 1},
+    {"with a torch", "hold torch", false, SETUP(obj_set_value(wearable(g, att, "torch", wear_flag::hold, {}, 0, ITEM_LIGHT), VAL_LIGHT_HOURS, 5);), false, 1},
+    {"with an everlasting torch", "hold torch", false, SETUP(obj_set_value(wearable(g, att, "torch", wear_flag::hold, {}, 0, ITEM_LIGHT), VAL_LIGHT_HOURS, -1);), false, 1},
+    {"with a burnt torch", "hold torch", false, SETUP(wearable(g, att, "torch", wear_flag::hold, {}, 0, ITEM_LIGHT);), false, 1},
+    {"holding something, with a torch", "hold torch", false, SETUP(dual(g, att, TYPE_SLASH - TYPE_HIT); obj_set_value(wearable(g, att, "torch", wear_flag::hold, {}, 0, ITEM_LIGHT), VAL_LIGHT_HOURS, 5);), false, 1},
     {"with a pebble", "hold pebble", false, SETUP(pebbles(g, att, 1);), false, 1},
-    {"with a charm", "hold charm", false, SETUP(wearable(g, att, "charm", ITEM_WEAR_HOLD);), false, 1},
+    {"with a charm", "hold charm", false, SETUP(wearable(g, att, "charm", wear_flag::hold);), false, 1},
     {"with a wand", "hold wand", false, SETUP(carry(g, att, {.name = "wand", .type = ITEM_WAND});), false, 1},
     {"with a staff", "hold staff", false, SETUP(carry(g, att, {.name = "staff", .type = ITEM_STAFF});), false, 1},
     {"with a scroll", "hold scroll", false, SETUP(carry(g, att, {.name = "scroll", .type = ITEM_SCROLL});), false, 1},
@@ -962,19 +962,19 @@ namespace {
     {"by a board", "remove 1", false, SETUP(here(g, {.name = "board", .type = ITEM_BOARD});), false, 1},
     {"with a board", "remove 1", false, SETUP(carry(g, att, {.name = "board", .type = ITEM_BOARD});), false, 1},
     {"by a board", "remove 0", false, SETUP(here(g, {.name = "board", .type = ITEM_BOARD});), false, 1},
-    {"by a board", "remove ring", false, SETUP(here(g, {.name = "board", .type = ITEM_BOARD}); worn(g, att, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R);), false, 1},
+    {"by a board", "remove ring", false, SETUP(here(g, {.name = "board", .type = ITEM_BOARD}); worn(g, att, {.name = "ring", .wear = {wear_flag::finger}}, WEAR_FINGER_R);), false, 1},
     {"naked", "remove all", false, SETUP(unarmed(g, att);), false, 1},
-    {"wearing rings", "remove all", false, SETUP(worn(g, att, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R); worn(g, att, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_L);), false, 1},
-    {"wearing rings", "remove all.ring", false, SETUP(worn(g, att, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R); worn(g, att, {.name = "hat", .wear = {ITEM_WEAR_HEAD}}, WEAR_HEAD);), false, 1},
-    {"wearing rings", "remove all.", false, SETUP(worn(g, att, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R);), false, 1},
-    {"wearing rings", "remove all.band", false, SETUP(worn(g, att, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R);), false, 1},
+    {"wearing rings", "remove all", false, SETUP(worn(g, att, {.name = "ring", .wear = {wear_flag::finger}}, WEAR_FINGER_R); worn(g, att, {.name = "ring", .wear = {wear_flag::finger}}, WEAR_FINGER_L);), false, 1},
+    {"wearing rings", "remove all.ring", false, SETUP(worn(g, att, {.name = "ring", .wear = {wear_flag::finger}}, WEAR_FINGER_R); worn(g, att, {.name = "hat", .wear = {wear_flag::head}}, WEAR_HEAD);), false, 1},
+    {"wearing rings", "remove all.", false, SETUP(worn(g, att, {.name = "ring", .wear = {wear_flag::finger}}, WEAR_FINGER_R);), false, 1},
+    {"wearing rings", "remove all.band", false, SETUP(worn(g, att, {.name = "ring", .wear = {wear_flag::finger}}, WEAR_FINGER_R);), false, 1},
     {"", "remove ring", false, SETUP(), false, 1},
-    {"wearing a ring", "remove ring", false, SETUP(worn(g, att, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R);), false, 1},
-    {"wearing a cursed ring", "remove ring", false, SETUP(worn(g, att, {.name = "ring", .flags = {ITEM_NODROP}, .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R);), false, 1},
-    {"an immortal wearing a cursed ring", "remove ring", false, SETUP(admin_set(g, att, ADMLVL_IMMORT); worn(g, att, {.name = "ring", .flags = {ITEM_NODROP}, .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R);), false, 1},
-    {"crowded, wearing a ring", "remove ring", false, SETUP(worn(g, att, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}, WEAR_FINGER_R); crowded(g, att);), false, 1},
-    {"wearing a ring of strength", "remove ring", false, SETUP({ obj_data *r = make(g, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}); obj_get_affected(r)[0].location = APPLY_STR; obj_get_affected(r)[0].modifier = 20; equip_char(g, att, r, WEAR_FINGER_R); restoreVitals(att, false); }), false, 1},
-    {"wearing a ring of might", "remove ring", false, SETUP({ obj_data *r = make(g, {.name = "ring", .wear = {ITEM_WEAR_FINGER}}); obj_get_affected(r)[0].location = APPLY_HIT; obj_get_affected(r)[0].modifier = 50000; equip_char(g, att, r, WEAR_FINGER_R); restoreVitals(att, false); }), false, 1},
+    {"wearing a ring", "remove ring", false, SETUP(worn(g, att, {.name = "ring", .wear = {wear_flag::finger}}, WEAR_FINGER_R);), false, 1},
+    {"wearing a cursed ring", "remove ring", false, SETUP(worn(g, att, {.name = "ring", .flags = {extra_flag::nodrop}, .wear = {wear_flag::finger}}, WEAR_FINGER_R);), false, 1},
+    {"an immortal wearing a cursed ring", "remove ring", false, SETUP(admin_set(g, att, ADMLVL_IMMORT); worn(g, att, {.name = "ring", .flags = {extra_flag::nodrop}, .wear = {wear_flag::finger}}, WEAR_FINGER_R);), false, 1},
+    {"crowded, wearing a ring", "remove ring", false, SETUP(worn(g, att, {.name = "ring", .wear = {wear_flag::finger}}, WEAR_FINGER_R); crowded(g, att);), false, 1},
+    {"wearing a ring of strength", "remove ring", false, SETUP({ obj_data *r = make(g, {.name = "ring", .wear = {wear_flag::finger}}); obj_get_affected(r)[0].location = APPLY_STR; obj_get_affected(r)[0].modifier = 20; equip_char(g, att, r, WEAR_FINGER_R); restoreVitals(att, false); }), false, 1},
+    {"wearing a ring of might", "remove ring", false, SETUP({ obj_data *r = make(g, {.name = "ring", .wear = {wear_flag::finger}}); obj_get_affected(r)[0].location = APPLY_HIT; obj_get_affected(r)[0].modifier = 50000; equip_char(g, att, r, WEAR_FINGER_R); restoreVitals(att, false); }), false, 1},
     {"two-handing", "remove sword", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50);), false, 1},
   };
 } // namespace

@@ -87,8 +87,8 @@ struct scenery {
 
 void show(const strike_shot &s, const scenery &sc)
 {
-  act(s.g, sc.to_char, true, s.ch, nullptr, s.vict, TO_CHAR);
-  act(s.g, or_if_empty(sc.to_room, sc.to_char), true, s.ch, nullptr, s.vict, TO_ROOM);
+  act(s.g, sc.to_char, true, s.ch, nullptr, s.vict, act_to::actor);
+  act(s.g, or_if_empty(sc.to_room, sc.to_char), true, s.ch, nullptr, s.vict, act_to::room);
 }
 
 /* A slam to the head throws the victim down, which can knock them out, and into the ground, which craters it */
@@ -121,17 +121,17 @@ void slam_crater(strike_shot &s, int where)
 
   if (where != 2)
     return;
-  if (!char_aff_flagged(vict, AFF_KNOCKED) &&
+  if (!char_aff_flagged(vict, aff_flag::knocked) &&
       (rand_number(g, 1, 4) >= 3 && (getCurPL(g, vict) > getCurPL(g, s.ch) / 5) &&
-       !char_aff_flagged(vict, AFF_SANCTUARY))) {
+       !char_aff_flagged(vict, aff_flag::sanctuary))) {
     act_triple(g, {"@C$N@W is knocked out!@n", "@WYou are knocked out!@n", "@C$N@W is knocked out!@n", true}, s.ch,
                nullptr, vict);
     setStatusKnockedOut(vict);
   } else if ((char_get_position(vict) == POS_STANDING || char_get_position(vict) == POS_FIGHTING) &&
-             !char_aff_flagged(vict, AFF_KNOCKED)) {
+             !char_aff_flagged(vict, aff_flag::knocked)) {
     char_set_position(vict, POS_SITTING);
   }
-  if (room_get_dmg(g, here()) > 95 || room_flagged(g, here(), ROOM_SPACE))
+  if (room_get_dmg(g, here()) > 95 || room_flagged(g, here(), room_flag::space))
     return;
   act_triple(g,
              {"@W$N@W slams into the ground forming a large crater with $S body!@n",
@@ -163,7 +163,7 @@ void slam_crater(strike_shot &s, int where)
 /* A tailwhip to the body or the head can knock a standing victim down, more likely to the head */
 void tailwhip_knockdown(strike_shot &s, int where)
 {
-  if (where <= 3 && !char_aff_flagged(s.vict, AFF_FLYING) && char_get_position(s.vict) == POS_STANDING &&
+  if (where <= 3 && !char_aff_flagged(s.vict, aff_flag::flying) && char_get_position(s.vict) == POS_STANDING &&
       rand_number(s.g, 1, 8) >= (where == 2 ? 6 : 7))
     handle_knockdown(s.g, s.vict);
 }
@@ -335,7 +335,7 @@ void bite_victim(GameWorld *g, struct char_data *ch, struct char_data *vict, int
       hurt(g, 0, 0, ch, vict, nullptr, 0, 0);
       return;
     }
-    if (pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
+    if (pry > rand_number(g, 1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, mob_flag::dummy))) {
       act_triple(g,
                  {"@C$N@W parries your bite with a punch of their own!@n",
                   "@WYou parry @C$n's@W bite with a punch of your own!@n",
@@ -397,11 +397,11 @@ void bite_victim(GameWorld *g, struct char_data *ch, struct char_data *vict, int
   }
   /* a mutant's bite can poison */
   if (!char_is_npc(ch) && axion_dice(g, 0) > char_get_aff_abils_con(vict) && rand_number(g, 1, 5) == 5) {
-    act(g, "@R$N@r was poisoned by your bite!@n", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "@rYou were poisoned by the bite!@n", true, ch, nullptr, vict, TO_VICT);
+    act(g, "@R$N@r was poisoned by your bite!@n", true, ch, nullptr, vict, act_to::actor);
+    act(g, "@rYou were poisoned by the bite!@n", true, ch, nullptr, vict, act_to::vict);
     char_set_poisonby(vict, ch);
     int duration = (char_get_aff_abils_intel(ch) / 50) + 1;
-    assign_affect(g, vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
+    assign_affect(g, vict, aff_flag::poison, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
   }
   pcost(g, ch, 0, stcost);
 }
@@ -441,7 +441,7 @@ ACMD(do_bite)
   if (skill <= 0)
     skill = 60;
   /* whoever is named, or else whoever ch is fighting here, or else something here */
-  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_room))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch))
       vict = char_get_fighting(g, ch);
     else if (!(obj = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)))))
@@ -456,7 +456,7 @@ ACMD(do_bite)
   if (!can_kill(g, ch, nullptr, obj, 0))
     return;
   int64_t dmg = getCurPL(g, ch) / 10000 + char_get_aff_abils_str(ch);
-  act(g, "@C$n@W bites $p@W extremely hard!@n", true, ch, obj, nullptr, TO_ROOM); /* quirk: the biter isn't told */
+  act(g, "@C$n@W bites $p@W extremely hard!@n", true, ch, obj, nullptr, act_to::room); /* quirk: the biter isn't told */
   hurt(g, 0, 0, ch, nullptr, obj, dmg, 0);
   pcost(g, ch, 0, stcost);
 }

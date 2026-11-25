@@ -58,7 +58,7 @@ const struct transform_bonus base_form = {
  * ============================================================================= */
 
 /* =============================================================================
- * Legendary Saiyan Transformations (PLR_LSSJ flag)
+ * Legendary Saiyan Transformations (player_flag::lssj flag)
  * ============================================================================= */
 
 /* =============================================================================
@@ -69,7 +69,7 @@ const struct transform_bonus oozaru_form = {
     .bonus                = 10000,
     .mult                 = 2.0,
     .drain                = 0.0,
-    .flag                 = PLR_OOZARU,
+    .flag                 = player_flag::oozaru,
     .rpp_cost             = 0,
     .requires_pl          = 0,
     .name                 = "@ROozaru@n",

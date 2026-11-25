@@ -124,7 +124,7 @@ static void sub_write_to_char(GameWorld *g, struct char_data *ch, const std::vec
 }
 
 /*
- * Sends arg to ch (TO_CHAR) and to the others in ch's room (TO_ROOM), each seeing the characters and objects it
+ * Sends arg to ch (act_to::actor) and to the others in ch's room (act_to::room), each seeing the characters and objects it
  * names as they see them: ~name is the character's name (you), |name its possessive (your), ^name his/her/its,
  * &name he/she/it, *name him/her/it, and _name an object's short description. They are found in ch's room whether
  * or not ch can see them. A backslash gives the character after it as it is.
@@ -168,10 +168,10 @@ void sub_write(GameWorld *g, std::string_view arg, struct char_data *ch, act_to 
     }
   }
 
-  if ((std::to_underlying(targets) & std::to_underlying(TO_CHAR)) && sendok(ch, to_sleeping))
+  if ((std::to_underlying(targets) & std::to_underlying(act_to::actor)) && sendok(ch, to_sleeping))
     sub_write_to_char(g, ch, pieces);
 
-  if (std::to_underlying(targets) & std::to_underlying(TO_ROOM))
+  if (std::to_underlying(targets) & std::to_underlying(act_to::room))
     for (char_data *to : room_people(g, char_get_in_room(ch)))
       if (to != ch && sendok(to, to_sleeping))
         sub_write_to_char(g, to, pieces);

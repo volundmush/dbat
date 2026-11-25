@@ -7,7 +7,6 @@
 #include "dbat/iterate.hpp"
 #include "dbat/db.hpp"
 #include "dbat/interpreter.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/object_utils.hpp"
@@ -51,7 +50,7 @@ const field<room_data> room_fields[] = {
        return "";
      }},
     {"fishing", [](const field_query &q, room_data *r) -> result {
-       return room_flagged(q.g, room_get_number(r), ROOM_FISHING) ? "1" : "0";
+       return room_flagged(q.g, room_get_number(r), room_flag::fishing) ? "1" : "0";
      }},
     {"gravity", [](const field_query &, room_data *r) -> result { return number(room_get_gravity(r)); }},
     {"id", [](const field_query &q, room_data *r) -> result {
@@ -68,7 +67,7 @@ const field<room_data> room_fields[] = {
        std::optional<room_flag> flag = flag_by_name<room_flag>(q.subfield);
        return flag && *flag != room_flag::dark && room_flagged(r, *flag) ? "1" : "0";
      }},
-    {"sector", [](const field_query &, room_data *r) -> result { return sprinttype(room_get_sector_type(r), sector_types); }},
+    {"sector", [](const field_query &, room_data *r) -> result { return std::string(type_name(sector_types, room_get_sector_type(r))); }},
     {"vnum", [](const field_query &q, room_data *r) -> result {
        if (q.has_arg())
          return number((int)(room_get_number(r) == parse_int(q.subfield)));
@@ -76,7 +75,7 @@ const field<room_data> room_fields[] = {
      }},
     {"weather", [](const field_query &q, room_data *r) -> result {
        static constexpr std::string_view sky_look[] = {"sunny", "cloudy", "rainy", "lightning"};
-       return room_flagged(r, ROOM_INDOORS) ? "" : str_format("{}", sky_look[q.g->weather_info.sky]);
+       return room_flagged(r, room_flag::indoors) ? "" : str_format("{}", sky_look[q.g->weather_info.sky]);
      }},
     {"zonename", [](const field_query &, room_data *r) -> result { return str_format("{}", room_get_zone(r)->name); }},
     {"zonenumber", [](const field_query &, room_data *r) -> result { return number(room_get_zone(r)->number); }},

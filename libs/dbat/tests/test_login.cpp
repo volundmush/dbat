@@ -105,7 +105,7 @@ namespace {
     char_set_class(pc, CLASS_ROSHI);
     char_set_pfilepos(pc, create_entry(g, char_get_pc_name(pc)));
     init_char(g, pc);
-    char_plr_set(pc, PLR_DELETED, true);
+    char_plr_set(pc, player_flag::deleted, true);
     save_char(g, pc);
     save_player_index(g);
     free_char(g, pc);

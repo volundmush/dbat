@@ -41,7 +41,7 @@ int arena_watch(GameWorld *g, struct char_data *ch)
   }
 
   if (found == false) {
-    char_prf_set(g, ch, PRF_ARENAWATCH, false);
+    char_prf_set(g, ch, pref_flag::arenawatch, false);
     char_set_arenawatch(ch, -1);
     return (NOWHERE);
   }
@@ -127,7 +127,7 @@ void send_to_room(GameWorld *g, room_vnum room, std::string_view text)
     if (desc_get_connected(d) != CON_PLAYING)
       continue;
 
-    if (char_prf_flagged(g, d->character, PRF_ARENAWATCH)) {
+    if (char_prf_flagged(g, d->character, pref_flag::arenawatch)) {
       if (arena_watch(g, d->character) == room) {
         write_to_output(g, d, "@c-----@CArena@c-----@n\r\n{}\r\n@c-----@CArena@c-----@n\r\n", text);
       }
@@ -273,21 +273,21 @@ static void perform_act(GameWorld *g, std::string_view orig, struct char_data *c
 /* act()/sub_write(): should ch receive this message? (to_sleeping: deliver even to sleeping characters) */
 bool sendok(struct char_data *ch, int to_sleeping)
 {
-  return (char_get_desc(ch) || script_has_type(char_get_script(ch), MTRIG_ACT)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, PLR_WRITING);
+  return (char_get_desc(ch) || script_has_type(char_get_script(ch), mob_trig::act)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, player_flag::writing);
 }
 
 void act_triple(GameWorld *g, const act_msgs &m, struct char_data *ch, struct obj_data *obj, struct char_data *vict)
 {
-  act(g, m.to_char, m.hide, ch, obj, vict, TO_CHAR);
-  act(g, m.to_vict, m.hide, ch, obj, vict, TO_VICT);
-  act(g, m.to_room, m.hide, ch, obj, vict, TO_NOTVICT);
+  act(g, m.to_char, m.hide, ch, obj, vict, act_to::actor);
+  act(g, m.to_vict, m.hide, ch, obj, vict, act_to::vict);
+  act(g, m.to_room, m.hide, ch, obj, vict, act_to::notvict);
 }
 
 void act_triple_vict_last(GameWorld *g, const act_msgs &m, struct char_data *ch, struct obj_data *obj, struct char_data *vict)
 {
-  act(g, m.to_char, m.hide, ch, obj, vict, TO_CHAR);
-  act(g, m.to_room, m.hide, ch, obj, vict, TO_NOTVICT);
-  act(g, m.to_vict, m.hide, ch, obj, vict, TO_VICT);
+  act(g, m.to_char, m.hide, ch, obj, vict, act_to::actor);
+  act(g, m.to_room, m.hide, ch, obj, vict, act_to::notvict);
+  act(g, m.to_vict, m.hide, ch, obj, vict, act_to::vict);
 }
 
 /* The message the last act() made, which act() returns even when it sent nothing this time (quirk), or nullptr if
@@ -308,7 +308,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
   if (str.empty())
     return nullptr;
 
-  if (res_sneak && char_aff_flagged(ch, AFF_SNEAK)) {
+  if (res_sneak && char_aff_flagged(ch, aff_flag::sneak)) {
     dcval = roll_skill(g, ch, SKILL_MOVE_SILENTLY); /* How difficult to counter? */
     if (char_get_skill(ch, SKILL_BALANCE))
       dcval += char_get_skill(ch, SKILL_BALANCE) / 10;
@@ -316,7 +316,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
       dcval += 10;
     }
     resskill = SKILL_SPOT; /* Skill used to resist      */
-  } else if (res_hide && char_aff_flagged(ch, AFF_HIDE)) {
+  } else if (res_hide && char_aff_flagged(ch, aff_flag::hide)) {
     dcval = roll_skill(g, ch, SKILL_HIDE);
     if (char_get_skill(ch, SKILL_BALANCE))
       dcval += char_get_skill(ch, SKILL_BALANCE) / 10;
@@ -325,7 +325,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
 
   g->dg_act_check = !target.no_trig;
 
-  if (type == TO_CHAR) {
+  if (type == act_to::actor) {
     if (ch && sendok(ch, to_sleeping) && (!resskill || (roll_skill(g, ch, resskill) >= dcval))) {
       perform_act(g, str, ch, obj, vict_obj, ch);
       return last_act_message(g);
@@ -333,7 +333,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
     return nullptr;
   }
 
-  if (type == TO_VICT) {
+  if (type == act_to::vict) {
     struct char_data *to = (struct char_data *)const_cast<void *>(vict_obj);
     if (to != nullptr && sendok(to, to_sleeping) && (!resskill || (roll_skill(g, to, resskill) >= dcval))) {
       perform_act(g, str, ch, obj, vict_obj, to);
@@ -342,13 +342,13 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
     return nullptr;
   }
 
-  if (type == TO_GMOTE) {
+  if (type == act_to::gmote) {
     std::string buf;
     for (descriptor_data *i : each_desc(g)) {
       if (!i->connected && i->character &&
-          (char_is_npc(i->character) || !char_prf_flagged(g, i->character, PRF_NOGOSS)) && /* someone switched */
-          !char_plr_flagged(i->character, PLR_WRITING) &&
-          !room_flagged(g, char_get_in_room(i->character), ROOM_SOUNDPROOF)) {
+          (char_is_npc(i->character) || !char_prf_flagged(g, i->character, pref_flag::nogoss)) && /* someone switched */
+          !char_plr_flagged(i->character, player_flag::writing) &&
+          !room_flagged(g, char_get_in_room(i->character), room_flag::soundproof)) {
 
         buf = str_format("@y{}@n", str);
         perform_act(g, buf, ch, obj, vict_obj, i->character);
@@ -359,7 +359,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
     return last_act_message(g);
   }
 
-  /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
+  /* ASSUMPTION: at this point we know type must be act_to::notvict or act_to::room */
 
   room_vnum room;
   if (ch && char_get_in_room(ch) != NOWHERE)
@@ -370,7 +370,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
     return nullptr;
   }
 
-  if (std::to_underlying(type) & std::to_underlying(TO_ROOM)) { /* quirk: TO_NOTVICT too, which has the bit */
+  if (std::to_underlying(type) & std::to_underlying(act_to::room)) { /* quirk: act_to::notvict too, which has the bit */
 
     for (descriptor_data *d : each_desc(g)) {
       if (desc_get_connected(d) != CON_PLAYING)
@@ -378,7 +378,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
 
       if (ch != nullptr) {
         if (char_in_arena(g, ch)) {
-          if (char_prf_flagged(g, d->character, PRF_ARENAWATCH)) {
+          if (char_prf_flagged(g, d->character, pref_flag::arenawatch)) {
             if (arena_watch(g, d->character) == char_get_in_room(ch)) {
               std::string buf3;
               buf3 = str_format("@c-----@CArena@c-----@n\r\n{}\r\n@c-----@CArena@c-----@n\r\n", str);
@@ -409,7 +409,7 @@ const std::string *act(GameWorld *g, std::string_view str, int hide_invisible, s
       continue;
     if (hide_invisible && ch && !char_can_see(g, to, ch))
       continue;
-    if (type != TO_ROOM && to == vict_obj)
+    if (type != act_to::room && to == vict_obj)
       continue;
     if (resskill && roll_skill(g, to, resskill) < dcval)
       continue;

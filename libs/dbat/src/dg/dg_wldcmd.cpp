@@ -76,13 +76,13 @@ static void act_to_room(GameWorld *g, std::string_view str, room_data *room)
     return;
 
   /*
-     * since you can't use act(..., TO_ROOM) for an room, send it
-     * TO_ROOM and TO_CHAR for some char in the room.
+     * since you can't use act(..., act_to::room) for an room, send it
+     * act_to::room and act_to::actor for some char in the room.
      * (just dont use $n or you might get strange results)
      */
   std::string text(str);
-  act(g, text, false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_ROOM);
-  act(g, text, false, first_char(g, room_get_people(room)), nullptr, nullptr, TO_CHAR);
+  act(g, text, false, first_char(g, room_get_people(room)), nullptr, nullptr, act_to::room);
+  act(g, text, false, first_char(g, room_get_people(room)), nullptr, nullptr, act_to::actor);
 }
 
 /* World commands */
@@ -125,10 +125,10 @@ static WCMD(do_weffect)
       wld_log(g, room, "weffect target is NOWHERE.");
       return;
     }
-    if (!room_flagged(g, target, ROOM_INDOORS)) {
-      room_set_flag(g, target, ROOM_INDOORS, true);
+    if (!room_flagged(g, target, room_flag::indoors)) {
+      room_set_flag(g, target, room_flag::indoors, true);
     } else {
-      room_set_flag(g, target, ROOM_INDOORS, false);
+      room_set_flag(g, target, room_flag::indoors, false);
     }
   } else if (str_eq_nocase(arg, "lava")) {
     if (!room_of(g, target)) {
@@ -194,9 +194,9 @@ static WCMD(do_wsend)
 
   if ((ch = get_char_by_room(g, room, name))) {
     if (subcmd == SCMD_WSEND)
-      sub_write(g, msg, ch, TO_CHAR);
+      sub_write(g, msg, ch, act_to::actor);
     else if (subcmd == SCMD_WECHOAROUND)
-      sub_write(g, msg, ch, TO_ROOM);
+      sub_write(g, msg, ch, act_to::room);
   }
 
   else
@@ -298,7 +298,7 @@ static WCMD(do_wteleport)
     }
 
     for (char_data *tch : room_people(g, room)) {
-      if (!valid_dg_target(g, tch, DG_ALLOW_GODS))
+      if (!valid_dg_target(g, tch, dg_gods::allow))
         continue;
       char_from_room(g, tch);
       char_to_room(g, tch, target);
@@ -308,7 +308,7 @@ static WCMD(do_wteleport)
 
   else {
     if ((ch = get_char_by_room(g, room, arg1))) {
-      if (valid_dg_target(g, ch, DG_ALLOW_GODS)) {
+      if (valid_dg_target(g, ch, dg_gods::allow)) {
         char_from_room(g, ch);
         char_to_room(g, ch, target);
         enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
@@ -334,7 +334,7 @@ static WCMD(do_wforce)
   if (str_eq_nocase(arg1, "all")) {
     for (char_data *tch : room_people(g, room)) {
 
-      if (valid_dg_target(g, tch, 0)) {
+      if (valid_dg_target(g, tch, dg_gods::refuse)) {
         command_interpreter(g, tch, line);
       }
     }
@@ -342,7 +342,7 @@ static WCMD(do_wforce)
 
   else {
     if ((ch = get_char_by_room(g, room, arg1))) {
-      if (valid_dg_target(g, ch, 0)) {
+      if (valid_dg_target(g, ch, dg_gods::refuse)) {
         command_interpreter(g, ch, line);
       }
     }

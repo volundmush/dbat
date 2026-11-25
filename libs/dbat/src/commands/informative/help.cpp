@@ -14,7 +14,6 @@
 #include "dbat/consts/time.hpp"
 #include "dbat/help.hpp"
 #include "dbat/command.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/random.hpp"
@@ -88,7 +87,7 @@ ACMD(do_weather)
   if (char_is_outside(g, ch)) {
     send_to_char(g, ch, "The sky is {} and {}.\r\n", sky_look[g->weather_info.sky],
                  g->weather_info.change >= 0 ? "you feel a warm wind from south" : "your foot tells you bad weather is due");
-    if (char_adm_flagged(ch, ADM_KNOWWEATHER))
+    if (char_adm_flagged(ch, admin_flag::knowweather))
       send_to_char(g, ch, "Pressure: {:d} (change: {:d}), Sky: {:d} ({})\r\n",
                    g->weather_info.pressure,
                    g->weather_info.change,
@@ -247,7 +246,7 @@ ACMD(do_color)
     send_to_char(g, ch, "Usage: color [ off | on ]\r\n");
     return;
   }
-  char_prf_set(g, ch, PRF_COLOR, tp == C_ON);
+  char_prf_set(g, ch, pref_flag::color, tp == C_ON);
   send_to_char(g, ch, "Your color is now @o{}@n.\r\n", ctypes[tp]);
 }
 
@@ -261,55 +260,55 @@ ACMD(do_toggle)
   if (char_get_admlevel(ch)) {
     send_to_char(g, ch,
                  "      Buildwalk: {:<3}    Clear Screen in OLC: {:<3}\r\n",
-                 ONOFF(char_prf_flagged(g, ch, PRF_BUILDWALK)),
-                 ONOFF(char_prf_flagged(g, ch, PRF_CLS)));
+                 ONOFF(char_prf_flagged(g, ch, pref_flag::buildwalk)),
+                 ONOFF(char_prf_flagged(g, ch, pref_flag::cls)));
 
     send_to_char(g, ch,
                  "      No Hassle: {:<3}          Holylight: {:<3}         Room Flags: {:<3}\r\n",
-                 ONOFF(char_prf_flagged(g, ch, PRF_NOHASSLE)),
-                 ONOFF(char_prf_flagged(g, ch, PRF_HOLYLIGHT)),
-                 ONOFF(char_prf_flagged(g, ch, PRF_ROOMFLAGS)));
+                 ONOFF(char_prf_flagged(g, ch, pref_flag::nohassle)),
+                 ONOFF(char_prf_flagged(g, ch, pref_flag::holylight)),
+                 ONOFF(char_prf_flagged(g, ch, pref_flag::roomflags)));
   }
 
   send_to_char(g, ch,
                "Hit Pnt Display: {:<3}         Brief Mode: {:<3}     Summon Protect: {:<3}\r\n   Move Display: {:<3}       Compact Mode: {:<3}           On Quest: {:<3}\r\n    Exp Display: {:<3}             NoTell: {:<3}       Repeat Comm.: {:<3}\r\n     Ki Display: {:<3}               Deaf: {:<3}         Wimp Level: {:<3}\r\n Gossip Channel: {:<3}    Auction Channel: {:<3}      Grats Channel: {:<3}\r\n      Auto Loot: {:<3}          Auto Gold: {:<3}        Color Level: {}\r\n     Auto Split: {:<3}           Auto Sac: {:<3}           Auto Mem: {:<3}\r\n     View Order: {:<3}        Auto Assist: {:<3}     Auto Show Exit: {:<3}\r\n    TNL Display: {:<3}    ",
 
-               ONOFF(char_prf_flagged(g, ch, PRF_DISPHP)),
-               ONOFF(char_prf_flagged(g, ch, PRF_BRIEF)),
-               ONOFF(!char_prf_flagged(g, ch, PRF_SUMMONABLE)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::disphp)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::brief)),
+               ONOFF(!char_prf_flagged(g, ch, pref_flag::summonable)),
 
-               ONOFF(char_prf_flagged(g, ch, PRF_DISPMOVE)),
-               ONOFF(char_prf_flagged(g, ch, PRF_COMPACT)),
-               YESNO(char_prf_flagged(g, ch, PRF_QUEST)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::dispmove)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::compact)),
+               YESNO(char_prf_flagged(g, ch, pref_flag::quest)),
 
-               ONOFF(char_prf_flagged(g, ch, PRF_DISPEXP)),
-               ONOFF(char_prf_flagged(g, ch, PRF_NOTELL)),
-               YESNO(!char_prf_flagged(g, ch, PRF_NOREPEAT)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::dispexp)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::notell)),
+               YESNO(!char_prf_flagged(g, ch, pref_flag::norepeat)),
 
-               ONOFF(char_prf_flagged(g, ch, PRF_DISPKI)),
-               YESNO(char_prf_flagged(g, ch, PRF_DEAF)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::dispki)),
+               YESNO(char_prf_flagged(g, ch, pref_flag::deaf)),
                wimp,
 
-               ONOFF(!char_prf_flagged(g, ch, PRF_NOGOSS)),
-               ONOFF(!char_prf_flagged(g, ch, PRF_NOAUCT)),
-               ONOFF(!char_prf_flagged(g, ch, PRF_NOGRATZ)),
+               ONOFF(!char_prf_flagged(g, ch, pref_flag::nogoss)),
+               ONOFF(!char_prf_flagged(g, ch, pref_flag::noauct)),
+               ONOFF(!char_prf_flagged(g, ch, pref_flag::nogratz)),
 
-               ONOFF(char_prf_flagged(g, ch, PRF_AUTOLOOT)),
-               ONOFF(char_prf_flagged(g, ch, PRF_AUTOGOLD)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::autoloot)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::autogold)),
                ctypes[COLOR_LEV(g, ch)],
 
-               ONOFF(char_prf_flagged(g, ch, PRF_AUTOSPLIT)),
-               ONOFF(char_prf_flagged(g, ch, PRF_AUTOSAC)),
-               ONOFF(char_prf_flagged(g, ch, PRF_AUTOMEM)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::autosplit)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::autosac)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::automem)),
 
-               ONOFF(char_prf_flagged(g, ch, PRF_VIEWORDER)),
-               ONOFF(char_prf_flagged(g, ch, PRF_AUTOASSIST)),
-               ONOFF(char_prf_flagged(g, ch, PRF_AUTOEXIT)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::vieworder)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::autoassist)),
+               ONOFF(char_prf_flagged(g, ch, pref_flag::autoexit)),
 
-               ONOFF(char_prf_flagged(g, ch, PRF_DISPTNL)));
+               ONOFF(char_prf_flagged(g, ch, pref_flag::disptnl)));
 
   if (CONFIG_ENABLE_COMPRESSION)
-    send_to_char(g, ch, "    Compression: {:<3}\r\n", ONOFF(!char_prf_flagged(g, ch, PRF_NOCOMPRESS)));
+    send_to_char(g, ch, "    Compression: {:<3}\r\n", ONOFF(!char_prf_flagged(g, ch, pref_flag::nocompress)));
 }
 
 static int sort_commands_helper(const void *a, const void *b, void *world)
@@ -343,7 +342,7 @@ ACMD(do_commands)
   struct char_data *vict = ch;
 
   if (!arg.empty()) {
-    auto who = find_char(g, ch, arg, FIND_CHAR_WORLD, "Who is that?\r\n").and_then([](struct char_data *v) -> parsed<struct char_data *> {
+    auto who = find_char(g, ch, arg, find_flag::char_world, "Who is that?\r\n").and_then([](struct char_data *v) -> parsed<struct char_data *> {
       if (char_is_npc(v))
         return std::unexpected("Who is that?\r\n");
       return v;

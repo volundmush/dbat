@@ -41,10 +41,10 @@ struct bfs_queue_struct {
 
 
 /* Utility macros */
-#define MARK(g, room)      (room_set_flag(g, room, ROOM_BFS_MARK, true))
-#define UNMARK(g, room)    (room_set_flag(g, room, ROOM_BFS_MARK, false))
-#define IS_MARKED(g, room) (room_flagged(g, room, ROOM_BFS_MARK))
-#define IS_CLOSED(g, x, y) (room_exit_flagged(room_get_dir_option(g, (x), (y)), EX_CLOSED))
+#define MARK(g, room)      (room_set_flag(g, room, room_flag::bfs_mark, true))
+#define UNMARK(g, room)    (room_set_flag(g, room, room_flag::bfs_mark, false))
+#define IS_MARKED(g, room) (room_flagged(g, room, room_flag::bfs_mark))
+#define IS_CLOSED(g, x, y) (room_exit_flagged(room_get_dir_option(g, (x), (y)), exit_flag::closed))
 
 static bool VALID_EDGE(GameWorld *g, room_vnum x, int y)
 {
@@ -52,7 +52,7 @@ static bool VALID_EDGE(GameWorld *g, room_vnum x, int y)
     return false;
   if (CONFIG_TRACK_T_DOORS == false && IS_CLOSED(g, x, y))
     return false;
-  if (room_flagged(g, room_get_exit_to_room(g, x, y), ROOM_NOTRACK) || IS_MARKED(g, room_get_exit_to_room(g, x, y)))
+  if (room_flagged(g, room_get_exit_to_room(g, x, y), room_flag::notrack) || IS_MARKED(g, room_get_exit_to_room(g, x, y)))
     return false;
 
   return true;
@@ -109,7 +109,7 @@ int find_first_step(GameWorld *g, room_vnum src, room_vnum target)
     return (BFS_ALREADY_THERE);
 
   /* clear marks first, some OLC systems will save the mark. */
-  g->rooms.visit([](room_vnum, struct room_data *room) { room_set_flag(room, ROOM_BFS_MARK, false); });
+  g->rooms.visit([](room_vnum, struct room_data *room) { room_set_flag(room, room_flag::bfs_mark, false); });
   MARK(g, src);
   /* first, enqueue the first steps, saving which direction we're going. */
   for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {
@@ -150,7 +150,7 @@ ACMD(do_sradar)
   std::string_view rest = argument;
   arg                   = take_arg(rest);
 
-  if (!char_plr_flagged(ch, PLR_PILOTING) && char_get_admlevel(ch) < 1) {
+  if (!char_plr_flagged(ch, player_flag::piloting) && char_get_admlevel(ch) < 1) {
     send_to_char(g, ch, "You are not flying a ship, maybe you want detect?\r\n");
     return;
   }
@@ -160,7 +160,7 @@ ACMD(do_sradar)
     return;
   }
 
-  if (!char_plr_flagged(ch, PLR_PILOTING) && char_get_admlevel(ch) >= 1) {
+  if (!char_plr_flagged(ch, player_flag::piloting) && char_get_admlevel(ch) >= 1) {
     noship = true;
   } else if (!(vehicle = find_vehicle_by_vnum(g, obj_get_value(controls, 0)))) {
     send_to_char(g, ch, "@wYou can't find anything to pilot.\r\n");
@@ -313,7 +313,7 @@ ACMD(do_radar)
   int dir, num = 0, found = false, found2 = false, fcount = 0;
 
   for (obj_data *obj2 : char_inventory(g, ch)) {
-    if (obj_get_vnum(g, obj2) == 12 && (!obj_extra_flagged(obj2, ITEM_BROKEN)) && (!obj_extra_flagged(obj2, ITEM_FORGED))) {
+    if (obj_get_vnum(g, obj2) == 12 && (!obj_extra_flagged(obj2, extra_flag::broken)) && (!obj_extra_flagged(obj2, extra_flag::forged))) {
       found2 = true;
     }
   }
@@ -329,11 +329,11 @@ ACMD(do_radar)
 
   else {
     char_set_wait(ch, PULSE_2SEC);
-    act(g, "$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, act_to::room);
     while (num < 20000) {
       if (room_of(g, room)) {
         for (obj_data *obj : room_contents(g, room)) {
-          if (obj_extra_flagged(obj, ITEM_FORGED)) {
+          if (obj_extra_flagged(obj, extra_flag::forged)) {
             continue;
           }
           if (obj_get_vnum(g, obj) == 20 || obj_get_vnum(g, obj) == 21 || obj_get_vnum(g, obj) == 22 || obj_get_vnum(g, obj) == 23 || obj_get_vnum(g, obj) == 24 || obj_get_vnum(g, obj) == 25 || obj_get_vnum(g, obj) == 26) {
@@ -361,7 +361,7 @@ ACMD(do_radar)
             continue;
           }
           for (obj_data *obj : char_inventory(g, tch)) {
-            if (obj_extra_flagged(obj, ITEM_FORGED)) {
+            if (obj_extra_flagged(obj, extra_flag::forged)) {
               continue;
             }
             if (obj_get_vnum(g, obj) == 20 || obj_get_vnum(g, obj) == 21 || obj_get_vnum(g, obj) == 22 || obj_get_vnum(g, obj) == 23 || obj_get_vnum(g, obj) == 24 || obj_get_vnum(g, obj) == 25 || obj_get_vnum(g, obj) == 26) {
@@ -421,7 +421,7 @@ ACMD(do_track)
   if (arg.empty() && char_get_fighting(g, ch)) {
     vict = char_get_fighting(g, ch);
     send_to_char(g, ch, "You focus on the one your are fighting.\r\n");
-    if (char_aff_flagged(vict, AFF_NOTRACK) || char_is_android(vict)) {
+    if (char_aff_flagged(vict, aff_flag::notrack) || char_is_android(vict)) {
       send_to_char(g, ch, "You can't sense them.\r\n");
       return;
     }
@@ -429,9 +429,9 @@ ACMD(do_track)
       send_to_char(g, ch, "You will remember their ki signal from now on.\r\n");
       sense_memory_write(g, ch, vict);
     }
-    act(g, "You look at $N@n intently for a moment.", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
-    act(g, "$n looks at $N@n intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
+    act(g, "You look at $N@n intently for a moment.", true, ch, nullptr, vict, act_to::actor);
+    act(g, "$n looks at you intently for a moment.", true, ch, nullptr, vict, act_to::vict);
+    act(g, "$n looks at $N@n intently for a moment.", true, ch, nullptr, vict, act_to::notvict);
     if (!char_is_android(vict)) {
       if (char_get_alignment(vict) > 50 && char_get_alignment(vict) < 200) {
         send_to_char(g, ch, "You sense slightly pure and good ki from them.\r\n");
@@ -562,13 +562,13 @@ ACMD(do_track)
 
   /* The person can't see the victim. */
 
-  if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+  if (!(vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
     send_to_char(g, ch, "No one is around by that name.\r\n");
     return;
   }
 
   /* We can't track the victim. */
-  if (char_aff_flagged(vict, AFF_NOTRACK) || char_is_android(vict)) {
+  if (char_aff_flagged(vict, aff_flag::notrack) || char_is_android(vict)) {
     send_to_char(g, ch, "You can't sense them.\r\n");
     return;
   }
@@ -587,63 +587,63 @@ ACMD(do_track)
     return;
   }
 
-  if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_YARDRAT)) && (room_flagged(g, char_get_in_room(vict), ROOM_YARDRAT)))) {
+  if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::yardrat)) && (room_flagged(g, char_get_in_room(vict), room_flag::yardrat)))) {
     send_to_char(g, ch, "@WSense@D: @YYardrat@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) && (room_flagged(g, char_get_in_room(vict), ROOM_EARTH)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::earth)) && (room_flagged(g, char_get_in_room(vict), room_flag::earth)))) {
     send_to_char(g, ch, "@WSense@D: @GEarth@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_VEGETA)) && (room_flagged(g, char_get_in_room(vict), ROOM_VEGETA)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::vegeta)) && (room_flagged(g, char_get_in_room(vict), room_flag::vegeta)))) {
     send_to_char(g, ch, "@WSense@D: @YVegeta@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) && (room_flagged(g, char_get_in_room(vict), ROOM_NAMEK)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::namek)) && (room_flagged(g, char_get_in_room(vict), room_flag::namek)))) {
     send_to_char(g, ch, "@WSense@D: @gNamek@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) && (room_flagged(g, char_get_in_room(vict), ROOM_FRIGID)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::frigid)) && (room_flagged(g, char_get_in_room(vict), room_flag::frigid)))) {
     send_to_char(g, ch, "@WSense@D: @CFrigid@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) && (room_flagged(g, char_get_in_room(vict), ROOM_AETHER)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::aether)) && (room_flagged(g, char_get_in_room(vict), room_flag::aether)))) {
     send_to_char(g, ch, "@WSense@D: @mAetherh@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_KONACK)) && (room_flagged(g, char_get_in_room(vict), ROOM_KONACK)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::konack)) && (room_flagged(g, char_get_in_room(vict), room_flag::konack)))) {
     send_to_char(g, ch, "@WSense@D: @MKonack@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) && (room_flagged(g, char_get_in_room(vict), ROOM_KANASSA)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::kanassa)) && (room_flagged(g, char_get_in_room(vict), room_flag::kanassa)))) {
     send_to_char(g, ch, "@WSense@D: @cKanassa@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
-  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), ROOM_ARLIA)) && (room_flagged(g, char_get_in_room(vict), ROOM_ARLIA)))) {
+  } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_flagged(g, char_get_in_room(ch), room_flag::arlia)) && (room_flagged(g, char_get_in_room(vict), room_flag::arlia)))) {
     send_to_char(g, ch, "@WSense@D: @yArlia@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
   } else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(room_planet_zenith(g, char_get_in_room(ch))) && (room_planet_zenith(g, char_get_in_room(vict))))) {
     send_to_char(g, ch, "@WSense@D: @CZenith@n\r\n");
-    if ((vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+    if ((vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
       std::string_view blah = sense_location(g, vict);
       send_to_char(g, ch, "@WSense@D: @Y{}@n\r\n", blah);
     }
@@ -670,9 +670,9 @@ ACMD(do_track)
         send_to_char(g, ch, "Hmm.. something seems to be wrong.\r\n");
         break;
       case BFS_ALREADY_THERE:
-        act(g, "You look at $N@n intently for a moment.", true, ch, nullptr, vict, TO_CHAR);
-        act(g, "$n looks at you intently for a moment.", true, ch, nullptr, vict, TO_VICT);
-        act(g, "$n looks at $N intently for a moment.", true, ch, nullptr, vict, TO_NOTVICT);
+        act(g, "You look at $N@n intently for a moment.", true, ch, nullptr, vict, act_to::actor);
+        act(g, "$n looks at you intently for a moment.", true, ch, nullptr, vict, act_to::vict);
+        act(g, "$n looks at $N intently for a moment.", true, ch, nullptr, vict, act_to::notvict);
         if (!char_is_android(vict)) {
           if (char_get_alignment(vict) > 50 && char_get_alignment(vict) < 200) {
             send_to_char(g, ch, "You sense slightly pure and good ki from them.\r\n");

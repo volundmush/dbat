@@ -5,7 +5,7 @@
 #include "dbat/flag_set.hpp"
 #include "dbat/name_table.hpp"
 
-extern const name_table room_bits; /* NUM_ROOM_FLAGS of them */
+extern const name_table room_bits; /* flag_count<room_flag> of them */
 
 /* Room flags: used in room_data.room_flags */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
@@ -82,75 +82,5 @@ template <> struct flag_traits<room_flag> {
   static constexpr const name_table &names = room_bits;
 };
 
-/* The old names, until every use says room_flag:: */
-constexpr room_flag ROOM_DARK        = room_flag::dark;
-constexpr room_flag ROOM_DEATH       = room_flag::death;
-constexpr room_flag ROOM_NOMOB       = room_flag::nomob;
-constexpr room_flag ROOM_INDOORS     = room_flag::indoors;
-constexpr room_flag ROOM_PEACEFUL    = room_flag::peaceful;
-constexpr room_flag ROOM_SOUNDPROOF  = room_flag::soundproof;
-constexpr room_flag ROOM_NOTRACK     = room_flag::notrack;
-constexpr room_flag ROOM_NOINSTANT   = room_flag::noinstant;
-constexpr room_flag ROOM_TUNNEL      = room_flag::tunnel;
-constexpr room_flag ROOM_PRIVATE     = room_flag::private_;
-constexpr room_flag ROOM_GODROOM     = room_flag::godroom;
-constexpr room_flag ROOM_HOUSE       = room_flag::house;
-constexpr room_flag ROOM_HOUSE_CRASH = room_flag::house_crash;
-constexpr room_flag ROOM_ATRIUM      = room_flag::atrium;
-constexpr room_flag ROOM_OLC         = room_flag::olc;
-constexpr room_flag ROOM_BFS_MARK    = room_flag::bfs_mark;
-constexpr room_flag ROOM_VEHICLE     = room_flag::vehicle;
-constexpr room_flag ROOM_UNDERGROUND = room_flag::underground;
-constexpr room_flag ROOM_CURRENT     = room_flag::current;
-constexpr room_flag ROOM_TIMED_DT    = room_flag::timed_dt;
-constexpr room_flag ROOM_EARTH       = room_flag::earth;
-constexpr room_flag ROOM_VEGETA      = room_flag::vegeta;
-constexpr room_flag ROOM_FRIGID      = room_flag::frigid;
-constexpr room_flag ROOM_KONACK      = room_flag::konack;
-constexpr room_flag ROOM_NAMEK       = room_flag::namek;
-constexpr room_flag ROOM_NEO         = room_flag::neo;
-constexpr room_flag ROOM_AL          = room_flag::al;
-constexpr room_flag ROOM_SPACE       = room_flag::space;
-constexpr room_flag ROOM_HELL        = room_flag::hell;
-constexpr room_flag ROOM_REGEN       = room_flag::regen;
-constexpr room_flag ROOM_RHELL       = room_flag::rhell;
-constexpr room_flag ROOM_GRAVITYX10  = room_flag::gravityx10;
-constexpr room_flag ROOM_AETHER      = room_flag::aether;
-constexpr room_flag ROOM_HBTC        = room_flag::hbtc;
-constexpr room_flag ROOM_PAST        = room_flag::past;
-constexpr room_flag ROOM_CBANK       = room_flag::cbank;
-constexpr room_flag ROOM_SHIP        = room_flag::ship;
-constexpr room_flag ROOM_YARDRAT     = room_flag::yardrat;
-constexpr room_flag ROOM_KANASSA     = room_flag::kanassa;
-constexpr room_flag ROOM_ARLIA       = room_flag::arlia;
-constexpr room_flag ROOM_AURA        = room_flag::aura;
-constexpr room_flag ROOM_EORBIT      = room_flag::eorbit;
-constexpr room_flag ROOM_FORBIT      = room_flag::forbit;
-constexpr room_flag ROOM_KORBIT      = room_flag::korbit;
-constexpr room_flag ROOM_NORBIT      = room_flag::norbit;
-constexpr room_flag ROOM_VORBIT      = room_flag::vorbit;
-constexpr room_flag ROOM_AORBIT      = room_flag::aorbit;
-constexpr room_flag ROOM_YORBIT      = room_flag::yorbit;
-constexpr room_flag ROOM_KANORB      = room_flag::kanorb;
-constexpr room_flag ROOM_ARLORB      = room_flag::arlorb;
-constexpr room_flag ROOM_NEBULA      = room_flag::nebula;
-constexpr room_flag ROOM_ASTERO      = room_flag::astero;
-constexpr room_flag ROOM_WORMHO      = room_flag::wormho;
-constexpr room_flag ROOM_STATION     = room_flag::station;
-constexpr room_flag ROOM_STAR        = room_flag::star;
-constexpr room_flag ROOM_CERRIA      = room_flag::cerria;
-constexpr room_flag ROOM_CORBIT      = room_flag::corbit;
-constexpr room_flag ROOM_BEDROOM     = room_flag::bedroom;
-constexpr room_flag ROOM_WORKOUT     = room_flag::workout;
-constexpr room_flag ROOM_GARDEN1     = room_flag::garden1;
-constexpr room_flag ROOM_GARDEN2     = room_flag::garden2;
-constexpr room_flag ROOM_FERTILE1    = room_flag::fertile1;
-constexpr room_flag ROOM_FERTILE2    = room_flag::fertile2;
-constexpr room_flag ROOM_FISHING     = room_flag::fishing;
-constexpr room_flag ROOM_FISHFRESH   = room_flag::fishfresh;
-constexpr room_flag ROOM_CANREMODEL  = room_flag::canremodel;
 
-constexpr int NUM_ROOM_FLAGS = static_cast<int>(flag_count<room_flag>);
-
-constexpr int RF_ARRAY_MAX = 4;
 

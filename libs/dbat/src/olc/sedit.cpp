@@ -145,7 +145,7 @@ namespace {
     shop.do_not_buy    = shop_default_msgs[SHOP_MSG_NOBUY];
     shop.message_buy   = shop_default_msgs[SHOP_MSG_BUY];
     shop.message_sell  = shop_default_msgs[SHOP_MSG_SELL];
-    shop_trade_set(&shop, TRADE_NOBROKEN, true);
+    shop_trade_set(&shop, trade_flag::nobroken, true);
   }
 
   void shop_editor::products_menu(GameWorld *g, struct descriptor_data *d)

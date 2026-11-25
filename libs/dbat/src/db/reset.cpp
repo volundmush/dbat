@@ -386,16 +386,16 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
           } else
             switch (ZCMD2.arg3) {
               case 0:
-                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(EX_LOCKED);
-                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(EX_CLOSED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(exit_flag::locked);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(exit_flag::closed);
                 break;
               case 1:
-                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(EX_CLOSED);
-                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(EX_LOCKED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(exit_flag::closed);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.reset(exit_flag::locked);
                 break;
               case 2:
-                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(EX_LOCKED);
-                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(EX_CLOSED);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(exit_flag::locked);
+                room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(exit_flag::closed);
                 break;
             }
           last_cmd = 1;
@@ -466,9 +466,9 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
       rrnum = rvnum;
       if (room_of(g, rrnum)) {
         reset_wtrigger(g, room_of(g, rrnum));
-        if (room_flagged(g, rrnum, ROOM_AURA) && rand_number(g, 1, 5) >= 4) {
+        if (room_flagged(g, rrnum, room_flag::aura) && rand_number(g, 1, 5) >= 4) {
           send_to_room(g, rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-          room_set_flag(g, rrnum, ROOM_AURA, false);
+          room_set_flag(g, rrnum, room_flag::aura, false);
         }
         if (room_sect(g, rrnum) == SECT_LAVA) {
           room_set_geffect(g, rrnum, 5);
@@ -531,7 +531,7 @@ bool is_empty(GameWorld *g, struct zone_data *zone_nr)
     if (char_is_npc(i->character))
       continue; /* immortal switched into a mob */
 
-    if ((char_get_admlevel(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(g, i->character, PRF_NOHASSLE)))
+    if ((char_get_admlevel(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(g, i->character, pref_flag::nohassle)))
       continue;
 
     return false;

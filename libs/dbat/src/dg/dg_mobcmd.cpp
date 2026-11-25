@@ -93,7 +93,7 @@ static bool mob_cmd_allowed(GameWorld *g, char_data *ch, bool check_charm)
     send_to_char(g, ch, "Huh?!?\r\n");
     return false;
   }
-  if (check_charm && char_aff_flagged(ch, AFF_CHARM))
+  if (check_charm && char_aff_flagged(ch, aff_flag::charm))
     return false;
   return true;
 }
@@ -123,7 +123,7 @@ ACMD(do_masound)
     if (((newexit = room_get_dir_option(g, was_in_room, door)) != nullptr) &&
         newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
       char_set_in_room(ch, newexit->to_room);
-      sub_write(g, text, ch, TO_ROOM);
+      sub_write(g, text, ch, act_to::room);
     }
   }
 
@@ -194,7 +194,7 @@ ACMD(do_mkill)
     return;
   }
 
-  if (!char_is_npc(victim) && char_prf_flagged(g, victim, PRF_NOHASSLE)) {
+  if (!char_is_npc(victim) && char_prf_flagged(g, victim, pref_flag::nohassle)) {
     mob_log(g, ch, "mkill: target has nohassle on");
     return;
   }
@@ -251,7 +251,7 @@ ACMD(do_mjunk)
 
   find_dots dotmode = find_all_dots(arg); /* takes "all." off arg */
 
-  if (dotmode == FIND_INDIV) {
+  if (dotmode == find_dots::indiv) {
     /* Thanks to Carlos Myers for fixing the line below */
     if ((pos = get_obj_pos_in_equip_vis(g, ch, arg, nullptr, char_get_equipment_array(ch))) >= 0) {
       extract_obj(g, unequip_char(g, ch, pos));
@@ -262,7 +262,7 @@ ACMD(do_mjunk)
     return;
   }
   for (obj_data *item : char_inventory(g, ch)) {
-    if (dotmode == FIND_ALL || isname(arg, obj_get_name(item))) {
+    if (dotmode == find_dots::all || isname(arg, obj_get_name(item))) {
       extract_obj(g, item);
     }
   }
@@ -301,8 +301,8 @@ ACMD(do_mechoaround)
 
   if (std::string_view name = char_get_name(victim); !name.empty()) /* empty for a mob with no short description */
     search_replace(p, name, "$n");
-  act(g, p, true, victim, nullptr, nullptr, TO_ROOM);
-  /*sub_write(p, victim, TRUE, TO_ROOM);*/
+  act(g, p, true, victim, nullptr, nullptr, act_to::room);
+  /*sub_write(p, victim, TRUE, act_to::room);*/
 }
 
 /* sends the message to only the victim */
@@ -332,7 +332,7 @@ ACMD(do_msend)
     return;
   }
 
-  sub_write(g, p, victim, TO_CHAR);
+  sub_write(g, p, victim, act_to::actor);
 }
 
 /* prints the message to the room at large */
@@ -347,7 +347,7 @@ ACMD(do_mecho)
   }
   std::string p(skip_spaces(argument));
 
-  sub_write(g, p, ch, TO_ROOM);
+  sub_write(g, p, ch, act_to::room);
 }
 
 ACMD(do_mzoneecho)
@@ -436,7 +436,7 @@ ACMD(do_mload)
     /* special handling to make objects able to load on a person/in a container/worn etc. */
     if (target.empty()) {
       add_unique_id(g, object);
-      if (obj_wear_flagged(object, ITEM_WEAR_TAKE)) {
+      if (obj_wear_flagged(object, wear_flag::take)) {
         obj_to_char(g, object, ch);
       } else {
         obj_to_room(g, object, char_get_in_room(ch));
@@ -642,7 +642,7 @@ ACMD(do_mteleport)
 
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
 
-      if (valid_dg_target(g, tch, DG_ALLOW_GODS)) {
+      if (valid_dg_target(g, tch, dg_gods::allow)) {
         char_from_room(g, tch);
         char_to_room(g, tch, target);
         enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
@@ -654,12 +654,12 @@ ACMD(do_mteleport)
         mob_log(g, ch, "mteleport: victim ({}) does not exist", arg1.c_str());
         return;
       }
-    } else if (!(vict = get_char_vis(g, ch, arg1, nullptr, FIND_CHAR_WORLD))) {
+    } else if (!(vict = get_char_vis(g, ch, arg1, nullptr, find_flag::char_world))) {
       mob_log(g, ch, "mteleport: victim ({}) does not exist", arg1.c_str());
       return;
     }
 
-    if (valid_dg_target(g, vict, DG_ALLOW_GODS)) {
+    if (valid_dg_target(g, vict, dg_gods::allow)) {
       char_from_room(g, vict);
       char_to_room(g, vict, target);
       enter_wtrigger(g, room_of(g, char_get_in_room(vict)), vict, -1);
@@ -727,7 +727,7 @@ ACMD(do_mforce)
           (char_get_in_room(i->character) == char_get_in_room(ch))) {
         vch = i->character;
         if (char_get_level(vch) < char_get_level(ch) && char_can_see(g, ch, vch) &&
-            valid_dg_target(g, vch, 0)) {
+            valid_dg_target(g, vch, dg_gods::refuse)) {
           command_interpreter(g, vch, rest);
         }
       }
@@ -750,7 +750,7 @@ ACMD(do_mforce)
       return;
     }
 
-    if (valid_dg_target(g, victim, 0))
+    if (valid_dg_target(g, victim, dg_gods::refuse))
       command_interpreter(g, victim, rest);
   }
 }
@@ -777,7 +777,7 @@ ACMD(do_mremember)
       mob_log(g, ch, "mremember: victim ({}) does not exist", arg.c_str());
       return;
     }
-  } else if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+  } else if (!(victim = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
     mob_log(g, ch, "mremember: victim ({}) does not exist", arg.c_str());
     return;
   }
@@ -821,7 +821,7 @@ ACMD(do_mforget)
       mob_log(g, ch, "mforget: victim ({}) does not exist", arg.c_str());
       return;
     }
-  } else if (!(victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+  } else if (!(victim = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
     mob_log(g, ch, "mforget: victim ({}) does not exist", arg.c_str());
     return;
   }
@@ -983,7 +983,7 @@ ACMD(do_mfollow)
       mob_log(g, ch, "mfollow: victim ({}) does not exist", buf.c_str());
       return;
     }
-  } else if (!(leader = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_ROOM))) {
+  } else if (!(leader = get_char_vis(g, ch, buf, nullptr, find_flag::char_room))) {
     mob_log(g, ch, "mfollow: victim ({}) not found", buf.c_str());
     return;
   }
@@ -991,7 +991,7 @@ ACMD(do_mfollow)
   if (char_get_master(g, ch) == leader) /* already following */
     return;
 
-  if (char_aff_flagged(ch, AFF_CHARM) && (char_get_master(g, ch))) /* can't override charm */
+  if (char_aff_flagged(ch, aff_flag::charm) && (char_get_master(g, ch))) /* can't override charm */
     return;
 
   /* stop following someone else first */

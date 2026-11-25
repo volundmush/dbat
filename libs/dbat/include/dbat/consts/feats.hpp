@@ -11,6 +11,5 @@ constexpr int CFEAT_GREATER_WEAPON_SPECIALIZATION = 5;
 constexpr int CFEAT_MAX = 5;
 
 constexpr int MAX_FEATS         = 750;
-constexpr int FT_ARRAY_MAX      = 4;
 constexpr int NUM_FEATS_DEFINED = 252;
 

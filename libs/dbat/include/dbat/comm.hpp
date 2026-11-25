@@ -80,9 +80,9 @@ void send_to_range(GameWorld *g, room_vnum start, room_vnum finish, std::format_
   send_to_range(g, start, finish, str_format(fmt, std::forward<Args>(args)...));
 }
 /* Whom act() tells. The values are the old TO_ numbers, and they matter: act() asks bit 0 for "the room" (which
-   TO_NOTVICT has too), and sub_write() asks TO_CHAR's and TO_ROOM's bits. */
+   act_to::notvict has too), and sub_write() asks act_to::actor's and act_to::room's bits. */
 enum class act_to : uint8_t { room = 1, vict = 2, notvict = 3, actor = 4, gmote = 5 };
-/* How act() tells them, added to whom with |: TO_CHAR | TO_SLEEP */
+/* How act() tells them, added to whom with |: act_to::actor | act_option::even_asleep */
 enum class act_option : uint8_t { even_asleep, no_trig, sneak_resist, hide_resist };
 struct act_target {
   act_to to;
@@ -103,17 +103,6 @@ constexpr act_target operator|(act_target target, act_option option)
   return target;
 }
 constexpr act_target operator|(act_to who, act_option option) { return act_target(who) | option; }
-
-/* The old names, until every use says act_to:: and act_option:: */
-constexpr act_to TO_ROOM               = act_to::room;
-constexpr act_to TO_VICT               = act_to::vict;
-constexpr act_to TO_NOTVICT            = act_to::notvict;
-constexpr act_to TO_CHAR               = act_to::actor;
-constexpr act_to TO_GMOTE              = act_to::gmote;
-constexpr act_option TO_SLEEP          = act_option::even_asleep;
-constexpr act_option DG_NO_TRIG        = act_option::no_trig;
-constexpr act_option TO_SNEAKRESIST    = act_option::sneak_resist;
-constexpr act_option TO_HIDERESIST     = act_option::hide_resist;
 
 /* Sends str, with its $ codes filled in, to those type names. Nothing is sent for an empty str. The message made,
    or null if none has been made yet (it is the last one made, even when none was sent this time: a quirk). */
@@ -137,7 +126,6 @@ void act_triple(GameWorld *g, const act_msgs &m, struct char_data *ch, struct ob
 void act_triple_vict_last(GameWorld *g, const act_msgs &m, struct char_data *ch, struct obj_data *obj, struct char_data *vict);
 void close_socket(GameWorld *g, struct descriptor_data *d);
 void close_all_sockets(GameWorld *g);
-
 
 /* I/O functions */
 void write_to_q(std::string_view txt, struct txt_q *queue, int aliased);

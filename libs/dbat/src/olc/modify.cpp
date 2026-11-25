@@ -51,7 +51,7 @@ void string_edit_begin(struct descriptor_data *d, std::string *target, size_t le
 void string_write(struct descriptor_data *d, std::string *writeto, size_t len, long mailto)
 {
   if (d->character && !char_is_npc(d->character))
-    char_plr_set(d->character, PLR_WRITING, true);
+    char_plr_set(d->character, player_flag::writing, true);
 
   string_edit_begin(d, writeto, len);
   d->mail_to = mailto;
@@ -148,8 +148,8 @@ void string_add(GameWorld *g, struct descriptor_data *d, std::string_view typed)
     d->mail_to = 0;
     d->max_str = 0;
     if (d->character && !char_is_npc(d->character)) {
-      char_plr_set(d->character, PLR_MAILING, false);
-      char_plr_set(d->character, PLR_WRITING, false);
+      char_plr_set(d->character, player_flag::mailing, false);
+      char_plr_set(d->character, player_flag::writing, false);
     }
   } else if (action != STRINGADD_ACTION && text.size() + 3 <= d->max_str) /* 3 = \r\n\0 */
     text += "\r\n";
@@ -157,7 +157,7 @@ void string_add(GameWorld *g, struct descriptor_data *d, std::string_view typed)
 
 static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int action)
 {
-  if (char_plr_flagged(d->character, PLR_MAILING)) {
+  if (char_plr_flagged(d->character, player_flag::mailing)) {
     if (action == STRINGADD_SAVE && !d->edit_text.empty()) {
       store_mail(g, d->mail_to, char_get_idnum(d->character), d->edit_text);
       write_to_output(g, d, "Message sent!\r\n");
@@ -168,7 +168,7 @@ static void playing_string_cleanup(GameWorld *g, struct descriptor_data *d, int 
     d->draft.clear(); /* store_mail() keeps its own copy */
   }
 
-  if (char_plr_flagged(d->character, PLR_WRITING)) {
+  if (char_plr_flagged(d->character, player_flag::writing)) {
     if (d->mail_to >= BOARD_MAGIC) {
       struct board_info *board = locate_board(g, d->mail_to - BOARD_MAGIC);
 
@@ -222,7 +222,7 @@ ACMD(do_skillset)
     return;
   }
 
-  if (!(vict = get_char_vis(g, ch, name, nullptr, FIND_CHAR_WORLD))) {
+  if (!(vict = get_char_vis(g, ch, name, nullptr, find_flag::char_world))) {
     send_to_char(g, ch, CONFIG_NOPERSON);
     return;
   }
@@ -236,12 +236,12 @@ ACMD(do_skillset)
   if (rest.empty()) {
     std::string text = "\r\nSkills:\r\n";
 
-    text += print_skills_by_type(g, vict, SKTYPE_SKILL, "");
+    text += print_skills_by_type(g, vict, skill_kind::skill, "");
     text += "\r\nSpells:\r\n";
-    text += print_skills_by_type(g, vict, SKTYPE_SPELL, "");
+    text += print_skills_by_type(g, vict, skill_kind::spell, "");
     if (CONFIG_ENABLE_LANGUAGES) {
       text += "\r\nLanguages:\r\n";
-      text += print_skills_by_type(g, vict, SKTYPE_SKILL | SKTYPE_LANG, "");
+      text += print_skills_by_type(g, vict, skill_kind::skill | skill_kind::lang, "");
     }
     send_to_char(g, ch, text);
     return;
@@ -260,7 +260,7 @@ ACMD(do_skillset)
   std::string skillname(rest.substr(1, close - 1));
   for (char &c : skillname)
     c = tolower(c);
-  if ((skill = find_skill_num(g, skillname, SKTYPE_SKILL)) <= 0) {
+  if ((skill = find_skill_num(g, skillname, skill_kind::skill)) <= 0) {
     send_to_char(g, ch, "Unrecognized skill.\r\n");
     return;
   }

@@ -197,7 +197,7 @@ namespace {
     for (descriptor_data *pt : each_desc(g))
       if (desc_is_playing(pt) && pt->character && pt->character != ch)
         send_to_char(g, pt->character, "{}{}{}\r\n", before, text, after);
-    if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
+    if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::norepeat))
       send_to_char(g, ch, CONFIG_OK);
     else
       send_to_char(g, ch, "{}{}{}\r\n", before, text, after);
@@ -283,7 +283,7 @@ ACMD(do_newsedit)
     return;
   }
 
-  act(g, "$n begins to edit the news.", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "$n begins to edit the news.", true, ch, nullptr, nullptr, act_to::room);
   send_to_char(g, ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
   send_to_char(g, ch, " @RRemember that using # in newsedit is not possible. That\n");
   send_to_char(g, ch, "character will be eaten because it is required for the news\n");
@@ -326,19 +326,19 @@ ACMD(do_echo)
   } else {
     buf = text;
   }
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::norepeat))
     send_to_char(g, ch, CONFIG_OK);
   if (no_name)
-    act(g, str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch)), false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, str_format("@D(@GOOC@W: @gSmote by user {}@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch)), false, ch, nullptr, nullptr, act_to::room);
   if (!tch) {
-    act(g, buf, false, ch, nullptr, nullptr, TO_CHAR);
-    act(g, buf, false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, buf, false, ch, nullptr, nullptr, act_to::actor);
+    act(g, buf, false, ch, nullptr, nullptr, act_to::room);
     return;
   }
-  act(g, buf, false, ch, nullptr, tch, TO_CHAR);
-  act(g, buf, false, ch, nullptr, tch, TO_NOTVICT);
+  act(g, buf, false, ch, nullptr, tch, act_to::actor);
+  act(g, buf, false, ch, nullptr, tch, act_to::notvict);
   search_replace(buf, "$N", "you");
-  act(g, buf, false, ch, nullptr, tch, TO_VICT);
+  act(g, buf, false, ch, nullptr, tch, act_to::vict);
 }
 
 ACMD(do_send)
@@ -351,12 +351,12 @@ ACMD(do_send)
     send_to_char(g, ch, "Send what to who?\r\n");
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, CONFIG_NOPERSON);
+  auto found = find_char(g, ch, arg, find_flag::char_world, CONFIG_NOPERSON);
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
   send_to_char(g, vict, "{}\r\n", buf);
-  if (char_prf_flagged(g, ch, PRF_NOREPEAT))
+  if (char_prf_flagged(g, ch, pref_flag::norepeat))
     send_to_char(g, ch, "Sent.\r\n");
   else
     send_to_char(g, ch, "You send '{}' to {}.\r\n", buf, char_get_name(vict));
@@ -368,7 +368,7 @@ ACMD(do_syslog)
   std::string arg       = take_arg(rest);
   if (arg.empty()) {
     send_to_char(g, ch, "Your syslog is currently {}.\r\n",
-                 logtypes[(char_prf_flagged(g, ch, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, ch, PRF_LOG2) ? 2 : 0)]);
+                 logtypes[(char_prf_flagged(g, ch, pref_flag::log1) ? 1 : 0) + (char_prf_flagged(g, ch, pref_flag::log2) ? 2 : 0)]);
     return;
   }
   int tp = search_block(arg, logtypes, false);
@@ -376,8 +376,8 @@ ACMD(do_syslog)
     send_to_char(g, ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
     return;
   }
-  char_prf_set(g, ch, PRF_LOG1, (tp & 1) != 0);
-  char_prf_set(g, ch, PRF_LOG2, (tp & 2) != 0);
+  char_prf_set(g, ch, pref_flag::log1, (tp & 1) != 0);
+  char_prf_set(g, ch, pref_flag::log2, (tp & 2) != 0);
   send_to_char(g, ch, "Your syslog is now {}.\r\n", logtypes[tp]);
 }
 
@@ -444,9 +444,9 @@ ACMD(do_wiznet)
         if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(d->character) < ADMLVL_IMMORT || !char_can_see(g, ch, d->character))
           continue;
         send_to_char(g, ch, "  {}{}{}{}\r\n", printf_width(char_get_name(d->character), MAX_NAME_LENGTH, true),
-                     char_plr_flagged(d->character, PLR_WRITING) ? " (Writing)" : "",
-                     char_plr_flagged(d->character, PLR_MAILING) ? " (Writing mail)" : "",
-                     char_prf_flagged(g, d->character, PRF_NOWIZ) ? " (Offline)" : "");
+                     char_plr_flagged(d->character, player_flag::writing) ? " (Writing)" : "",
+                     char_plr_flagged(d->character, player_flag::mailing) ? " (Writing mail)" : "",
+                     char_prf_flagged(g, d->character, pref_flag::nowiz) ? " (Offline)" : "");
       }
       return;
 
@@ -456,7 +456,7 @@ ACMD(do_wiznet)
     default:
       break;
   }
-  if (char_prf_flagged(g, ch, PRF_NOWIZ)) {
+  if (char_prf_flagged(g, ch, pref_flag::nowiz)) {
     send_to_char(g, ch, "You are offline!\r\n");
     return;
   }
@@ -471,14 +471,14 @@ ACMD(do_wiznet)
   std::string unseen    = str_format("@cSomeone@D: {}@G{}{}@n\r\n", level_tag, emote ? "<--- " : "", said);
 
   for (descriptor_data *d : each_desc(g)) {
-    if (!desc_is_playing(d) || char_get_admlevel(d->character) < level || char_prf_flagged(g, d->character, PRF_NOWIZ) ||
-        char_plr_flagged(d->character, PLR_MAILING) /* quirk: reads MAILING (WRITING | MAILING, 4 | 5), meant WRITING or MAILING */ || (d == char_get_desc(ch) && char_prf_flagged(g, d->character, PRF_NOREPEAT)))
+    if (!desc_is_playing(d) || char_get_admlevel(d->character) < level || char_prf_flagged(g, d->character, pref_flag::nowiz) ||
+        char_plr_flagged(d->character, player_flag::mailing) /* quirk: reads MAILING (WRITING | MAILING, 4 | 5), meant WRITING or MAILING */ || (d == char_get_desc(ch) && char_prf_flagged(g, d->character, pref_flag::norepeat)))
       continue;
     const std::string &line = char_can_see(g, d->character, ch) ? seen : unseen;
     send_to_char(g, d->character, line);
     add_history(g, d->character, line, HIST_WIZNET);
   }
 
-  if (char_prf_flagged(g, ch, PRF_NOREPEAT))
+  if (char_prf_flagged(g, ch, pref_flag::norepeat))
     send_to_char(g, ch, CONFIG_OK);
 }

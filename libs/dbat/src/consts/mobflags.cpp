@@ -39,5 +39,5 @@ static constexpr std::string_view action_bits_entries[] = {
     "NOPOISON",
     "KNOWKAIO",
     "POWERINGUP"};
-static_assert(std::size(action_bits_entries) == NUM_MOB_FLAGS);
+static_assert(std::size(action_bits_entries) == flag_count<mob_flag>);
 constinit const name_table action_bits(action_bits_entries);

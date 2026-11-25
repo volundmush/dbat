@@ -14,7 +14,6 @@
 #include "dbat/consts/time.hpp"
 #include "dbat/help.hpp"
 #include "dbat/command.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/random.hpp"
@@ -75,7 +74,7 @@ static double terrain_bonus(GameWorld *g, struct char_data *ch)
       break;
   }
 
-  if (room_flagged(g, char_get_in_room(ch), ROOM_SPACE)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::space)) {
     bonus += -0.5;
   }
 
@@ -102,17 +101,17 @@ void search_room(GameWorld *g, struct char_data *ch)
   }
 
   reveal_hiding(g, ch, 0);
-  act(g, "@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, act_to::room);
   char_set_wait(ch, PULSE_1SEC);
 
   for (char_data *vict : room_people(g, char_get_in_room(ch))) {
-    if (char_aff_flagged(vict, AFF_HIDE) && vict != ch) {
+    if (char_aff_flagged(vict, aff_flag::hide) && vict != ch) {
       if (char_get_suppression(vict) >= 1) {
         perc *= (char_get_suppression(vict) * 0.01);
       }
       prob = char_get_aff_abils_dex(vict) + (char_get_aff_abils_intel(vict) * 0.6) + char_get_skill(vict, SKILL_HIDE) + char_get_skill(vict, SKILL_MOVE_SILENTLY);
 
-      if (char_aff_flagged(vict, AFF_LIQUEFIED)) {
+      if (char_aff_flagged(vict, aff_flag::liquefied)) {
         prob *= 1.5;
       }
       if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 4 || char_get_genome(ch, 1) == 4)) {
@@ -131,10 +130,10 @@ void search_room(GameWorld *g, struct char_data *ch)
   }
 
   for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
-    if (obj_extra_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(g, 50, 200)) {
-      act(g, "@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
-      act(g, "@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
-      obj_extra_set(obj, ITEM_BURIED, false);
+    if (obj_extra_flagged(obj, extra_flag::buried) && perc * bonus > rand_number(g, 50, 200)) {
+      act(g, "@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, act_to::actor);
+      act(g, "@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, act_to::room);
+      obj_extra_set(obj, extra_flag::buried, false);
       found++;
     }
   }
@@ -196,8 +195,8 @@ static void map_draw_room(GameWorld *g, area_map &map, int x, int y, room_vnum r
     if (!exit || exit->to_room == NOWHERE || !MAP_STEPS[door])
       continue;
     int row = y + MAP_STEPS[door]->dy, column = x + MAP_STEPS[door]->dx;
-    if (room_exit_flagged(exit, EX_CLOSED)) {
-      if (!room_exit_flagged(exit, EX_SECRET))
+    if (room_exit_flagged(exit, exit_flag::closed)) {
+      if (!room_exit_flagged(exit, exit_flag::secret))
         map[row][column] = '8';
       continue;
     }
@@ -236,11 +235,11 @@ namespace {
   bool exit_visible(GameWorld *g, struct char_data *ch, int dir)
   {
     struct room_direction_data *exit = char_get_exit(g, ch, dir);
-    return exit && !room_exit_flagged(exit, EX_SECRET);
+    return exit && !room_exit_flagged(exit, exit_flag::secret);
   }
 
   /* An exit's mark beside the small map: shut, open, or blank where there's none to see. */
-  std::string_view exit_mark(GameWorld *g, struct char_data *ch, int dir, std::string_view shut, std::string_view open, exit_flag shut_flag = EX_CLOSED)
+  std::string_view exit_mark(GameWorld *g, struct char_data *ch, int dir, std::string_view shut, std::string_view open, exit_flag shut_flag = exit_flag::closed)
   {
     if (!exit_visible(g, ch, dir))
       return "   ";
@@ -255,7 +254,7 @@ namespace {
         return str_format("@w       @w|{}@w|           {}", exit_mark(g, ch, NORTH, " @rN ", " @CN "), line);
       case 3: /* quirk: northeast is never shown shut */
         return str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", exit_mark(g, ch, NORTHWEST, " @rNW", " @CNW"), exit_mark(g, ch, UP, " @yU ", " @YU "),
-                          exit_mark(g, ch, NORTHEAST, "@rNE ", "@CNE ", EX_SECRET), line);
+                          exit_mark(g, ch, NORTHEAST, "@rNE ", "@CNE ", exit_flag::secret), line);
       case 4: {
         std::string_view inside = exit_visible(g, ch, INDIR)    ? exit_mark(g, ch, INDIR, " @rI ", " @mI ")
                              : exit_visible(g, ch, OUTDIR) ? exit_mark(g, ch, OUTDIR, "@rOUT", "@mOUT")
@@ -264,7 +263,7 @@ namespace {
       }
       case 5: /* quirk: southeast is never shown shut */
         return str_format("@w @w|{}@w| |{}@w| |{}@w|     {}", exit_mark(g, ch, SOUTHWEST, " @rSW", " @CSW"), exit_mark(g, ch, DOWN, " @yD ", " @YD "),
-                          exit_mark(g, ch, SOUTHEAST, "@rSE ", "@CSE ", EX_SECRET), line);
+                          exit_mark(g, ch, SOUTHEAST, "@rSE ", "@CSE ", exit_flag::secret), line);
       default:
         return str_format("@w       @w|{}@w|           {}", exit_mark(g, ch, SOUTH, " @rS ", " @CS "), line);
     }
@@ -300,7 +299,7 @@ void gen_map(GameWorld *g, struct char_data *ch, int num)
   map_draw_room(g, map, 4, 4, char_get_in_room(ch), ch);
   for (int door = 0; door < NUM_OF_DIRS; door++) {
     struct room_direction_data *exit = char_get_exit(g, ch, door);
-    if (exit && exit->to_room != NOWHERE && !room_exit_flagged(exit, EX_CLOSED) && MAP_STEPS[door])
+    if (exit && exit->to_room != NOWHERE && !room_exit_flagged(exit, exit_flag::closed) && MAP_STEPS[door])
       map_draw_room(g, map, 4 + MAP_STEPS[door]->dx, 4 + MAP_STEPS[door]->dy, exit->to_room, ch);
   }
 
@@ -350,11 +349,11 @@ ACMD(do_scan)
     send_to_char(g, ch, "You must be dreaming.\n\r");
     return;
   }
-  if (char_aff_flagged(ch, AFF_BLIND)) {
+  if (char_aff_flagged(ch, aff_flag::blind)) {
     send_to_char(g, ch, "You can't see a damn thing, you're blind!\n\r");
     return;
   }
-  if (char_plr_flagged(ch, PLR_EYEC)) {
+  if (char_plr_flagged(ch, player_flag::eyec)) {
     send_to_char(g, ch, "You can't see a damned thing, your eyes are closed!\r\n");
     return;
   }
@@ -362,7 +361,7 @@ ACMD(do_scan)
   for (int i = 0; i < 10; i++) {
     if (!char_get_exit(g, ch, i))
       continue;
-    if (room_is_dark(g, char_get_in_room(ch)) && char_get_admlevel(ch) < ADMLVL_IMMORT && !char_aff_flagged(ch, AFF_INFRAVISION)) {
+    if (room_is_dark(g, char_get_in_room(ch)) && char_get_admlevel(ch) < ADMLVL_IMMORT && !char_aff_flagged(ch, aff_flag::infravision)) {
       send_to_char(g, ch, "{}: DARK\n\r", dirnames[i]);
       continue;
     }
@@ -372,7 +371,7 @@ ACMD(do_scan)
 
     /* and the room past it */
     struct room_direction_data *far = char_get_exit2(g, ch, i);
-    if (!far || !far->to_room || far->to_room == NOWHERE || far->exit_info.test(EX_CLOSED))
+    if (!far || !far->to_room || far->to_room == NOWHERE || far->exit_info.test(exit_flag::closed))
       continue;
     if (room_is_dark(g, far->to_room))
       send_to_char(g, ch, "{}<-> {}Far {}: Too dark to tell! {}<->{}\r\n", QMAG, QCYN, dirnames[i], QMAG, QNRM);
@@ -385,7 +384,7 @@ ACMD(do_scan)
 void search_in_direction(GameWorld *g, struct char_data *ch, int dir)
 {
   send_to_char(g, ch, "You search for secret doors.\r\n");
-  act(g, "$n searches the area intently.", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "$n searches the area intently.", true, ch, nullptr, nullptr, act_to::room);
 
   /* SEARCHING is allowed untrained */
   int skill_lvl = char_get_skill(ch, SKILL_SEARCH);
@@ -399,12 +398,12 @@ void search_in_direction(GameWorld *g, struct char_data *ch, int dir)
 
   if (!exit)
     send_to_char(g, ch, "There is no exit there.\r\n");
-  else if (!exit_description(exit).empty() && !room_exit_flagged(exit, EX_SECRET))
+  else if (!exit_description(exit).empty() && !room_exit_flagged(exit, exit_flag::secret))
     send_to_char(g, ch, "{}", exit_description(exit));
-  else if (!room_exit_flagged(exit, EX_SECRET))
+  else if (!room_exit_flagged(exit, exit_flag::secret))
     send_to_char(g, ch, "There is a normal exit there.\r\n");
-  else if (room_exit_flagged(exit, EX_ISDOOR) && !exit_keyword(exit).empty() && check)
-    send_to_char(g, ch, "There is a hidden door keyword: '{}' {}there.\r\n", fname(exit_keyword(exit)), room_exit_flagged(exit, EX_CLOSED) ? "" : "open ");
+  else if (room_exit_flagged(exit, exit_flag::isdoor) && !exit_keyword(exit).empty() && check)
+    send_to_char(g, ch, "There is a hidden door keyword: '{}' {}there.\r\n", fname(exit_keyword(exit)), room_exit_flagged(exit, exit_flag::closed) ? "" : "open ");
   else
     send_to_char(g, ch, "There is no exit there.\r\n");
 }

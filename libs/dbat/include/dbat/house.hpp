@@ -33,15 +33,6 @@ template <> struct flag_traits<house_flag> {
   static constexpr const name_table &names = house_bits;
 };
 
-/* The old names, until every use says house_flag:: */
-constexpr house_flag HOUSE_NOGUESTS   = house_flag::noguests;
-constexpr house_flag HOUSE_FREE       = house_flag::free;
-constexpr house_flag HOUSE_NOIMMS     = house_flag::noimms;
-constexpr house_flag HOUSE_IMPONLY    = house_flag::imponly;
-constexpr house_flag HOUSE_RENTFREE   = house_flag::rentfree;
-constexpr house_flag HOUSE_SAVENORENT = house_flag::savenorent;
-constexpr house_flag HOUSE_NOSAVE     = house_flag::nosave;
-
 constexpr int HOUSE_NUM_FLAGS = static_cast<int>(flag_count<house_flag>);
 
 /* The flags as the files save them, a long (all its bits, in words 0 and 1: a long is 32 bits on Windows), and back */
@@ -77,8 +68,6 @@ struct house_control_rec {
   long spare6{};
   long spare7{};
 };
-
-
 
 /* Loads the houses at boot; an error if etc/hcontrol can't be read */
 io::loaded<void> House_boot(GameWorld *g);

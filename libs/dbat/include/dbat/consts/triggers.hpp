@@ -13,7 +13,7 @@ constexpr int OBJ_TRIGGER = 1;
 constexpr int WLD_TRIGGER = 2;
 
 /* mob trigger types */
-extern const name_table trig_types; /* NUM_MTRIG_TYPES of them, a name for each bit (the unused ones too) */
+extern const name_table trig_types; /* flag_count<mob_trig> of them, a name for each bit (the unused ones too) */
 enum class mob_trig : uint8_t {
   global    = 0,   /* check even if zone empty   */
   random    = 1,   /* checked randomly           */
@@ -40,29 +40,8 @@ template <> struct flag_traits<mob_trig> {
   static constexpr const name_table &names = trig_types;
 };
 
-/* The old names, until every use says mob_trig:: */
-constexpr mob_trig MTRIG_GLOBAL    = mob_trig::global;
-constexpr mob_trig MTRIG_RANDOM    = mob_trig::random;
-constexpr mob_trig MTRIG_COMMAND   = mob_trig::command;
-constexpr mob_trig MTRIG_SPEECH    = mob_trig::speech;
-constexpr mob_trig MTRIG_ACT       = mob_trig::act;
-constexpr mob_trig MTRIG_DEATH     = mob_trig::death;
-constexpr mob_trig MTRIG_GREET     = mob_trig::greet;
-constexpr mob_trig MTRIG_GREET_ALL = mob_trig::greet_all;
-constexpr mob_trig MTRIG_ENTRY     = mob_trig::entry;
-constexpr mob_trig MTRIG_RECEIVE   = mob_trig::receive;
-constexpr mob_trig MTRIG_FIGHT     = mob_trig::fight;
-constexpr mob_trig MTRIG_HITPRCNT  = mob_trig::hitprcnt;
-constexpr mob_trig MTRIG_BRIBE     = mob_trig::bribe;
-constexpr mob_trig MTRIG_LOAD      = mob_trig::load;
-constexpr mob_trig MTRIG_MEMORY    = mob_trig::memory;
-constexpr mob_trig MTRIG_CAST      = mob_trig::cast;
-constexpr mob_trig MTRIG_LEAVE     = mob_trig::leave;
-constexpr mob_trig MTRIG_DOOR      = mob_trig::door;
-constexpr mob_trig MTRIG_TIME      = mob_trig::time;
-
 /* obj trigger types */
-extern const name_table otrig_types; /* NUM_OTRIG_TYPES of them, a name for each bit (the unused ones too) */
+extern const name_table otrig_types; /* flag_count<obj_trig> of them, a name for each bit (the unused ones too) */
 enum class obj_trig : uint8_t {
   global  = 0,   /* unused                     */
   random  = 1,   /* checked randomly           */
@@ -84,24 +63,8 @@ template <> struct flag_traits<obj_trig> {
   static constexpr const name_table &names = otrig_types;
 };
 
-/* The old names, until every use says obj_trig:: */
-constexpr obj_trig OTRIG_GLOBAL  = obj_trig::global;
-constexpr obj_trig OTRIG_RANDOM  = obj_trig::random;
-constexpr obj_trig OTRIG_COMMAND = obj_trig::command;
-constexpr obj_trig OTRIG_TIMER   = obj_trig::timer;
-constexpr obj_trig OTRIG_GET     = obj_trig::get;
-constexpr obj_trig OTRIG_DROP    = obj_trig::drop;
-constexpr obj_trig OTRIG_GIVE    = obj_trig::give;
-constexpr obj_trig OTRIG_WEAR    = obj_trig::wear;
-constexpr obj_trig OTRIG_REMOVE  = obj_trig::remove;
-constexpr obj_trig OTRIG_LOAD    = obj_trig::load;
-constexpr obj_trig OTRIG_CAST    = obj_trig::cast;
-constexpr obj_trig OTRIG_LEAVE   = obj_trig::leave;
-constexpr obj_trig OTRIG_CONSUME = obj_trig::consume;
-constexpr obj_trig OTRIG_TIME    = obj_trig::time;
-
 /* wld trigger types */
-extern const name_table wtrig_types; /* NUM_WTRIG_TYPES of them, a name for each bit (the unused ones too) */
+extern const name_table wtrig_types; /* flag_count<wld_trig> of them, a name for each bit (the unused ones too) */
 enum class wld_trig : uint8_t {
   global  = 0,   /* check even if zone empty   */
   random  = 1,   /* checked randomly           */
@@ -119,19 +82,6 @@ enum class wld_trig : uint8_t {
 template <> struct flag_traits<wld_trig> {
   static constexpr const name_table &names = wtrig_types;
 };
-
-/* The old names, until every use says wld_trig:: */
-constexpr wld_trig WTRIG_GLOBAL  = wld_trig::global;
-constexpr wld_trig WTRIG_RANDOM  = wld_trig::random;
-constexpr wld_trig WTRIG_COMMAND = wld_trig::command;
-constexpr wld_trig WTRIG_SPEECH  = wld_trig::speech;
-constexpr wld_trig WTRIG_RESET   = wld_trig::reset;
-constexpr wld_trig WTRIG_ENTER   = wld_trig::enter;
-constexpr wld_trig WTRIG_DROP    = wld_trig::drop;
-constexpr wld_trig WTRIG_CAST    = wld_trig::cast;
-constexpr wld_trig WTRIG_LEAVE   = wld_trig::leave;
-constexpr wld_trig WTRIG_DOOR    = wld_trig::door;
-constexpr wld_trig WTRIG_TIME    = wld_trig::time;
 
 /*
  * The three families together. A trigger's types (trig_data::trigger_type) and a script's (script_data::types) are
@@ -169,25 +119,16 @@ enum class ocmd_where : uint8_t {
 template <> struct flag_traits<ocmd_where> {
   static constexpr const name_table &names = ocmd_bits;
 };
-constexpr ocmd_where OCMD_EQUIP = ocmd_where::equip;
-constexpr ocmd_where OCMD_INVEN = ocmd_where::inven;
-constexpr ocmd_where OCMD_ROOM  = ocmd_where::room;
 
 /* Whether a trigger's narg has this where */
 constexpr bool narg_hears(int narg, ocmd_where where) { return (static_cast<bitvector_t>(narg) & flag_set<ocmd_where>{where}.word(0)) != 0; }
 
 /* obj consume trigger commands */
 enum class consume_cmd : uint8_t { eat = 1, drink = 2, quaff = 3 };
-constexpr consume_cmd OCMD_EAT   = consume_cmd::eat;
-constexpr consume_cmd OCMD_DRINK = consume_cmd::drink;
-constexpr consume_cmd OCMD_QUAFF = consume_cmd::quaff;
 
 constexpr int TRIG_NEW     = 0; /* trigger starts from top  */
 constexpr int TRIG_RESTART = 1; /* trigger restarting       */
 
-constexpr int NUM_MTRIG_TYPES = static_cast<int>(flag_count<mob_trig>);
-constexpr int NUM_OTRIG_TYPES = static_cast<int>(flag_count<obj_trig>);
-constexpr int NUM_WTRIG_TYPES = static_cast<int>(flag_count<wld_trig>);
 
 /*
  * DG Scripts UID ranges. The range a UID falls in tells scripts what kind of
@@ -211,8 +152,8 @@ constexpr int DG_SPELL_LEVEL = 25;
 constexpr int MAX_SCRIPT_DEPTH  = 10;       /* maximum depth triggers can recurse into each other */
 constexpr int SCRIPT_ERROR_CODE = -9999999; /* this shouldn't happen too often */
 
-/* flag for valid_dg_target() */
-constexpr int DG_ALLOW_GODS = (1 << 0);
+/* Whether valid_dg_target() lets a god be a script's target (true for %teleport%, false for %force%) */
+enum class dg_gods : bool { refuse = false, allow = true };
 
 /* first character of a UID as it appears in script text, e.g. "}1063303" */
 constexpr char UID_CHAR = '}';

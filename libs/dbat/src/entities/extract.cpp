@@ -110,16 +110,16 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   }
 
   if (char_get_grappling(g, ch)) {
-    act(g, "@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_CHAR);
-    act(g, "@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, char_get_grappling(g, ch), TO_ROOM);
+    act(g, "@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, char_get_grappling(g, ch), act_to::actor);
+    act(g, "@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, char_get_grappling(g, ch), act_to::room);
     char_set_grap(char_get_grappling(g, ch), -1);
     char_set_grappled(char_get_grappling(g, ch), nullptr);
     char_set_grappling(ch, nullptr);
     char_set_grap(ch, -1);
   }
   if (char_get_grappled(g, ch)) {
-    act(g, "@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, char_get_grappled(g, ch), TO_CHAR);
-    act(g, "@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, char_get_grappled(g, ch), TO_ROOM);
+    act(g, "@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, char_get_grappled(g, ch), act_to::actor);
+    act(g, "@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, char_get_grappled(g, ch), act_to::room);
     char_set_grap(char_get_grappled(g, ch), -1);
     char_set_grappling(char_get_grappled(g, ch), nullptr);
     char_set_grappled(ch, nullptr);
@@ -138,15 +138,15 @@ void extract_char_final(GameWorld *g, struct char_data *ch)
   }
 
   if (char_get_drag(g, ch)) {
-    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(g, ch), TO_CHAR);
-    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(g, ch), TO_ROOM);
+    act(g, "@WYou stop dragging @C$N@W!@n", true, ch, nullptr, char_get_drag(g, ch), act_to::actor);
+    act(g, "@C$n@W stops dragging @c$N@W!@n", true, ch, nullptr, char_get_drag(g, ch), act_to::room);
     char_set_dragged(char_get_drag(g, ch), nullptr);
     char_set_drag(ch, nullptr);
   }
 
   if (char_get_dragged(g, ch)) {
-    act(g, "@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, char_get_dragged(g, ch), TO_CHAR);
-    act(g, "@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, char_get_dragged(g, ch), TO_ROOM);
+    act(g, "@WYou stop being dragged by @C$N@W!@n", true, ch, nullptr, char_get_dragged(g, ch), act_to::actor);
+    act(g, "@C$n@W stops being dragged by @c$N@W!@n", true, ch, nullptr, char_get_dragged(g, ch), act_to::room);
     char_set_drag(char_get_dragged(g, ch), nullptr);
     char_set_dragged(ch, nullptr);
   }
@@ -238,13 +238,13 @@ void extract_char(GameWorld *g, struct char_data *ch)
   struct obj_data *obj;
 
   if (char_is_npc(ch)) {
-    if (!char_mob_flagged(ch, MOB_NOTDEADYET))
-      char_mob_set(ch, MOB_NOTDEADYET, true);
+    if (!char_mob_flagged(ch, mob_flag::notdeadyet))
+      char_mob_set(ch, mob_flag::notdeadyet, true);
     else
       return;
   } else {
-    if (!char_plr_flagged(ch, PLR_NOTDEADYET))
-      char_plr_set(ch, PLR_NOTDEADYET, true);
+    if (!char_plr_flagged(ch, player_flag::notdeadyet))
+      char_plr_set(ch, player_flag::notdeadyet, true);
     else
       return;
   }
@@ -252,7 +252,7 @@ void extract_char(GameWorld *g, struct char_data *ch)
   /*save_char_pets(ch);*/
 
   for (char_data *fol : char_followers(g, ch)) {
-    if (char_is_npc(fol) && char_aff_flagged(fol, AFF_CHARM) &&
+    if (char_is_npc(fol) && char_aff_flagged(fol, aff_flag::charm) &&
         (char_get_in_room(fol) == char_get_in_room(ch) || char_get_in_room(ch) == 1)) {
       /* transfer objects to char, if any */
       while (char_get_inventory(fol)) {
@@ -358,10 +358,10 @@ static void finish_character_extractions(GameWorld *g)
   for (char_data *vict : each_char(g)) {
     if (!g->extractions_pending)
       break;
-    if (char_mob_flagged(vict, MOB_NOTDEADYET))
-      char_mob_set(vict, MOB_NOTDEADYET, false);
-    else if (char_plr_flagged(vict, PLR_NOTDEADYET))
-      char_plr_set(vict, PLR_NOTDEADYET, false);
+    if (char_mob_flagged(vict, mob_flag::notdeadyet))
+      char_mob_set(vict, mob_flag::notdeadyet, false);
+    else if (char_plr_flagged(vict, player_flag::notdeadyet))
+      char_plr_set(vict, player_flag::notdeadyet, false);
     else
       continue;
 

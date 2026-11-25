@@ -341,7 +341,7 @@ ACMD(do_attach)
   loc     = !loc_name.empty() ? parse_int(loc_name) : -1;
 
   if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
-    victim = get_char_vis(g, ch, targ_name, nullptr, FIND_CHAR_WORLD);
+    victim = get_char_vis(g, ch, targ_name, nullptr, find_flag::char_world);
     if (!victim) { /* search room for one with this vnum */
       victim = find_first(room_people(g, char_get_in_room(ch)),
                           [&](char_data *v) { return char_get_mob_vnum(g, v) == num_arg; });
@@ -512,7 +512,7 @@ ACMD(do_detach)
 
   else {
     if (is_abbrev(arg1, "mobile") || str_eq_nocase(arg1, "mtr")) {
-      victim = get_char_vis(g, ch, arg2, nullptr, FIND_CHAR_WORLD);
+      victim = get_char_vis(g, ch, arg2, nullptr, find_flag::char_world);
       if (!victim) { /* search room for one with this vnum */
         victim = find_first(room_people(g, char_get_in_room(ch)),
                             [&](char_data *v) { return char_get_mob_vnum(g, v) == num_arg; });
@@ -559,7 +559,7 @@ ACMD(do_detach)
         ;
       else if ((object = get_obj_in_list_vis(g, ch, arg1, nullptr, room_get_contents(g, char_get_in_room(ch)))))
         ;
-      else if ((victim = get_char_vis(g, ch, arg1, nullptr, FIND_CHAR_WORLD)))
+      else if ((victim = get_char_vis(g, ch, arg1, nullptr, find_flag::char_world)))
         ;
       else if ((object = get_obj_vis(g, ch, arg1, nullptr)))
         ;

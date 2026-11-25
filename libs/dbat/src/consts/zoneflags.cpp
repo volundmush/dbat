@@ -39,5 +39,5 @@ static constexpr std::string_view zone_bits_entries[] = {
     "SPARE31",
     "SPARE32",
     "SPARE33"};
-static_assert(std::size(zone_bits_entries) == NUM_ZONE_FLAGS);
+static_assert(std::size(zone_bits_entries) == flag_count<zone_flag>);
 constinit const name_table zone_bits(zone_bits_entries);

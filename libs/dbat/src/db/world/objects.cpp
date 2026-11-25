@@ -55,7 +55,7 @@ bool check_object_spell_number(GameWorld *g, obj_data *obj, int val)
   if (spell == -1 || spell == 0) /* no spell */
     return false;
 
-  bool error = spell < 0 || spell >= SKILL_TABLE_SIZE || skill_type(g, spell) != SKTYPE_SPELL;
+  bool error = spell < 0 || spell >= SKILL_TABLE_SIZE || skill_type(g, spell) != skill_kind::spell;
   if (error)
     mud_log("SYSERR: Object #{:d} ({}) has out of range spell #{:d}.", obj_get_vnum(g, obj),
             obj_get_short_description(obj), spell);

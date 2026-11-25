@@ -101,7 +101,7 @@ const espec_field especs[] = {
        af.modifier  = n[2];
        af.location  = n[3];
        std::optional<aff_flag> bit = flag_from_index<aff_flag>(n[4]); /* a number past the affects isn't loaded */
-       af.bitvector                = bit.value_or(AFF_DONTUSE);
+       af.bitvector                = bit.value_or(aff_flag::dontuse);
        af.specific                 = affect_checked_specific(n[3], n[5]);
        if (bit && affect_is_loadable(&af))
          affect_to_char(g, mob, &af);
@@ -265,7 +265,7 @@ io::loaded<void> read_mob(GameWorld *g, io::text_reader &in, mob_vnum vnum)
     char_get_affected_by(mob).set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i + 4], 0, "asciiflag_conv"));
   }
   char_set_alignment(mob, alignment);
-  char_mob_set(mob, MOB_ISNPC, true);
+  char_mob_set(mob, mob_flag::isnpc, true);
   rules::not_dead_yet_cleared(mob, vnum);
 
   switch (toupper(static_cast<unsigned char>(kind[0]))) {

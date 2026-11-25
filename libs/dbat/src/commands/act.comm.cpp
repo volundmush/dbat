@@ -144,7 +144,7 @@ ACMD(do_osay)
     return;
   }
   std::string mine   = str_format("@WYou @D[@mOSAY@D] @W'@w{}@W'@n", argument);
-  std::string theirs = str_format("@W{} @D[@mOSAY@D] @W'@w{}@W'@n", char_prf_flagged(g, ch, PRF_HIDE) ? "Anonymous" : public_name(ch), argument);
+  std::string theirs = str_format("@W{} @D[@mOSAY@D] @W'@w{}@W'@n", char_prf_flagged(g, ch, pref_flag::hide) ? "Anonymous" : public_name(ch), argument);
   act_triple(g, {mine.c_str(), {}, theirs.c_str()}, ch, nullptr, nullptr);
 }
 
@@ -211,13 +211,13 @@ ACMD(do_say)
   std::string_view verb      = say_verb(text);
   struct char_data *sch = addressed(g, ch, text);
   if (!sch) {
-    act(g, str_format("@w$n @W{}s, '@C{}@W'@n", verb, text), true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, str_format("@w$n @W{}s, '@C{}@W'@n", verb, text), true, ch, nullptr, nullptr, act_to::room);
   } else {
-    act(g, str_format("@w$n @Wsays to @gyou@W, '@C{}@W'@n", text), true, ch, nullptr, sch, TO_VICT);
-    act(g, str_format("@w$n @Wsays to @g$N@W, '@C{}@W'@n", text), true, ch, nullptr, sch, TO_NOTVICT);
+    act(g, str_format("@w$n @Wsays to @gyou@W, '@C{}@W'@n", text), true, ch, nullptr, sch, act_to::vict);
+    act(g, str_format("@w$n @Wsays to @g$N@W, '@C{}@W'@n", text), true, ch, nullptr, sch, act_to::notvict);
   }
 
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::norepeat)) {
     send_to_char(g, ch, CONFIG_OK);
   } else {
     std::string said = str_format("@WYou {}, '@C{}@W'@n\r\n", verb, text);
@@ -239,10 +239,10 @@ namespace {
   /* One of ch's group hears what ch told it */
   void tell_group_member(GameWorld *g, struct char_data *ch, struct char_data *who, std::string &said, const std::string &as_act, bool garbled)
   {
-    if (!char_aff_flagged(who, AFF_GROUP) || who == ch || !char_is_awake(who))
+    if (!char_aff_flagged(who, aff_flag::group) || who == ch || !char_is_awake(who))
       return;
     if (!CONFIG_ENABLE_LANGUAGES) {
-      act(g, as_act, true, ch, nullptr, who, garbled ? TO_VICT | TO_SLEEP : TO_VICT);
+      act(g, as_act, true, ch, nullptr, who, garbled ? act_to::vict | act_option::even_asleep : act_to::vict);
       return;
     }
     /* quirk: the garbling of what's said piles up, from each follower to the next */
@@ -257,7 +257,7 @@ ACMD(do_gsay)
 {
   argument = skip_spaces(argument);
 
-  if (!char_aff_flagged(ch, AFF_GROUP)) {
+  if (!char_aff_flagged(ch, aff_flag::group)) {
     send_to_char(g, ch, "But you are not the member of a group!\r\n");
     return;
   }
@@ -278,7 +278,7 @@ ACMD(do_gsay)
   for (char_data *fol : char_followers(g, leader))
     tell_group_member(g, ch, fol, said, as_act, true);
 
-  if (char_prf_flagged(g, ch, PRF_NOREPEAT))
+  if (char_prf_flagged(g, ch, pref_flag::norepeat))
     send_to_char(g, ch, CONFIG_OK);
   else
     send_to_char(g, ch, "@WYou tell the group, '@G{}@W'@n\r\n", argument);
@@ -301,7 +301,7 @@ namespace {
     if (CONFIG_ENABLE_LANGUAGES || !char_is_npc(ch))
       add_history(g, vict, heard, HIST_TELL);
 
-    if (char_is_npc(ch) || char_prf_flagged(g, ch, PRF_NOREPEAT)) {
+    if (char_is_npc(ch) || char_prf_flagged(g, ch, pref_flag::norepeat)) {
       send_to_char(g, ch, CONFIG_OK);
     } else {
       std::string told = str_format("@YYou tell {}, '{}'@n\r\n", public_name(vict), arg);
@@ -324,27 +324,27 @@ namespace {
       send_to_char(g, ch, "You try to tell yourself something.\r\n");
     else if (player && char_get_level(ch) < 3 && to_mortal)
       send_to_char(g, ch, "You need to be level 3 or higher to send or receive tells");
-    else if (player && char_prf_flagged(g, ch, PRF_AFK) && mortal)
+    else if (player && char_prf_flagged(g, ch, pref_flag::afk) && mortal)
       send_to_char(g, ch, "You can't send tells when AFK.\r\n");
-    else if (player && char_prf_flagged(g, vict, PRF_AFK)) {
+    else if (player && char_prf_flagged(g, vict, pref_flag::afk)) {
       if (!mortal) /* an immortal reaches them anyway */
         return true;
       send_to_char(g, ch, "They are AFK right now, try later.\r\n");
     }
     else if (!char_is_npc(vict) && char_get_level(vict) < 3 && mortal)
       send_to_char(g, ch, "They need to be level 3 or higher to send or receive tells");
-    else if (player && char_prf_flagged(g, ch, PRF_NOTELL) && to_mortal)
+    else if (player && char_prf_flagged(g, ch, pref_flag::notell) && to_mortal)
       send_to_char(g, ch, "You can't tell other people while you have notell on.\r\n");
-    else if (room_flagged(g, char_get_in_room(ch), ROOM_SOUNDPROOF) && to_mortal)
+    else if (room_flagged(g, char_get_in_room(ch), room_flag::soundproof) && to_mortal)
       send_to_char(g, ch, "The walls seem to absorb your words.\r\n");
     else if (char_is_npc(vict))
       send_to_char(g, ch, "You can't send tells to mobs.\r\n");
     else if (!char_get_desc(vict)) /* linkless */
-      act(g, "$E's linkless at the moment.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
-    else if (char_plr_flagged(vict, PLR_WRITING))
-      act(g, "$E's writing a message right now; try again later.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
-    else if ((mortal && char_prf_flagged(g, vict, PRF_NOTELL)) || room_flagged(g, char_get_in_room(vict), ROOM_SOUNDPROOF))
-      act(g, "$E can't hear you.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+      act(g, "$E's linkless at the moment.", false, ch, nullptr, vict, act_to::actor | act_option::even_asleep);
+    else if (char_plr_flagged(vict, player_flag::writing))
+      act(g, "$E's writing a message right now; try again later.", false, ch, nullptr, vict, act_to::actor | act_option::even_asleep);
+    else if ((mortal && char_prf_flagged(g, vict, pref_flag::notell)) || room_flagged(g, char_get_in_room(vict), room_flag::soundproof))
+      act(g, "$E can't hear you.", false, ch, nullptr, vict, act_to::actor | act_option::even_asleep);
     else
       return true;
     return false;
@@ -384,7 +384,7 @@ ACMD(do_tell)
       send_to_char(g, ch, "No user around with that name.");
       return;
     }
-  } else if (!(vict = get_player_vis(g, ch, who, nullptr, FIND_CHAR_WORLD))) {
+  } else if (!(vict = get_player_vis(g, ch, who, nullptr, find_flag::char_world))) {
     send_to_char(g, ch, CONFIG_NOPERSON);
     return;
   }
@@ -396,11 +396,11 @@ ACMD(do_reply)
 {
   if (char_is_npc(ch))
     return;
-  if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::hbtc)) {
     send_to_char(g, ch, "This is a different dimension!\r\n");
     return;
   }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::past)) {
     send_to_char(g, ch, "This is the past, you can't send tells!\r\n");
     return;
   }
@@ -504,7 +504,7 @@ ACMD(do_spec_comm)
     send_to_char(g, ch, "Whom do you want to {}.. and what??\r\n", how.sing);
     return;
   }
-  struct char_data *vict = get_char_vis(g, ch, who, nullptr, FIND_CHAR_ROOM);
+  struct char_data *vict = get_char_vis(g, ch, who, nullptr, find_flag::char_room);
   if (!vict) {
     send_to_char(g, ch, CONFIG_NOPERSON);
     return;
@@ -522,14 +522,14 @@ ACMD(do_spec_comm)
   } else {
     heard = str_format("@c$n @W{} you '@m{}@W'@n", how.plur, what);
   }
-  act(g, heard, false, ch, nullptr, vict, TO_VICT);
+  act(g, heard, false, ch, nullptr, vict, act_to::vict);
 
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT))
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::norepeat))
     send_to_char(g, ch, CONFIG_OK);
   else
-    act(g, str_format("@WYou {} @C$N@W, '@m{}@W'@n\r\n", how.sing, what), true, ch, nullptr, vict, TO_CHAR);
+    act(g, str_format("@WYou {} @C$N@W, '@m{}@W'@n\r\n", how.sing, what), true, ch, nullptr, vict, act_to::actor);
 
-  act(g, how.others, false, ch, nullptr, vict, TO_NOTVICT);
+  act(g, how.others, false, ch, nullptr, vict, act_to::notvict);
   if (subcmd == SCMD_WHISPER)
     handle_whisper(g, what, ch, vict);
 }
@@ -607,11 +607,11 @@ ACMD(do_write)
   if (!writing_things(g, ch, papername, penname, paper, pen))
     return;
   if (obj_get_type_flag(pen) != ITEM_PEN) {
-    act(g, "$p is no good for writing with.", false, ch, pen, nullptr, TO_CHAR);
+    act(g, "$p is no good for writing with.", false, ch, pen, nullptr, act_to::actor);
     return;
   }
   if (obj_get_type_flag(paper) != ITEM_NOTE) {
-    act(g, "You can't write on $p.", false, ch, paper, nullptr, TO_CHAR);
+    act(g, "You can't write on $p.", false, ch, paper, nullptr, act_to::actor);
     return;
   }
   /* Something on it, display it as that's in input buffer. */
@@ -619,8 +619,8 @@ ACMD(do_write)
     send_to_char(g, ch, "There's something written on it already:\r\n");
     send_to_char(g, ch, "{}", obj_get_action_description(paper));
   }
-  act(g, "$n begins to jot down a note.", true, ch, nullptr, nullptr, TO_ROOM);
-  obj_extra_set(paper, ITEM_UNIQUE_SAVE, true);
+  act(g, "$n begins to jot down a note.", true, ch, nullptr, nullptr, act_to::room);
+  obj_extra_set(paper, extra_flag::unique_save, true);
   send_editor_help(g, char_get_desc(ch));
   string_write(char_get_desc(ch), obj_action_description_slot(paper), MAX_NOTE_LENGTH, 0);
 }
@@ -641,25 +641,25 @@ ACMD(do_page)
   }
   std::string buf = str_format("\007\007*$n* {}", buf2);
   if (str_eq_nocase(arg, "all")) {
-    if (!char_adm_flagged(ch, ADM_TELLALL)) {
+    if (!char_adm_flagged(ch, admin_flag::tellall)) {
       send_to_char(g, ch, "You will never be godly enough to do that!\r\n");
       return;
     }
     for (descriptor_data *d : each_desc(g))
       if (desc_get_connected(d) == CON_PLAYING && d->character)
-        act(g, buf, false, ch, nullptr, d->character, TO_VICT);
+        act(g, buf, false, ch, nullptr, d->character, act_to::vict);
     return;
   }
-  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD);
+  struct char_data *vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world);
   if (!vict) {
     send_to_char(g, ch, "There is no such person in the game!\r\n");
     return;
   }
-  act(g, buf, false, ch, nullptr, vict, TO_VICT);
-  if (char_prf_flagged(g, ch, PRF_NOREPEAT))
+  act(g, buf, false, ch, nullptr, vict, act_to::vict);
+  if (char_prf_flagged(g, ch, pref_flag::norepeat))
     send_to_char(g, ch, CONFIG_OK);
   else
-    act(g, buf, false, ch, nullptr, vict, TO_CHAR);
+    act(g, buf, false, ch, nullptr, vict, act_to::actor);
 }
 
 /**********************************************************************
@@ -676,12 +676,12 @@ namespace {
   };
 
   constexpr channel CHANNELS[] = {
-      {PRF_NOMUSIC, HIST_HOLLER,  "You cannot music!!\r\n",      "@D[@mMUSIC@D]", "You aren't even on the channel!\r\n",   "@[10]"},
-      {PRF_DEAF,    HIST_SHOUT,   "You cannot shout!!\r\n",      "shout",         "Turn off your noshout flag first!\r\n", "@[9]" },
-      {PRF_NOGOSS,  HIST_GOSSIP,  "You cannot ooc!!\r\n",        "@D[@BOOC@D]",   "You aren't even on the channel!\r\n",   "@[10]"},
-      {PRF_NOAUCT,  HIST_AUCTION, "You cannot newbie!!\r\n",     "newbie",        "You aren't even on the channel!\r\n",   "@[11]"},
-      {PRF_NOGRATZ, HIST_GRATS,   "You cannot congratulate!\r\n", "congrat",      "You aren't even on the channel!\r\n",   "@[12]"},
-      {PRF_BRIEF,   -1,           "You cannot gemote!!\r\n",     "gemote",        "You aren't even on the channel!\r\n",   "@[10]"}, /* quirk: reads PRF_BRIEF (0), meant as no flag */
+      {pref_flag::nomusic, HIST_HOLLER,  "You cannot music!!\r\n",      "@D[@mMUSIC@D]", "You aren't even on the channel!\r\n",   "@[10]"},
+      {pref_flag::deaf,    HIST_SHOUT,   "You cannot shout!!\r\n",      "shout",         "Turn off your noshout flag first!\r\n", "@[9]" },
+      {pref_flag::nogoss,  HIST_GOSSIP,  "You cannot ooc!!\r\n",        "@D[@BOOC@D]",   "You aren't even on the channel!\r\n",   "@[10]"},
+      {pref_flag::noauct,  HIST_AUCTION, "You cannot newbie!!\r\n",     "newbie",        "You aren't even on the channel!\r\n",   "@[11]"},
+      {pref_flag::nogratz, HIST_GRATS,   "You cannot congratulate!\r\n", "congrat",      "You aren't even on the channel!\r\n",   "@[12]"},
+      {pref_flag::brief,   -1,           "You cannot gemote!!\r\n",     "gemote",        "You aren't even on the channel!\r\n",   "@[10]"}, /* quirk: reads pref_flag::brief (0), meant as no flag */
   };
 
   /* Whether whoever is at i hears ch on the channel */
@@ -690,9 +690,9 @@ namespace {
     struct char_data *who = i->character;
     if (desc_get_connected(i) != CON_PLAYING || i == char_get_desc(ch) || !who)
       return false;
-    if (!char_is_npc(who) && (char_prf_flagged(g, who, CHANNELS[subcmd].off_flag) || char_plr_flagged(who, PLR_WRITING)))
+    if (!char_is_npc(who) && (char_prf_flagged(g, who, CHANNELS[subcmd].off_flag) || char_plr_flagged(who, player_flag::writing)))
       return false;
-    if (room_flagged(g, char_get_in_room(who), ROOM_SOUNDPROOF))
+    if (room_flagged(g, char_get_in_room(who), room_flag::soundproof))
       return false;
     /* a shout carries through the zone, to those awake */
     return subcmd != SCMD_SHOUT || (room_get_zone(g, char_get_in_room(ch)) == room_get_zone(g, char_get_in_room(who)) && char_is_awake(who));
@@ -713,7 +713,7 @@ namespace {
       return str_format("{}@W$n@W {}s@W, '@w{}@W'@n{}", c.colour, c.name, text, c.colour);
     if (char_get_admlevel(ch) > 0)
       return str_format("{}@W$n {}s@W, '@w{}@W'@n{}", c.colour, c.name, text, c.colour);
-    if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HIDE) && ch != who) {
+    if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::hide) && ch != who) {
       if (char_get_admlevel(who) < ADMLVL_IMMORT)
         return str_format("{}@WAnonymous Player {}s@W, '@w{}@W'@n{}", c.colour, c.name, text, c.colour);
       return str_format("{}@W{}(H) {}s@W, '@w{}@W'@n{}", c.colour, char_get_admlevel(who) > 0 ? char_get_name(ch) : char_get_user(ch), c.name, text, c.colour);
@@ -729,7 +729,7 @@ namespace {
     if (char_get_spam(ch) >= 3 && char_get_admlevel(ch) < 1) {
       send_to_imm(g, "SPAMMING: {} has been frozen for spamming!\r\n", char_get_name(ch));
       send_to_all(g, "@rSPAMMING@D: @C{}@w has been frozen for spamming, let that be a lesson to 'em.@n\r\n", char_get_name(ch));
-      char_plr_set(ch, PLR_FROZEN, true);
+      char_plr_set(ch, player_flag::frozen, true);
       char_set_freeze_level(g, ch, 1);
     } else if (char_get_spam(ch) < 3) {
       char_set_spam(ch, char_get_spam(ch) + 1);
@@ -742,11 +742,11 @@ ACMD(do_gen_comm)
   /* to keep pets, etc from being ordered to shout */
   if (!char_get_desc(ch))
     return;
-  if (char_plr_flagged(ch, PLR_NOSHOUT)) {
+  if (char_plr_flagged(ch, player_flag::noshout)) {
     send_to_char(g, ch, "{}", CHANNELS[subcmd].cant);
     return;
   }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_SOUNDPROOF)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::soundproof)) {
     send_to_char(g, ch, "The walls seem to absorb your words.\r\n");
     return;
   }
@@ -779,7 +779,7 @@ ACMD(do_gen_comm)
   }
   delete_doubledollar(text);
 
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NOREPEAT)) {
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::norepeat)) {
     send_to_char(g, ch, CONFIG_OK);
   } else {
     std::string said = str_format("{}@WYou {}@W, '@w{}@W'{}@n\r\n", c.colour, c.name, text, c.colour);
@@ -792,7 +792,7 @@ ACMD(do_gen_comm)
       continue;
     std::string heard = heard_as(g, ch, i->character, subcmd, text);
     /* hears() leaves only those act() sends to, so there is always a message */
-    if (const std::string *sent = act(g, heard, false, ch, nullptr, i->character, TO_VICT | TO_SLEEP))
+    if (const std::string *sent = act(g, heard, false, ch, nullptr, i->character, act_to::vict | act_option::even_asleep))
       add_history(g, i->character, *sent, c.history);
   }
   count_spam(g, ch);

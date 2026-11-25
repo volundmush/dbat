@@ -124,8 +124,8 @@ void add_unique_id(GameWorld *g, struct obj_data *obj)
       obj_set_unique_id(obj, circle_random(g));
   }
   if (CONFIG_ALL_ITEMS_UNIQUE) {
-    if (!obj_extra_flagged(obj, ITEM_UNIQUE_SAVE))
-      obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
+    if (!obj_extra_flagged(obj, extra_flag::unique_save))
+      obj_extra_set(obj, extra_flag::unique_save, true);
   }
   elem                        = new obj_unique_hash_elem();
   elem->generation         = obj_get_generation(obj);
@@ -199,7 +199,7 @@ void check_unique_id(GameWorld *g, struct obj_data *obj)
     }
     if (elem->generation == obj_get_generation(obj) && elem->unique_id == obj_get_unique_id(obj)) {
       log_dupe_objects(g, elem->obj, obj);
-      obj_extra_set(obj, ITEM_PURGE, true);
+      obj_extra_set(obj, extra_flag::purge, true);
     }
     elem = elem->next_e;
   }

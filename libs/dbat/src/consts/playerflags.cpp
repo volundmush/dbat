@@ -84,5 +84,5 @@ static constexpr std::string_view player_bits_entries[] = {
     "ROBBED",
     "TAILH",
     "NOGROW"};
-static_assert(std::size(player_bits_entries) == NUM_PLR_FLAGS);
+static_assert(std::size(player_bits_entries) == flag_count<player_flag>);
 constinit const name_table player_bits(player_bits_entries);

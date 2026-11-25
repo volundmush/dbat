@@ -27,5 +27,5 @@ static constexpr std::string_view admin_bits_entries[] = {
     "ALLSHOPS",
     "CEDIT",
 };
-static_assert(std::size(admin_bits_entries) == NUM_ADMFLAGS);
+static_assert(std::size(admin_bits_entries) == flag_count<admin_flag>);
 constinit const name_table admin_bits(admin_bits_entries);

@@ -5,7 +5,6 @@
 #include "dbat/extradesc.hpp"
 #include "dbat/registry.hpp"
 #include "dbat/consts/types.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/rooms.hpp"
 
 int room_sect(GameWorld *g, room_vnum room);

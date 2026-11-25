@@ -24,19 +24,8 @@ template <> struct flag_traits<find_flag> {
   static constexpr const name_table &names = find_bits;
 };
 
-/* The old names, until every use says find_flag:: */
-constexpr find_flag FIND_CHAR_ROOM  = find_flag::char_room;
-constexpr find_flag FIND_CHAR_WORLD = find_flag::char_world;
-constexpr find_flag FIND_OBJ_INV    = find_flag::obj_inv;
-constexpr find_flag FIND_OBJ_ROOM   = find_flag::obj_room;
-constexpr find_flag FIND_OBJ_WORLD  = find_flag::obj_world;
-constexpr find_flag FIND_OBJ_EQUIP  = find_flag::obj_equip;
-
 /* What an argument asks for: one thing, "all", or "all.x" */
 enum class find_dots : uint8_t { indiv = 0, all = 1, alldot = 2 };
-constexpr find_dots FIND_INDIV  = find_dots::indiv;
-constexpr find_dots FIND_ALL    = find_dots::all;
-constexpr find_dots FIND_ALLDOT = find_dots::alldot;
 
 /* Whether str abbreviates one of the words of namelist, ignoring case (a number must match whole) */
 bool isname(std::string_view str, std::string_view namelist);
@@ -52,7 +41,7 @@ int get_number(std::string &name);
  * afterwards prints what is left.
  */
 struct char_data *get_char_room(GameWorld *g, std::string &name, int *number, room_vnum room);
-/* inroom: FIND_CHAR_ROOM for the room only; anything else, or none, for anywhere */
+/* inroom: find_flag::char_room for the room only; anything else, or none, for anywhere */
 struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, std::optional<find_flag> inroom);
 struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, find_flag where);
 struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number);
@@ -61,7 +50,6 @@ struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, std::st
 struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number);
 struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, struct obj_data *equipment[]);
 int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, struct obj_data *equipment[]);
-
 
 struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, const id_list &list);
 struct obj_data *get_obj_num(GameWorld *g, obj_vnum nr);
@@ -73,7 +61,7 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::s
 
 /* find all dots */
 
-/* FIND_ALL for "all", FIND_ALLDOT for "all.x" (taking "all." off arg), FIND_INDIV otherwise */
+/* find_dots::all for "all", find_dots::alldot for "all.x" (taking "all." off arg), find_dots::indiv otherwise */
 find_dots find_all_dots(std::string &arg);
 
 /* Generic Find */

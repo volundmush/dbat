@@ -13,7 +13,6 @@
 #include "dbat/consts/auction.hpp"
 #include "dbat/consts/aligns.hpp"
 #include "dbat/utils.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/config.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
@@ -93,12 +92,12 @@ void wishSYS(GameWorld *g)
       switch (g->DRAGONC) {
         case 300:
           send_to_room(g, g->DRAGONR, "@WThe dragon balls on the ground begin to glow yellow in slow pulses.@n\r\n");
-          send_to_planet(g, 0, ROOM_EARTH, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
+          send_to_planet(g, 0, room_flag::earth, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 295:
           send_to_room(g, g->DRAGONR, "@WSuddenly lightning shoots into the sky, twisting about as a roar can be heard for miles!@n\r\n");
-          send_to_planet(g, 0, ROOM_EARTH, "@DThe sky flashes with lightning.@n\r\n");
+          send_to_planet(g, 0, room_flag::earth, "@DThe sky flashes with lightning.@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 290:
@@ -110,7 +109,7 @@ void wishSYS(GameWorld *g)
           g->DRAGONC -= 1;
           break;
         case 285:
-          send_to_planet(g, 0, ROOM_EARTH, "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
+          send_to_planet(g, 0, room_flag::earth, "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
           g->DRAGONC -= 1;
           break;
         case 280:
@@ -135,7 +134,7 @@ void wishSYS(GameWorld *g)
           break;
         case 0:
           send_to_room(g, g->DRAGONR, "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
-          send_to_planet(g, 0, ROOM_EARTH, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
+          send_to_planet(g, 0, room_flag::earth, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
           if (char_data *dragon = char_by_id(g, g->EDRAGON_uid))
             extract_char(g, dragon);
           g->SHENRON = false;
@@ -162,7 +161,7 @@ void wishSYS(GameWorld *g)
         switch (place) {
           case 1:
             if (room_of(g, num)) {
-              if (room_flagged(g, num, ROOM_EARTH) || room_flagged(g, num, ROOM_VEGETA) || room_flagged(g, num, ROOM_FRIGID) || room_flagged(g, num, ROOM_AETHER) || room_flagged(g, num, ROOM_NAMEK) || room_flagged(g, num, ROOM_KONACK) || room_flagged(g, num, ROOM_YARDRAT) || room_flagged(g, num, ROOM_YARDRAT)) {
+              if (room_flagged(g, num, room_flag::earth) || room_flagged(g, num, room_flag::vegeta) || room_flagged(g, num, room_flag::frigid) || room_flagged(g, num, room_flag::aether) || room_flagged(g, num, room_flag::namek) || room_flagged(g, num, room_flag::konack) || room_flagged(g, num, room_flag::yardrat) || room_flagged(g, num, room_flag::yardrat)) {
                 g->SHADOW_DRAGON1 = num;
                 place          = 2;
                 num            = rand_number(g, 200, 20000);
@@ -175,7 +174,7 @@ void wishSYS(GameWorld *g)
             break;
           case 2:
             if (room_of(g, num)) {
-              if (room_flagged(g, num, ROOM_EARTH) || room_flagged(g, num, ROOM_VEGETA) || room_flagged(g, num, ROOM_FRIGID) || room_flagged(g, num, ROOM_AETHER) || room_flagged(g, num, ROOM_NAMEK) || room_flagged(g, num, ROOM_KONACK) || room_flagged(g, num, ROOM_YARDRAT) || room_flagged(g, num, ROOM_YARDRAT)) {
+              if (room_flagged(g, num, room_flag::earth) || room_flagged(g, num, room_flag::vegeta) || room_flagged(g, num, room_flag::frigid) || room_flagged(g, num, room_flag::aether) || room_flagged(g, num, room_flag::namek) || room_flagged(g, num, room_flag::konack) || room_flagged(g, num, room_flag::yardrat) || room_flagged(g, num, room_flag::yardrat)) {
                 g->SHADOW_DRAGON2 = num;
                 place          = 3;
                 num            = rand_number(g, 200, 20000);
@@ -188,7 +187,7 @@ void wishSYS(GameWorld *g)
             break;
           case 3:
             if (room_of(g, num)) {
-              if (room_flagged(g, num, ROOM_EARTH) || room_flagged(g, num, ROOM_VEGETA) || room_flagged(g, num, ROOM_FRIGID) || room_flagged(g, num, ROOM_AETHER) || room_flagged(g, num, ROOM_NAMEK) || room_flagged(g, num, ROOM_KONACK) || room_flagged(g, num, ROOM_YARDRAT) || room_flagged(g, num, ROOM_YARDRAT)) {
+              if (room_flagged(g, num, room_flag::earth) || room_flagged(g, num, room_flag::vegeta) || room_flagged(g, num, room_flag::frigid) || room_flagged(g, num, room_flag::aether) || room_flagged(g, num, room_flag::namek) || room_flagged(g, num, room_flag::konack) || room_flagged(g, num, room_flag::yardrat) || room_flagged(g, num, room_flag::yardrat)) {
                 g->SHADOW_DRAGON3 = num;
                 place          = 4;
                 num            = rand_number(g, 200, 20000);
@@ -201,7 +200,7 @@ void wishSYS(GameWorld *g)
             break;
           case 4:
             if (room_of(g, num)) {
-              if (room_flagged(g, num, ROOM_EARTH) || room_flagged(g, num, ROOM_VEGETA) || room_flagged(g, num, ROOM_FRIGID) || room_flagged(g, num, ROOM_AETHER) || room_flagged(g, num, ROOM_NAMEK) || room_flagged(g, num, ROOM_KONACK) || room_flagged(g, num, ROOM_YARDRAT) || room_flagged(g, num, ROOM_YARDRAT)) {
+              if (room_flagged(g, num, room_flag::earth) || room_flagged(g, num, room_flag::vegeta) || room_flagged(g, num, room_flag::frigid) || room_flagged(g, num, room_flag::aether) || room_flagged(g, num, room_flag::namek) || room_flagged(g, num, room_flag::konack) || room_flagged(g, num, room_flag::yardrat) || room_flagged(g, num, room_flag::yardrat)) {
                 g->SHADOW_DRAGON4 = num;
                 place          = 5;
                 num            = rand_number(g, 200, 20000);
@@ -214,7 +213,7 @@ void wishSYS(GameWorld *g)
             break;
           case 5:
             if (room_of(g, num)) {
-              if (room_flagged(g, num, ROOM_EARTH) || room_flagged(g, num, ROOM_VEGETA) || room_flagged(g, num, ROOM_FRIGID) || room_flagged(g, num, ROOM_AETHER) || room_flagged(g, num, ROOM_NAMEK) || room_flagged(g, num, ROOM_KONACK) || room_flagged(g, num, ROOM_YARDRAT) || room_flagged(g, num, ROOM_YARDRAT)) {
+              if (room_flagged(g, num, room_flag::earth) || room_flagged(g, num, room_flag::vegeta) || room_flagged(g, num, room_flag::frigid) || room_flagged(g, num, room_flag::aether) || room_flagged(g, num, room_flag::namek) || room_flagged(g, num, room_flag::konack) || room_flagged(g, num, room_flag::yardrat) || room_flagged(g, num, room_flag::yardrat)) {
                 g->SHADOW_DRAGON5 = num;
                 place          = 6;
                 num            = rand_number(g, 200, 20000);
@@ -227,7 +226,7 @@ void wishSYS(GameWorld *g)
             break;
           case 6:
             if (room_of(g, num)) {
-              if (room_flagged(g, num, ROOM_EARTH) || room_flagged(g, num, ROOM_VEGETA) || room_flagged(g, num, ROOM_FRIGID) || room_flagged(g, num, ROOM_AETHER) || room_flagged(g, num, ROOM_NAMEK) || room_flagged(g, num, ROOM_KONACK) || room_flagged(g, num, ROOM_YARDRAT) || room_flagged(g, num, ROOM_YARDRAT)) {
+              if (room_flagged(g, num, room_flag::earth) || room_flagged(g, num, room_flag::vegeta) || room_flagged(g, num, room_flag::frigid) || room_flagged(g, num, room_flag::aether) || room_flagged(g, num, room_flag::namek) || room_flagged(g, num, room_flag::konack) || room_flagged(g, num, room_flag::yardrat) || room_flagged(g, num, room_flag::yardrat)) {
                 g->SHADOW_DRAGON6 = num;
                 place          = 7;
                 num            = rand_number(g, 200, 20000);
@@ -240,7 +239,7 @@ void wishSYS(GameWorld *g)
             break;
           case 7:
             if (room_of(g, num)) {
-              if (room_flagged(g, num, ROOM_EARTH) || room_flagged(g, num, ROOM_VEGETA) || room_flagged(g, num, ROOM_FRIGID) || room_flagged(g, num, ROOM_AETHER) || room_flagged(g, num, ROOM_NAMEK) || room_flagged(g, num, ROOM_KONACK) || room_flagged(g, num, ROOM_YARDRAT) || room_flagged(g, num, ROOM_YARDRAT)) {
+              if (room_flagged(g, num, room_flag::earth) || room_flagged(g, num, room_flag::vegeta) || room_flagged(g, num, room_flag::frigid) || room_flagged(g, num, room_flag::aether) || room_flagged(g, num, room_flag::namek) || room_flagged(g, num, room_flag::konack) || room_flagged(g, num, room_flag::yardrat) || room_flagged(g, num, room_flag::yardrat)) {
                 g->SHADOW_DRAGON7 = num;
                 done           = true;
                 num            = rand_number(g, 200, 20000);
@@ -313,11 +312,11 @@ namespace {
 
 ACMD(do_summon)
 {
-  if (!room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
+  if (!room_flagged(g, char_get_in_room(ch), room_flag::earth)) {
     send_to_char(g, ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
     return;
   }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_NOINSTANT) || room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::noinstant) || room_flagged(g, char_get_in_room(ch), room_flag::peaceful)) {
     send_to_char(g, ch, "You can not summon shenron in this protected area!\r\n");
     return;
   }
@@ -328,7 +327,7 @@ ACMD(do_summon)
   /* all seven, and none of them fakes */
   std::array<bool, 7> held{};
   for (obj_data *obj : char_inventory(g, ch))
-    if (!obj_extra_flagged(obj, ITEM_FORGED) && is_dragon_ball(g, obj))
+    if (!obj_extra_flagged(obj, extra_flag::forged) && is_dragon_ball(g, obj))
       held[obj_get_vnum(g, obj) - FIRST_DRAGON_BALL] = true;
   if (!std::ranges::all_of(held, std::identity())) {
     send_to_char(g, ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");
@@ -336,8 +335,8 @@ ACMD(do_summon)
   }
 
   reveal_hiding(g, ch, 0);
-  act(g, "@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, act_to::actor);
+  act(g, "@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", true, ch, nullptr, nullptr, act_to::room);
   g->SHENRON = true;
   g->DRAGONC = 300;
   g->DRAGONR = char_get_in_room(ch);
@@ -417,7 +416,7 @@ namespace {
 
   void more_money(GameWorld *, struct char_data *wch) { char_set_bank_gold(wch, char_get_bank_gold(wch) + 1000000); }
 
-  void immunity(GameWorld *, struct char_data *wch) { char_aff_set(wch, AFF_IMMUNITY, true); }
+  void immunity(GameWorld *, struct char_data *wch) { char_aff_set(wch, aff_flag::immunity, true); }
 
   constexpr boon KNOWLEDGE    = {"knowledge", "now has more knowledge", "a knowledge wish", more_practice, false};
   constexpr boon SPEED        = {"speed", "is now faster", "a speed wish", raise_by_10<char_get_real_abils_cha, char_set_real_abils_cha>, true};
@@ -470,8 +469,8 @@ namespace {
     char_to_room(g, wch, zero_is_300 && char_get_droom(wch) <= 0 ? 300 : char_get_droom(wch));
     look_at_room(g, char_get_in_room(wch), wch, 0);
     send_to_char(g, wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-    char_aff_set(wch, AFF_SPIRIT, false);
-    char_aff_set(wch, AFF_ETHEREAL, false);
+    char_aff_set(wch, aff_flag::spirit, false);
+    char_aff_set(wch, aff_flag::ethereal, false);
   }
 
   bool revive(wisher &w)
@@ -479,7 +478,7 @@ namespace {
     GameWorld *g = w.g;
     auto &named  = w.named;
     int count    = w.count();
-    auto dead    = [](struct char_data *c) { return char_aff_flagged(c, AFF_SPIRIT); };
+    auto dead    = [](struct char_data *c) { return char_aff_flagged(c, aff_flag::spirit); };
 
     if (count == 1) {
       if (!dead(named[0])) {
@@ -529,7 +528,7 @@ namespace {
     if (g->WISH[0] != 0)
       return false;
     send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {} is now immortal!@w'@n\r\n", char_get_name(w.named[0]));
-    char_plr_set(w.named[0], PLR_IMMORTAL, true);
+    char_plr_set(w.named[0], player_flag::immortal, true);
     g->WISH[0] = 1;
     g->WISH[1] = 1;
     g->SELFISHMETER += 4;
@@ -549,7 +548,7 @@ namespace {
   {
     GameWorld *g = w.g;
     send_to_room(g, g->DRAGONR, "@wShenron says, '@CYour wish has been granted, {} is now mortal!{}@w'@n\r\n", char_get_name(w.named[0]), second_wish(g));
-    char_plr_set(w.named[0], PLR_IMMORTAL, false);
+    char_plr_set(w.named[0], player_flag::immortal, false);
     g->SELFISHMETER += 4;
     mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Shenron: {} has made a mortal wish on {}.", char_get_name(w.ch), char_get_name(w.named[0]));
     char_set_wait(w.ch, PULSE_4SEC);

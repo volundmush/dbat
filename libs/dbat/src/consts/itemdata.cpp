@@ -4,7 +4,7 @@
 
 /*
  * WEAR_x - for eq list
- * Not use in sprinttype() so no \n.
+ * Not used by type_name() so no \n.
  */
 static constexpr std::string_view wear_where_entries[] = {
     "@c<@CUsed Somewhere     @c>@n ",
@@ -124,7 +124,7 @@ static constexpr std::string_view wear_bits_entries[] = {
     "EAR",
     "SHOULDERS",
     "SCOUTER"};
-static_assert(std::size(wear_bits_entries) == NUM_ITEM_WEARS);
+static_assert(std::size(wear_bits_entries) == flag_count<wear_flag>);
 constinit const name_table wear_bits(wear_bits_entries);
 
 /* ITEM_x (extra bits) */
@@ -224,7 +224,7 @@ static constexpr std::string_view extra_bits_entries[] = {
     "CARDCASE",
     "MOB_NOPICKUP",
     "NOSTEAL"};
-static_assert(std::size(extra_bits_entries) == NUM_ITEM_FLAGS);
+static_assert(std::size(extra_bits_entries) == flag_count<extra_flag>);
 constinit const name_table extra_bits(extra_bits_entries);
 
 /* CONT_x */
@@ -234,7 +234,7 @@ static constexpr std::string_view container_bits_entries[] = {
     "CLOSED",
     "LOCKED",
 };
-static_assert(std::size(container_bits_entries) == NUM_CONT_FLAGS);
+static_assert(std::size(container_bits_entries) == flag_count<container_flag>);
 constinit const name_table container_bits(container_bits_entries);
 
 /* LIQ_x */
@@ -375,5 +375,5 @@ constinit const name_table color_liquid(color_liquid_entries);
 
 /*
  * level of fullness for drink containers
- * Not used in sprinttype() so no \n.
+ * Not used by type_name() so no \n.
  */

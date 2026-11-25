@@ -54,7 +54,7 @@ static GameWorld *make_world(room_vnum first_vnum, int count)
   struct char_data *mob_proto = g->mob_proto.emplace(first_vnum);
   clear_char(mob_proto);
   char_set_nr(mob_proto, first_vnum);
-  char_mob_set(mob_proto, MOB_ISNPC, true);
+  char_mob_set(mob_proto, mob_flag::isnpc, true);
   g->mob_index.emplace(first_vnum)->vnum = first_vnum;
 
   struct obj_data *proto = g->obj_proto.emplace(first_vnum);
@@ -494,7 +494,7 @@ static void check_objects_off_the_ground(void)
   /* a carried Glacial Wall doesn't melt */
   g   = make_world(79, 1);
   obj = carried_object(g, holder);
-  obj_extra_set(obj, ITEM_ICE, true);
+  obj_extra_set(obj, extra_flag::ice, true);
   obj_set_weight(obj, 500);
   for (int i = 0; i < 20; i++)
     point_update(g);
@@ -507,7 +507,7 @@ static void check_objects_off_the_ground(void)
   g   = make_world(500, 1);
   obj = carried_object(g, holder);
   obj_from_char(g, obj);
-  obj_extra_set(obj, ITEM_ICE, true);
+  obj_extra_set(obj, extra_flag::ice, true);
   obj_set_weight(obj, 20);
   int64_t load = char_get_carry_weight(holder);
   obj_to_char(g, obj, holder);

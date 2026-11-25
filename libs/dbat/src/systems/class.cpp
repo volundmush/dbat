@@ -127,15 +127,15 @@ void do_start(GameWorld *g, struct char_data *ch)
     char_set_conditions(g, ch, DRUNK, 0);
   }
 
-  char_prf_set(g, ch, PRF_AUTOEXIT, true);
-  char_prf_set(g, ch, PRF_HINTS, true);
-  char_prf_set(g, ch, PRF_NOMUSIC, true);
-  char_prf_set(g, ch, PRF_DISPHP, true);
+  char_prf_set(g, ch, pref_flag::autoexit, true);
+  char_prf_set(g, ch, pref_flag::hints, true);
+  char_prf_set(g, ch, pref_flag::nomusic, true);
+  char_prf_set(g, ch, pref_flag::disphp, true);
   char_set_limb_condition(ch, (1) - 1, 100);
   char_set_limb_condition(ch, (2) - 1, 100);
   char_set_limb_condition(ch, (3) - 1, 100);
   char_set_limb_condition(ch, (4) - 1, 100);
-  char_plr_set(ch, PLR_HEAD, true);
+  char_plr_set(ch, player_flag::head, true);
 
   char_set_skill_slots(ch, 30);
 
@@ -163,11 +163,11 @@ void do_start(GameWorld *g, struct char_data *ch)
 
   if (char_get_race(ch) == RACE_SAIYAN || char_get_race(ch) == RACE_HALFBREED) {
     if (char_get_race(ch) != RACE_HALFBREED || (char_get_race(ch) == RACE_HALFBREED && char_get_racial_pref(ch) != 1)) {
-      char_plr_set(ch, PLR_STAIL, true);
+      char_plr_set(ch, player_flag::stail, true);
     }
   }
   if (char_get_race(ch) == RACE_ICER || char_get_race(ch) == RACE_BIO) {
-    char_plr_set(ch, PLR_TAIL, true);
+    char_plr_set(ch, player_flag::tail, true);
   }
   if (char_get_race(ch) == RACE_MAJIN) {
     char_set_absorbs(ch, 0);
@@ -176,13 +176,13 @@ void do_start(GameWorld *g, struct char_data *ch)
   if (char_get_race(ch) == RACE_BIO) {
     char_set_absorbs(ch, 3);
   }
-  char_prf_set(g, ch, PRF_VIEWORDER, true);
-  char_prf_set(g, ch, PRF_DISPMOVE, true);
-  char_prf_set(g, ch, PRF_DISPKI, true);
-  char_prf_set(g, ch, PRF_DISPEXP, true);
-  char_prf_set(g, ch, PRF_DISPTNL, true);
+  char_prf_set(g, ch, pref_flag::vieworder, true);
+  char_prf_set(g, ch, pref_flag::dispmove, true);
+  char_prf_set(g, ch, pref_flag::dispki, true);
+  char_prf_set(g, ch, pref_flag::dispexp, true);
+  char_prf_set(g, ch, pref_flag::disptnl, true);
 
-  if (!char_plr_flagged(ch, PLR_FORGET)) {
+  if (!char_plr_flagged(ch, player_flag::forget)) {
     if (char_get_choice(ch) == 1) {
       punch = rand_number(g, 30, 40);
       char_set_skills_base(ch, SKILL_BLOCK, punch);
@@ -249,7 +249,7 @@ void do_start(GameWorld *g, struct char_data *ch)
     char_set_skills_base(ch, SKILL_PUNCH, char_get_skills_base(ch, SKILL_PUNCH) + punch);
   } /* End CC skills */
   else {
-    char_plr_set(ch, PLR_FORGET, false);
+    char_plr_set(ch, player_flag::forget, false);
   }
 
   if (char_is_kai(ch) || char_is_kanassan(ch)) {
@@ -261,7 +261,7 @@ void do_start(GameWorld *g, struct char_data *ch)
     punch = rand_number(g, 10, 16);
     char_set_skills_base(ch, SKILL_REGENERATE, punch);
   }
-  if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
+  if (char_is_android(ch) && char_plr_flagged(ch, player_flag::absorb)) {
     punch = rand_number(g, 25, 35);
     char_set_skills_base(ch, SKILL_ABSORB, punch);
   }
@@ -326,7 +326,7 @@ void do_start(GameWorld *g, struct char_data *ch)
       char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     case RACE_ANDROID:
-      char_aff_set(ch, AFF_INFRAVISION, true);
+      char_aff_set(ch, aff_flag::infravision, true);
       char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     default:
@@ -381,7 +381,7 @@ void do_start(GameWorld *g, struct char_data *ch)
   char_set_baseki(ch, MAX(getBaseKI(ch), 100L));
   char_set_basest(ch, MAX(getBaseST(ch), 100L));
 
-  if (char_is_android(ch) && char_plr_flagged(ch, PLR_SENSEM)) {
+  if (char_is_android(ch) && char_plr_flagged(ch, player_flag::sensem)) {
     char_set_skills_base(ch, SKILL_SENSE, 100);
     gainBasePL(ch, rand_number(g, 400, 500), false);
     gainBaseST(ch, rand_number(g, 400, 500), false);
@@ -428,10 +428,10 @@ void do_start(GameWorld *g, struct char_data *ch)
   char_set_transclass(ch, rand_number(g, 1, 3));
 
   if (CONFIG_SITEOK_ALL)
-    char_plr_set(ch, PLR_SITEOK, true);
+    char_plr_set(ch, player_flag::siteok, true);
 
   if (char_get_race(ch) == RACE_SAIYAN && rand_number(g, 1, 100) >= 95) {
-    char_plr_set(ch, PLR_LSSJ, true);
+    char_plr_set(ch, player_flag::lssj, true);
     write_to_output(g, char_get_desc(ch), "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
   }
   restoreVitals(ch, true);
@@ -733,8 +733,8 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
     char_set_basest(ch, MAX(getBaseST(ch), 250L));
 
     add_prac = 5;
-    if (char_plr_flagged(ch, PLR_SKILLP)) {
-      char_plr_set(ch, PLR_SKILLP, false);
+    if (char_plr_flagged(ch, player_flag::skillp)) {
+      char_plr_set(ch, player_flag::skillp, false);
       add_prac *= 5;
     } else {
       add_prac *= 2;
@@ -789,7 +789,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
   if (char_get_admlevel(ch) >= ADMLVL_IMMORT) {
     for (i = 0; i < 3; i++)
       char_set_conditions(g, ch, i, (char)-1);
-    char_prf_set(g, ch, PRF_HOLYLIGHT, true);
+    char_prf_set(g, ch, pref_flag::holylight, true);
   }
 
   buf = str_format("@D[@YGain@D: @RPl@D(@G{}@D) @gSt@D(@G{}@D) @CKi@D(@G{}@D) @bPS@D(@G{}@D)]", add_commas(add_hp), add_commas(add_move), add_commas(add_mana), add_commas(add_prac));
@@ -980,106 +980,106 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
  */
 bool invalid_class(struct char_data *ch, struct obj_data *obj)
 {
-  if (obj_extra_flagged(obj, ITEM_ANTI_WIZARD) && char_is_roshi(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_wizard) && char_is_roshi(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_CLERIC) && char_is_piccolo(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_cleric) && char_is_piccolo(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_FIGHTER) && char_is_nail(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_fighter) && char_is_nail(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_ROGUE) && char_is_krane(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_rogue) && char_is_krane(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_MONK) && char_is_bardock(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_monk) && char_is_bardock(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ONLY_MONK) && !char_is_bardock(ch))
+  if (obj_extra_flagged(obj, extra_flag::only_monk) && !char_is_bardock(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ONLY_WIZARD) && !char_is_roshi(ch))
+  if (obj_extra_flagged(obj, extra_flag::only_wizard) && !char_is_roshi(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ONLY_JINTO) && !char_is_jinto(ch))
+  if (obj_extra_flagged(obj, extra_flag::only_jinto) && !char_is_jinto(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ONLY_CLERIC) && !char_is_piccolo(ch))
+  if (obj_extra_flagged(obj, extra_flag::only_cleric) && !char_is_piccolo(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ONLY_ROGUE) && !char_is_krane(ch))
+  if (obj_extra_flagged(obj, extra_flag::only_rogue) && !char_is_krane(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_ASSASSIN) && !char_is_kurzak(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_assassin) && !char_is_kurzak(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ONLY_FIGHTER) && !char_is_nail(ch))
+  if (obj_extra_flagged(obj, extra_flag::only_fighter) && !char_is_nail(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ONLY_PALADIN) && !char_is_ginyu(ch))
+  if (obj_extra_flagged(obj, extra_flag::only_paladin) && !char_is_ginyu(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_WIZARD) && char_is_roshi(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_wizard) && char_is_roshi(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_PALADIN) && char_is_ginyu(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_paladin) && char_is_ginyu(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_BARBARIAN) && char_is_kabito(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_barbarian) && char_is_kabito(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_BARD) && char_is_andsix(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_bard) && char_is_andsix(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ONLY_BARD) && !char_is_andsix(ch))
+  if (obj_extra_flagged(obj, extra_flag::only_bard) && !char_is_andsix(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_RANGER) && char_is_dabura(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_ranger) && char_is_dabura(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_DRUID) && char_is_tapion(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_druid) && char_is_tapion(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_ARCANE_ARCHER) && char_is_jinto(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_arcane_archer) && char_is_jinto(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_ARCANE_TRICKSTER) && char_is_tsuna(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_arcane_trickster) && char_is_tsuna(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_ARCHMAGE) && char_is_kurzak(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_archmage) && char_is_kurzak(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_BLACKGUARD) && char_is_blackguard(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_blackguard) && char_is_blackguard(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_DRAGON_DISCIPLE) && char_is_dragon_disciple(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_dragon_disciple) && char_is_dragon_disciple(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_DUELIST) && char_is_duelist(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_duelist) && char_is_duelist(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_DWARVEN_DEFENDER) && char_is_dwarven_defender(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_dwarven_defender) && char_is_dwarven_defender(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_ELDRITCH_KNIGHT) && char_is_eldritch_knight(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_eldritch_knight) && char_is_eldritch_knight(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT) && char_is_hierophant(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_hierophant) && char_is_hierophant(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_HORIZON_WALKER) && char_is_horizon_walker(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_horizon_walker) && char_is_horizon_walker(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_LOREMASTER) && char_is_loremaster(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_loremaster) && char_is_loremaster(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_MYSTIC_THEURGE) && char_is_mystic_theurge(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_mystic_theurge) && char_is_mystic_theurge(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_SHADOWDANCER) && char_is_shadowdancer(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_shadowdancer) && char_is_shadowdancer(ch))
     return true;
 
-  if (obj_extra_flagged(obj, ITEM_ANTI_THAUMATURGIST) && char_is_thaumaturgist(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_thaumaturgist) && char_is_thaumaturgist(ch))
     return true;
 
   return false;

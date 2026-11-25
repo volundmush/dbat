@@ -11,7 +11,6 @@
 #include "dbat/comm.hpp"
 #include "dbat/db.hpp"
 #include "dbat/interpreter.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/spells.hpp"
 #include "dbat/class.hpp"
@@ -52,16 +51,7 @@ result condition(const field_query &q, char_data *c, int which)
   return number(char_get_conditions(q.g, c, which));
 }
 
-/* Whether c has the flag the argument names, of the flags names lists; "0" without an argument */
-result named_flag(const field_query &q, std::span<const std::string_view> names, auto &&flagged)
-{
-  if (!q.has_arg())
-    return "0";
-  int flag = get_flag_by_name(names, q.subfield);
-  return yes_no(flag != NOFLAG && flagged(flag));
-}
-
-/* The same for a typed family, flagged() taking its flag */
+/* Whether c has the flag of family E the argument names; "0" without an argument */
 template <flag_family E> result named_flag(const field_query &q, auto &&flagged)
 {
   if (!q.has_arg())
@@ -99,7 +89,7 @@ std::string uid_or_none(const char_data *c) { return c ? uid_text(char_get_id(c)
 /* What a skill is at, by name */
 std::string skill_percent(GameWorld *g, char_data *ch, std::string_view skill)
 {
-  int skillnum = find_skill_num(g, skill, SKTYPE_SKILL);
+  int skillnum = find_skill_num(g, skill, skill_kind::skill);
   if (skillnum <= 0)
     return "unknown skill";
   return number(char_get_skill(ch, skillnum));
@@ -141,7 +131,7 @@ const field<char_data> char_fields[] = {
        return char_is_npc(c) ? std::string("blank") : str_format("{}", char_sensei_name(c));
      }},
     {"con", [](const field_query &q, char_data *c) { return ability(q, c, char_get_aff_abils_con, char_set_aff_abils_con); }},
-    {"dead", [](const field_query &, char_data *c) -> result { return yes_no(char_aff_flagged(c, AFF_SPIRIT)); }},
+    {"dead", [](const field_query &, char_data *c) -> result { return yes_no(char_aff_flagged(c, aff_flag::spirit)); }},
     {"death", [](const field_query &, char_data *c) -> result { return number((long long)char_get_deathtime(c)); }},
     {"dex", [](const field_query &q, char_data *c) { return ability(q, c, char_get_aff_abils_dex, char_set_aff_abils_dex); }},
     {"drag", [](const field_query &q, char_data *c) -> result { return yes_no(!char_is_npc(c) && char_get_drag(q.g, c)); }},
@@ -166,7 +156,7 @@ const field<char_data> char_fields[] = {
        return number(char_get_exp(c));
      }},
     {"fighting", [](const field_query &q, char_data *c) -> result { return uid_or_none(char_get_fighting(q.g, c)); }},
-    {"flying", [](const field_query &, char_data *c) -> result { return yes_no(char_aff_flagged(c, AFF_FLYING)); }},
+    {"flying", [](const field_query &, char_data *c) -> result { return yes_no(char_aff_flagged(c, aff_flag::flying)); }},
     {"follower", [](const field_query &, char_data *c) -> result {
        return char_get_followers(c) ? uid_text(char_get_followers(c).newest()) : "";
      }},
@@ -204,9 +194,9 @@ const field<char_data> char_fields[] = {
            return uid_text(obj_get_id(obj));
        return "";
      }},
-    {"is_killer", [](const field_query &q, char_data *c) { return player_flag_field(q, c, PLR_KILLER); }},
+    {"is_killer", [](const field_query &q, char_data *c) { return player_flag_field(q, c, player_flag::killer); }},
     {"is_pc", [](const field_query &, char_data *c) -> result { return yes_no(!char_is_npc(c)); }},
-    {"is_thief", [](const field_query &q, char_data *c) { return player_flag_field(q, c, PLR_THIEF); }},
+    {"is_thief", [](const field_query &q, char_data *c) { return player_flag_field(q, c, player_flag::thief); }},
     {"level", [](const field_query &, char_data *c) -> result { return number(char_get_level(c)); }},
     {"mana", [](const field_query &q, char_data *c) -> result {
        change_points(q, c, incCurKI, decCurKI);
@@ -265,7 +255,7 @@ const field<char_data> char_fields[] = {
          if (ns > -1)
            char_set_size(c, ns);
        }
-       return sprinttype(get_size(c), size_names);
+       return std::string(type_name(size_names, get_size(c)));
      }},
     {"skill", [](const field_query &q, char_data *c) -> result { return skill_percent(q.g, c, q.subfield); }},
     {"skillset", [](const field_query &q, char_data *c) -> result { /* skillset("<skill name>" <amount>) */
@@ -274,7 +264,7 @@ const field<char_data> char_fields[] = {
          std::string skillname = take_quoted(rest);
          rest                  = skip_spaces(rest);
          if (!rest.empty() && is_number(rest)) {
-           int skillnum = find_skill_num(q.g, skillname, SKTYPE_SKILL);
+           int skillnum = find_skill_num(q.g, skillname, skill_kind::skill);
            if (skillnum > 0)
              char_set_skills_base(c, skillnum, std::max(0, std::min(100, parse_int(rest))));
          }

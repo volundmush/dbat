@@ -19,7 +19,6 @@
 #include "dbat/consts/time.hpp"
 #include "dbat/help.hpp"
 #include "dbat/command.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/random.hpp"
@@ -118,17 +117,17 @@ namespace {
   /* A super saiyan's hair and eyes, by form */
   void super_saiyan_looks(GameWorld *g, struct char_data *ch, struct char_data *tch)
   {
-    if (char_plr_flagged(tch, PLR_TRANS1) || char_plr_flagged(tch, PLR_TRANS2)) {
+    if (char_plr_flagged(tch, player_flag::trans1) || char_plr_flagged(tch, player_flag::trans2)) {
       feature_line(g, ch, "Hair Length", HAIR_LENGTHS, char_get_hairl(tch));
-      feature_line(g, ch, "Hair Style", char_plr_flagged(tch, PLR_TRANS1) ? "Spiky.        " : "Sharp Spikes. ");
+      feature_line(g, ch, "Hair Style", char_plr_flagged(tch, player_flag::trans1) ? "Spiky.        " : "Sharp Spikes. ");
       feature_line(g, ch, "Hair Color", "Golden.       ");
       feature_line(g, ch, "Eye Color", "Emerald.      ");
-    } else if (char_plr_flagged(tch, PLR_TRANS3)) {
+    } else if (char_plr_flagged(tch, player_flag::trans3)) {
       feature_line(g, ch, "Hair Length", "Really Long.  ");
       feature_line(g, ch, "Hair Style", "Spiky.        ");
       feature_line(g, ch, "Hair Color", "Golden.       ");
       feature_line(g, ch, "Eye Color", "Aqua Green.   ");
-    } else if (char_plr_flagged(tch, PLR_TRANS4)) {
+    } else if (char_plr_flagged(tch, player_flag::trans4)) {
       feature_line(g, ch, "Hair Length", "Long.        ");
       feature_line(g, ch, "Hair Style", "Soft Spikes. ");
       feature_line(g, ch, "Hair Color", "Black.       ");
@@ -146,7 +145,7 @@ void bringdesc(GameWorld *g, struct char_data *ch, struct char_data *tch)
     return;
   }
 
-  if (ch != tch && char_plr_flagged(tch, PLR_DISGUISED)) {
+  if (ch != tch && char_plr_flagged(tch, player_flag::disguised)) {
     feature_line(g, ch, "Hair Length", "Hidden.         ");
     feature_line(g, ch, "Hair Color", "Hidden.         ");
     feature_line(g, ch, "Hair Style", "Hidden.         ");
@@ -193,7 +192,7 @@ namespace {
   bool exit_seen_by_immortal(GameWorld *g, struct char_data *ch, struct room_direction_data *exit, const std::string &dir, int door, std::string &line)
   {
     line = str_format("@c{:<9} @D- [@Y{:>5d}@D]@w {}.\r\n", dir, exit->to_room, room_get_name(g, exit->to_room));
-    if (!exit->exit_info.test(EX_ISDOOR) && !exit->exit_info.test(EX_SECRET))
+    if (!exit->exit_info.test(exit_flag::isdoor) && !exit->exit_info.test(exit_flag::secret))
       return true;
     /* This exit has a door - tell all about it, if it has a keyword to name it by */
     if (exit_keyword(exit).empty()) {
@@ -202,20 +201,20 @@ namespace {
       return false;
     }
     std::string argh = str_format("{} ", !str_eq_nocase(fname(exit_keyword(exit)), "undefined") ? fname(exit_keyword(exit)) : "opening");
-    line += str_format("                    The {}{} {} {} {}{}.\r\n", exit->exit_info.test(EX_SECRET) ? "@rsecret@w " : "",
+    line += str_format("                    The {}{} {} {} {}{}.\r\n", exit->exit_info.test(exit_flag::secret) ? "@rsecret@w " : "",
                        (!exit_keyword(exit).empty() && !str_eq_nocase(fname(exit_keyword(exit)), "undefined")) ? fname(exit_keyword(exit)) : "opening",
-                       until_nul(argh).contains("s ") ? "are" : "is", exit->exit_info.test(EX_CLOSED) ? "closed" : "open",
-                       exit->exit_info.test(EX_LOCKED) ? "and locked" : "and unlocked", exit->exit_info.test(EX_PICKPROOF) ? " (pickproof)" : "");
+                       until_nul(argh).contains("s ") ? "are" : "is", exit->exit_info.test(exit_flag::closed) ? "closed" : "open",
+                       exit->exit_info.test(exit_flag::locked) ? "and locked" : "and unlocked", exit->exit_info.test(exit_flag::pickproof) ? " (pickproof)" : "");
     return true;
   }
 
   /* What a mortal is told of an exit: where an open one goes, or that a door is closed, if they can see it. */
   std::string exit_seen_by_mortal(GameWorld *g, struct char_data *ch, struct room_direction_data *exit, const std::string &dir, bool has_light)
   {
-    if (!exit->exit_info.test(EX_CLOSED))
+    if (!exit->exit_info.test(exit_flag::closed))
       return str_format("@c{:<9} @D-@w {}\r\n", dir,
                         room_is_dark(g, exit->to_room) && !char_can_see_in_dark(g, ch) && !has_light ? "@bToo dark to tell.@w" : room_get_name(g, exit->to_room));
-    if (CONFIG_DISP_CLOSED_DOORS && !exit->exit_info.test(EX_SECRET))
+    if (CONFIG_DISP_CLOSED_DOORS && !exit->exit_info.test(exit_flag::secret))
       return str_format("@c{:<9} @D-@w The {} appears @rclosed.@n\r\n", dir, exit_keyword(exit).empty() ? "opening" : fname(exit_keyword(exit)));
     return {};
   }
@@ -260,15 +259,15 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
     return;
 
   send_to_char(g, ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
-  if (char_is_affected(ch, AFF_BLIND)) {
+  if (char_is_affected(ch, aff_flag::blind)) {
     send_to_char(g, ch, "You can't see a damned thing, you're blind!\r\n");
     return;
   }
-  if (char_plr_flagged(ch, PLR_EYEC)) {
+  if (char_plr_flagged(ch, player_flag::eyec)) {
     send_to_char(g, ch, "You can't see a damned thing, your eyes are closed!\r\n");
     return;
   }
-  if (room_is_dark(g, char_get_in_room(ch)) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
+  if (room_is_dark(g, char_get_in_room(ch)) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, player_flag::auralight)) {
     send_to_char(g, ch, "It is pitch black...\r\n");
     return;
   }
@@ -277,8 +276,8 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
   bool has_light = std::ranges::any_of(std::views::iota(0, NUM_WEARS), [&](int i) {
     struct obj_data *eq = char_get_equipment(ch, i);
     return eq && obj_get_type_flag(eq) == ITEM_LIGHT && obj_get_value(eq, VAL_LIGHT_HOURS);
-  }) || char_plr_flagged(ch, PLR_AURALIGHT);
-  bool sees_all = char_adm_flagged(ch, ADM_SEESECRET) || char_get_admlevel(ch) > 4; /* Immortals see everything */
+  }) || char_plr_flagged(ch, player_flag::auralight);
+  bool sees_all = char_adm_flagged(ch, admin_flag::seesecret) || char_get_admlevel(ch) > 4; /* Immortals see everything */
 
   std::array<std::string, NUM_OF_DIRS> lines;
   int door_found = 0;
@@ -303,8 +302,8 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
       send_to_char(g, ch, lines[door]);
   send_to_char(g, ch, "@D------------------------------------------------------------------------@n\r\n");
 
-  if (room_flagged(g, target_room, ROOM_HOUSE)) {
-    bool garden1 = room_flagged(g, target_room, ROOM_GARDEN1), garden2 = room_flagged(g, target_room, ROOM_GARDEN2);
+  if (room_flagged(g, target_room, room_flag::house)) {
+    bool garden1 = room_flagged(g, target_room, room_flag::garden1), garden2 = room_flagged(g, target_room, room_flag::garden2);
     if (!garden1 && !garden2)
       send_to_char(g, ch, "@D[@GItems Stored@D: @g{:d}@D]@n\r\n", check_saveroom_count(g, ch, nullptr));
     else if (garden1 && !garden2)
@@ -321,7 +320,7 @@ static void do_auto_exits2(GameWorld *g, room_vnum target_room, struct char_data
   int shown = 0;
   for (int door = 0; door < NUM_OF_DIRS; door++) {
     struct room_direction_data *exit = room_get_dir_option(g, target_room, door);
-    if (!exit || exit->to_room == NOWHERE || room_exit_flagged(exit, EX_CLOSED))
+    if (!exit || exit->to_room == NOWHERE || room_exit_flagged(exit, exit_flag::closed))
       continue;
     send_to_char(g, ch, "{} ", abbr_dirs[door]);
     shown++;
@@ -331,7 +330,7 @@ static void do_auto_exits2(GameWorld *g, room_vnum target_room, struct char_data
 
 ACMD(do_exits)
 {
-  if (!char_prf_flagged(g, ch, PRF_NODEC))
+  if (!char_prf_flagged(g, ch, pref_flag::nodec))
     do_auto_exits(g, char_get_in_room(ch), ch, EXIT_COMPLETE);
   else
     do_auto_exits2(g, char_get_in_room(ch), ch);
@@ -358,8 +357,8 @@ ACMD(do_autoexit)
     return;
   }
   if (tp == EXIT_OFF || tp == EXIT_NORMAL || tp == EXIT_COMPLETE) { /* "n/a" changes nothing */
-    char_prf_set(g, ch, PRF_AUTOEXIT, tp != EXIT_OFF);
-    char_prf_set(g, ch, PRF_FULL_EXIT, tp == EXIT_COMPLETE);
+    char_prf_set(g, ch, pref_flag::autoexit, tp != EXIT_OFF);
+    char_prf_set(g, ch, pref_flag::full_exit, tp == EXIT_COMPLETE);
   }
   send_to_char(g, ch, "Your @rautoexit level@n is now {}.\r\n", exitlevels[char_exit_level(g, ch)]);
 }
@@ -374,22 +373,22 @@ namespace {
 
   /* Where a room is, the first that it's in */
   constexpr place_line PLACES[] = {
-      {room_is<ROOM_EARTH>,   "Planet: @GEarth"},
-      {room_is<ROOM_CERRIA>,  "Planet: @RCerria"},
+      {room_is<room_flag::earth>,   "Planet: @GEarth"},
+      {room_is<room_flag::cerria>,  "Planet: @RCerria"},
       {room_planet_zenith,    "Planet: @BZenith"},
-      {room_is<ROOM_AETHER>,  "Planet: @MAether"},
-      {room_is<ROOM_FRIGID>,  "Planet: @CFrigid"},
-      {room_is<ROOM_SPACE>,   "Planet: @DNone"},
-      {room_is<ROOM_VEGETA>,  "Planet: @YVegeta"},
-      {room_is<ROOM_NAMEK>,   "Planet: @gNamek"},
-      {room_is<ROOM_KONACK>,  "Planet: @MKonack"},
-      {room_is<ROOM_NEO>,     "Planet: @WNeo Nirvana"},
-      {room_is<ROOM_AL>,      "Dimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye"},
-      {room_is<ROOM_HELL>,    "Dimension: @RPunishment Hell"},
-      {room_is<ROOM_RHELL>,   "Dimension: @RH@re@Dl@Rl"},
-      {room_is<ROOM_YARDRAT>, "Planet: @mYardrat"},
-      {room_is<ROOM_KANASSA>, "Planet: @BKanassa"},
-      {room_is<ROOM_ARLIA>,   "Planet: @GArlia"},
+      {room_is<room_flag::aether>,  "Planet: @MAether"},
+      {room_is<room_flag::frigid>,  "Planet: @CFrigid"},
+      {room_is<room_flag::space>,   "Planet: @DNone"},
+      {room_is<room_flag::vegeta>,  "Planet: @YVegeta"},
+      {room_is<room_flag::namek>,   "Planet: @gNamek"},
+      {room_is<room_flag::konack>,  "Planet: @MKonack"},
+      {room_is<room_flag::neo>,     "Planet: @WNeo Nirvana"},
+      {room_is<room_flag::al>,      "Dimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye"},
+      {room_is<room_flag::hell>,    "Dimension: @RPunishment Hell"},
+      {room_is<room_flag::rhell>,   "Dimension: @RH@re@Dl@Rl"},
+      {room_is<room_flag::yardrat>, "Planet: @mYardrat"},
+      {room_is<room_flag::kanassa>, "Planet: @BKanassa"},
+      {room_is<room_flag::arlia>,   "Planet: @GArlia"},
   };
 
   /* The gravities a room is told to have; any other says nothing */
@@ -469,11 +468,11 @@ namespace {
 
   void room_header(GameWorld *g, struct char_data *ch, room_vnum target_room)
   {
-    bool decorated = !char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_NODEC);
-    if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_ROOMFLAGS)) {
+    bool decorated = !char_is_npc(ch) && !char_prf_flagged(g, ch, pref_flag::nodec);
+    if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::roomflags)) {
       struct room_data *rm = room_of(g, char_get_in_room(ch)); /* quirk: the sector and triggers are those of the room ch is in */
-      std::string flags    = flag_names(*room_get_room_flags(g, target_room));
-      std::string sector   = sprinttype(room_get_sector_type(rm), sector_types);
+      std::string flags      = flag_names(*room_get_room_flags(g, target_room));
+      std::string_view sector = type_name(sector_types, room_get_sector_type(rm));
       if (decorated)
         send_to_char(g, ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
       send_to_char(g, ch, "@wLocation: @G{:<70}@w\r\n", room_get_name(g, target_room));
@@ -499,11 +498,11 @@ namespace {
       send_to_char(g, ch, "@wGravity: @WNormal@n\r\n");
     else if (auto it = std::ranges::find(GRAVITIES, gravity, &std::pair<int, std::string_view>::first); it != std::end(GRAVITIES))
       send_to_char(g, ch, "@wGravity: @W{}@n\r\n", it->second);
-    if (room_flagged(g, target_room, ROOM_REGEN))
+    if (room_flagged(g, target_room, room_flag::regen))
       send_to_char(g, ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
-    if (room_flagged(g, target_room, ROOM_AURA))
+    if (room_flagged(g, target_room, room_flag::aura))
       send_to_char(g, ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
-    if (room_flagged(g, target_room, ROOM_HBTC))
+    if (room_flagged(g, target_room, room_flag::hbtc))
       send_to_char(g, ch, "@rThis room feels like it opperates in a different time frame.@n\r\n");
     if (decorated)
       send_to_char(g, ch, "@wO----------------------------------------------------------------------O@n\r\n");
@@ -538,35 +537,35 @@ void look_at_room(GameWorld *g, room_vnum target_room, struct char_data *ch, int
   (void)ignore_brief;
   if (!char_get_desc(ch))
     return;
-  if (room_is_dark(g, target_room) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
+  if (room_is_dark(g, target_room) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, player_flag::auralight)) {
     send_to_char(g, ch, "It is pitch black...\r\n");
     return;
   }
-  if (char_aff_flagged(ch, AFF_BLIND)) {
+  if (char_aff_flagged(ch, aff_flag::blind)) {
     send_to_char(g, ch, "You see nothing but infinite darkness...\r\n");
     return;
   }
-  if (char_plr_flagged(ch, PLR_EYEC)) {
+  if (char_plr_flagged(ch, player_flag::eyec)) {
     send_to_char(g, ch, "You can't see a damned thing, your eyes are closed!\r\n");
     return;
   }
 
   room_header(g, ch, target_room);
-  if ((!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_BRIEF)) || room_flagged(g, target_room, ROOM_DEATH))
+  if ((!char_is_npc(ch) && !char_prf_flagged(g, ch, pref_flag::brief)) || room_flagged(g, target_room, room_flag::death))
     room_description(g, ch, target_room);
 
   /* autoexits */
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_NODEC))
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::nodec))
     do_auto_exits2(g, target_room, ch);
-  if (!char_is_npc(ch) && !char_prf_flagged(g, ch, PRF_NODEC))
+  if (!char_is_npc(ch) && !char_prf_flagged(g, ch, pref_flag::nodec))
     do_auto_exits(g, target_room, ch, char_exit_level(g, ch));
 
   /* now list characters & objects */
-  if (room_flagged(g, target_room, ROOM_GARDEN1))
+  if (room_flagged(g, target_room, room_flag::garden1))
     send_to_char(g, ch, "@D[@GPlants Planted@D: @g{:d}@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(g, ch, nullptr));
-  else if (room_flagged(g, target_room, ROOM_GARDEN2))
+  else if (room_flagged(g, target_room, room_flag::garden2))
     send_to_char(g, ch, "@D[@GPlants Planted@D: @g{:d}@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(g, ch, nullptr));
-  else if (room_flagged(g, target_room, ROOM_HOUSE))
+  else if (room_flagged(g, target_room, room_flag::house))
     send_to_char(g, ch, "@D[@GItems Stored@D: @g{:d}@D]@n\r\n", check_saveroom_count(g, ch, nullptr));
   list_obj_to_char(g, room_get_contents(g, target_room), ch, SHOW_OBJ_LONG, false);
   list_char_to_char(g, room_get_people(g, target_room), ch);
@@ -586,10 +585,10 @@ static void look_in_direction(GameWorld *g, struct char_data *ch, int dir)
     obj_to_char(g, read_object(g, 17), ch);
   }
 
-  if (room_exit_flagged(exit, EX_ISDOOR) && !exit_keyword(exit).empty()) {
-    if (!room_exit_flagged(exit, EX_SECRET) && room_exit_flagged(exit, EX_CLOSED))
+  if (room_exit_flagged(exit, exit_flag::isdoor) && !exit_keyword(exit).empty()) {
+    if (!room_exit_flagged(exit, exit_flag::secret) && room_exit_flagged(exit, exit_flag::closed))
       send_to_char(g, ch, "The {} is closed.\r\n", fname(exit_keyword(exit)));
-    else if (!room_exit_flagged(exit, EX_CLOSED))
+    else if (!room_exit_flagged(exit, exit_flag::closed))
       send_to_char(g, ch, "The {} is open.\r\n", fname(exit_keyword(exit)));
   }
 }
@@ -605,7 +604,7 @@ namespace {
       return;
     }
     room_vnum portal_dest = obj_get_value(obj, VAL_PORTAL_DEST);
-    if (!room_of(g, portal_dest) || (room_is_dark(g, portal_dest) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, PLR_AURALIGHT)))
+    if (!room_of(g, portal_dest) || (room_is_dark(g, portal_dest) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, player_flag::auralight)))
       send_to_char(g, ch, "You see nothing but infinite darkness...\r\n");
     else
       send_to_char(g, ch, "After seconds of concentration you see the image of {}.\r\n", room_get_name(g, portal_dest));
@@ -613,14 +612,14 @@ namespace {
 
   void look_in_vehicle(GameWorld *g, struct char_data *ch, struct obj_data *obj)
   {
-    if (obj_val_flagged(obj, CONT_CLOSED)) {
+    if (obj_val_flagged(obj, container_flag::closed)) {
       send_to_char(g, ch, "It is closed.\r\n");
       return;
     }
     room_vnum inside = obj_get_value(obj, VAL_VEHICLE_ROOM);
     if (obj_get_value(obj, VAL_VEHICLE_APPEAR) >= 0 || !room_of(g, inside))
       send_to_char(g, ch, "You cannot see inside that.\r\n");
-    else if (room_is_dark(g, inside) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, PLR_AURALIGHT))
+    else if (room_is_dark(g, inside) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, player_flag::auralight))
       send_to_char(g, ch, "It is pitch black...\r\n");
     else {
       send_to_char(g, ch, "You look inside and see:\r\n");
@@ -633,18 +632,18 @@ namespace {
 
   void look_in_container(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::optional<find_flag> bits)
   {
-    if (obj_val_flagged(obj, CONT_CLOSED)) {
+    if (obj_val_flagged(obj, container_flag::closed)) {
       send_to_char(g, ch, "It is closed.\r\n");
       return;
     }
     send_to_char(g, ch, "{}", obj_get_short_description(obj));
     if (obj_get_type_flag(obj) == ITEM_CONTAINER && std::ranges::contains(WATCHED_CONTAINERS, obj_get_vnum(g, obj)))
-      act(g, "$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
-    if (bits == FIND_OBJ_INV)
+      act(g, "$n looks in $p.", true, ch, obj, nullptr, act_to::room);
+    if (bits == find_flag::obj_inv)
       send_to_char(g, ch, " (carried): \r\n");
-    else if (bits == FIND_OBJ_ROOM)
+    else if (bits == find_flag::obj_room)
       send_to_char(g, ch, " (here): \r\n");
-    else if (bits == FIND_OBJ_EQUIP)
+    else if (bits == find_flag::obj_equip)
       send_to_char(g, ch, " (used): \r\n");
     list_obj_to_char(g, obj_get_contains(obj), ch, SHOW_OBJ_SHORT, true);
   }
@@ -662,7 +661,7 @@ namespace {
       send_to_char(g, ch, "Its contents seem somewhat murky.\r\n"); /* BUG */
       return;
     }
-    std::string liquid = sprinttype(obj_get_value(obj, VAL_DRINKCON_LIQUID), color_liquid);
+    std::string_view liquid = type_name(color_liquid, obj_get_value(obj, VAL_DRINKCON_LIQUID));
     if (capacity < 0 || leftin == capacity)
       send_to_char(g, ch, "It's full of a {} liquid.\r\n", liquid);
     else if (leftin >= capacity * .8)
@@ -686,14 +685,14 @@ static void look_in_obj(GameWorld *g, struct char_data *ch, const std::string &a
   }
   struct obj_data *obj    = nullptr;
   struct char_data *dummy = nullptr;
-  std::optional<find_flag> bits                = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj);
+  std::optional<find_flag> bits                = generic_find(g, arg, find_flag::obj_inv | find_flag::obj_room | find_flag::obj_equip, ch, &dummy, &obj);
   if (!bits) {
     send_to_char(g, ch, "There doesn't seem to be {} {} here.\r\n", AN(arg.c_str()), arg);
     return;
   }
 
   int type = obj_get_type_flag(obj);
-  if (type == ITEM_PORTAL && !obj_val_flagged(obj, CONT_CLOSEABLE))
+  if (type == ITEM_PORTAL && !obj_val_flagged(obj, container_flag::closeable))
     look_through_portal(g, ch, obj);
   else if (type == ITEM_VEHICLE)
     look_in_vehicle(g, ch, obj);
@@ -819,12 +818,12 @@ static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg,
 
   struct char_data *found_char = nullptr;
   struct obj_data *found_obj   = nullptr;
-  std::optional<find_flag> bits                     = generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP | FIND_CHAR_ROOM, ch, &found_char, &found_obj);
+  std::optional<find_flag> bits                     = generic_find(g, arg, find_flag::obj_inv | find_flag::obj_room | find_flag::obj_equip | find_flag::char_room, ch, &found_char, &found_obj);
 
   /* Is the target a character? */
   if (found_char != nullptr) {
     look_at_char(g, found_char, ch);
-    if (ch != found_char && !char_aff_flagged(ch, AFF_HIDE))
+    if (ch != found_char && !char_aff_flagged(ch, aff_flag::hide))
       act_triple(g, LOOKS_AT, ch, nullptr, found_char);
     return;
   }
@@ -899,7 +898,7 @@ void look_out_window(GameWorld *g, struct char_data *ch, std::string_view arg)
   /* First, lets find something to look out of or through. */
   if (!arg.empty()) {
     struct char_data *dummy = nullptr;
-    if (!generic_find(g, arg, FIND_OBJ_ROOM | FIND_OBJ_INV | FIND_OBJ_EQUIP, ch, &dummy, &viewport)) {
+    if (!generic_find(g, arg, find_flag::obj_room | find_flag::obj_inv | find_flag::obj_equip, ch, &dummy, &viewport)) {
       send_to_char(g, ch, "You don't see that here.\r\n");
       return;
     }
@@ -920,7 +919,7 @@ void look_out_window(GameWorld *g, struct char_data *ch, std::string_view arg)
     send_to_char(g, ch, "You don't seem to be able to see outside.\r\n");
     return;
   }
-  if (obj_val_flagged(viewport, CONT_CLOSEABLE) && obj_val_flagged(viewport, CONT_CLOSED)) {
+  if (obj_val_flagged(viewport, container_flag::closeable) && obj_val_flagged(viewport, container_flag::closed)) {
     send_to_char(g, ch, "It is closed.\r\n");
     return;
   }
@@ -936,7 +935,7 @@ void look_out_window(GameWorld *g, struct char_data *ch, std::string_view arg)
     /* the default "outside": the last way out to a room not indoors */
     for (int door = 0; door < NUM_OF_DIRS; door++) {
       struct room_direction_data *exit = char_get_exit(g, ch, door);
-      if (exit && exit->to_room != NOWHERE && !room_flagged(g, exit->to_room, ROOM_INDOORS))
+      if (exit && exit->to_room != NOWHERE && !room_flagged(g, exit->to_room, room_flag::indoors))
         target_room = exit->to_room;
     }
   }
@@ -945,9 +944,9 @@ void look_out_window(GameWorld *g, struct char_data *ch, std::string_view arg)
     return;
   }
   if (!obj_get_action_description(viewport).empty())
-    act(g, obj_get_action_description(viewport), true, ch, viewport, nullptr, TO_CHAR);
+    act(g, obj_get_action_description(viewport), true, ch, viewport, nullptr, act_to::actor);
   else
-    act(g, "$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "$n looks out the window.", true, ch, nullptr, nullptr, act_to::room);
   send_to_char(g, ch, "You look outside and see:\r\n");
   look_at_room(g, target_room, ch, 0);
 }
@@ -969,15 +968,15 @@ ACMD(do_look)
     send_to_char(g, ch, "You can't see anything but stars!\r\n");
     return;
   }
-  if (char_aff_flagged(ch, AFF_BLIND)) {
+  if (char_aff_flagged(ch, aff_flag::blind)) {
     send_to_char(g, ch, "You can't see a damned thing, you're blind!\r\n");
     return;
   }
-  if (char_plr_flagged(ch, PLR_EYEC)) {
+  if (char_plr_flagged(ch, player_flag::eyec)) {
     send_to_char(g, ch, "You can't see a damned thing, your eyes are closed!\r\n");
     return;
   }
-  if (room_is_dark(g, char_get_in_room(ch)) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
+  if (room_is_dark(g, char_get_in_room(ch)) && !char_can_see_in_dark(g, ch) && !char_plr_flagged(ch, player_flag::auralight)) {
     send_to_char(g, ch, "It is pitch black...\r\n");
     list_char_to_char(g, room_get_people(g, char_get_in_room(ch)), ch); /* glowing red eyes */
     return;
@@ -1058,7 +1057,7 @@ ACMD(do_examine)
 
   struct char_data *tmp_char;
   struct obj_data *tmp_object;
-  generic_find(g, arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_CHAR_ROOM | FIND_OBJ_EQUIP, ch, &tmp_char, &tmp_object);
+  generic_find(g, arg, find_flag::obj_inv | find_flag::obj_room | find_flag::char_room | find_flag::obj_equip, ch, &tmp_char, &tmp_object);
   if (tmp_object && (obj_get_type_flag(tmp_object) == ITEM_DRINKCON || obj_get_type_flag(tmp_object) == ITEM_FOUNTAIN || obj_get_type_flag(tmp_object) == ITEM_CONTAINER)) {
     send_to_char(g, ch, "When you look inside, you see:\r\n");
     look_in_obj(g, ch, arg);

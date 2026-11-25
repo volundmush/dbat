@@ -5,7 +5,7 @@
 #include "dbat/flag_set.hpp"
 #include "dbat/name_table.hpp"
 
-extern const name_table preference_bits; /* NUM_PRF_FLAGS of them */
+extern const name_table preference_bits; /* flag_count<pref_flag> of them */
 
 /* Preference flags: player_special_data.pref */
 enum class pref_flag : uint8_t {
@@ -74,70 +74,5 @@ enum class pref_flag : uint8_t {
 template <> struct flag_traits<pref_flag> {
   static constexpr const name_table &names = preference_bits;
 };
-
-/* The old names, until every use says pref_flag:: */
-constexpr pref_flag PRF_BRIEF      = pref_flag::brief;
-constexpr pref_flag PRF_COMPACT    = pref_flag::compact;
-constexpr pref_flag PRF_DEAF       = pref_flag::deaf;
-constexpr pref_flag PRF_NOTELL     = pref_flag::notell;
-constexpr pref_flag PRF_DISPHP     = pref_flag::disphp;
-constexpr pref_flag PRF_DISPMANA   = pref_flag::dispmana;
-constexpr pref_flag PRF_DISPMOVE   = pref_flag::dispmove;
-constexpr pref_flag PRF_AUTOEXIT   = pref_flag::autoexit;
-constexpr pref_flag PRF_NOHASSLE   = pref_flag::nohassle;
-constexpr pref_flag PRF_QUEST      = pref_flag::quest;
-constexpr pref_flag PRF_SUMMONABLE = pref_flag::summonable;
-constexpr pref_flag PRF_NOREPEAT   = pref_flag::norepeat;
-constexpr pref_flag PRF_HOLYLIGHT  = pref_flag::holylight;
-constexpr pref_flag PRF_COLOR      = pref_flag::color;
-constexpr pref_flag PRF_SPARE      = pref_flag::spare;
-constexpr pref_flag PRF_NOWIZ      = pref_flag::nowiz;
-constexpr pref_flag PRF_LOG1       = pref_flag::log1;
-constexpr pref_flag PRF_LOG2       = pref_flag::log2;
-constexpr pref_flag PRF_NOAUCT     = pref_flag::noauct;
-constexpr pref_flag PRF_NOGOSS     = pref_flag::nogoss;
-constexpr pref_flag PRF_NOGRATZ    = pref_flag::nogratz;
-constexpr pref_flag PRF_ROOMFLAGS  = pref_flag::roomflags;
-constexpr pref_flag PRF_DISPAUTO   = pref_flag::dispauto;
-constexpr pref_flag PRF_CLS        = pref_flag::cls;
-constexpr pref_flag PRF_BUILDWALK  = pref_flag::buildwalk;
-constexpr pref_flag PRF_AFK        = pref_flag::afk;
-constexpr pref_flag PRF_AUTOLOOT   = pref_flag::autoloot;
-constexpr pref_flag PRF_AUTOGOLD   = pref_flag::autogold;
-constexpr pref_flag PRF_AUTOSPLIT  = pref_flag::autosplit;
-constexpr pref_flag PRF_FULL_EXIT  = pref_flag::full_exit;
-constexpr pref_flag PRF_AUTOSAC    = pref_flag::autosac;
-constexpr pref_flag PRF_AUTOMEM    = pref_flag::automem;
-constexpr pref_flag PRF_VIEWORDER  = pref_flag::vieworder;
-constexpr pref_flag PRF_NOCOMPRESS = pref_flag::nocompress;
-constexpr pref_flag PRF_AUTOASSIST = pref_flag::autoassist;
-constexpr pref_flag PRF_DISPKI     = pref_flag::dispki;
-constexpr pref_flag PRF_DISPEXP    = pref_flag::dispexp;
-constexpr pref_flag PRF_DISPTNL    = pref_flag::disptnl;
-constexpr pref_flag PRF_TEST       = pref_flag::test;
-constexpr pref_flag PRF_HIDE       = pref_flag::hide;
-constexpr pref_flag PRF_NMWARN     = pref_flag::nmwarn;
-constexpr pref_flag PRF_HINTS      = pref_flag::hints;
-constexpr pref_flag PRF_FURY       = pref_flag::fury;
-constexpr pref_flag PRF_NODEC      = pref_flag::nodec;
-constexpr pref_flag PRF_NOEQSEE    = pref_flag::noeqsee;
-constexpr pref_flag PRF_NOMUSIC    = pref_flag::nomusic;
-constexpr pref_flag PRF_LKEEP      = pref_flag::lkeep;
-constexpr pref_flag PRF_DISTIME    = pref_flag::distime;
-constexpr pref_flag PRF_DISGOLD    = pref_flag::disgold;
-constexpr pref_flag PRF_DISPRAC    = pref_flag::disprac;
-constexpr pref_flag PRF_NOPARRY    = pref_flag::noparry;
-constexpr pref_flag PRF_DISHUTH    = pref_flag::dishuth;
-constexpr pref_flag PRF_DISPERC    = pref_flag::disperc;
-constexpr pref_flag PRF_CARVE      = pref_flag::carve;
-constexpr pref_flag PRF_ARENAWATCH = pref_flag::arenawatch;
-constexpr pref_flag PRF_NOGIVE     = pref_flag::nogive;
-constexpr pref_flag PRF_INSTRUCT   = pref_flag::instruct;
-constexpr pref_flag PRF_GHEALTH    = pref_flag::ghealth;
-constexpr pref_flag PRF_IHEALTH    = pref_flag::ihealth;
-constexpr pref_flag PRF_ENERGIZE   = pref_flag::energize;
-
-constexpr int NUM_PRF_FLAGS = static_cast<int>(flag_count<pref_flag>);
-constexpr int PR_ARRAY_MAX  = 4;
 
 

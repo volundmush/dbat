@@ -13,7 +13,6 @@
 #include "dbat/consts/auction.hpp"
 #include "dbat/consts/aligns.hpp"
 #include "dbat/utils.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/config.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
@@ -288,13 +287,13 @@ ACMD(do_train)
 
   reveal_hiding(g, ch, 0);
   const drill &d = stat.drills[rand_number(g, 1, 3) - 1];
-  act(g, d.to_char, true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, d.to_room, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, d.to_char, true, ch, nullptr, nullptr, act_to::actor);
+  act(g, d.to_room, true, ch, nullptr, nullptr, act_to::room);
 
   plus = (plus + 75) * 2;
   if (char_get_in_room(ch) >= 19800 && char_get_in_room(ch) <= 19899)
     plus *= 4;
-  if (room_flagged(g, char_get_in_room(ch), ROOM_HBTC))
+  if (room_flagged(g, char_get_in_room(ch), room_flag::hbtc))
     plus *= 3;
   if (char_get_bonuses(ch, BONUS_HARDWORKER))
     plus += plus * 0.25;
@@ -346,7 +345,7 @@ ACMD(do_potential)
     send_to_char(g, ch, "Who's potential do you want to release?\r\nPotential Releases: {:d}\r\n", char_get_boosts(ch));
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "That target isn't here.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_room, "That target isn't here.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -357,7 +356,7 @@ ACMD(do_potential)
     refusal = "You can't release your own potential.\r\n";
   else if (char_get_boosts(ch) == 0)
     refusal = "You have no potential releases to perform.\r\n";
-  else if (char_plr_flagged(vict, PLR_PR))
+  else if (char_plr_flagged(vict, player_flag::pr))
     refusal = "Their potential has already been released\r\n";
   else if (char_is_android(vict))
     refusal = "They are a machine and have no potential to release.\r\n";
@@ -370,7 +369,7 @@ ACMD(do_potential)
     return;
   }
   int boost = char_get_skill(ch, SKILL_POTENTIAL) / 2;
-  char_plr_set(vict, PLR_PR, true);
+  char_plr_set(vict, player_flag::pr, true);
   gainBasePL(vict, (getBasePL(vict) / 100) * boost, false);
   if (char_is_halfbreed(vict)) {
     gainBaseKI(vict, (getBaseKI(vict) / 100) * boost, false);
@@ -472,8 +471,8 @@ int body_workout(GameWorld *g, struct char_data *ch, int gravity, std::string_vi
     return 0;
 
   int bonus = roll(g, tier->body_lo, tier->body_hi);
-  act(g, str_format("@gYou do a {}{}@n", what, tier->to_char), true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, str_format("@g$n does a {}{}@n", what, tier->to_room), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("@gYou do a {}{}@n", what, tier->to_char), true, ch, nullptr, nullptr, act_to::actor);
+  act(g, str_format("@g$n does a {}{}@n", what, tier->to_room), true, ch, nullptr, nullptr, act_to::room);
   return bonus;
 }
 
@@ -524,18 +523,18 @@ template <class T> void place_bonus(GameWorld *g, struct char_data *ch, T &bonus
 {
   room_vnum room = char_get_in_room(ch);
 
-  if (room_flagged(g, room, ROOM_HBTC)) {
+  if (room_flagged(g, room, room_flag::hbtc)) {
     send_to_char(g, ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10;
-  } else if (room_flagged(g, room, ROOM_WORKOUT)) {
+  } else if (room_flagged(g, room, room_flag::workout)) {
     bonus *= in_rooms(ch, 19100, 19199) ? 10 : 5;
   } else if (in_rooms(ch, 19800, 19899)) {
     send_to_char(g, ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
   }
   if (bonus <= 0)
-    bonus = room_flagged(g, room, ROOM_HBTC) ? 15 : 1;
-  if (bonus <= workout_least && room_flagged(g, room, ROOM_WORKOUT))
+    bonus = room_flagged(g, room, room_flag::hbtc) ? 15 : 1;
+  if (bonus <= workout_least && room_flagged(g, room, room_flag::workout))
     bonus = in_rooms(ch, 19100, 19199) ? 12 : 6;
 }
 
@@ -570,7 +569,7 @@ bool fit_to_exercise(GameWorld *g, struct char_data *ch, int cost, int limb, std
     send_to_char(g, ch, "You are too tired!\r\n");
     return false;
   }
-  if (char_plr_flagged(ch, PLR_SPAR)) {
+  if (char_plr_flagged(ch, player_flag::spar)) {
     send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
     return false;
   }
@@ -578,7 +577,7 @@ bool fit_to_exercise(GameWorld *g, struct char_data *ch, int cost, int limb, std
     send_to_char(g, ch, "You are fighting you moron!\r\n");
     return false;
   }
-  if (char_aff_flagged(ch, AFF_FLYING)) {
+  if (char_aff_flagged(ch, aff_flag::flying)) {
     send_to_char(g, ch, "You can't do {}s in midair!\r\n", what);
     return false;
   }
@@ -593,7 +592,7 @@ ACMD(do_situp)
     send_to_char(g, ch, "You are a mob fool!\r\n");
     return;
   }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::hell)) {
     send_to_char(g, ch, "The fire makes it too hot!\r\n");
     return;
   }
@@ -601,7 +600,7 @@ ACMD(do_situp)
     send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
-  if (char_plr_flagged(ch, PLR_FISHING)) {
+  if (char_plr_flagged(ch, player_flag::fishing)) {
     send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
@@ -639,7 +638,7 @@ ACMD(do_pushup)
     send_to_char(g, ch, "You are a mob fool!\r\n");
     return;
   }
-  if (char_plr_flagged(ch, PLR_FISHING)) {
+  if (char_plr_flagged(ch, player_flag::fishing)) {
     send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
@@ -715,20 +714,20 @@ void break_mind_link(GameWorld *g, struct char_data *ch)
     return;
   }
   if (char_get_aff_abils_intel(ch) + rand_number(g, -5, 10) >= char_get_aff_abils_intel(linked) + (char_get_skill(linked, SKILL_TELEPATHY) * 0.1)) {
-    act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, nullptr, linked, TO_CHAR);
-    act(g, "$n closes their eyes for a few seconds.", false, ch, nullptr, linked, TO_ROOM);
+    act(g, "@rYou manage to break the mind link between you and @R$N@r!@n", false, ch, nullptr, linked, act_to::actor);
+    act(g, "$n closes their eyes for a few seconds.", false, ch, nullptr, linked, act_to::room);
     send_to_char(g, linked, "@rYour mind linked target manages to push you out!@n\r\n");
-    if (char_get_aff_abils_intel(linked) < axion_dice(g, -10) && !char_aff_flagged(linked, AFF_SHOCKED)) {
+    if (char_get_aff_abils_intel(linked) < axion_dice(g, -10) && !char_aff_flagged(linked, aff_flag::shocked)) {
       send_to_char(g, linked, "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
-      char_aff_set(linked, AFF_SHOCKED, false); /* quirk: they aren't, though */
+      char_aff_set(linked, aff_flag::shocked, false); /* quirk: they aren't, though */
     }
     char_set_linker(linked, 0);
     char_set_mindlink(linked, nullptr);
     char_set_mindlink(ch, nullptr);
     return;
   }
-  act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, nullptr, linked, TO_CHAR);
-  act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, nullptr, linked, TO_ROOM);
+  act(g, "@rYou struggle to free your mind of @R$N's@r link, but fail!@n", false, ch, nullptr, linked, act_to::actor);
+  act(g, "$n closes their eyes for a few seconds, and appears to struggle quite a bit.", false, ch, nullptr, linked, act_to::room);
   send_to_char(g, linked, "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
   decCurKI(g, ch, getMaxKI(g, linked) * .05, 0);
 }
@@ -744,11 +743,11 @@ ACMD(do_meditate)
     send_to_char(g, ch, "You are a mob fool!\r\n");
     return;
   }
-  if (room_flagged(g, char_get_in_room(ch), ROOM_HELL)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::hell)) {
     send_to_char(g, ch, "The fire makes it too hot!\r\n");
     return;
   }
-  if (char_plr_flagged(ch, PLR_FISHING)) {
+  if (char_plr_flagged(ch, player_flag::fishing)) {
     send_to_char(g, ch, "Stop fishing first.\r\n");
     return;
   }
@@ -764,7 +763,7 @@ ACMD(do_meditate)
     send_to_char(g, ch, "You are dragging someone!\r\n");
     return;
   }
-  if (char_plr_flagged(ch, PLR_SPAR)) {
+  if (char_plr_flagged(ch, player_flag::spar)) {
     send_to_char(g, ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
     return;
   }
@@ -812,8 +811,8 @@ ACMD(do_meditate)
     return;
   }
 
-  act(g, "@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, nullptr, TO_CHAR);
-  act(g, "@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, nullptr, TO_ROOM);
+  act(g, "@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", true, ch, obj, nullptr, act_to::actor);
+  act(g, "@c$n closes $s eyes and lifts $p@c with $s ki.@n", true, ch, obj, nullptr, act_to::room);
 
   const gravity_tier *tier = gravity_tier_of(gravity);
   int64_t bonus            = tier ? roll(g, tier->mind_lo, tier->mind_hi) : 0;
@@ -890,7 +889,7 @@ void base_update(GameWorld *g)
       ash_burn(g, d->character);
     }
     int64_t forty_lf = getMaxLF(g, d->character) * 0.4;
-    if (char_aff_flagged(d->character, AFF_CURSE) && getCurLF(g, d->character) > forty_lf) {
+    if (char_aff_flagged(d->character, aff_flag::curse) && getCurLF(g, d->character) > forty_lf) {
       decCurLFPercent(g, d->character, .01, 0);
       demon_refill_lf(g, d->character, getMaxLF(g, d->character) * 0.01);
 
@@ -901,37 +900,37 @@ void base_update(GameWorld *g)
     if (char_get_backstabcool(d->character) > 0) {
       char_set_backstabcool(d->character, char_get_backstabcool(d->character) - (1));
     }
-    if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 60) {
+    if (char_plr_flagged(d->character, player_flag::goop) && char_get_gooptime(d->character) == 60) {
       if (char_is_bio(d->character)) {
-        act(g, "@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", true, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", true, d->character, nullptr, nullptr, act_to::actor);
       } else {
-        act(g, "@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", true, d->character, nullptr, nullptr, TO_CHAR);
-        act(g, "@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", true, d->character, nullptr, nullptr, act_to::actor);
+        act(g, "@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, d->character, nullptr, nullptr, act_to::room);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
-    } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 30) {
+    } else if (char_plr_flagged(d->character, player_flag::goop) && char_get_gooptime(d->character) == 30) {
       if (char_is_bio(d->character)) {
-        act(g, "@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true, d->character, nullptr, nullptr, TO_CHAR);
-        act(g, "@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true, d->character, nullptr, nullptr, act_to::actor);
+        act(g, "@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, d->character, nullptr, nullptr, act_to::room);
       } else {
-        act(g, "@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", true, d->character, nullptr, nullptr, TO_CHAR);
-        act(g, "@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", true, d->character, nullptr, nullptr, act_to::actor);
+        act(g, "@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", true, d->character, nullptr, nullptr, act_to::room);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
-    } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 15) {
+    } else if (char_plr_flagged(d->character, player_flag::goop) && char_get_gooptime(d->character) == 15) {
       if (char_is_bio(d->character)) {
-        act(g, "@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", true, d->character, nullptr, nullptr, TO_CHAR);
-        act(g, "@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", true, d->character, nullptr, nullptr, act_to::actor);
+        act(g, "@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", true, d->character, nullptr, nullptr, act_to::room);
       } else {
-        act(g, "@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", true, d->character, nullptr, nullptr, TO_CHAR);
-        act(g, "@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", true, d->character, nullptr, nullptr, act_to::actor);
+        act(g, "@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", true, d->character, nullptr, nullptr, act_to::room);
       }
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
-    } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 0) {
+    } else if (char_plr_flagged(d->character, player_flag::goop) && char_get_gooptime(d->character) == 0) {
       if (char_is_bio(d->character)) {
         restoreHealth(d->character, true);
-        act(g, "@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", true, d->character, nullptr, nullptr, TO_CHAR);
-        act(g, "@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", true, d->character, nullptr, nullptr, act_to::actor);
+        act(g, "@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", true, d->character, nullptr, nullptr, act_to::room);
       }
       //Zenkai Boost
       else if (char_is_saiyan(d->character)) {
@@ -961,14 +960,14 @@ void base_update(GameWorld *g)
           send_to_char(g, d->character, "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
           send_to_char(g, d->character, "@D[@RPL@Y:@n+{}@D] @D[@CKI@Y:@n+{}@D] @D[@GSTA@Y:@n+{}@D]@n\r\n", add_commas(zenkaiPL), add_commas(zenkaiKi), add_commas(zenkaiSt));
         }
-        act(g, "@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", true, d->character, nullptr, nullptr, TO_CHAR);
-        act(g, "@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n", true, d->character, nullptr, nullptr, act_to::actor);
+        act(g, "@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!", true, d->character, nullptr, nullptr, act_to::room);
       } else {
         restoreHealth(d->character, true);
-        act(g, "@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", true, d->character, nullptr, nullptr, TO_CHAR);
-        act(g, "@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", true, d->character, nullptr, nullptr, act_to::actor);
+        act(g, "@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", true, d->character, nullptr, nullptr, act_to::room);
       }
-      char_plr_set(d->character, PLR_GOOP, false);
+      char_plr_set(d->character, player_flag::goop, false);
     } else {
       char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
     }
@@ -1004,11 +1003,11 @@ void base_update(GameWorld *g)
         char_set_defending(d->character, nullptr);
       }
     }
-    if (char_plr_flagged(d->character, PLR_TRANSMISSION)) {
-      char_plr_set(d->character, PLR_TRANSMISSION, false);
+    if (char_plr_flagged(d->character, player_flag::transmission)) {
+      char_plr_set(d->character, player_flag::transmission, false);
     }
-    if (!char_get_fighting(g, d->character) && char_aff_flagged(d->character, AFF_POSITION)) {
-      char_aff_set(d->character, AFF_POSITION, false);
+    if (!char_get_fighting(g, d->character) && char_aff_flagged(d->character, aff_flag::position)) {
+      char_aff_set(d->character, aff_flag::position, false);
     }
     if (char_get_sits(g, d->character)) {
       if (char_get_in_room(d->character) != obj_get_in_room(char_get_sits(g, d->character))) {
@@ -1019,17 +1018,17 @@ void base_update(GameWorld *g)
     }
     if (char_get_ping(d->character) >= 1) {
       char_set_ping(d->character, char_get_ping(d->character) - (1));
-      if (char_plr_flagged(d->character, PLR_PILOTING) && char_get_ping(d->character) == 0) {
+      if (char_plr_flagged(d->character, player_flag::piloting) && char_get_ping(d->character) == 0) {
         send_to_char(g, d->character, "Your radar is ready to calculate the direction of another destination.\r\n");
       }
     }
     if (char_get_admlevel(d->character) < 1 && g->TOPCOUNTDOWN <= 0 && char_get_level(d->character) > 0) {
       topWrite(g, d->character);
     }
-    if (char_plr_flagged(d->character, PLR_SELFD) && !char_plr_flagged(d->character, PLR_SELFD2)) {
+    if (char_plr_flagged(d->character, player_flag::selfd) && !char_plr_flagged(d->character, player_flag::selfd2)) {
       if (rand_number(g, 4, 100) < char_get_skill(d->character, SKILL_SELFD)) {
         send_to_char(g, d->character, "You feel you are ready to self destruct!\r\n");
-        char_plr_set(d->character, PLR_SELFD2, true);
+        char_plr_set(d->character, player_flag::selfd2, true);
       }
     }
     if (!char_get_fighting(g, d->character) && char_get_combo(d->character) > -1) {
@@ -1052,26 +1051,26 @@ void base_update(GameWorld *g)
       if (room_get_geffect(g, char_get_in_room(d->character)) <= 4) {
         switch (rand_number(g, 1, 4)) {
           case 1:
-            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr, nullptr, TO_ROOM);
-            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr, nullptr, TO_CHAR);
+            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr, nullptr, act_to::room);
+            act(g, "@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr, nullptr, act_to::actor);
             break;
           case 2:
-            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, nullptr, nullptr, TO_ROOM);
-            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, nullptr, nullptr, TO_CHAR);
+            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, nullptr, nullptr, act_to::room);
+            act(g, "@RThe lava bubbles and gives off tremendous heat!@n", false, d->character, nullptr, nullptr, act_to::actor);
             break;
           case 3:
-            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, nullptr, nullptr, TO_ROOM);
-            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, nullptr, nullptr, TO_CHAR);
+            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, nullptr, nullptr, act_to::room);
+            act(g, "@RNoxious fumes rise from the bubbling lava!@n", false, d->character, nullptr, nullptr, act_to::actor);
             break;
           case 4:
-            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, nullptr, nullptr, TO_ROOM);
-            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, nullptr, nullptr, TO_CHAR);
+            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, nullptr, nullptr, act_to::room);
+            act(g, "@RSome of the lava cools as it spreads further from the source!@n", false, d->character, nullptr, nullptr, act_to::actor);
             break;
         }
         room_set_geffect(g, char_get_in_room(d->character), room_get_geffect(g, char_get_in_room(d->character)) + (1));
       } else if (room_get_geffect(g, char_get_in_room(d->character)) == 5) {
-        act(g, "@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_ROOM);
-        act(g, "@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_CHAR);
+        act(g, "@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, act_to::room);
+        act(g, "@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, act_to::actor);
         room_set_geffect(g, char_get_in_room(d->character), room_get_geffect(g, char_get_in_room(d->character)) + (1));
       }
     }
@@ -1083,9 +1082,9 @@ void base_update(GameWorld *g)
     if (char_is_android(d->character) && char_get_absorbing(g, d->character)) {
       if (getCurST(g, char_get_absorbing(g, d->character)) < (getMaxST(g, d->character) / 15) &&
           getCurKI(g, char_get_absorbing(g, d->character)) < (getMaxKI(g, d->character) / 15)) {
-        act(g, "@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_CHAR);
-        act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_VICT);
-        act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_NOTVICT);
+        act(g, "@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::actor);
+        act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::vict);
+        act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::notvict);
         if (!char_get_fighting(g, d->character) || char_get_fighting(g, d->character) != char_get_absorbing(g, d->character)) {
           set_fighting(g, d->character, char_get_absorbby(g, char_get_absorbing(g, d->character)));
         }
@@ -1106,10 +1105,10 @@ void base_update(GameWorld *g)
         decCurKI(g, char_get_absorbing(g, d->character), getMaxKI(g, d->character) / 20, 1);
         decCurST(g, char_get_absorbing(g, d->character), getMaxST(g, d->character) / 20, 1);
 
-        act(g, "@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_CHAR);
-        act(g, "@C$n@W absorbs stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_VICT);
+        act(g, "@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::actor);
+        act(g, "@C$n@W absorbs stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::vict);
         send_to_char(g, char_get_absorbing(g, d->character), "@wTry 'escape'!@n\r\n");
-        act(g, "@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_NOTVICT);
+        act(g, "@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::notvict);
         if (getCurPL(g, d->character) < getEffMaxPL(g, d->character)) {
           incCurHealth(g, d->character, getMaxKI(g, d->character) * .04, true);
           send_to_char(g, d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
@@ -1117,9 +1116,9 @@ void base_update(GameWorld *g)
 
         if (isFullST(d->character) && isFullKI(d->character)) {
 
-          act(g, "@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_CHAR);
-          act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_VICT);
-          act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), TO_NOTVICT);
+          act(g, "@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::actor);
+          act(g, "@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::vict);
+          act(g, "@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr, char_get_absorbing(g, d->character), act_to::notvict);
           if (!char_get_fighting(g, d->character) || char_get_fighting(g, d->character) != char_get_absorbing(g, d->character)) {
             set_fighting(g, d->character, char_get_absorbby(g, char_get_absorbing(g, d->character)));
           }
@@ -1150,7 +1149,7 @@ void base_update(GameWorld *g)
             }
             send_to_char(g, d->character, "@gYou gain +@G{:d}@g permanent powerlevel!@n\r\n", gain);
             if (group_bonus(g, d->character, 2) == 7) {
-              if (char_plr_flagged(leader, PLR_SENSEM)) {
+              if (char_plr_flagged(leader, player_flag::sensem)) {
                 int gbonus = gain * 0.15;
                 gain += gbonus;
                 send_to_char(g, d->character, "The leader of your group conveys an extra bonus! @D[@G+{}@D]@n \r\n", add_commas(gbonus));
@@ -1176,7 +1175,7 @@ void base_update(GameWorld *g)
             }
             send_to_char(g, d->character, "@gYou gain +@G{:d}@g permanent stamina!@n\r\n", gain);
             if (group_bonus(g, d->character, 2) == 7) {
-              if (char_plr_flagged(leader, PLR_SENSEM)) {
+              if (char_plr_flagged(leader, player_flag::sensem)) {
                 int gbonus = gain * 0.15;
                 gain += gbonus;
                 send_to_char(g, d->character, "The leader of your group conveys an extra bonus! @D[@G+{}@D]@n \r\n", add_commas(gbonus));
@@ -1202,7 +1201,7 @@ void base_update(GameWorld *g)
             }
             send_to_char(g, d->character, "@gYou gain +@G{:d}@g permanent ki!@n\r\n", gain);
             if (char_get_master(g, d->character) && group_bonus(g, d->character, 2) == 7) {
-              if (char_plr_flagged(leader, PLR_SENSEM)) {
+              if (char_plr_flagged(leader, player_flag::sensem)) {
                 int gbonus = gain * 0.15;
                 gain += gbonus;
                 send_to_char(g, d->character, "The leader of your group conveys an extra bonus! @D[@G+{}@D]@n \r\n", add_commas(gbonus));

@@ -61,7 +61,7 @@ public:
   constexpr bool any() const { return !none(); }
   constexpr bool none() const { return words_ == std::array<bitvector_t, FLAG_WORDS>{}; }
   constexpr bool operator==(const flag_set &) const = default;
-  /* whether any bit is set in both: "has any of these", as IS_SET() with a mask asked */
+  /* whether any bit is set in both: "has any of these", as the old IS_SET() with a mask asked */
   constexpr bool intersects(const flag_set &other) const
   {
     for (std::size_t i = 0; i < FLAG_WORDS; i++)
@@ -130,7 +130,7 @@ private:
   std::array<bitvector_t, FLAG_WORDS> words_{};
 };
 
-/* Flags together, as the masks they replace were or'ed: EX_ISDOOR | EX_CLOSED. The result is a set, never a flag,
+/* Flags together, as the masks they replace were or'ed: exit_flag::isdoor | exit_flag::closed. The result is a set, never a flag,
    so it can't stand in for one (two flags or'ed as ints made a third) */
 template <flag_family E> constexpr flag_set<E> operator|(flag_set<E> set, E flag)
 {

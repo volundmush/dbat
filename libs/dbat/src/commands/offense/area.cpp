@@ -17,34 +17,34 @@
 
 bool area_fair_game(GameWorld *, struct char_data *, struct char_data *vict)
 {
-  if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict))
+  if (char_aff_flagged(vict, aff_flag::spirit) && !char_is_npc(vict))
     return false;
   if (char_get_level(vict) <= 8 && !char_is_npc(vict))
     return false;
-  return !char_mob_flagged(vict, MOB_NOKILL);
+  return !char_mob_flagged(vict, mob_flag::nokill);
 }
 
 bool area_fair_game_ungrouped(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict))
+  if (char_aff_flagged(vict, aff_flag::group) && (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict))
     return false;
   return area_fair_game(g, ch, vict);
 }
 
 bool area_fair_game_no_group(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  if (char_aff_flagged(vict, AFF_GROUP) && char_get_master(g, vict) == char_get_master(g, ch))
+  if (char_aff_flagged(vict, aff_flag::group) && char_get_master(g, vict) == char_get_master(g, ch))
     return false;
   return area_fair_game_ungrouped(g, ch, vict);
 }
 
 bool area_vanishes(GameWorld *g, struct char_data *ch, struct char_data *vict, const act_msgs &msgs)
 {
-  if (!((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) ||
+  if (!((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, aff_flag::zanzoken)) ||
       getCurST(g, vict) < 1 || char_get_position(vict) == POS_SLEEPING)
     return false;
   act_triple(g, msgs, ch, nullptr, vict);
-  char_aff_set(vict, AFF_ZANZOKEN, false);
+  char_aff_set(vict, aff_flag::zanzoken, false);
   pcost(g, vict, 0, getEffMaxPL(g, vict) / 200);
   return true;
 }
@@ -54,8 +54,8 @@ namespace {
 /* The user's side of it: to_char, then to_room */
 void act_pair(GameWorld *g, const act_msgs &msgs, struct char_data *ch)
 {
-  act(g, msgs.to_char, true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, msgs.to_room, true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, msgs.to_char, true, ch, nullptr, nullptr, act_to::actor);
+  act(g, msgs.to_room, true, ch, nullptr, nullptr, act_to::room);
 }
 
 void pay(const area_shot &s)
@@ -96,7 +96,7 @@ void catch_everyone(area_shot &s)
       continue;
     }
     act_triple(g, atk.hit, ch, nullptr, vict);
-    if (atk.knockdown != area_knockdown::never && !char_aff_flagged(vict, AFF_FLYING) &&
+    if (atk.knockdown != area_knockdown::never && !char_aff_flagged(vict, aff_flag::flying) &&
         char_get_position(vict) == POS_STANDING &&
         (atk.knockdown == area_knockdown::always || rand_number(g, 1, 4) == 4))
       handle_knockdown(g, vict);
@@ -128,7 +128,7 @@ void perform_area_attack(GameWorld *g, struct char_data *ch, std::string_view ar
     s.attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(g, ch));
   if (!check_points(g, ch, getMaxKI(g, ch) * s.minimum, 0))
     return;
-  if (!attack.in_peace && room_flagged(g, char_get_in_room(ch), ROOM_PEACEFUL)) {
+  if (!attack.in_peace && room_flagged(g, char_get_in_room(ch), room_flag::peaceful)) {
     send_to_char(g, ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }

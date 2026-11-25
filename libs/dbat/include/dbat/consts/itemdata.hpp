@@ -113,7 +113,7 @@ constexpr int ITEM_FISHBAIT   = 36; /* DITTO                        */
 
 constexpr int NUM_ITEM_TYPES = 37;
 
-extern const name_table wear_bits; /* NUM_ITEM_WEARS of them */
+extern const name_table wear_bits; /* flag_count<wear_flag> of them */
 
 /* Take/Wear flags: used by obj_data.wear_flags */
 enum class wear_flag : uint8_t {
@@ -142,30 +142,8 @@ template <> struct flag_traits<wear_flag> {
   static constexpr const name_table &names = wear_bits;
 };
 
-/* The old names, until every use says wear_flag:: */
-constexpr wear_flag ITEM_WEAR_TAKE   = wear_flag::take;
-constexpr wear_flag ITEM_WEAR_FINGER = wear_flag::finger;
-constexpr wear_flag ITEM_WEAR_NECK   = wear_flag::neck;
-constexpr wear_flag ITEM_WEAR_BODY   = wear_flag::body;
-constexpr wear_flag ITEM_WEAR_HEAD   = wear_flag::head;
-constexpr wear_flag ITEM_WEAR_LEGS   = wear_flag::legs;
-constexpr wear_flag ITEM_WEAR_FEET   = wear_flag::feet;
-constexpr wear_flag ITEM_WEAR_HANDS  = wear_flag::hands;
-constexpr wear_flag ITEM_WEAR_ARMS   = wear_flag::arms;
-constexpr wear_flag ITEM_WEAR_SHIELD = wear_flag::shield;
-constexpr wear_flag ITEM_WEAR_ABOUT  = wear_flag::about;
-constexpr wear_flag ITEM_WEAR_WAIST  = wear_flag::waist;
-constexpr wear_flag ITEM_WEAR_WRIST  = wear_flag::wrist;
-constexpr wear_flag ITEM_WEAR_WIELD  = wear_flag::wield;
-constexpr wear_flag ITEM_WEAR_HOLD   = wear_flag::hold;
-constexpr wear_flag ITEM_WEAR_PACK   = wear_flag::pack;
-constexpr wear_flag ITEM_WEAR_EAR    = wear_flag::ear;
-constexpr wear_flag ITEM_WEAR_SH     = wear_flag::sh;
-constexpr wear_flag ITEM_WEAR_EYE    = wear_flag::eye;
 
-constexpr int NUM_ITEM_WEARS = static_cast<int>(flag_count<wear_flag>);
-
-extern const name_table extra_bits; /* NUM_ITEM_FLAGS of them */
+extern const name_table extra_bits; /* flag_count<extra_flag> of them */
 
 /* Extra object flags: used by obj_data.extra_flags */
 enum class extra_flag : uint8_t {
@@ -270,107 +248,9 @@ template <> struct flag_traits<extra_flag> {
   static constexpr const name_table &names = extra_bits;
 };
 
-/* The old names, until every use says extra_flag:: */
-constexpr extra_flag ITEM_GLOW                  = extra_flag::glow;
-constexpr extra_flag ITEM_HUM                   = extra_flag::hum;
-constexpr extra_flag ITEM_NORENT                = extra_flag::norent;
-constexpr extra_flag ITEM_NODONATE              = extra_flag::nodonate;
-constexpr extra_flag ITEM_NOINVIS               = extra_flag::noinvis;
-constexpr extra_flag ITEM_INVISIBLE             = extra_flag::invisible;
-constexpr extra_flag ITEM_MAGIC                 = extra_flag::magic;
-constexpr extra_flag ITEM_NODROP                = extra_flag::nodrop;
-constexpr extra_flag ITEM_BLESS                 = extra_flag::bless;
-constexpr extra_flag ITEM_ANTI_GOOD             = extra_flag::anti_good;
-constexpr extra_flag ITEM_ANTI_EVIL             = extra_flag::anti_evil;
-constexpr extra_flag ITEM_ANTI_NEUTRAL          = extra_flag::anti_neutral;
-constexpr extra_flag ITEM_ANTI_WIZARD           = extra_flag::anti_wizard;
-constexpr extra_flag ITEM_ANTI_CLERIC           = extra_flag::anti_cleric;
-constexpr extra_flag ITEM_ANTI_ROGUE            = extra_flag::anti_rogue;
-constexpr extra_flag ITEM_ANTI_FIGHTER          = extra_flag::anti_fighter;
-constexpr extra_flag ITEM_NOSELL                = extra_flag::nosell;
-constexpr extra_flag ITEM_ANTI_DRUID            = extra_flag::anti_druid;
-constexpr extra_flag ITEM_2H                    = extra_flag::two_handed;
-constexpr extra_flag ITEM_ANTI_BARD             = extra_flag::anti_bard;
-constexpr extra_flag ITEM_ANTI_RANGER           = extra_flag::anti_ranger;
-constexpr extra_flag ITEM_ANTI_PALADIN          = extra_flag::anti_paladin;
-constexpr extra_flag ITEM_ANTI_HUMAN            = extra_flag::anti_human;
-constexpr extra_flag ITEM_ANTI_ICER             = extra_flag::anti_icer;
-constexpr extra_flag ITEM_ANTI_SAIYAN           = extra_flag::anti_saiyan;
-constexpr extra_flag ITEM_ANTI_KONATSU          = extra_flag::anti_konatsu;
-constexpr extra_flag ITEM_UNIQUE_SAVE           = extra_flag::unique_save;
-constexpr extra_flag ITEM_BROKEN                = extra_flag::broken;
-constexpr extra_flag ITEM_UNBREAKABLE           = extra_flag::unbreakable;
-constexpr extra_flag ITEM_ANTI_MONK             = extra_flag::anti_monk;
-constexpr extra_flag ITEM_ANTI_BARBARIAN        = extra_flag::anti_barbarian;
-constexpr extra_flag ITEM_ANTI_SORCERER         = extra_flag::anti_sorcerer;
-constexpr extra_flag ITEM_DOUBLE                = extra_flag::double_;
-constexpr extra_flag ITEM_ONLY_WIZARD           = extra_flag::only_wizard;
-constexpr extra_flag ITEM_ONLY_CLERIC           = extra_flag::only_cleric;
-constexpr extra_flag ITEM_ONLY_ROGUE            = extra_flag::only_rogue;
-constexpr extra_flag ITEM_ONLY_FIGHTER          = extra_flag::only_fighter;
-constexpr extra_flag ITEM_ONLY_DRUID            = extra_flag::only_druid;
-constexpr extra_flag ITEM_ONLY_BARD             = extra_flag::only_bard;
-constexpr extra_flag ITEM_ONLY_RANGER           = extra_flag::only_ranger;
-constexpr extra_flag ITEM_ONLY_PALADIN          = extra_flag::only_paladin;
-constexpr extra_flag ITEM_ONLY_HUMAN            = extra_flag::only_human;
-constexpr extra_flag ITEM_ONLY_ICER             = extra_flag::only_icer;
-constexpr extra_flag ITEM_ONLY_SAIYAN           = extra_flag::only_saiyan;
-constexpr extra_flag ITEM_ONLY_KONATSU          = extra_flag::only_konatsu;
-constexpr extra_flag ITEM_ONLY_MONK             = extra_flag::only_monk;
-constexpr extra_flag ITEM_ONLY_BARBARIAN        = extra_flag::only_barbarian;
-constexpr extra_flag ITEM_ONLY_SORCERER         = extra_flag::only_sorcerer;
-constexpr extra_flag ITEM_ANTI_ARCANE_ARCHER    = extra_flag::anti_arcane_archer;
-constexpr extra_flag ITEM_ANTI_ARCANE_TRICKSTER = extra_flag::anti_arcane_trickster;
-constexpr extra_flag ITEM_ANTI_ARCHMAGE         = extra_flag::anti_archmage;
-constexpr extra_flag ITEM_ANTI_ASSASSIN         = extra_flag::anti_assassin;
-constexpr extra_flag ITEM_ANTI_BLACKGUARD       = extra_flag::anti_blackguard;
-constexpr extra_flag ITEM_ANTI_DRAGON_DISCIPLE  = extra_flag::anti_dragon_disciple;
-constexpr extra_flag ITEM_ANTI_DUELIST          = extra_flag::anti_duelist;
-constexpr extra_flag ITEM_ANTI_DWARVEN_DEFENDER = extra_flag::anti_dwarven_defender;
-constexpr extra_flag ITEM_ANTI_ELDRITCH_KNIGHT  = extra_flag::anti_eldritch_knight;
-constexpr extra_flag ITEM_ANTI_HIEROPHANT       = extra_flag::anti_hierophant;
-constexpr extra_flag ITEM_ANTI_HORIZON_WALKER   = extra_flag::anti_horizon_walker;
-constexpr extra_flag ITEM_ANTI_LOREMASTER       = extra_flag::anti_loremaster;
-constexpr extra_flag ITEM_ANTI_MYSTIC_THEURGE   = extra_flag::anti_mystic_theurge;
-constexpr extra_flag ITEM_ANTI_SHADOWDANCER     = extra_flag::anti_shadowdancer;
-constexpr extra_flag ITEM_ANTI_THAUMATURGIST    = extra_flag::anti_thaumaturgist;
-constexpr extra_flag ITEM_BSCOUTER              = extra_flag::bscouter;
-constexpr extra_flag ITEM_MSCOUTER              = extra_flag::mscouter;
-constexpr extra_flag ITEM_ASCOUTER              = extra_flag::ascouter;
-constexpr extra_flag ITEM_USCOUTER              = extra_flag::uscouter;
-constexpr extra_flag ITEM_WEAPLVL1              = extra_flag::weaplvl1;
-constexpr extra_flag ITEM_WEAPLVL2              = extra_flag::weaplvl2;
-constexpr extra_flag ITEM_WEAPLVL3              = extra_flag::weaplvl3;
-constexpr extra_flag ITEM_WEAPLVL4              = extra_flag::weaplvl4;
-constexpr extra_flag ITEM_WEAPLVL5              = extra_flag::weaplvl5;
-constexpr extra_flag ITEM_CBOARD                = extra_flag::cboard;
-constexpr extra_flag ITEM_FORGED                = extra_flag::forged;
-constexpr extra_flag ITEM_SHEATH                = extra_flag::sheath;
-constexpr extra_flag ITEM_ONLY_JINTO            = extra_flag::only_jinto;
-constexpr extra_flag ITEM_BURIED                = extra_flag::buried;
-constexpr extra_flag ITEM_SLOT1                 = extra_flag::slot1;
-constexpr extra_flag ITEM_SLOT2                 = extra_flag::slot2;
-constexpr extra_flag ITEM_TOKEN                 = extra_flag::token;
-constexpr extra_flag ITEM_SLOT_ONE              = extra_flag::slot_one;
-constexpr extra_flag ITEM_SLOTS_FILLED          = extra_flag::slots_filled;
-constexpr extra_flag ITEM_RESTRING              = extra_flag::restring;
-constexpr extra_flag ITEM_CUSTOM                = extra_flag::custom;
-constexpr extra_flag ITEM_PROTECTED             = extra_flag::protected_;
-constexpr extra_flag ITEM_NORANDOM              = extra_flag::norandom;
-constexpr extra_flag ITEM_THROW                 = extra_flag::throw_;
-constexpr extra_flag ITEM_HOT                   = extra_flag::hot;
-constexpr extra_flag ITEM_PURGE                 = extra_flag::purge;
-constexpr extra_flag ITEM_ICE                   = extra_flag::ice;
-constexpr extra_flag ITEM_DUPLICATE             = extra_flag::duplicate;
-constexpr extra_flag ITEM_MATURE                = extra_flag::mature;
-constexpr extra_flag ITEM_CARDCASE              = extra_flag::cardcase;
-constexpr extra_flag ITEM_NOPICKUP              = extra_flag::nopickup;
-constexpr extra_flag ITEM_NOSTEAL               = extra_flag::nosteal;
-
-constexpr int NUM_ITEM_FLAGS = static_cast<int>(flag_count<extra_flag>);
 
 /* Container flags: value[1] (VAL_CONTAINER_FLAGS), as one word; obj_container_flags() reads them */
-extern const name_table container_bits; /* NUM_CONT_FLAGS of them */
+extern const name_table container_bits; /* flag_count<container_flag> of them */
 enum class container_flag : uint8_t {
   closeable = 0, /* Container can be closed	*/
   pickproof = 1, /* Container is pickproof	*/
@@ -382,13 +262,6 @@ template <> struct flag_traits<container_flag> {
   static constexpr const name_table &names = container_bits;
 };
 
-/* The old names, until every use says container_flag:: */
-constexpr container_flag CONT_CLOSEABLE = container_flag::closeable;
-constexpr container_flag CONT_PICKPROOF = container_flag::pickproof;
-constexpr container_flag CONT_CLOSED    = container_flag::closed;
-constexpr container_flag CONT_LOCKED    = container_flag::locked;
-
-constexpr int NUM_CONT_FLAGS = static_cast<int>(flag_count<container_flag>);
 
 /* object-related structures ******************************************/
 constexpr int NUM_OBJ_VAL_POSITIONS = 16;
@@ -654,8 +527,6 @@ constexpr int VAL_SOILQ                = 8;
 
 constexpr int NUM_FULLNESS = 5;
 
-constexpr int EF_ARRAY_MAX = 4;
-constexpr int TW_ARRAY_MAX = 4;
 
 extern const name_table wear_where; /* NUM_WEARS of them */
 extern const name_table item_types; /* NUM_ITEM_TYPES of them */

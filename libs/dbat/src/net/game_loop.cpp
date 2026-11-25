@@ -174,7 +174,7 @@ void game_process_commands(GameWorld *g)
           char_from_room(g, d->character);
         char_to_room(g, d->character, char_get_was_in_room(d->character));
         char_set_was_in_room(d->character, NOWHERE);
-        act(g, "$n has returned.", true, d->character, nullptr, nullptr, TO_ROOM);
+        act(g, "$n has returned.", true, d->character, nullptr, nullptr, act_to::room);
       }
       char_set_wait(d->character, 1);
     }

@@ -31,7 +31,7 @@ void fly_zone(GameWorld *g, struct zone_data *zone, std::string_view messg, stru
 
   for (descriptor_data *i : each_desc(g)) {
     if (!i->connected && i->character && char_is_awake(i->character) && char_is_outside(g, i->character) && (char_get_in_room(i->character) != NOWHERE) && (room_get_zone(g, char_get_in_room(i->character)) == zone) && i->character != ch) {
-      if (char_plr_flagged(i->character, PLR_DISGUISED)) {
+      if (char_plr_flagged(i->character, player_flag::disguised)) {
         write_to_output(g, i, "A disguised figure {}", messg);
       } else {
         write_to_output(g, i, "{}{} {}", readIntro(i->character, ch) == 1 ? "" : "A ", get_i_name(i->character, ch), messg);
@@ -63,7 +63,7 @@ void send_to_sense(GameWorld *g, int type, std::string_view messg, struct char_d
     if (((room_get_zone(g, char_get_in_room(ch)) != room_get_zone(g, char_get_in_room(tch)) && type == 0) || !char_is_awake(tch))) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_SHIP)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::ship)) {
       continue;
     }
     if (obj && type == 0) {
@@ -163,7 +163,7 @@ void send_to_scouter(GameWorld *g, std::string_view messg, struct char_data *ch,
     if ((((room_get_zone(g, char_get_in_room(ch)) != room_get_zone(g, char_get_in_room(tch))) && type == 0) || !char_is_awake(tch))) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_SHIP)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::ship)) {
       continue;
     }
     if (char_get_invis_level(g, ch) > char_get_admlevel(tch)) {
@@ -172,40 +172,40 @@ void send_to_scouter(GameWorld *g, std::string_view messg, struct char_data *ch,
     if (char_is_android(ch)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_EARTH) && !room_flagged(g, char_get_in_room(tch), ROOM_EARTH)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::earth) && !room_flagged(g, char_get_in_room(tch), room_flag::earth)) {
       continue;
     }
     if (room_planet_zenith(g, char_get_in_room(ch)) && !room_planet_zenith(g, char_get_in_room(tch))) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_FRIGID) && !room_flagged(g, char_get_in_room(tch), ROOM_FRIGID)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::frigid) && !room_flagged(g, char_get_in_room(tch), room_flag::frigid)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_NAMEK) && !room_flagged(g, char_get_in_room(tch), ROOM_NAMEK)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::namek) && !room_flagged(g, char_get_in_room(tch), room_flag::namek)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_AL) && !room_flagged(g, char_get_in_room(tch), ROOM_AL)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::al) && !room_flagged(g, char_get_in_room(tch), room_flag::al)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_VEGETA) && !room_flagged(g, char_get_in_room(tch), ROOM_VEGETA)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::vegeta) && !room_flagged(g, char_get_in_room(tch), room_flag::vegeta)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_KONACK) && !room_flagged(g, char_get_in_room(tch), ROOM_KONACK)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::konack) && !room_flagged(g, char_get_in_room(tch), room_flag::konack)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_NEO) && !room_flagged(g, char_get_in_room(tch), ROOM_NEO)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::neo) && !room_flagged(g, char_get_in_room(tch), room_flag::neo)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_YARDRAT) && !room_flagged(g, char_get_in_room(tch), ROOM_YARDRAT)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::yardrat) && !room_flagged(g, char_get_in_room(tch), room_flag::yardrat)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_KANASSA) && !room_flagged(g, char_get_in_room(tch), ROOM_KANASSA)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::kanassa) && !room_flagged(g, char_get_in_room(tch), room_flag::kanassa)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_ARLIA) && !room_flagged(g, char_get_in_room(tch), ROOM_ARLIA)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::arlia) && !room_flagged(g, char_get_in_room(tch), room_flag::arlia)) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(ch), ROOM_AETHER) && !room_flagged(g, char_get_in_room(tch), ROOM_AETHER)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::aether) && !room_flagged(g, char_get_in_room(tch), room_flag::aether)) {
       continue;
     }
     if (!obj) {
@@ -216,43 +216,43 @@ void send_to_scouter(GameWorld *g, std::string_view messg, struct char_data *ch,
     }
     if (type == 0) {
       if (num == 1) {
-        if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
+        if (obj_extra_flagged(obj, extra_flag::bscouter) && getCurPL(g, ch) >= 150000) {
           write_to_output(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-        } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {
+        } else if (obj_extra_flagged(obj, extra_flag::mscouter) && getCurPL(g, ch) >= 5000000) {
           write_to_output(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-        } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, ch) >= 15000000) {
+        } else if (obj_extra_flagged(obj, extra_flag::ascouter) && getCurPL(g, ch) >= 15000000) {
           write_to_output(g, i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
         } else {
           write_to_output(g, i, "{}@n", messg);
         }
       } else {
-        if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
+        if (obj_extra_flagged(obj, extra_flag::bscouter) && getCurPL(g, ch) >= 150000) {
           write_to_output(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-        } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {
+        } else if (obj_extra_flagged(obj, extra_flag::mscouter) && getCurPL(g, ch) >= 5000000) {
           write_to_output(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-        } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, ch) >= 15000000) {
+        } else if (obj_extra_flagged(obj, extra_flag::ascouter) && getCurPL(g, ch) >= 15000000) {
           write_to_output(g, i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
         } else {
           write_to_output(g, i, "{}\r\n", messg);
         }
       }
     } else if (type == 1 && char_get_skill(tch, SKILL_SENSE) < 20) {
-      if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
+      if (obj_extra_flagged(obj, extra_flag::bscouter) && getCurPL(g, ch) >= 150000) {
         write_to_output(g, i, "@D[@GBlip@D]@w {}. @RPL@D:@Y ??????????\r\n", messg);
-      } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {
+      } else if (obj_extra_flagged(obj, extra_flag::mscouter) && getCurPL(g, ch) >= 5000000) {
         write_to_output(g, i, "@D[@GBlip@D]@w {}. @RPL@D:@Y ??????????\r\n", messg);
-      } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, ch) >= 15000000) {
+      } else if (obj_extra_flagged(obj, extra_flag::ascouter) && getCurPL(g, ch) >= 15000000) {
         write_to_output(g, i, "@D[@GBlip@D]@w {}. @RPL@D:@Y ??????????\r\n", messg);
       } else {
         write_to_output(g, i, "@D[Blip@D]@w {}. @RPL@D:@Y {}@n\r\n\r\n", messg, add_commas(getCurPL(g, ch)));
       }
     } else if (type == 2 && char_get_skill(tch, SKILL_SENSE) < 20) {
       std::string_view blah = sense_location(g, ch);
-      if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(g, ch) >= 150000) {
+      if (obj_extra_flagged(obj, extra_flag::bscouter) && getCurPL(g, ch) >= 150000) {
         write_to_output(g, i, "@D[@GBlip@D]@w {} at... @G{}. @RPL@D:@Y ??????????\r\n", messg, blah);
-      } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(g, ch) >= 5000000) {
+      } else if (obj_extra_flagged(obj, extra_flag::mscouter) && getCurPL(g, ch) >= 5000000) {
         write_to_output(g, i, "@D[@GBlip@D]@w {} at... @G{}. @RPL@D:@Y ??????????\r\n", messg, blah);
-      } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(g, ch) >= 15000000) {
+      } else if (obj_extra_flagged(obj, extra_flag::ascouter) && getCurPL(g, ch) >= 15000000) {
         write_to_output(g, i, "@D[@GBlip@D]@w {} at... @G{}. @RPL@D:@Y ??????????\r\n", messg, blah);
       } else {
         write_to_output(g, i, "@D[Blip@D]@w {} at... @G{}. @RPL@D:@Y {}@n\r\n\r\n", messg, blah, add_commas(getCurPL(g, ch)));
@@ -283,25 +283,25 @@ void send_to_worlds(GameWorld *g, struct char_data *ch)
     if (desc_get_connected(i) != CON_PLAYING) {
       continue;
     }
-    if (room_flagged(g, char_get_in_room(i->character), ROOM_EARTH) && room_flagged(g, char_get_in_room(ch), ROOM_EARTH)) {
+    if (room_flagged(g, char_get_in_room(i->character), room_flag::earth) && room_flagged(g, char_get_in_room(ch), room_flag::earth)) {
       send_to_char(g, i->character, message);
-    } else if (room_flagged(g, char_get_in_room(i->character), ROOM_VEGETA) && room_flagged(g, char_get_in_room(ch), ROOM_VEGETA)) {
+    } else if (room_flagged(g, char_get_in_room(i->character), room_flag::vegeta) && room_flagged(g, char_get_in_room(ch), room_flag::vegeta)) {
       send_to_char(g, i->character, message);
     } else if (room_planet_zenith(g, char_get_in_room(i->character)) && room_planet_zenith(g, char_get_in_room(ch))) {
       send_to_char(g, i->character, message);
-    } else if (room_flagged(g, char_get_in_room(i->character), ROOM_NAMEK) && room_flagged(g, char_get_in_room(ch), ROOM_NAMEK)) {
+    } else if (room_flagged(g, char_get_in_room(i->character), room_flag::namek) && room_flagged(g, char_get_in_room(ch), room_flag::namek)) {
       send_to_char(g, i->character, message);
-    } else if (room_flagged(g, char_get_in_room(i->character), ROOM_KONACK) && room_flagged(g, char_get_in_room(ch), ROOM_KONACK)) {
+    } else if (room_flagged(g, char_get_in_room(i->character), room_flag::konack) && room_flagged(g, char_get_in_room(ch), room_flag::konack)) {
       send_to_char(g, i->character, message);
-    } else if (room_flagged(g, char_get_in_room(i->character), ROOM_YARDRAT) && room_flagged(g, char_get_in_room(ch), ROOM_YARDRAT)) {
+    } else if (room_flagged(g, char_get_in_room(i->character), room_flag::yardrat) && room_flagged(g, char_get_in_room(ch), room_flag::yardrat)) {
       send_to_char(g, i->character, message);
-    } else if (room_flagged(g, char_get_in_room(i->character), ROOM_FRIGID) && room_flagged(g, char_get_in_room(ch), ROOM_FRIGID)) {
+    } else if (room_flagged(g, char_get_in_room(i->character), room_flag::frigid) && room_flagged(g, char_get_in_room(ch), room_flag::frigid)) {
       send_to_char(g, i->character, message);
-    } else if (room_flagged(g, char_get_in_room(i->character), ROOM_KANASSA) && room_flagged(g, char_get_in_room(ch), ROOM_KANASSA)) {
+    } else if (room_flagged(g, char_get_in_room(i->character), room_flag::kanassa) && room_flagged(g, char_get_in_room(ch), room_flag::kanassa)) {
       send_to_char(g, i->character, message);
-    } else if (room_flagged(g, char_get_in_room(i->character), ROOM_ARLIA) && room_flagged(g, char_get_in_room(ch), ROOM_ARLIA)) {
+    } else if (room_flagged(g, char_get_in_room(i->character), room_flag::arlia) && room_flagged(g, char_get_in_room(ch), room_flag::arlia)) {
       send_to_char(g, i->character, message);
-    } else if (room_flagged(g, char_get_in_room(i->character), ROOM_AETHER) && room_flagged(g, char_get_in_room(ch), ROOM_AETHER)) {
+    } else if (room_flagged(g, char_get_in_room(i->character), room_flag::aether) && room_flagged(g, char_get_in_room(ch), room_flag::aether)) {
       send_to_char(g, i->character, message);
     }
   }
@@ -319,10 +319,10 @@ void send_to_imm(GameWorld *g, std::string_view text)
     if (char_get_admlevel(i->character) == 0) {
       continue;
     }
-    if (!char_prf_flagged(g, i->character, PRF_LOG2)) {
+    if (!char_prf_flagged(g, i->character, pref_flag::log2)) {
       continue;
     }
-    if (char_plr_flagged(i->character, PLR_WRITING)) {
+    if (char_plr_flagged(i->character, player_flag::writing)) {
       continue;
     }
     write_to_output(g, i, "@g[ Log: ");

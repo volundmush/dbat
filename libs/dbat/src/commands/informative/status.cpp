@@ -20,7 +20,6 @@
 #include "dbat/consts/time.hpp"
 #include "dbat/help.hpp"
 #include "dbat/command.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/affect.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/random.hpp"
@@ -162,7 +161,7 @@ ACMD(do_perf)
   }
   /* the first skill whose name has arg in it */
   auto skills = std::views::iota(0, SKILL_TABLE_SIZE);
-  auto found  = std::ranges::find_if(skills, [&](int i) { return g->spell_info[i].skilltype == SKTYPE_SKILL && std::string_view(g->spell_info[i].name).contains(until_nul(arg)); });
+  auto found  = std::ranges::find_if(skills, [&](int i) { return g->spell_info[i].skilltype == skill_kind::skill && std::string_view(g->spell_info[i].name).contains(until_nul(arg)); });
   if (found == skills.end()) {
     send_to_char(g, ch, "The skill {} doesn't exist.\r\n", arg);
     return;
@@ -211,9 +210,9 @@ namespace {
   };
 
   /* An android's model and version, the first flag it has; failing them all, the last. */
-  constexpr by_flag ANDROID_MODELS[]   = {{PLR_ABSORB, "@CAbsorption"}, {PLR_REPAIR, "@GSelf Repairing"}, {PLR_SENSEM, "@RSensor Equiped"}, {std::nullopt, "@WNone"}};
-  constexpr by_flag ANDROID_VERSIONS[] = {{PLR_TRANS1, "Beta 1.0"}, {PLR_TRANS2, "ANS 2.0"}, {PLR_TRANS3, "ANS 3.0"}, {PLR_TRANS4, "ANS 4.0"},
-                                          {PLR_TRANS5, "ANS 5.0"},  {PLR_TRANS6, "ANS 6.0"}, {std::nullopt, "Alpha 0.5"}};
+  constexpr by_flag ANDROID_MODELS[]   = {{player_flag::absorb, "@CAbsorption"}, {player_flag::repair, "@GSelf Repairing"}, {player_flag::sensem, "@RSensor Equiped"}, {std::nullopt, "@WNone"}};
+  constexpr by_flag ANDROID_VERSIONS[] = {{player_flag::trans1, "Beta 1.0"}, {player_flag::trans2, "ANS 2.0"}, {player_flag::trans3, "ANS 3.0"}, {player_flag::trans4, "ANS 4.0"},
+                                          {player_flag::trans5, "ANS 5.0"},  {player_flag::trans6, "ANS 6.0"}, {std::nullopt, "Alpha 0.5"}};
 
   std::string_view first_flagged(struct char_data *ch, std::span<const by_flag> rows)
   {
@@ -307,30 +306,30 @@ namespace {
   };
 
   /* Rillao: transloc, add new transes here */
-  constexpr transformation HUMAN_FORMS[]     = {{PLR_TRANS1, std::nullopt, "@CSuper Human First"}, {PLR_TRANS2, std::nullopt, "@CSuper Human Second"}, {PLR_TRANS3, std::nullopt, "@CSuper Human Third"}, {PLR_TRANS4, std::nullopt, "@CSuper Human Fourth"}};
-  constexpr transformation SAIYAN_FORMS[]    = {{PLR_TRANS1, PLR_FPSSJ, "@YFull Powered @CSuper Saiyan"}, {PLR_TRANS1, std::nullopt, "@CSuper Saiyan First"},
-                                                {PLR_TRANS2, std::nullopt, "@CSuper Saiyan Second"}, {PLR_TRANS3, std::nullopt, "@CSuper Saiyan Third"},
-                                                {PLR_TRANS4, std::nullopt, "@CSuper Saiyan Fourth"}, {PLR_OOZARU, std::nullopt, "@COozaru"}};
-  constexpr transformation LEGENDARY_FORMS[] = {{PLR_TRANS1, PLR_FPSSJ, "@YFull Powered @CSuper Saiyan"}, {PLR_TRANS1, std::nullopt, "@CSuper Saiyan First"},
-                                                {PLR_TRANS2, std::nullopt, "@YLegendary @CSuper Saiyan"}, {PLR_OOZARU, std::nullopt, "@COozaru"}};
-  constexpr transformation NAMEK_FORMS[]     = {{PLR_TRANS1, std::nullopt, "@CSuper Namek First"}, {PLR_TRANS2, std::nullopt, "@CSuper Namek Second"}, {PLR_TRANS3, std::nullopt, "@CSuper Namek Third"}, {PLR_TRANS4, std::nullopt, "@CSuper Namek Fourth"}};
-  constexpr transformation ICER_FORMS[]      = {{PLR_TRANS1, std::nullopt, "@CTransform First"}, {PLR_TRANS2, std::nullopt, "@CTransform Second"}, {PLR_TRANS3, std::nullopt, "@CTransform Third"}, {PLR_TRANS4, std::nullopt, "@CTransform Fourth"}};
-  constexpr transformation KONATSU_FORMS[]   = {{PLR_TRANS1, std::nullopt, "@CShadow First"}, {PLR_TRANS2, std::nullopt, "@CShadow Second"}, {PLR_TRANS3, std::nullopt, "@CShadow Third"}, {PLR_TRANS4, std::nullopt, "@CShadow Fourth"}};
-  constexpr transformation MUTANT_FORMS[]    = {{PLR_TRANS1, std::nullopt, "@CMutate First"}, {PLR_TRANS2, std::nullopt, "@CMutate Second"}, {PLR_TRANS3, std::nullopt, "@CMutate Third"}};
-  constexpr transformation BIO_FORMS[]       = {{PLR_TRANS1, std::nullopt, "@CMature"}, {PLR_TRANS2, std::nullopt, "@CSemi-perfect"}, {PLR_TRANS3, std::nullopt, "@CPerfect"}, {PLR_TRANS4, std::nullopt, "@CSuper Perfect"}};
-  constexpr transformation ANDROID_FORMS[]   = {{PLR_TRANS1, std::nullopt, "@CSeries 1.0"}, {PLR_TRANS2, std::nullopt, "@CSeries 2.0"}, {PLR_TRANS3, std::nullopt, "@CSeries 3.0"},
-                                                {PLR_TRANS4, std::nullopt, "@CSeries 4.0"}, {PLR_TRANS5, std::nullopt, "@CSeries 5.0"}, {PLR_TRANS6, std::nullopt, "@CSeries 6.0"}};
-  constexpr transformation MAJIN_FORMS[]     = {{PLR_TRANS1, std::nullopt, "@CAffinity"}, {PLR_TRANS2, std::nullopt, "@CSuper"}, {PLR_TRANS3, std::nullopt, "@CTrue"}};
-  constexpr transformation TRUFFLE_FORMS[]   = {{PLR_TRANS1, std::nullopt, "@CAscend First"}, {PLR_TRANS2, std::nullopt, "@CAscend Second"}, {PLR_TRANS3, std::nullopt, "@CAscend Third"}};
-  constexpr transformation KAI_FORMS[]       = {{PLR_TRANS1, std::nullopt, "@CMystic First"}, {PLR_TRANS2, std::nullopt, "@CMystic Second"}, {PLR_TRANS3, std::nullopt, "@CMystic Third"}};
+  constexpr transformation HUMAN_FORMS[]     = {{player_flag::trans1, std::nullopt, "@CSuper Human First"}, {player_flag::trans2, std::nullopt, "@CSuper Human Second"}, {player_flag::trans3, std::nullopt, "@CSuper Human Third"}, {player_flag::trans4, std::nullopt, "@CSuper Human Fourth"}};
+  constexpr transformation SAIYAN_FORMS[]    = {{player_flag::trans1, player_flag::fpssj, "@YFull Powered @CSuper Saiyan"}, {player_flag::trans1, std::nullopt, "@CSuper Saiyan First"},
+                                                {player_flag::trans2, std::nullopt, "@CSuper Saiyan Second"}, {player_flag::trans3, std::nullopt, "@CSuper Saiyan Third"},
+                                                {player_flag::trans4, std::nullopt, "@CSuper Saiyan Fourth"}, {player_flag::oozaru, std::nullopt, "@COozaru"}};
+  constexpr transformation LEGENDARY_FORMS[] = {{player_flag::trans1, player_flag::fpssj, "@YFull Powered @CSuper Saiyan"}, {player_flag::trans1, std::nullopt, "@CSuper Saiyan First"},
+                                                {player_flag::trans2, std::nullopt, "@YLegendary @CSuper Saiyan"}, {player_flag::oozaru, std::nullopt, "@COozaru"}};
+  constexpr transformation NAMEK_FORMS[]     = {{player_flag::trans1, std::nullopt, "@CSuper Namek First"}, {player_flag::trans2, std::nullopt, "@CSuper Namek Second"}, {player_flag::trans3, std::nullopt, "@CSuper Namek Third"}, {player_flag::trans4, std::nullopt, "@CSuper Namek Fourth"}};
+  constexpr transformation ICER_FORMS[]      = {{player_flag::trans1, std::nullopt, "@CTransform First"}, {player_flag::trans2, std::nullopt, "@CTransform Second"}, {player_flag::trans3, std::nullopt, "@CTransform Third"}, {player_flag::trans4, std::nullopt, "@CTransform Fourth"}};
+  constexpr transformation KONATSU_FORMS[]   = {{player_flag::trans1, std::nullopt, "@CShadow First"}, {player_flag::trans2, std::nullopt, "@CShadow Second"}, {player_flag::trans3, std::nullopt, "@CShadow Third"}, {player_flag::trans4, std::nullopt, "@CShadow Fourth"}};
+  constexpr transformation MUTANT_FORMS[]    = {{player_flag::trans1, std::nullopt, "@CMutate First"}, {player_flag::trans2, std::nullopt, "@CMutate Second"}, {player_flag::trans3, std::nullopt, "@CMutate Third"}};
+  constexpr transformation BIO_FORMS[]       = {{player_flag::trans1, std::nullopt, "@CMature"}, {player_flag::trans2, std::nullopt, "@CSemi-perfect"}, {player_flag::trans3, std::nullopt, "@CPerfect"}, {player_flag::trans4, std::nullopt, "@CSuper Perfect"}};
+  constexpr transformation ANDROID_FORMS[]   = {{player_flag::trans1, std::nullopt, "@CSeries 1.0"}, {player_flag::trans2, std::nullopt, "@CSeries 2.0"}, {player_flag::trans3, std::nullopt, "@CSeries 3.0"},
+                                                {player_flag::trans4, std::nullopt, "@CSeries 4.0"}, {player_flag::trans5, std::nullopt, "@CSeries 5.0"}, {player_flag::trans6, std::nullopt, "@CSeries 6.0"}};
+  constexpr transformation MAJIN_FORMS[]     = {{player_flag::trans1, std::nullopt, "@CAffinity"}, {player_flag::trans2, std::nullopt, "@CSuper"}, {player_flag::trans3, std::nullopt, "@CTrue"}};
+  constexpr transformation TRUFFLE_FORMS[]   = {{player_flag::trans1, std::nullopt, "@CAscend First"}, {player_flag::trans2, std::nullopt, "@CAscend Second"}, {player_flag::trans3, std::nullopt, "@CAscend Third"}};
+  constexpr transformation KAI_FORMS[]       = {{player_flag::trans1, std::nullopt, "@CMystic First"}, {player_flag::trans2, std::nullopt, "@CMystic Second"}, {player_flag::trans3, std::nullopt, "@CMystic Third"}};
 
   struct race_forms {
     bool (*is)(const struct char_data *ch);
     std::span<const transformation> forms;
   };
 
-  bool full_saiyan(const struct char_data *ch) { return (char_is_saiyan(ch) || char_is_halfbreed(ch)) && !char_plr_flagged(ch, PLR_LSSJ); }
-  bool legendary(const struct char_data *ch) { return char_is_saiyan(ch) && char_plr_flagged(ch, PLR_LSSJ); }
+  bool full_saiyan(const struct char_data *ch) { return (char_is_saiyan(ch) || char_is_halfbreed(ch)) && !char_plr_flagged(ch, player_flag::lssj); }
+  bool legendary(const struct char_data *ch) { return char_is_saiyan(ch) && char_plr_flagged(ch, player_flag::lssj); }
 
   /* In this order; a hoshijin's forms are its star phases, and are told apart below. */
   const race_forms RACE_FORMS[] = {
@@ -381,15 +380,15 @@ struct limb_row {
   player_flag cyber_flag;
 };
 constexpr limb_row LIMBS[] = {
-    {"Right Arm   ", 0, PLR_CRARM, PLR_CRARM},
-    {"Left Arm    ", 1, PLR_CLARM, PLR_CLARM},
-    {"Right Leg   ", 2, PLR_CLARM, PLR_CRLEG}, /* quirk: a sound right leg is the left arm's */
-    {"Left Leg    ", 3, PLR_CLLEG, PLR_CLLEG},
+    {"Right Arm   ", 0, player_flag::crarm, player_flag::crarm},
+    {"Left Arm    ", 1, player_flag::clarm, player_flag::clarm},
+    {"Right Leg   ", 2, player_flag::clarm, player_flag::crleg}, /* quirk: a sound right leg is the left arm's */
+    {"Left Leg    ", 3, player_flag::clleg, player_flag::clleg},
 };
 
 void appendages_status(GameWorld *g, struct char_data *ch)
 {
-  if (char_plr_flagged(ch, PLR_HEAD))
+  if (char_plr_flagged(ch, player_flag::head))
     send_to_char(g, ch, "            @D[@cHead        @D: @GHave.          @D]@n\r\n");
   else
     send_to_char(g, ch, "            @D[@cHead        @D: @rMissing.         @D]@n\r\n");
@@ -408,9 +407,9 @@ void appendages_status(GameWorld *g, struct char_data *ch)
 
   std::optional<player_flag> tail;
   if (char_is_saiyan(ch) || char_is_halfbreed(ch))
-    tail = PLR_STAIL;
+    tail = player_flag::stail;
   else if (char_is_icer(ch) || char_is_bio(ch))
-    tail = PLR_TAIL;
+    tail = player_flag::tail;
   if (tail) {
     if (char_plr_flagged(ch, *tail))
       send_to_char(g, ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
@@ -552,17 +551,17 @@ void info_status(GameWorld *g, struct char_data *ch)
   send_to_char(g, ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
   trans_check(g, ch, ch);
   send_to_char(g, ch, "         You have died {:d} times.\r\n", char_get_dcount(ch));
-  if (char_plr_flagged(ch, PLR_NOSHOUT))
+  if (char_plr_flagged(ch, player_flag::noshout))
     send_to_char(g, ch, "         You have been @rmuted@n on public channels.\r\n");
   if (char_get_in_room(ch) == 9)
     send_to_char(g, ch, "         You are in punishment hell, so sad....\r\n");
-  if (!char_prf_flagged(g, ch, PRF_HINTS))
+  if (!char_prf_flagged(g, ch, pref_flag::hints))
     send_to_char(g, ch, "         You have hints turned off.\r\n");
   if (g->NEWSUPDATE > char_get_lastpl(ch))
     send_to_char(g, ch, "         Check the 'news', it has been updated recently.\r\n");
   if (has_mail(g, char_get_idnum(ch)))
     send_to_char(g, ch, "         Check your mail at the nearest postmaster.\r\n");
-  if (char_prf_flagged(g, ch, PRF_HIDE))
+  if (char_prf_flagged(g, ch, pref_flag::hide))
     send_to_char(g, ch, "         You are hidden from who and ooc.\r\n");
   if (!char_get_voice(ch).empty())
     send_to_char(g, ch, "         Your voice desc: '{}'\r\n", char_get_voice(ch));
@@ -591,9 +590,9 @@ void info_status(GameWorld *g, struct char_data *ch)
     send_to_char(g, ch, "         You have @C{}@n ki charged.\r\n", add_commas(char_get_charge(ch)));
   if (char_get_kaioken(ch) > 0)
     send_to_char(g, ch, "         You are focusing Kaioken x {:d}.\r\n", char_get_kaioken(ch));
-  if (char_aff_flagged(ch, AFF_SANCTUARY))
+  if (char_aff_flagged(ch, aff_flag::sanctuary))
     send_to_char(g, ch, "         You are surrounded by a barrier @D(@Y{}@D)@n\r\n", add_commas(char_get_barrier(ch)));
-  if (char_aff_flagged(ch, AFF_FIRESHIELD))
+  if (char_aff_flagged(ch, aff_flag::fireshield))
     send_to_char(g, ch, "         You are surrounded by flames!@n\r\n");
   if (char_get_suppression(ch) > 0)
     send_to_char(g, ch, "         You are suppressing current PL to {:d}.\r\n", char_get_suppression(ch));
@@ -605,7 +604,7 @@ void info_status(GameWorld *g, struct char_data *ch)
 
   if (char_get_level(ch) >= 100)
     send_to_char(g, ch, "         Your strengths are potentially limitless.\r\n");
-  else if ((char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) || (!char_is_android(ch) && !char_is_bio(ch) && !char_is_majin(ch)))
+  else if ((char_is_android(ch) && char_plr_flagged(ch, player_flag::absorb)) || (!char_is_android(ch) && !char_is_bio(ch) && !char_is_majin(ch)))
     send_to_char(g, ch, "         @R{}@n to SC a stat this level.\r\n", add_commas(calc_soft_cap(ch)));
   else
     send_to_char(g, ch, "         @R{}@n in PL/KI/ST combined to SC this level.\r\n", add_commas(calc_soft_cap(ch)));
@@ -645,39 +644,39 @@ void genome_status(GameWorld *g, struct char_data *ch, std::string_view heading,
 }
 
 constexpr flag_line STEALTH_LINES[] = {
-    {flag_kind::plr, PLR_EYEC, "Your eyes are closed.\r\n"},
-    {flag_kind::aff, AFF_SNEAK, "You are prepared to sneak where ever you go.\r\n"},
-    {flag_kind::plr, PLR_DISGUISED, "You have disguised your facial features.\r\n"},
-    {flag_kind::aff, AFF_FLYING, "You are flying.\r\n"},
-    {flag_kind::plr, PLR_PILOTING, "You are busy piloting a ship.\r\n"},
+    {flag_kind::plr, player_flag::eyec, "Your eyes are closed.\r\n"},
+    {flag_kind::aff, aff_flag::sneak, "You are prepared to sneak where ever you go.\r\n"},
+    {flag_kind::plr, player_flag::disguised, "You have disguised your facial features.\r\n"},
+    {flag_kind::aff, aff_flag::flying, "You are flying.\r\n"},
+    {flag_kind::plr, player_flag::piloting, "You are busy piloting a ship.\r\n"},
 };
 static_assert(kinds_match(STEALTH_LINES));
 constexpr flag_line READY_LINES[] = {
-    {flag_kind::aff, AFF_ZANZOKEN, "You are prepared to zanzoken.\r\n"},
-    {flag_kind::aff, AFF_HASS, "Your arms are moving fast.\r\n"},
-    {flag_kind::aff, AFF_INFUSE, "Your ki will be infused in your next physical attack.\r\n"},
-    {flag_kind::plr, PLR_TAILHIDE, "Your tail is hidden!\r\n"},
-    {flag_kind::plr, PLR_NOGROW, "Your tail is no longer regrowing!\r\n"},
-    {flag_kind::affected, AFF_SPECIAL_POSE, "You are feeling confident from your pose earlier.\r\n"},
-    {flag_kind::affected, AFF_HYDROZAP, "You are effected by Kanso Suru.\r\n"},
+    {flag_kind::aff, aff_flag::zanzoken, "You are prepared to zanzoken.\r\n"},
+    {flag_kind::aff, aff_flag::hass, "Your arms are moving fast.\r\n"},
+    {flag_kind::aff, aff_flag::infuse, "Your ki will be infused in your next physical attack.\r\n"},
+    {flag_kind::plr, player_flag::tailhide, "Your tail is hidden!\r\n"},
+    {flag_kind::plr, player_flag::nogrow, "Your tail is no longer regrowing!\r\n"},
+    {flag_kind::affected, aff_flag::special_pose, "You are feeling confident from your pose earlier.\r\n"},
+    {flag_kind::affected, aff_flag::hydrozap, "You are effected by Kanso Suru.\r\n"},
 };
 static_assert(kinds_match(READY_LINES));
 constexpr flag_line AFFLICTION_LINES[] = {
-    {flag_kind::aff, AFF_KNOCKED, "You have been knocked unconcious!\r\n"},
-    {flag_kind::aff, AFF_INVISIBLE, "You are invisible.\r\n"},
-    {flag_kind::aff, AFF_DETECT_INVIS, "You are sensitive to the presence of invisible things.\r\n"},
-    {flag_kind::aff, AFF_MBREAK, "Your mind has been broken!\r\n"},
-    {flag_kind::aff, AFF_WITHER, "You've been withered! You feel so weak...\r\n"},
-    {flag_kind::aff, AFF_SHOCKED, "Your mind has been shocked!\r\n"},
-    {flag_kind::aff, AFF_CHARM, "You have been charmed!\r\n"},
+    {flag_kind::aff, aff_flag::knocked, "You have been knocked unconcious!\r\n"},
+    {flag_kind::aff, aff_flag::invisible, "You are invisible.\r\n"},
+    {flag_kind::aff, aff_flag::detect_invis, "You are sensitive to the presence of invisible things.\r\n"},
+    {flag_kind::aff, aff_flag::mbreak, "Your mind has been broken!\r\n"},
+    {flag_kind::aff, aff_flag::wither, "You've been withered! You feel so weak...\r\n"},
+    {flag_kind::aff, aff_flag::shocked, "Your mind has been shocked!\r\n"},
+    {flag_kind::aff, aff_flag::charm, "You have been charmed!\r\n"},
     {flag_kind::spell, SPELL_MAGE_ARMOR, "You feel protected.\r\n"},
-    {flag_kind::aff, AFF_INFRAVISION, "You can see in darkness with infravision.\r\n"},
-    {flag_kind::prf, PRF_SUMMONABLE, "You are summonable by other players.\r\n"},
-    {flag_kind::aff, AFF_DETECT_ALIGN, "You see into the hearts of others.\r\n"},
-    {flag_kind::aff, AFF_DETECT_MAGIC, "You are sensitive to the magical nature of things.\r\n"},
-    {flag_kind::aff, AFF_SPIRIT, "You have died and are part of the SPIRIT world!\r\n"},
-    {flag_kind::prf, PRF_NOGIVE, "You are not accepting items being handed to you right now.\r\n"},
-    {flag_kind::aff, AFF_ETHEREAL, "You are ethereal and cannot interact with normal space!\r\n"},
+    {flag_kind::aff, aff_flag::infravision, "You can see in darkness with infravision.\r\n"},
+    {flag_kind::prf, pref_flag::summonable, "You are summonable by other players.\r\n"},
+    {flag_kind::aff, aff_flag::detect_align, "You see into the hearts of others.\r\n"},
+    {flag_kind::aff, aff_flag::detect_magic, "You are sensitive to the magical nature of things.\r\n"},
+    {flag_kind::aff, aff_flag::spirit, "You have died and are part of the SPIRIT world!\r\n"},
+    {flag_kind::prf, pref_flag::nogive, "You are not accepting items being handed to you right now.\r\n"},
+    {flag_kind::aff, aff_flag::ethereal, "You are ethereal and cannot interact with normal space!\r\n"},
 };
 static_assert(kinds_match(AFFLICTION_LINES));
 
@@ -794,7 +793,7 @@ void condition_status(GameWorld *g, struct char_data *ch)
     genome_status(g, ch, "Your genes carry:\r\n", GENES, " DNA");
   if (char_get_genome(ch, 0) == 11)
     send_to_char(g, ch, "You have used kyodaika.\r\n");
-  if (char_prf_flagged(g, ch, PRF_NOPARRY))
+  if (char_prf_flagged(g, ch, pref_flag::noparry))
     send_to_char(g, ch, "You have decided not to parry attacks.\r\n");
   position_status(g, ch);
   if (has_group(g, ch))
@@ -814,9 +813,9 @@ void condition_status(GameWorld *g, struct char_data *ch)
     send_to_char(g, ch, "Something is augmenting your auto-skill training rate by +{:d}%!\r\n", char_get_asb(ch));
   if (char_get_raw_lifebonus(ch) > 0)
     send_to_char(g, ch, "Something is augmenting your Life Force Max by +{:d}%!\r\n", char_get_raw_lifebonus(ch));
-  if (char_plr_flagged(ch, PLR_FISHING))
+  if (char_plr_flagged(ch, player_flag::fishing))
     send_to_char(g, ch, "Current Fishing Pole Bonus @D[@C{:d}@D]@n\r\n", char_get_accuracy(ch));
-  if (char_plr_flagged(ch, PLR_AURALIGHT))
+  if (char_plr_flagged(ch, player_flag::auralight))
     send_to_char(g, ch, "Aura Light is active.\r\n");
 }
 
@@ -931,8 +930,8 @@ ACMD(do_status)
 ACMD(do_inventory)
 {
   send_to_char(g, ch, "@w              @YInventory\r\n@D-------------------------------------@w\r\n");
-  if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_STOLEN)) {
-    char_plr_set(ch, PLR_STOLEN, false);
+  if (!char_is_npc(ch) && char_plr_flagged(ch, player_flag::stolen)) {
+    char_plr_set(ch, player_flag::stolen, false);
     send_to_char(g, ch, "@r   --------------------------------------------------@n\n");
     send_to_char(g, ch, "@R    You notice that you have been robbed sometime recently!\n");
     send_to_char(g, ch, "@r   --------------------------------------------------@n\n");
@@ -950,7 +949,7 @@ ACMD(do_equipment)
     bool wielded         = i == WEAR_WIELD1 || i == WEAR_WIELD2;
 
     if (!obj) {
-      if (char_body_flagged(ch, i) && (i != WEAR_WIELD2 || !char_plr_flagged(ch, PLR_THANDW)))
+      if (char_body_flagged(ch, i) && (i != WEAR_WIELD2 || !char_plr_flagged(ch, player_flag::thandw)))
         send_to_char(g, ch, "{}@wNothing.@n\r\n", wear_where[i]);
       continue;
     }
@@ -959,14 +958,14 @@ ACMD(do_equipment)
       send_to_char(g, ch, "Something.\r\n");
       continue;
     }
-    if (wielded && char_plr_flagged(ch, PLR_THANDW)) {
+    if (wielded && char_plr_flagged(ch, player_flag::thandw)) {
       send_to_char(g, ch, "@c<@CWielded by B. Hands@c>@n ");
       show_obj_to_char(g, obj, ch, SHOW_OBJ_SHORT);
       continue;
     }
     send_to_char(g, ch, "{}", wear_where[i]);
     show_obj_to_char(g, obj, ch, SHOW_OBJ_SHORT);
-    if (!obj_extra_flagged(obj, ITEM_SHEATH))
+    if (!obj_extra_flagged(obj, extra_flag::sheath))
       continue;
     for (obj_data *thing : obj_contents(g, obj)) {
       /* quirk: the arrow is coloured on a sheath worn, not on one wielded */
@@ -1018,7 +1017,7 @@ ACMD(do_consider)
   std::string_view rest = argument;
   std::string arg       = take_arg(rest);
 
-  auto victim = find_char(g, ch, arg, FIND_CHAR_ROOM, "Consider killing who?\r\n");
+  auto victim = find_char(g, ch, arg, find_flag::char_room, "Consider killing who?\r\n");
   if (reject(g, ch, victim))
     return;
   if (*victim == ch) {
@@ -1037,7 +1036,7 @@ ACMD(do_diagnose)
 
   struct char_data *vict = char_get_fighting(g, ch);
   if (!arg.empty()) {
-    auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, CONFIG_NOPERSON);
+    auto found = find_char(g, ch, arg, find_flag::char_room, CONFIG_NOPERSON);
     if (reject(g, ch, found))
       return;
     vict = *found;

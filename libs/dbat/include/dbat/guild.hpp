@@ -5,12 +5,12 @@
 
 #include "dbat/consts/tradeflags.hpp"
 #include "dbat/flag_set.hpp"
+#include "dbat/spells.hpp"
 #include "dbat/guild_utils.hpp"
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/skills.hpp"
 #include "dbat/consts/feats.hpp"
 
-constexpr int GW_ARRAY_MAX = 4;
 
 /* Default guild messages: used for new guilds and in place of a missing or malformed message. */
 extern const std::string_view guild_default_no_skill;
@@ -35,7 +35,7 @@ ACMD(do_teach);
 
 /* Functions defined in guild.c */
 /* ch's skills of type sktype as the skill list shows them, those matching argument (a name part or least level) */
-std::string print_skills_by_type(GameWorld *g, struct char_data *ch, int sktype, std::string_view argument);
+std::string print_skills_by_type(GameWorld *g, struct char_data *ch, flag_set<skill_kind> sktype, std::string_view argument);
 int rpp_to_level(struct char_data *ch);
 int slot_count(struct char_data *ch);
 void show_guild(GameWorld *g, struct char_data *ch, std::string_view arg);

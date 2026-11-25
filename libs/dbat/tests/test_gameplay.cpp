@@ -139,14 +139,14 @@ static void check_healing_glow_goes_on_the_target(void)
   char_set_skills_base(ch, SKILL_HEALGLOW, 100);
   do_healglow(g, ch, argument, 0, 0);
   CHECK(saw(ch, "blue glow"));
-  CHECK(is_affected(vict, AFF_HEALGLOW));
-  CHECK(!is_affected(ch, AFF_HEALGLOW));
+  CHECK(is_affected(vict, aff_flag::healglow));
+  CHECK(!is_affected(ch, aff_flag::healglow));
   th_shutdown(g);
 }
 
 static void hurt_all_over(GameWorld *g, struct char_data *ch)
 {
-  assign_affect(g, ch, AFF_POISON, SKILL_POISON, 5, 0, 0, 0, 0, 0, 0);
+  assign_affect(g, ch, aff_flag::poison, SKILL_POISON, 5, 0, 0, 0, 0, 0, 0);
   decCurST(g, ch, getCurST(g, ch) / 2, 0);
   decCurHealthPercent(g, ch, .5, 0);
 }
@@ -176,17 +176,17 @@ static void check_heal_helps_the_patient(void)
   char_set_skills_base(ch, SKILL_HEAL, 100);
   hurt_all_over(g, ch);
   hurt_all_over(g, vict);
-  assign_affect(g, vict, AFF_BLIND, SKILL_SOLARF, 5, 0, 0, 0, 0, 0, 0);
-  char_plr_set(vict, PLR_STAIL, false);
+  assign_affect(g, vict, aff_flag::blind, SKILL_SOLARF, 5, 0, 0, 0, 0, 0, 0);
+  char_plr_set(vict, player_flag::stail, false);
   healer_stamina  = getCurST(g, ch);
   patient_stamina = getCurST(g, vict);
   heal_until_it_works(g, ch, "patient");
-  CHECK(!char_aff_flagged(vict, AFF_POISON));
-  CHECK(!char_aff_flagged(vict, AFF_BLIND));
-  CHECK(char_aff_flagged(ch, AFF_POISON));
+  CHECK(!char_aff_flagged(vict, aff_flag::poison));
+  CHECK(!char_aff_flagged(vict, aff_flag::blind));
+  CHECK(char_aff_flagged(ch, aff_flag::poison));
   CHECK(getCurST(g, vict) > patient_stamina);
   CHECK(getCurST(g, ch) == healer_stamina);
-  CHECK(char_plr_flagged(vict, PLR_STAIL));
+  CHECK(char_plr_flagged(vict, player_flag::stail));
   th_shutdown(g);
 }
 
@@ -198,7 +198,7 @@ static void check_healing_yourself_cures_poison(void)
   char_set_skills_base(ch, SKILL_HEAL, 100);
   hurt_all_over(g, ch);
   heal_until_it_works(g, ch, "healer");
-  CHECK(!char_aff_flagged(ch, AFF_POISON));
+  CHECK(!char_aff_flagged(ch, aff_flag::poison));
   th_shutdown(g);
 }
 
@@ -261,7 +261,7 @@ static int zenkais(GameWorld *g, struct char_data *ch, int tries)
     if (!(child = fork())) {
       circle_srandom(g, 1000 + i);
       die(g, ch, nullptr);
-      _exit(char_plr_flagged(ch, PLR_GOOP) ? 1 : 0);
+      _exit(char_plr_flagged(ch, player_flag::goop) ? 1 : 0);
     }
     waitpid(child, &status, 0);
     count += WIFEXITED(status) && WEXITSTATUS(status) == 1;
@@ -275,7 +275,7 @@ static void check_no_zenkai_for_a_spirit(void)
   struct char_data *ch = fighter(g, "Saiyan", ADMLVL_NONE, RACE_SAIYAN, CLASS_ROSHI);
 
   CHECK(zenkais(g, ch, 40) > 0); /* or this checks nothing */
-  char_aff_set(ch, AFF_SPIRIT, true);
+  char_aff_set(ch, aff_flag::spirit, true);
   CHECK(zenkais(g, ch, 40) == 0);
   th_shutdown(g);
 }
@@ -285,11 +285,11 @@ static void check_disguise_is_safe_out_of_combat(void)
   GameWorld *g = th_boot();
   struct char_data *ch = fighter(g, "Disguised", ADMLVL_NONE, RACE_HUMAN, CLASS_ROSHI);
 
-  char_plr_set(ch, PLR_DISGUISED, true);
+  char_plr_set(ch, player_flag::disguised, true);
   char_set_charge(ch, 1); /* an aura, and not a fight: this used to be enough to lose it */
   for (int i = 0; i < 200; i++)
     fight_stack(g);
-  CHECK(char_plr_flagged(ch, PLR_DISGUISED));
+  CHECK(char_plr_flagged(ch, player_flag::disguised));
   th_shutdown(g);
 }
 
@@ -303,7 +303,7 @@ static void check_staff_log_all_of_snet(void)
   struct obj_data *scouter = read_object(g, 350);
   char ordinary[] = "hello everyone", broadcast[] = "* big news", call[] = "#12345 just you";
 
-  obj_wear_set(scouter, ITEM_WEAR_EYE, true);
+  obj_wear_set(scouter, wear_flag::eye, true);
   equip_char(g, ch, scouter, WEAR_EYE);
   char_from_room(g, far);
   char_to_room(g, far, 301);
@@ -428,7 +428,7 @@ static void check_multihit_repeats_the_last_attack(void)
   char_set_skills_base(ch, SKILL_ELBOW, 100);
   for (int i = 0; i < 2000 && !repeated; i++) {
     th_take_output(g, ch);
-    char_plr_set(ch, PLR_MULTIHIT, false);
+    char_plr_set(ch, player_flag::multihit, false);
     char_set_throws(ch, 0);
     char_set_wait(ch, 0);
     char_set_lastattack(ch, 2);

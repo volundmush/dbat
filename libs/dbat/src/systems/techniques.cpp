@@ -18,26 +18,26 @@
 
 bool tech_handle_zanzoken(GameWorld *g, char_data *ch, char_data *vict, std::string_view name)
 {
-  if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
+  if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(g, 1, 30) >= 28) || char_aff_flagged(vict, aff_flag::zanzoken)) &&
       (getCurST(g, vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-    if (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_ZANZOKEN) && char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, vict) + rand_number(g, 1, 5))) {
+    if (!char_aff_flagged(ch, aff_flag::zanzoken) || (char_aff_flagged(ch, aff_flag::zanzoken) && char_get_speedi(g, ch) + rand_number(g, 1, 5) < char_get_speedi(g, vict) + rand_number(g, 1, 5))) {
       std::string msg = str_format("@C$N@c disappears, avoiding your {} before reappearing!@n", name);
-      act(g, msg, true, ch, nullptr, vict, TO_CHAR);
+      act(g, msg, true, ch, nullptr, vict, act_to::actor);
       msg = str_format("@cYou disappear, avoiding @C$n's@c {} before reappearing!@n", name);
-      act(g, msg, true, ch, nullptr, vict, TO_VICT);
+      act(g, msg, true, ch, nullptr, vict, act_to::vict);
       msg = str_format("@C$N@c disappears, avoiding @C$n's@c {} before reappearing!@n", name);
-      act(g, msg, true, ch, nullptr, vict, TO_NOTVICT);
-      if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
-        char_aff_set(ch, AFF_ZANZOKEN, false);
+      act(g, msg, true, ch, nullptr, vict, act_to::notvict);
+      if (char_aff_flagged(ch, aff_flag::zanzoken)) {
+        char_aff_set(ch, aff_flag::zanzoken, false);
       }
-      char_aff_set(vict, AFF_ZANZOKEN, false);
+      char_aff_set(vict, aff_flag::zanzoken, false);
       return false;
     }
-    act(g, "@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", false, ch, nullptr, vict, TO_CHAR);
-    act(g, "@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", false, ch, nullptr, vict, TO_VICT);
-    act(g, "@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", false, ch, nullptr, vict, TO_NOTVICT);
-    char_aff_set(vict, AFF_ZANZOKEN, false);
-    char_aff_set(ch, AFF_ZANZOKEN, false);
+    act(g, "@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", false, ch, nullptr, vict, act_to::actor);
+    act(g, "@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", false, ch, nullptr, vict, act_to::vict);
+    act(g, "@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", false, ch, nullptr, vict, act_to::notvict);
+    char_aff_set(vict, aff_flag::zanzoken, false);
+    char_aff_set(ch, aff_flag::zanzoken, false);
   }
   return true;
 }
@@ -86,7 +86,7 @@ bool tech_handle_targeting(GameWorld *g, char_data *ch, std::string &arg, char_d
 {
   *vict = nullptr;
   *obj  = nullptr;
-  if (arg.empty() || !(*vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM))) {
+  if (arg.empty() || !(*vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_room))) {
     if (char_get_fighting(g, ch) && char_get_in_room(char_get_fighting(g, ch)) == char_get_in_room(ch)) {
       *vict = char_get_fighting(g, ch);
       return true;
@@ -102,16 +102,16 @@ bool tech_handle_targeting(GameWorld *g, char_data *ch, std::string &arg, char_d
 
 void tech_handle_burn(GameWorld *g, char_data *ch, char_data *vict, int face)
 {
-  if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(g, 1, 4) == face && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
+  if (!char_aff_flagged(vict, aff_flag::burned) && rand_number(g, 1, 4) == face && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
     send_to_char(g, vict, "@RYou are burned by the attack!@n\r\n");
     send_to_char(g, ch, "@RThey are burned by the attack!@n\r\n");
-    char_aff_set(vict, AFF_BURNED, true);
+    char_aff_set(vict, aff_flag::burned, true);
   } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
     send_to_char(g, ch, "@RThey appear to be fireproof!@n\r\n");
   } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
     send_to_char(g, vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
     send_to_char(g, ch, "@RThey are easily burned!@n\r\n");
-    char_aff_set(vict, AFF_BURNED, true);
+    char_aff_set(vict, aff_flag::burned, true);
   }
 }
 
@@ -145,8 +145,8 @@ void tech_impact_scenery(GameWorld *g, char_data *ch, char_data *vict, room_vnum
   auto show = [&](const scenery &sc) {
     if (sc.to_char.empty())
       return;
-    act(g, sc.to_char, true, ch, nullptr, vict, TO_CHAR);
-    act(g, or_if_empty(sc.to_room, sc.to_char), true, ch, nullptr, vict, TO_ROOM);
+    act(g, sc.to_char, true, ch, nullptr, vict, act_to::actor);
+    act(g, or_if_empty(sc.to_room, sc.to_char), true, ch, nullptr, vict, act_to::room);
   };
   int sect = room_sect(g, where);
 
@@ -174,27 +174,27 @@ void tech_impact_scenery(GameWorld *g, char_data *ch, char_data *vict, room_vnum
 void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, std::string_view part)
 {
 
-  if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
+  if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, aff_flag::spirit) && char_aff_flagged(vict, aff_flag::fireshield) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
     std::string_view part_name = or_if_empty(part, "body");
     std::string msg       = str_format("@c$N's@W fireshield burns your {}!@n", part_name);
-    act(g, msg, true, ch, nullptr, vict, TO_CHAR);
+    act(g, msg, true, ch, nullptr, vict, act_to::actor);
     msg = str_format("@C$n's@W {} is burned by your fireshield!@n", part_name);
-    act(g, msg, true, ch, nullptr, vict, TO_VICT);
+    act(g, msg, true, ch, nullptr, vict, act_to::vict);
     msg = str_format("@c$n's@W {} is burned by @C$N's@W fireshield!@n", part_name);
-    act(g, msg, true, ch, nullptr, vict, TO_NOTVICT);
+    act(g, msg, true, ch, nullptr, vict, act_to::notvict);
     int64_t dmg = getMaxKI(g, vict) * 0.02;
     char_set_lastattack(vict, char_get_lastattack(vict) + (1000));
     hurt(g, 0, 0, vict, ch, nullptr, dmg, 0);
     if (char_get_bonuses(ch, BONUS_FIREPRONE)) {
       send_to_char(g, ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
       send_to_char(g, vict, "@RThey are easily burned!@n\r\n");
-      char_aff_set(ch, AFF_BURNED, true);
+      char_aff_set(ch, aff_flag::burned, true);
     } else if (char_get_aff_abils_con(ch) < axion_dice(g, 0)) {
       send_to_char(g, ch, "@RYou are badly burned!@n\r\n");
       send_to_char(g, vict, "@RThey are burned!@n\r\n");
-      char_aff_set(ch, AFF_BURNED, true);
+      char_aff_set(ch, aff_flag::burned, true);
     }
-  } else if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
+  } else if (getCurPL(g, vict) > 0 && !char_aff_flagged(vict, aff_flag::spirit) && char_aff_flagged(vict, aff_flag::fireshield) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
     send_to_char(g, vict, "@RThey appear to be fireproof!@n\r\n");
   }
 }
@@ -202,9 +202,9 @@ void tech_handle_fireshield(GameWorld *g, char_data *ch, char_data *vict, std::s
 bool tech_handle_android_absorb(GameWorld *g, char_data *ch, char_data *vict)
 {
   if (char_is_android(vict) && char_has_arms(g, vict) && char_get_skill(vict, SKILL_ABSORB) > rand_number(g, 1, 140)) {
-    act(g, "@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", true, ch, nullptr, vict, TO_VICT);
-    act(g, "@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", true, ch, nullptr, vict, TO_NOTVICT);
+    act(g, "@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", true, ch, nullptr, vict, act_to::actor);
+    act(g, "@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", true, ch, nullptr, vict, act_to::vict);
+    act(g, "@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", true, ch, nullptr, vict, act_to::notvict);
     int amot = char_get_charge(ch);
     if (char_is_npc(ch)) {
       amot = getMaxKI(g, ch) / 20;
@@ -222,11 +222,11 @@ bool tech_handle_android_absorb(GameWorld *g, char_data *ch, char_data *vict)
 
 void tech_handle_crashdown(GameWorld *g, char_data *ch, char_data *vict)
 {
-  if (char_aff_flagged(vict, AFF_FLYING)) {
-    act(g, "@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_CHAR);
-    act(g, "@wYou are knocked out of the air!@n", true, ch, nullptr, vict, TO_VICT);
-    act(g, "@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_NOTVICT);
-    char_aff_set(vict, AFF_FLYING, false);
+  if (char_aff_flagged(vict, aff_flag::flying)) {
+    act(g, "@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, act_to::actor);
+    act(g, "@wYou are knocked out of the air!@n", true, ch, nullptr, vict, act_to::vict);
+    act(g, "@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, act_to::notvict);
+    char_aff_set(vict, aff_flag::flying, false);
     char_set_altitude(vict, 0);
     char_set_position(vict, POS_SITTING);
   } else {
@@ -244,15 +244,15 @@ bool tech_handle_arms(GameWorld *g, char_data *ch)
     send_to_char(g, ch, "Using your broken right arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (1) - 1) < 0) {
-      act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@RYour right arm has fallen apart!@n", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "@r$n@R's right arm has fallen apart!@n", true, ch, nullptr, nullptr, act_to::room);
     }
   } else if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50 && char_get_limb_condition(ch, (1) - 1) < 0) {
     send_to_char(g, ch, "Using your broken left arm has damaged it more!@n\r\n");
     char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) - (rand_number(g, 3, 5)));
     if (char_get_limb_condition(ch, (2) - 1) < 0) {
-      act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_CHAR);
-      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "@RYour left arm has fallen apart!@n", true, ch, nullptr, nullptr, act_to::actor);
+      act(g, "@r$n@R's left arm has fallen apart!@n", true, ch, nullptr, nullptr, act_to::room);
     }
   }
   return true;

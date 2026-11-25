@@ -196,9 +196,9 @@ namespace {
       mudlog(g, LOG_NRM, ADMLVL_BUILDER, true, "HSEDIT: Max houses limit reached - Unable to save OLC data");
     }
     if (room_of(g, house.vnum))
-      room_set_flag(g, house.vnum, ROOM_HOUSE, true);
+      room_set_flag(g, house.vnum, room_flag::house, true);
     if (room_of(g, house.atrium))
-      room_set_flag(g, house.atrium, ROOM_ATRIUM, true);
+      room_set_flag(g, house.atrium, room_flag::atrium, true);
   }
 
   void house_editor::delete_house(GameWorld *g, struct descriptor_data *d)
@@ -212,7 +212,7 @@ namespace {
     if (room_vnum room = g->house_control[i].vnum; !room_of(g, room))
       mud_log("SYSERR: House {:d} had invalid vnum {:d}!", house.vnum, room);
     else
-      room_set_flag(g, room, ROOM_BFS_MARK, false); /* quirk: clears ROOM_BFS_MARK, meant ROOM_HOUSE and ROOM_HOUSE_CRASH:
+      room_set_flag(g, room, room_flag::bfs_mark, false); /* quirk: clears room_flag::bfs_mark, meant room_flag::house and room_flag::house_crash:
                                                          their numbers or-ed as bits, 11 | 12 is 15 */
     House_delete_file(g->house_control[i].vnum);
     std::copy(g->house_control + i + 1, g->house_control + g->num_of_houses, g->house_control + i);

@@ -38,14 +38,14 @@ void psychic_barrage_mind(ki_shot &s)
   GameWorld *g           = s.g;
   struct char_data *vict = s.vict;
 
-  if (!char_aff_flagged(vict, AFF_MBREAK) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-    act(g, "@mYour mind's eye has been shattered, you can't charge ki until you recover!@n", true, vict, nullptr, nullptr, TO_CHAR);
-    act(g, "@M$n@m's mind has been damaged by the attack!@n", true, vict, nullptr, nullptr, TO_ROOM);
-    char_aff_set(vict, AFF_MBREAK, true);
-  } else if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-    act(g, "@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
-    act(g, "@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, TO_ROOM);
-    char_aff_set(vict, AFF_SHOCKED, true);
+  if (!char_aff_flagged(vict, aff_flag::mbreak) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, aff_flag::sanctuary)) {
+    act(g, "@mYour mind's eye has been shattered, you can't charge ki until you recover!@n", true, vict, nullptr, nullptr, act_to::actor);
+    act(g, "@M$n@m's mind has been damaged by the attack!@n", true, vict, nullptr, nullptr, act_to::room);
+    char_aff_set(vict, aff_flag::mbreak, true);
+  } else if (!char_aff_flagged(vict, aff_flag::shocked) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, aff_flag::sanctuary)) {
+    act(g, "@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, act_to::actor);
+    act(g, "@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, act_to::room);
+    char_aff_set(vict, aff_flag::shocked, true);
   }
 }
 
@@ -286,7 +286,7 @@ bool kakusanha_worth(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
   if (getCurPL(g, vict) <= 0)
     return false;
-  if (char_aff_flagged(vict, AFF_GROUP) && !char_is_npc(vict) &&
+  if (char_aff_flagged(vict, aff_flag::group) && !char_is_npc(vict) &&
       (char_get_master(g, vict) == ch || char_get_master(g, ch) == vict || char_get_master(g, vict) == char_get_master(g, ch)))
     return false;
   return area_fair_game(g, ch, vict);
@@ -313,7 +313,7 @@ void kakusanha_impacts(area_shot &s)
   room_vnum here = char_get_in_room(s.ch);
   int missed     = 5 - s.count;
 
-  if (s.count >= 5 || room_flagged(s.g, here, ROOM_SPACE))
+  if (s.count >= 5 || room_flagged(s.g, here, room_flag::space))
     return;
   send_to_room(s.g, here, "The rest of the beams slam into the ground!@n\r\n");
   send_to_room(s.g, here, "@wBright explosions erupt from the impacts!\r\n");

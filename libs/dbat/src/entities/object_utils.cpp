@@ -16,39 +16,39 @@ bool wearable_obj(struct obj_data *obj)
 {
   int pass = false;
 
-  if (obj_wear_flagged(obj, ITEM_WEAR_FINGER))
+  if (obj_wear_flagged(obj, wear_flag::finger))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_NECK))
+  if (obj_wear_flagged(obj, wear_flag::neck))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_BODY))
+  if (obj_wear_flagged(obj, wear_flag::body))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_HEAD))
+  if (obj_wear_flagged(obj, wear_flag::head))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_LEGS))
+  if (obj_wear_flagged(obj, wear_flag::legs))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_FEET))
+  if (obj_wear_flagged(obj, wear_flag::feet))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_HANDS))
+  if (obj_wear_flagged(obj, wear_flag::hands))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_ARMS))
+  if (obj_wear_flagged(obj, wear_flag::arms))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_SHIELD))
+  if (obj_wear_flagged(obj, wear_flag::shield))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_ABOUT))
+  if (obj_wear_flagged(obj, wear_flag::about))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_WAIST))
+  if (obj_wear_flagged(obj, wear_flag::waist))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_WRIST))
+  if (obj_wear_flagged(obj, wear_flag::wrist))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_WIELD))
+  if (obj_wear_flagged(obj, wear_flag::wield))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_EYE))
+  if (obj_wear_flagged(obj, wear_flag::eye))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_PACK))
+  if (obj_wear_flagged(obj, wear_flag::pack))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_SH))
+  if (obj_wear_flagged(obj, wear_flag::sh))
     pass = true;
-  if (obj_wear_flagged(obj, ITEM_WEAR_EAR))
+  if (obj_wear_flagged(obj, wear_flag::ear))
     pass = true;
 
   if (pass == true)
@@ -59,7 +59,7 @@ bool wearable_obj(struct obj_data *obj)
 
 void randomize_eq(GameWorld *g, struct obj_data *obj)
 {
-  if (wearable_obj(obj) && !obj_extra_flagged(obj, ITEM_NORANDOM)) {
+  if (wearable_obj(obj) && !obj_extra_flagged(obj, extra_flag::norandom)) {
     int value = 0, slot = 0, roll = rand_number(g, 2, 12), slot1 = 1, slot2 = 1;
     int stat     = 0;
     int strength = false, wisdom = false, intelligence = false, dexterity = false, speed = false, constitution = false;
@@ -308,9 +308,9 @@ void randomize_eq(GameWorld *g, struct obj_data *obj)
     }
     int dice = rand_number(g, 2, 12);
     if (dice >= 10) {
-      obj_extra_set(obj, ITEM_SLOT2, true);
+      obj_extra_set(obj, extra_flag::slot2, true);
     } else if (dice >= 7) {
-      obj_extra_set(obj, ITEM_SLOT1, true);
+      obj_extra_set(obj, extra_flag::slot1, true);
     }
   }
 }
@@ -392,7 +392,7 @@ struct obj_data *create_money(GameWorld *g, int amount)
   obj_set_value(obj, VAL_ALL_MAXHEALTH, 100);
   obj_set_value(obj, VAL_ALL_HEALTH, 100);
   obj->wear_flags = {};
-  obj_wear_set(obj, ITEM_WEAR_TAKE, true);
+  obj_wear_set(obj, wear_flag::take, true);
   obj_set_value(obj, VAL_MONEY_SIZE, amount);
   obj_set_cost(obj, amount);
   obj->item_number = NOTHING;

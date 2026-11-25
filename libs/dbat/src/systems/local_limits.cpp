@@ -52,7 +52,7 @@ static void check_idling(GameWorld *g, struct char_data *ch);
 static void barrier_shed(GameWorld *g, struct char_data *ch)
 {
 
-  if (!char_aff_flagged(ch, AFF_SANCTUARY)) {
+  if (!char_aff_flagged(ch, aff_flag::sanctuary)) {
     return;
   }
 
@@ -95,12 +95,12 @@ static void barrier_shed(GameWorld *g, struct char_data *ch)
 
   if (char_get_barrier(ch) <= 0) {
     char_set_barrier(ch, 0);
-    act(g, "@cYour barrier disappears.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    act(g, "@c$n@c's barrier disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@cYour barrier disappears.@n", true, ch, nullptr, nullptr, act_to::actor);
+    act(g, "@c$n@c's barrier disappears.@n", true, ch, nullptr, nullptr, act_to::room);
   } else {
-    act(g, "@cYour barrier loses some energy.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(g, "@cYour barrier loses some energy.@n", true, ch, nullptr, nullptr, act_to::actor);
     send_to_char(g, ch, "@D[@C{}@D]@n\r\n", add_commas(loss));
-    act(g, "@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.@n", true, ch, nullptr, nullptr, act_to::room);
   }
 
   if (recharge > 0 && (getCurKI(g, ch)) < getMaxKI(g, ch)) {
@@ -119,46 +119,46 @@ static void healthy_check(GameWorld *g, struct char_data *ch)
 
   int chance = 70, roll = rand_number(g, 1, 100), change = false;
 
-  if (char_aff_flagged(ch, AFF_SHOCKED) && roll >= chance) {
-    char_aff_set(ch, AFF_SHOCKED, false);
+  if (char_aff_flagged(ch, aff_flag::shocked) && roll >= chance) {
+    char_aff_set(ch, aff_flag::shocked, false);
     change = true;
   }
-  if (char_aff_flagged(ch, AFF_MBREAK) && roll >= chance) {
-    char_aff_set(ch, AFF_MBREAK, false);
+  if (char_aff_flagged(ch, aff_flag::mbreak) && roll >= chance) {
+    char_aff_set(ch, aff_flag::mbreak, false);
     change = true;
   }
-  if (is_affected(ch, AFF_WITHER) && roll >= chance) {
-    remove_affect(g, ch, AFF_WITHER);
+  if (is_affected(ch, aff_flag::wither) && roll >= chance) {
+    remove_affect(g, ch, aff_flag::wither);
     save_char(g, ch);
     change = true;
   }
-  if (char_aff_flagged(ch, AFF_CURSE) && roll >= chance) {
-    char_aff_set(ch, AFF_CURSE, false);
+  if (char_aff_flagged(ch, aff_flag::curse) && roll >= chance) {
+    char_aff_set(ch, aff_flag::curse, false);
     change = true;
   }
-  if (char_aff_flagged(ch, AFF_POISON) && roll >= chance) {
-    null_affect(g, ch, AFF_POISON);
+  if (char_aff_flagged(ch, aff_flag::poison) && roll >= chance) {
+    null_affect(g, ch, aff_flag::poison);
     change = true;
   }
-  if (char_is_affected(ch, AFF_PARALYZE) && roll >= chance) {
-    null_affect(g, ch, AFF_PARALYZE);
+  if (char_is_affected(ch, aff_flag::paralyze) && roll >= chance) {
+    null_affect(g, ch, aff_flag::paralyze);
     change = true;
   }
-  if (char_is_affected(ch, AFF_PARA) && roll >= chance) {
-    null_affect(g, ch, AFF_PARA);
+  if (char_is_affected(ch, aff_flag::para) && roll >= chance) {
+    null_affect(g, ch, aff_flag::para);
     change = true;
   }
-  if (char_aff_flagged(ch, AFF_BLIND) && roll >= chance) {
-    null_affect(g, ch, AFF_BLIND);
+  if (char_aff_flagged(ch, aff_flag::blind) && roll >= chance) {
+    null_affect(g, ch, aff_flag::blind);
     change = true;
   }
-  if (is_affected(ch, AFF_HYDROZAP) && roll >= chance) {
-    remove_affect(g, ch, AFF_HYDROZAP);
+  if (is_affected(ch, aff_flag::hydrozap) && roll >= chance) {
+    remove_affect(g, ch, aff_flag::hydrozap);
     save_char(g, ch);
     change = true;
   }
-  if (char_aff_flagged(ch, AFF_KNOCKED) && roll >= chance) {
-    char_aff_set(ch, AFF_KNOCKED, false);
+  if (char_aff_flagged(ch, aff_flag::knocked) && roll >= chance) {
+    char_aff_set(ch, aff_flag::knocked, false);
     char_set_position(ch, POS_SITTING);
     change = true;
   }
@@ -217,7 +217,7 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
     /* Neat and fast */
     gain = getMaxKI(g, ch) / 70;
   } else {
-    if (room_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::regen) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
       if (char_is_konatsu(ch)) {
         gain = getMaxKI(g, ch) / 12;
       }
@@ -230,7 +230,7 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_konatsu(ch) && !char_is_mutant(ch)) {
         gain = getMaxKI(g, ch) / 10;
       }
-    } else if (!room_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
+    } else if (!room_flagged(g, char_get_in_room(ch), room_flag::regen)) {
       if (char_is_konatsu(ch)) {
         gain = getMaxKI(g, ch) / 15;
       }
@@ -240,7 +240,7 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_konatsu(ch) && !char_is_mutant(ch)) {
         gain = getMaxKI(g, ch) / 12;
       }
-      if (room_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
+      if (room_flagged(g, char_get_in_room(ch), room_flag::bedroom)) {
         gain += gain * 0.25;
       }
       if (char_is_arlian(ch)) {
@@ -320,16 +320,16 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
     gain *= 2;
   }
 
-  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(g, ch) != nullptr) {
+  if (char_plr_flagged(ch, player_flag::healt) && char_get_sits(g, ch) != nullptr) {
     gain *= 20;
   }
-  if (is_affected(ch, AFF_SPECIAL_POSE) && axion_dice(g, 0) > char_get_skill(ch, SKILL_POSE)) {
-    remove_affect(g, ch, AFF_SPECIAL_POSE);
+  if (is_affected(ch, aff_flag::special_pose) && axion_dice(g, 0) > char_get_skill(ch, SKILL_POSE)) {
+    remove_affect(g, ch, aff_flag::special_pose);
     send_to_char(g, ch, "You feel slightly less confident now.\r\n");
     save_char(g, ch);
   }
-  if (is_affected(ch, AFF_HYDROZAP) && rand_number(g, 1, 4) >= 4) {
-    remove_affect(g, ch, AFF_HYDROZAP);
+  if (is_affected(ch, aff_flag::hydrozap) && rand_number(g, 1, 4) >= 4) {
+    remove_affect(g, ch, aff_flag::hydrozap);
     save_char(g, ch);
   }
 
@@ -345,10 +345,10 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
     gain += gain / 10;
   }
 
-  if (char_aff_flagged(ch, AFF_BLESS)) {
+  if (char_aff_flagged(ch, aff_flag::bless)) {
     gain *= 2;
   }
-  if (char_aff_flagged(ch, AFF_CURSE)) {
+  if (char_aff_flagged(ch, aff_flag::curse)) {
     gain /= 5;
   }
 
@@ -356,11 +356,11 @@ static int64_t mana_gain(GameWorld *g, struct char_data *ch)
     char_set_foodr(ch, char_get_foodr(ch) - (1));
   }
 
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_HINTS) && rand_number(g, 1, 5) == 5) {
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::hints) && rand_number(g, 1, 5) == 5) {
     hint_system(g, ch, 0);
   }
 
-  if (char_aff_flagged(ch, AFF_POISON))
+  if (char_aff_flagged(ch, aff_flag::poison))
     gain /= 4;
 
   if (cook_element(g, char_get_in_room(ch)) == 1)
@@ -378,7 +378,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
     /* Neat and fast */
     gain = getEffMaxPL(g, ch) / 70;
   } else {
-    if (room_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::regen) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
       if (char_is_human(ch)) {
         gain = getEffMaxPL(g, ch) / 20;
       }
@@ -394,7 +394,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_human(ch) && !char_is_namek(ch) && !char_is_mutant(ch)) {
         gain = getEffMaxPL(g, ch) / 10;
       }
-    } else if (!room_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
+    } else if (!room_flagged(g, char_get_in_room(ch), room_flag::regen)) {
       if (char_is_human(ch)) {
         gain = getEffMaxPL(g, ch) / 30;
       }
@@ -410,7 +410,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_human(ch) && !char_is_namek(ch) && !char_is_mutant(ch)) {
         gain = getEffMaxPL(g, ch) / 15;
       }
-      if (room_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
+      if (room_flagged(g, char_get_in_room(ch), room_flag::bedroom)) {
         gain += gain * 0.25;
       }
     }
@@ -420,7 +420,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
       case POS_STANDING:
         if (!char_is_hoshijin(ch) || (char_is_hoshijin(ch) && char_get_starphase(ch) <= 0)) {
           gain = gain / 4;
-        } else if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
+        } else if (char_is_android(ch) && char_plr_flagged(ch, player_flag::absorb)) {
           gain = gain / 3;
         } else {
           gain += (gain / 2);
@@ -444,7 +444,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
       case POS_RESTING:
         if (!char_get_sits(g, ch)) {
           gain += (gain / 2);
-        } else if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
+        } else if (char_is_android(ch) && char_plr_flagged(ch, player_flag::absorb)) {
           gain = gain * 1.5;
         } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090 && !char_is_arlian(ch)) {
           gain += gain * 1.1;
@@ -455,7 +455,7 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
       case POS_SITTING:
         if (!char_get_sits(g, ch)) {
           gain += (gain / 4);
-        } else if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
+        } else if (char_is_android(ch) && char_plr_flagged(ch, player_flag::absorb)) {
           gain = gain * 0.5;
         } else if (obj_get_vnum(g, char_get_sits(g, ch)) == 19090 && !char_is_arlian(ch)) {
           gain += gain * 0.6;
@@ -480,33 +480,33 @@ int64_t hit_gain(GameWorld *g, struct char_data *ch)
   if (char_is_hoshijin(ch) && char_get_starphase(ch) > 0) {
     gain *= 2;
   }
-  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(g, ch) != nullptr) {
+  if (char_plr_flagged(ch, player_flag::healt) && char_get_sits(g, ch) != nullptr) {
     gain *= 20;
   }
 
-  if (char_aff_flagged(ch, AFF_BLESS)) {
+  if (char_aff_flagged(ch, aff_flag::bless)) {
     gain *= 2;
   }
-  if (char_aff_flagged(ch, AFF_CURSE)) {
+  if (char_aff_flagged(ch, aff_flag::curse)) {
     gain /= 5;
   }
 
   /* Fury Mode Loss for halfbreeds */
 
-  if (char_plr_flagged(ch, PLR_FURY)) {
+  if (char_plr_flagged(ch, player_flag::fury)) {
     send_to_char(g, ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-    char_plr_set(ch, PLR_FURY, false);
+    char_plr_set(ch, player_flag::fury, false);
   }
 
   /* Fury Mode Loss for halfbreeds */
 
-  if (char_aff_flagged(ch, AFF_POISON))
+  if (char_aff_flagged(ch, aff_flag::poison))
     gain /= 4;
   if (cook_element(g, char_get_in_room(ch)) == 1)
     gain *= 2;
 
   if (!char_is_npc(ch)) {
-    if (char_plr_flagged(ch, PLR_ABSORB)) {
+    if (char_plr_flagged(ch, player_flag::absorb)) {
       gain = gain / 8;
     }
   }
@@ -527,7 +527,7 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
     /* Neat and fast */
     gain = getMaxST(g, ch) / 70;
   } else {
-    if (room_flagged(g, char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
+    if (room_flagged(g, char_get_in_room(ch), room_flag::regen) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && room_get_dmg(g, char_get_in_room(ch)) >= 75)) {
       if (char_is_mutant(ch)) {
         gain = getMaxST(g, ch) / 7;
       }
@@ -537,14 +537,14 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
       if (!char_is_mutant(ch)) {
         gain = getMaxST(g, ch) / 6;
       }
-    } else if (!room_flagged(g, char_get_in_room(ch), ROOM_REGEN)) {
+    } else if (!room_flagged(g, char_get_in_room(ch), room_flag::regen)) {
       if (char_is_mutant(ch)) {
         gain = getMaxST(g, ch) / 9;
       }
       if (!char_is_mutant(ch)) {
         gain = getMaxST(g, ch) / 8;
       }
-      if (room_flagged(g, char_get_in_room(ch), ROOM_BEDROOM)) {
+      if (room_flagged(g, char_get_in_room(ch), room_flag::bedroom)) {
         gain += gain * 0.25;
       }
     }
@@ -616,18 +616,18 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
   if (char_is_hoshijin(ch) && char_get_starphase(ch) > 0) {
     gain *= 2;
   }
-  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(g, ch) != nullptr) {
+  if (char_plr_flagged(ch, player_flag::healt) && char_get_sits(g, ch) != nullptr) {
     gain *= 20;
   }
 
-  if (char_aff_flagged(ch, AFF_BLESS)) {
+  if (char_aff_flagged(ch, aff_flag::bless)) {
     gain *= 2;
   }
-  if (char_aff_flagged(ch, AFF_CURSE)) {
+  if (char_aff_flagged(ch, aff_flag::curse)) {
     gain /= 5;
   }
 
-  if (char_aff_flagged(ch, AFF_POISON))
+  if (char_aff_flagged(ch, aff_flag::poison))
     gain /= 4;
 
   if (!calcGravCost(g, ch, 0)) {
@@ -635,7 +635,7 @@ static int64_t move_gain(GameWorld *g, struct char_data *ch)
     gain /= 4;
   }
 
-  if (room_flagged(g, char_get_in_room(ch), ROOM_AURA)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::aura)) {
     gain = getMaxST(g, ch) - (getCurST(g, ch));
   }
   if (cook_element(g, char_get_in_room(ch)) == 1)
@@ -658,40 +658,40 @@ static void update_flags(GameWorld *g, struct char_data *ch)
   if (char_get_bonuses(ch, BONUS_LATE) && char_get_position(ch) == POS_SLEEPING && rand_number(g, 1, 3) == 3) {
     if (getCurPL(g, ch) >= (getEffMaxPL(g, ch)) && (getCurST(g, ch)) >= getMaxST(g, ch) && (getCurKI(g, ch)) >= getMaxKI(g, ch)) {
       send_to_char(g, ch, "You FINALLY wake up.\r\n");
-      act(g, "$n wakes up.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n wakes up.", true, ch, nullptr, nullptr, act_to::room);
       char_set_position(ch, POS_SITTING);
     }
   }
 
-  if (char_aff_flagged(ch, AFF_KNOCKED) && !char_get_fighting(g, ch)) {
+  if (char_aff_flagged(ch, aff_flag::knocked) && !char_get_fighting(g, ch)) {
     cureStatusKnockedOut(g, ch, true);
   }
 
   barrier_shed(g, ch);
 
-  if (char_aff_flagged(ch, AFF_FIRESHIELD) && !char_get_fighting(g, ch) && rand_number(g, 1, 101) > char_get_skill(ch, SKILL_FIRESHIELD)) {
+  if (char_aff_flagged(ch, aff_flag::fireshield) && !char_get_fighting(g, ch) && rand_number(g, 1, 101) > char_get_skill(ch, SKILL_FIRESHIELD)) {
     send_to_char(g, ch, "Your fireshield disappears.\r\n");
-    char_aff_set(ch, AFF_FIRESHIELD, false);
+    char_aff_set(ch, aff_flag::fireshield, false);
   }
-  if (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_get_fighting(g, ch) && rand_number(g, 1, 3) == 2) {
+  if (char_aff_flagged(ch, aff_flag::zanzoken) && !char_get_fighting(g, ch) && rand_number(g, 1, 3) == 2) {
     send_to_char(g, ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
-    char_aff_set(ch, AFF_ZANZOKEN, false);
+    char_aff_set(ch, aff_flag::zanzoken, false);
   }
-  if (char_aff_flagged(ch, AFF_ENSNARED) && rand_number(g, 1, 3) == 2) {
+  if (char_aff_flagged(ch, aff_flag::ensnared) && rand_number(g, 1, 3) == 2) {
     send_to_char(g, ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
-    char_aff_set(ch, AFF_ENSNARED, false);
+    char_aff_set(ch, aff_flag::ensnared, false);
   }
 
-  if ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && char_plr_flagged(ch, PLR_TRANS1) && !char_plr_flagged(ch, PLR_FPSSJ)) {
+  if ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && char_plr_flagged(ch, player_flag::trans1) && !char_plr_flagged(ch, player_flag::fpssj)) {
     char_set_absorbs(ch, char_get_absorbs(ch) + (1));
     if (char_get_absorbs(ch) >= 300) {
       send_to_char(g, ch, "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
-      char_plr_set(ch, PLR_FPSSJ, true);
+      char_plr_set(ch, player_flag::fpssj, true);
       char_set_absorbs(ch, 0);
     }
   }
 
-  if (!char_is_npc(ch) && !char_plr_flagged(ch, PLR_STAIL) && !char_plr_flagged(ch, PLR_NOGROW) && (char_is_saiyan(ch) || char_is_halfbreed(ch))) {
+  if (!char_is_npc(ch) && !char_plr_flagged(ch, player_flag::stail) && !char_plr_flagged(ch, player_flag::nogrow) && (char_is_saiyan(ch) || char_is_halfbreed(ch))) {
     if (char_get_racial_pref(ch) == 1 && rand_number(g, 1, 50) >= 40) {
       char_set_tail_growth(ch, char_get_tail_growth(ch) + (1));
     } else if (char_get_racial_pref(ch) != 1 || char_is_saiyan(ch)) {
@@ -699,23 +699,23 @@ static void update_flags(GameWorld *g, struct char_data *ch)
     }
     if (char_get_tail_growth(ch) >= 10) {
       send_to_char(g, ch, "@wYour tail grows back.@n\r\n");
-      act(g, "$n@w's tail grows back.@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n@w's tail grows back.@n", true, ch, nullptr, nullptr, act_to::room);
       char_gain_tail(g, ch, true);
       char_set_tail_growth(ch, 0);
     }
   }
-  if (!char_is_npc(ch) && !char_plr_flagged(ch, PLR_TAIL) && (char_is_icer(ch) || char_is_bio(ch))) {
+  if (!char_is_npc(ch) && !char_plr_flagged(ch, player_flag::tail) && (char_is_icer(ch) || char_is_bio(ch))) {
     char_set_tail_growth(ch, char_get_tail_growth(ch) + (1));
     if (char_get_tail_growth(ch) >= 10) {
       send_to_char(g, ch, "@wYour tail grows back.@n\r\n");
-      act(g, "$n@w's tail grows back.@n", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n@w's tail grows back.@n", true, ch, nullptr, nullptr, act_to::room);
       char_gain_tail(g, ch, true);
       char_set_tail_growth(ch, 0);
     }
   }
-  if (char_aff_flagged(ch, AFF_MBREAK) && rand_number(g, 1, 3 + sick_fail) == 2) {
+  if (char_aff_flagged(ch, aff_flag::mbreak) && rand_number(g, 1, 3 + sick_fail) == 2) {
     send_to_char(g, ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
-    char_aff_set(ch, AFF_MBREAK, false);
+    char_aff_set(ch, aff_flag::mbreak, false);
     if (char_get_skill(ch, SKILL_TELEPATHY) <= 0 && rand_number(g, 1, 2) == 2) {
       char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) - 1);
       char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) - 1);
@@ -734,7 +734,7 @@ static void update_flags(GameWorld *g, struct char_data *ch)
         char_set_real_abils_intel(ch, 4);
     }
   }
-  if (char_aff_flagged(ch, AFF_SHOCKED) && rand_number(g, 1, 4) == 4) {
+  if (char_aff_flagged(ch, aff_flag::shocked) && rand_number(g, 1, 4) == 4) {
     send_to_char(g, ch, "@wYour mind is no longer shocked.@n\r\n");
     if (char_get_skill(ch, SKILL_TELEPATHY) > 0) {
       int skill = char_get_skill(ch, SKILL_TELEPATHY), stop = false;
@@ -748,21 +748,21 @@ static void update_flags(GameWorld *g, struct char_data *ch)
       if (skill < char_get_skill(ch, SKILL_TELEPATHY))
         send_to_char(g, ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
     }
-    char_aff_set(ch, AFF_SHOCKED, false);
+    char_aff_set(ch, aff_flag::shocked, false);
   }
-  if (char_aff_flagged(ch, AFF_FROZEN) && rand_number(g, 1, 2) == 2) {
+  if (char_aff_flagged(ch, aff_flag::frozen) && rand_number(g, 1, 2) == 2) {
     send_to_char(g, ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
-    act(g, "$n@W breaks out of the ice holding $m prisoner!", true, ch, nullptr, nullptr, TO_ROOM);
-    char_aff_set(ch, AFF_FROZEN, false);
+    act(g, "$n@W breaks out of the ice holding $m prisoner!", true, ch, nullptr, nullptr, act_to::room);
+    char_aff_set(ch, aff_flag::frozen, false);
   }
-  if (is_affected(ch, AFF_WITHER) && rand_number(g, 1, 6 + sick_fail) == 2) {
+  if (is_affected(ch, aff_flag::wither) && rand_number(g, 1, 6 + sick_fail) == 2) {
     send_to_char(g, ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
-    act(g, "$n@W's looks more fit now.", true, ch, nullptr, nullptr, TO_ROOM);
-    remove_affect(g, ch, AFF_WITHER);
+    act(g, "$n@W's looks more fit now.", true, ch, nullptr, nullptr, act_to::room);
+    remove_affect(g, ch, aff_flag::wither);
     save_char(g, ch);
   }
   if (wearing_stardust(g, ch) == 1) {
-    char_aff_set(ch, AFF_ZANZOKEN, true);
+    char_aff_set(ch, aff_flag::zanzoken, true);
     send_to_char(g, ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
   }
 }
@@ -831,10 +831,10 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
     return;
   }
 
-  if (char_aff_flagged(ch, AFF_WUNJO)) {
+  if (char_aff_flagged(ch, aff_flag::wunjo)) {
     gain += gain * 0.15;
   }
-  if (char_plr_flagged(ch, PLR_IMMORTAL)) {
+  if (char_plr_flagged(ch, player_flag::immortal)) {
     gain = gain * 0.95;
   }
 
@@ -865,13 +865,13 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
         if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(g, ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(g, ch))) {
           send_to_char(g, char_get_mindlink(g, ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
         } else {
-          act(g, "@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_VICT);
+          act(g, "@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, char_get_mindlink(g, ch), act_to::vict);
           int read = gain * 0.12;
           gain -= read;
           if (read == 0)
             read = 1;
           gain_exp(g, char_get_mindlink(g, ch), read);
-          act(g, "@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
+          act(g, "@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch, nullptr, char_get_mindlink(g, ch), act_to::actor);
         }
       }
       int64_t difff = level_exp(ch, char_get_level(ch) + 1) * 5;
@@ -897,14 +897,14 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
         if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(g, ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(g, ch))) {
           send_to_char(g, char_get_mindlink(g, ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
         } else {
-          act(g, "@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_VICT);
+          act(g, "@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, char_get_mindlink(g, ch), act_to::vict);
           int64_t read = gain * 0.12;
           diff -= (read * 0.15);
           gain -= read;
           if (read == 0)
             read = 1;
           gain_exp(g, char_get_mindlink(g, ch), read);
-          act(g, "@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch, nullptr, char_get_mindlink(g, ch), TO_CHAR);
+          act(g, "@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch, nullptr, char_get_mindlink(g, ch), act_to::actor);
         }
       }
       if (rand_number(g, 1, 5) >= 2) {
@@ -987,7 +987,7 @@ void gain_condition(GameWorld *g, struct char_data *ch, int condition, int value
     return;
   }
 
-  if (char_plr_flagged(ch, PLR_WRITING))
+  if (char_plr_flagged(ch, player_flag::writing))
     return;
 
   intoxicated = (char_get_conditions(g, ch, DRUNK) > 0);
@@ -1085,10 +1085,10 @@ static void check_idling(GameWorld *g, struct char_data *ch)
       if (char_get_in_room(ch) == 0 || char_get_in_room(ch) == 1) {
         char_set_load_room(g, ch, char_get_load_room(g, ch));
       }
-      if (!room_flagged(g, char_get_in_room(ch), ROOM_PAST) && (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899)) {
+      if (!room_flagged(g, char_get_in_room(ch), room_flag::past) && (char_get_in_room(ch) < 19800 || char_get_in_room(ch) > 19899)) {
         char_set_load_room(g, ch, char_get_in_room(ch));
       }
-      if (room_flagged(g, char_get_in_room(ch), ROOM_PAST)) {
+      if (room_flagged(g, char_get_in_room(ch), room_flag::past)) {
         char_set_load_room(g, ch, 1561);
       }
       if (char_get_in_room(ch) >= 2002 && char_get_in_room(ch) <= 2011) {
@@ -1140,7 +1140,7 @@ static void check_idling(GameWorld *g, struct char_data *ch)
           }
         }
       }
-      act(g, "$n disappears into the void.", true, ch, nullptr, nullptr, TO_ROOM);
+      act(g, "$n disappears into the void.", true, ch, nullptr, nullptr, act_to::room);
       send_to_char(g, ch, "You have been idle, and are pulled into a void.\r\n");
       save_char(g, ch);
       char_from_room(g, ch);
@@ -1171,7 +1171,7 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
 {
   int healrate = 0, recovered = false;
 
-  if (char_plr_flagged(ch, PLR_BANDAGED)) {
+  if (char_plr_flagged(ch, player_flag::bandaged)) {
     healrate += 10;
   }
 
@@ -1186,8 +1186,8 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
   if (healrate > 0) {
     if (char_get_limb_condition(ch, (1) - 1) > 0 && char_get_limb_condition(ch, (1) - 1) < 50) {
       if (char_get_limb_condition(ch, (1) - 1) + healrate >= 50) {
-        act(g, "You realize your right arm is no longer broken.", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "$n starts moving $s right arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "You realize your right arm is no longer broken.", true, ch, nullptr, nullptr, act_to::actor);
+        act(g, "$n starts moving $s right arm gingerly for a moment.", true, ch, nullptr, nullptr, act_to::room);
         char_set_limb_condition(ch, (1) - 1, char_get_limb_condition(ch, (1) - 1) + (healrate));
         recovered = true;
       } else {
@@ -1204,8 +1204,8 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
 
     if (char_get_limb_condition(ch, (2) - 1) > 0 && char_get_limb_condition(ch, (2) - 1) < 50) {
       if (char_get_limb_condition(ch, (2) - 1) + healrate >= 50) {
-        act(g, "You realize your left arm is no longer broken.", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "$n starts moving $s left arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "You realize your left arm is no longer broken.", true, ch, nullptr, nullptr, act_to::actor);
+        act(g, "$n starts moving $s left arm gingerly for a moment.", true, ch, nullptr, nullptr, act_to::room);
         char_set_limb_condition(ch, (2) - 1, char_get_limb_condition(ch, (2) - 1) + (healrate));
         recovered = true;
       } else {
@@ -1222,8 +1222,8 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
 
     if (char_get_limb_condition(ch, (3) - 1) > 0 && char_get_limb_condition(ch, (3) - 1) < 50) {
       if (char_get_limb_condition(ch, (3) - 1) + healrate >= 50) {
-        act(g, "You realize your right leg is no longer broken.", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "$n starts moving $s right leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "You realize your right leg is no longer broken.", true, ch, nullptr, nullptr, act_to::actor);
+        act(g, "$n starts moving $s right leg gingerly for a moment.", true, ch, nullptr, nullptr, act_to::room);
         char_set_limb_condition(ch, (3) - 1, char_get_limb_condition(ch, (3) - 1) + (healrate));
         recovered = true;
       } else {
@@ -1240,8 +1240,8 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
 
     if (char_get_limb_condition(ch, (4) - 1) > 0 && char_get_limb_condition(ch, (4) - 1) < 50) {
       if (char_get_limb_condition(ch, (4) - 1) + healrate >= 50) {
-        act(g, "You realize your left leg is no longer broken.", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "$n starts moving $s left leg gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "You realize your left leg is no longer broken.", true, ch, nullptr, nullptr, act_to::actor);
+        act(g, "$n starts moving $s left leg gingerly for a moment.", true, ch, nullptr, nullptr, act_to::room);
         char_set_limb_condition(ch, (4) - 1, char_get_limb_condition(ch, (4) - 1) + (healrate));
         recovered = true;
       } else {
@@ -1256,7 +1256,7 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
       send_to_char(g, ch, "Your left leg as fully recovered.\r\n");
     }
 
-    if (!char_plr_flagged(ch, PLR_BANDAGED) && recovered == true) {
+    if (!char_plr_flagged(ch, player_flag::bandaged) && recovered == true) {
       if (axion_dice(g, -10) > char_get_aff_abils_con(ch)) {
         char_set_real_abils_str(ch, char_get_real_abils_str(ch) - 1);
         char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) - 1);
@@ -1279,8 +1279,8 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
     }
   }
 
-  if (char_plr_flagged(ch, PLR_BANDAGED) && recovered == true) {
-    char_plr_set(ch, PLR_BANDAGED, false);
+  if (char_plr_flagged(ch, player_flag::bandaged) && recovered == true) {
+    char_plr_set(ch, player_flag::bandaged, false);
     send_to_char(g, ch, "You remove your bandages.\r\n");
     return;
   }
@@ -1292,7 +1292,7 @@ static void point_update_characters(GameWorld *g)
   for (char_data *i : each_char(g)) {
 
     if (!char_is_npc(i) && char_get_in_room(i) != NOWHERE) {
-      if (room_flagged(g, char_get_in_room(i), ROOM_HOUSE)) {
+      if (room_flagged(g, char_get_in_room(i), room_flag::house)) {
         char_set_relax_count(i, char_get_relax_count(i) + (1));
       } else if (char_get_relax_count(i) >= 464) {
         char_set_relax_count(i, char_get_relax_count(i) - (4));
@@ -1330,14 +1330,14 @@ static void point_update_characters(GameWorld *g)
         }
       }
 
-      if (char_plr_flagged(i, PLR_AURALIGHT)) {
+      if (char_plr_flagged(i, player_flag::auralight)) {
         if ((getCurKI(g, i)) > (mana_gain(g, i) + getPercentOfMaxKI(g, i, .05))) {
           send_to_char(g, i, "You send more energy into your aura to keep the light active.\r\n");
           decCurKI(g, i, mana_gain(g, i) + getPercentOfMaxKI(g, i, .05), 0);
         } else {
           send_to_char(g, i, "You don't have enough energy to keep the aura active.\r\n");
-          act(g, "$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
-          char_plr_set(i, PLR_AURALIGHT, false);
+          act(g, "$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, act_to::room);
+          char_plr_set(i, player_flag::auralight, false);
           room_set_light(g, char_get_in_room(i), room_get_light(g, char_get_in_room(i)) - 1);
         }
       }
@@ -1363,11 +1363,11 @@ static void point_update_characters(GameWorld *g)
           remove_kaioken(g, i, 2);
       }
 
-      if (char_aff_flagged(i, AFF_BURNED)) {
+      if (char_aff_flagged(i, aff_flag::burned)) {
         if (rand_number(g, 1, 5) >= 4) {
           send_to_char(g, i, "Your burns are healed now.\r\n");
-          act(g, "$n@w's burns are now healed.@n", true, i, nullptr, nullptr, TO_ROOM);
-          char_aff_set(i, AFF_BURNED, false);
+          act(g, "$n@w's burns are now healed.@n", true, i, nullptr, nullptr, act_to::room);
+          char_aff_set(i, aff_flag::burned, false);
         }
       }
 
@@ -1381,23 +1381,23 @@ static void point_update_characters(GameWorld *g)
 
       if (room_sect(g, char_get_in_room(i)) == SECT_WATER_NOSWIM && !char_get_carried_by(g, i) && !char_is_kanassan(i)) {
         if ((getCurST(g, i)) >= (getCurCarriedWeight(i))) {
-          act(g, "@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);
-          act(g, "@C$n@b swims in place.@n", true, i, nullptr, nullptr, TO_ROOM);
+          act(g, "@bYou swim in place.@n", true, i, nullptr, nullptr, act_to::actor);
+          act(g, "@C$n@b swims in place.@n", true, i, nullptr, nullptr, act_to::room);
           decCurST(g, i, getCurCarriedWeight(i), 0);
         } else {
           decCurST(g, i, getCurCarriedWeight(i), 0);
-          act(g, "@RYou are drowning!@n", true, i, nullptr, nullptr, TO_CHAR);
-          act(g, "@C$n@b gulps water as $e struggles to stay above the water line.@n", true, i, nullptr, nullptr, TO_ROOM);
+          act(g, "@RYou are drowning!@n", true, i, nullptr, nullptr, act_to::actor);
+          act(g, "@C$n@b gulps water as $e struggles to stay above the water line.@n", true, i, nullptr, nullptr, act_to::room);
           if (getCurPL(g, i) - ((getEffMaxPL(g, i)) / 3) <= 0) {
-            act(g, "@rYou drown!@n", true, i, nullptr, nullptr, TO_CHAR);
-            act(g, "@R$n@r drowns!@n", true, i, nullptr, nullptr, TO_ROOM);
+            act(g, "@rYou drown!@n", true, i, nullptr, nullptr, act_to::actor);
+            act(g, "@R$n@r drowns!@n", true, i, nullptr, nullptr, act_to::room);
             die(g, i, nullptr);
           } else {
             decCurHealth(g, i, (getEffMaxPL(g, i)) / 3, 0);
           }
         }
       }
-      if (!has_o2(i) && room_sunken(g, char_get_in_room(i)) && !room_flagged(g, char_get_in_room(i), ROOM_SPACE)) {
+      if (!has_o2(i) && room_sunken(g, char_get_in_room(i)) && !room_flagged(g, char_get_in_room(i), room_flag::space)) {
         if (((getCurKI(g, i)) - mana_gain(g, i)) > getMaxKI(g, i) / 200) {
           send_to_char(g, i, "Your ki holds an atmosphere around you.\r\n");
           decCurKI(g, i, mana_gain(g, i) + getPercentOfMaxKI(g, i, .005), 0);
@@ -1407,12 +1407,12 @@ static void point_update_characters(GameWorld *g)
             decCurHealth(g, i, hit_gain(g, i) + getPercentOfMaxHealth(g, i, .05), 0);
           } else if (getCurPL(g, i) <= getEffMaxPL(g, i) / 20) {
             send_to_char(g, i, "You have drowned!\r\n");
-            act(g, "@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
+            act(g, "@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, act_to::room);
             die(g, i, nullptr);
           }
         }
       }
-      if (!has_o2(i) && room_flagged(g, char_get_in_room(i), ROOM_SPACE)) {
+      if (!has_o2(i) && room_flagged(g, char_get_in_room(i), room_flag::space)) {
         if (((getCurKI(g, i)) - mana_gain(g, i)) > getMaxKI(g, i) * 0.005) {
           send_to_char(g, i, "Your ki holds an atmosphere around you.\r\n");
           decCurKI(g, i, mana_gain(g, i) + getPercentOfMaxKI(g, i, .005), 0);
@@ -1423,45 +1423,45 @@ static void point_update_characters(GameWorld *g)
           } else if (getCurPL(g, i) <= getEffMaxPL(g, i) / 20) {
             send_to_char(g, i, "You have drowned!\r\n");
             decCurHealthPercent(g, i, 1, 1);
-            act(g, "@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
+            act(g, "@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, act_to::room);
             die(g, i, nullptr);
           }
         }
       }
-      if (!char_aff_flagged(i, AFF_FLYING) && room_get_geffect(g, char_get_in_room(i)) == 6 && !char_mob_flagged(i, MOB_NOKILL) && !char_is_demon(i)) {
-        act(g, "@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_CHAR);
-        act(g, "@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_ROOM);
+      if (!char_aff_flagged(i, aff_flag::flying) && room_get_geffect(g, char_get_in_room(i)) == 6 && !char_mob_flagged(i, mob_flag::nokill) && !char_is_demon(i)) {
+        act(g, "@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, act_to::actor);
+        act(g, "@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, act_to::room);
         if (char_is_npc(i) && char_is_humanoid(i) && rand_number(g, 1, 2) == 2) {
           do_fly(g, i, "", 0, 0);
         }
         decCurHealthPercent(g, i, .05, 0);
         if (getCurPL(g, i) < 0) {
-          act(g, "@rYou have burned to death!@n", true, i, nullptr, nullptr, TO_CHAR);
-          act(g, "@R$n@r has burned to death!@n", true, i, nullptr, nullptr, TO_ROOM);
+          act(g, "@rYou have burned to death!@n", true, i, nullptr, nullptr, act_to::actor);
+          act(g, "@R$n@r has burned to death!@n", true, i, nullptr, nullptr, act_to::room);
           die(g, i, nullptr);
         }
       }
-      if (change && !char_aff_flagged(i, AFF_POISON)) {
-        if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(g, i) != nullptr) {
+      if (change && !char_aff_flagged(i, aff_flag::poison)) {
+        if (char_plr_flagged(i, player_flag::healt) && char_get_sits(g, i) != nullptr) {
           send_to_char(g, i, "@wThe healing tank works wonders on your injuries.@n\r\n");
           obj_set_healcharge(char_get_sits(g, i), obj_get_healcharge(char_get_sits(g, i)) - (rand_number(g, 1, 2)));
           if (obj_get_healcharge(char_get_sits(g, i)) == 0) {
             send_to_char(g, i, "@wThe healing tank is now too low on energy to heal you.\r\n");
-            act(g, "You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
-            act(g, "@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-            char_plr_set(i, PLR_HEALT, false);
+            act(g, "You step out of the now empty healing tank.", true, i, nullptr, nullptr, act_to::actor);
+            act(g, "@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, act_to::room);
+            char_plr_set(i, player_flag::healt, false);
             obj_set_sitting(char_get_sits(g, i), nullptr);
             char_set_sits(i, nullptr);
           } else if (isFullVitals(i)) {
             send_to_char(g, i, "@wYou are fully recovered now.\r\n");
-            act(g, "You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
-            act(g, "@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-            char_plr_set(i, PLR_HEALT, false);
+            act(g, "You step out of the now empty healing tank.", true, i, nullptr, nullptr, act_to::actor);
+            act(g, "@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, act_to::room);
+            char_plr_set(i, player_flag::healt, false);
             obj_set_sitting(char_get_sits(g, i), nullptr);
             char_set_sits(i, nullptr);
           }
-        } else if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(g, i) == nullptr) {
-          char_plr_set(i, PLR_HEALT, false);
+        } else if (char_plr_flagged(i, player_flag::healt) && char_get_sits(g, i) == nullptr) {
+          char_plr_set(i, player_flag::healt, false);
         } else if (char_get_position(i) == POS_SLEEPING) {
           send_to_char(g, i, "@wYour sleep does you some good.@n\r\n");
           if (!char_is_android(i) && !char_get_fighting(g, i))
@@ -1479,7 +1479,7 @@ static void point_update_characters(GameWorld *g)
         else
           send_to_char(g, i, "You feel slightly better.\r\n");
       }
-      if (char_aff_flagged(i, AFF_POISON)) {
+      if (char_aff_flagged(i, aff_flag::poison)) {
         double cost = 0.0;
         if (char_get_aff_abils_con(i) >= 100) {
           cost = 0.01;
@@ -1496,13 +1496,13 @@ static void point_update_characters(GameWorld *g)
         }
         if (getCurPL(g, i) - getEffMaxPL(g, i) * cost > 0) {
           send_to_char(g, i, "You puke as the poison burns through your blood.\r\n");
-          act(g, "$n shivers and then pukes.", true, i, nullptr, nullptr, TO_ROOM);
+          act(g, "$n shivers and then pukes.", true, i, nullptr, nullptr, act_to::room);
           decCurHealth(g, i, getEffMaxPL(g, i) * cost, 0);
         } else {
           send_to_char(g, i, "The poison claims your life!\r\n");
-          act(g, "$n pukes up blood and falls down dead!", true, i, nullptr, nullptr, TO_ROOM);
+          act(g, "$n pukes up blood and falls down dead!", true, i, nullptr, nullptr, act_to::room);
           if (char_get_poisonby(g, i)) {
-            if (char_aff_flagged(char_get_poisonby(g, i), AFF_GROUP)) {
+            if (char_aff_flagged(char_get_poisonby(g, i), aff_flag::group)) {
               group_gain(g, char_get_poisonby(g, i), i);
             } else {
               solo_gain(g, char_get_poisonby(g, i), i);
@@ -1520,7 +1520,7 @@ static void point_update_characters(GameWorld *g)
     } else if (char_get_position(i) == POS_MORTALLYW) {
       continue;
     }
-    if ((getCurKI(g, i)) >= getMaxKI(g, i) * 0.5 && char_get_charge(i) < getMaxKI(g, i) * 0.1 && char_get_preference(i) == PREFERENCE_KI && !char_plr_flagged(i, PLR_AURALIGHT)) {
+    if ((getCurKI(g, i)) >= getMaxKI(g, i) * 0.5 && char_get_charge(i) < getMaxKI(g, i) * 0.1 && char_get_preference(i) == PREFERENCE_KI && !char_plr_flagged(i, player_flag::auralight)) {
       char_set_charge(i, getMaxKI(g, i) * 0.1);
     }
     if (!char_is_npc(i)) {
@@ -1541,7 +1541,7 @@ static void point_update_objects(GameWorld *g)
   for (obj_data *j : each_obj(g)) {
 
     /* Let's get rid of dropped norent items. */
-    if (obj_extra_flagged(j, ITEM_NORENT) && obj_get_worn_by(j) == nullptr && obj_get_carried_by(j) == nullptr && auction_obj(g) != j && obj_get_vnum(g, j) != 7200) {
+    if (obj_extra_flagged(j, extra_flag::norent) && obj_get_worn_by(j) == nullptr && obj_get_carried_by(j) == nullptr && auction_obj(g) != j && obj_get_vnum(g, j) != 7200) {
       time_t diff = 0;
 
       diff = game_now(g) - obj_get_lload(j);
@@ -1563,29 +1563,29 @@ static void point_update_objects(GameWorld *g)
       /* timer count down */
       if (obj_get_timer(j) > 0)
         obj_set_timer(j, obj_get_timer(j) - 1);
-      if (!obj_get_name(j).contains("android") && !obj_get_name(j).contains("Android") && !obj_extra_flagged(j, ITEM_BURIED)) {
+      if (!obj_get_name(j).contains("android") && !obj_get_name(j).contains("Android") && !obj_extra_flagged(j, extra_flag::buried)) {
         if (obj_get_timer(j) == 5) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DFlies start to gather around $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
-            act(g, "@DFlies start to gather around $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
+            act(g, "@DFlies start to gather around $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::actor);
+            act(g, "@DFlies start to gather around $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::room);
           }
         }
         if (obj_get_timer(j) == 3) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DA cloud of flies has formed over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
-            act(g, "@DA cloud of flies has formed over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
+            act(g, "@DA cloud of flies has formed over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::actor);
+            act(g, "@DA cloud of flies has formed over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::room);
           }
         }
         if (obj_get_timer(j) == 2) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
-            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
+            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::actor);
+            act(g, "@DMaggots can be seen crawling all over $p@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::room);
           }
         }
         if (obj_get_timer(j) == 1) {
           if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
-            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
-            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
+            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::actor);
+            act(g, "@DMaggots have nearly stripped $p of all its flesh@D.@n", true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::room);
           }
         }
       }
@@ -1593,20 +1593,20 @@ static void point_update_objects(GameWorld *g)
 
         if (obj_get_carried_by(j)) {
           if (!obj_get_name(j).contains("android")) {
-            act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, TO_CHAR);
+            act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, act_to::actor);
             if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
               act(g, "A quivering horde of maggots consumes $p.",
-                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
+                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::room);
               act(g, "A quivering horde of maggots consumes $p.",
-                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
+                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::actor);
             }
           } else {
-            act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, TO_CHAR);
+            act(g, "$p decays in your hands.", false, obj_get_carried_by(j), j, nullptr, act_to::actor);
             if ((obj_get_in_room(j) != NOWHERE) && (room_get_people(g, obj_get_in_room(j)))) {
               act(g, "$p breaks down completely into a pile of junk.",
-                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
+                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::room);
               act(g, "$p breaks down completely into a pile of junk.",
-                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
+                  true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::actor);
             }
           }
         }
@@ -1639,9 +1639,9 @@ static void point_update_objects(GameWorld *g)
       if (obj_get_timer(j) == 0) {
         if (obj_get_in_room(j) != NOWHERE) {
           act(g, "A glowing portal fades from existence.",
-              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
+              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::room);
           act(g, "A glowing portal fades from existence.",
-              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
+              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::actor);
         }
         extract_obj(g, j);
         continue;
@@ -1653,14 +1653,14 @@ static void point_update_objects(GameWorld *g)
       if (obj_get_timer(j) == 0) {
         if (obj_get_in_room(j) != NOWHERE) {
           act(g, "The $p@n settles to the ground and goes out.",
-              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_ROOM);
+              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::room);
           act(g, "A $p@n settles to the ground and goes out.",
-              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, TO_CHAR);
+              true, first_char(g, room_get_people(g, obj_get_in_room(j))), j, nullptr, act_to::actor);
         }
         extract_obj(g, j);
         continue;
       }
-    } else if (obj_extra_flagged(j, ITEM_ICE)) {
+    } else if (obj_extra_flagged(j, extra_flag::ice)) {
       if (obj_get_vnum(g, j) == 79 && obj_get_in_room(j) != NOWHERE && rand_number(g, 1, 2) == 2) {
         if (room_get_geffect(g, obj_get_in_room(j)) >= 1 && room_get_geffect(g, obj_get_in_room(j)) <= 5) {
           send_to_room(g, obj_get_in_room(j), "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
@@ -1741,7 +1741,7 @@ void timed_dt(GameWorld *g, struct char_data *ch)
       if (char_get_in_room(vict) == NOWHERE)
         continue;
 
-      if (!room_flagged(g, char_get_in_room(vict), ROOM_TIMED_DT))
+      if (!room_flagged(g, char_get_in_room(vict), room_flag::timed_dt))
         continue;
 
       timed_dt(g, vict);
@@ -1772,7 +1772,7 @@ void timed_dt(GameWorld *g, struct char_data *ch)
 
       /* Skip those alread dead people */
       /* extract char() jest sets the bit*/
-      if (char_plr_flagged(vict, PLR_NOTDEADYET))
+      if (char_plr_flagged(vict, player_flag::notdeadyet))
         continue;
 
       log_death_trap(g, vict);

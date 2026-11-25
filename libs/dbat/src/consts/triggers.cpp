@@ -25,7 +25,7 @@ static constexpr std::string_view trig_types_entries[] = {
     "Door",
     "UNUSED",
     "Time"};
-static_assert(std::size(trig_types_entries) == NUM_MTRIG_TYPES);
+static_assert(std::size(trig_types_entries) == flag_count<mob_trig>);
 constinit const name_table trig_types(trig_types_entries);
 
 /* obj trigger types */
@@ -50,7 +50,7 @@ static constexpr std::string_view otrig_types_entries[] = {
     "UNUSED",
     "Consume",
     "Time"};
-static_assert(std::size(otrig_types_entries) == NUM_OTRIG_TYPES);
+static_assert(std::size(otrig_types_entries) == flag_count<obj_trig>);
 constinit const name_table otrig_types(otrig_types_entries);
 
 /* wld trigger types */
@@ -75,7 +75,7 @@ static constexpr std::string_view wtrig_types_entries[] = {
     "Door",
     "UNUSED",
     "Time"};
-static_assert(std::size(wtrig_types_entries) == NUM_WTRIG_TYPES);
+static_assert(std::size(wtrig_types_entries) == flag_count<wld_trig>);
 constinit const name_table wtrig_types(wtrig_types_entries);
 
 static constexpr std::string_view ocmd_bits_entries[] = {"EQUIP", "INVEN", "ROOM"};

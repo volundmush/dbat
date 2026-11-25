@@ -208,17 +208,17 @@ std::string random_char(GameWorld *g, const owner_ptr &go)
   std::visit(overloaded{
                  [&](char_data *ch) {
                    for (char_data *tch : room_people(g, char_get_in_room(ch)))
-                     if (tch != ch && valid_dg_target(g, tch, DG_ALLOW_GODS) && char_can_see(g, ch, tch))
+                     if (tch != ch && valid_dg_target(g, tch, dg_gods::allow) && char_can_see(g, ch, tch))
                        consider(tch);
                  },
                  [&](obj_data *obj) {
                    for (char_data *other : room_people(g, obj_room(obj)))
-                     if (valid_dg_target(g, other, DG_ALLOW_GODS))
+                     if (valid_dg_target(g, other, dg_gods::allow))
                        consider(other);
                  },
                  [&](room_data *room) {
                    for (char_data *who : room_people(g, room))
-                     if (valid_dg_target(g, who, DG_ALLOW_GODS))
+                     if (valid_dg_target(g, who, dg_gods::allow))
                        consider(who);
                  },
              },

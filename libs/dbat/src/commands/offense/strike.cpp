@@ -34,8 +34,8 @@ bool legs_ok(GameWorld *g, struct char_data *ch)
       send_to_char(g, ch, leg.worse);
       char_set_limb_condition(ch, leg.limb, char_get_limb_condition(ch, leg.limb) - rand_number(g, 3, 5));
       if (char_get_limb_condition(ch, leg.limb) < 0) {
-        act(g, leg.gone_char, true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, leg.gone_room, true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, leg.gone_char, true, ch, nullptr, nullptr, act_to::actor);
+        act(g, leg.gone_room, true, ch, nullptr, nullptr, act_to::room);
       }
       break;
     }
@@ -144,7 +144,7 @@ void at_victim(strike_shot &s)
       }
       return;
     }
-    if (pry > rand_number(g, 1, 140) && (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, MOB_DUMMY))) {
+    if (pry > rand_number(g, 1, 140) && (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, mob_flag::dummy))) {
       act_triple(g, atk.parry, s.ch, nullptr, s.vict);
       improve_skill(g, s.vict, SKILL_PARRY, 0);
       pay(s, s.stcost / 2);
@@ -192,8 +192,8 @@ void at_object(strike_shot &s)
   if (!can_kill(g, s.ch, nullptr, s.obj, 0))
     return;
   s.dmg = getCurPL(g, s.ch) / 10000 + char_get_aff_abils_str(s.ch);
-  act(g, s.attack->obj_to_char, s.attack->obj_hide, s.ch, s.obj, nullptr, TO_CHAR);
-  act(g, s.attack->obj_to_room, s.attack->obj_hide, s.ch, s.obj, nullptr, TO_ROOM);
+  act(g, s.attack->obj_to_char, s.attack->obj_hide, s.ch, s.obj, nullptr, act_to::actor);
+  act(g, s.attack->obj_to_room, s.attack->obj_hide, s.ch, s.obj, nullptr, act_to::room);
   hurt(g, 0, 0, s.ch, nullptr, s.obj, s.dmg, 0);
   pay(s, s.stcost);
 }
@@ -225,7 +225,7 @@ void perform_strike(GameWorld *g, struct char_data *ch, std::string_view argumen
         return;
       break;
     case strike_needs::tail:
-      if (!char_plr_flagged(ch, PLR_TAIL) && !char_is_npc(ch)) {
+      if (!char_plr_flagged(ch, player_flag::tail) && !char_is_npc(ch)) {
         send_to_char(g, ch, "You have no tail!\r\n");
         return;
       }

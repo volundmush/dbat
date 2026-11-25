@@ -98,7 +98,7 @@ int process_output(GameWorld *g, struct descriptor_data *t)
     packet += "**OVERFLOW**\r\n";
 
   /* add the extra CRLF if the person isn't in compact mode */
-  if (desc_get_connected(t) == CON_PLAYING && t->character && !char_is_npc(t->character) && !char_prf_flagged(g, t->character, PRF_COMPACT))
+  if (desc_get_connected(t) == CON_PLAYING && t->character && !char_is_npc(t->character) && !char_prf_flagged(g, t->character, pref_flag::compact))
     packet += "\r\n";
 
   /* add a prompt */

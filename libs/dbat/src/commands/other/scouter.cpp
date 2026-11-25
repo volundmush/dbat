@@ -14,7 +14,6 @@
 #include "dbat/consts/auction.hpp"
 #include "dbat/consts/aligns.hpp"
 #include "dbat/utils.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/config.hpp"
 #include "dbat/character_utils.hpp"
 #include "dbat/descriptor_utils.hpp"
@@ -72,7 +71,7 @@ namespace {
   {
     if (char_is_npc(ch))
       return;
-    auto found = find_char(g, ch, target, FIND_CHAR_WORLD, "Look through who's eyes?\r\n");
+    auto found = find_char(g, ch, target, find_flag::char_world, "Look through who's eyes?\r\n");
     if (reject(g, ch, found))
       return;
     struct char_data *vict = *found;
@@ -83,7 +82,7 @@ namespace {
       refusal = MINDLESS;
     else if (char_get_admlevel(vict) > char_get_admlevel(ch))
       refusal = "Their mental power oustrips your's by unfathomable measurements!\r\n";
-    else if (char_aff_flagged(ch, AFF_SHOCKED))
+    else if (char_aff_flagged(ch, aff_flag::shocked))
       refusal = "Your mind has been shocked by telepathic feedback! You are not able to use telepathy right now.\r\n";
     else if (char_is_android(vict))
       refusal = ARTIFICIAL;
@@ -91,9 +90,9 @@ namespace {
       refusal = "They throw off your attempt with their own telepathic abilities!\r\n";
     else if (char_get_in_room(ch) == char_get_in_room(vict))
       refusal = "They are in the same room as you!\r\n";
-    else if (char_aff_flagged(vict, AFF_BLIND))
+    else if (char_aff_flagged(vict, aff_flag::blind))
       refusal = "They are blind!\r\n";
-    else if (char_plr_flagged(vict, PLR_EYEC))
+    else if (char_plr_flagged(vict, player_flag::eyec))
       refusal = "Their eyes are closed!\r\n";
     if (!refusal.empty()) {
       send_to_char(g, ch, refusal);
@@ -118,7 +117,7 @@ namespace {
       char_set_linker(ch, 0);
       return;
     }
-    auto found = find_char(g, ch, target, FIND_CHAR_WORLD, "Link with the mind of who?\r\n");
+    auto found = find_char(g, ch, target, find_flag::char_world, "Link with the mind of who?\r\n");
     if (reject(g, ch, found))
       return;
     struct char_data *vict = *found;
@@ -138,8 +137,8 @@ namespace {
       return;
     }
     if (char_get_skill(ch, SKILL_TELEPATHY) < axion_dice(g, char_get_aff_abils_intel(vict) * 0.1)) {
-      act(g, "@R$n@r tried to link $s mind with yours, but you manage to force a break in the link!@n", false, ch, nullptr, vict, TO_VICT);
-      act(g, "@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", false, ch, nullptr, vict, TO_CHAR);
+      act(g, "@R$n@r tried to link $s mind with yours, but you manage to force a break in the link!@n", false, ch, nullptr, vict, act_to::vict);
+      act(g, "@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", false, ch, nullptr, vict, act_to::actor);
       return;
     }
     act_triple(g, {"@CYou link your mind with @w$N.@n", "@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", {}, true}, ch, nullptr, vict);
@@ -162,7 +161,7 @@ namespace {
   /* telepathy read: what vict, in the room, is */
   void telepathy_read(GameWorld *g, struct char_data *ch, std::string &target)
   {
-    auto found = find_char(g, ch, target, FIND_CHAR_ROOM, "Read the mind of who?\r\n");
+    auto found = find_char(g, ch, target, find_flag::char_room, "Read the mind of who?\r\n");
     if (reject(g, ch, found))
       return;
     struct char_data *vict = *found;
@@ -176,10 +175,10 @@ namespace {
     }
     if (axion_dice(g, 0) > char_get_skill(ch, SKILL_TELEPATHY)) {
       telepathy_cost(g, ch);
-      act(g, "@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", true, ch, nullptr, vict, TO_CHAR);
-      if (rand_number(g, 1, 15) >= 14 && !char_aff_flagged(ch, AFF_SHOCKED)) {
-        act(g, "@MYour mind has been shocked!@n", true, ch, nullptr, nullptr, TO_CHAR);
-        char_aff_set(ch, AFF_SHOCKED, true);
+      act(g, "@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", true, ch, nullptr, vict, act_to::actor);
+      if (rand_number(g, 1, 15) >= 14 && !char_aff_flagged(ch, aff_flag::shocked)) {
+        act(g, "@MYour mind has been shocked!@n", true, ch, nullptr, nullptr, act_to::actor);
+        char_aff_set(ch, aff_flag::shocked, true);
       } else
         improve_skill(g, ch, SKILL_TELEPATHY, 0);
       return;
@@ -213,7 +212,7 @@ namespace {
   {
     struct char_data *vict = char_get_mindlink(g, ch);
     if (!vict) {
-      auto found = find_char(g, ch, target, FIND_CHAR_WORLD, "Send your thoughts to who?\r\n");
+      auto found = find_char(g, ch, target, find_flag::char_world, "Send your thoughts to who?\r\n");
       if (reject(g, ch, found))
         return;
       vict = *found;
@@ -289,7 +288,7 @@ ACMD(do_eavesdrop)
   struct room_direction_data *exit = char_get_exit(g, ch, dir);
   if (!exit)
     send_to_char(g, ch, "There is not a room there...\r\n");
-  else if (exit->exit_info.test(EX_CLOSED) && !exit_keyword(exit).empty())
+  else if (exit->exit_info.test(exit_flag::closed) && !exit_keyword(exit).empty())
     send_to_char(g, ch, "The {} is closed.\r\n", fname(exit_keyword(exit)));
   else {
     char_set_listenroom(ch, exit->to_room);
@@ -306,7 +305,7 @@ void check_eq(GameWorld *g, struct char_data *ch)
     if (!obj)
       continue;
     std::string_view to_char, to_room;
-    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
+    if (obj_extra_flagged(obj, extra_flag::broken)) {
       to_char = "@W$p@W falls apart and you remove it.@n";
       to_room = "@W$p@W falls apart and @C$n@W remove it.@n";
     } else if (obj == char_get_equipment(ch, WEAR_WIELD1) && char_get_limb_condition(ch, 0) <= 0) {
@@ -317,8 +316,8 @@ void check_eq(GameWorld *g, struct char_data *ch)
       to_room = "@C$n@W lets go of @c$p@W!@n";
     } else
       continue;
-    act(g, to_char, false, ch, obj, nullptr, TO_CHAR);
-    act(g, to_room, false, ch, obj, nullptr, TO_ROOM);
+    act(g, to_char, false, ch, obj, nullptr, act_to::actor);
+    act(g, to_room, false, ch, obj, nullptr, act_to::room);
     perform_remove(g, ch, i);
     return;
   }
@@ -334,13 +333,13 @@ namespace {
   std::string_view snet_blocked(GameWorld *g, struct char_data *ch)
   {
     room_vnum room = char_get_in_room(ch);
-    if (room_flagged(g, room, ROOM_HBTC))
+    if (room_flagged(g, room, room_flag::hbtc))
       return "This is a different dimension!\r\n";
     if (char_in_arena(g, ch))
       return "Lol, no.\r\n";
-    if (room_flagged(g, room, ROOM_PAST))
+    if (room_flagged(g, room, room_flag::past))
       return "This is the past, you can't talk on scouter net!\r\n";
-    if (room_flagged(g, room, ROOM_HELL))
+    if (room_flagged(g, room, room_flag::hell))
       return "The fire eats your transmission!\r\n";
     if (room >= 19800 && room <= 19899)
       return "Your signal will not be able to escape the walls of the pocket dimension.\r\n";
@@ -353,10 +352,10 @@ namespace {
     room_vnum from = char_get_in_room(ch), there = char_get_in_room(d->character);
     if (desc_get_connected(d) != CON_PLAYING || there == from)
       return false;
-    if (room_flagged(g, there, ROOM_HBTC) || room_flagged(g, there, ROOM_PAST))
+    if (room_flagged(g, there, room_flag::hbtc) || room_flagged(g, there, room_flag::past))
       return false;
     /* the afterlife only hears the afterlife, and the living only the living */
-    if (room_flagged(g, there, ROOM_RHELL) != room_flagged(g, from, ROOM_RHELL) || room_flagged(g, there, ROOM_AL) != room_flagged(g, from, ROOM_AL))
+    if (room_flagged(g, there, room_flag::rhell) != room_flagged(g, from, room_flag::rhell) || room_flagged(g, there, room_flag::al) != room_flagged(g, from, room_flag::al))
       return false;
     if (char_get_position(d->character) == POS_SLEEPING)
       return false;
@@ -400,8 +399,8 @@ ACMD(do_snet)
   int channel = call <= -1 ? parse_int(arg) : 0;
   if (channel > 0) {
     obj_set_scoutfreq(obj, std::min(channel, 999));
-    act(g, "@wYou push some buttons on $p@w and change its channel.", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@C$n@w pushes some buttons on $p@w and changes its channel.", true, ch, obj, nullptr, TO_ROOM);
+    act(g, "@wYou push some buttons on $p@w and change its channel.", true, ch, obj, nullptr, act_to::actor);
+    act(g, "@C$n@w pushes some buttons on $p@w and changes its channel.", true, ch, obj, nullptr, act_to::room);
     return;
   }
   if (char_get_bonuses(ch, BONUS_MUTE) > 0) {
@@ -467,11 +466,11 @@ ACMD(do_snet)
     hist = str_format("@CYou call @D[@R#@W{:d}@D] @G{}@n\r\n", call, CAP(arg2));
   send_to_char(g, ch, "{}", hist);
   add_history(g, ch, hist, HIST_SNET);
-  act(g, str_format("@C$n@W says into $s scouter, '@G@G{}@W'@n\r\n", said()), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("@C$n@W says into $s scouter, '@G@G{}@W'@n\r\n", said()), true, ch, nullptr, nullptr, act_to::room);
   if (kind == CALL) {
     if (!reached)
       send_to_char(g, ch, "@mThe transmission didn't reach them.@n\r\n");
-  } else if (room_flagged(g, char_get_in_room(ch), ROOM_RHELL) || room_flagged(g, char_get_in_room(ch), ROOM_AL))
+  } else if (room_flagged(g, char_get_in_room(ch), room_flag::rhell) || room_flagged(g, char_get_in_room(ch), room_flag::al))
     send_to_char(g, ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
 }
 
@@ -480,7 +479,7 @@ namespace {
   constexpr struct {
     extra_flag flag;
     int64_t limit;
-  } SCOUTER_LIMITS[] = {{ITEM_BSCOUTER, 150000}, {ITEM_MSCOUTER, 5000000}, {ITEM_ASCOUTER, 15000000}};
+  } SCOUTER_LIMITS[] = {{extra_flag::bscouter, 150000}, {extra_flag::mscouter, 5000000}, {extra_flag::ascouter, 15000000}};
 
   bool beyond_scouter(GameWorld *g, struct obj_data *scouter, struct char_data *vict)
   {
@@ -520,9 +519,9 @@ namespace {
 
   /* What a scouter notices about someone beyond their numbers */
   constexpr struct {
-    std::optional<aff_flag> aff; /* or none for the PLR_SELFD flag */
+    std::optional<aff_flag> aff; /* or none for the player_flag::selfd flag */
     std::string_view what{};
-  } NOTICED[] = {{AFF_ZANZOKEN, "Zanzoken Prepared"}, {AFF_HASS, "Accelerated Arms"}, {AFF_HEALGLOW, "Healing Glow Prepared"}, {AFF_POISON, "Poisoned"}, {std::nullopt, "Explosive Energy"}};
+  } NOTICED[] = {{aff_flag::zanzoken, "Zanzoken Prepared"}, {aff_flag::hass, "Accelerated Arms"}, {aff_flag::healglow, "Healing Glow Prepared"}, {aff_flag::poison, "Poisoned"}, {std::nullopt, "Explosive Energy"}};
 
   /* scouter scan: everyone on ch's planet, and the way to them or where they are */
   void scouter_scan(GameWorld *g, struct char_data *ch, struct obj_data *obj)
@@ -585,7 +584,7 @@ ACMD(do_scouter)
     scouter_scan(g, ch, obj);
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_ROOM, "They don't seem to be here.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_room, "They don't seem to be here.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -607,7 +606,7 @@ ACMD(do_scouter)
     act_triple(g, POINTED, ch, nullptr, vict);
     perform_remove(g, ch, WEAR_EYE);
     send_to_char(g, ch, "Your scouter overloads and explodes!\r\n");
-    act(g, "$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "$n's scouter explodes!", false, ch, nullptr, nullptr, act_to::room);
     extract_obj(g, obj);
     save_char(g, ch);
     return;
@@ -626,7 +625,7 @@ ACMD(do_scouter)
   send_to_char(g, ch, "{} ", READING_EXTRA);
   bool noticed = false;
   for (const auto &n : NOTICED) {
-    if (n.aff ? !char_aff_flagged(vict, *n.aff) : !char_plr_flagged(vict, PLR_SELFD))
+    if (n.aff ? !char_aff_flagged(vict, *n.aff) : !char_plr_flagged(vict, player_flag::selfd))
       continue;
     send_to_char(g, ch, "{}@Y{:>21}@n@D|@n\n", noticed ? "@D|@1             " : "", n.what);
     noticed = true;

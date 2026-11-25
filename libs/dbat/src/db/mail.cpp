@@ -48,7 +48,7 @@ static bool mail_recip_ok(GameWorld *g, std::string_view name)
   int player_i, ret = false;
 
   if ((player_i = get_ptable_by_name(g, name)) >= 0) {
-    if (!g->player_table[player_i].flags.test(PINDEX_DELETED))
+    if (!g->player_table[player_i].flags.test(pindex_flag::deleted))
       ret = true;
   }
   return ret;
@@ -168,35 +168,35 @@ static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char
 
   if (char_get_level(ch) < MIN_MAIL_LEVEL && char_get_admlevel(ch) < ADMLVL_IMMORT) {
     buf = str_format("$n tells you, 'Sorry, you have to be level {:d} to send mail!'", MIN_MAIL_LEVEL);
-    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
+    act(g, buf, false, mailman, nullptr, ch, act_to::vict);
     return;
   }
   std::string name = take_arg(arg);
 
   if (name.empty()) { /* you'll get no argument from me! */
     act(g, "$n tells you, 'You need to specify an addressee!'",
-        false, mailman, nullptr, ch, TO_VICT);
+        false, mailman, nullptr, ch, act_to::vict);
     return;
   }
-  if (char_get_gold(ch) < STAMP_PRICE && !char_adm_flagged(ch, ADM_MONEY)) {
+  if (char_get_gold(ch) < STAMP_PRICE && !char_adm_flagged(ch, admin_flag::money)) {
     buf = str_format("$n tells you, 'A stamp costs {:d} zenni.'\r\n$n tells you, '...which I see you can't afford.'",
                      STAMP_PRICE);
-    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
+    act(g, buf, false, mailman, nullptr, ch, act_to::vict);
     return;
   }
   if ((recipient = get_id_by_name(g, name)) < 0 || !mail_recip_ok(g, name)) {
     act(g, "$n tells you, 'No one by that name is registered here!'",
-        false, mailman, nullptr, ch, TO_VICT);
+        false, mailman, nullptr, ch, act_to::vict);
     return;
   }
-  act(g, "$n starts to write some mail.", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "$n starts to write some mail.", true, ch, nullptr, nullptr, act_to::room);
   buf = str_format("$n tells you, 'I'll take {:d} zenni for the stamp.'\r\n$n tells you, 'Write your message. (/s saves /h for help).'",
                    STAMP_PRICE);
 
-  act(g, buf, false, mailman, nullptr, ch, TO_VICT);
-  act(g, "@C$n@w starts writing a letter.@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, buf, false, mailman, nullptr, ch, act_to::vict);
+  act(g, "@C$n@w starts writing a letter.@n", true, ch, nullptr, nullptr, act_to::room);
   char_set_gold(ch, char_get_gold(ch) - (STAMP_PRICE));
-  char_plr_set(ch, PLR_MAILING, true); /* string_write() sets writing. */
+  char_plr_set(ch, player_flag::mailing, true); /* string_write() sets writing. */
 
   /* Start writing! */
   char_get_desc(ch)->draft.clear();
@@ -207,9 +207,9 @@ static void postmaster_check_mail(GameWorld *g, struct char_data *ch, struct cha
                                   int cmd, std::string_view arg)
 {
   if (has_mail(g, char_get_idnum(ch)))
-    act(g, "$n tells you, 'You have mail waiting.'", false, mailman, nullptr, ch, TO_VICT);
+    act(g, "$n tells you, 'You have mail waiting.'", false, mailman, nullptr, ch, act_to::vict);
   else
-    act(g, "$n tells you, 'Sorry, you don't have any mail waiting.'", false, mailman, nullptr, ch, TO_VICT);
+    act(g, "$n tells you, 'Sorry, you don't have any mail waiting.'", false, mailman, nullptr, ch, act_to::vict);
 }
 
 static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,
@@ -220,7 +220,7 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
 
   if (!has_mail(g, char_get_idnum(ch)) && mailman != nullptr) {
     buf = "$n tells you, 'Sorry, you don't have any mail waiting.'";
-    act(g, buf, false, mailman, nullptr, ch, TO_VICT);
+    act(g, buf, false, mailman, nullptr, ch, act_to::vict);
     return;
   }
   while (has_mail(g, char_get_idnum(ch))) {
@@ -229,8 +229,8 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
 
     obj_set_type_flag(obj, ITEM_NOTE);
     obj_get_wear_flags(obj) = {};
-    obj_wear_set(obj, ITEM_WEAR_TAKE, true);
-    obj_wear_set(obj, ITEM_WEAR_HOLD, true);
+    obj_wear_set(obj, wear_flag::take, true);
+    obj_wear_set(obj, wear_flag::hold, true);
     obj_set_weight(obj, 1);
     obj_set_cost(obj, 30);
     obj_set_cost_per_day(obj, 10);
@@ -244,7 +244,7 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
     obj_set_name(obj, "mail paper letter");
     bla.clear();
     blm.clear();
-    obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
+    obj_extra_set(obj, extra_flag::unique_save, true);
     add_unique_id(g, obj);
     obj_set_value(obj, 7, MATERIAL_PAPER);
     obj_set_value(obj, VAL_NOTE_HEALTH, 100);
@@ -254,12 +254,12 @@ static void postmaster_receive_mail(GameWorld *g, struct char_data *ch, struct c
       obj_set_action_description(obj, "Mail system error - please report.  Error #11.\r\n");
 
     /* so it saves */
-    obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
+    obj_extra_set(obj, extra_flag::unique_save, true);
 
     if (desc_is_playing(char_get_desc(ch)) && mailman != nullptr) {
       obj_to_char(g, obj, ch);
-      act(g, "$n gives you a piece of mail.", false, mailman, nullptr, ch, TO_VICT);
-      act(g, "$N gives $n a piece of mail.", false, ch, nullptr, mailman, TO_ROOM);
+      act(g, "$n gives you a piece of mail.", false, mailman, nullptr, ch, act_to::vict);
+      act(g, "$N gives $n a piece of mail.", false, ch, nullptr, mailman, act_to::room);
     } else {
       extract_obj(g, obj);
     }

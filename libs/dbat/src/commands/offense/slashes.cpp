@@ -40,15 +40,15 @@ void slay(ki_shot &s)
   struct char_data *vict = s.vict;
 
   die(g, vict, ch);
-  if (char_aff_flagged(ch, AFF_GROUP)) {
+  if (char_aff_flagged(ch, aff_flag::group)) {
     group_gain(g, ch, vict);
   } else {
     solo_gain(g, ch, vict);
   }
-  if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOGOLD)) {
+  if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, pref_flag::autogold)) {
     do_get(g, ch, "all.zenni corpse", 0, 0);
   }
-  if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, PRF_AUTOLOOT)) {
+  if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, pref_flag::autoloot)) {
     do_get(g, ch, "all corpse", 0, 0);
   }
 }
@@ -105,12 +105,12 @@ void sever(ki_shot &s, const sever_msgs &m, int left_limb, int right_limb, int o
   GameWorld *g           = s.g;
   struct char_data *vict = s.vict;
   auto say               = [&](const act_msgs &a) {
-    act(g, a.to_char, true, s.ch, nullptr, vict, TO_CHAR);
-    act(g, a.to_vict, true, s.ch, nullptr, vict, TO_VICT);
-    act(g, a.to_room, true, s.ch, nullptr, vict, m.told_to_vict ? TO_VICT : TO_NOTVICT);
+    act(g, a.to_char, true, s.ch, nullptr, vict, act_to::actor);
+    act(g, a.to_vict, true, s.ch, nullptr, vict, act_to::vict);
+    act(g, a.to_room, true, s.ch, nullptr, vict, m.told_to_vict ? act_to::vict : act_to::notvict);
   };
 
-  if (rand_number(g, 1, 100) >= odds && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
+  if (rand_number(g, 1, 100) >= odds && !char_is_npc(vict) && !char_aff_flagged(vict, aff_flag::sanctuary)) {
     if (char_get_limb_condition(vict, left_limb - 1) > 0 && !is_sparring(s.ch) && rand_number(g, 1, 2) == 2) {
       say(m.left);
       char_set_limb_condition(vict, left_limb - 1, 0);
@@ -136,15 +136,15 @@ void twin_slash_weapon(ki_shot &s)
 {
   struct obj_data *wobj = char_get_equipment(s.ch, WEAR_WIELD1);
   int wlvl              = 0;
-  if (obj_extra_flagged(wobj, ITEM_WEAPLVL1)) {
+  if (obj_extra_flagged(wobj, extra_flag::weaplvl1)) {
     wlvl = 1;
-  } else if (obj_extra_flagged(wobj, ITEM_WEAPLVL2)) {
+  } else if (obj_extra_flagged(wobj, extra_flag::weaplvl2)) {
     wlvl = 2;
-  } else if (obj_extra_flagged(wobj, ITEM_WEAPLVL3)) {
+  } else if (obj_extra_flagged(wobj, extra_flag::weaplvl3)) {
     wlvl = 3;
-  } else if (obj_extra_flagged(wobj, ITEM_WEAPLVL4)) {
+  } else if (obj_extra_flagged(wobj, extra_flag::weaplvl4)) {
     wlvl = 4;
-  } else if (obj_extra_flagged(wobj, ITEM_WEAPLVL5)) {
+  } else if (obj_extra_flagged(wobj, extra_flag::weaplvl5)) {
     wlvl = 5;
   }
   if (char_get_skill(s.ch, SKILL_TSLASH) >= 100) {
@@ -229,7 +229,7 @@ void phoenix_slash_fire(ki_shot &s)
   } else if (char_get_bonuses(s.vict, BONUS_FIREPRONE)) {
     s.dmg += s.dmg * 0.4;
   }
-  char_aff_set(s.vict, AFF_ASHED, true);
+  char_aff_set(s.vict, aff_flag::ashed, true);
 }
 
 void phoenix_slash_burn(ki_shot &s)
@@ -240,7 +240,7 @@ void phoenix_slash_burn(ki_shot &s)
 void phoenix_slash_settle(ki_shot &s, ki_outcome how)
 {
   if (how == ki_outcome::hit)
-    char_aff_set(s.vict, AFF_ASHED, false);
+    char_aff_set(s.vict, aff_flag::ashed, false);
 }
 
 /* It does three times the damage to object 79 */
@@ -251,8 +251,8 @@ bool phoenix_slash_at_object(ki_shot &s)
   s.dmg = damtype(s.g, s.ch, s.attack->damtype, s.skill, s.attperc);
   s.dmg /= 10;
   s.dmg *= 3;
-  act(s.g, s.attack->obj_to_char, s.attack->obj_hide, s.ch, s.obj, nullptr, TO_CHAR);
-  act(s.g, s.attack->obj_to_room, s.attack->obj_hide, s.ch, s.obj, nullptr, TO_ROOM);
+  act(s.g, s.attack->obj_to_char, s.attack->obj_hide, s.ch, s.obj, nullptr, act_to::actor);
+  act(s.g, s.attack->obj_to_room, s.attack->obj_hide, s.ch, s.obj, nullptr, act_to::room);
   hurt(s.g, 0, 0, s.ch, nullptr, s.obj, s.dmg, 0);
   pcost(s.g, s.ch, s.attperc, 0);
   return true;
@@ -272,11 +272,11 @@ void darkness_dragon_slash_bonus(ki_shot &s)
 /* and can blind */
 void darkness_dragon_slash_blind(ki_shot &s)
 {
-  if (rand_number(s.g, 1, 3) == 3 && !char_aff_flagged(s.vict, AFF_BLIND)) {
-    act(s.g, "@mYou are struck blind temporarily!@n", true, s.vict, nullptr, nullptr, TO_CHAR);
-    act(s.g, "@c$n@m is struck blind by the attack!@n", true, s.vict, nullptr, nullptr, TO_ROOM);
+  if (rand_number(s.g, 1, 3) == 3 && !char_aff_flagged(s.vict, aff_flag::blind)) {
+    act(s.g, "@mYou are struck blind temporarily!@n", true, s.vict, nullptr, nullptr, act_to::actor);
+    act(s.g, "@c$n@m is struck blind by the attack!@n", true, s.vict, nullptr, nullptr, act_to::room);
     int duration = 1;
-    assign_affect(s.g, s.vict, AFF_BLIND, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
+    assign_affect(s.g, s.vict, aff_flag::blind, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
   }
 }
 

@@ -98,7 +98,7 @@ namespace {
     const auto &info = g->spell_info[skill];
     if (info.name == "!UNUSED!")
       return false;
-    return which == mode::skills ? info.skilltype == SKTYPE_SKILL : IS_SET(info.skilltype, SKTYPE_LANG);
+    return which == mode::skills ? info.skilltype == skill_kind::skill : info.skilltype.test(skill_kind::lang);
   }
 
   void guild_editor::edit_new()

@@ -94,9 +94,9 @@ namespace {
   void with_droid(GameWorld *g, struct char_data *ch)
   {
     droid_only(g, ch);
-    room_set_flag(g, char_get_in_room(ch), ROOM_CANREMODEL, true);
+    room_set_flag(g, char_get_in_room(ch), room_flag::canremodel, true);
   }
-  void remodelable(GameWorld *g, struct char_data *ch) { room_set_flag(g, char_get_in_room(ch), ROOM_CANREMODEL, true); }
+  void remodelable(GameWorld *g, struct char_data *ch) { room_set_flag(g, char_get_in_room(ch), room_flag::canremodel, true); }
 
   std::vector<std::string> then(std::vector<std::string> first, const std::vector<std::string> &rest)
   {
@@ -439,8 +439,8 @@ namespace {
   struct char_data *builder(GameWorld *g, const char *name, int admlevel)
   {
     struct char_data *ch = th_player(g, name, admlevel);
-    char_prf_set(g, ch, PRF_LOG1, true);
-    char_prf_set(g, ch, PRF_LOG2, true);
+    char_prf_set(g, ch, pref_flag::log1, true);
+    char_prf_set(g, ch, pref_flag::log2, true);
     th_take_output(g, ch);
     return ch;
   }

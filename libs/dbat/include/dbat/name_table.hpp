@@ -25,3 +25,11 @@ public:
 private:
   std::span<const std::string_view> names_;
 };
+
+/* names[type] as a description shows a type (a sector, an item type, an apply): UNDEFINED past the end of names, and
+ * for a negative type the first name (quirk) */
+constexpr std::string_view type_name(std::span<const std::string_view> names, int type)
+{
+  std::size_t nr = type < 0 ? 0 : static_cast<std::size_t>(type);
+  return nr < names.size() ? names[nr] : "UNDEFINED";
+}

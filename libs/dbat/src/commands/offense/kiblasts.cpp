@@ -113,9 +113,9 @@ void shogekiha_refund(ki_shot &s)
 void shogekiha_dissipate(ki_shot &s)
 {
   if (s.mastery) {
-    act(s.g, "@CYour skillful shogekiha disipated some of @c$N's@C charged ki!@n", true, s.ch, nullptr, s.vict, TO_CHAR);
-    act(s.g, "@C$n@C's skillful shogekiha disipated some of YOUR charged ki!@n", true, s.ch, nullptr, s.vict, TO_VICT);
-    act(s.g, "@C$n@C's skillful shogekiha disipated some of @c$N's@C charged ki!", true, s.ch, nullptr, s.vict, TO_NOTVICT);
+    act(s.g, "@CYour skillful shogekiha disipated some of @c$N's@C charged ki!@n", true, s.ch, nullptr, s.vict, act_to::actor);
+    act(s.g, "@C$n@C's skillful shogekiha disipated some of YOUR charged ki!@n", true, s.ch, nullptr, s.vict, act_to::vict);
+    act(s.g, "@C$n@C's skillful shogekiha disipated some of @c$N's@C charged ki!", true, s.ch, nullptr, s.vict, act_to::notvict);
     char_set_charge(s.vict, char_get_charge(s.vict) - (char_get_charge(s.vict) * 0.25));
   }
 }
@@ -128,15 +128,15 @@ bool shogekiha_at_object(ki_shot &s)
   struct obj_data *obj = s.obj;
 
   if (obj_get_kicharge(obj) > 0 && char_get_charge(ch) > obj_get_kicharge(obj)) {
-    act(g, "@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and shatter the attack with your ki!@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and shatters the attack with $s ki!@n", true, ch, obj, nullptr, TO_ROOM);
+    act(g, "@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and shatter the attack with your ki!@n", true, ch, obj, nullptr, act_to::actor);
+    act(g, "@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and shatters the attack with $s ki!@n", true, ch, obj, nullptr, act_to::room);
     obj_set_kicharge(obj, obj_get_kicharge(obj) - (char_get_charge(ch)));
     extract_obj(g, obj);
     return true;
   }
   if (obj_get_kicharge(obj) > 0 && char_get_charge(ch) < obj_get_kicharge(obj)) {
-    act(g, "@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and weaken the attack with your ki before taking the rest of the attack in the chest!@n", true, ch, obj, nullptr, TO_CHAR);
-    act(g, "@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and weakens the attack with $s ki before taking the rest of the attack in the chest!@n", true, ch, obj, nullptr, TO_ROOM);
+    act(g, "@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and weaken the attack with your ki before taking the rest of the attack in the chest!@n", true, ch, obj, nullptr, act_to::actor);
+    act(g, "@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and weakens the attack with $s ki before taking the rest of the attack in the chest!@n", true, ch, obj, nullptr, act_to::room);
     obj_set_kicharge(obj, obj_get_kicharge(obj) - (char_get_charge(ch)));
     char_set_charge(ch, 0);
     s.dmg = obj_get_kicharge(obj);
@@ -181,10 +181,10 @@ void kiblast_knockout(ki_shot &s)
   struct char_data *vict = s.vict;
 
   if (s.mastery && s.pl_before > getCurPL(g, vict) && (s.pl_before - getCurPL(g, vict) > (getEffMaxPL(g, vict)) * 0.025)) {
-    if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-      act(g, "@C$N@W is knocked out!@n", true, s.ch, nullptr, vict, TO_CHAR);
-      act(g, "@WYou are knocked out!@n", true, s.ch, nullptr, vict, TO_VICT);
-      act(g, "@C$N@W is knocked out!@n", true, s.ch, nullptr, vict, TO_NOTVICT);
+    if (!char_aff_flagged(vict, aff_flag::knocked) && !char_aff_flagged(vict, aff_flag::sanctuary)) {
+      act(g, "@C$N@W is knocked out!@n", true, s.ch, nullptr, vict, act_to::actor);
+      act(g, "@WYou are knocked out!@n", true, s.ch, nullptr, vict, act_to::vict);
+      act(g, "@C$N@W is knocked out!@n", true, s.ch, nullptr, vict, act_to::notvict);
       setStatusKnockedOut(vict);
     }
   }

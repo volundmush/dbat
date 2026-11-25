@@ -18,7 +18,7 @@ namespace rules {
 
 void gravity_by_flags(GameWorld *g, room_vnum room)
 {
-  if (room_flagged(g, room, ROOM_VEGETA) || room_flagged(g, room, ROOM_GRAVITYX10))
+  if (room_flagged(g, room, room_flag::vegeta) || room_flagged(g, room, room_flag::gravityx10))
     room_set_gravity(g, room, 10);
 }
 
@@ -65,13 +65,13 @@ void mob_class_in_range(char_data *mob, mob_vnum vnum)
 
 void infravision_unless_human(char_data *mob)
 {
-  if (!char_is_human(mob) && !char_aff_flagged(mob, AFF_INFRAVISION))
-    char_aff_set(mob, AFF_INFRAVISION, true);
+  if (!char_is_human(mob) && !char_aff_flagged(mob, aff_flag::infravision))
+    char_aff_set(mob, aff_flag::infravision, true);
 }
 
 void autobalance_starts_bare(char_data *mob)
 {
-  if (!char_mob_flagged(mob, MOB_AUTOBALANCE))
+  if (!char_mob_flagged(mob, mob_flag::autobalance))
     return;
   char_set_exp(mob, 0);
   char_set_armor(mob, 0);
@@ -81,9 +81,9 @@ void autobalance_starts_bare(char_data *mob)
 
 void not_dead_yet_cleared(char_data *mob, mob_vnum vnum)
 {
-  if (char_mob_flagged(mob, MOB_NOTDEADYET)) {
+  if (char_mob_flagged(mob, mob_flag::notdeadyet)) {
     mud_log("SYSERR: Mob #{:d} has reserved bit MOB_NOTDEADYET set.", vnum);
-    char_mob_set(mob, MOB_NOTDEADYET, false);
+    char_mob_set(mob, mob_flag::notdeadyet, false);
   }
 }
 
@@ -126,9 +126,9 @@ void portal_timer(obj_data *obj)
 
 void object_charm_cleared(obj_data *obj, obj_vnum vnum)
 {
-  if (obj_aff_flagged(obj, AFF_CHARM)) {
+  if (obj_aff_flagged(obj, aff_flag::charm)) {
     mud_log("SYSERR: Object #{:d} has reserved bit AFF_CHARM set.", vnum);
-    obj_aff_set(obj, AFF_CHARM, false);
+    obj_aff_set(obj, aff_flag::charm, false);
   }
 }
 

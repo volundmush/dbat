@@ -27,7 +27,7 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
   if (!object || !room_of(g, room))
     mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #{:d}, obj {})", room, as_pointer((void *)object));
   else {
-    if (room_flagged(g, room, ROOM_GARDEN1) || room_flagged(g, room, ROOM_GARDEN2)) {
+    if (room_flagged(g, room, room_flag::garden1) || room_flagged(g, room, room_flag::garden2)) {
       if (obj_get_type_flag(object) != ITEM_PLANT) {
         send_to_room(g, room, "{} @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", obj_get_short_description(object));
         extract_obj(g, object);
@@ -42,15 +42,15 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
     obj_set_in_room(object, room);
     obj_set_carried_by(object, nullptr);
     obj_set_lload(object, game_now(g));
-    if (obj_get_type_flag(object) == ITEM_VEHICLE && !obj_extra_flagged(object, ITEM_UNBREAKABLE) && obj_get_vnum(g, object) > 19199) {
-      obj_extra_set(object, ITEM_UNBREAKABLE, true);
+    if (obj_get_type_flag(object) == ITEM_VEHICLE && !obj_extra_flagged(object, extra_flag::unbreakable) && obj_get_vnum(g, object) > 19199) {
+      obj_extra_set(object, extra_flag::unbreakable, true);
     }
     if (obj_get_type_flag(object) == ITEM_HATCH && obj_get_vnum(g, object) <= 19199) {
       if ((obj_get_vnum(g, object) <= 18999 && obj_get_vnum(g, object) >= 18800) || (obj_get_vnum(g, object) <= 19199 && obj_get_vnum(g, object) >= 19100)) {
         obj_vnum hnum          = obj_get_value(object, 0);
         struct obj_data *house = read_object(g, hnum);
         obj_to_room(g, house, obj_get_value(object, 6));
-        obj_set_container_flags(object, obj_container_flags(object) | CONT_CLOSED | CONT_LOCKED);
+        obj_set_container_flags(object, obj_container_flags(object) | container_flag::closed | container_flag::locked);
       }
     }
     if (obj_get_type_flag(object) == ITEM_HATCH && obj_get_value(object, 0) > 1 && obj_get_vnum(g, object) > 19199) {
@@ -74,25 +74,25 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
             obj_set_short_description(vehicle, nick2);
             obj_set_description(vehicle, nick3);
           }
-          obj_set_container_flags(object, obj_container_flags(object) | CONT_CLOSED | CONT_LOCKED);
+          obj_set_container_flags(object, obj_container_flags(object) | container_flag::closed | container_flag::locked);
         } else {
           mud_log("Hatch load: Hatch with no vehicle load room: #{:d}!", obj_get_vnum(g, object));
         }
       }
     }
     if (obj_get_exit(g, object, 5) && (room_sect(g, obj_get_in_room(object)) == SECT_UNDERWATER || room_sect(g, obj_get_in_room(object)) == SECT_WATER_NOSWIM)) {
-      act(g, "$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
+      act(g, "$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, act_to::room);
       room_vnum numb = obj_get_exit(g, object, 5)->to_room;
       obj_from_room(g, object);
       obj_to_room(g, object, numb);
     }
     if (obj_get_exit(g, object, 5) && room_sect(g, obj_get_in_room(object)) == SECT_FLYING && (obj_get_vnum(g, object) < 80 || obj_get_vnum(g, object) > 83)) {
-      act(g, "$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
+      act(g, "$p @Cfalls down.@n", true, nullptr, object, nullptr, act_to::room);
       room_vnum numb = obj_get_exit(g, object, 5)->to_room;
       obj_from_room(g, object);
       obj_to_room(g, object, numb);
       if (room_sect(g, obj_get_in_room(object)) != SECT_FLYING) {
-        act(g, "$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
+        act(g, "$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, act_to::room);
       }
     }
     if (obj_get_value(object, 0) != 0) {
@@ -100,8 +100,8 @@ void obj_to_room(GameWorld *g, struct obj_data *object, room_vnum room)
         obj_set_level(object, obj_get_value(object, 0));
       }
     }
-    if (room_flagged(g, room, ROOM_HOUSE))
-      room_set_flag(g, room, ROOM_HOUSE_CRASH, true);
+    if (room_flagged(g, room, room_flag::house))
+      room_set_flag(g, room, room_flag::house_crash, true);
   }
 }
 
@@ -129,8 +129,8 @@ void obj_from_room(GameWorld *g, struct obj_data *object)
 
   room_contents_slot(g, obj_get_in_room(object))->remove(obj_get_id(object));
 
-  if (room_flagged(g, obj_get_in_room(object), ROOM_HOUSE))
-    room_set_flag(g, obj_get_in_room(object), ROOM_HOUSE_CRASH, true);
+  if (room_flagged(g, obj_get_in_room(object), room_flag::house))
+    room_set_flag(g, obj_get_in_room(object), room_flag::house_crash, true);
   obj_set_in_room(object, NOWHERE);
 }
 
@@ -161,8 +161,8 @@ void obj_to_obj(GameWorld *g, struct obj_data *obj, struct obj_data *obj_to)
     if (obj_get_carried_by(tmp_obj))
       char_set_carry_weight(obj_get_carried_by(tmp_obj), char_get_carry_weight(obj_get_carried_by(tmp_obj)) + (obj_get_weight(obj)));
   }
-  if (obj_get_in_room(obj_to) != NOWHERE && room_flagged(g, obj_get_in_room(obj_to), ROOM_HOUSE)) {
-    room_set_flag(g, obj_get_in_room(obj_to), ROOM_HOUSE_CRASH, true);
+  if (obj_get_in_room(obj_to) != NOWHERE && room_flagged(g, obj_get_in_room(obj_to), room_flag::house)) {
+    room_set_flag(g, obj_get_in_room(obj_to), room_flag::house_crash, true);
   }
 }
 
@@ -192,8 +192,8 @@ void obj_from_obj(GameWorld *g, struct obj_data *obj)
       char_set_carry_weight(obj_get_carried_by(temp), char_get_carry_weight(obj_get_carried_by(temp)) - (obj_get_weight(obj)));
   }
 
-  if (obj_get_in_room(obj_from) != NOWHERE && room_flagged(g, obj_get_in_room(obj_from), ROOM_HOUSE)) {
-    room_set_flag(g, obj_get_in_room(obj_from), ROOM_HOUSE_CRASH, true);
+  if (obj_get_in_room(obj_from) != NOWHERE && room_flagged(g, obj_get_in_room(obj_from), room_flag::house)) {
+    room_set_flag(g, obj_get_in_room(obj_from), room_flag::house_crash, true);
   }
 
   obj_set_in_obj(obj, nullptr);
@@ -209,10 +209,10 @@ void char_from_room(GameWorld *g, struct char_data *ch)
     return;
   }
 
-  if (char_get_fighting(g, ch) != nullptr && !char_aff_flagged(ch, AFF_PURSUIT))
+  if (char_get_fighting(g, ch) != nullptr && !char_aff_flagged(ch, aff_flag::pursuit))
     stop_fighting(g, ch);
-  if (char_aff_flagged(ch, AFF_PURSUIT) && char_get_fighting(g, ch) == nullptr)
-    char_aff_set(ch, AFF_PURSUIT, false);
+  if (char_aff_flagged(ch, aff_flag::pursuit) && char_get_fighting(g, ch) == nullptr)
+    char_aff_set(ch, aff_flag::pursuit, false);
 
   for (i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(ch, i) != nullptr)
@@ -220,7 +220,7 @@ void char_from_room(GameWorld *g, struct char_data *ch)
         if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
           room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
 
-  if (char_plr_flagged(ch, PLR_AURALIGHT))
+  if (char_plr_flagged(ch, player_flag::auralight))
     room_set_light(g, char_get_in_room(ch), room_get_light(g, char_get_in_room(ch)) - 1);
 
   room_people_slot(g, char_get_in_room(ch))->remove(char_get_id(ch));
@@ -247,17 +247,17 @@ void char_to_room(GameWorld *g, struct char_data *ch, room_vnum room)
           if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
             room_set_light(g, room, room_get_light(g, room) + 1);
 
-    if (char_plr_flagged(ch, PLR_AURALIGHT))
+    if (char_plr_flagged(ch, player_flag::auralight))
       room_set_light(g, room, room_get_light(g, room) + 1);
 
     /* Stop fighting now, if we left. */
-    if (char_get_fighting(g, ch) && char_get_in_room(ch) != char_get_in_room(char_get_fighting(g, ch)) && !char_aff_flagged(ch, AFF_PURSUIT)) {
+    if (char_get_fighting(g, ch) && char_get_in_room(ch) != char_get_in_room(char_get_fighting(g, ch)) && !char_aff_flagged(ch, aff_flag::pursuit)) {
       stop_fighting(g, char_get_fighting(g, ch));
       stop_fighting(g, ch);
     }
     if (!char_is_npc(ch)) {
-      if (char_prf_flagged(g, ch, PRF_ARENAWATCH)) {
-        char_prf_set(g, ch, PRF_ARENAWATCH, false);
+      if (char_prf_flagged(g, ch, pref_flag::arenawatch)) {
+        char_prf_set(g, ch, pref_flag::arenawatch, false);
         char_set_arenawatch(ch, -1);
       }
     }
@@ -274,12 +274,12 @@ void obj_to_char(GameWorld *g, struct obj_data *object, struct char_data *ch)
     obj_set_in_room(object, NOWHERE);
     char_set_carry_weight(ch, char_get_carry_weight(ch) + (obj_get_weight(object)));
     char_set_carry_items(ch, char_get_carry_items(ch) + 1);
-    if ((char_get_kaioken(ch) <= 0 && !char_aff_flagged(ch, AFF_METAMORPH)) && !obj_extra_flagged(object, ITEM_THROW)) {
+    if ((char_get_kaioken(ch) <= 0 && !char_aff_flagged(ch, aff_flag::metamorph)) && !obj_extra_flagged(object, extra_flag::throw_)) {
 
     } else if (getCurPL(g, ch) > getEffMaxPL(g, ch)) {
       if (char_get_kaioken(ch) > 0) {
         send_to_char(g, ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
-      } else if (char_aff_flagged(ch, AFF_METAMORPH)) {
+      } else if (char_aff_flagged(ch, aff_flag::metamorph)) {
         send_to_char(g, ch, "@RYour metamorphosis strains under the additional weight!@n\n");
       }
     }
@@ -291,7 +291,7 @@ void obj_to_char(GameWorld *g, struct obj_data *object, struct char_data *ch)
       }
     }
     if (!char_is_npc(ch))
-      char_plr_set(ch, PLR_CRASH, true);
+      char_plr_set(ch, player_flag::crash, true);
   } else
     mud_log("SYSERR: NULL obj ({}) or char ({}) passed to obj_to_char.", as_pointer((void *)object), as_pointer((void *)ch));
 }
@@ -319,7 +319,7 @@ void obj_from_char(GameWorld *g, struct obj_data *object)
 
   /* set flag for crash-save system, but not on mobs! */
   if (!char_is_npc(obj_get_carried_by(object)))
-    char_plr_set(obj_get_carried_by(object), PLR_CRASH, true);
+    char_plr_set(obj_get_carried_by(object), player_flag::crash, true);
 
   char_set_carry_weight(obj_get_carried_by(object), char_get_carry_weight(obj_get_carried_by(object)) - (obj_get_weight(object)));
   char_set_carry_items(obj_get_carried_by(object), char_get_carry_items(obj_get_carried_by(object)) - 1);
@@ -370,11 +370,11 @@ static int apply_ac(struct char_data *ch, int eq_pos)
 
 bool invalid_align(struct char_data *ch, struct obj_data *obj)
 {
-  if (obj_extra_flagged(obj, ITEM_ANTI_EVIL) && char_is_evil(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_evil) && char_is_evil(ch))
     return true;
-  if (obj_extra_flagged(obj, ITEM_ANTI_GOOD) && char_is_good(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_good) && char_is_good(ch))
     return true;
-  if (obj_extra_flagged(obj, ITEM_ANTI_NEUTRAL) && char_is_neutral(ch))
+  if (obj_extra_flagged(obj, extra_flag::anti_neutral) && char_is_neutral(ch))
     return true;
   return false;
 }
@@ -402,8 +402,8 @@ void equip_char(GameWorld *g, struct char_data *ch, struct obj_data *obj, int po
     return;
   }
   if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
-    act(g, "You stop wearing $p as something prevents you.", false, ch, obj, nullptr, TO_CHAR);
-    act(g, "$n stops wearing $p as something prevents $m.", false, ch, obj, nullptr, TO_ROOM);
+    act(g, "You stop wearing $p as something prevents you.", false, ch, obj, nullptr, act_to::actor);
+    act(g, "$n stops wearing $p as something prevents $m.", false, ch, obj, nullptr, act_to::room);
     /* Changed to drop in inventory instead of the ground. */
     obj_to_char(g, obj, ch);
     return;

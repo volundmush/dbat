@@ -64,5 +64,5 @@ static constexpr std::string_view preference_bits_entries[] = {
     "GHEALTH",
     "IHEALTH",
     "ENERGIZE"};
-static_assert(std::size(preference_bits_entries) == NUM_PRF_FLAGS);
+static_assert(std::size(preference_bits_entries) == flag_count<pref_flag>);
 constinit const name_table preference_bits(preference_bits_entries);

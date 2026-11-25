@@ -72,9 +72,9 @@ static void run_object_triggers(GameWorld *g, obj_trig type, void (*run)(GameWor
 }
 
 /* A mob's script was asked for these by the room types' names, which are the same bits */
-static_assert(std::to_underlying(MTRIG_RANDOM) == std::to_underlying(WTRIG_RANDOM) &&
-              std::to_underlying(MTRIG_GLOBAL) == std::to_underlying(WTRIG_GLOBAL) &&
-              std::to_underlying(MTRIG_TIME) == std::to_underlying(WTRIG_TIME));
+static_assert(std::to_underlying(mob_trig::random) == std::to_underlying(wld_trig::random) &&
+              std::to_underlying(mob_trig::global) == std::to_underlying(wld_trig::global) &&
+              std::to_underlying(mob_trig::time) == std::to_underlying(wld_trig::time));
 
 /* checks every PULSE_SCRIPT for random triggers */
 void script_trigger_check(GameWorld *g)
@@ -86,23 +86,23 @@ void script_trigger_check(GameWorld *g)
     if (char_get_script(ch)) {
       sc = char_get_script(ch);
 
-      if (trig_word_has(sc->types, MTRIG_RANDOM) &&
+      if (trig_word_has(sc->types, mob_trig::random) &&
           (!is_empty(g, room_get_zone(g, char_get_in_room(ch))) ||
-           trig_word_has(sc->types, MTRIG_GLOBAL)))
+           trig_word_has(sc->types, mob_trig::global)))
         random_mtrigger(g, ch);
     }
   }
 
-  run_object_triggers(g, OTRIG_RANDOM, random_otrigger);
+  run_object_triggers(g, obj_trig::random, random_otrigger);
 
   for (room_vnum nr : g->rooms.vnums()) {
     if (room_get_script(g, nr)) {
       room = room_of(g, nr);
       sc   = room_get_script(room);
 
-      if (trig_word_has(sc->types, WTRIG_RANDOM) &&
+      if (trig_word_has(sc->types, wld_trig::random) &&
           (!is_empty(g, room_get_zone(room)) ||
-           trig_word_has(sc->types, WTRIG_GLOBAL)))
+           trig_word_has(sc->types, wld_trig::global)))
         random_wtrigger(g, room);
     }
   }
@@ -117,23 +117,23 @@ void check_time_triggers(GameWorld *g)
     if (char_get_script(ch)) {
       sc = char_get_script(ch);
 
-      if (trig_word_has(sc->types, MTRIG_TIME) &&
+      if (trig_word_has(sc->types, mob_trig::time) &&
           (!is_empty(g, room_get_zone(g, char_get_in_room(ch))) ||
-           trig_word_has(sc->types, MTRIG_GLOBAL)))
+           trig_word_has(sc->types, mob_trig::global)))
         time_mtrigger(g, ch);
     }
   }
 
-  run_object_triggers(g, OTRIG_TIME, time_otrigger);
+  run_object_triggers(g, obj_trig::time, time_otrigger);
 
   for (room_vnum nr : g->rooms.vnums()) {
     if (room_get_script(g, nr)) {
       room = room_of(g, nr);
       sc   = room_get_script(room);
 
-      if (trig_word_has(sc->types, WTRIG_TIME) &&
+      if (trig_word_has(sc->types, wld_trig::time) &&
           (!is_empty(g, room_get_zone(room)) ||
-           trig_word_has(sc->types, WTRIG_GLOBAL)))
+           trig_word_has(sc->types, wld_trig::global)))
         time_wtrigger(g, room);
     }
   }

@@ -638,10 +638,10 @@ static bool allowed_while_restrained(std::string_view cmd, bool liquefied)
 /* False (after telling them why) if ch's condition stops them running cmd. */
 static bool command_pass(GameWorld *g, std::string_view cmd, struct char_data *ch)
 {
-  bool liquefied = char_aff_flagged(ch, AFF_LIQUEFIED);
+  bool liquefied = char_aff_flagged(ch, aff_flag::liquefied);
   std::string_view held = liquefied                                ? "liquefied"
-                     : char_is_affected(ch, AFF_PARALYZE) ? "petrified"
-                     : char_is_affected(ch, AFF_FROZEN)   ? "a frozen block of ice"
+                     : char_is_affected(ch, aff_flag::paralyze) ? "petrified"
+                     : char_is_affected(ch, aff_flag::frozen)   ? "a frozen block of ice"
                                                           : std::string_view();
   if (!held.empty()) {
     if (allowed_while_restrained(cmd, liquefied))
@@ -650,7 +650,7 @@ static bool command_pass(GameWorld *g, std::string_view cmd, struct char_data *c
     return false;
   }
   /* paralysis can be overcome, by a roll against one's intelligence */
-  if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(g, 1, 60) && !allowed_while_restrained(cmd, false)) {
+  if (char_is_affected(ch, aff_flag::para) && char_get_aff_abils_intel(ch) < rand_number(g, 1, 60) && !allowed_while_restrained(cmd, false)) {
     act_triple(g, {"@yYou fail to overcome your paralysis!@n", {}, "@Y$n @ystruggles with $s paralysis!@n", true}, ch, nullptr, nullptr);
     return false;
   }
@@ -695,7 +695,7 @@ bool special(GameWorld *g, struct char_data *ch, int cmd, std::string_view arg)
 
   /* special in mobile present? */
   for (char_data *k : room_people(g, char_get_in_room(ch)))
-    if (!char_mob_flagged(k, MOB_NOTDEADYET))
+    if (!char_mob_flagged(k, mob_flag::notdeadyet))
       if (char_get_mob_spec(g, k) && char_get_mob_spec(g, k)(g, ch, k, cmd, arg))
         return true;
 
@@ -779,11 +779,11 @@ void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view ar
     send_to_char(g, ch, "It's unfortunate...\r\n");
   else if (check_disabled(g, &g->complete_cmd_info[cmd])) /* is it disabled? */
     send_to_char(g, ch, "This command has been temporarily disabled.\r\n");
-  else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_GOOP) && char_get_admlevel(ch) < ADMLVL_IMPL)
+  else if (!char_is_npc(ch) && char_plr_flagged(ch, player_flag::goop) && char_get_admlevel(ch) < ADMLVL_IMPL)
     send_to_char(g, ch, "You only have your internal thoughts until your body has finished regenerating!\r\n");
-  else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_FROZEN) && char_get_admlevel(ch) < ADMLVL_IMPL)
+  else if (!char_is_npc(ch) && char_plr_flagged(ch, player_flag::frozen) && char_get_admlevel(ch) < ADMLVL_IMPL)
     send_to_char(g, ch, "You try, but the mind-numbing cold prevents you...\r\n");
-  else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_SPIRAL))
+  else if (!char_is_npc(ch) && char_plr_flagged(ch, player_flag::spiral))
     send_to_char(g, ch, "You are occupied with your Spiral Comet attack!\r\n");
   else if (g->complete_cmd_info[cmd].command_pointer == nullptr)
     send_to_char(g, ch, "Sorry, that command hasn't been implemented yet.\r\n");

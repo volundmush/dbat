@@ -34,9 +34,9 @@ namespace {
                                             "Head Slot",  "Neck Slot",  "Back Slot", "Shoulder Slot", "Weapon"};
 
   /* Where custom equipment of each type (but the weapon) is worn */
-  constexpr std::optional<wear_flag> CUSTOM_WEAR[16] = {std::nullopt,   ITEM_WEAR_BODY, ITEM_WEAR_ABOUT, ITEM_WEAR_WRIST, ITEM_WEAR_EAR,  ITEM_WEAR_FINGER,
-                                   ITEM_WEAR_EYE,  ITEM_WEAR_HANDS, ITEM_WEAR_FEET, ITEM_WEAR_WAIST, ITEM_WEAR_LEGS, ITEM_WEAR_ARMS,
-                                   ITEM_WEAR_HEAD, ITEM_WEAR_NECK, ITEM_WEAR_PACK,  ITEM_WEAR_SH};
+  constexpr std::optional<wear_flag> CUSTOM_WEAR[16] = {std::nullopt,   wear_flag::body, wear_flag::about, wear_flag::wrist, wear_flag::ear,  wear_flag::finger,
+                                   wear_flag::eye,  wear_flag::hands, wear_flag::feet, wear_flag::waist, wear_flag::legs, wear_flag::arms,
+                                   wear_flag::head, wear_flag::neck, wear_flag::pack,  wear_flag::sh};
 
   /* A custom weapon's kind, and the damage it does */
   static constexpr std::string_view CUSTOM_WEAPONS[7] = {"Not A Weapon", "Sword", "Dagger", "Spear", "Club", "Gun", "Brawling"};
@@ -191,7 +191,7 @@ namespace {
       obj_set_description(obj, order.long_desc);
       order.what = pobj_order::kind::none;
       char_set_gold(d->character, char_get_gold(d->character) - 5000);
-      obj_extra_set(obj, ITEM_RESTRING, true);
+      obj_extra_set(obj, extra_flag::restring, true);
       write_to_output(g, d, "Purchase complete.");
       send_to_imm(g, "Restring Eq: {} has bought: {}, which was {}.", char_get_name(d->character), obj_get_short_description(obj), order.was);
       finish(d);
@@ -280,14 +280,14 @@ namespace {
       obj_set_value(obj, VAL_WEAPON_DAMTYPE, CUSTOM_DAMAGE[order.weapon] - TYPE_HIT);
       obj_set_level(obj, 20);
     }
-    obj_extra_set(obj, ITEM_SLOT2, true);
+    obj_extra_set(obj, extra_flag::slot2, true);
     order.what   = pobj_order::kind::none;
     order.asking = step::none;
     char_set_rp(d->character, char_get_rp(d->character) - 20);
     d->acct.rpp -= 20;
     save_account(d);
     obj_set_size(obj, get_size(d->character));
-    obj_extra_set(obj, ITEM_CUSTOM, true);
+    obj_extra_set(obj, extra_flag::custom, true);
     send_to_imm(g, "Custom Eq: {} has bought: {}.", char_get_name(d->character), obj_get_short_description(obj));
     customWrite(d->character, obj);
     log_custom(g, d, obj);

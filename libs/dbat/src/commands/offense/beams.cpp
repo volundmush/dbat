@@ -68,7 +68,7 @@ void masenko_bonus(ki_shot &s)
 /* A masenko that hits sometimes tires the victim */
 void masenko_drain_stamina(ki_shot &s)
 {
-  if (rand_number(s.g, 1, 2) == 2 && !char_aff_flagged(s.vict, AFF_SANCTUARY)) {
+  if (rand_number(s.g, 1, 2) == 2 && !char_aff_flagged(s.vict, aff_flag::sanctuary)) {
     send_to_char(s.g, s.vict, "@RThe attack seems to have taken a toll on your stamina!@n\r\n");
     decCurST(s.g, s.vict, s.dmg / 4, 0);
   }
@@ -256,14 +256,14 @@ void beam_knockback(ki_shot &s, ki_outcome how)
       }
     }
     if (char_can_go(g, vict, attempt)) {
-      act(g, "$N@W is pushed away by the blast!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@WYou are pushed away by the blast!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "$N@W is pushed away by the blast!@n", true, ch, nullptr, vict, TO_NOTVICT);
+      act(g, "$N@W is pushed away by the blast!@n", true, ch, nullptr, vict, act_to::actor);
+      act(g, "@WYou are pushed away by the blast!@n", true, ch, nullptr, vict, act_to::vict);
+      act(g, "$N@W is pushed away by the blast!@n", true, ch, nullptr, vict, act_to::notvict);
       do_simple_move(g, vict, attempt, true);
     } else {
-      act(g, "$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, nullptr, vict, TO_CHAR);
-      act(g, "@WYou are pushed away by the blast, but are slammed into an obstruction!@n", true, ch, nullptr, vict, TO_VICT);
-      act(g, "$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, nullptr, vict, TO_NOTVICT);
+      act(g, "$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, nullptr, vict, act_to::actor);
+      act(g, "@WYou are pushed away by the blast, but are slammed into an obstruction!@n", true, ch, nullptr, vict, act_to::vict);
+      act(g, "$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, nullptr, vict, act_to::notvict);
       s.dmg *= 2;
       hurt(g, 1, 195, ch, vict, nullptr, s.dmg, 1);
     }

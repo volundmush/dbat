@@ -26,9 +26,9 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
   if (d->str) {
     if (desc_get_connected(d) == CON_EXDESC) {
       prompt = "Enter Description(/h for editor help)> ";
-    } else if (char_plr_flagged(d->character, PLR_WRITING) && !char_plr_flagged(d->character, PLR_MAILING)) {
+    } else if (char_plr_flagged(d->character, player_flag::writing) && !char_plr_flagged(d->character, player_flag::mailing)) {
       prompt = "Enter Message(/h for editor help)> ";
-    } else if (char_plr_flagged(d->character, PLR_MAILING)) {
+    } else if (char_plr_flagged(d->character, player_flag::mailing)) {
       prompt = "Enter Mail Message(/h for editor help)> ";
     } else {
       prompt = "Enter Message> ";
@@ -38,7 +38,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
       prompt += str_format("i{:d} ", char_get_invis_level(g, d->character));
     }
     /* show only when below 25% */
-    if (char_prf_flagged(g, d->character, PRF_DISPAUTO) && char_get_level(d->character) >= 500) {
+    if (char_prf_flagged(g, d->character, pref_flag::dispauto) && char_get_level(d->character) >= 500) {
       struct char_data *ch = d->character;
       if (getCurPL(g, ch) << 2 < getEffMaxPL(g, ch)) {
         prompt += str_format("PL: {:d} ", getCurPL(g, ch));
@@ -51,19 +51,19 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
       }
     } else { /* not auto prompt */
       prompt += "@w";
-      if (char_plr_flagged(d->character, PLR_SELFD)) {
-        prompt += str_format("@D[@RSELF-D@r: @w{}@D]@n", char_plr_flagged(d->character, PLR_SELFD2) ? "READY" : "PREP");
+      if (char_plr_flagged(d->character, player_flag::selfd)) {
+        prompt += str_format("@D[@RSELF-D@r: @w{}@D]@n", char_plr_flagged(d->character, player_flag::selfd2) ? "READY" : "PREP");
         flagged = true;
       }
-      if (char_is_halfbreed(d->character) && !char_plr_flagged(d->character, PLR_FURY) && char_prf_flagged(g, d->character, PRF_FURY)) {
+      if (char_is_halfbreed(d->character) && !char_plr_flagged(d->character, player_flag::fury) && char_prf_flagged(g, d->character, pref_flag::fury)) {
         prompt += str_format("@D[@mFury@W: @r{:d}@D]@w", char_get_fury(d->character));
         flagged = true;
       }
-      if (char_is_halfbreed(d->character) && char_plr_flagged(d->character, PLR_FURY) && char_prf_flagged(g, d->character, PRF_FURY)) {
+      if (char_is_halfbreed(d->character) && char_plr_flagged(d->character, player_flag::fury) && char_prf_flagged(g, d->character, pref_flag::fury)) {
         prompt += "@D[@mFury@W: @rENGAGED@D]@w";
         flagged = true;
       }
-      if (has_mail(g, char_get_idnum(d->character)) && !char_prf_flagged(g, d->character, PRF_NMWARN) && (char_get_admlevel(d->character) > 0)) {
+      if (has_mail(g, char_get_idnum(d->character)) && !char_prf_flagged(g, d->character, pref_flag::nmwarn) && (char_get_admlevel(d->character) > 0)) {
         prompt += "CHECK MAIL - ";
         flagged = true;
       }
@@ -79,7 +79,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
         prompt += str_format("KAIOKEN X{:d} - ", char_get_kaioken(d->character));
         flagged = true;
       }
-      if (has_mail(g, char_get_idnum(d->character)) && (char_get_admlevel(d->character) <= 0) && !char_prf_flagged(g, d->character, PRF_NMWARN)) {
+      if (has_mail(g, char_get_idnum(d->character)) && (char_get_admlevel(d->character) <= 0) && !char_prf_flagged(g, d->character, pref_flag::nmwarn)) {
         prompt += "CHECK MAIL - ";
         flagged = true;
       }
@@ -91,23 +91,23 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
         prompt += str_format("Dragging: ({}) - ", char_get_name(char_get_drag(g, d->character)));
         flagged = true;
       }
-      if (char_prf_flagged(g, d->character, PRF_BUILDWALK)) {
+      if (char_prf_flagged(g, d->character, pref_flag::buildwalk)) {
         prompt += "BUILDWALKING - ";
         flagged = true;
       }
-      if (char_aff_flagged(d->character, AFF_FLYING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if (char_aff_flagged(d->character, aff_flag::flying) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         prompt += "FLYING - ";
         flagged = true;
       }
-      if (char_aff_flagged(d->character, AFF_HIDE) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if (char_aff_flagged(d->character, aff_flag::hide) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         prompt += "HIDING - ";
         flagged = true;
       }
-      if (char_plr_flagged(d->character, PLR_SPAR) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if (char_plr_flagged(d->character, player_flag::spar) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         prompt += "SPARRING - ";
         flagged = true;
       }
-      if (char_plr_flagged(d->character, PLR_NOSHOUT)) {
+      if (char_plr_flagged(d->character, player_flag::noshout)) {
         prompt += "MUTED - ";
         flagged = true;
       }
@@ -155,38 +155,38 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
         prompt += "Combo (Heeldrop) - ";
         flagged = true;
       }
-      if (char_prf_flagged(g, d->character, PRF_AFK) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if (char_prf_flagged(g, d->character, pref_flag::afk) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         prompt += "AFK - ";
         flagged = true;
       }
-      if (char_plr_flagged(d->character, PLR_FISHING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if (char_plr_flagged(d->character, player_flag::fishing) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         prompt += "FISHING -";
         flagged = true;
       }
       if (flagged == true) {
         prompt += "@n\n";
       }
-      if ((char_get_sits(g, d->character) && char_plr_flagged(d->character, PLR_HEALT)) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if ((char_get_sits(g, d->character) && char_plr_flagged(d->character, player_flag::healt)) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         chair   = char_get_sits(g, d->character);
         prompt += "@c<@CFloating inside a healing tank@c>@n\r\n";
         flagged = true;
       }
-      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SITTING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SITTING) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         chair   = char_get_sits(g, d->character);
         prompt += str_format("Sitting on: {}\r\n", obj_get_short_description(chair));
         flagged = true;
       }
-      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_RESTING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_RESTING) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         chair   = char_get_sits(g, d->character);
         prompt += str_format("Resting on: {}\r\n", obj_get_short_description(chair));
         flagged = true;
       }
-      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SLEEPING) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if ((char_get_sits(g, d->character) && char_get_position(d->character) == POS_SLEEPING) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         chair   = char_get_sits(g, d->character);
         prompt += str_format("Sleeping on: {}\r\n", obj_get_short_description(chair));
         flagged = true;
       }
-      if (char_aff_flagged(d->character, AFF_POSITION) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if (char_aff_flagged(d->character, aff_flag::position) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
         chair   = char_get_sits(g, d->character);
         prompt += "(Best Position)\r\n";
         flagged = true;
@@ -196,7 +196,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
       }
       if (char_get_charge(d->character) > 0) {
         int64_t charge = char_get_charge(d->character);
-        if (!char_prf_flagged(g, d->character, PRF_NODEC) && !char_prf_flagged(g, d->character, PRF_DISPERC)) {
+        if (!char_prf_flagged(g, d->character, pref_flag::nodec) && !char_prf_flagged(g, d->character, pref_flag::disperc)) {
           if (charge >= getMaxKI(g, d->character)) {
             prompt += "@CCharge @D[@G==@D<@RMAX@D>@G===@D]@n\n";
           } else if (charge >= getMaxKI(g, d->character) * .95) {
@@ -241,31 +241,31 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
             prompt += "@CCharge @D[@g----------@D]@n\n";
           }
         }
-        if (char_prf_flagged(g, d->character, PRF_DISPERC) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+        if (char_prf_flagged(g, d->character, pref_flag::disperc) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
           if (char_get_charge(d->character) > 0) {
             int64_t perc = (char_get_charge(d->character) * 100) / getMaxKI(g, d->character);
             prompt += str_format("@D[@BCharge@Y: @C{:d}{}@D]@n\n", perc, "%");
           }
         }
-        if (char_prf_flagged(g, d->character, PRF_NODEC)) {
+        if (char_prf_flagged(g, d->character, pref_flag::nodec)) {
           if (charge > 0) {
             int64_t perc = (charge * 100) / getMaxKI(g, d->character);
             prompt += str_format("Ki is charged to {:d} percent.\n", perc);
           }
         }
       }
-      if (char_aff_flagged(d->character, AFF_FIRESHIELD)) {
+      if (char_aff_flagged(d->character, aff_flag::fireshield)) {
         prompt += "@D(@rF@RI@YR@rE@RS@YH@rI@RE@YL@rD@D)@n\n";
       }
-      if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
-        if (char_prf_flagged(g, d->character, PRF_DISPERC) && !char_prf_flagged(g, d->character, PRF_NODEC)) {
+      if (char_aff_flagged(d->character, aff_flag::sanctuary)) {
+        if (char_prf_flagged(g, d->character, pref_flag::disperc) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {
           if (char_get_barrier(d->character) > 0) {
             int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(g, d->character);
             prompt += str_format("@D[@GBarrier@Y: @B{:d}{}@D]@n\n", perc, "%");
           }
         }
 
-        if (!char_prf_flagged(g, d->character, PRF_NODEC) && !char_prf_flagged(g, d->character, PRF_DISPERC)) {
+        if (!char_prf_flagged(g, d->character, pref_flag::nodec) && !char_prf_flagged(g, d->character, pref_flag::disperc)) {
           if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .75) {
             prompt += "@BBarrier @D[@C==MAX==@D]@n\n";
           } else if (char_get_barrier(d->character) >= getMaxKI(g, d->character) * .70) {
@@ -300,15 +300,15 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
             prompt += "@BBarrier @D[@C--Low-@D]@n\n";
           }
         }
-        if (char_prf_flagged(g, d->character, PRF_NODEC)) {
+        if (char_prf_flagged(g, d->character, pref_flag::nodec)) {
           if (char_get_barrier(d->character) > 0) {
             int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(g, d->character);
             prompt += str_format("A barrier charged to {:d} percent surrounds you.@n\n", perc);
           }
         }
       }
-      if (!char_prf_flagged(g, d->character, PRF_DISPERC)) {
-        if (char_prf_flagged(g, d->character, PRF_DISPHP)) {
+      if (!char_prf_flagged(g, d->character, pref_flag::disperc)) {
+        if (char_prf_flagged(g, d->character, pref_flag::disphp)) {
           std::string_view col      = "n";
           struct char_data *ch = d->character;
           if (getMaxPL(g, ch) > getMaxPLTrans(g, ch))
@@ -324,7 +324,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
 
           prompt += str_format("@D[@RPL@n@Y: @{}{}@D]@n", col, add_commas(getCurPL(g, ch)));
         }
-      } else if (char_prf_flagged(g, d->character, PRF_DISPHP)) {
+      } else if (char_prf_flagged(g, d->character, pref_flag::disphp)) {
 
         struct char_data *ch = d->character;
         double perc          = ((double)getCurHealth(g, ch) / (double)getMaxPLTrans(g, ch)) * 100;
@@ -342,18 +342,18 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
 
         prompt += str_format("@D[@RPL@n@Y: @{}{:d}{}@D]@n", col, (int)perc, "@w%");
       }
-      if (!char_prf_flagged(g, d->character, PRF_DISPERC)) {
-        if (char_prf_flagged(g, d->character, PRF_DISPKI) &&
+      if (!char_prf_flagged(g, d->character, pref_flag::disperc)) {
+        if (char_prf_flagged(g, d->character, pref_flag::dispki) &&
             (getCurKI(g, d->character)) > getMaxKI(g, d->character) / 2) {
           prompt += str_format("@D[@CKI@Y: @c{}@D]@n", add_commas((getCurKI(g, d->character))));
-        } else if (char_prf_flagged(g, d->character, PRF_DISPKI) &&
+        } else if (char_prf_flagged(g, d->character, pref_flag::dispki) &&
                    (getCurKI(g, d->character)) > getMaxKI(g, d->character) / 10) {
           prompt += str_format("@D[@CKI@Y: @y{}@D]@n", add_commas((getCurKI(g, d->character))));
-        } else if (char_prf_flagged(g, d->character, PRF_DISPKI) &&
+        } else if (char_prf_flagged(g, d->character, pref_flag::dispki) &&
                    (getCurKI(g, d->character)) <= getMaxKI(g, d->character) / 10) {
           prompt += str_format("@D[@CKI@Y: @r{}@D]@n", add_commas((getCurKI(g, d->character))));
         }
-      } else if (char_prf_flagged(g, d->character, PRF_DISPKI)) {
+      } else if (char_prf_flagged(g, d->character, pref_flag::dispki)) {
         int64_t power = (getCurKI(g, d->character)), maxpower = getMaxKI(g, d->character);
         int perc = 0;
         if (power <= 0) {
@@ -375,18 +375,18 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
           prompt += str_format("@D[@CKI@n@Y: @r{:d}{}@D]@n", perc, "@w%");
         }
       }
-      if (!char_prf_flagged(g, d->character, PRF_DISPERC)) {
-        if (char_prf_flagged(g, d->character, PRF_DISPMOVE) &&
+      if (!char_prf_flagged(g, d->character, pref_flag::disperc)) {
+        if (char_prf_flagged(g, d->character, pref_flag::dispmove) &&
             (getCurST(g, d->character)) > getMaxST(g, d->character) / 2) {
           prompt += str_format("@D[@GSTA@Y: @c{}@D]@n", add_commas((getCurST(g, d->character))));
-        } else if (char_prf_flagged(g, d->character, PRF_DISPMOVE) &&
+        } else if (char_prf_flagged(g, d->character, pref_flag::dispmove) &&
                    (getCurST(g, d->character)) > getMaxST(g, d->character) / 10) {
           prompt += str_format("@D[@GSTA@Y: @y{}@D]@n", add_commas((getCurST(g, d->character))));
-        } else if (char_prf_flagged(g, d->character, PRF_DISPMOVE) &&
+        } else if (char_prf_flagged(g, d->character, pref_flag::dispmove) &&
                    (getCurST(g, d->character)) <= getMaxST(g, d->character) / 10) {
           prompt += str_format("@D[@GSTA@Y: @r{}@D]@n", add_commas((getCurST(g, d->character))));
         }
-      } else if (char_prf_flagged(g, d->character, PRF_DISPMOVE)) {
+      } else if (char_prf_flagged(g, d->character, pref_flag::dispmove)) {
         int64_t power = (getCurST(g, d->character)), maxpower = getMaxST(g, d->character);
         int perc = 0;
         if (power <= 0) {
@@ -408,19 +408,19 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
           prompt += str_format("@D[@GSTA@n@Y: @r{:d}{}@D]@n", perc, "@w%");
         }
       }
-      if (char_prf_flagged(g, d->character, PRF_DISPTNL) && char_get_level(d->character) < 100) {
+      if (char_prf_flagged(g, d->character, pref_flag::disptnl) && char_get_level(d->character) < 100) {
         prompt += str_format("@D[@yTNL@Y: @W{}@D]@n", add_commas(level_exp(d->character, char_get_level(d->character) + 1) - char_get_exp(d->character)));
       }
-      if (char_prf_flagged(g, d->character, PRF_DISTIME)) {
+      if (char_prf_flagged(g, d->character, pref_flag::distime)) {
         prompt += str_format("@D[@W{:>2d} {}@D]@n", (g->time_info.hours % 12 == 0) ? 12 : (g->time_info.hours % 12), g->time_info.hours >= 12 ? "PM" : "AM");
       }
-      if (char_prf_flagged(g, d->character, PRF_DISGOLD)) {
+      if (char_prf_flagged(g, d->character, pref_flag::disgold)) {
         prompt += str_format("@D[@YZen@y: @W{}@D]@n", add_commas(char_get_gold(d->character)));
       }
-      if (char_prf_flagged(g, d->character, PRF_DISPRAC)) {
+      if (char_prf_flagged(g, d->character, pref_flag::disprac)) {
         prompt += str_format("@D[@mPS@y: @W{}@D]@n", add_commas(char_get_practice_points(g, d->character)));
       }
-      if (char_prf_flagged(g, d->character, PRF_DISHUTH)) {
+      if (char_prf_flagged(g, d->character, pref_flag::dishuth)) {
         int hun = char_get_conditions(g, d->character, HUNGER), thir = char_get_conditions(g, d->character, THIRST);
         prompt += "\n@D[@mHung@y:";
         if (hun >= 48) {
@@ -462,7 +462,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
           prompt += "@D[@mThir@y: @WN/A@D]@n";
         }
       }
-      if (has_group(g, d->character) && !char_prf_flagged(g, d->character, PRF_GHEALTH)) {
+      if (has_group(g, d->character) && !char_prf_flagged(g, d->character, pref_flag::ghealth)) {
         prompt += str_format("\n{}", report_party_health(g, d->character));
       }
       prompt += "\n";

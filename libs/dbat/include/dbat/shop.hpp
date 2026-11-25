@@ -17,7 +17,6 @@ struct shop_buy_data {
   std::string keywords{}; /* Which of that type it buys: empty for all */
 };
 
-constexpr int SW_ARRAY_MAX = 4;
 
 /* The shop messages, in shop file order. */
 enum shop_message {

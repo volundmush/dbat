@@ -40,13 +40,13 @@ flag_set<exit_flag> door_flags(int door)
 {
   switch (door) {
     case 1:
-      return EX_ISDOOR;
+      return exit_flag::isdoor;
     case 2:
-      return EX_ISDOOR | EX_PICKPROOF;
+      return exit_flag::isdoor | exit_flag::pickproof;
     case 3:
-      return EX_ISDOOR | EX_SECRET;
+      return exit_flag::isdoor | exit_flag::secret;
     case 4:
-      return EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
+      return exit_flag::isdoor | exit_flag::pickproof | exit_flag::secret;
     default:
       return {};
   }
@@ -55,13 +55,13 @@ flag_set<exit_flag> door_flags(int door)
 /* An exit's door, as a number for the file: the reverse of door_flags() */
 int door_number(const flag_set<exit_flag> &exit_info)
 {
-  if (!exit_info.test(EX_ISDOOR))
+  if (!exit_info.test(exit_flag::isdoor))
     return 0;
-  if (exit_info.test(EX_SECRET) && exit_info.test(EX_PICKPROOF))
+  if (exit_info.test(exit_flag::secret) && exit_info.test(exit_flag::pickproof))
     return 4;
-  if (exit_info.test(EX_SECRET))
+  if (exit_info.test(exit_flag::secret))
     return 3;
-  if (exit_info.test(EX_PICKPROOF))
+  if (exit_info.test(exit_flag::pickproof))
     return 2;
   return 1;
 }

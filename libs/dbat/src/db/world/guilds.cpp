@@ -132,21 +132,21 @@ io::loaded<void> read_guild(GameWorld *g, io::text_reader &in, guild_vnum vnum, 
   if (!with_who.empty() && (with_who[0] == '#' || with_who[0] == '$'))
     next = std::move(with_who);
   else {
-    int slot = 1;
-    for (size_t at = 0; slot < GW_ARRAY_MAX && at < with_who.size(); slot++) {
+    std::size_t slot = 1;
+    for (size_t at = 0; slot < FLAG_WORDS && at < with_who.size(); slot++) {
       int n = 0;
       if (io::scan_ints(std::string_view(with_who).substr(at), std::span(&n, 1)) != 1) {
         mud_log("SYSERR: Can't parse GM_WITH_WHO line in {}: '{}'", context, with_who);
         break;
       }
-      guild_get_with_who(guild).set_word(static_cast<std::size_t>(slot), static_cast<bitvector_t>(n));
+      guild_get_with_who(guild).set_word(slot, static_cast<bitvector_t>(n));
       while (at < with_who.size() && (isdigit(static_cast<unsigned char>(with_who[at])) || with_who[at] == '-'))
         at++;
       while (at < with_who.size() && !(isdigit(static_cast<unsigned char>(with_who[at])) || with_who[at] == '-'))
         at++;
     }
-    for (; slot < GW_ARRAY_MAX; slot++)
-      guild_get_with_who(guild).set_word(static_cast<std::size_t>(slot), 0);
+    for (; slot < FLAG_WORDS; slot++)
+      guild_get_with_who(guild).set_word(slot, 0);
     io::loaded<std::string> after = in.tilde_string(context);
     if (!after)
       return std::unexpected(after.error());
@@ -214,8 +214,8 @@ bool save_guilds(GameWorld *g, struct zone_data *zone)
               guild_get_gm(guild) == NOBODY ? -1 : mob_index_of(g, guild_get_gm(guild))->vnum,
               static_cast<int>(guild_get_with_who(guild).word(0)), /* as signed, as always */
               guild_get_open(guild), guild_get_close(guild));
-    for (int i = 1; i < GW_ARRAY_MAX; i++)
-      out.print("{}{:d}", i == 1 ? "" : " ", static_cast<int>(guild_get_with_who(guild).word(static_cast<std::size_t>(i))));
+    for (std::size_t i = 1; i < FLAG_WORDS; i++)
+      out.print("{}{:d}", i == 1 ? "" : " ", static_cast<int>(guild_get_with_who(guild).word(i)));
     out.write("\n");
   }
   out.write("$~\n");

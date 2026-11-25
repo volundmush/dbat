@@ -53,7 +53,6 @@
 #include "dbat/io/paths.hpp"
 #include "dbat/stringutils.hpp"
 #include "dbat/flag_set.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/objsave.hpp"
 #include "dbat/relocate.hpp"
 #include "dbat/utils.hpp"
@@ -731,7 +730,7 @@ static void check_infravision_comes_off_an_android(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player_as(g, "Tester", ADMLVL_NONE, RACE_ANDROID, 0);
-  struct affected_type af = {.type = SPELL_SLEEP, .duration = 5, .modifier = 7, .location = APPLY_ACCURACY, .bitvector = AFF_INFRAVISION};
+  struct affected_type af = {.type = SPELL_SLEEP, .duration = 5, .modifier = 7, .location = APPLY_ACCURACY, .bitvector = aff_flag::infravision};
   int accuracy = char_get_accuracy(ch);
 
   affect_to_char(g, ch, &af);
@@ -970,19 +969,64 @@ static void check_scan_range(void)
   }
 }
 
-/* flag_set's names and words, for every family's table, against sprintbitarray() and the raw words */
+/* flag_set's names and words, for every family's table, against the readers it replaced and the raw words */
+
+/* The old readers (from flags.cpp, which the game no longer has), exactly as they were, for flag_set to be held to */
+static bool old_bit_set(std::span<const bitvector_t> words, std::size_t flag) { return (words[flag / 32] & (1u << (flag % 32))) != 0; }
+
+/* the names in a finished list, the space after the last taken off; an empty list is "None " */
+static std::string old_flag_list(std::string out)
+{
+  if (out.empty())
+    return "None ";
+  out.pop_back();
+  return out;
+}
+
+/* each set bit's name, a bit past the end of names UNDEFINED */
+static std::string old_sprintbit(bitvector_t bits, std::span<const std::string_view> names)
+{
+  std::string out;
+  for (std::size_t nr = 0; bits; bits >>= 1, nr++)
+    if (bits & 1) {
+      out += nr < names.size() ? names[nr] : "UNDEFINED";
+      out += ' ';
+    }
+  return old_flag_list(std::move(out));
+}
+
+/* the set flags' names, read up to the end of names, an empty name left out */
+static std::string old_sprintbitarray(std::span<const bitvector_t> words, std::span<const std::string_view> names)
+{
+  std::string out;
+  for (std::size_t flag = 0; flag < words.size() * 32 && flag < names.size(); flag++)
+    if (old_bit_set(words, flag) && !names[flag].empty()) {
+      out += names[flag];
+      out += ' ';
+    }
+  return old_flag_list(std::move(out));
+}
+
+/* the place of the name, exactly as the list has it, read up to an empty name; -1 if none */
+static int old_flag_by_name(std::span<const std::string_view> list, std::string_view name)
+{
+  for (std::size_t i = 0; i < list.size() && !list[i].empty(); i++)
+    if (list[i] == name)
+      return static_cast<int>(i);
+  return -1;
+}
 
 /* A flag_set is laid out as the four words it replaced, so the structures holding one keep their size */
 static_assert(sizeof(flag_set<zone_flag>) == sizeof(bitvector_t[FLAG_WORDS]) && alignof(flag_set<zone_flag>) == alignof(bitvector_t));
 
 /* A list of flags, and adding and taking away sets, checked by the compiler */
 static_assert([] {
-  constexpr flag_set<zone_flag> some{ZONE_CLOSED, ZONE_QUEST};
-  flag_set<zone_flag> set{ZONE_QUEST, ZONE_DBALLS};
+  constexpr flag_set<zone_flag> some{zone_flag::closed, zone_flag::quest};
+  flag_set<zone_flag> set{zone_flag::quest, zone_flag::dballs};
   set |= some;
-  bool added = set.test(ZONE_CLOSED) && set.test(ZONE_QUEST) && set.test(ZONE_DBALLS) && !set.test(ZONE_NOIMMORT);
+  bool added = set.test(zone_flag::closed) && set.test(zone_flag::quest) && set.test(zone_flag::dballs) && !set.test(zone_flag::noimmort);
   set -= some;
-  return added && set == flag_set<zone_flag>{ZONE_DBALLS} && some.word(0) == 0b101;
+  return added && set == flag_set<zone_flag>{zone_flag::dballs} && some.word(0) == 0b101;
 }());
 
 template <class E> static int flag_set_mismatches(const name_table &table)
@@ -991,45 +1035,45 @@ template <class E> static int flag_set_mismatches(const name_table &table)
   uint64_t state   = 88172645463325252ULL;
   auto next_word   = [&]() { state ^= state << 13; state ^= state >> 7; state ^= state << 17; return static_cast<bitvector_t>(state); };
   for (int round = 0; round < 2000; round++) {
-    bitvector_t words[FLAG_WORDS];
+    std::array<bitvector_t, FLAG_WORDS> words{};
     for (bitvector_t &w : words)
       w = round % 3 == 0 ? 0 : round % 3 == 1 ? next_word() & next_word() : next_word(); /* none, sparse, dense */
     flag_set<E> set = flag_set<E>::from_words(words);
-    mismatches += flag_names(set) != sprintbitarray(words, table, FLAG_WORDS);
-    mismatches += set.words() != std::to_array(words);
+    mismatches += flag_names(set) != old_sprintbitarray(words, table);
+    mismatches += set.words() != words;
     for (std::size_t i = 0; i < flag_count<E>; i++)
-      mismatches += set.test(static_cast<E>(i)) != (IS_SET_AR(words, i) != 0);
+      mismatches += set.test(static_cast<E>(i)) != old_bit_set(words, i);
     for (E flag : set.flags())
-      mismatches += !IS_SET_AR(words, static_cast<std::size_t>(flag));
+      mismatches += !old_bit_set(words, static_cast<std::size_t>(flag));
   }
   return mismatches;
 }
 
-/* Mob flags are an NPC's and player flags a player's: neither kind reads or takes the other's, save MOB_ISNPC on a
+/* Mob flags are an NPC's and player flags a player's: neither kind reads or takes the other's, save mob_flag::isnpc on a
    player, which lands on the player flag of its old shared bit */
 static void check_act_split(void)
 {
   auto *ch = new char_data();
-  char_mob_set(ch, MOB_SENTINEL, true);
-  char_plr_set(ch, PLR_THIEF, true); /* an NPC has no player flags */
-  CHECK(char_mob_flagged(ch, MOB_SENTINEL));
-  CHECK(!char_plr_flagged(ch, PLR_THIEF));
-  CHECK(!char_plr_toggle(ch, PLR_THIEF));
+  char_mob_set(ch, mob_flag::sentinel, true);
+  char_plr_set(ch, player_flag::thief, true); /* an NPC has no player flags */
+  CHECK(char_mob_flagged(ch, mob_flag::sentinel));
+  CHECK(!char_plr_flagged(ch, player_flag::thief));
+  CHECK(!char_plr_toggle(ch, player_flag::thief));
   char_make_player_specials(ch);
-  CHECK(!char_mob_flagged(ch, MOB_SENTINEL)); /* a player reads no mob flags */
-  char_mob_set(ch, MOB_AWARE, true);
-  CHECK(char_get_mob_flags(ch).test(MOB_SENTINEL) && !char_get_mob_flags(ch).test(MOB_AWARE));
-  char_plr_set(ch, PLR_THIEF, true);
-  CHECK(char_plr_flagged(ch, PLR_THIEF));
-  CHECK(!char_plr_toggle(ch, PLR_THIEF));
-  char_mob_set(ch, MOB_ISNPC, true);
-  CHECK(char_plr_flagged(ch, PLR_DONTSET));
-  CHECK(!char_mob_toggle(ch, MOB_ISNPC) && !char_plr_flagged(ch, PLR_DONTSET));
+  CHECK(!char_mob_flagged(ch, mob_flag::sentinel)); /* a player reads no mob flags */
+  char_mob_set(ch, mob_flag::aware, true);
+  CHECK(char_get_mob_flags(ch).test(mob_flag::sentinel) && !char_get_mob_flags(ch).test(mob_flag::aware));
+  char_plr_set(ch, player_flag::thief, true);
+  CHECK(char_plr_flagged(ch, player_flag::thief));
+  CHECK(!char_plr_toggle(ch, player_flag::thief));
+  char_mob_set(ch, mob_flag::isnpc, true);
+  CHECK(char_plr_flagged(ch, player_flag::dontset));
+  CHECK(!char_mob_toggle(ch, mob_flag::isnpc) && !char_plr_flagged(ch, player_flag::dontset));
   char_drop_player_specials(ch);
   delete ch;
 }
 
-/* flag_mask_names() against sprintbit(), for a single-word family: word 0 only, UNDEFINED past the names */
+/* flag_mask_names() against the old sprintbit(), for a single-word family: word 0 only, UNDEFINED past the names */
 template <class E> static int flag_mask_mismatches(const name_table &table)
 {
   int mismatches = 0;
@@ -1039,17 +1083,17 @@ template <class E> static int flag_mask_mismatches(const name_table &table)
     bitvector_t word = round % 3 == 0 ? 0 : round % 3 == 1 ? static_cast<bitvector_t>(state) & 0x3f : static_cast<bitvector_t>(state);
     flag_set<E> set;
     set.set_word(0, word);
-    mismatches += flag_mask_names(set) != sprintbit(word, table);
+    mismatches += flag_mask_names(set) != old_sprintbit(word, table);
   }
   return mismatches;
 }
 
 /* Flags or'ed together are a set of them, never a flag */
-static_assert((EX_ISDOOR | EX_CLOSED | EX_LOCKED).word(0) == 0b111 && (CONT_CLOSED | CONT_LOCKED).word(0) == 0b1100);
-static_assert(!std::is_convertible_v<decltype(EX_ISDOOR | EX_CLOSED), exit_flag>);
+static_assert((exit_flag::isdoor | exit_flag::closed | exit_flag::locked).word(0) == 0b111 && (container_flag::closed | container_flag::locked).word(0) == 0b1100);
+static_assert(!std::is_convertible_v<decltype(exit_flag::isdoor | exit_flag::closed), exit_flag>);
 /* act()'s whom and how: an option goes with someone to tell, never alone */
-static_assert((TO_CHAR | TO_SLEEP).to == TO_CHAR && (TO_CHAR | TO_SLEEP).even_asleep && !(TO_CHAR | TO_SLEEP).sneak_resist);
-static_assert((TO_ROOM | TO_SNEAKRESIST).sneak_resist && act_target(TO_VICT).to == TO_VICT && !act_target(TO_VICT).even_asleep);
+static_assert((act_to::actor | act_option::even_asleep).to == act_to::actor && (act_to::actor | act_option::even_asleep).even_asleep && !(act_to::actor | act_option::even_asleep).sneak_resist);
+static_assert((act_to::room | act_option::sneak_resist).sneak_resist && act_target(act_to::vict).to == act_to::vict && !act_target(act_to::vict).even_asleep);
 static_assert(!std::is_convertible_v<act_option, act_target>);
 
 static void check_flag_sets(void)
@@ -1072,23 +1116,23 @@ static void check_flag_sets(void)
   CHECK(flag_mask_mismatches<wld_trig>(wtrig_types) == 0);
   /* a trigger's types word is named by the table of what it is for, any other number as a mob's */
   for (bitvector_t word : {0u, 0x80001u, 0xFFFFFFFFu, 0x40000u}) {
-    CHECK(trig_type_names(OBJ_TRIGGER, word) == sprintbit(word, otrig_types));
-    CHECK(trig_type_names(WLD_TRIGGER, word) == sprintbit(word, wtrig_types));
-    CHECK(trig_type_names(MOB_TRIGGER, word) == sprintbit(word, trig_types));
-    CHECK(trig_type_names(7, word) == sprintbit(word, trig_types));
+    CHECK(trig_type_names(OBJ_TRIGGER, word) == old_sprintbit(word, otrig_types));
+    CHECK(trig_type_names(WLD_TRIGGER, word) == old_sprintbit(word, wtrig_types));
+    CHECK(trig_type_names(MOB_TRIGGER, word) == old_sprintbit(word, trig_types));
+    CHECK(trig_type_names(7, word) == old_sprintbit(word, trig_types));
   }
   /* a house's flags are a long in the files: every value comes back, negative or past 32 bits */
   for (long n : {0L, 6L, -1L, 0x7fffffffL, 0x80000000L, 0x123456789abL, -0x123456789abL})
     CHECK(house_flags_number(house_flags_from_number(n)) == n);
 
-  /* by number and by name, as get_flag_by_name() found them */
+  /* by number and by name, as the old get_flag_by_name() found them */
   CHECK(flag_from_index<room_flag>(-1) == std::nullopt);
-  CHECK(flag_from_index<room_flag>(NUM_ROOM_FLAGS) == std::nullopt);
+  CHECK(flag_from_index<room_flag>(flag_count<room_flag>) == std::nullopt);
   CHECK(flag_from_index<room_flag>(3) == static_cast<room_flag>(3));
   for (std::size_t i = 0; i < room_bits.size(); i++) {
     std::optional<room_flag> named = flag_by_name<room_flag>(room_bits[i]);
-    int old                             = get_flag_by_name(room_bits, room_bits[i]);
-    CHECK(named ? static_cast<int>(*named) == old : old == NOFLAG);
+    int old                        = old_flag_by_name(room_bits, room_bits[i]);
+    CHECK(named ? static_cast<int>(*named) == old : old == -1);
   }
   CHECK(flag_by_name<room_flag>("NO_SUCH_FLAG") == std::nullopt);
 }
@@ -1311,12 +1355,12 @@ static int old_get_number(char **name)
 static find_dots old_find_all_dots(char *arg)
 {
   if (!strcmp(arg, "all"))
-    return (FIND_ALL);
+    return (find_dots::all);
   else if (!strncmp(arg, "all.", 4)) {
     memmove(arg, arg + 4, strlen(arg + 4) + 1);
-    return (FIND_ALLDOT);
+    return (find_dots::alldot);
   } else
-    return (FIND_INDIV);
+    return (find_dots::indiv);
 }
 
 /* isname(), is_name(), get_number() and the rest find what they did as char * functions, and leave the
@@ -1546,7 +1590,7 @@ static void check_spellbook_edit_can_be_abandoned(void)
   struct char_data *ch = th_player(g, "Bookish", ADMLVL_IMPL);
   int spell            = 0;
   for (int i = 1; i < SKILL_TABLE_SIZE && !spell; i++)
-    if (g->spell_info[i].skilltype == SKTYPE_SPELL)
+    if (g->spell_info[i].skilltype == skill_kind::spell)
       spell = i;
   CHECK(spell > 0);
   std::string number = std::to_string(spell);
@@ -1978,8 +2022,8 @@ static void check_sensing_keeps_no_copies(void)
   struct char_data *ch  = th_player(g, "Sensed", 0);
   struct char_data *tch = th_player(g, "Senser", 0);
 
-  room_set_flag(g, 300, ROOM_EARTH, true);
-  room_set_flag(g, 301, ROOM_EARTH, true);
+  room_set_flag(g, 300, room_flag::earth, true);
+  room_set_flag(g, 301, room_flag::earth, true);
   char_from_room(g, ch);
   char_to_room(g, ch, 300);
   char_from_room(g, tch);
@@ -2162,7 +2206,7 @@ static void check_message_about_an_object_with_no_description(void)
   std::string description(obj_get_short_description(obj)); /* a copy: clearing the field invalidates the view */
 
   obj_set_short_description(obj, "");
-  act(g, "You look at $p.", false, ch, obj, nullptr, TO_CHAR);
+  act(g, "You look at $p.", false, ch, obj, nullptr, act_to::actor);
   CHECK(saw(ch, "You look at"));
   obj_set_short_description(obj, description);
   th_shutdown(g);
@@ -2209,7 +2253,7 @@ static void check_naming_things_with_no_short_description(void)
   spell_locate_object(g, 30, ch, nullptr, obj, "");
   CHECK(saw(ch, " is in The Hall."));
   th_take_output(g, ch);
-  sub_write(g, "You notice _thing12.", ch, TO_CHAR); /* a script's message naming it */
+  sub_write(g, "You notice _thing12.", ch, act_to::actor); /* a script's message naming it */
   CHECK(saw(ch, "You notice ."));
   obj_from_room(g, obj);
   obj_to_char(g, obj, ch);
@@ -2218,7 +2262,7 @@ static void check_naming_things_with_no_short_description(void)
   CHECK(saw(ch, "You nickname  as 'bob'."));
   obj_set_name(obj, "");
   th_take_output(g, ch);
-  act(g, "You hold $o.", false, ch, obj, nullptr, TO_CHAR); /* $o: the first of its keywords */
+  act(g, "You hold $o.", false, ch, obj, nullptr, act_to::actor); /* $o: the first of its keywords */
   CHECK(saw(ch, "You hold ."));
   th_shutdown(g);
 }
@@ -2627,7 +2671,7 @@ static void check_attached_trigger_shows_with_room_flags(void)
   obj_set_proto_script(obj, {}); /* as if its prototype had none */
   obj_to_room(g, obj, char_get_in_room(ch));
   add_trigger(g, dg_ensure_script(obj_script_slot(obj)), read_trigger(g, find_trigger(g, 312)), -1);
-  char_prf_set(g, ch, PRF_ROOMFLAGS, true);
+  char_prf_set(g, ch, pref_flag::roomflags, true);
   th_take_output(g, ch);
   th_type(g, ch, "look"); /* this read the prototype's first trigger, which there isn't */
   CHECK(strstr(th_output(ch), "350") != nullptr);

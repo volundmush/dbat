@@ -18,7 +18,6 @@
 #include "dbat/consts/adminflags.hpp"
 #include "dbat/consts/mobflags.hpp"
 #include "dbat/characters.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/log.hpp"
 #include "dbat/races.hpp"
 #include "dbat/class.hpp"
@@ -122,7 +121,7 @@ bool char_prf_toggle(GameWorld *g, struct char_data *ch, pref_flag flag);
 bool char_aff_toggle(struct char_data *ch, aff_flag flag);
 bool char_mob_toggle(struct char_data *ch, mob_flag flag);
 
-/* Flag setters. PLR bits are ignored on NPCs, and MOB bits on PCs (except MOB_ISNPC). */
+/* Flag setters. PLR bits are ignored on NPCs, and MOB bits on PCs (except mob_flag::isnpc). */
 void char_plr_set(struct char_data *ch, player_flag flag, bool on);
 void char_mob_set(struct char_data *ch, mob_flag flag, bool on);
 void char_aff_set(struct char_data *ch, aff_flag flag, bool on);

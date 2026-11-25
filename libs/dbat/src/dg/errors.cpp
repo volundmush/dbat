@@ -110,9 +110,9 @@ void script_log(GameWorld *g, std::string_view text)
       continue;
     if (char_get_admlevel(i->character) < ADMLVL_BUILDER)
       continue;
-    if (char_plr_flagged(i->character, PLR_WRITING))
+    if (char_plr_flagged(i->character, player_flag::writing))
       continue;
-    if (LOG_NRM > (char_prf_flagged(g, i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(g, i->character, PRF_LOG2) ? 2 : 0))
+    if (LOG_NRM > (char_prf_flagged(g, i->character, pref_flag::log1) ? 1 : 0) + (char_prf_flagged(g, i->character, pref_flag::log2) ? 2 : 0))
       continue;
 
     send_to_char(g, i->character, "@g[ {}{} ]\r\n@n", text, ctx);

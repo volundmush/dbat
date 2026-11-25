@@ -8,7 +8,6 @@
 #include "dbat/iterate.hpp"
 #include "dbat/db.hpp"
 #include "dbat/interpreter.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/handler.hpp"
 #include "dbat/object_utils.hpp"
 #include "dbat/character_utils.hpp"
@@ -88,8 +87,8 @@ const field<obj_data> obj_fields[] = {
     {"health", [](const field_query &q, obj_data *o) -> result {
        if (q.has_arg()) {
          obj_set_value(o, VAL_ALL_HEALTH, std::max(1, parse_int(q.subfield) + obj_get_value(o, VAL_ALL_HEALTH)));
-         if (obj_extra_flagged(o, ITEM_BROKEN) && obj_get_value(o, VAL_ALL_HEALTH) >= 100)
-           obj_extra_set(o, ITEM_BROKEN, false);
+         if (obj_extra_flagged(o, extra_flag::broken) && obj_get_value(o, VAL_ALL_HEALTH) >= 100)
+           obj_extra_set(o, extra_flag::broken, false);
        }
        return number(obj_get_value(o, VAL_ALL_HEALTH));
      }},
@@ -136,10 +135,10 @@ const field<obj_data> obj_fields[] = {
          if (ns > -1)
            obj_set_size(o, ns);
        }
-       return sprinttype(obj_get_size(o), size_names);
+       return std::string(type_name(size_names, obj_get_size(o)));
      }},
     {"timer", [](const field_query &, obj_data *o) -> result { return number(obj_get_timer(o)); }},
-    {"type", [](const field_query &, obj_data *o) -> result { return sprinttype(obj_get_type_flag(o), item_types); }},
+    {"type", [](const field_query &, obj_data *o) -> result { return std::string(type_name(item_types, obj_get_type_flag(o))); }},
     {"val0", value_field<0>},
     {"val1", value_field<1>},
     {"val2", value_field<2>},

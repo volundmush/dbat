@@ -40,7 +40,7 @@ static void grow_plants(GameWorld *g)
     if (obj_get_carried_by(k) || obj_get_in_obj(k)) {
       continue;
     }
-    if (room_flagged(g, obj_get_in_room(k), ROOM_GARDEN1) || room_flagged(g, obj_get_in_room(k), ROOM_GARDEN2)) {
+    if (room_flagged(g, obj_get_in_room(k), room_flag::garden1) || room_flagged(g, obj_get_in_room(k), room_flag::garden2)) {
       if (obj_get_value(k, VAL_WATERLEVEL) < 0 && obj_get_value(k, VAL_WATERLEVEL) > -10) {
         obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
         if (obj_get_value(k, VAL_WATERLEVEL) > -10) {
@@ -245,11 +245,11 @@ static void weather_change(GameWorld *g)
 
 void oozaru_transform(GameWorld *g, char_data *ch)
 {
-  if (char_plr_flagged(ch, PLR_OOZARU))
+  if (char_plr_flagged(ch, player_flag::oozaru))
     return;
 
-  act(g, "@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", true, ch, nullptr, nullptr, act_to::actor);
+  act(g, "@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", true, ch, nullptr, nullptr, act_to::room);
   char_plr_set(ch, *oozaru_form.flag, true);
 }
 
@@ -259,7 +259,7 @@ static void oozaru_add(GameWorld *g)
     if (!desc_is_playing(d)) {
       continue;
     }
-    if (char_moon_ok(g, d->character) && !char_plr_flagged(d->character, PLR_OOZARU)) {
+    if (char_moon_ok(g, d->character) && !char_plr_flagged(d->character, player_flag::oozaru)) {
       oozaru_transform(g, d->character);
     }
   }
@@ -267,14 +267,14 @@ static void oozaru_add(GameWorld *g)
 
 void oozaru_revert(GameWorld *g, char_data *ch)
 {
-  if (!char_plr_flagged(ch, PLR_OOZARU))
+  if (!char_plr_flagged(ch, player_flag::oozaru))
     return;
 
-  act(g, "@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", true, ch, nullptr, nullptr, TO_CHAR);
-  act(g, "@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", true, ch, nullptr, nullptr, act_to::actor);
+  act(g, "@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", true, ch, nullptr, nullptr, act_to::room);
   char_set_position(ch, POS_SLEEPING);
 
-  char_plr_set(ch, PLR_OOZARU, false);
+  char_plr_set(ch, player_flag::oozaru, false);
 }
 
 static void oozaru_drop(GameWorld *g)
@@ -294,22 +294,22 @@ static void check_hoshi_phase(GameWorld *g, struct char_data *ch, int type)
   switch (type) {
     case 0:
       if (char_get_starphase(ch) > 0) {
-        act(g, "@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n", true, ch, nullptr, nullptr, act_to::actor);
+        act(g, "@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n", true, ch, nullptr, nullptr, act_to::room);
         phase_powerup(g, ch, 0);
       }
       break; // Drop Powerup
     case 1:
       if (char_get_starphase(ch) != 1) {
-        act(g, "@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n", true, ch, nullptr, nullptr, act_to::actor);
+        act(g, "@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", true, ch, nullptr, nullptr, act_to::room);
         phase_powerup(g, ch, 1);
       }
       break; // Powerup Phase 1
     case 2:
       if (char_get_starphase(ch) != 2) {
-        act(g, "@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n", true, ch, nullptr, nullptr, TO_CHAR);
-        act(g, "@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", true, ch, nullptr, nullptr, TO_ROOM);
+        act(g, "@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n", true, ch, nullptr, nullptr, act_to::actor);
+        act(g, "@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", true, ch, nullptr, nullptr, act_to::room);
         phase_powerup(g, ch, 2);
       }
       break; // Powerup Phase 2
@@ -343,7 +343,7 @@ static void phase_powerup(GameWorld *g, struct char_data *ch, int phase)
   }
 
   // clear existing bonus...
-  remove_affect(g, ch, AFF_STARPHASE);
+  remove_affect(g, ch, aff_flag::starphase);
 
   int bonus = 0;
 
@@ -362,7 +362,7 @@ static void phase_powerup(GameWorld *g, struct char_data *ch, int phase)
   }
 
   if (bonus > 0) {
-    assign_affect(g, ch, AFF_STARPHASE, 0, -1, bonus, 0, 0, 0, 0, bonus);
+    assign_affect(g, ch, aff_flag::starphase, 0, -1, bonus, 0, 0, 0, 0, bonus);
   }
   char_set_starphase(ch, phase);
   save_char(g, ch);

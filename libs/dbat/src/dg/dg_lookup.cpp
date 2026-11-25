@@ -157,27 +157,27 @@ int find_eq_pos_script(std::string_view arg)
 bool can_wear_on_pos(struct obj_data *obj, int pos)
 {
   switch (pos) {
-    case WEAR_WIELD1: return obj_wear_flagged(obj, ITEM_WEAR_WIELD);
-    case WEAR_WIELD2: return obj_wear_flagged(obj, ITEM_WEAR_TAKE);
+    case WEAR_WIELD1: return obj_wear_flagged(obj, wear_flag::wield);
+    case WEAR_WIELD2: return obj_wear_flagged(obj, wear_flag::take);
     case WEAR_FINGER_R:
-    case WEAR_FINGER_L: return obj_wear_flagged(obj, ITEM_WEAR_FINGER);
+    case WEAR_FINGER_L: return obj_wear_flagged(obj, wear_flag::finger);
     case WEAR_NECK_1:
-    case WEAR_NECK_2: return obj_wear_flagged(obj, ITEM_WEAR_NECK);
-    case WEAR_BODY: return obj_wear_flagged(obj, ITEM_WEAR_BODY);
-    case WEAR_HEAD: return obj_wear_flagged(obj, ITEM_WEAR_HEAD);
-    case WEAR_LEGS: return obj_wear_flagged(obj, ITEM_WEAR_LEGS);
-    case WEAR_FEET: return obj_wear_flagged(obj, ITEM_WEAR_FEET);
-    case WEAR_HANDS: return obj_wear_flagged(obj, ITEM_WEAR_HANDS);
-    case WEAR_ARMS: return obj_wear_flagged(obj, ITEM_WEAR_ARMS);
-    case WEAR_ABOUT: return obj_wear_flagged(obj, ITEM_WEAR_ABOUT);
-    case WEAR_WAIST: return obj_wear_flagged(obj, ITEM_WEAR_WAIST);
+    case WEAR_NECK_2: return obj_wear_flagged(obj, wear_flag::neck);
+    case WEAR_BODY: return obj_wear_flagged(obj, wear_flag::body);
+    case WEAR_HEAD: return obj_wear_flagged(obj, wear_flag::head);
+    case WEAR_LEGS: return obj_wear_flagged(obj, wear_flag::legs);
+    case WEAR_FEET: return obj_wear_flagged(obj, wear_flag::feet);
+    case WEAR_HANDS: return obj_wear_flagged(obj, wear_flag::hands);
+    case WEAR_ARMS: return obj_wear_flagged(obj, wear_flag::arms);
+    case WEAR_ABOUT: return obj_wear_flagged(obj, wear_flag::about);
+    case WEAR_WAIST: return obj_wear_flagged(obj, wear_flag::waist);
     case WEAR_WRIST_R:
-    case WEAR_WRIST_L: return obj_wear_flagged(obj, ITEM_WEAR_WRIST);
-    case WEAR_BACKPACK: return obj_wear_flagged(obj, ITEM_WEAR_PACK);
+    case WEAR_WRIST_L: return obj_wear_flagged(obj, wear_flag::wrist);
+    case WEAR_BACKPACK: return obj_wear_flagged(obj, wear_flag::pack);
     case WEAR_EAR_R:
-    case WEAR_EAR_L: return obj_wear_flagged(obj, ITEM_WEAR_EAR);
-    case WEAR_SH: return obj_wear_flagged(obj, ITEM_WEAR_SH);
-    case WEAR_EYE: return obj_wear_flagged(obj, ITEM_WEAR_EYE);
+    case WEAR_EAR_L: return obj_wear_flagged(obj, wear_flag::ear);
+    case WEAR_SH: return obj_wear_flagged(obj, wear_flag::sh);
+    case WEAR_EYE: return obj_wear_flagged(obj, wear_flag::eye);
     default: return false;
   }
 }
@@ -233,12 +233,12 @@ char_data *get_char(GameWorld *g, std::string_view name)
   if (name.starts_with(UID_CHAR)) {
     i = find_char(g, parse_int(name.substr(1)));
 
-    if (i && valid_dg_target(g, i, DG_ALLOW_GODS))
+    if (i && valid_dg_target(g, i, dg_gods::allow))
       return i;
   } else {
     for (char_data *tch : each_char(g))
       if (isname(name, char_get_alias(tch)) &&
-          valid_dg_target(g, tch, DG_ALLOW_GODS))
+          valid_dg_target(g, tch, dg_gods::allow))
         return tch;
   }
 
@@ -255,14 +255,14 @@ char_data *get_char_near_obj(GameWorld *g, obj_data *obj, std::string_view name)
   if (name.starts_with(UID_CHAR)) {
     ch = find_char(g, parse_int(name.substr(1)));
 
-    if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
+    if (ch && valid_dg_target(g, ch, dg_gods::allow))
       return ch;
   } else {
     room_vnum num;
     if ((num = obj_room(obj)) != NOWHERE)
       for (char_data *tch : room_people(g, num))
         if (isname(name, char_get_alias(tch)) &&
-            valid_dg_target(g, tch, DG_ALLOW_GODS))
+            valid_dg_target(g, tch, dg_gods::allow))
           return tch;
   }
 
@@ -280,12 +280,12 @@ char_data *get_char_in_room(GameWorld *g, room_data *room, std::string_view name
   if (name.starts_with(UID_CHAR)) {
     ch = find_char(g, parse_int(name.substr(1)));
 
-    if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
+    if (ch && valid_dg_target(g, ch, dg_gods::allow))
       return ch;
   } else {
     for (char_data *tch : room_people(g, room))
       if (isname(name, char_get_alias(tch)) &&
-          valid_dg_target(g, tch, DG_ALLOW_GODS))
+          valid_dg_target(g, tch, dg_gods::allow))
         return tch;
   }
 
@@ -376,22 +376,22 @@ char_data *get_char_by_obj(GameWorld *g, obj_data *obj, std::string_view name)
   if (name.starts_with(UID_CHAR)) {
     ch = find_char(g, parse_int(name.substr(1)));
 
-    if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
+    if (ch && valid_dg_target(g, ch, dg_gods::allow))
       return ch;
   } else {
     if (obj_get_carried_by(obj) &&
         isname(name, char_get_alias(obj_get_carried_by(obj))) &&
-        valid_dg_target(g, obj_get_carried_by(obj), DG_ALLOW_GODS))
+        valid_dg_target(g, obj_get_carried_by(obj), dg_gods::allow))
       return obj_get_carried_by(obj);
 
     if (obj_get_worn_by(obj) &&
         isname(name, char_get_alias(obj_get_worn_by(obj))) &&
-        valid_dg_target(g, obj_get_worn_by(obj), DG_ALLOW_GODS))
+        valid_dg_target(g, obj_get_worn_by(obj), dg_gods::allow))
       return obj_get_worn_by(obj);
 
     for (char_data *tch : each_char(g))
       if (isname(name, char_get_alias(tch)) &&
-          valid_dg_target(g, tch, DG_ALLOW_GODS))
+          valid_dg_target(g, tch, dg_gods::allow))
         return tch;
   }
 
@@ -409,17 +409,17 @@ char_data *get_char_by_room(GameWorld *g, room_data *room, std::string_view name
   if (name.starts_with(UID_CHAR)) {
     ch = find_char(g, parse_int(name.substr(1)));
 
-    if (ch && valid_dg_target(g, ch, DG_ALLOW_GODS))
+    if (ch && valid_dg_target(g, ch, dg_gods::allow))
       return ch;
   } else {
     for (char_data *vict : room_people(g, room))
       if (isname(name, char_get_alias(vict)) &&
-          valid_dg_target(g, vict, DG_ALLOW_GODS))
+          valid_dg_target(g, vict, dg_gods::allow))
         return vict;
 
     for (char_data *tch : each_char(g))
       if (isname(name, char_get_alias(tch)) &&
-          valid_dg_target(g, tch, DG_ALLOW_GODS))
+          valid_dg_target(g, tch, dg_gods::allow))
         return tch;
   }
 
@@ -640,21 +640,4 @@ void dg_log_uid_stats(GameWorld *g)
           g->max_mob_id, 100.0 * (g->max_mob_id - MOB_ID_BASE) / ((double)MOB_ID_MAX - MOB_ID_BASE),
           g->max_obj_id, 100.0 * (g->max_obj_id - OBJ_ID_BASE) / ((double)OBJ_ID_MAX - OBJ_ID_BASE),
           (long)(g->characters.size() + g->objects.size()));
-}
-
-int check_flags_by_name_ar(bitvector_t *array, int numflags, std::string_view search, std::span<const std::string_view> namelist)
-{
-  int i, item = -1;
-
-  for (i = 0; i < numflags && item < 0; i++)
-    if (search == namelist[i])
-      item = i;
-
-  if (item < 0)
-    return false;
-
-  if (IS_SET_AR(array, item))
-    return item;
-
-  return false;
 }

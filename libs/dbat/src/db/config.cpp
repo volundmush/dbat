@@ -213,11 +213,11 @@ const int auto_pwipe = true;
    This struct holds information used to determine which players to wipe
    then the mud boots.  The levels must be in ascending order, with a
    descending level marking the end of the array.  A level -1 entry in the
-   beginning is the case for players with the PLR_DELETED flag.  The
+   beginning is the case for players with the player_flag::deleted flag.  The
    values below match the stock purgeplay.c criteria.
 
    Detailed explanation by array element:
-   * Element 0, level -1, days 0: Players with PLR_DELETED flag are always
+   * Element 0, level -1, days 0: Players with player_flag::deleted flag are always
 	wiped.
    * Element 1, level 0, days 0: Players at level 0 have created a
 	character, but have never actually entered the game, so always

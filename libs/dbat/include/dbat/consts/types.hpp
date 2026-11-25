@@ -9,7 +9,6 @@ constexpr IDXTYPE NOTHING = -1; /* nil reference for objects	*/
 
 constexpr IDXTYPE NOWHERE = NOTHING;
 constexpr IDXTYPE NOBODY  = NOTHING;
-constexpr IDXTYPE NOFLAG  = NOTHING;
 
 /* Various virtual (human-reference) number types. */
 typedef IDXTYPE room_vnum;

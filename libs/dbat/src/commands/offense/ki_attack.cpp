@@ -157,7 +157,7 @@ ki_outcome shoot_once(ki_shot &s, int prob, int perc, int pry, int blk, int dge,
       return ki_outcome::absorbed;
     }
     if (!atk.parry.to_char.empty() && pry > rand_number(g, 1, 140) &&
-        (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, MOB_DUMMY))) {
+        (!char_is_npc(s.vict) || !char_mob_flagged(s.vict, mob_flag::dummy))) {
       ki_act(s, atk.parry);
       if (atk.on_parry) {
         atk.on_parry(s);
@@ -284,7 +284,7 @@ void at_victim(ki_shot &s)
     bool last = shot == atk.shots;
     if (shot > 1)
       prob -= prob / 5;
-    else if (atk.shots > 1 && (char_aff_flagged(s.vict, AFF_SPIRIT) || getCurPL(g, s.vict) <= 0) &&
+    else if (atk.shots > 1 && (char_aff_flagged(s.vict, aff_flag::spirit) || getCurPL(g, s.vict) <= 0) &&
              !char_is_npc(s.vict))
       return;
     if (shoot(s, prob, perc, pry, blk, dge, last) == ki_outcome::hit && getCurPL(g, s.vict) <= 0) {
@@ -309,8 +309,8 @@ void at_object(ki_shot &s)
   if (s.attack->on_object && s.attack->on_object(s))
     return;
   s.dmg = damtype(g, s.ch, s.attack->obj_damtype ? s.attack->obj_damtype : s.attack->damtype, s.skill, s.attperc) / 10;
-  act(g, s.attack->obj_to_char, s.attack->obj_hide, s.ch, s.obj, nullptr, TO_CHAR);
-  act(g, s.attack->obj_to_room, s.attack->obj_hide, s.ch, s.obj, nullptr, TO_ROOM);
+  act(g, s.attack->obj_to_char, s.attack->obj_hide, s.ch, s.obj, nullptr, act_to::actor);
+  act(g, s.attack->obj_to_room, s.attack->obj_hide, s.ch, s.obj, nullptr, act_to::room);
   hurt(g, 0, 0, s.ch, nullptr, s.obj, s.dmg, 0);
   pcost(g, s.ch, s.attperc, 0);
   if (s.attack->after_paying)

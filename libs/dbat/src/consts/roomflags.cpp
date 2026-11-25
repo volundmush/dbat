@@ -69,5 +69,5 @@ static constexpr std::string_view room_bits_entries[] = {
     "FISHING",
     "FRESHWATFISH",
     "CANREMODEL"};
-static_assert(std::size(room_bits_entries) == NUM_ROOM_FLAGS);
+static_assert(std::size(room_bits_entries) == flag_count<room_flag>);
 constinit const name_table room_bits(room_bits_entries);

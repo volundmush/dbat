@@ -46,39 +46,35 @@ template <> struct flag_traits<mag_routine> {
   static constexpr const name_table &names = routine_bits;
 };
 
-/* The old names, until every use says mag_routine:: */
-constexpr mag_routine MAG_DAMAGE         = mag_routine::damage;
-constexpr mag_routine MAG_AFFECTS        = mag_routine::affects;
-constexpr mag_routine MAG_UNAFFECTS      = mag_routine::unaffects;
-constexpr mag_routine MAG_POINTS         = mag_routine::points;
-constexpr mag_routine MAG_ALTER_OBJS     = mag_routine::alter_objs;
-constexpr mag_routine MAG_GROUPS         = mag_routine::groups;
-constexpr mag_routine MAG_MASSES         = mag_routine::masses;
-constexpr mag_routine MAG_AREAS          = mag_routine::areas;
-constexpr mag_routine MAG_SUMMONS        = mag_routine::summons;
-constexpr mag_routine MAG_CREATIONS      = mag_routine::creations;
-constexpr mag_routine MAG_MANUAL         = mag_routine::manual;
-constexpr mag_routine MAG_AFFECTSV       = mag_routine::affectsv;
-constexpr mag_routine MAG_ACTION_FREE    = mag_routine::action_free;
-constexpr mag_routine MAG_ACTION_PARTIAL = mag_routine::action_partial;
-constexpr mag_routine MAG_ACTION_FULL    = mag_routine::action_full;
-constexpr mag_routine MAG_NEXTSTRIKE     = mag_routine::nextstrike;
-constexpr mag_routine MAG_TOUCH_MELEE    = mag_routine::touch_melee;
-constexpr mag_routine MAG_TOUCH_RANGED   = mag_routine::touch_ranged;
+/* How a spell's victim saves (spell_info_type::save_flags) */
+extern const name_table save_bits; /* flag_count<mag_save> of them */
+enum class mag_save : uint8_t {
+  fort    = 0,
+  reflex  = 1,
+  will    = 2,
+  half    = 3,
+  none    = 4,
+  partial = 5,
+  count_  = 6,
+};
+template <> struct flag_traits<mag_save> {
+  static constexpr const name_table &names = save_bits;
+};
 
-constexpr int MAGSAVE_FORT    = (1 << 0);
-constexpr int MAGSAVE_REFLEX  = (1 << 1);
-constexpr int MAGSAVE_WILL    = (1 << 2);
-constexpr int MAGSAVE_HALF    = (1 << 3);
-constexpr int MAGSAVE_NONE    = (1 << 4);
-constexpr int MAGSAVE_PARTIAL = (1 << 5);
-
-constexpr int MAGCOMP_DIVINE_FOCUS = (1 << 0);
-constexpr int MAGCOMP_EXP_COST     = (1 << 1);
-constexpr int MAGCOMP_FOCUS        = (1 << 2);
-constexpr int MAGCOMP_MATERIAL     = (1 << 3);
-constexpr int MAGCOMP_SOMATIC      = (1 << 4);
-constexpr int MAGCOMP_VERBAL       = (1 << 5);
+/* What casting a spell takes (spell_info_type::comp_flags) */
+extern const name_table component_bits; /* flag_count<mag_component> of them */
+enum class mag_component : uint8_t {
+  divine_focus = 0,
+  exp_cost     = 1,
+  focus        = 2,
+  material     = 3,
+  somatic      = 4,
+  verbal       = 5,
+  count_       = 6,
+};
+template <> struct flag_traits<mag_component> {
+  static constexpr const name_table &names = component_bits;
+};
 
 constexpr int TYPE_UNDEFINED     = (-1);
 constexpr int SPELL_RESERVED_DBC = 0; /* SKILL NUMBER ZERO -- RESERVED */
@@ -228,8 +224,8 @@ enum class spell_target : uint8_t {
   char_world = 2,
   fight_self = 3,
   fight_vict = 4,
-  self_only  = 5,   /* Only a check, use with i.e. TAR_CHAR_ROOM */
-  not_self   = 6,   /* Only a check, use with i.e. TAR_CHAR_ROOM */
+  self_only  = 5,   /* Only a check, use with i.e. spell_target::char_room */
+  not_self   = 6,   /* Only a check, use with i.e. spell_target::char_room */
   obj_inv    = 7,
   obj_room   = 8,
   obj_world  = 9,
@@ -240,40 +236,42 @@ template <> struct flag_traits<spell_target> {
   static constexpr const name_table &names = target_bits;
 };
 
-/* The old names, until every use says spell_target:: */
-constexpr spell_target TAR_IGNORE     = spell_target::ignore;
-constexpr spell_target TAR_CHAR_ROOM  = spell_target::char_room;
-constexpr spell_target TAR_CHAR_WORLD = spell_target::char_world;
-constexpr spell_target TAR_FIGHT_SELF = spell_target::fight_self;
-constexpr spell_target TAR_FIGHT_VICT = spell_target::fight_vict;
-constexpr spell_target TAR_SELF_ONLY  = spell_target::self_only;
-constexpr spell_target TAR_NOT_SELF   = spell_target::not_self;
-constexpr spell_target TAR_OBJ_INV    = spell_target::obj_inv;
-constexpr spell_target TAR_OBJ_ROOM   = spell_target::obj_room;
-constexpr spell_target TAR_OBJ_WORLD  = spell_target::obj_world;
-constexpr spell_target TAR_OBJ_EQUIP  = spell_target::obj_equip;
+/* What a skill table entry is (spell_info_type::skilltype): one kind each, though lookups take a set (none for an unused entry) */
+extern const name_table skill_kind_bits; /* flag_count<skill_kind> of them */
+enum class skill_kind : uint8_t {
+  spell  = 0,
+  skill  = 1,
+  lang   = 2,
+  weapon = 3,
+  art    = 4,
+  count_ = 5,
+};
+template <> struct flag_traits<skill_kind> {
+  static constexpr const name_table &names = skill_kind_bits;
+};
 
-constexpr int SKTYPE_NONE   = 0;
-constexpr int SKTYPE_SPELL  = (1 << 0);
-constexpr int SKTYPE_SKILL  = (1 << 1);
-constexpr int SKTYPE_LANG   = (1 << 2);
-constexpr int SKTYPE_WEAPON = (1 << 3);
-constexpr int SKTYPE_ART    = (1 << 4);
-
-constexpr int SKFLAG_NEEDTRAIN = (1 << 0); /* Disallow use of 0 skill with only stat mod */
-constexpr int SKFLAG_STRMOD    = (1 << 1);
-constexpr int SKFLAG_DEXMOD    = (1 << 2);
-constexpr int SKFLAG_CONMOD    = (1 << 3);
-constexpr int SKFLAG_INTMOD    = (1 << 4);
-constexpr int SKFLAG_WISMOD    = (1 << 5);
-constexpr int SKFLAG_CHAMOD    = (1 << 6);
-constexpr int SKFLAG_ARMORBAD  = (1 << 7);
-constexpr int SKFLAG_ARMORALL  = (1 << 8);
-constexpr int SKFLAG_TIER1     = (1 << 9);
-constexpr int SKFLAG_TIER2     = (1 << 10);
-constexpr int SKFLAG_TIER3     = (1 << 11);
-constexpr int SKFLAG_TIER4     = (1 << 12);
-constexpr int SKFLAG_TIER5     = (1 << 13);
+/* How a skill is trained and what modifies it (spell_info_type::flags); needtrain disallows using a skill at 0 with only its stat */
+extern const name_table skill_flag_bits; /* flag_count<skill_flag> of them */
+enum class skill_flag : uint8_t {
+  needtrain = 0,
+  strmod    = 1,
+  dexmod    = 2,
+  conmod    = 3,
+  intmod    = 4,
+  wismod    = 5,
+  chamod    = 6,
+  armorbad  = 7,
+  armorall  = 8,
+  tier1     = 9,
+  tier2     = 10,
+  tier3     = 11,
+  tier4     = 12,
+  tier5     = 13,
+  count_    = 14,
+};
+template <> struct flag_traits<skill_flag> {
+  static constexpr const name_table &names = skill_flag_bits;
+};
 
 constexpr int SKLEARN_CANT       = 0; /* This class can't learn this skill */
 constexpr int SKLEARN_CROSSCLASS = 1; /* Cross-class skill for this class */
@@ -296,16 +294,15 @@ struct spell_info_type {
   std::string_view name{};         /* a string constant */
   std::string_view wear_off_msg{}; /* a string constant, or empty for none */
   int race_can_learn[NUM_RACES]{};
-  int skilltype{}; /* Is it a spell, skill, art, feat, or what? used as bitvector */
-  int flags{};
-  int save_flags{};
-  int comp_flags{};
+  flag_set<skill_kind> skilltype; /* none for an unused entry */
+  flag_set<skill_flag> flags;
+  flag_set<mag_save> save_flags;
+  flag_set<mag_component> comp_flags;
   int8_t can_learn_skill[NUM_CLASSES]{};
   int spell_level{};
   int school{};
   int domain{};
 };
-
 
 /* Whether the spell has any of these routines */
 bool spell_has_routine(GameWorld *g, int spellnum, flag_set<mag_routine> routines);
@@ -358,7 +355,7 @@ ASPELL(art_abundant_step);
 
 /* basic magic calling functions */
 
-int find_skill_num(GameWorld *g, std::string_view name, int sktype);
+int find_skill_num(GameWorld *g, std::string_view name, flag_set<skill_kind> sktype);
 
 int mag_damage(int level, struct char_data *ch, struct char_data *victim,
                int spellnum);
@@ -371,7 +368,6 @@ void mag_groups(GameWorld *g, int level, struct char_data *ch, int spellnum);
 void mag_masses(GameWorld *g, int level, struct char_data *ch, int spellnum);
 
 void mag_areas(GameWorld *g, int level, struct char_data *ch, int spellnum);
-
 
 void mag_points(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                 int spellnum);
@@ -399,5 +395,5 @@ bool mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
 std::string_view skill_name(GameWorld *g, int num);
 int roll_skill(GameWorld *g, const struct char_data *ch, int snum);
 bool roll_resisted(GameWorld *g, const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
-int skill_type(GameWorld *g, int skill);
+flag_set<skill_kind> skill_type(GameWorld *g, int skill);
 

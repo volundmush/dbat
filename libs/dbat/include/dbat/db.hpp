@@ -109,15 +109,7 @@ template <> struct flag_traits<pindex_flag> {
   static constexpr const name_table &names = pindex_bits;
 };
 
-/* The old names, until every use says pindex_flag:: */
-constexpr pindex_flag PINDEX_DELETED    = pindex_flag::deleted;
-constexpr pindex_flag PINDEX_NODELETE   = pindex_flag::nodelete;
-constexpr pindex_flag PINDEX_SELFDELETE = pindex_flag::selfdelete;
-constexpr pindex_flag PINDEX_NOWIZLIST  = pindex_flag::nowizlist;
-
 // global variables
-
-
 
 void auc_load(struct obj_data *obj);
 /* public procedures in db.cpp, reset.cpp and the entity files */

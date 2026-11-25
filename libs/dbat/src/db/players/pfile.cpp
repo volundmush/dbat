@@ -178,7 +178,7 @@ void read_affects(pfile_reader &r)
       af.modifier  = n[2];
       af.location  = n[3];
       std::optional<aff_flag> bit = flag_from_index<aff_flag>(n[4]); /* a number past the affects isn't loaded */
-      af.bitvector                = bit.value_or(AFF_DONTUSE);
+      af.bitvector                = bit.value_or(aff_flag::dontuse);
       af.specific                 = affect_checked_specific(n[3], n[5]);
       if (bit && affect_is_loadable(&af))
         affect_to_char(r.g, r.ch, &af);
@@ -736,7 +736,7 @@ void save_char(GameWorld *g, struct char_data *ch)
       tmp_aff[i].modifier  = 0;
       tmp_aff[i].specific  = 0;
       tmp_aff[i].location  = 0;
-      tmp_aff[i].bitvector = AFF_DONTUSE;
+      tmp_aff[i].bitvector = aff_flag::dontuse;
     }
   }
 
@@ -797,19 +797,19 @@ void save_char(GameWorld *g, struct char_data *ch)
     g->player_table[id].played = char_get_lastpl(ch);
   }
   const flag_set<pindex_flag> old_flags = g->player_table[id].flags;
-  if (char_plr_flagged(ch, PLR_DELETED))
-    g->player_table[id].flags.set(PINDEX_DELETED);
+  if (char_plr_flagged(ch, player_flag::deleted))
+    g->player_table[id].flags.set(pindex_flag::deleted);
   else
-    g->player_table[id].flags.reset(PINDEX_DELETED);
-  if (char_plr_flagged(ch, PLR_NODELETE) || char_plr_flagged(ch, PLR_CRYO))
-    g->player_table[id].flags.set(PINDEX_NODELETE);
+    g->player_table[id].flags.reset(pindex_flag::deleted);
+  if (char_plr_flagged(ch, player_flag::nodelete) || char_plr_flagged(ch, player_flag::cryo))
+    g->player_table[id].flags.set(pindex_flag::nodelete);
   else
-    g->player_table[id].flags.reset(PINDEX_NODELETE);
+    g->player_table[id].flags.reset(pindex_flag::nodelete);
 
-  if (char_plr_flagged(ch, PLR_FROZEN) || char_plr_flagged(ch, PLR_NOWIZLIST))
-    g->player_table[id].flags.set(PINDEX_NOWIZLIST);
+  if (char_plr_flagged(ch, player_flag::frozen) || char_plr_flagged(ch, player_flag::nowizlist))
+    g->player_table[id].flags.set(pindex_flag::nowizlist);
   else
-    g->player_table[id].flags.reset(PINDEX_NOWIZLIST);
+    g->player_table[id].flags.reset(pindex_flag::nowizlist);
 
   if (g->player_table[id].flags != old_flags || save_index)
     save_player_index(g);

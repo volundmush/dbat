@@ -160,14 +160,14 @@ namespace {
   void npc_flags_menu(GameWorld *g, struct descriptor_data *d, mob_editor &e)
   {
     clear_screen(g, d);
-    olc_list_columns(g, d, action_bits, NUM_MOB_FLAGS, 1, "  ", 2);
+    olc_list_columns(g, d, action_bits, flag_count<mob_flag>, 1, "  ", 2);
     write_to_output(g, d, "\r\nCurrent flags : @c{}@n\r\nEnter mob flags (0 to quit) : ", flag_names(char_get_mob_flags(e.mob.get())));
   }
 
   void aff_flags_menu(GameWorld *g, struct descriptor_data *d, mob_editor &e)
   {
     clear_screen(g, d);
-    olc_list_columns(g, d, affected_bits.span().subspan(1), NUM_AFF_FLAGS, 1, "  ", 2);
+    olc_list_columns(g, d, affected_bits.span().subspan(1), flag_count<aff_flag>, 1, "  ", 2);
     write_to_output(g, d, "\r\nCurrent flags   : @c{}@n\r\nEnter aff flags (0 to quit) : ",
                     flag_names(char_get_affected_by(e.mob.get())));
   }
@@ -234,7 +234,7 @@ namespace {
     char_set_real_abils_con(mob.get(), physical);
     char_set_real_abils_dex(mob.get(), physical);
     char_reset_aff_abils(mob.get());
-    char_mob_set(mob.get(), MOB_ISNPC, true);
+    char_mob_set(mob.get(), mob_flag::isnpc, true);
 
     char_set_nr(mob.get(), NOBODY);
     char_set_alias(mob.get(), "mob unfinished");
@@ -339,11 +339,11 @@ namespace {
           done(g, d);
           return;
         }
-        if (n <= NUM_AFF_FLAGS) /* the menu's numbers are the flags' (quirk: so the last toggles bit 79, past them) */
+        if (std::cmp_less_equal(n, flag_count<aff_flag>)) /* the menu's numbers are the flags' (quirk: so the last toggles bit 79, past them) */
           char_get_affected_by(mob.get()).toggle_bit(static_cast<std::size_t>(n));
-        /* Remove unwanted bits right away. quirk: clears AFF_TAMED alone, meant AFF_CHARM, AFF_POISON, AFF_GROUP and
-           AFF_SLEEP: their numbers or-ed as bits, 22 | 12 | 9 | 15 is 31 */
-        char_aff_set(mob.get(), AFF_TAMED, false);
+        /* Remove unwanted bits right away. quirk: clears aff_flag::tamed alone, meant aff_flag::charm, aff_flag::poison, aff_flag::group and
+           aff_flag::sleep: their numbers or-ed as bits, 22 | 12 | 9 | 15 is 31 */
+        char_aff_set(mob.get(), aff_flag::tamed, false);
         aff_flags_menu(g, d, *this);
         return;
 
@@ -360,8 +360,8 @@ namespace {
       case mode::number:
         if (number->set)
           number->set(mob.get(), n);
-        if (number->unbalances && char_mob_flagged(mob.get(), MOB_AUTOBALANCE))
-          char_mob_toggle(mob.get(), MOB_AUTOBALANCE);
+        if (number->unbalances && char_mob_flagged(mob.get(), mob_flag::autobalance))
+          char_mob_toggle(mob.get(), mob_flag::autobalance);
         done(g, d);
         return;
 
@@ -425,7 +425,7 @@ namespace {
 
   void mob_editor::save_answer(GameWorld *g, struct descriptor_data *d, std::string_view line)
   {
-    char_mob_set(mob.get(), MOB_ISNPC, true); /* Ensure mob has MOB_ISNPC set or things will go pear shaped. */
+    char_mob_set(mob.get(), mob_flag::isnpc, true); /* Ensure mob has mob_flag::isnpc set or things will go pear shaped. */
     const std::optional<bool> save = yes_or_no(line);
     if (!save) {
       write_to_output(g, d, "Invalid choice!\r\n");

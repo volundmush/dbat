@@ -188,7 +188,7 @@ struct char_data *get_player_vis(GameWorld *g, struct char_data *ch, std::string
   for (char_data *i : each_char(g)) {
     if (char_is_npc(i))
       continue;
-    if (inroom == FIND_CHAR_ROOM && char_get_in_room(i) != char_get_in_room(ch))
+    if (inroom == find_flag::char_room && char_get_in_room(i) != char_get_in_room(ch))
       continue;
     if (!goes_by(ch, i, name))
       continue;
@@ -217,7 +217,7 @@ struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, std::str
 
   /* 0.<name> means PC with name */
   if (*number == 0)
-    return (get_player_vis(g, ch, name, nullptr, FIND_CHAR_ROOM));
+    return (get_player_vis(g, ch, name, nullptr, find_flag::char_room));
 
   /* CAP(name) capitalises the caller's name, as the scan reaches it; the comparisons after it see the capital */
   for (char_data *i : room_people(g, char_get_in_room(ch))) {
@@ -299,9 +299,9 @@ struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, std::st
 
 struct char_data *get_char_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, find_flag where)
 {
-  if (where == FIND_CHAR_ROOM)
+  if (where == find_flag::char_room)
     return get_char_room_vis(g, ch, name, number);
-  else if (where == FIND_CHAR_WORLD)
+  else if (where == find_flag::char_world)
     return get_char_world_vis(g, ch, name, number);
   else
     return (nullptr);
@@ -398,12 +398,12 @@ int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &na
 find_dots find_all_dots(std::string &arg)
 {
   if (arg == "all")
-    return (FIND_ALL);
+    return (find_dots::all);
   if (arg.starts_with("all.")) {
     arg.erase(0, 4);
-    return (FIND_ALLDOT);
+    return (find_dots::alldot);
   }
-  return (FIND_INDIV);
+  return (find_dots::indiv);
 }
 
 /* Generic Find, designed to find any object/character
@@ -438,39 +438,39 @@ std::optional<find_flag> generic_find(GameWorld *g, std::string_view arg, flag_s
   if (!(number = get_number(name)))
     return std::nullopt;
 
-  if (where.test(FIND_CHAR_ROOM)) { /* Find person in room */
+  if (where.test(find_flag::char_room)) { /* Find person in room */
     if ((*tar_ch = get_char_room_vis(g, ch, name, &number)) != nullptr)
-      return (FIND_CHAR_ROOM);
+      return (find_flag::char_room);
   }
 
-  if (where.test(FIND_CHAR_WORLD)) {
+  if (where.test(find_flag::char_world)) {
     if ((*tar_ch = get_char_world_vis(g, ch, name, &number)) != nullptr)
-      return (FIND_CHAR_WORLD);
+      return (find_flag::char_world);
   }
 
-  if (where.test(FIND_OBJ_EQUIP)) {
+  if (where.test(find_flag::obj_equip)) {
     for (found = false, i = 0; i < NUM_WEARS && !found; i++)
       if (char_get_equipment(ch, i) && isname(name, obj_get_name(char_get_equipment(ch, i))) && --number == 0) {
         *tar_obj = char_get_equipment(ch, i);
         found    = true;
       }
     if (found)
-      return (FIND_OBJ_EQUIP);
+      return (find_flag::obj_equip);
   }
 
-  if (where.test(FIND_OBJ_INV)) {
+  if (where.test(find_flag::obj_inv)) {
     if ((*tar_obj = get_obj_in_list_vis(g, ch, name, &number, char_get_inventory(ch))) != nullptr)
-      return (FIND_OBJ_INV);
+      return (find_flag::obj_inv);
   }
 
-  if (where.test(FIND_OBJ_ROOM)) {
+  if (where.test(find_flag::obj_room)) {
     if ((*tar_obj = get_obj_in_list_vis(g, ch, name, &number, room_get_contents(g, char_get_in_room(ch)))) != nullptr)
-      return (FIND_OBJ_ROOM);
+      return (find_flag::obj_room);
   }
 
-  if (where.test(FIND_OBJ_WORLD)) {
+  if (where.test(find_flag::obj_world)) {
     if ((*tar_obj = get_obj_vis(g, ch, name, &number)))
-      return (FIND_OBJ_WORLD);
+      return (find_flag::obj_world);
   }
 
   return std::nullopt;

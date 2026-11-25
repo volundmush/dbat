@@ -225,7 +225,7 @@ static void reconnected(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "Reconnecting.\r\n");
   pay_player_count_rewards(g, update_player_count(g));
   char_set_time_logon(d->character, game_now(g));
-  act(g, "$n has reconnected.", true, d->character, nullptr, nullptr, TO_ROOM);
+  act(g, "$n has reconnected.", true, d->character, nullptr, nullptr, act_to::room);
   mudlog(g, LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(g, d->character)), true, "{} [{}] has reconnected.", char_get_name(d->character), d->host);
   char_set_rp(d->character, d->acct.rpp);
   login_notices(g, d, true);
@@ -236,7 +236,7 @@ static void usurped(GameWorld *g, struct descriptor_data *d)
   write_to_output(g, d, "You take over your own body, already in use!\r\n");
   act(g, "$n suddenly keels over in pain, surrounded by a white aura...\r\n"
       "$n's body has been taken over by a new spirit!",
-      true, d->character, nullptr, nullptr, TO_ROOM);
+      true, d->character, nullptr, nullptr, act_to::room);
   char_set_rp(d->character, d->acct.rpp);
   mudlog(g, LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(g, d->character)), true,
          "{} has re-logged in ... disconnecting old socket.", char_get_name(d->character));
@@ -264,9 +264,9 @@ static bool perform_dupe_check(GameWorld *g, struct descriptor_data *d)
   char_set_desc(d->character, d);
   d->original = nullptr;
   char_set_timer(d->character, 0);
-  char_plr_set(d->character, PLR_MAILING, false);
-  char_plr_set(d->character, PLR_WRITING, false);
-  char_aff_set(d->character, AFF_GROUP, false);
+  char_plr_set(d->character, player_flag::mailing, false);
+  char_plr_set(d->character, player_flag::writing, false);
+  char_aff_set(d->character, aff_flag::group, false);
   desc_set_connected(d, CON_PLAYING);
 
   switch (how) {
@@ -294,7 +294,7 @@ static room_vnum start_room(GameWorld *g, struct char_data *ch)
   /* If char was saved with NOWHERE, or the room is gone... */
   if (!room_of(g, load_room))
     load_room = char_get_admlevel(ch) ? CONFIG_IMMORTAL_START : CONFIG_MORTAL_START;
-  if (char_plr_flagged(ch, PLR_FROZEN))
+  if (char_plr_flagged(ch, player_flag::frozen))
     load_room = CONFIG_FROZEN_START;
   if (!room_of(g, load_room)) /* a builder deleted the start room */
     load_room = 0;            /* The Void */
@@ -320,7 +320,7 @@ static int place_player(GameWorld *g, struct descriptor_data *d)
   read_saved_vars(ch);
   for (char_data *check : each_char(g))
     if (!char_get_master(g, check) && char_is_npc(check) && char_get_master_id(check) == char_get_idnum(ch) &&
-        char_aff_flagged(check, AFF_CHARM) && !circle_follow(g, check, ch))
+        char_aff_flagged(check, aff_flag::charm) && !circle_follow(g, check, ch))
       add_follower(g, check, ch);
   save_char(g, ch);
   return load_result;
@@ -333,10 +333,10 @@ static void reset_session_state(GameWorld *g, struct char_data *ch)
     player_flag flag;
     int limb;
   } regrown[] = {
-      {PLR_RARM, 0},
-      {PLR_LARM, 1},
-      {PLR_LLEG, 3},
-      {PLR_RLEG, 2},
+      {player_flag::rarm, 0},
+      {player_flag::larm, 1},
+      {player_flag::lleg, 3},
+      {player_flag::rleg, 2},
   };
 
   for (const auto &r : regrown)
@@ -347,14 +347,14 @@ static void reset_session_state(GameWorld *g, struct char_data *ch)
   char_set_combine(ch, -1);
   char_set_sleeptime(ch, 8);
   char_set_foodr(ch, 2);
-  char_set_altitude(ch, char_aff_flagged(ch, AFF_FLYING) ? 1 : 0);
-  for (aff_flag aff : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN})
+  char_set_altitude(ch, char_aff_flagged(ch, aff_flag::flying) ? 1 : 0);
+  for (aff_flag aff : {aff_flag::position, aff_flag::sanctuary, aff_flag::zanzoken})
     if (char_aff_flagged(ch, aff))
       char_aff_set(ch, aff, false);
-  if (char_plr_flagged(ch, PLR_KNOCKED))
-    char_plr_set(ch, PLR_KNOCKED, false);
-  if (char_is_android(ch) && !char_aff_flagged(ch, AFF_INFRAVISION))
-    char_aff_set(ch, AFF_INFRAVISION, true);
+  if (char_plr_flagged(ch, player_flag::knocked))
+    char_plr_set(ch, player_flag::knocked, false);
+  if (char_is_android(ch) && !char_aff_flagged(ch, aff_flag::infravision))
+    char_aff_set(ch, aff_flag::infravision, true);
   char_set_absorbing(ch, nullptr);
   char_set_absorbby(ch, nullptr);
   char_set_sits(ch, nullptr);
@@ -363,15 +363,15 @@ static void reset_session_state(GameWorld *g, struct char_data *ch)
   char_set_overf(ch, false);
   char_set_spam(ch, 0);
   char_set_rage_meter(ch, 0);
-  if (char_affects(ch).empty() && char_aff_flagged(ch, AFF_HEALGLOW))
-    char_aff_set(ch, AFF_HEALGLOW, false);
-  char_set_speedboost(ch, char_aff_flagged(ch, AFF_HAYASA) ? char_get_speedcalc(g, ch) * 0.5 : 0);
+  if (char_affects(ch).empty() && char_aff_flagged(ch, aff_flag::healglow))
+    char_aff_set(ch, aff_flag::healglow, false);
+  char_set_speedboost(ch, char_aff_flagged(ch, aff_flag::hayasa) ? char_get_speedcalc(g, ch) * 0.5 : 0);
   if (char_get_trp(ch) < char_get_rp(ch))
     char_set_trp(ch, char_get_rp(ch));
   if (char_is_namek(ch) && char_get_conditions(g, ch, HUNGER) >= 0)
     char_set_conditions(g, ch, HUNGER, -1);
-  if (char_plr_flagged(ch, PLR_HEALT))
-    char_plr_set(ch, PLR_HEALT, false);
+  if (char_plr_flagged(ch, player_flag::healt))
+    char_plr_set(ch, player_flag::healt, false);
 }
 
 /* What the race brings with it: the moon's and the stars' forms, and the skills it starts with. */
@@ -406,7 +406,7 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
   reset_char(g, ch);
   read_aliases(g, ch);
   racial_body_parts(ch);
-  if (char_plr_flagged(ch, PLR_INVSTART))
+  if (char_plr_flagged(ch, player_flag::invstart))
     char_set_invis_level(g, ch, char_get_level(ch));
 
   int load_result = place_player(g, d);
@@ -523,7 +523,7 @@ static void remake_deleted_character(GameWorld *g, struct descriptor_data *d, st
   char_set_desc(d->character, d);
   char_set_alias(d->character, CAP(name));
   /* no place in the player index: the old one's emptied, and finishing creation makes a new one */
-  char_prf_set(g, d->character, PRF_COLOR, true);
+  char_prf_set(g, d->character, pref_flag::color, true);
   char_set_rp(d->character, d->acct.rpp);
   d->chargen = {};
   enter_state(g, d, CON_QRACE);
@@ -534,11 +534,11 @@ static void remake_deleted_character(GameWorld *g, struct descriptor_data *d, st
 static void log_in_character(GameWorld *g, struct descriptor_data *d)
 {
   /* undo it just in case they are set */
-  char_plr_set(d->character, PLR_WRITING, false);
-  char_plr_set(d->character, PLR_MAILING, false);
-  char_plr_set(d->character, PLR_CRYO, false);
-  char_aff_set(d->character, AFF_GROUP, false);
-  if (isbanned(g, d->host) == BAN_SELECT && !char_plr_flagged(d->character, PLR_SITEOK)) {
+  char_plr_set(d->character, player_flag::writing, false);
+  char_plr_set(d->character, player_flag::mailing, false);
+  char_plr_set(d->character, player_flag::cryo, false);
+  char_aff_set(d->character, aff_flag::group, false);
+  if (isbanned(g, d->host) == BAN_SELECT && !char_plr_flagged(d->character, player_flag::siteok)) {
     write_to_output(g, d, "Sorry, this char has not been cleared for login from your site!\r\n");
     mudlog(g, LOG_NRM, ADMLVL_GOD, true, "Connection attempt for {} denied from {}", char_get_name(d->character), d->host);
     desc_set_connected(d, CON_CLOSE);
@@ -573,7 +573,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, std::string_
     clear_char(d->character);
     char_make_player_specials(d->character);
     char_set_desc(d->character, d);
-    char_prf_set(g, d->character, PRF_COLOR, true);
+    char_prf_set(g, d->character, pref_flag::color, true);
   }
   if (d->writenew > 0) {
     if (arg.empty()) {
@@ -602,7 +602,7 @@ static void state_get_name(GameWorld *g, struct descriptor_data *d, std::string_
     return;
   }
   char_set_pfilepos(d->character, player_i);
-  if (char_plr_flagged(d->character, PLR_DELETED))
+  if (char_plr_flagged(d->character, player_flag::deleted))
     remake_deleted_character(g, d, tmp_name);
   else
     log_in_character(g, d);
@@ -974,7 +974,7 @@ static void enter_game(GameWorld *g, struct descriptor_data *d)
   }
   int load_result = enter_player_game(g, d);
   send_to_char(g, d->character, CONFIG_WELC_MESSG);
-  act(g, "$n has entered the game.", true, d->character, nullptr, nullptr, TO_ROOM);
+  act(g, "$n has entered the game.", true, d->character, nullptr, nullptr, act_to::room);
 
   int oldcount = update_player_count(g);
   char_set_time_logon(d->character, game_now(g));
@@ -1000,9 +1000,9 @@ static void enter_game(GameWorld *g, struct descriptor_data *d)
   }
   d->has_prompt = 0;
   /* We've updated to 3.1 - some bits might be set wrongly: */
-  char_prf_set(g, d->character, PRF_BUILDWALK, false);
-  if (!char_get_equipment(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, PLR_THANDW))
-    char_plr_set(d->character, PLR_THANDW, false);
+  char_prf_set(g, d->character, pref_flag::buildwalk, false);
+  if (!char_get_equipment(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, player_flag::thandw))
+    char_plr_set(d->character, player_flag::thandw, false);
 }
 
 /* CON_MENU: get selection from main menu */
@@ -1087,13 +1087,13 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, std::string_v
   int player_i;
 
   if (arg == "yes" || arg == "YES") {
-    if (char_plr_flagged(d->character, PLR_FROZEN)) {
+    if (char_plr_flagged(d->character, player_flag::frozen)) {
       write_to_output(g, d, "You try to kill yourself, but the ice stops you.\r\nCharacter not deleted.\r\n\r\n");
       desc_set_connected(d, CON_CLOSE);
       return;
     }
     if (char_get_admlevel(d->character) < ADMLVL_GRGOD)
-      char_plr_set(d->character, PLR_DELETED, true);
+      char_plr_set(d->character, player_flag::deleted, true);
     save_char(g, d->character);
     Crash_delete_file(char_get_name(d->character));
     /* If the selfdelete_fastwipe flag is set (in config.c), remove all
@@ -1101,7 +1101,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, std::string_v
   */
     if (selfdelete_fastwipe)
       if ((player_i = get_ptable_by_name(g, char_get_name(d->character))) >= 0) {
-        g->player_table[player_i].flags.set(PINDEX_SELFDELETE);
+        g->player_table[player_i].flags.set(pindex_flag::selfdelete);
         remove_player(g, player_i);
       }
     delete_aliases(char_get_name(d->character));

@@ -59,7 +59,7 @@ ASPELL(spell_create_water)
         obj_set_value(obj, VAL_DRINKCON_HOWFULL, obj_get_value(obj, VAL_DRINKCON_HOWFULL) + (water));
         name_to_drinkcon(g, obj, LIQ_WATER);
         weight_change_object(g, obj, water);
-        act(g, "$p is filled.", false, ch, obj, nullptr, TO_CHAR);
+        act(g, "$p is filled.", false, ch, obj, nullptr, act_to::actor);
       }
     }
   }
@@ -70,10 +70,10 @@ ASPELL(spell_recall)
   if (victim == nullptr || char_is_npc(victim))
     return;
 
-  act(g, "$n disappears.", true, victim, nullptr, nullptr, TO_ROOM);
+  act(g, "$n disappears.", true, victim, nullptr, nullptr, act_to::room);
   char_from_room(g, victim);
   char_to_room(g, victim, g->r_mortal_start_room);
-  act(g, "$n appears in the middle of the room.", true, victim, nullptr, nullptr, TO_ROOM);
+  act(g, "$n appears in the middle of the room.", true, victim, nullptr, nullptr, act_to::room);
   look_at_room(g, char_get_in_room(victim), victim, 0);
   entry_memory_mtrigger(g, victim);
   greet_mtrigger(g, victim, -1);
@@ -89,15 +89,15 @@ ASPELL(spell_teleport)
 
   do {
     to_room = g->rooms.nth(rand_number(g, 0, (int)g->rooms.size() - 1));
-    /* quirk: reads ROOM_HOUSE alone, meant ROOM_PRIVATE, ROOM_DEATH or ROOM_GODROOM: their numbers or-ed as
+    /* quirk: reads room_flag::house alone, meant room_flag::private_, room_flag::death or room_flag::godroom: their numbers or-ed as
        bits, 9 | 1 | 10 is 11, so teleport may land in a death trap */
-  } while (room_flagged(g, to_room, ROOM_HOUSE));
+  } while (room_flagged(g, to_room, room_flag::house));
 
   act(g, "$n slowly fades out of existence and is gone.",
-      false, victim, nullptr, nullptr, TO_ROOM);
+      false, victim, nullptr, nullptr, act_to::room);
   char_from_room(g, victim);
   char_to_room(g, victim, to_room);
-  act(g, "$n slowly fades into existence.", false, victim, nullptr, nullptr, TO_ROOM);
+  act(g, "$n slowly fades into existence.", false, victim, nullptr, nullptr, act_to::room);
   look_at_room(g, char_get_in_room(victim), victim, 0);
   entry_memory_mtrigger(g, victim);
   greet_mtrigger(g, victim, -1);
@@ -117,15 +117,15 @@ ASPELL(spell_summon)
   }
 
   if (!CONFIG_PK_ALLOWED) {
-    if (char_mob_flagged(victim, MOB_AGGRESSIVE)) {
+    if (char_mob_flagged(victim, mob_flag::aggressive)) {
       act(g, "As the words escape your lips and $N travels\r\n"
           "through time and space towards you, you realize that $E is\r\n"
           "aggressive and might harm you, so you wisely send $M back.",
-          false, ch, nullptr, victim, TO_CHAR);
+          false, ch, nullptr, victim, act_to::actor);
       return;
     }
-    if (!char_is_npc(victim) && !char_prf_flagged(g, victim, PRF_SUMMONABLE) &&
-        !char_plr_flagged(victim, PLR_KILLER)) {
+    if (!char_is_npc(victim) && !char_prf_flagged(g, victim, pref_flag::summonable) &&
+        !char_plr_flagged(victim, player_flag::killer)) {
       send_to_char(g, victim, "{} just tried to summon you to: {}.\r\n{} failed because you have summon protection on.\r\nType NOSUMMON to allow other players to summon you.\r\n",
                    char_get_name(ch), room_get_name(g, char_get_in_room(ch)),
                    (char_get_sex(ch) == SEX_MALE) ? "He" : "She");
@@ -136,19 +136,19 @@ ASPELL(spell_summon)
     }
   }
 
-  if (char_mob_flagged(victim, MOB_NOSUMMON) ||
+  if (char_mob_flagged(victim, mob_flag::nosummon) ||
       (char_is_npc(victim) && mag_newsaves(ch, victim, SPELL_SUMMON, level, char_get_aff_abils_intel(ch)))) {
     send_to_char(g, ch, "{}", SUMMON_FAIL);
     return;
   }
 
-  act(g, "$n disappears suddenly.", true, victim, nullptr, nullptr, TO_ROOM);
+  act(g, "$n disappears suddenly.", true, victim, nullptr, nullptr, act_to::room);
 
   char_from_room(g, victim);
   char_to_room(g, victim, char_get_in_room(ch));
 
-  act(g, "$n arrives suddenly.", true, victim, nullptr, nullptr, TO_ROOM);
-  act(g, "$n has summoned you!", false, ch, nullptr, victim, TO_VICT);
+  act(g, "$n arrives suddenly.", true, victim, nullptr, nullptr, act_to::room);
+  act(g, "$n has summoned you!", false, ch, nullptr, victim, act_to::vict);
   look_at_room(g, char_get_in_room(victim), victim, 0);
   entry_memory_mtrigger(g, victim);
   greet_mtrigger(g, victim, -1);
@@ -209,15 +209,15 @@ ASPELL(spell_charm)
 
   if (victim == ch)
     send_to_char(g, ch, "You like yourself even better!\r\n");
-  else if (!char_is_npc(victim) && !char_prf_flagged(g, victim, PRF_SUMMONABLE))
+  else if (!char_is_npc(victim) && !char_prf_flagged(g, victim, pref_flag::summonable))
     send_to_char(g, ch, "You fail because SUMMON protection is on!\r\n");
-  else if (char_aff_flagged(victim, AFF_SANCTUARY))
+  else if (char_aff_flagged(victim, aff_flag::sanctuary))
     send_to_char(g, ch, "Your victim is protected by sanctuary!\r\n");
-  else if (char_mob_flagged(victim, MOB_NOCHARM))
+  else if (char_mob_flagged(victim, mob_flag::nocharm))
     send_to_char(g, ch, "Your victim resists!\r\n");
-  else if (char_aff_flagged(ch, AFF_CHARM))
+  else if (char_aff_flagged(ch, aff_flag::charm))
     send_to_char(g, ch, "You can't have any followers of your own!\r\n");
-  else if (char_aff_flagged(victim, AFF_CHARM) || level < char_get_level(victim))
+  else if (char_aff_flagged(victim, aff_flag::charm) || level < char_get_level(victim))
     send_to_char(g, ch, "You fail.\r\n");
   /* player charming another player - no legal reason for this */
   else if (!CONFIG_PK_ALLOWED && !char_is_npc(victim))
@@ -243,12 +243,12 @@ ASPELL(spell_charm)
       af.duration /= char_get_aff_abils_intel(victim);
     af.modifier  = 0;
     af.location  = 0;
-    af.bitvector = AFF_CHARM;
+    af.bitvector = aff_flag::charm;
     affect_to_char(g, victim, &af);
 
-    act(g, "Isn't $n just such a nice fellow?", false, ch, nullptr, victim, TO_VICT);
+    act(g, "Isn't $n just such a nice fellow?", false, ch, nullptr, victim, act_to::vict);
     if (char_is_npc(victim))
-      char_mob_set(victim, MOB_SPEC, false);
+      char_mob_set(victim, mob_flag::spec, false);
   }
 }
 
@@ -260,7 +260,7 @@ ASPELL(spell_identify)
     std::string bitbuf;
     std::string buf2;
 
-    bitbuf = sprinttype(obj_get_type_flag(obj), item_types);
+    bitbuf = type_name(item_types, obj_get_type_flag(obj));
     send_to_char(g, ch, "You feel informed:\r\nObject '{}', Item type: {}\r\n", obj_get_short_description(obj), bitbuf);
 
     { /* quirk: tested the affects array's address, which is never null, so this always shows */
@@ -305,7 +305,7 @@ ASPELL(spell_identify)
           send_to_char(g, ch, "Can affect you as :\r\n");
           found = true;
         }
-        bitbuf = sprinttype(obj_get_affected(obj)[i].location, apply_types);
+        bitbuf = type_name(apply_types, obj_get_affected(obj)[i].location);
         switch (obj_get_affected(obj)[i].location) {
           case APPLY_FEAT:
             buf2 = str_format(" ({})", g->feat_list[obj_get_affected(obj)[i].specific].name);
@@ -336,7 +336,7 @@ ASPELL(spell_enchant_weapon)
     return;
 
   /* Either already enchanted or not a weapon. */
-  if (obj_get_type_flag(obj) != ITEM_WEAPON || obj_extra_flagged(obj, ITEM_MAGIC))
+  if (obj_get_type_flag(obj) != ITEM_WEAPON || obj_extra_flagged(obj, extra_flag::magic))
     return;
 
   /* Make sure no other affections. */
@@ -344,7 +344,7 @@ ASPELL(spell_enchant_weapon)
     if (obj_get_affected(obj)[i].location != APPLY_NONE)
       return;
 
-  obj_extra_set(obj, ITEM_MAGIC, true);
+  obj_extra_set(obj, extra_flag::magic, true);
 
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
     if (obj_get_affected(obj)[i].location == APPLY_NONE) {
@@ -363,28 +363,28 @@ ASPELL(spell_enchant_weapon)
   }
 
   if (char_is_good(ch)) {
-    obj_extra_set(obj, ITEM_ANTI_EVIL, true);
-    act(g, "$p glows blue.", false, ch, obj, nullptr, TO_CHAR);
+    obj_extra_set(obj, extra_flag::anti_evil, true);
+    act(g, "$p glows blue.", false, ch, obj, nullptr, act_to::actor);
   } else if (char_is_evil(ch)) {
-    obj_extra_set(obj, ITEM_ANTI_GOOD, true);
-    act(g, "$p glows red.", false, ch, obj, nullptr, TO_CHAR);
+    obj_extra_set(obj, extra_flag::anti_good, true);
+    act(g, "$p glows red.", false, ch, obj, nullptr, act_to::actor);
   } else
-    act(g, "$p glows yellow.", false, ch, obj, nullptr, TO_CHAR);
+    act(g, "$p glows yellow.", false, ch, obj, nullptr, act_to::actor);
 }
 
 ASPELL(spell_detect_poison)
 {
   if (victim) {
     if (victim == ch) {
-      if (char_aff_flagged(victim, AFF_POISON))
+      if (char_aff_flagged(victim, aff_flag::poison))
         send_to_char(g, ch, "You can sense poison in your blood.\r\n");
       else
         send_to_char(g, ch, "You feel healthy.\r\n");
     } else {
-      if (char_aff_flagged(victim, AFF_POISON))
-        act(g, "You sense that $E is poisoned.", false, ch, nullptr, victim, TO_CHAR);
+      if (char_aff_flagged(victim, aff_flag::poison))
+        act(g, "You sense that $E is poisoned.", false, ch, nullptr, victim, act_to::actor);
       else
-        act(g, "You sense that $E is healthy.", false, ch, nullptr, victim, TO_CHAR);
+        act(g, "You sense that $E is healthy.", false, ch, nullptr, victim, act_to::actor);
     }
   }
 
@@ -394,10 +394,10 @@ ASPELL(spell_detect_poison)
       case ITEM_FOUNTAIN:
       case ITEM_FOOD:
         if (obj_get_value(obj, VAL_FOOD_POISON))
-          act(g, "You sense that $p has been contaminated.", false, ch, obj, nullptr, TO_CHAR);
+          act(g, "You sense that $p has been contaminated.", false, ch, obj, nullptr, act_to::actor);
         else
           act(g, "You sense that $p is safe for consumption.", false, ch, obj, nullptr,
-              TO_CHAR);
+              act_to::actor);
         break;
       default:
         send_to_char(g, ch, "You sense that it should not be consumed.\r\n");
@@ -414,17 +414,17 @@ ASPELL(spell_portal)
   if (ch == nullptr || victim == nullptr)
     return;
 
-  if (!can_edit_zone(g, ch, room_get_zone(rm)) && zone_flagged(g, room_get_zone(rm), ZONE_QUEST)) {
+  if (!can_edit_zone(g, ch, room_get_zone(rm)) && zone_flagged(g, room_get_zone(rm), zone_flag::quest)) {
     send_to_char(g, ch, "That target is in a quest zone.\r\n");
     return;
   }
 
-  if (zone_flagged(g, room_get_zone(rm), ZONE_CLOSED) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
+  if (zone_flagged(g, room_get_zone(rm), zone_flag::closed) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
     send_to_char(g, ch, "That target is in a closed zone.\r\n");
     return;
   }
 
-  if (zone_flagged(g, room_get_zone(rm), ZONE_NOIMMORT) && char_get_admlevel(ch) < ADMLVL_GRGOD) {
+  if (zone_flagged(g, room_get_zone(rm), zone_flag::noimmort) && char_get_admlevel(ch) < ADMLVL_GRGOD) {
     send_to_char(g, ch, "That target is in a zone closed to all.\r\n");
     return;
   }
@@ -438,9 +438,9 @@ ASPELL(spell_portal)
   add_unique_id(g, portal);
   obj_to_room(g, portal, char_get_in_room(ch));
   act(g, "$n opens a portal in thin air.",
-      true, ch, nullptr, nullptr, TO_ROOM);
+      true, ch, nullptr, nullptr, act_to::room);
   act(g, "You open a portal out of thin air.",
-      true, ch, nullptr, nullptr, TO_CHAR);
+      true, ch, nullptr, nullptr, act_to::actor);
   /* create the portal at the other end */
   tportal = read_object(g, portal_object);
   obj_set_value(tportal, VAL_PORTAL_DEST, char_get_in_room(ch));
@@ -450,9 +450,9 @@ ASPELL(spell_portal)
   add_unique_id(g, portal);
   obj_to_room(g, tportal, char_get_in_room(victim));
   act(g, "A shimmering portal appears out of thin air.",
-      true, victim, nullptr, nullptr, TO_ROOM);
+      true, victim, nullptr, nullptr, act_to::room);
   act(g, "A shimmering portal opens here for you.",
-      true, victim, nullptr, nullptr, TO_CHAR);
+      true, victim, nullptr, nullptr, act_to::actor);
 }
 
 ASPELL(art_abundant_step)
@@ -511,12 +511,12 @@ ASPELL(art_abundant_step)
       break;
   }
   send_to_char(g, ch, "Your will bends reality as you travel through the ethereal plane.\r\n");
-  act(g, "$n is suddenly absent.", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "$n is suddenly absent.", true, ch, nullptr, nullptr, act_to::room);
 
   char_from_room(g, ch);
   char_to_room(g, ch, r);
 
-  act(g, "$n is suddenly present.", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "$n is suddenly present.", true, ch, nullptr, nullptr, act_to::room);
 
   look_at_room(g, char_get_in_room(ch), ch, 0);
 
@@ -533,7 +533,7 @@ int roll_skill(GameWorld *g, const struct char_data *ch, int snum)
         skval += 5;
       }
     } else if (SKILL_HIDE == snum) {
-      if (char_aff_flagged(ch, AFF_LIQUEFIED)) {
+      if (char_aff_flagged(ch, aff_flag::liquefied)) {
         skval += 5;
       } else if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 5 || char_get_genome(ch, 1) == 5)) {
         skval += 10;
@@ -569,7 +569,7 @@ int roll_skill(GameWorld *g, const struct char_data *ch, int snum)
   }
   if (snum < 0 || snum >= SKILL_TABLE_SIZE)
     return 0;
-  if (IS_SET(g->spell_info[snum].skilltype, SKTYPE_SPELL)) {
+  if (g->spell_info[snum].skilltype.test(skill_kind::spell)) {
     /*
      * There's no real roll for a spell to succeed, so instead we will
      * return the spell resistance roll; the defender must have resistance
@@ -582,26 +582,26 @@ int roll_skill(GameWorld *g, const struct char_data *ch, int snum)
         roll += char_get_class_ranks(ch, i); /* Caster level for eligable classes */
     return roll + rand_number(g, 1, 20);
   }
-  if (IS_SET(g->spell_info[snum].skilltype, SKTYPE_SKILL)) {
-    if (!skval && IS_SET(g->spell_info[snum].flags, SKFLAG_NEEDTRAIN)) {
+  if (g->spell_info[snum].skilltype.test(skill_kind::skill)) {
+    if (!skval && g->spell_info[snum].flags.test(skill_flag::needtrain)) {
       return -1;
     }
     roll = skval;
-    if (IS_SET(g->spell_info[snum].flags, SKFLAG_STRMOD))
+    if (g->spell_info[snum].flags.test(skill_flag::strmod))
       roll += ability_mod_value(char_get_aff_abils_str(ch));
-    if (IS_SET(g->spell_info[snum].flags, SKFLAG_DEXMOD))
+    if (g->spell_info[snum].flags.test(skill_flag::dexmod))
       roll += dex_mod_capped(ch);
-    if (IS_SET(g->spell_info[snum].flags, SKFLAG_CONMOD))
+    if (g->spell_info[snum].flags.test(skill_flag::conmod))
       roll += ability_mod_value(char_get_aff_abils_con(ch));
-    if (IS_SET(g->spell_info[snum].flags, SKFLAG_INTMOD))
+    if (g->spell_info[snum].flags.test(skill_flag::intmod))
       roll += ability_mod_value(char_get_aff_abils_intel(ch));
-    if (IS_SET(g->spell_info[snum].flags, SKFLAG_WISMOD))
+    if (g->spell_info[snum].flags.test(skill_flag::wismod))
       roll += ability_mod_value(char_get_aff_abils_wis(ch));
-    if (IS_SET(g->spell_info[snum].flags, SKFLAG_CHAMOD))
+    if (g->spell_info[snum].flags.test(skill_flag::chamod))
       roll += ability_mod_value(char_get_aff_abils_cha(ch));
-    if (IS_SET(g->spell_info[snum].flags, SKFLAG_ARMORALL))
+    if (g->spell_info[snum].flags.test(skill_flag::armorall))
       roll -= 0;
-    else if (IS_SET(g->spell_info[snum].flags, SKFLAG_ARMORBAD))
+    else if (g->spell_info[snum].flags.test(skill_flag::armorbad))
       roll -= 0;
     return roll + rand_number(g, 1, 20);
   }

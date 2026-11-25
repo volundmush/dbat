@@ -23,7 +23,6 @@
 #include "dbat/dg_scripts.hpp"
 #include "dbat/feats.hpp"
 #include "dbat/fight.hpp"
-#include "dbat/flags.hpp"
 #include "dbat/game_world.hpp"
 #include "dbat/genobj.hpp"
 #include "dbat/genolc.hpp"
@@ -198,7 +197,7 @@ namespace {
   void extras_menu(GameWorld *g, struct descriptor_data *d, object_editor &e)
   {
     clear_screen(g, d);
-    olc_list_columns(g, d, extra_bits, NUM_ITEM_FLAGS, 1, " ", 3);
+    olc_list_columns(g, d, extra_bits, flag_count<extra_flag>, 1, " ", 3);
     write_to_output(g, d, "\r\nObject flags: @c{}@n\r\nEnter object extra flag (0 to quit) : ",
                     flag_names(obj_get_extra_flags(&e.obj)));
   }
@@ -206,7 +205,7 @@ namespace {
   void wear_menu(GameWorld *g, struct descriptor_data *d, object_editor &e)
   {
     clear_screen(g, d);
-    olc_list_columns(g, d, wear_bits, NUM_ITEM_WEARS, 1, " ", 3);
+    olc_list_columns(g, d, wear_bits, flag_count<wear_flag>, 1, " ", 3);
     write_to_output(g, d, "\r\nWear flags: @c{}@n\r\nEnter wear flag, 0 to quit : ", flag_names(obj_get_wear_flags(&e.obj)));
   }
 
@@ -221,8 +220,8 @@ namespace {
   {
     clear_screen(g, d);
     int columns = 0;
-    for (int counter = 1; counter < NUM_AFF_FLAGS; counter++) {
-      if (counter == std::to_underlying(AFF_CHARM)) /* Setting AFF_CHARM on objects like this is dangerous. */
+    for (int counter = 1; std::cmp_less(counter, flag_count<aff_flag>); counter++) {
+      if (counter == std::to_underlying(aff_flag::charm)) /* Setting aff_flag::charm on objects like this is dangerous. */
         continue;
       write_to_output(g, d, "@g{:>2d}@n) {:<20.20}{}", counter, affected_bits[counter], !(++columns % 3) ? "\r\n" : "");
     }
@@ -260,7 +259,7 @@ namespace {
     clear_screen(g, d);
     int columns = 0;
     for (int counter = 0; counter < SKILL_TABLE_SIZE; counter++)
-      if (IS_SET(skill_type(g, counter), SKTYPE_SPELL))
+      if (skill_type(g, counter).test(skill_kind::spell))
         write_to_output(g, d, "@g{:>2d}@n) @y{:<20.20}@n{}", counter, g->spell_info[counter].name, !(++columns % 3) ? "\r\n" : "");
     write_to_output(g, d, "\r\n@nEnter spell choice (-1 for none) : ");
   }
@@ -481,7 +480,7 @@ namespace {
     obj_set_name(&obj, "unfinished object");
     obj_set_description(&obj, "An unfinished object is lying here.");
     obj_set_short_description(&obj, "an unfinished object");
-    obj_wear_set(&obj, ITEM_WEAR_TAKE, true);
+    obj_wear_set(&obj, wear_flag::take, true);
     obj_set_type_flag(&obj, ITEM_WORN);
     obj_set_value(&obj, VAL_ALL_HEALTH, 100);
     obj_set_value(&obj, VAL_ALL_MAXHEALTH, 100);
@@ -510,7 +509,7 @@ namespace {
                     or_if_empty(obj_get_short_description(&obj), "undefined"),
                     or_if_empty(obj_get_description(&obj), "undefined"),
                     or_if_empty(obj_get_action_description(&obj), "Not Set.\r\n"),
-                    sprinttype(obj_get_type_flag(&obj), item_types), flag_names(obj_get_extra_flags(&obj)));
+                    type_name(item_types, obj_get_type_flag(&obj)), flag_names(obj_get_extra_flags(&obj)));
 
     std::string values;
     for (int i = 0; i < NUM_OBJ_VAL_POSITIONS; i++)
@@ -614,7 +613,7 @@ namespace {
         if (n == 0)
           done(g, d);
         else {
-          if (n < 0 || n > NUM_ITEM_WEARS)
+          if (n < 0 || std::cmp_greater(n, flag_count<wear_flag>))
             write_to_output(g, d, "That's not a valid choice!\r\n");
           else if (std::optional<wear_flag> flag = flag_from_index<wear_flag>(n - 1))
             obj_wear_toggle(&obj, *flag);
@@ -632,9 +631,9 @@ namespace {
           done(g, d);
           return;
         }
-        /* Setting AFF_CHARM on objects like this is dangerous. The menu's numbers are the flags' (quirk: so the last
+        /* Setting aff_flag::charm on objects like this is dangerous. The menu's numbers are the flags' (quirk: so the last
            toggles bit 79, past them) */
-        if (n > 0 && n <= NUM_AFF_FLAGS && n != std::to_underlying(AFF_CHARM))
+        if (n > 0 && std::cmp_less_equal(n, flag_count<aff_flag>) && n != std::to_underlying(aff_flag::charm))
           obj_get_bitvector(&obj).toggle_bit(static_cast<std::size_t>(n));
         perm_menu(g, d, *this);
         return;
@@ -778,13 +777,13 @@ namespace {
       copy_proto_script(obj_proto_of(g, obj_get_vnum(g, live)), live);
       assign_triggers(g, live);
     }
-    obj_extra_set(live, ITEM_UNIQUE_SAVE, true);
+    obj_extra_set(live, extra_flag::unique_save, true);
     mudlog(g, LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(g, d->character)), true, "OLC: {} iedit a unique #{:d}", char_get_name(d->character),
            obj_get_vnum(g, live));
     if (d->character) { /* quirk: without the leaving's log line */
-      char_plr_set(d->character, PLR_WRITING, false);
+      char_plr_set(d->character, player_flag::writing, false);
       desc_set_connected(d, CON_PLAYING);
-      act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
+      act(g, "$n stops using OLC.", true, d->character, nullptr, nullptr, act_to::room);
     }
     d->olc.reset();
   }
@@ -967,7 +966,7 @@ namespace {
         write_to_output(g, d, " @g{:d}@n) None.\r\n", counter + 1);
         continue;
       }
-      write_to_output(g, d, " @g{:d}@n) {:+d} to @b{}@n", counter + 1, apply.modifier, sprinttype(apply.location, apply_types));
+      write_to_output(g, d, " @g{:d}@n) {:+d} to @b{}@n", counter + 1, apply.modifier, type_name(apply_types, apply.location));
       if (apply.location == APPLY_FEAT)
         write_to_output(g, d, " ({})", g->feat_list[apply.specific].name);
       else if (apply.location == APPLY_SKILL)
@@ -1016,7 +1015,7 @@ namespace {
       apply.specific = affect_checked_specific(apply.location, parse_int(line));
     else if (apply.location == APPLY_SKILL) {
       std::string name(line);
-      if (const int skill = find_skill_num(g, name, SKTYPE_SKILL); skill > -1)
+      if (const int skill = find_skill_num(g, name, skill_kind::skill); skill > -1)
         apply.specific = skill;
     } else if (apply.location == APPLY_FEAT) {
       if (const int feat = find_feat_num(g, line); feat > -1)
@@ -1049,7 +1048,7 @@ namespace {
     clear_screen(g, d);
     int columns = 0;
     for (int counter = 0; counter < SKILL_TABLE_SIZE; counter++)
-      if (g->spell_info[counter].skilltype == SKTYPE_SPELL)
+      if (g->spell_info[counter].skilltype == skill_kind::spell)
         write_to_output(g, d, "@g{:>3d}@n) @y{:<20.20}@n{}", counter, g->spell_info[counter].name, !(++columns % 3) ? "\r\n" : "");
     write_to_output(g, d, "@n\r\nEnter spell number (0 is no spell) : ");
     asking = mode::spellbook;
@@ -1186,8 +1185,8 @@ ACMD(do_iedit)
   struct descriptor_data *d = char_get_desc(ch);
   open_session(g, d, std::make_unique<object_editor>(), {});
   object_editor &editor = session_of<object_editor>(d);
-  obj_extra_set(k, ITEM_UNIQUE_SAVE, true);
-  char_plr_set(ch, PLR_WRITING, true);
+  obj_extra_set(k, extra_flag::unique_save, true);
+  char_plr_set(ch, player_flag::writing, true);
 
   /* A private copy, as oedit makes: it isn't in the game, and has no script; quirk: its number shows as 0 */
   copy_object(g, &editor.obj, k);
@@ -1196,6 +1195,6 @@ ACMD(do_iedit)
   editor.individual_id = obj_get_id(k);
   editor.menu(g, d);
 
-  act(g, "$n starts using OLC.", true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "$n starts using OLC.", true, ch, nullptr, nullptr, act_to::room);
   desc_set_connected(d, CON_IEDIT);
 }

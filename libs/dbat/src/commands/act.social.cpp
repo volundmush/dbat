@@ -51,7 +51,7 @@ ACMD(do_action)
 
   if (argument.empty()) {
     send_to_char(g, ch, "{}\r\n", message_text(action->char_no_arg));
-    act(g, message_text(action->others_no_arg), action->hide, ch, nullptr, nullptr, TO_ROOM);
+    act(g, message_text(action->others_no_arg), action->hide, ch, nullptr, nullptr, act_to::room);
     return;
   }
 
@@ -67,14 +67,14 @@ ACMD(do_action)
   if (!action->char_found) /* the target word only counts for socials that take one */
     arg.clear();
 
-  vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_room);
   if (!vict) {
     if (action->char_obj_found) {
       targ = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch));
       if (!targ) targ = get_obj_in_list_vis(g, ch, arg, nullptr, room_get_contents(g, char_get_in_room(ch)));
       if (targ) {
-        act(g, message_text(action->char_obj_found), action->hide, ch, targ, nullptr, TO_CHAR);
-        act(g, message_text(action->others_obj_found), action->hide, ch, targ, nullptr, TO_ROOM);
+        act(g, message_text(action->char_obj_found), action->hide, ch, targ, nullptr, act_to::actor);
+        act(g, message_text(action->others_obj_found), action->hide, ch, targ, nullptr, act_to::room);
         return;
       }
     }
@@ -90,20 +90,20 @@ ACMD(do_action)
       send_to_char(g, ch, "{}\r\n", message_text(action->char_auto));
     else
       send_to_char(g, ch, "Erm, no.\r\n");
-    act(g, message_text(action->others_auto), action->hide, ch, nullptr, nullptr, TO_ROOM);
+    act(g, message_text(action->others_auto), action->hide, ch, nullptr, nullptr, act_to::room);
     return;
   }
 
   if (char_get_position(vict) < action->min_victim_position) {
-    act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+    act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, act_to::actor | act_option::even_asleep);
     return;
   }
   /* The body part, if one is named, which act() reads as $t text */
   bool to_part         = !part.empty();
   struct obj_data *as_t = to_part ? static_cast<struct obj_data *>(static_cast<void *>(part.data())) : nullptr;
-  act(g, message_text(to_part ? action->char_body_found : action->char_found), 0, ch, as_t, vict, TO_CHAR | TO_SLEEP);
-  act(g, message_text(to_part ? action->others_body_found : action->others_found), action->hide, ch, as_t, vict, TO_NOTVICT);
-  act(g, message_text(to_part ? action->vict_body_found : action->vict_found), action->hide, ch, as_t, vict, TO_VICT);
+  act(g, message_text(to_part ? action->char_body_found : action->char_found), 0, ch, as_t, vict, act_to::actor | act_option::even_asleep);
+  act(g, message_text(to_part ? action->others_body_found : action->others_found), action->hide, ch, as_t, vict, act_to::notvict);
+  act(g, message_text(to_part ? action->vict_body_found : action->vict_found), action->hide, ch, as_t, vict, act_to::vict);
 }
 
 namespace {
@@ -124,7 +124,7 @@ ACMD(do_insult)
     send_to_char(g, ch, "I'm sure you don't want to insult *everybody*...\r\n");
     return;
   }
-  struct char_data *victim = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_ROOM);
+  struct char_data *victim = get_char_vis(g, ch, arg, nullptr, find_flag::char_room);
   if (!victim) {
     send_to_char(g, ch, "Can't hear you!\r\n");
     return;
@@ -138,8 +138,8 @@ ACMD(do_insult)
   std::string_view insult = roll == 0   ? SEXED_INSULTS[char_get_sex(ch) == SEX_MALE][char_get_sex(victim) == SEX_MALE]
                        : roll == 1 ? "$n calls your mother a bitch!"
                                    : "$n tells you to get lost!";
-  act(g, insult, false, ch, nullptr, victim, TO_VICT);
-  act(g, "$n insults $N.", true, ch, nullptr, victim, TO_NOTVICT);
+  act(g, insult, false, ch, nullptr, victim, act_to::vict);
+  act(g, "$n insults $N.", true, ch, nullptr, victim, act_to::notvict);
 }
 
 void create_command_list(GameWorld *g)
@@ -234,11 +234,11 @@ ACMD(do_gmote)
 
   if ((act_nr = find_action(g, cmd)) < 0) {
     out = str_format("@D[@BOOC@D: @g{} {}@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
-    act(g, out, false, ch, nullptr, vict, TO_GMOTE);
+    act(g, out, false, ch, nullptr, vict, act_to::gmote);
     return;
   }
 
-  if (room_flagged(g, char_get_in_room(ch), ROOM_SOUNDPROOF)) {
+  if (room_flagged(g, char_get_in_room(ch), room_flag::soundproof)) {
     send_to_char(g, ch, "The walls seem to absorb your actions.\r\n");
     return;
   }
@@ -255,7 +255,7 @@ ACMD(do_gmote)
       return;
     }
     seen = message_text(action->others_no_arg);
-  } else if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+  } else if (!(vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
     send_to_char(g, ch, "{}\r\n", message_text(action->not_found));
     return;
   } else if (vict == ch) {
@@ -265,10 +265,10 @@ ACMD(do_gmote)
     }
     seen = message_text(action->others_auto);
   } else if (char_get_position(vict) < action->min_victim_position) {
-    act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
+    act(g, "$N is not in a proper position for that.", false, ch, nullptr, vict, act_to::actor | act_option::even_asleep);
     return;
   } else {
     seen = message_text(action->others_found);
   }
-  act(g, str_format("@D[@BOOC@D: @g{}@D]@n", seen), false, ch, nullptr, vict, TO_GMOTE);
+  act(g, str_format("@D[@BOOC@D: @g{}@D]@n", seen), false, ch, nullptr, vict, act_to::gmote);
 }

@@ -292,7 +292,7 @@ bool buildwalk(GameWorld *g, struct char_data *ch, int dir)
   room_vnum vnum;
   room_vnum rnum;
 
-  if (!char_is_npc(ch) && char_prf_flagged(g, ch, PRF_BUILDWALK) &&
+  if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::buildwalk) &&
       char_get_admlevel(ch) >= ADMLVL_IMMORT) {
 
     if (!can_edit_zone(g, ch, room_get_zone(g, char_get_in_room(ch)))) {

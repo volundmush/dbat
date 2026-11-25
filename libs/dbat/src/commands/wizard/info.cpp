@@ -99,7 +99,7 @@ ACMD(do_finddoor)
     obj = obj_proto_of(g, vnum);
   } else {
     generic_find(g, arg,
-                 FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_WORLD | FIND_OBJ_EQUIP,
+                 find_flag::obj_inv | find_flag::obj_room | find_flag::obj_world | find_flag::obj_equip,
                  ch, &tmp_char, &obj);
     if (!obj)
       send_to_char(g, ch, "What key do you want to find a door for?\r\n");
@@ -277,7 +277,7 @@ static void do_stat_room(GameWorld *g, struct char_data *ch)
 
   send_to_char(g, ch, "Room name: @c{}@n\r\n", room_get_name(rm));
 
-  buf2 = sprinttype(room_get_sector_type(rm), sector_types);
+  buf2 = type_name(sector_types, room_get_sector_type(rm));
   send_to_char(g, ch, "Zone: [{:>3d}], VNum: [@g{:>5d}@n], RNum: [{:>5d}], IDNum: [{:>5d}], Type: {}\r\n",
                room_get_zone(rm)->number, room_get_number(rm), char_get_in_room(ch),
                (long)room_get_number(rm) + ROOM_ID_BASE, buf2);
@@ -375,7 +375,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
                or_if_empty(obj_get_short_description(j), "<None>"), obj_get_name(j),
                size_names[obj_get_size(j)]);
 
-  buf = sprinttype(obj_get_type_flag(j), item_types);
+  buf = type_name(item_types, obj_get_type_flag(j));
   send_to_char(g, ch, "VNum: [@g{:>5d}@n], RNum: [{:>5d}], Idnum: [{:>5d}], Type: {}, SpecProc: {}\r\n",
                vnum, obj_get_item_number(j), obj_get_id(j), buf, obj_get_spec(g, j) ? "Exists" : "None");
 
@@ -476,7 +476,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
       break;
     case ITEM_DRINKCON:
     case ITEM_FOUNTAIN:
-      buf = sprinttype(obj_get_value(j, VAL_DRINKCON_LIQUID), drinks);
+      buf = type_name(drinks, obj_get_value(j, VAL_DRINKCON_LIQUID));
       send_to_char(g, ch, "Capacity: {:d}, Contains: {:d}, Poisoned: {}, Liquid: {}\r\n",
                    obj_get_value(j, VAL_DRINKCON_CAPACITY), obj_get_value(j, VAL_DRINKCON_HOWFULL), YESNO(obj_get_value(j, VAL_DRINKCON_POISON)), buf);
       break;
@@ -530,7 +530,7 @@ static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *
   send_to_char(g, ch, "Affections:");
   for (i = 0; i < MAX_OBJ_AFFECT; i++)
     if (obj_get_affected(j)[i].modifier) {
-      buf = sprinttype(obj_get_affected(j)[i].location, apply_types);
+      buf = type_name(apply_types, obj_get_affected(j)[i].location);
       send_to_char(g, ch, "{} {:+d} to {}", found++ ? "," : "", obj_get_affected(j)[i].modifier, buf);
       switch (obj_get_affected(j)[i].location) {
         case APPLY_FEAT:
@@ -560,7 +560,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 
   if (char_is_npc(k))
     send_to_char(g, ch, "LOADED AT: [{}]\r\n", asctime_text(char_get_lastpl(k)));
-  buf = sprinttype(char_get_sex(k), genders);
+  buf = type_name(genders, char_get_sex(k));
   send_to_char(g, ch, "{} {} '{}'  IDNum: [{:>5d}], In room [{:>5d}], Loadroom : [{:>5d}]\r\n",
                buf, (!char_is_npc(k) ? "PC" : (!char_is_mob(g, k) ? "NPC" : "MOB")),
                char_get_name(k), char_is_npc(k) ? char_get_id(k) : char_get_idnum(k), char_get_in_room(k), char_is_npc(k) ? char_get_hometown(k) : char_get_load_room(g, k));
@@ -640,16 +640,16 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 
   send_to_char(g, ch, "Armor: [{:d} ]\r\n", char_get_armor(k));
 
-  buf = sprinttype(char_get_position(k), position_types);
+  buf = type_name(position_types, char_get_position(k));
   send_to_char(g, ch, "Pos: {}, Fighting: {}", buf, char_get_fighting(g, k) ? char_get_name(char_get_fighting(g, k)) : "Nobody");
 
   if (char_get_desc(k)) {
-    buf = sprinttype(desc_get_connected(char_get_desc(k)), connected_types);
+    buf = type_name(connected_types, desc_get_connected(char_get_desc(k)));
     send_to_char(g, ch, ", Connected: {}", buf);
   }
 
   if (char_is_npc(k)) {
-    buf = sprinttype(char_get_mob_specials_default_pos(k), position_types);
+    buf = type_name(position_types, char_get_mob_specials_default_pos(k));
     send_to_char(g, ch, ", Default position: {}\r\n", buf);
     buf = flag_names(char_get_mob_flags(k));
     send_to_char(g, ch, "NPC flags: @c{}@n\r\n", buf);
@@ -725,7 +725,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
       if (aff->modifier)
         send_to_char(g, ch, "{:+d} to {}", aff->modifier, apply_types[(int)aff->location]);
 
-      if (aff->bitvector != AFF_DONTUSE) {
+      if (aff->bitvector != aff_flag::dontuse) {
         if (aff->modifier)
           send_to_char(g, ch, ", ");
 
@@ -788,7 +788,7 @@ ACMD(do_varstat)
   std::string_view rest = argument;
   arg                   = take_arg(rest);
 
-  if (!(vict = get_char_vis(g, ch, arg, nullptr, FIND_CHAR_WORLD))) {
+  if (!(vict = get_char_vis(g, ch, arg, nullptr, find_flag::char_world))) {
     send_to_char(g, ch, "That player is not in the game.\r\n");
     return;
   }
@@ -819,7 +819,7 @@ namespace {
       send_to_char(g, ch, "Stats on which mobile?\r\n");
       return;
     }
-    auto found = find_char(g, ch, name, FIND_CHAR_WORLD, "No such mobile around.\r\n");
+    auto found = find_char(g, ch, name, find_flag::char_world, "No such mobile around.\r\n");
     if (!reject(g, ch, found))
       do_stat_character(g, ch, *found);
   }
@@ -830,7 +830,7 @@ namespace {
       send_to_char(g, ch, "Stats on which player?\r\n");
       return;
     }
-    auto found = find_player(g, ch, name, FIND_CHAR_WORLD, "No such player around.\r\n");
+    auto found = find_player(g, ch, name, find_flag::char_world, "No such player around.\r\n");
     if (!reject(g, ch, found))
       do_stat_character(g, ch, *found);
   }
@@ -841,7 +841,7 @@ namespace {
       send_to_char(g, ch, "Stats on which player?\r\n");
       return;
     }
-    if (struct char_data *victim = get_player_vis(g, ch, name, nullptr, FIND_CHAR_WORLD)) {
+    if (struct char_data *victim = get_player_vis(g, ch, name, nullptr, find_flag::char_world)) {
       do_stat_character(g, ch, victim);
       return;
     }
@@ -896,11 +896,11 @@ namespace {
     if ((object = get_obj_in_equip_vis(g, ch, name, &number, char_get_equipment_array(ch))) ||
         (object = get_obj_in_list_vis(g, ch, name, &number, char_get_inventory(ch))))
       do_stat_object(g, ch, object);
-    else if ((victim = get_char_vis(g, ch, name, &number, FIND_CHAR_ROOM)))
+    else if ((victim = get_char_vis(g, ch, name, &number, find_flag::char_room)))
       do_stat_character(g, ch, victim);
     else if ((object = get_obj_in_list_vis(g, ch, name, &number, room_get_contents(g, char_get_in_room(ch)))))
       do_stat_object(g, ch, object);
-    else if ((victim = get_char_vis(g, ch, name, &number, FIND_CHAR_WORLD)))
+    else if ((victim = get_char_vis(g, ch, name, &number, find_flag::char_world)))
       do_stat_character(g, ch, victim);
     else if ((object = get_obj_vis(g, ch, name, &number)))
       do_stat_object(g, ch, object);
@@ -1228,7 +1228,7 @@ namespace {
         text += str_format("SPL: ({:>3d}{}) @c{:<21}@n ", aff.duration + 1, Unit, skill_name(g, aff.type));
         if (aff.modifier)
           text += str_format("{:+d} to {}", aff.modifier, apply_types[(int)aff.location]);
-        if (aff.bitvector != AFF_DONTUSE) {
+        if (aff.bitvector != aff_flag::dontuse) {
           if (aff.modifier)
             text += ", ";
           text += str_format("sets {}", flag_name(aff.bitvector));
@@ -1256,8 +1256,8 @@ namespace {
       {"rent",       ADMLVL_GRGOD,  show_rent                                  },
       {"stats",      ADMLVL_IMMORT, show_stats                                 },
       {"errors",     ADMLVL_IMPL,   show_errors                                },
-      {"death",      ADMLVL_GOD,    show_flagged_rooms<DEATH_TRAPS, ROOM_DEATH>},
-      {"godrooms",   ADMLVL_IMMORT, show_flagged_rooms<GODROOMS, ROOM_GODROOM> },
+      {"death",      ADMLVL_GOD,    show_flagged_rooms<DEATH_TRAPS, room_flag::death>},
+      {"godrooms",   ADMLVL_IMMORT, show_flagged_rooms<GODROOMS, room_flag::godroom> },
       {"shops",      ADMLVL_IMMORT, show_shops_of                              },
       {"houses",     ADMLVL_GOD,    show_houses                                },
       {"snoop",      ADMLVL_GRGOD,  show_snoop                                 },
@@ -1364,7 +1364,7 @@ ACMD(do_plist)
                    CCCYN(g, ch, C_NRM), CCNRM(g, ch, C_NRM));
 
   for (i = 0; i <= g->top_of_p_table; i++) {
-    if (g->player_table[i].flags.test(PINDEX_DELETED)) {
+    if (g->player_table[i].flags.test(pindex_flag::deleted)) {
       buf += str_format("[{:>3d}] <DELETED> --Will be removed next boot.\r\n", g->player_table[i].id);
       continue;
     }
@@ -1414,29 +1414,29 @@ constexpr int MAX_DAM_ALLOWED     = 50; /* for weapons  - avg. dam*/
 constexpr int MAX_AFFECTS_ALLOWED = 3;
 
 /* Armor class limits*/
-constexpr int TOTAL_WEAR_CHECKS = (NUM_ITEM_WEARS - 2); /*minus Wield and Take*/
+constexpr int TOTAL_WEAR_CHECKS = (flag_count<wear_flag> - 2); /*minus Wield and Take*/
 static const struct zcheck_armor {
   wear_flag bitvector{};   /* from Structs.h                       */
   int ac_allowed{};        /* Max. AC allowed for this body part  */
   std::string_view message{};   /* phrase for error message            */
 } zarmor[] = {
-    {ITEM_WEAR_FINGER, 10, "Ring"         },
-    {ITEM_WEAR_NECK,   10, "Necklace"     },
-    {ITEM_WEAR_BODY,   10, "Body armor"   },
-    {ITEM_WEAR_HEAD,   10, "Head gear"    },
-    {ITEM_WEAR_LEGS,   10, "Legwear"      },
-    {ITEM_WEAR_FEET,   10, "Footwear"     },
-    {ITEM_WEAR_HANDS,  10, "Glove"        },
-    {ITEM_WEAR_ARMS,   10, "Armwear"      },
-    {ITEM_WEAR_SHIELD, 10, "Shield"       },
-    {ITEM_WEAR_ABOUT,  10, "Cloak"        },
-    {ITEM_WEAR_WAIST,  10, "Belt"         },
-    {ITEM_WEAR_WRIST,  10, "Wristwear"    },
-    {ITEM_WEAR_HOLD,   10, "Held item"    },
-    {ITEM_WEAR_PACK,   10, "Backpack item"},
-    {ITEM_WEAR_EAR,    10, "Earring item" },
-    {ITEM_WEAR_SH,     10, "Shoulder item"},
-    {ITEM_WEAR_EYE,    10, "Eye item"     }
+    {wear_flag::finger, 10, "Ring"         },
+    {wear_flag::neck,   10, "Necklace"     },
+    {wear_flag::body,   10, "Body armor"   },
+    {wear_flag::head,   10, "Head gear"    },
+    {wear_flag::legs,   10, "Legwear"      },
+    {wear_flag::feet,   10, "Footwear"     },
+    {wear_flag::hands,  10, "Glove"        },
+    {wear_flag::arms,   10, "Armwear"      },
+    {wear_flag::shield, 10, "Shield"       },
+    {wear_flag::about,  10, "Cloak"        },
+    {wear_flag::waist,  10, "Belt"         },
+    {wear_flag::wrist,  10, "Wristwear"    },
+    {wear_flag::hold,   10, "Held item"    },
+    {wear_flag::pack,   10, "Backpack item"},
+    {wear_flag::ear,    10, "Earring item" },
+    {wear_flag::sh,     10, "Shoulder item"},
+    {wear_flag::eye,    10, "Eye item"     }
 };
 
 /*
@@ -1574,8 +1574,8 @@ ACMD(do_zcheck)
           (found = 1))
         buf += str_format("- Needs to be fixed - {}Autogenerate!{}\r\n", CCYEL(g, ch, C_NRM), CCNRM(g, ch, C_NRM));
 
-      if (char_mob_flagged(mob, MOB_AGGRESSIVE) &&
-          char_mob_flagged(mob, MOB_MEMORY) /* quirk: reads MEMORY (AGGR_GOOD | AGGR_EVIL | AGGR_NEUTRAL, 9 | 8 | 10), meant any of them */ && (found = 1))
+      if (char_mob_flagged(mob, mob_flag::aggressive) &&
+          char_mob_flagged(mob, mob_flag::memory) /* quirk: reads MEMORY (AGGR_GOOD | AGGR_EVIL | AGGR_NEUTRAL, 9 | 8 | 10), meant any of them */ && (found = 1))
         buf += "- Both aggresive and agressive to align.\r\n";
 
       if ((char_get_gold(mob) > MAX_GOLD_ALLOWED) && (found = 1))
@@ -1586,19 +1586,19 @@ ACMD(do_zcheck)
       if (char_get_exp(mob) > MAX_EXP_ALLOWED && (found = 1))
         buf += str_format("- Has {:d} experience (limit: {:d})\r\n",
                           char_get_exp(mob), MAX_EXP_ALLOWED);
-      /* quirk: reads AFF_TAMED alone, meant AFF_GROUP, AFF_CHARM or AFF_POISON: their numbers or-ed as bits, 9 | 22 | 12
+      /* quirk: reads aff_flag::tamed alone, meant aff_flag::group, aff_flag::charm or aff_flag::poison: their numbers or-ed as bits, 9 | 22 | 12
          is 31 */
-      if (char_aff_flagged(mob, AFF_TAMED) && (found = 1))
+      if (char_aff_flagged(mob, aff_flag::tamed) && (found = 1))
         buf += str_format("- Has illegal affection bits set ({} {} {})\r\n",
-                          char_aff_flagged(mob, AFF_GROUP) ? "GROUP" : "",
-                          char_aff_flagged(mob, AFF_CHARM) ? "CHARM" : "",
-                          char_aff_flagged(mob, AFF_POISON) ? "POISON" : "");
+                          char_aff_flagged(mob, aff_flag::group) ? "GROUP" : "",
+                          char_aff_flagged(mob, aff_flag::charm) ? "CHARM" : "",
+                          char_aff_flagged(mob, aff_flag::poison) ? "POISON" : "");
 
-      /*if (!MOB_FLAGGED(mob, MOB_SENTINEL) && !MOB_FLAGGED(mob, MOB_STAY_ZONE) && (found = 1))
+      /*if (!MOB_FLAGGED(mob, mob_flag::sentinel) && !MOB_FLAGGED(mob, mob_flag::stay_zone) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
                             "- Neither SENTINEL nor STAY_ZONE bits set.\r\n");*/
 
-      if (char_mob_flagged(mob, MOB_SPEC) && (found = 1))
+      if (char_mob_flagged(mob, mob_flag::spec) && (found = 1))
         buf += "- SPEC flag needs to be removed.\r\n";
 
       /*****ADDITIONAL MOB CHECKS HERE*****/
@@ -1645,7 +1645,7 @@ ACMD(do_zcheck)
 
       } /*switch on Item_Type*/
 
-      if (!obj_wear_flagged(obj, ITEM_WEAR_TAKE)) {
+      if (!obj_wear_flagged(obj, wear_flag::take)) {
         if ((obj_get_cost(obj) || (obj_get_weight(obj) && obj_get_type_flag(obj) != ITEM_FOUNTAIN) ||
              obj_get_cost_per_day(obj)) &&
             (found = 1))
@@ -1750,15 +1750,15 @@ ACMD(do_zcheck)
         } /* for (k.. */
       } /* cycle directions */
 
-      /* quirk: reads ROOM_BFS_MARK alone, meant any of the five: the flags' numbers were or-ed as if they were
+      /* quirk: reads room_flag::bfs_mark alone, meant any of the five: the flags' numbers were or-ed as if they were
          bits, and 11 | 12 | 13 | 14 | 15 is 15 */
-      if (room_flagged(g, i, ROOM_BFS_MARK))
+      if (room_flagged(g, i, room_flag::bfs_mark))
         buf += str_format("- Has illegal affection bits set ({} {} {} {} {})\r\n",
-                          room_flagged(g, i, ROOM_ATRIUM) ? "ATRIUM" : "",
-                          room_flagged(g, i, ROOM_HOUSE) ? "HOUSE" : "",
-                          room_flagged(g, i, ROOM_HOUSE_CRASH) ? "HCRSH" : "",
-                          room_flagged(g, i, ROOM_OLC) ? "OLC" : "",
-                          room_flagged(g, i, ROOM_BFS_MARK) ? "*" : "");
+                          room_flagged(g, i, room_flag::atrium) ? "ATRIUM" : "",
+                          room_flagged(g, i, room_flag::house) ? "HOUSE" : "",
+                          room_flagged(g, i, room_flag::house_crash) ? "HCRSH" : "",
+                          room_flagged(g, i, room_flag::olc) ? "OLC" : "",
+                          room_flagged(g, i, room_flag::bfs_mark) ? "*" : "");
 
       const std::string_view description = room_get_description(g, i);
       if ((MIN_ROOM_DESC_LENGTH) && description.size() < MIN_ROOM_DESC_LENGTH && (found = 1))

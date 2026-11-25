@@ -132,77 +132,77 @@ static void auto_equip(GameWorld *g, struct char_data *ch, struct obj_data *obj,
         break;
       case WEAR_FINGER_R:
       case WEAR_FINGER_L:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_FINGER)) /* not fitting :( */
+        if (!obj_wear_flagged(obj, wear_flag::finger)) /* not fitting :( */
           location = LOC_INVENTORY;
         break;
       case WEAR_NECK_1:
       case WEAR_NECK_2:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_NECK))
+        if (!obj_wear_flagged(obj, wear_flag::neck))
           location = LOC_INVENTORY;
         break;
       case WEAR_BODY:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_BODY))
+        if (!obj_wear_flagged(obj, wear_flag::body))
           location = LOC_INVENTORY;
         break;
       case WEAR_HEAD:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_HEAD))
+        if (!obj_wear_flagged(obj, wear_flag::head))
           location = LOC_INVENTORY;
         break;
       case WEAR_LEGS:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_LEGS))
+        if (!obj_wear_flagged(obj, wear_flag::legs))
           location = LOC_INVENTORY;
         break;
       case WEAR_FEET:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_FEET))
+        if (!obj_wear_flagged(obj, wear_flag::feet))
           location = LOC_INVENTORY;
         break;
       case WEAR_HANDS:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_HANDS))
+        if (!obj_wear_flagged(obj, wear_flag::hands))
           location = LOC_INVENTORY;
         break;
       case WEAR_ARMS:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_ARMS))
+        if (!obj_wear_flagged(obj, wear_flag::arms))
           location = LOC_INVENTORY;
         break;
       case WEAR_UNUSED1:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_SHIELD))
+        if (!obj_wear_flagged(obj, wear_flag::shield))
           location = LOC_INVENTORY;
         j = WEAR_WIELD2;
         break;
       case WEAR_ABOUT:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_ABOUT))
+        if (!obj_wear_flagged(obj, wear_flag::about))
           location = LOC_INVENTORY;
         break;
       case WEAR_WAIST:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_WAIST))
+        if (!obj_wear_flagged(obj, wear_flag::waist))
           location = LOC_INVENTORY;
         break;
       case WEAR_WRIST_R:
       case WEAR_WRIST_L:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_WRIST))
+        if (!obj_wear_flagged(obj, wear_flag::wrist))
           location = LOC_INVENTORY;
         break;
       case WEAR_WIELD1:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_WIELD))
+        if (!obj_wear_flagged(obj, wear_flag::wield))
           location = LOC_INVENTORY;
         break;
       case WEAR_WIELD2:
         break;
       case WEAR_EYE:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_EYE))
+        if (!obj_wear_flagged(obj, wear_flag::eye))
           location = LOC_INVENTORY;
         break;
       case WEAR_BACKPACK:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_PACK))
+        if (!obj_wear_flagged(obj, wear_flag::pack))
           location = LOC_INVENTORY;
         break;
       case WEAR_SH:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_SH))
+        if (!obj_wear_flagged(obj, wear_flag::sh))
           location = LOC_INVENTORY;
         break;
       case WEAR_EAR_R:
       case WEAR_EAR_L:
-        if (!obj_wear_flagged(obj, ITEM_WEAR_EAR))
+        if (!obj_wear_flagged(obj, wear_flag::ear))
           location = LOC_INVENTORY;
         break;
       default:
@@ -435,9 +435,9 @@ static bool Crash_is_unrentable(struct obj_data *obj)
 {
   if (!obj)
     return false;
-  if (obj_extra_flagged(obj, ITEM_NORENT) || obj_get_cost_per_day(obj) < 0 ||
+  if (obj_extra_flagged(obj, extra_flag::norent) || obj_get_cost_per_day(obj) < 0 ||
       (obj_get_item_number(obj) <= NOTHING &&
-       !obj_extra_flagged(obj, ITEM_UNIQUE_SAVE))) {
+       !obj_extra_flagged(obj, extra_flag::unique_save))) {
     return true;
   }
   return false;
@@ -471,7 +471,7 @@ void Crash_crashsave(GameWorld *g, struct char_data *ch)
     return;
 
   if (Crash_write_safe_file(g, ch, RENT_CRASH, 0, "crashsave"))
-    char_plr_set(ch, PLR_CRASH, false);
+    char_plr_set(ch, player_flag::crash, false);
 }
 
 void Crash_rentsave(GameWorld *g, struct char_data *ch, int cost)
@@ -502,10 +502,10 @@ void Crash_save_all(GameWorld *g)
 {
   for (descriptor_data *d : each_desc(g)) {
     if ((desc_get_connected(d) == CON_PLAYING) && !char_is_npc(d->character)) {
-      if (char_plr_flagged(d->character, PLR_CRASH)) {
+      if (char_plr_flagged(d->character, player_flag::crash)) {
         Crash_crashsave(g, d->character);
         save_char(g, d->character);
-        char_plr_set(d->character, PLR_CRASH, false);
+        char_plr_set(d->character, player_flag::crash, false);
       }
     }
   }
@@ -585,8 +585,8 @@ static bool Crash_load_file(GameWorld *g, struct char_data *ch, io::text_reader 
         name_to_drinkcon(g, temp, obj_get_value(temp, 2));
     }
     if (obj_get_vnum(g, temp) == 20099 || obj_get_vnum(g, temp) == 20098)
-      if (obj_extra_flagged(temp, ITEM_UNBREAKABLE))
-        obj_extra_set(temp, ITEM_UNBREAKABLE, false);
+      if (obj_extra_flagged(temp, extra_flag::unbreakable))
+        obj_extra_set(temp, extra_flag::unbreakable, false);
     auto_equip(g, ch, temp, locate);
     rows.place(temp, locate);
   });

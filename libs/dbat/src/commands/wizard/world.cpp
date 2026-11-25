@@ -62,11 +62,11 @@ namespace {
   /* victim, by ch's doing, to where ch is */
   void transfer(GameWorld *g, struct char_data *ch, struct char_data *victim)
   {
-    act(g, "$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
+    act(g, "$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, act_to::room);
     char_from_room(g, victim);
     char_to_room(g, victim, char_get_in_room(ch));
-    act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
-    act(g, "$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
+    act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, act_to::room);
+    act(g, "$n has transferred you!", false, ch, nullptr, victim, act_to::vict);
     look_at_room(g, char_get_in_room(victim), victim, 0);
     enter_wtrigger(g, room_of(g, char_get_in_room(victim)), victim, -1);
   }
@@ -104,11 +104,11 @@ ACMD(do_transobj)
   struct obj_data *obj = *found;
 
   if (!str_eq_nocase("all", arg2)) {
-    auto to = find_char(g, ch, arg2, FIND_CHAR_WORLD, "That player is not in the game.\r\n");
+    auto to = find_char(g, ch, arg2, find_flag::char_world, "That player is not in the game.\r\n");
     if (reject(g, ch, to))
       return;
-    act(g, "You send $p to $N.", true, ch, obj, *to, TO_CHAR);
-    act(g, "$n sends $p across the universe to you.", true, ch, obj, *to, TO_VICT);
+    act(g, "You send $p to $N.", true, ch, obj, *to, act_to::actor);
+    act(g, "$n sends $p across the universe to you.", true, ch, obj, *to, act_to::vict);
     obj_from_char(g, obj);
     obj_to_char(g, obj, *to);
     return;
@@ -116,11 +116,11 @@ ACMD(do_transobj)
 
   /* Everyone gets a copy, made from its prototype */
   obj_vnum num = obj_get_vnum(g, obj); /* quirk: for something with none, everyone is told of it but gets nothing */
-  act(g, "You send $p to everyone in the game.", true, ch, obj, nullptr, TO_CHAR);
+  act(g, "You send $p to everyone in the game.", true, ch, obj, nullptr, act_to::actor);
   for (descriptor_data *d : each_desc(g)) {
     if (!desc_is_playing(d) || char_is_npc(d->character) || d->character == ch)
       continue;
-    act(g, "$N sends $p across the universe to you.", true, d->character, obj, ch, TO_CHAR);
+    act(g, "$N sends $p across the universe to you.", true, d->character, obj, ch, act_to::actor);
     obj_to_char(g, read_object(g, num), d->character);
   }
 }
@@ -132,7 +132,7 @@ ACMD(do_recall)
     return;
   }
   send_to_char(g, ch, "You disappear in a burst of light!\r\n");
-  act(g, "$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
+  act(g, "$n disappears in a burst of light!", false, ch, nullptr, nullptr, act_to::room);
   if (!room_of(g, 2))
     return;
   char_from_room(g, ch);
@@ -166,7 +166,7 @@ room_vnum find_target_room(GameWorld *g, struct char_data *ch, std::string_view 
     int num;
 
     num = get_number(mobobjstr);
-    if ((target_mob = get_char_vis(g, ch, mobobjstr, &num, FIND_CHAR_WORLD)) != nullptr) {
+    if ((target_mob = get_char_vis(g, ch, mobobjstr, &num, find_flag::char_world)) != nullptr) {
       if ((location = char_get_in_room(target_mob)) == NOWHERE) {
         send_to_char(g, ch, "That character is currently lost.\r\n");
         return (NOWHERE);
@@ -197,17 +197,17 @@ room_vnum find_target_room(GameWorld *g, struct char_data *ch, std::string_view 
 
   rm = room_of(g, location);
 
-  if ((!can_edit_zone(g, ch, room_get_zone(rm)) && char_get_admlevel(ch) < ADMLVL_GOD) && zone_flagged(g, room_get_zone(rm), ZONE_QUEST)) {
+  if ((!can_edit_zone(g, ch, room_get_zone(rm)) && char_get_admlevel(ch) < ADMLVL_GOD) && zone_flagged(g, room_get_zone(rm), zone_flag::quest)) {
     send_to_char(g, ch, "This target is in a quest zone.\r\n");
     return (NOWHERE);
   }
 
-  if ((char_get_admlevel(ch) < ADMLVL_VICE) && zone_flagged(g, room_get_zone(rm), ZONE_NOIMMORT)) {
+  if ((char_get_admlevel(ch) < ADMLVL_VICE) && zone_flagged(g, room_get_zone(rm), zone_flag::noimmort)) {
     send_to_char(g, ch, "This target is in a zone closed to all.\r\n");
     return (NOWHERE);
   }
 
-  if (room_flagged(g, location, ROOM_GODROOM))
+  if (room_flagged(g, location, room_flag::godroom))
     send_to_char(g, ch, "You are not godly enough to use that room!\r\n");
   else
     return (location);
@@ -248,15 +248,15 @@ ACMD(do_goto)
   room_vnum location = find_target_room(g, ch, argument);
   if (location == NOWHERE)
     return;
-  if (char_plr_flagged(ch, PLR_HEALT)) {
+  if (char_plr_flagged(ch, player_flag::healt)) {
     send_to_char(g, ch, "They are inside a healing tank!\r\n");
     return;
   }
 
-  act(g, str_format("$n {}", or_if_empty(char_get_poofout(g, ch), "disappears in a puff of smoke.")), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("$n {}", or_if_empty(char_get_poofout(g, ch), "disappears in a puff of smoke.")), true, ch, nullptr, nullptr, act_to::room);
   char_from_room(g, ch);
   char_to_room(g, ch, location);
-  act(g, str_format("$n {}", or_if_empty(char_get_poofin(g, ch), "appears with an ear-splitting bang.")), true, ch, nullptr, nullptr, TO_ROOM);
+  act(g, str_format("$n {}", or_if_empty(char_get_poofin(g, ch), "appears with an ear-splitting bang.")), true, ch, nullptr, nullptr, act_to::room);
   look_at_room(g, char_get_in_room(ch), ch, 0);
   enter_wtrigger(g, room_of(g, char_get_in_room(ch)), ch, -1);
 }
@@ -271,7 +271,7 @@ ACMD(do_trans)
     return;
   }
   if (str_eq_nocase("all", buf)) {
-    if (!char_adm_flagged(ch, ADM_TRANSALL)) {
+    if (!char_adm_flagged(ch, admin_flag::transall)) {
       send_to_char(g, ch, "I think not.\r\n");
       return;
     }
@@ -282,7 +282,7 @@ ACMD(do_trans)
     return;
   }
 
-  auto found = find_char(g, ch, buf, FIND_CHAR_WORLD, CONFIG_NOPERSON);
+  auto found = find_char(g, ch, buf, find_flag::char_world, CONFIG_NOPERSON);
   if (reject(g, ch, found))
     return;
   struct char_data *victim = *found;
@@ -294,7 +294,7 @@ ACMD(do_trans)
     send_to_char(g, ch, "Go transfer someone your own size.\r\n");
     return;
   }
-  if (char_plr_flagged(victim, PLR_HEALT)) {
+  if (char_plr_flagged(victim, player_flag::healt)) {
     send_to_char(g, ch, "They are inside a healing tank!\r\n");
     return;
   }
@@ -311,7 +311,7 @@ ACMD(do_teleport)
     send_to_char(g, ch, "Whom do you wish to teleport?\r\n");
     return;
   }
-  auto found = find_char(g, ch, buf, FIND_CHAR_WORLD, CONFIG_NOPERSON);
+  auto found = find_char(g, ch, buf, find_flag::char_world, CONFIG_NOPERSON);
   if (reject(g, ch, found))
     return;
   struct char_data *victim = *found;
@@ -329,16 +329,16 @@ ACMD(do_teleport)
   room_vnum target = find_target_room(g, ch, buf2);
   if (target == NOWHERE)
     return;
-  if (char_plr_flagged(victim, PLR_HEALT)) {
+  if (char_plr_flagged(victim, player_flag::healt)) {
     send_to_char(g, ch, "They are inside a healing tank!\r\n");
     return;
   }
   send_to_char(g, ch, CONFIG_OK);
-  act(g, "$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
+  act(g, "$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, act_to::room);
   char_from_room(g, victim);
   char_to_room(g, victim, target);
-  act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
-  act(g, "$n has teleported you!", false, ch, nullptr, victim, TO_VICT);
+  act(g, "$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, act_to::room);
+  act(g, "$n has teleported you!", false, ch, nullptr, victim, act_to::vict);
   look_at_room(g, char_get_in_room(victim), victim, 0);
   enter_wtrigger(g, room_of(g, char_get_in_room(victim)), victim, -1);
 }
@@ -377,7 +377,7 @@ ACMD(do_snoop)
     stop_snooping(g, ch);
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, "No such person around.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_world, "No such person around.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *victim = *found;
@@ -424,7 +424,7 @@ ACMD(do_switch)
     send_to_char(g, ch, "Switch with who?\r\n");
     return;
   }
-  auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, "No such character.\r\n");
+  auto found = find_char(g, ch, arg, find_flag::char_world, "No such character.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *victim = *found;
@@ -433,9 +433,9 @@ ACMD(do_switch)
     refusal = "Hee hee... we are jolly funny today, eh?\r\n";
   else if (char_get_desc(victim))
     refusal = "You can't do that, the body is already in use!\r\n";
-  else if (!char_is_npc(victim) && !char_adm_flagged(ch, ADM_SWITCHMORTAL))
+  else if (!char_is_npc(victim) && !char_adm_flagged(ch, admin_flag::switchmortal))
     refusal = "You aren't holy enough to use a mortal's body.\r\n";
-  else if (char_get_admlevel(ch) < ADMLVL_VICE && room_flagged(g, char_get_in_room(victim), ROOM_GODROOM))
+  else if (char_get_admlevel(ch) < ADMLVL_VICE && room_flagged(g, char_get_in_room(victim), room_flag::godroom))
     refusal = "You are not godly enough to use that room!\r\n";
   if (!refusal.empty()) {
     send_to_char(g, ch, refusal);
@@ -493,9 +493,9 @@ ACMD(do_load)
     for (int i = 0; i < n; i++) {
       struct char_data *mob = read_mobile(g, vnum);
       char_to_room(g, mob, char_get_in_room(ch));
-      act(g, "$n makes a quaint, magical gesture with one hand.", true, ch, nullptr, nullptr, TO_ROOM);
-      act(g, "$n has created $N!", false, ch, nullptr, mob, TO_ROOM);
-      act(g, "You create $N.", false, ch, nullptr, mob, TO_CHAR);
+      act(g, "$n makes a quaint, magical gesture with one hand.", true, ch, nullptr, nullptr, act_to::room);
+      act(g, "$n has created $N!", false, ch, nullptr, mob, act_to::room);
+      act(g, "You create $N.", false, ch, nullptr, mob, act_to::actor);
       load_mtrigger(g, mob);
     }
     return;
@@ -520,9 +520,9 @@ ACMD(do_load)
       obj_to_char(g, obj, ch);
     else
       obj_to_room(g, obj, char_get_in_room(ch));
-    act(g, "$n makes a strange magical gesture.", true, ch, nullptr, nullptr, TO_ROOM);
-    act(g, "$n has created $p!", false, ch, obj, nullptr, TO_ROOM);
-    act(g, "You create $p.", false, ch, obj, nullptr, TO_CHAR);
+    act(g, "$n makes a strange magical gesture.", true, ch, nullptr, nullptr, act_to::room);
+    act(g, "$n has created $p!", false, ch, obj, nullptr, act_to::room);
+    act(g, "You create $p.", false, ch, obj, nullptr, act_to::actor);
     load_otrigger(g, obj);
   }
 }
@@ -534,7 +534,7 @@ ACMD(do_purge)
   std::string buf       = take_arg(rest);
 
   if (buf.empty()) {
-    act(g, "$n gestures... You are surrounded by scorching flames!", false, ch, nullptr, nullptr, TO_ROOM);
+    act(g, "$n gestures... You are surrounded by scorching flames!", false, ch, nullptr, nullptr, act_to::room);
     send_to_room(g, char_get_in_room(ch), "The world seems a little cleaner.\r\n");
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (!char_is_npc(tch))
@@ -552,12 +552,12 @@ ACMD(do_purge)
     return;
   }
 
-  if (struct char_data *vict = get_char_vis(g, ch, buf, nullptr, FIND_CHAR_WORLD)) {
+  if (struct char_data *vict = get_char_vis(g, ch, buf, nullptr, find_flag::char_world)) {
     if (!char_is_npc(vict) && char_get_admlevel(ch) <= char_get_admlevel(vict)) {
       send_to_char(g, ch, "Fuuuuuuuuu!\r\n");
       return;
     }
-    act(g, "$n disintegrates $N.", false, ch, nullptr, vict, TO_NOTVICT);
+    act(g, "$n disintegrates $N.", false, ch, nullptr, vict, act_to::notvict);
     if (!char_is_npc(vict)) {
       send_to_all(g, "@R{}@r purges @R{}'s@r sorry ass right off the MUD!@n\r\n", char_get_name(ch), char_get_name(vict));
       mudlog(g, LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(g, ch)), true, "(GC) {} has purged {}.", char_get_name(ch), char_get_name(vict));
@@ -570,7 +570,7 @@ ACMD(do_purge)
     }
     extract_char(g, vict);
   } else if (struct obj_data *obj = get_obj_in_list_vis(g, ch, buf, nullptr, room_get_contents(g, char_get_in_room(ch)))) {
-    act(g, "$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
+    act(g, "$n destroys $p.", false, ch, obj, nullptr, act_to::room);
     extract_obj(g, obj);
   } else {
     send_to_char(g, ch, "Nothing here by that name.\r\n");
@@ -591,9 +591,9 @@ ACMD(do_force)
     send_to_char(g, ch, "Whom do you wish to force do what?\r\n");
     return;
   }
-  bool mass = char_adm_flagged(ch, ADM_FORCEMASS) && (str_eq_nocase("all", arg) || str_eq_nocase("room", arg));
+  bool mass = char_adm_flagged(ch, admin_flag::forcemass) && (str_eq_nocase("all", arg) || str_eq_nocase("room", arg));
   if (!mass) {
-    auto found = find_char(g, ch, arg, FIND_CHAR_WORLD, CONFIG_NOPERSON);
+    auto found = find_char(g, ch, arg, find_flag::char_world, CONFIG_NOPERSON);
     if (reject(g, ch, found))
       return;
     struct char_data *vict = *found;
@@ -602,7 +602,7 @@ ACMD(do_force)
       return;
     }
     send_to_char(g, ch, CONFIG_OK);
-    act(g, forced, true, ch, nullptr, vict, TO_VICT);
+    act(g, forced, true, ch, nullptr, vict, act_to::vict);
     mudlog(g, LOG_NRM, log_level, true, "(GC) {} forced {} to {}", char_get_name(ch), char_get_name(vict), to_force);
     command_interpreter(g, vict, to_force);
     return;
@@ -614,7 +614,7 @@ ACMD(do_force)
     for (char_data *tch : room_people(g, char_get_in_room(ch))) {
       if (!char_is_npc(tch) && char_get_admlevel(tch) >= char_get_admlevel(ch))
         continue;
-      act(g, forced, true, ch, nullptr, tch, TO_VICT);
+      act(g, forced, true, ch, nullptr, tch, act_to::vict);
       command_interpreter(g, tch, to_force);
     }
     return;
@@ -624,7 +624,7 @@ ACMD(do_force)
     struct char_data *vict = i->character;
     if (desc_get_connected(i) != CON_PLAYING || !vict || (!char_is_npc(vict) && char_get_admlevel(vict) >= char_get_admlevel(ch)))
       continue;
-    act(g, forced, true, ch, nullptr, vict, TO_VICT);
+    act(g, forced, true, ch, nullptr, vict, act_to::vict);
     command_interpreter(g, vict, to_force);
   }
 }
@@ -680,7 +680,7 @@ ACMD(do_raise)
 
   if (char_get_admlevel(ch) < ADMLVL_BUILDER && !char_is_npc(ch))
     return;
-  auto found = find_player(g, ch, name, FIND_CHAR_WORLD, "There is no such player.\r\n");
+  auto found = find_player(g, ch, name, find_flag::char_world, "There is no such player.\r\n");
   if (reject(g, ch, found))
     return;
   struct char_data *vict = *found;
@@ -688,7 +688,7 @@ ACMD(do_raise)
     send_to_char(g, ch, "Sorry, only players get spirits.\r\n");
     return;
   }
-  if (!char_aff_flagged(vict, AFF_SPIRIT)) {
+  if (!char_aff_flagged(vict, aff_flag::spirit)) {
     send_to_char(g, ch, "But they aren't even dead!\r\n");
     return;
   }

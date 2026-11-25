@@ -56,7 +56,7 @@ namespace {
   void assembly_editor::menu(GameWorld *g, struct descriptor_data *d)
   {
     send_to_char(g, d->character, "Assembly Number: @c{:d}@n\r\nAssembly Name  : @y{}@n\r\nAssembly Type  : @y{}@n\r\nComponents:\r\n", vnum,
-                 obj_get_short_description(obj_proto_of(g, vnum)), sprinttype(type, AssemblyTypes));
+                 obj_get_short_description(obj_proto_of(g, vnum)), type_name(AssemblyTypes, type));
 
     if (components.empty())
       send_to_char(g, d->character, "   < NONE > \r\n");

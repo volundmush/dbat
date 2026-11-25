@@ -279,13 +279,11 @@ void send_to_zone(GameWorld *g, std::string_view messg, struct zone_data *zone);
 /* from dg_misc.c */
 void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
 void do_dg_affect(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *trig, std::string_view cmd);
-bool valid_dg_target(GameWorld *g, char_data *ch, int bitvector);
+bool valid_dg_target(GameWorld *g, char_data *ch, dg_gods gods);
 void script_damage(GameWorld *g, char_data *vict, int dam);
 constexpr int NUM_DOOR_FIELDS = 6; /* what dg_door_apply() can change */
 extern const name_table dg_door_fields; /* NUM_DOOR_FIELDS of them */
 bool dg_door_apply(GameWorld *g, room_data *rm, int dir, int field, std::string_view value);
-
-int check_flags_by_name_ar(bitvector_t *array, int numflags, std::string_view search, std::span<const std::string_view> namelist);
 
 /* from dg_objcmd.c */
 room_vnum obj_room(obj_data *obj);
@@ -333,5 +331,4 @@ struct dg_run_ctx {
   std::string actor;
   long actor_uid{}; /* 0 if none */
 };
-
 
