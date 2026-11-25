@@ -32,7 +32,7 @@ enum shop_message {
 };
 
 /* Default text for each shop message: used for new shops and in place of a missing or malformed message. */
-extern const std::string_view shop_default_msgs[NUM_SHOP_MSGS];
+extern const std::array<std::string_view, NUM_SHOP_MSGS> shop_default_msgs;
 
 struct shop_data {
   room_vnum vnum{};                     /* Virtual number of this shop		*/

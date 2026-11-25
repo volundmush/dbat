@@ -1,9 +1,10 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/senseis.hpp"
 
 /* Sensei Fighting Style */
-static constexpr std::string_view sensei_style_entries[MAX_SENSEI] = {
+static constexpr std::array<std::string_view, MAX_SENSEI> sensei_style_entries = {{
     "Kame Arts",         /* Roshi */
     "Demon Taijutsu",    /* Piccolo */
     "Crane Arts",        /* Krane */
@@ -18,11 +19,11 @@ static constexpr std::string_view sensei_style_entries[MAX_SENSEI] = {
     "Star's Radiance",   /* Jinto */
     "Sacred Tsunami",    /* Tsuna */
     "Adaptive Taijutsu", /* Kurzak */
-    "\n"};
+    "\n"}};
 static_assert(std::size(sensei_style_entries) == MAX_SENSEI);
 constinit const name_table sensei_style(sensei_style_entries);
 
-static constexpr std::string_view class_abbrevs_entries[] = {
+static constexpr auto class_abbrevs_entries = std::to_array<std::string_view>({
     "Ro",
     "Pi",
     "Kr",
@@ -53,12 +54,12 @@ static constexpr std::string_view class_abbrevs_entries[] = {
     "Ad",
     "Co",
     "Ar",
-    "Wa"};
+    "Wa"});
 static_assert(std::size(class_abbrevs_entries) == NUM_CLASSES);
 constinit const name_table class_abbrevs(class_abbrevs_entries);
 
 /* Copied from the SRD under OGL, see ../doc/srd.txt for information */
-static constexpr std::string_view pc_class_types_entries[] = {
+static constexpr auto pc_class_types_entries = std::to_array<std::string_view>({
     "Roshi",
     "Piccolo",
     "Krane",
@@ -89,12 +90,12 @@ static constexpr std::string_view pc_class_types_entries[] = {
     "Adept",
     "Commoner",
     "Aristrocrat",
-    "Warrior"};
+    "Warrior"});
 static_assert(std::size(pc_class_types_entries) == NUM_CLASSES);
 constinit const name_table pc_class_types(pc_class_types_entries);
 
 /* Copied from the SRD under OGL, see ../doc/srd.txt for information */
-static constexpr std::string_view class_names_entries[] = {
+static constexpr auto class_names_entries = std::to_array<std::string_view>({
     "roshi",
     "piccolo",
     "krane",
@@ -125,7 +126,7 @@ static constexpr std::string_view class_names_entries[] = {
     "magi",
     "normal",
     "noble",
-    "soldier"};
+    "soldier"});
 static_assert(std::size(class_names_entries) == NUM_CLASSES);
 constinit const name_table class_names(class_names_entries);
 

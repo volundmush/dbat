@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/consts/deathtype.hpp"
@@ -782,8 +783,7 @@ void remove_limb(GameWorld *g, struct char_data *vict, int num)
 }
 
 /* Weapon attack texts */
-const struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
-    {
+const std::array<attack_hit_type, NUM_ATTACK_TYPES> attack_hit_text = {{
         {"hit",      "hits"     }, /* 0 */
         {"sting",    "stings"   },
         {"whip",     "whips"    },
@@ -799,7 +799,7 @@ const struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
         {"blast",    "blasts"   },
         {"punch",    "punches"  },
         {"stab",     "stabs"    }
-};
+}};
 
 #define IS_WEAPON(type) (((type) >= TYPE_HIT) && ((type) < TYPE_SUFFERING))
 

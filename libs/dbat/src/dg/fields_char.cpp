@@ -1,6 +1,7 @@
 /*
  * DG Scripts: the fields of a character, as in %actor.name% or %actor.gold(10)%. See fields.hpp.
  */
+#include <array>
 #include <algorithm>
 #include <cstdlib>
 
@@ -104,7 +105,7 @@ bool char_has_item(GameWorld *g, std::string_view item, char_data *ch)
 }
 
 /* The fields, by name */
-const field<char_data> char_fields[] = {
+const auto char_fields = std::to_array<field<char_data>>({
     {"aaaaa", [](const field_query &, char_data *) -> result { return "0"; }},
     {"affect", [](const field_query &q, char_data *c) {
        return named_flag<aff_flag>(q, [c](aff_flag f) { return char_aff_flagged(c, f); });
@@ -290,7 +291,7 @@ const field<char_data> char_fields[] = {
          char_set_gold(c, char_get_gold(c) + parse_int(q.subfield));
        return number(char_get_gold(c));
      }},
-};
+});
 
 } // namespace
 

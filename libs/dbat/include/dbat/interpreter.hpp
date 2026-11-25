@@ -1,4 +1,5 @@
 #pragma once
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -10,7 +11,7 @@
 #define IS_MOVE(g, cmdnum)  (g->complete_cmd_info[cmdnum].command_pointer == do_move)
 
 std::string_view trait_name(int i); /* a bonus or negative trait's name, by BONUS_* */
-extern const struct command_info cmd_info[];
+extern const std::span<const command_info> cmd_info;
 
 void userLoad(struct descriptor_data *d, std::string_view name);
 /* Expands line if it starts with one of d's aliases: a simple one in place (false), a complex one onto the front of

@@ -8,6 +8,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <algorithm>
 #include <cerrno>
 #include <cstdlib>
@@ -108,10 +109,10 @@ ACMD(do_action)
 
 namespace {
   /* The first of the insults, by whether the insulter is male, then the insulted */
-  constexpr std::string_view SEXED_INSULTS[2][2] = {
+  constexpr std::array<std::array<std::string_view, 2>, 2> SEXED_INSULTS = {{
       {"$n tells you that you'd lose a beauty contest against a troll.", "$n accuses you of having the smallest... (brain?)"},
       {"$n says that women can't fight.",                                 "$n accuses you of fighting like a woman!"        },
-  };
+  }};
 } // namespace
 
 /* No command calls this any more: insult is out of the command table */

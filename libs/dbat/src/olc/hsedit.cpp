@@ -6,6 +6,7 @@
 *  Copyright 2007 Stefan Cole (aka Jamdog)                               *
 *  Used at AderonMUD (aderonmud.genesismuds.com 3200)                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <array>
 #include <algorithm>
 #include "dbat/name_table.hpp"
 #include <cstdlib>
@@ -30,12 +31,12 @@
 #include "dbat/olc/commands.hpp"
 
 namespace {
-  static constexpr std::string_view house_types_entries[] = {"PLAYER_OWNED", "IMM_OWNED", "CLAN_OWNED", "UNOWNED"};
+  static constexpr auto house_types_entries = std::to_array<std::string_view>({"PLAYER_OWNED", "IMM_OWNED", "CLAN_OWNED", "UNOWNED"});
   static constexpr name_table house_types(house_types_entries);
 
   /* The atrium directions' menu lines, in the order of the directions */
-  static constexpr std::string_view atrium_directions[] = {"North  ", "East   ", "South  ", "West   ", "Up     ", "Down   ",
-                                           "NorthW ", "NorthE ", "SouthE ", "SouthW ", "Inside ", "Outside"};
+  static constexpr auto atrium_directions = std::to_array<std::string_view>({"North  ", "East   ", "South  ", "West   ", "Up     ", "Down   ",
+                                           "NorthW ", "NorthE ", "SouthE ", "SouthW ", "Inside ", "Outside"});
 
   /* The house editor: the house in one room, as the house control list has it, or new */
   struct house_editor final : olc_session {

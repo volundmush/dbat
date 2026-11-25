@@ -1,3 +1,4 @@
+#include <array>
 #include <iterator>
 #include <string_view>
 
@@ -6,7 +7,7 @@
 /* ADM_x */
 
 /* Administrative flags, for flag_names() */
-static constexpr std::string_view admin_bits_entries[] = {
+static constexpr auto admin_bits_entries = std::to_array<std::string_view>({
     "TELLALL",
     "SEEINV",
     "SEESECRET",
@@ -26,6 +27,6 @@ static constexpr std::string_view admin_bits_entries[] = {
     "NODAMAGE",
     "ALLSHOPS",
     "CEDIT",
-};
+});
 static_assert(std::size(admin_bits_entries) == flag_count<admin_flag>);
 constinit const name_table admin_bits(admin_bits_entries);

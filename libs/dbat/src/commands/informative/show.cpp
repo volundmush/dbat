@@ -1,5 +1,6 @@
 /* show.c: showing objects and characters to a viewer
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 #include <cstdlib>
 #include <vector>
@@ -90,13 +91,13 @@ static void see_plant(GameWorld *g, struct obj_data *obj, struct char_data *ch)
   }
 }
 
-static constexpr std::string_view weapon_disp[6] = {
+static constexpr std::array<std::string_view, 6> weapon_disp = {{
     "Sword",
     "Dagger",
     "Spear",
     "Club",
     "Gun",
-    "Brawling"};
+    "Brawling"}};
 
 void display_spells(GameWorld *g, struct char_data *ch, struct obj_data *obj)
 {

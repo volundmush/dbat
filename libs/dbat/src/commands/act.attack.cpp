@@ -13,6 +13,7 @@
 *   credits found in act.offensive.c except for the commands added in-    *
 *                                                   ~~Iovan               *
 ************************************************************************ */
+#include <array>
 #include <algorithm>
 #include <span>
 
@@ -1088,14 +1089,14 @@ ACMD(do_seishou)
 namespace {
 
 /* A thrown object's weapon level adds a share of its damage, and later a flat amount */
-constexpr extra_flag THROW_LEVEL_FLAGS[] = {extra_flag::weaplvl1, extra_flag::weaplvl2, extra_flag::weaplvl3, extra_flag::weaplvl4, extra_flag::weaplvl5};
-constexpr double THROW_LEVEL_SHARE[]  = {0.1, 0.2, 0.3, 0.4, 0.5};
-constexpr int THROW_LEVEL_BONUS[]     = {1000, 5000, 10000, 16000, 25000};
+constexpr auto THROW_LEVEL_FLAGS = std::to_array<extra_flag>({extra_flag::weaplvl1, extra_flag::weaplvl2, extra_flag::weaplvl3, extra_flag::weaplvl4, extra_flag::weaplvl5});
+constexpr auto THROW_LEVEL_SHARE = std::to_array<double>({0.1, 0.2, 0.3, 0.4, 0.5});
+constexpr auto THROW_LEVEL_BONUS = std::to_array<int>({1000, 5000, 10000, 16000, 25000});
 
 /* What a thrown object is, by the messages it gets: anything but a weapon, a weapon by its damage type (in this
    order, from 1), or another weapon */
 constexpr int THROWN_THING = 0, THROWN_BLASTING = 5, THROWN_OTHER = 6;
-constexpr int THROWN_DAMTYPES[] = {TYPE_PIERCE, TYPE_SLASH, TYPE_CRUSH, TYPE_STAB, TYPE_BLAST};
+constexpr auto THROWN_DAMTYPES = std::to_array<int>({TYPE_PIERCE, TYPE_SLASH, TYPE_CRUSH, TYPE_STAB, TYPE_BLAST});
 
 int thrown_kind(struct obj_data *obj)
 {
@@ -1109,14 +1110,14 @@ int thrown_kind(struct obj_data *obj)
 struct throw_wear_by {
   int material, low, high;
 };
-constexpr throw_wear_by THROW_WEAR[] = {
+constexpr auto THROW_WEAR = std::to_array<throw_wear_by>({
     {MATERIAL_STEEL,   5,  30},
     {MATERIAL_IRON,    18, 50},
     {MATERIAL_MITHRIL, 5,  15},
     {MATERIAL_KACHIN,  5,  15},
     {MATERIAL_STONE,   20, 50},
     {MATERIAL_DIAMOND, 5,  20},
-};
+});
 
 int throw_wear(GameWorld *g, struct obj_data *obj)
 {
@@ -1129,7 +1130,7 @@ int throw_wear(GameWorld *g, struct obj_data *obj)
 }
 
 /* An object thrown: to_char, to_vict and to_room, which act_triple_vict_last() sends to the victim last */
-constexpr act_msgs THROWN[] = {
+constexpr auto THROWN = std::to_array<act_msgs>({
     {"You throw $p at $N@n full speed, and watch it smash into $M!",
      "$n@n throws $p at you full speed. You reel as it smashes into your body!",
      "$n@n throws $p at $N@n full speed, and watches it smash into $M!", true},
@@ -1149,7 +1150,7 @@ constexpr act_msgs THROWN[] = {
      "$n@n pulls out and throws $p at you full speed. You reel as it hits your body!",
      "$n@n pulls out and throws $p at $N@n full speed, and watches it hit $M!", true},
     {}, /* quirk: another weapon says nothing */
-};
+});
 constexpr act_msgs THROWN_ENERGIZED = {
     "You charge $p with the energy in your fingertips! As it begins to @Yglow a bright hot @Rred@n you throw $p at $N@n full speed, and watch it smash into $M!",
     "$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at YOU@n full speed, and watches it smash into YOU!!",

@@ -1,9 +1,10 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/mobflags.hpp"
 
 /* MOB_x */
-static constexpr std::string_view action_bits_entries[] = {
+static constexpr auto action_bits_entries = std::to_array<std::string_view>({
     "SPEC",
     "SENTINEL",
     "NOSCAVENGER",
@@ -38,6 +39,6 @@ static constexpr std::string_view action_bits_entries[] = {
     "REPAIR",
     "NOPOISON",
     "KNOWKAIO",
-    "POWERINGUP"};
+    "POWERINGUP"});
 static_assert(std::size(action_bits_entries) == flag_count<mob_flag>);
 constinit const name_table action_bits(action_bits_entries);

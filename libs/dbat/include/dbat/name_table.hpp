@@ -12,7 +12,7 @@
  */
 class name_table {
 public:
-  template <std::size_t N> constexpr name_table(const std::string_view (&names)[N]) : names_(names) {}
+  constexpr name_table(std::span<const std::string_view> names) : names_(names) {}
 
   /* name i, or "\n" past the end (a negative number, made a size_t, is past it too) */
   constexpr std::string_view operator[](std::size_t i) const { return i < names_.size() ? names_[i] : "\n"; }

@@ -94,7 +94,7 @@ struct trained_stat {
   std::array<drill, 3> drills;
 };
 
-constexpr trained_stat STATS[] = {
+constexpr auto STATS = std::to_array<trained_stat>({
     {"str", "strength", "Strength Progress    ", char_real_abils_str_slot, &player_special_data::trainstr, BONUS_BRAWNY, BONUS_WIMP, false,
      {{{"@WYou throw a flurry of punches into the air at an invisible opponent.@n", "@W$n throws a flurry of punches into the air.@n"},
        {"@WYou leap into the air and throw a wild kick at an invisible opponent@n", "@W$n leaps into the air and throws a wild kick at nothing.@n"},
@@ -119,7 +119,7 @@ constexpr trained_stat STATS[] = {
      {{{"@WYou do a series of backflips through the air, landing gracefully on one foot a moment later.@n", "@W$n does a series of backflips through the air, landing gracefully on one foot a moment later.@n"},
        {"@WYou flip forward and launch off your hands into the air. You land gracefully on one foot a moment later.@n", "@W$n flips forward and launches off $s hands into the air. Then $e lands gracefully on one foot a moment later.@n"},
        {"@WYou flip to the side off one hand and then land on your feet.@n", "@W$n flips to the side off one hand and then lands on $s feet.@n"}}}},
-};
+});
 constexpr size_t N_STATS = std::size(STATS);
 
 /* Some races need more (or less) training for some stats: shares of the usual, in STATS' order */
@@ -321,7 +321,7 @@ ACMD(do_train)
     char_set_practice_points(g, ch, char_get_practice_points(g, ch) - 1);
   }
 
-  int needed = training_needed(ch, &stat - STATS);
+  int needed = training_needed(ch, &stat - STATS.data());
   if (progress >= needed) {
     progress -= needed;
     send_to_char(g, ch, "You feel your {} improve!@n\r\n", stat.name);
@@ -392,7 +392,7 @@ struct heavy_gravity {
   int gravity;
   int extra;
 };
-constexpr heavy_gravity HEAVY_GRAVITY[] = {{300, 1000000}, {400, 2000000}, {500, 7500000}, {1000, 15000000}, {5000, 25000000}, {10000, 50000000}};
+constexpr auto HEAVY_GRAVITY = std::to_array<heavy_gravity>({{300, 1000000}, {400, 2000000}, {500, 7500000}, {1000, 15000000}, {5000, 25000000}, {10000, 50000000}});
 
 /* What exercising costs in this gravity, with this weight lifted (by the mind). Situps and pushups count it in an
  * int, meditation in an int64_t. */
@@ -435,7 +435,7 @@ struct gravity_tier {
   int mind_lo, mind_hi;
   std::string_view to_char, to_room; /* after "You do a situp" and "$n does a situp" */
 };
-constexpr gravity_tier GRAVITIES[] = {
+constexpr auto GRAVITIES = std::to_array<gravity_tier>({
     {0, 1, 1, 1, 1, ".", "."},
     {10, 3, 7, 2, 4, ", feeling the strain of gravity.", ", while sweating."},
     {20, 8, 14, 5, 10, ", and feel gravity's pull.", ", while sweating."},
@@ -450,7 +450,7 @@ constexpr gravity_tier GRAVITIES[] = {
     {1000, 9000, 10000, 9000, 10000, ", and it was a really hard one to finish.", ", while sweating profusely."},
     {5000, 15000, 20000, 15000, 20000, ", and it was a really hard one to finish.", ", while sweating profusely."},
     {10000, 25000, 30000, 25000, 30000, ", and it was a really hard one to finish.", ", while sweating profusely."},
-};
+});
 
 const gravity_tier *gravity_tier_of(int gravity)
 {

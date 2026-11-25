@@ -77,10 +77,10 @@ namespace {
     int min_level, max_level; /* admin levels */
   };
 
-  constexpr who_rank WHO_RANKS[] = {
+  constexpr auto WHO_RANKS = std::to_array<who_rank>({
       {"\r\n               @c------------  @D[    @gI@Gm@Wm@Do@Gr@Dt@Wa@Gl@gs   @D]  @c------------@n\r\n", ADMLVL_IMMORT, ADMLVL_IMPL      },
       {"\r\n               @c------------  @D[     @DM@ro@Rr@wt@Ra@rl@Ds    ]  @c------------@n\r\n",       0,             ADMLVL_IMMORT - 1},
-  };
+  });
 
   bool in_rank(struct char_data *tch, const who_rank &rank) { return char_get_admlevel(tch) >= rank.min_level && char_get_admlevel(tch) <= rank.max_level; }
 
@@ -97,7 +97,7 @@ namespace {
     std::string_view tag{};
   };
 
-  constexpr edit_tag EDIT_TAGS[] = {
+  constexpr auto EDIT_TAGS = std::to_array<edit_tag>({
       {CON_OEDIT,    " (O Edit)"},
       {CON_MEDIT,    " (M Edit)"},
       {CON_ZEDIT,    " (Z Edit)"},
@@ -108,7 +108,7 @@ namespace {
       {CON_AEDIT,    " (S Edit)"}, /* quirk: as shop editing */
       {CON_CEDIT,    " (C Edit)"},
       {CON_HEDIT,    " (H Edit)"},
-  };
+  });
 
   struct who_flag {
     std::variant<pref_flag, player_flag> flag;
@@ -116,7 +116,7 @@ namespace {
     bool immortals_see_only = false;
   };
 
-  constexpr who_flag WHO_FLAGS[] = {
+  constexpr auto WHO_FLAGS = std::to_array<who_flag>({
       {pref_flag::deaf,      " (DEAF)"           },
       {pref_flag::notell,    " (NO TELL)"        },
       {pref_flag::nogoss,    " (NO OOC)"         },
@@ -126,7 +126,7 @@ namespace {
       {pref_flag::afk,       " (AFK)"            },
       {player_flag::fishing,   " (@BFISHING@n)", true},
       {pref_flag::nowiz,     " (NO WIZ)"         },
-  };
+  });
 
   void who_line(GameWorld *g, struct char_data *ch, descriptor_data *d, struct char_data *tch)
   {
@@ -394,7 +394,7 @@ namespace {
   };
 
   /* The first that a room is on; failing them all, it's unknown. */
-  constexpr planet PLANETS[] = {
+  constexpr auto PLANETS = std::to_array<planet>({
       {"@GEarth@n",   flagged<room_flag::earth>  },
       {"@CFrigid@n",  flagged<room_flag::frigid> },
       {"@YVegeta@n",  flagged<room_flag::vegeta> },
@@ -405,7 +405,7 @@ namespace {
       {"@CZenith@n",  room_planet_zenith   },
       {"@YYardrat@n", flagged<room_flag::yardrat>},
       {"@cKanassa@n", flagged<room_flag::kanassa>},
-  };
+  });
 
   std::string_view planet_name(GameWorld *g, room_vnum room)
   {
@@ -470,12 +470,12 @@ ACMD(do_where)
 
 namespace {
   /* The toplist file has five names for each, in this order; the last, roleplay points, isn't shown. */
-  static constexpr std::string_view TOPLIST_SECTIONS[] = {
+  static constexpr auto TOPLIST_SECTIONS = std::to_array<std::string_view>({
       "       @D-@RPowerlevel@D-@n\r\n",
       "       @D-@BKi        @D-@n\r\n",
       "       @D-@GStamina   @D-@n\r\n",
       "       @D-@gZenni     @D-@n\r\n",
-  };
+  });
 } // namespace
 
 ACMD(do_toplist)

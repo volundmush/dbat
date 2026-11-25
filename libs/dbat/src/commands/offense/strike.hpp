@@ -4,6 +4,7 @@
  * does is perform_strike(), and what each does differently is its strike_attack. They cost stamina rather than
  * charged ki, a parry of one is a counterblow, and a hit can be burned by a fire shield and lead to a multihit.
  */
+#include <span>
 #include <array>
 #include <cstdint>
 #include <optional>
@@ -25,8 +26,8 @@ enum class strike_needs { hands, /* arms (limb_ok()), and a hand free of weapons
                           nothing };
 
 /* Where an elbow, a kick, a knee, a headbutt or a bash lands: its fourth place is a leg and its fifth an arm */
-inline constexpr strike_spot LEG_THEN_ARM[5] = {strike_spot::body, strike_spot::head, strike_spot::body,
-                                                strike_spot::leg, strike_spot::arm};
+inline constexpr std::array<strike_spot, 5> LEG_THEN_ARM = {{strike_spot::body, strike_spot::head, strike_spot::body,
+                                                strike_spot::leg, strike_spot::arm}};
 
 struct strike_attack;
 
@@ -68,7 +69,7 @@ struct strike_attack {
   act_msgs miss;              /* when the victim could have avoided it */
   act_msgs miss_spent;        /* when the victim had no stamina left to avoid it */
   std::array<act_msgs, 5> hits;           /* by where roll_hitloc() says it landed */
-  const strike_spot *spots{}; /* what each of those is; null for body, head, body, arm, leg */
+  std::span<const strike_spot> spots{}; /* what each of those is; none for body, head, body, arm, leg */
   std::string_view obj_to_char{};
   std::string_view obj_to_room{};
   bool obj_hide{}; /* act()'s hide_invisible for those two */

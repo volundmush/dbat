@@ -1,3 +1,4 @@
+#include <array>
 #include <cassert>
 #include <cstdlib>
 
@@ -11,7 +12,7 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static constexpr std::string_view find_bits_entries[] = {"CHAR_ROOM", "CHAR_WORLD", "OBJ_INV", "OBJ_ROOM", "OBJ_WORLD", "OBJ_EQUIP"};
+static constexpr auto find_bits_entries = std::to_array<std::string_view>({"CHAR_ROOM", "CHAR_WORLD", "OBJ_INV", "OBJ_ROOM", "OBJ_WORLD", "OBJ_EQUIP"});
 static_assert(std::size(find_bits_entries) == flag_count<find_flag>);
 constinit const name_table find_bits(find_bits_entries);
 

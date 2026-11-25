@@ -1,5 +1,6 @@
 /* abilities.c: racial and special abilities
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
@@ -952,8 +953,8 @@ ACMD(do_regenerate)
 
 namespace {
   /* The health each level of kaioken needs */
-  constexpr int64_t KAIOKEN_LEVELS[21] = {0, 0, 0, 5000, 10000, 15000, 25000, 35000, 50000, 75000, 100000,
-                                          150000, 200000, 250000, 300000, 400000, 500000, 600000, 700000, 800000, 1000000};
+  constexpr std::array<int64_t, 21> KAIOKEN_LEVELS = {{0, 0, 0, 5000, 10000, 15000, 25000, 35000, 50000, 75000, 100000,
+                                          150000, 200000, 250000, 300000, 400000, 500000, 600000, 700000, 800000, 1000000}};
 } // namespace
 
 ACMD(do_kaioken)
@@ -1499,7 +1500,7 @@ namespace {
     int difficulty; /* added to the roll against it */
     std::string_view failed, made, made_seen;
   };
-  constexpr medical_product MEDICAL_PRODUCTS[] = {
+  constexpr auto MEDICAL_PRODUCTS = std::to_array<medical_product>({
       {"adrenex", 381, 65, 15,
        "@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you begin to construct an Andrenex Adreneline Injector you screw up and end up breaking the water tight seal. The adreneline leaks out and is wasted.@n",
        "@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully construct an Adrenex Adreneline Injector@n",
@@ -1516,7 +1517,7 @@ namespace {
        "@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete a vial of Formula 82 you notice that you read the mixture measurements wrong. You dispose of the vile vial immediately.@n",
        "@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble a vial of Formula 82.@n",
        "@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n"},
-  };
+  });
 
   /* aid (product): one made with a construction kit, which is used up either way */
   void construct_aid(GameWorld *g, struct char_data *ch, const medical_product &p, struct obj_data *kit)

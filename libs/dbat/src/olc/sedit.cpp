@@ -3,6 +3,7 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <type_traits>
@@ -49,7 +50,7 @@ namespace {
     bool allow_int = false; /* a message that may give the price (%d) */
   };
 
-  constexpr field FIELDS[] = {
+  constexpr auto FIELDS = std::to_array<field>({
       {'1', mode::open1,       CONTEXT_SEDIT_OPEN1,       &shop_data::open1        },
       {'2', mode::close1,      CONTEXT_SEDIT_CLOSE1,      &shop_data::close1       },
       {'3', mode::open2,       CONTEXT_SEDIT_OPEN2,       &shop_data::open2        },
@@ -63,10 +64,10 @@ namespace {
       {'b', mode::no_buy,      CONTEXT_SEDIT_NOBUY,       &shop_data::do_not_buy   },
       {'c', mode::buy,         CONTEXT_SEDIT_BUY,         &shop_data::message_buy,  true},
       {'d', mode::sell,        CONTEXT_SEDIT_SELL,        &shop_data::message_sell, true},
-  };
+  });
 
   /* The context help of the modes that aren't fields */
-  constexpr std::pair<mode, int> CONTEXTS[] = {
+  constexpr auto CONTEXTS = std::to_array<std::pair<mode, int>>({
       {mode::main_menu,      CONTEXT_SEDIT_MAIN_MENU         },
       {mode::confirm_save,   CONTEXT_SEDIT_CONFIRM_SAVESTRING},
       {mode::products_menu,  CONTEXT_SEDIT_PRODUCTS_MENU     },
@@ -82,7 +83,7 @@ namespace {
       {mode::new_room,       CONTEXT_SEDIT_NEW_ROOM          },
       {mode::shop_flags,     CONTEXT_SEDIT_SHOP_FLAGS        },
       {mode::no_trade,       CONTEXT_SEDIT_NOTRADE           },
-  };
+  });
 
   /* Removes the entry the builder numbered n, if there is one */
   template <typename T> void erase_at(std::vector<T> &list, int n)

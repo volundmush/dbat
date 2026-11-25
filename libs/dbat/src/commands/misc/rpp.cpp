@@ -11,6 +11,7 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
+#include <array>
 #include <cstdlib>
 
 #include "dbat/args.hpp"
@@ -63,12 +64,12 @@ namespace {
     int preference;
     std::string_view chosen{};
   };
-  constexpr specialization SPECIALIZATIONS[] = {
+  constexpr auto SPECIALIZATIONS = std::to_array<specialization>({
     {"throw", PREFERENCE_THROWING, "You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n"},
     {"hand", PREFERENCE_H2H, "You will now favor your body as your fighting specialization. Your body is ready.\r\n"},
     {"ki", PREFERENCE_KI, "You will now favor your ki energy as your fighting specialization. I expect more than a few smoldering craters.\r\n"},
     {"weapon", PREFERENCE_WEAPON, "You will now favor your weapons as your fighting specialization. Let the blood fly!\r\n"},
-  };
+  });
 
   /* What the RPP item store sells, by choice number */
   struct rpp_item {
@@ -83,7 +84,7 @@ namespace {
     bool bank_wording; /* quirk: the receipt says the RPP came from the Bank */
     bool crowded_receipt; /* quirk: carrying too many items sends the receipt instead */
   };
-  constexpr rpp_item RPP_STORE[] = {
+  constexpr auto RPP_STORE = std::to_array<rpp_item>({
     {20, 26, 13, 50, 1110, 1119, 1117, 0, false, false},     /* Stardust Equipment Set */
     {5, 2, 1, 40, 1120, 1120, 0, 0, true, false},            /* Platinum Masamune */
     {5, 2, 1, 40, 1121, 1121, 0, 0, false, false},           /* Obsidian Dirk */
@@ -93,7 +94,7 @@ namespace {
     {5, 2, 1, 40, 1125, 1125, 0, 0, false, false},           /* Jagged Rock */
     {8, 10000000, 1, 0, 1126, 1126, 0, 10000000, false, false}, /* Kachin Mountain */
     {15, 2, 1, 0, 1127, 1127, 0, 0, false, false},           /* Spar Booster */
-  };
+  });
 
   void receipt(GameWorld *g, struct char_data *ch, const rpp_item &item)
   {

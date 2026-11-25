@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
@@ -134,13 +135,13 @@ namespace {
     int (*list)(GameWorld *, std::string_view, struct char_data *);
     std::string_view none{};
   };
-  const vnum_kind VNUM_KINDS[] = {
+  const auto VNUM_KINDS = std::to_array<vnum_kind>({
     {"mob", vnum_mobile, "No mobiles by that name.\r\n"},
     {"obj", vnum_object, "No objects by that name.\r\n"},
     {"mat", vnum_material, "No materials by that name.\r\n"},
     {"wtype", vnum_weapontype, "No weapon types by that name.\r\n"},
     {"atype", vnum_armortype, "No armor types by that name.\r\n"},
-  };
+  });
 } // namespace
 
 ACMD(do_vnum)
@@ -912,9 +913,9 @@ namespace {
     std::string_view name{};
     void (*stat)(GameWorld *, struct char_data *, std::string &);
   };
-  constexpr stat_kind STAT_KINDS[] = {
+  constexpr auto STAT_KINDS = std::to_array<stat_kind>({
     {"room", stat_room}, {"mob", stat_mob}, {"player", stat_player}, {"file", stat_file}, {"object", stat_object}, {"zone", stat_zone},
-  };
+  });
 } // namespace
 
 ACMD(do_stat)
@@ -1249,7 +1250,7 @@ namespace {
   };
 
   /* Matched by prefix, in this order. "nothing" is there to be matched, and understood as nothing. */
-  constexpr show_field SHOW_FIELDS[] = {
+  constexpr auto SHOW_FIELDS = std::to_array<show_field>({
       {"nothing",    0,             nullptr                                    },
       {"zones",      ADMLVL_IMMORT, show_zones                                 },
       {"player",     ADMLVL_GOD,    show_player                                },
@@ -1267,7 +1268,7 @@ namespace {
       {"uniques",    ADMLVL_GRGOD,  show_uniques                               },
       {"affect",     ADMLVL_GRGOD,  show_affects<HOURS>                        },
       {"affectv",    ADMLVL_GRGOD,  show_affects<ROUNDS>                       },
-  };
+  });
 } // namespace
 
 ACMD(do_show)
@@ -1505,7 +1506,7 @@ constexpr int MAX_APPLY_DAMAGE_MOD_TOTAL  = 5;
 
 /*room limits*/
 /* Off limit zones are any zones a player should NOT be able to walk to (ex. Limbo) */
-static const int offlimit_zones[]  = {0, 12, 13, 14, -1}; /*what zones can no room connect to (virtual num) */
+static const auto offlimit_zones = std::to_array<int>({0, 12, 13, 14, -1}); /*what zones can no room connect to (virtual num) */
 constexpr int MIN_ROOM_DESC_LENGTH = 80;                  /* at least one line - set to 0 to not care. */
 constexpr int MAX_COLOUMN_WIDTH    = 80;                  /* at most 80 chars per line */
 

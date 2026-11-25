@@ -13,6 +13,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include "dbat/consts/maximums.hpp"
 #include "dbat/consts/admlevel.hpp"
 #include "dbat/characters.hpp"
@@ -233,7 +234,7 @@ const bool auto_pwipe = true;
 	be the end of the criteria.  The days entry is not used in this
 	case.
 */
-const struct pclean_criteria_data pclean_criteria[7] = {
+const std::array<pclean_criteria_data, 7> pclean_criteria = {{
     /*	LEVEL		DAYS	*/
     {0,   0  }, /* level 0 */
     {1,   30 },
@@ -242,7 +243,7 @@ const struct pclean_criteria_data pclean_criteria[7] = {
     {50,  360}, /* highest mortal */
     {100, 360}, /* all immortals */
     {-1,  0  }  /* no more level checks */
-};
+}};
 
 /* Do you want players who self-delete to be wiped immediately with no
    backup?

@@ -3,6 +3,7 @@
 improved-edit.c		Routines specific to the improved editor.
 
 */
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -481,7 +482,7 @@ namespace {
     void (*run)(GameWorld *g, struct descriptor_data *d, std::string_view args);
   };
 
-  constexpr editor_command COMMANDS[] = {
+  constexpr auto COMMANDS = std::to_array<editor_command>({
       {'c', false, clear_text  },
       {'d', false, delete_lines},
       {'e', false, edit_line   },
@@ -491,7 +492,7 @@ namespace {
       {'l', true,  list_lines  },
       {'n', true,  number_lines},
       {'r', false, replace_text},
-  };
+  });
 } // namespace
 
 int improved_editor_execute(GameWorld *g, struct descriptor_data *d, std::string_view line)

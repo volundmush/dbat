@@ -58,13 +58,13 @@ static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data 
 static void do_auto_exits2(GameWorld *g, room_vnum target_room, struct char_data *ch);
 
 /* Portal appearance types */
-static constexpr std::string_view portal_appearance_entries[] = {
+static constexpr auto portal_appearance_entries = std::to_array<std::string_view>({
     "All you can see is the glow of the portal.",
     "You see an image of yourself in the room - my, you are looking attractive today.",
     "All you can see is a swirling grey mist.",
     "The scene is of the surrounding countryside, but somehow blurry and lacking focus.",
     "The blackness appears to stretch on forever.",
-    "Suddenly, out of the blackness a flaming red eye appears and fixes its gaze upon you."};
+    "Suddenly, out of the blackness a flaming red eye appears and fixes its gaze upon you."});
 static constexpr name_table portal_appearance(portal_appearance_entries);
 
 namespace {
@@ -74,32 +74,32 @@ namespace {
     std::string_view word{};
   };
 
-  constexpr feature_word HAIR_LENGTHS[] = {{HAIRL_LONG, "Long.         "}, {HAIRL_BALD, "Bald.         "}, {HAIRL_SHORT, "Short.        "},
-                                           {HAIRL_MEDIUM, "Medium.       "}, {HAIRL_RLONG, "Really Long.  "}};
-  constexpr feature_word HAIR_STYLES[]  = {{HAIRS_PLAIN, "Plain.        "}, {HAIRS_MOHAWK, "Mohawk.       "}, {HAIRS_SPIKY, "Spiky.        "},
+  constexpr auto HAIR_LENGTHS = std::to_array<feature_word>({{HAIRL_LONG, "Long.         "}, {HAIRL_BALD, "Bald.         "}, {HAIRL_SHORT, "Short.        "},
+                                           {HAIRL_MEDIUM, "Medium.       "}, {HAIRL_RLONG, "Really Long.  "}});
+  constexpr auto HAIR_STYLES = std::to_array<feature_word>({{HAIRS_PLAIN, "Plain.        "}, {HAIRS_MOHAWK, "Mohawk.       "}, {HAIRS_SPIKY, "Spiky.        "},
                                            {HAIRS_CURLY, "Curly.        "}, {HAIRS_UNEVEN, "Uneven.       "}, {HAIRS_PONYTAIL, "Pony Tail.    "},
                                            {HAIRS_AFRO, "Afro.         "},  {HAIRS_FADE, "Fade.         "},   {HAIRS_CREW, "Crew Cut.     "},
-                                           {HAIRS_FEATHERED, "Feathered.    "}, {HAIRS_DRED, "Dread Locks.  "}};
-  constexpr feature_word HAIR_COLORS[]  = {{HAIRC_BLACK, "Black.        "}, {HAIRC_BROWN, "Brown.        "}, {HAIRC_BLONDE, "Blonde.       "},
+                                           {HAIRS_FEATHERED, "Feathered.    "}, {HAIRS_DRED, "Dread Locks.  "}});
+  constexpr auto HAIR_COLORS = std::to_array<feature_word>({{HAIRC_BLACK, "Black.        "}, {HAIRC_BROWN, "Brown.        "}, {HAIRC_BLONDE, "Blonde.       "},
                                            {HAIRC_GREY, "Grey.         "},  {HAIRC_RED, "Red.          "},   {HAIRC_ORANGE, "Orange.       "},
                                            {HAIRC_GREEN, "Green.        "}, {HAIRC_BLUE, "Blue.         "},  {HAIRC_PINK, "Pink.         "},
                                            {HAIRC_PURPLE, "Purple.       "}, {HAIRC_SILVER, "Silver.       "}, {HAIRC_CRIMSON, "Crimson.      "},
-                                           {HAIRC_WHITE, "White.        "}};
-  constexpr feature_word EYE_COLORS[]   = {{EYE_BLUE, "Blue.         "},  {EYE_BLACK, "Black.        "},  {EYE_GREEN, "Green.        "},
+                                           {HAIRC_WHITE, "White.        "}});
+  constexpr auto EYE_COLORS = std::to_array<feature_word>({{EYE_BLUE, "Blue.         "},  {EYE_BLACK, "Black.        "},  {EYE_GREEN, "Green.        "},
                                            {EYE_BROWN, "Brown.        "}, {EYE_RED, "Red.          "},    {EYE_AQUA, "Aqua.         "},
                                            {EYE_PINK, "Pink.         "},  {EYE_PURPLE, "Purple.       "}, {EYE_CRIMSON, "Crimson.      "},
-                                           {EYE_GOLD, "Gold.         "},  {EYE_AMBER, "Amber.        "},  {EYE_EMERALD, "Emerald.      "}};
-  constexpr feature_word SKIN_COLORS[]  = {{SKIN_WHITE, "White.        "}, {SKIN_TAN, "Tan.          "},   {SKIN_BLACK, "Black.        "},
+                                           {EYE_GOLD, "Gold.         "},  {EYE_AMBER, "Amber.        "},  {EYE_EMERALD, "Emerald.      "}});
+  constexpr auto SKIN_COLORS = std::to_array<feature_word>({{SKIN_WHITE, "White.        "}, {SKIN_TAN, "Tan.          "},   {SKIN_BLACK, "Black.        "},
                                            {SKIN_GREEN, "Green.        "}, {SKIN_ORANGE, "Orange.       "}, {SKIN_YELLOW, "Yellow.       "},
                                            {SKIN_RED, "Red.          "},   {SKIN_GREY, "Grey.         "},   {SKIN_BLUE, "Blue.         "},
-                                           {SKIN_AQUA, "Aqua.         "},  {SKIN_PINK, "Pink.         "},   {SKIN_PURPLE, "Purple.       "}};
+                                           {SKIN_AQUA, "Aqua.         "},  {SKIN_PINK, "Pink.         "},   {SKIN_PURPLE, "Purple.       "}});
   /* horns, antennae and a majin's forelock go by hair length */
-  constexpr feature_word HORN_LENGTHS[]     = {{HAIRL_BALD, "None.         "}, {HAIRL_SHORT, "Short.        "}, {HAIRL_MEDIUM, "Medium.       "},
-                                               {HAIRL_LONG, "Long.         "}, {HAIRL_RLONG, "Really Long.  "}};
-  constexpr feature_word ANTENNA_LENGTHS[]  = {{HAIRL_BALD, "Tiny.        "}, {HAIRL_SHORT, "Short.       "}, {HAIRL_MEDIUM, "Medium.      "},
-                                               {HAIRL_LONG, "Long.        "}, {HAIRL_RLONG, "R. Long.     "}};
-  constexpr feature_word FORELOCK_LENGTHS[] = {{HAIRL_BALD, "Tiny.         "}, {HAIRL_SHORT, "Short.        "}, {HAIRL_MEDIUM, "Medium.       "},
-                                               {HAIRL_LONG, "Long.         "}, {HAIRL_RLONG, "R. Long.      "}};
+  constexpr auto HORN_LENGTHS = std::to_array<feature_word>({{HAIRL_BALD, "None.         "}, {HAIRL_SHORT, "Short.        "}, {HAIRL_MEDIUM, "Medium.       "},
+                                               {HAIRL_LONG, "Long.         "}, {HAIRL_RLONG, "Really Long.  "}});
+  constexpr auto ANTENNA_LENGTHS = std::to_array<feature_word>({{HAIRL_BALD, "Tiny.        "}, {HAIRL_SHORT, "Short.       "}, {HAIRL_MEDIUM, "Medium.      "},
+                                               {HAIRL_LONG, "Long.        "}, {HAIRL_RLONG, "R. Long.     "}});
+  constexpr auto FORELOCK_LENGTHS = std::to_array<feature_word>({{HAIRL_BALD, "Tiny.         "}, {HAIRL_SHORT, "Short.        "}, {HAIRL_MEDIUM, "Medium.       "},
+                                               {HAIRL_LONG, "Long.         "}, {HAIRL_RLONG, "R. Long.      "}});
 
   void feature_line(GameWorld *g, struct char_data *ch, std::string_view label, std::string_view word)
   {
@@ -184,8 +184,8 @@ void bringdesc(GameWorld *g, struct char_data *ch, struct char_data *tch)
 
 namespace {
   /* The order exits are listed in, and each direction's name in capitals, for the error about one. */
-  constexpr int EXIT_ORDER[] = {NORTHWEST, NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, UP, DOWN, INDIR, OUTDIR};
-  static constexpr std::string_view DIR_SHOUTED[NUM_OF_DIRS] = {"NORTH", "EAST", "SOUTH", "WEST", "UP", "DOWN", "NORTHWEST", "NORTHEAST", "SOUTHEAST", "SOUTHWEST", "INSIDE", "OUTSIDE"};
+  constexpr auto EXIT_ORDER = std::to_array<int>({NORTHWEST, NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, UP, DOWN, INDIR, OUTDIR});
+  static constexpr std::array<std::string_view, NUM_OF_DIRS> DIR_SHOUTED = {{"NORTH", "EAST", "SOUTH", "WEST", "UP", "DOWN", "NORTHWEST", "NORTHEAST", "SOUTHEAST", "SOUTHWEST", "INSIDE", "OUTSIDE"}};
 
   /* What an immortal is told of an exit: where it goes, and of its door if it has one. False if its door has no
      keyword to name it by. */
@@ -336,7 +336,7 @@ ACMD(do_exits)
     do_auto_exits2(g, char_get_in_room(ch), ch);
 }
 
-static constexpr std::string_view exitlevels_entries[] = {"off", "normal", "n/a", "complete"};
+static constexpr auto exitlevels_entries = std::to_array<std::string_view>({"off", "normal", "n/a", "complete"});
 static constexpr name_table exitlevels(exitlevels_entries);
 
 ACMD(do_autoexit)
@@ -372,7 +372,7 @@ namespace {
   };
 
   /* Where a room is, the first that it's in */
-  constexpr place_line PLACES[] = {
+  constexpr auto PLACES = std::to_array<place_line>({
       {room_is<room_flag::earth>,   "Planet: @GEarth"},
       {room_is<room_flag::cerria>,  "Planet: @RCerria"},
       {room_planet_zenith,    "Planet: @BZenith"},
@@ -389,16 +389,16 @@ namespace {
       {room_is<room_flag::yardrat>, "Planet: @mYardrat"},
       {room_is<room_flag::kanassa>, "Planet: @BKanassa"},
       {room_is<room_flag::arlia>,   "Planet: @GArlia"},
-  };
+  });
 
   /* The gravities a room is told to have; any other says nothing */
-  constexpr std::pair<int, std::string_view> GRAVITIES[] = {{10, "10x"},   {20, "20x"},   {30, "30x"},       {40, "40x"},       {50, "50x"},
+  constexpr auto GRAVITIES = std::to_array<std::pair<int, std::string_view>>({{10, "10x"},   {20, "20x"},   {30, "30x"},       {40, "40x"},       {50, "50x"},
                                                         {100, "100x"}, {200, "200x"}, {300, "300x"},     {400, "400x"},     {500, "500x"},
-                                                        {1000, "1,000x"}, {5000, "5,000x"}, {10000, "10,000x"}};
+                                                        {1000, "1,000x"}, {5000, "5,000x"}, {10000, "10,000x"}});
 
   /* How a room's damage shows, by its terrain: at most 2, 4, 6, 10, 20, 30, 50, 75 and 99, then anything more */
-  constexpr int DAMAGE_STEPS[] = {2, 4, 6, 10, 20, 30, 50, 75, 99};
-  static constexpr std::string_view FLOOR_DAMAGE[] = {
+  constexpr auto DAMAGE_STEPS = std::to_array<int>({2, 4, 6, 10, 20, 30, 50, 75, 99});
+  static constexpr auto FLOOR_DAMAGE = std::to_array<std::string_view>({
       "@wA small hole with chunks of debris that can be seen scarring the floor.@n",
       "@wA couple small holes with chunks of debris that can be seen scarring the floor.@n",
       "@wA few small holes with chunks of debris that can be seen scarring the floor.@n",
@@ -409,8 +409,8 @@ namespace {
       "@wThis entire area is falling apart, it has been damaged so badly.@n",
       "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n",
       "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n",
-  };
-  static constexpr std::string_view GROUND_DAMAGE[] = {
+  });
+  static constexpr auto GROUND_DAMAGE = std::to_array<std::string_view>({
       "@wA small hole with chunks of debris that can be seen scarring the ground.@n",
       "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n",
       "@wA few small craters with chunks of debris that can be seen scarring the ground.@n",
@@ -421,8 +421,8 @@ namespace {
       "@wThis entire area is falling apart, it has been damaged so badly.@n",
       "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n",
       "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n",
-  };
-  static constexpr std::string_view FOREST_DAMAGE[] = {
+  });
+  static constexpr auto FOREST_DAMAGE = std::to_array<std::string_view>({
       "@wA small tree sits in a little crater here.@n",
       "@wTrees have been uprooted by craters in the ground.@n",
       "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n",
@@ -433,8 +433,8 @@ namespace {
       "@wVery few trees are left standing in this area, replaced instead by large craters.@n",
       "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n",
       "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n",
-  };
-  static constexpr std::string_view MOUNTAIN_DAMAGE[] = {
+  });
+  static constexpr auto MOUNTAIN_DAMAGE = std::to_array<std::string_view>({
       "@wA small crater has been burned into the side of this mountain.@n",
       "@wA couple craters have been burned into the side of this mountain.@n",
       "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n",
@@ -445,9 +445,9 @@ namespace {
       "@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n",
       "@wThe mountain side here has completely collapsed, shedding dangerous rubble down to its base.@n",
       "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n",
-  };
+  });
 
-  const std::string_view *damage_shown(int sect)
+  std::span<const std::string_view> damage_shown(int sect)
   {
     switch (sect) {
       case SECT_INSIDE:
@@ -462,7 +462,7 @@ namespace {
       case SECT_MOUNTAIN:
         return MOUNTAIN_DAMAGE;
       default:
-        return nullptr;
+        return {};
     }
   }
 
@@ -516,7 +516,7 @@ namespace {
       send_to_char(g, ch, "@w{}@n", room_get_description(g, target_room));
     if (dmg == 100 && (sect == SECT_WATER_SWIM || room_sunken(g, target_room) || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT))
       send_to_char(g, ch, "@w{}@n", room_get_description(g, target_room));
-    if (const std::string_view *shown = damage_shown(sect); shown && dmg > 0) {
+    if (std::span<const std::string_view> shown = damage_shown(sect); !shown.empty() && dmg > 0) {
       auto step = std::ranges::find_if(DAMAGE_STEPS, [&](int most) { return dmg <= most; });
       send_to_char(g, ch, "\r\n");
       send_to_char(g, ch, shown[step - std::begin(DAMAGE_STEPS)]);
@@ -628,7 +628,7 @@ namespace {
   }
 
   /* The containers whose looking in is seen */
-  constexpr obj_vnum WATCHED_CONTAINERS[] = {697, 698, 682, 683, 684};
+  constexpr auto WATCHED_CONTAINERS = std::to_array<obj_vnum>({697, 698, 682, 683, 684});
 
   void look_in_container(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::optional<find_flag> bits)
   {
@@ -1064,7 +1064,7 @@ ACMD(do_examine)
   }
 }
 
-const std::string_view default_color_choices[NUM_COLOR + 1] = {
+const std::array<std::string_view, NUM_COLOR + 1> default_color_choices = {{
     /* COLOR_NORMAL */ AA_NORMAL,
     /* COLOR_ROOMNAME */ AA_NORMAL ANSISEPSTR AF_CYAN,
     /* COLOR_ROOMOBJS */ AA_NORMAL ANSISEPSTR AF_GREEN,
@@ -1081,4 +1081,4 @@ const std::string_view default_color_choices[NUM_COLOR + 1] = {
     /* COLOR_TELL */ AA_NORMAL ANSISEPSTR AF_RED,
     /* COLOR_YOUSAY */ AA_NORMAL ANSISEPSTR AF_CYAN,
     /* COLOR_ROOMSAY */ AA_NORMAL ANSISEPSTR AF_WHITE,
-    {}};
+    {}}};

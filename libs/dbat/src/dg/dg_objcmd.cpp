@@ -8,6 +8,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <array>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -701,7 +702,7 @@ static OCMD(do_oat)
     extract_obj(g, object);
 }
 
-static const struct obj_command_info obj_cmd_info[] = {
+static const auto obj_cmd_info = std::to_array<obj_command_info>({
     {"RESERVED",     nullptr,       0               }, /* this must be first -- for specprocs */
 
     {"oasound ",     do_oasound,    0               },
@@ -723,7 +724,7 @@ static const struct obj_command_info obj_cmd_info[] = {
     {"otransform ",  do_otransform, 0               },
     {"ozoneecho ",   do_ozoneecho,  0               }, /* fix by Rumble */
 
-};
+});
 
 /*
  *  This is the command interpreter used by objects, called by script_driver.

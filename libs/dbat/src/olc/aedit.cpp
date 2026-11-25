@@ -4,6 +4,7 @@
  * Copyright 1996 Harvey Gilpin                                         *
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)             *
  ************************************************************************/
+#include <array>
 #include <algorithm>
 #include <cstdlib>
 #include <string_view>
@@ -36,7 +37,7 @@ namespace {
     social_message social_messg::*text;
   };
 
-  constexpr message_row MESSAGES[] = {
+  constexpr auto MESSAGES = std::to_array<message_row>({
       {'a', "Char    [NO ARG]", "Enter social shown to the Character when there is no argument supplied.", &social_messg::char_no_arg},
       {'b', "Others  [NO ARG]", "Enter social shown to Others when there is no argument supplied.", &social_messg::others_no_arg},
       {'c', "Char [NOT FOUND]", "Enter text shown to the Character when his victim isnt found.", &social_messg::not_found},
@@ -50,7 +51,7 @@ namespace {
       {'k', "Victim[BODY PRT]", "Enter 'body part' social shown to the Victim when the victim is found.", &social_messg::vict_body_found},
       {'l', "Char       [OBJ]", "Enter 'object' social shown to the Character when the object is found.", &social_messg::char_obj_found},
       {'m', "Others     [OBJ]", "Enter 'object' social shown to the Room when the object is found.", &social_messg::others_obj_found},
-  };
+  });
 
   /* The command (other than a social) the text names, by abbreviating what it's sorted as or being it; -1 for none */
   int find_named_command(GameWorld *g, std::string_view txt)

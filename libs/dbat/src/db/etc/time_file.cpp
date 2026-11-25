@@ -4,6 +4,7 @@
  *
  * A number that can't be read leaves it, and every one after it, as it was (quirk: as fscanf() stuck there).
  */
+#include <array>
 #include <ctime>
 #include <variant>
 
@@ -19,7 +20,7 @@ namespace {
 using time_field = std::variant<std::nullptr_t, time_t GameWorld::*, int GameWorld::*>;
 
 /* nullptr is the beginning of the game's time */
-const time_field time_fields[] = {
+const auto time_fields = std::to_array<time_field>({
     nullptr,
     &GameWorld::NEWSUPDATE,
     &GameWorld::BOARDNEWMORT,
@@ -46,7 +47,7 @@ const time_field time_fields[] = {
     &GameWorld::SHADOW_DRAGON6,
     &GameWorld::SHADOW_DRAGON7,
     &GameWorld::ERAPLAYERS,
-};
+});
 
 struct field_reader {
   GameWorld *g;

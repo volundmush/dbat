@@ -1,4 +1,5 @@
 /* strike.cpp: what every strike does; see strike.hpp */
+#include <span>
 #include "strike.hpp"
 
 #include <string>
@@ -66,7 +67,7 @@ void land(strike_shot &s)
   if (atk.on_spot)
     atk.on_spot(s, where);
   int leg = 0, limb = 0, eq = 0; /* hurt()'s first two arguments; dam_eq_loc(): 1 arms, 2 legs, 3 head, 4 body */
-  switch ((atk.spots ? atk.spots : standard)[where - 1]) {
+  switch ((atk.spots.empty() ? std::span<const strike_spot>(standard) : atk.spots)[where - 1]) {
     case strike_spot::body:
       if (char_get_bonuses(s.ch, BONUS_SOFT))
         s.dmg *= calc_critical(g, s.ch, 2);

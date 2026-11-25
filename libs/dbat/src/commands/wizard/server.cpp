@@ -9,6 +9,7 @@
 ************************************************************************ */
 
 
+#include <array>
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.wizard.hpp"
@@ -63,13 +64,13 @@ namespace {
     std::string_view touched{}; /* the file left for autorun, or empty */
     int reboot;
   };
-  const shutdown_mode SHUTDOWN_MODES[] = {
+  const auto SHUTDOWN_MODES = std::to_array<shutdown_mode>({
     {"", "Shutdown", "Shutting down.\r\n", {}, 0},
     {"reboot", "Reboot", "Rebooting.. come back in a minute or two.\r\n", FASTBOOT_FILE, 1},
     {"die", "Shutdown", "Shutting down for maintenance.\r\n", KILLSCRIPT_FILE, 0},
     {"now", "Shutdown NOW", "Rebooting.. come back in a minute or two.\r\n", {}, 2 /* do not autosave olc */},
     {"pause", "Shutdown", "Shutting down for maintenance.\r\n", PAUSE_FILE, 0},
-  };
+  });
 } // namespace
 
 ACMD(do_shutdown)

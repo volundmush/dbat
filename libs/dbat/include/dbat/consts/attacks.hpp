@@ -1,11 +1,12 @@
 #pragma once
+#include <span>
 #include "dbat/name_table.hpp"
 #include <string_view>
 
 constexpr int NUM_ATTACK_NAMES = 14; /* the attacks a group can combine */
 extern const name_table attack_names_comp; /* NUM_ATTACK_NAMES of them */
 extern const name_table attack_names; /* NUM_ATTACK_NAMES of them */
-extern const int attack_skills[];
+extern const std::span<const int> attack_skills;
 
 constexpr int TYPE_HIT      = 300;
 constexpr int TYPE_STING    = 301;

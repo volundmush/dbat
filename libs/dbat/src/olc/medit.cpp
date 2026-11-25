@@ -4,6 +4,7 @@
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <memory>
@@ -50,7 +51,7 @@ namespace {
     int context;
   };
 
-  constexpr number_field NUMBERS[] = {
+  constexpr auto NUMBERS = std::to_array<number_field>({
       {'6', [](char_data *m, int n) { char_set_race_level(m, LIMIT(n, 1, 150)); },                    false, CONTEXT_MEDIT_LEVEL       },
       {'7', [](char_data *m, int n) { char_set_alignment(m, LIMIT(n, -1000, 1000)); },                false, CONTEXT_MEDIT_ALIGNMENT   },
       {'8', [](char_data *m, int n) { char_set_accuracy_mod(m, LIMIT(n, 0, 50)); },                   true,  CONTEXT_MEDIT_ACCURACY    },
@@ -63,7 +64,7 @@ namespace {
       {'f', [](char_data *m, int n) { char_set_armor(m, LIMIT(n, 10, 200000)); },                     true,  CONTEXT_MEDIT_AC          },
       {'g', [](char_data *m, int n) { char_set_exp(m, LIMIT(n, 0, MAX_MOB_EXP)); },                   true,  CONTEXT_MEDIT_EXP         },
       {'h', [](char_data *m, int n) { char_set_gold(m, LIMIT(n, 0, MAX_MOB_GOLD)); },                 false, CONTEXT_MEDIT_GOLD        },
-  };
+  });
 
   /* A one-line text of the main menu's */
   struct text_field {
@@ -72,11 +73,11 @@ namespace {
     int context;
   };
 
-  constexpr text_field TEXTS[] = {
+  constexpr auto TEXTS = std::to_array<text_field>({
       {'2', [](char_data *m, const std::string &t) { char_set_alias(m, text_or_undefined(t)); },                                   CONTEXT_MEDIT_ALIAS },
       {'3', [](char_data *m, const std::string &t) { char_set_sdesc(m, text_or_undefined(t)); },                                   CONTEXT_MEDIT_S_DESC},
       {'4', [](char_data *m, const std::string &t) { char_set_ldesc(m, t.empty() ? std::string("undefined") : t + "\r\n"); },     CONTEXT_MEDIT_L_DESC},
-  };
+  });
 
   /* The mob editor: a copy of a mobile prototype, put into the world on saving */
   struct mob_editor final : olc_session {
@@ -203,7 +204,7 @@ namespace {
     list_menu show;
   };
 
-  constexpr list_choice LISTS[] = {
+  constexpr auto LISTS = std::to_array<list_choice>({
       {'1', mob_editor::mode::sex,              sex_menu        },
       {'i', mob_editor::mode::position,         positions_menu  },
       {'j', mob_editor::mode::default_position, positions_menu  },
@@ -213,7 +214,7 @@ namespace {
       {'n', mob_editor::mode::klass,            class_menu      },
       {'o', mob_editor::mode::race,             race_menu       },
       {'y', mob_editor::mode::size,             size_menu       },
-  };
+  });
 
   /* ---- the editor ---- */
 

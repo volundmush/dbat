@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/config.hpp"
@@ -26,25 +27,25 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static constexpr std::string_view routine_bits_entries[] = {"DAMAGE", "AFFECTS", "UNAFFECTS", "POINTS", "ALTER_OBJS", "GROUPS", "MASSES", "AREAS", "SUMMONS",
+static constexpr auto routine_bits_entries = std::to_array<std::string_view>({"DAMAGE", "AFFECTS", "UNAFFECTS", "POINTS", "ALTER_OBJS", "GROUPS", "MASSES", "AREAS", "SUMMONS",
                                                             "CREATIONS", "MANUAL", "AFFECTSV", "ACTION_FREE", "ACTION_PARTIAL", "ACTION_FULL", "NEXTSTRIKE",
-                                                            "TOUCH_MELEE", "TOUCH_RANGED"};
+                                                            "TOUCH_MELEE", "TOUCH_RANGED"});
 static_assert(std::size(routine_bits_entries) == flag_count<mag_routine>);
 constinit const name_table routine_bits(routine_bits_entries);
-static constexpr std::string_view target_bits_entries[] = {"IGNORE", "CHAR_ROOM", "CHAR_WORLD", "FIGHT_SELF", "FIGHT_VICT", "SELF_ONLY", "NOT_SELF",
-                                                           "OBJ_INV", "OBJ_ROOM", "OBJ_WORLD", "OBJ_EQUIP"};
+static constexpr auto target_bits_entries = std::to_array<std::string_view>({"IGNORE", "CHAR_ROOM", "CHAR_WORLD", "FIGHT_SELF", "FIGHT_VICT", "SELF_ONLY", "NOT_SELF",
+                                                           "OBJ_INV", "OBJ_ROOM", "OBJ_WORLD", "OBJ_EQUIP"});
 static_assert(std::size(target_bits_entries) == flag_count<spell_target>);
 constinit const name_table target_bits(target_bits_entries);
-static constexpr std::string_view save_bits_entries[] = {"FORT", "REFLEX", "WILL", "HALF", "NONE", "PARTIAL"};
+static constexpr auto save_bits_entries = std::to_array<std::string_view>({"FORT", "REFLEX", "WILL", "HALF", "NONE", "PARTIAL"});
 static_assert(std::size(save_bits_entries) == flag_count<mag_save>);
 constinit const name_table save_bits(save_bits_entries);
-static constexpr std::string_view component_bits_entries[] = {"DIVINE_FOCUS", "EXP_COST", "FOCUS", "MATERIAL", "SOMATIC", "VERBAL"};
+static constexpr auto component_bits_entries = std::to_array<std::string_view>({"DIVINE_FOCUS", "EXP_COST", "FOCUS", "MATERIAL", "SOMATIC", "VERBAL"});
 static_assert(std::size(component_bits_entries) == flag_count<mag_component>);
 constinit const name_table component_bits(component_bits_entries);
-static constexpr std::string_view skill_kind_bits_entries[] = {"SPELL", "SKILL", "LANG", "WEAPON", "ART"};
+static constexpr auto skill_kind_bits_entries = std::to_array<std::string_view>({"SPELL", "SKILL", "LANG", "WEAPON", "ART"});
 static_assert(std::size(skill_kind_bits_entries) == flag_count<skill_kind>);
 constinit const name_table skill_kind_bits(skill_kind_bits_entries);
-static constexpr std::string_view skill_flag_bits_entries[] = {"NEEDTRAIN", "STRMOD", "DEXMOD", "CONMOD", "INTMOD", "WISMOD", "CHAMOD", "ARMORBAD", "ARMORALL", "TIER1", "TIER2", "TIER3", "TIER4", "TIER5"};
+static constexpr auto skill_flag_bits_entries = std::to_array<std::string_view>({"NEEDTRAIN", "STRMOD", "DEXMOD", "CONMOD", "INTMOD", "WISMOD", "CHAMOD", "ARMORBAD", "ARMORALL", "TIER1", "TIER2", "TIER3", "TIER4", "TIER5"});
 static_assert(std::size(skill_flag_bits_entries) == flag_count<skill_flag>);
 constinit const name_table skill_flag_bits(skill_flag_bits_entries);
 

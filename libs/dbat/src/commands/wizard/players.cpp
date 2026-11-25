@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
@@ -156,7 +157,7 @@ namespace {
   }
 
   /* The senior immortals, whom no one can lock out */
-  static constexpr std::string_view SENIOR_IMMORTALS[] = {"Iovan", "Fahl", "Xyron", "Samael"};
+  static constexpr auto SENIOR_IMMORTALS = std::to_array<std::string_view>({"Iovan", "Fahl", "Xyron", "Samael"});
 } // namespace
 
 ACMD(do_approve)
@@ -574,10 +575,10 @@ namespace {
     int subcmd;
     bool (*apply)(GameWorld *, struct char_data *, struct char_data *);
   };
-  constexpr wizutil WIZUTILS[] = {
+  constexpr auto WIZUTILS = std::to_array<wizutil>({
     {SCMD_REROLL, reroll}, {SCMD_PARDON, pardon}, {SCMD_NOTITLE, notitle}, {SCMD_SQUELCH, squelch},
     {SCMD_FREEZE, freeze}, {SCMD_THAW, thaw},     {SCMD_UNAFFECT, unaffect},
-  };
+  });
 } // namespace
 
 /* General fn for wizcommands of the sort: cmd <player> */
@@ -726,7 +727,7 @@ namespace {
   };
 
   /* Matched exactly, then by prefix, in this order. */
-  constexpr set_field SET_FIELDS[] = {
+  constexpr auto SET_FIELDS = std::to_array<set_field>({
       {"brief", ADMLVL_GOD, PC, BINARY, pref<pref_flag::brief>},
       {"invstart", ADMLVL_GOD, PC, BINARY, act_flag<player_flag::invstart>},
       {"title", ADMLVL_GOD, PC, MISC, [](setting &s) {
@@ -917,7 +918,7 @@ namespace {
       {"tclass", ADMLVL_VICE, PC, NUMBER, [](setting &s) { char_set_transclass(s.vict, s.clamp(1, 3)); return s.logged("transformation class"); }},
       {"clones", ADMLVL_IMPL, PC, NUMBER, [](setting &s) { char_set_clones(s.vict, s.clamp(1, 3)); return s.says("Done.\r\n", true); }},
       {"armor", ADMLVL_IMPL, PC, NUMBER, [](setting &s) { char_set_armor(s.vict, s.clamp(0, 1000000)); return s.says("Done.\r\n", true); }},
-  };
+  });
 
   /* What a field no one has heard of is taken as. */
   constexpr set_field UNKNOWN_FIELD = {"", 0, BOTH, MISC, cant_set};

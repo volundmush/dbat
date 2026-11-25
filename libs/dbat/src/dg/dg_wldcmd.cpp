@@ -8,6 +8,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <array>
 #include <cstdlib>
 
 #include "dbat/args.hpp"
@@ -553,7 +554,7 @@ static WCMD(do_wat)
   wld_command_interpreter(g, room_of(g, loc), command);
 }
 
-static const struct wld_command_info wld_cmd_info[] = {
+static const auto wld_cmd_info = std::to_array<wld_command_info>({
     {"RESERVED",     nullptr,      0               }, /* this must be first -- for specprocs */
 
     {"wasound ",     do_wasound,   0               },
@@ -570,7 +571,7 @@ static const struct wld_command_info wld_cmd_info[] = {
     {"wdamage ",     do_wdamage,   0               },
     {"wat ",         do_wat,       0               },
     {"weffect ",     do_weffect,   0               },
-};
+});
 
 /*
  *  This is the command interpreter used by rooms, called by script_driver.

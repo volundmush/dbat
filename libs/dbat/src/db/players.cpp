@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <ctime>
 #include <filesystem>
 #include <optional>
@@ -36,7 +37,7 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static constexpr std::string_view pindex_bits_entries[] = {"DELETED", "NODELETE", "SELFDELETE", "NOWIZLIST"};
+static constexpr auto pindex_bits_entries = std::to_array<std::string_view>({"DELETED", "NODELETE", "SELFDELETE", "NOWIZLIST"});
 static_assert(std::size(pindex_bits_entries) == flag_count<pindex_flag>);
 constinit const name_table pindex_bits(pindex_bits_entries);
 

@@ -7,6 +7,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <array>
 #include <algorithm>
 #include <cerrno>
 #include <climits>
@@ -809,7 +810,7 @@ struct dg_command {
 
 command_result carry_on() { return command_result::next; }
 
-constexpr dg_command dg_commands[] = {
+constexpr auto dg_commands = std::to_array<dg_command>({
     {"eval ", [](command_call &c) { process_eval(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
     {"nop ", [](command_call &) { return carry_on(); }},
     {"extract ", [](command_call &c) { extract_value(c.g, c.sc, c.trig, c.cmd); return carry_on(); }},
@@ -832,7 +833,7 @@ constexpr dg_command dg_commands[] = {
     {"attach ", [](command_call &c) { process_attach(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
     {"detach ", [](command_call &c) { process_detach(c.g, c.go, c.sc, c.trig, c.cmd); return carry_on(); }},
     {"version", [](command_call &c) { mudlog(c.g, LOG_NRM, ADMLVL_GOD, true, "{}", DG_SCRIPT_VERSION); return carry_on(); }},
-};
+});
 
 } // namespace
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <cstdint>
 #include <string_view>
 
@@ -534,6 +535,6 @@ extern const name_table item_types; /* NUM_ITEM_TYPES of them */
 extern const name_table drinks; /* NUM_LIQ_TYPES of them */
 extern const name_table drinknames; /* NUM_LIQ_TYPES of them */
 extern const name_table color_liquid; /* NUM_LIQ_TYPES of them */
-extern const int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS];
+extern const std::array<std::array<int, NUM_CONDITIONS>, NUM_LIQ_TYPES> drink_aff;
 extern const name_table material_names; /* NUM_MATERIALS of them */
 

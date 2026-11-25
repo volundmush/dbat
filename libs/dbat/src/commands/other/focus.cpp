@@ -597,7 +597,7 @@ struct focus_kind {
   void (*focus)(GameWorld *g, struct char_data *ch, std::string &name);
 };
 
-constexpr focus_kind FOCUSES[] = {
+constexpr auto FOCUSES = std::to_array<focus_kind>({
     {"tough",          buff<TOUGH>    },
     {"might",          buff<MIGHT>    },
     {"wither",         wither         },
@@ -611,7 +611,7 @@ constexpr focus_kind FOCUSES[] = {
     {"vigor",          vigor          },
     {"cure",           cure           },
     {"poison",         poison         },
-};
+});
 
 } // namespace
 

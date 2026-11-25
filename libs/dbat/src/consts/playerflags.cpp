@@ -1,9 +1,10 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/playerflags.hpp"
 
 /* PLR_x */
-static constexpr std::string_view player_bits_entries[] = {
+static constexpr auto player_bits_entries = std::to_array<std::string_view>({
     "KILLER",
     "ROGUE",
     "FROZEN",
@@ -83,6 +84,6 @@ static constexpr std::string_view player_bits_entries[] = {
     "RDISPLAY",
     "ROBBED",
     "TAILH",
-    "NOGROW"};
+    "NOGROW"});
 static_assert(std::size(player_bits_entries) == flag_count<player_flag>);
 constinit const name_table player_bits(player_bits_entries);

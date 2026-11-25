@@ -1,3 +1,5 @@
+#include <span>
+#include <array>
 #include "dbat/races.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/interpreter.hpp"
@@ -153,7 +155,7 @@ int wield_type(int chsize, const struct obj_data *weap)
   return WIELD_NONE;
 }
 
-static const int race_bodyparts[NUM_RACES][NUM_WEARS] = {
+static const std::array<std::array<int, NUM_WEARS>, NUM_RACES> race_bodyparts = {{
     /* 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22 */
     /* U, F, F, N, N, B, H, L, F, H, A, U, A, W, W, W, W, W, B, E, E, W, M */
     /* RACE_HUMAN       */ {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -203,7 +205,7 @@ static const int race_bodyparts[NUM_RACES][NUM_WEARS] = {
     {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     /* RACE_FAERIE      */
     {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-};
+}};
 
 void racial_body_parts(struct char_data *ch)
 {
@@ -221,10 +223,10 @@ void racial_body_parts(struct char_data *ch)
 
 /* Race behaviour. A race is identified by its RACE_* constant (ch->race). */
 
-static constexpr std::string_view race_display_names[NUM_RACES] = {
+static constexpr std::array<std::string_view, NUM_RACES> race_display_names = {{
     "Human", "Saiyan", "Icer", "Konatsu", "Namekian", "Mutant", "Kanassan", "Halfbreed",
     "BioAndroid", "Android", "Demon", "Majin", "Kai", "Truffle", "Hoshijin", "Animal",
-    "Saiba", "Serpent", "Ogre", "Yardratian", "Arlian", "Dragon", "Mechanical", "Spirit"};
+    "Saiba", "Serpent", "Ogre", "Yardratian", "Arlian", "Dragon", "Mechanical", "Spirit"}};
 
 bool race_exists(int r)
 {
@@ -411,32 +413,32 @@ struct form_name {
   int tier{};
 };
 
-static const struct form_name two_form_names[] = {
+static const auto two_form_names = std::to_array<form_name>({
     {"first",  1},
     {"second", 2},
     {{},  0}
-};
-static const struct form_name three_form_names[] = {
+});
+static const auto three_form_names = std::to_array<form_name>({
     {"first",  1},
     {"second", 2},
     {"third",  3},
     {{},  0}
-};
-static const struct form_name four_form_names[] = {
+});
+static const auto four_form_names = std::to_array<form_name>({
     {"first",  1},
     {"second", 2},
     {"third",  3},
     {"fourth", 4},
     {{},  0}
-};
-static const struct form_name bio_form_names[] = {
+});
+static const auto bio_form_names = std::to_array<form_name>({
     {"mature",        1},
     {"semi-perfect",  2},
     {"perfect",       3},
     {"super-perfect", 4},
     {{},       0}
-};
-static const struct form_name android_form_names[] = {
+});
+static const auto android_form_names = std::to_array<form_name>({
     {"1.0",   1},
     {"2.0",   2},
     {"3.0",   3},
@@ -444,15 +446,16 @@ static const struct form_name android_form_names[] = {
     {"5.0",   5},
     {"6.0",   6},
     {{},  0}
-};
-static const struct form_name majin_form_names[] = {
+});
+static const auto majin_form_names = std::to_array<form_name>({
     {"affinity", 1},
     {"super",    2},
     {"true",     3},
     {{},  0}
-};
+});
 
-static const struct form_name *race_form_names(char_data *ch)
+/* the race's form names, ended by one with no name; none for a race without forms */
+static std::span<const form_name> race_form_names(char_data *ch)
 {
   switch (char_get_race(ch)) {
     case RACE_ANDROID:
@@ -470,122 +473,108 @@ static const struct form_name *race_form_names(char_data *ch)
         case 4:
           return four_form_names;
         default:
-          return nullptr;
+          return {};
       }
   }
 }
 
 /* Transformation bonuses, indexed by tier (1-6); entry 0 is unused. Missing tiers are zeroed. */
 constexpr int MAX_TRANS_TIER = 6;
-typedef transform_bonus trans_table[MAX_TRANS_TIER + 1];
+using trans_table = std::array<transform_bonus, MAX_TRANS_TIER + 1>;
 
-static const trans_table human_trans_bonus = {
+static const trans_table human_trans_bonus = {{
     {},
     {.bonus = 1000000,   .mult = 2,   .drain = .1, .flag = player_flag::trans1},
     {.bonus = 12000000,  .mult = 3,   .drain = .2, .flag = player_flag::trans2},
     {.bonus = 50000000,  .mult = 4,   .drain = .2, .flag = player_flag::trans3},
-    {.bonus = 270000000, .mult = 4.5, .drain = .2, .flag = player_flag::trans4}
-};
+    {.bonus = 270000000, .mult = 4.5, .drain = .2, .flag = player_flag::trans4}}};
 
-static const trans_table saiyan_trans_bonus = {
+static const trans_table saiyan_trans_bonus = {{
     {},
     {.bonus = 800000,    .mult = 2,   .drain = .1, .flag = player_flag::trans1},
     {.bonus = 20000000,  .mult = 3,   .drain = .2, .flag = player_flag::trans2},
     {.bonus = 80000000,  .mult = 4,   .drain = .2, .flag = player_flag::trans3},
-    {.bonus = 182000000, .mult = 5.5, .drain = .2, .flag = player_flag::trans4}
-};
+    {.bonus = 182000000, .mult = 5.5, .drain = .2, .flag = player_flag::trans4}}};
 
-static const trans_table namekian_trans_bonus = {
+static const trans_table namekian_trans_bonus = {{
     {},
     {.bonus = 200000,    .mult = 2,   .drain = .1, .flag = player_flag::trans1},
     {.bonus = 4000000,   .mult = 3,   .drain = .2, .flag = player_flag::trans2},
     {.bonus = 65000000,  .mult = 4,   .drain = .2, .flag = player_flag::trans3},
-    {.bonus = 230000000, .mult = 4.5, .drain = .2, .flag = player_flag::trans4}
-};
+    {.bonus = 230000000, .mult = 4.5, .drain = .2, .flag = player_flag::trans4}}};
 
-static const trans_table konatsu_trans_bonus = {
+static const trans_table konatsu_trans_bonus = {{
     {},
     {.bonus = 1000000,   .mult = 2, .drain = .1, .flag = player_flag::trans1},
     {.bonus = 56000000,  .mult = 4, .drain = .2, .flag = player_flag::trans2},
-    {.bonus = 290000000, .mult = 5, .drain = .2, .flag = player_flag::trans3}
-};
+    {.bonus = 290000000, .mult = 5, .drain = .2, .flag = player_flag::trans3}}};
 
-static const trans_table icer_trans_bonus = {
+static const trans_table icer_trans_bonus = {{
     {},
     {.bonus = 400000,    .mult = 2, .drain = .1, .flag = player_flag::trans1},
     {.bonus = 7000000,   .mult = 3, .drain = .2, .flag = player_flag::trans2},
     {.bonus = 45000000,  .mult = 4, .drain = .2, .flag = player_flag::trans3},
-    {.bonus = 200000000, .mult = 5, .drain = .2, .flag = player_flag::trans4}
-};
+    {.bonus = 200000000, .mult = 5, .drain = .2, .flag = player_flag::trans4}}};
 
-static const trans_table saiyan_trans_bonus_legendary = {
+static const trans_table saiyan_trans_bonus_legendary = {{
     {},
     {.bonus = 800000,    .mult = 2, .drain = .1, .flag = player_flag::trans1},
-    {.bonus = 185000000, .mult = 5.5, .drain = 0, .flag = player_flag::trans2}
-};
+    {.bonus = 185000000, .mult = 5.5, .drain = 0, .flag = player_flag::trans2}}};
 
-static const trans_table truffle_trans_bonus = {
+static const trans_table truffle_trans_bonus = {{
     {},
     {.bonus = 1300000,   .mult = 3, .drain = .1, .flag = player_flag::trans1},
     {.bonus = 80000000,  .mult = 4, .drain = .2, .flag = player_flag::trans2},
-    {.bonus = 300000000, .mult = 5, .drain = .2, .flag = player_flag::trans3}
-};
+    {.bonus = 300000000, .mult = 5, .drain = .2, .flag = player_flag::trans3}}};
 
-static const trans_table kai_trans_bonus = {
+static const trans_table kai_trans_bonus = {{
     {},
     {.bonus = 1100000,   .mult = 3, .drain = .1, .flag = player_flag::trans1},
     {.bonus = 115000000, .mult = 4, .drain = .2, .flag = player_flag::trans2},
-    {.bonus = 270000000, .mult = 5, .drain = .2, .flag = player_flag::trans3}
-};
+    {.bonus = 270000000, .mult = 5, .drain = .2, .flag = player_flag::trans3}}};
 
-static const trans_table halfbreed_trans_bonus = {
+static const trans_table halfbreed_trans_bonus = {{
     {},
     {.bonus = 900000,    .mult = 2, .drain = .1, .flag = player_flag::trans1},
     {.bonus = 16500000,  .mult = 4, .drain = .2, .flag = player_flag::trans2},
-    {.bonus = 240000000, .mult = 5, .drain = .2, .flag = player_flag::trans3}
-};
+    {.bonus = 240000000, .mult = 5, .drain = .2, .flag = player_flag::trans3}}};
 
-static const trans_table mutant_trans_bonus = {
+static const trans_table mutant_trans_bonus = {{
     {},
     {.bonus = 100000,   .mult = 2, .drain = .1, .flag = player_flag::trans1},
     {.bonus = 8500000,  .mult = 3, .drain = .2, .flag = player_flag::trans2},
-    {.bonus = 80000000, .mult = 4, .drain = .2, .flag = player_flag::trans3}
-};
+    {.bonus = 80000000, .mult = 4, .drain = .2, .flag = player_flag::trans3}}};
 
-static const trans_table majin_trans_bonus = {
+static const trans_table majin_trans_bonus = {{
     {},
     {.bonus = 1250000,   .mult = 2,   .drain = 0, .flag = player_flag::trans1},
     {.bonus = 15000000,  .mult = 3,   .drain = 0, .flag = player_flag::trans2},
-    {.bonus = 340000000, .mult = 4.5, .drain = 0, .flag = player_flag::trans3}
-};
+    {.bonus = 340000000, .mult = 4.5, .drain = 0, .flag = player_flag::trans3}}};
 
-static const trans_table bio_trans_bonus = {
+static const trans_table bio_trans_bonus = {{
     {},
     {.bonus = 1000000,   .mult = 2,   .drain = 0, .flag = player_flag::trans1},
     {.bonus = 8000000,   .mult = 3,   .drain = 0, .flag = player_flag::trans2},
     {.bonus = 70000000,  .mult = 3.5, .drain = 0, .flag = player_flag::trans3},
-    {.bonus = 400000000, .mult = 4,   .drain = 0, .flag = player_flag::trans4}
-};
+    {.bonus = 400000000, .mult = 4,   .drain = 0, .flag = player_flag::trans4}}};
 
-static const trans_table android_trans_bonus_sense = {
+static const trans_table android_trans_bonus_sense = {{
     {},
     {.bonus = 12500000,    .mult = 1, .drain = 0, .flag = player_flag::trans1},
     {.bonus = 50000000,    .mult = 1, .drain = 0, .flag = player_flag::trans2},
     {.bonus = 312000000,   .mult = 1, .drain = 0, .flag = player_flag::trans3},
     {.bonus = 2500000000,  .mult = 1, .drain = 0, .flag = player_flag::trans4},
     {.bonus = 5000000000,  .mult = 1, .drain = 0, .flag = player_flag::trans5},
-    {.bonus = 10000000000, .mult = 1, .drain = 0, .flag = player_flag::trans6}
-};
+    {.bonus = 10000000000, .mult = 1, .drain = 0, .flag = player_flag::trans6}}};
 
-static const trans_table android_trans_bonus = {
+static const trans_table android_trans_bonus = {{
     {},
     {.bonus = 5000000,    .mult = 1, .drain = 0, .flag = player_flag::trans1},
     {.bonus = 20000000,   .mult = 1, .drain = 0, .flag = player_flag::trans2},
     {.bonus = 125000000,  .mult = 1, .drain = 0, .flag = player_flag::trans3},
     {.bonus = 1000000000, .mult = 1, .drain = 0, .flag = player_flag::trans4},
     {.bonus = 2500000000, .mult = 1, .drain = 0, .flag = player_flag::trans5},
-    {.bonus = 5000000000, .mult = 1, .drain = 0, .flag = player_flag::trans6}
-};
+    {.bonus = 5000000000, .mult = 1, .drain = 0, .flag = player_flag::trans6}}};
 
 static const transform_bonus hoshi_birth = {
     .bonus = 0, .mult = 2, .drain = 0, .flag = player_flag::trans1};
@@ -593,7 +582,8 @@ static const transform_bonus hoshi_birth = {
 static const transform_bonus hoshi_life = {
     .bonus = 0, .mult = 3, .drain = 0, .flag = player_flag::trans2};
 
-static const transform_bonus *race_trans_table(const char_data *ch)
+/* the race's forms by tier; none for a race without them */
+static std::span<const transform_bonus> race_trans_table(const char_data *ch)
 {
   switch (char_get_race(ch)) {
     case RACE_ANDROID:
@@ -627,7 +617,7 @@ static const transform_bonus *race_trans_table(const char_data *ch)
     case RACE_TRUFFLE:
       return truffle_trans_bonus;
     default:
-      return nullptr;
+      return {};
   }
 }
 
@@ -691,21 +681,20 @@ transform_bonus race_current_form(GameWorld *g, char_data *ch)
 
   int tier = race_current_trans_tier(ch);
   if (!tier) return base_form;
-  const transform_bonus *table = race_trans_table(ch);
-  if (!table) return base_form;
+  std::span<const transform_bonus> table = race_trans_table(ch);
+  if (table.empty()) return base_form;
   return table[tier];
 }
 
 bool race_find_form(char_data *ch, std::string_view arg, transform_bonus *out)
 {
-  const struct form_name *names = race_form_names(ch);
-  if (!names)
-    return false;
-  const transform_bonus *table = race_trans_table(ch);
-  for (; !names->name.empty(); names++) {
-    if (str_eq_nocase(names->name, arg)) {
-      if (table)
-        *out = table[names->tier];
+  std::span<const transform_bonus> table = race_trans_table(ch);
+  for (const form_name &name : race_form_names(ch)) {
+    if (name.name.empty())
+      break;
+    if (str_eq_nocase(name.name, arg)) {
+      if (!table.empty())
+        *out = table[name.tier];
       else
         *out = transform_bonus{};
       return true;
@@ -1492,13 +1481,13 @@ void race_echo_revert(GameWorld *g, char_data *ch, int tier)
   }
 }
 
-static const int64_t soft_cap_variable[10] = {1500, 4500, 15000, 45000, 60000, 240000, 600000, 750000, 2400000, 4500000};
+static const std::array<int64_t, 10> soft_cap_variable = {{1500, 4500, 15000, 45000, 60000, 240000, 600000, 750000, 2400000, 4500000}};
 
-static const int64_t soft_cap_fixed[10] = {500, 1500, 5000, 15000, 20000, 80000, 200000, 250000, 800000, 1500000};
+static const std::array<int64_t, 10> soft_cap_fixed = {{500, 1500, 5000, 15000, 20000, 80000, 200000, 250000, 800000, 1500000}};
 
-static const int64_t soft_cap_demon[10] = {500, 1500, 5000, 25000, 40000, 100000, 250000, 300000, 1000000, 2000000};
+static const std::array<int64_t, 10> soft_cap_demon = {{500, 1500, 5000, 25000, 40000, 100000, 250000, 300000, 1000000, 2000000}};
 
-const int64_t *race_soft_cap_table(const char_data *ch)
+std::span<const int64_t> race_soft_cap_table(const char_data *ch)
 {
   switch (char_get_race(ch)) {
     case RACE_DEMON:

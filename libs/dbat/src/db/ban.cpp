@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <cerrno>
 #include <cstdlib>
 #include <string>
@@ -30,12 +31,12 @@
 
 /* local functions */
 
-static constexpr std::string_view ban_types[] = {
+static constexpr auto ban_types = std::to_array<std::string_view>({
     "no",
     "new",
     "select",
     "all",
-    "ERROR"};
+    "ERROR"});
 
 void free_ban_list(GameWorld *g)
 {

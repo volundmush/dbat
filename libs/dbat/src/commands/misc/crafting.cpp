@@ -80,12 +80,12 @@ namespace {
     room_flag planet;
     obj_vnum first;
   };
-  constexpr fishing_water FISHING_WATERS[] = {
+  constexpr auto FISHING_WATERS = std::to_array<fishing_water>({
     {true, room_flag::earth, 1000},
     {true, room_flag::aether, 1012},
     {false, room_flag::earth, 1004},
     {false, room_flag::namek, 1008},
-  };
+  });
 
   void catch_fish(GameWorld *g, struct char_data *ch, int quality)
   {
@@ -415,7 +415,7 @@ namespace {
     std::string_view room_name{};         /* quirk: what the room sees written on someone else, if not the name */
     bool shows_unclamped;          /* quirk: Purisaz on others shows the duration before it's raised to 1 */
   };
-  constexpr rune RUNES[] = {
+  constexpr auto RUNES = std::to_array<rune>({
     {"kenaz", 1, false, &KENAZ, &KENAZ, true, {}, false},
     {"algiz", 2, true, &ALGIZ, &ALGIZ, true, {}, false},
     {"oagaz", 3, true, &OAGAZ, nullptr, false, {}, false},
@@ -423,7 +423,7 @@ namespace {
     {"wunjo", 4, true, &WUNJO, &WUNJO, true, {}, false},
     {"purisaz", 4, true, &PURISAZ, &PURISAZ, true, "PUrisaz", true},
     {"gebo", 10, true, &GEBO, &GEBO, true, {}, false},
-  };
+  });
 
   void write_rune(GameWorld *g, struct char_data *ch, struct char_data *vict, const rune &r, const rune_effect &effect, struct obj_data *bottle,
                   int inkcost, int skill, int64_t cost)
@@ -473,9 +473,9 @@ namespace {
     double price;
     int level;
   };
-  constexpr silk_grade SILK_GRADES[] = {
+  constexpr auto SILK_GRADES = std::to_array<silk_grade>({
     {16708, 20, 4, 4, 4, 80}, {16700, 15, 3, 3, 4, 75}, {16701, 10, 3, 3, 3, 50}, {16702, 6, 2, 2, 2, 25}, {16703, 4, 1, 1, 1.5, 5},
-  };
+  });
   constexpr silk_grade PLAIN_SILK = {0, 1, 0, 0, 1, 0};
 
   /* What can be woven, and the word that picks it up */
@@ -484,18 +484,18 @@ namespace {
     obj_vnum vnum;
     std::string_view keyword{};
   };
-  constexpr silk_piece SILK_PIECES[] = {
+  constexpr auto SILK_PIECES = std::to_array<silk_piece>({
     {"head", 16705, "headsash"},
     {"wrist", 16706, "wristband"},
     {"belt", 16707, "belt"},
-  };
+  });
 
   /* The bundles silk is spun into, best first, by the skill needed */
   struct silk_bundle {
     int min_skill;
     obj_vnum vnum;
   };
-  constexpr silk_bundle SILK_BUNDLES[] = {{100, 16700}, {90, 16701}, {80, 16702}, {50, 16703}, {0, 16704}};
+  constexpr auto SILK_BUNDLES = std::to_array<silk_bundle>({{100, 16700}, {90, 16701}, {80, 16702}, {50, 16703}, {0, 16704}});
 
   void weave_silk(GameWorld *g, struct char_data *ch, const std::string &what, int prob, int perc)
   {
@@ -594,7 +594,7 @@ namespace {
     std::string_view plural{};
     std::string_view after{};
   };
-  constexpr ingredient_kind INGREDIENT_KINDS[INGREDIENTS] = {
+  constexpr std::array<ingredient_kind, INGREDIENTS> INGREDIENT_KINDS = {{
     {{RCP_TOMATO}, "tomato", "es", ""},
     {{RCP_POTATO}, "potato", "es", ""},
     {{RCP_ONION}, "onion", "s", ""},
@@ -614,7 +614,7 @@ namespace {
     {{RCP_SILVERTROUT, RCP_SILVEREEL, RCP_VALBISH, RCP_VOOSPIKE}, "silver trout, silver eel, valbish, or voos pike", "", ""},
     {{RCP_STRIPEDBASS, RCP_COBIA, RCP_GUSBLAT, RCP_SHADOWFISH}, "striped bass, cobia, gusblat, or shadowfish", "", ""},
     {{RCP_BLUECATFISH, RCP_TAMBOR, RCP_REPEEIL, RCP_SHADEEEL}, "blue catfish, tambor, repeeil, or shadeeel", "", ""},
-  };
+  }};
 
   struct portion {
     ingredient kind;
@@ -630,7 +630,7 @@ namespace {
     int psbonus;
     int expbonus;
   };
-  constexpr dish DISHES[] = {
+  constexpr auto DISHES = std::to_array<dish>({
     {{{{NORMMEAT, 1}}}, 8, true, MEAL_STEAK, 1, 5},
     {{{{TOMATO, 2}}}, 0, false, MEAL_TOMATO_SOUP, 2, 15},
     {{{{POTATO, 2}}}, 0, false, MEAL_POTATO_SOUP, 1, 20},
@@ -648,7 +648,7 @@ namespace {
     {{{{FLOUR, 1}, {APPLEPLUM, 1}}}, 0, false, MEAL_APPLEPLUM, 1, 9},
     {{{{FLOUR, 1}, {FBERRY, 1}}}, 0, false, MEAL_FBERRY_MUFFIN, 3, 12},
     {{{{FLOUR, 1}, {CARAMBOLA, 1}}}, 0, false, MEAL_CARAMBOLA_BREAD, 1, 9},
-  };
+  });
 
   int ingredient_of(obj_vnum vnum)
   {

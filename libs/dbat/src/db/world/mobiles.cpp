@@ -16,6 +16,7 @@
  *   ...
  *   $
  */
+#include <array>
 #include <algorithm>
 #include <optional>
 
@@ -50,7 +51,7 @@ struct espec_field {
 
 std::optional<int> unless_zero(int n) { return n != 0 ? std::optional<int>(n) : std::nullopt; }
 
-const espec_field especs[] = {
+const auto especs = std::to_array<espec_field>({
     /* written, in this order */
     {"Size",
      [](GameWorld *, char_data *mob, std::string_view, int n) { char_set_size(mob, std::clamp(n, SIZE_UNDEFINED, NUM_SIZES - 1)); },
@@ -120,7 +121,7 @@ const espec_field especs[] = {
     {"SkillMod", nullptr, nullptr},
     {"Class", nullptr, nullptr},
     {"EpicClass", nullptr, nullptr},
-};
+});
 
 /* "<keyword>: <value>"; a line with no ':' has no value, and no keyword takes one with none */
 void read_espec(GameWorld *g, char_data *mob, mob_vnum vnum, std::string_view line)

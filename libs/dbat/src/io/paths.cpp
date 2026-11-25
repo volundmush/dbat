@@ -1,6 +1,7 @@
 /*
  * Where the game's files are: see dbat/io/paths.hpp.
  */
+#include <array>
 #include <algorithm>
 #include <cerrno>
 #include <cstdio>
@@ -21,7 +22,7 @@ struct file_kind {
   std::string_view directory, suffix;
 };
 
-constexpr file_kind kinds[] = {
+constexpr auto kinds = std::to_array<file_kind>({
     {CRASH_FILE,       LIB_PLROBJS,  SUF_OBJS  },
     {ALIAS_FILE,       LIB_PLRALIAS, SUF_ALIAS },
     {ETEXT_FILE,       LIB_PLRTEXT,  SUF_TEXT  },
@@ -33,7 +34,7 @@ constexpr file_kind kinds[] = {
     {INTRO_FILE,       LIB_INTRO,    SUF_INTRO },
     {SENSE_FILE,       LIB_SENSE,    SUF_SENSE },
     {CUSTOME_FILE,     LIB_USER,     SUF_CUSTOM},
-};
+});
 
 /* The directory players are kept in by the first letter of their name */
 std::string_view bucket(char first)

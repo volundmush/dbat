@@ -16,6 +16,7 @@
  *
  * Older deployments hold it as a binary dump of the records: see legacy_binary.cpp, which converts it as it loads.
  */
+#include <array>
 #include <algorithm>
 #include <optional>
 #include <string>
@@ -61,7 +62,7 @@ long *spares(house_control_rec &h, int i)
   return s[i];
 }
 
-const house_field house_fields[] = {
+const auto house_fields = std::to_array<house_field>({
     {"Atrium", [](house_control_rec &h, io::fields &f) { return read_number(h.atrium, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.atrium); }},
     {"Exit", [](house_control_rec &h, io::fields &f) { return read_number(h.exit_num, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.exit_num); }},
     {"Built", [](house_control_rec &h, io::fields &f) { return read_number(h.built_on, f); }, [](const house_control_rec &h, io::text_writer &o, std::string_view t) { write_number(o, t, h.built_on); }},
@@ -111,7 +112,7 @@ const house_field house_fields[] = {
          o.print(" {:d}", *spares(copy, i));
        o.write("\n");
      }},
-};
+});
 
 } // namespace
 

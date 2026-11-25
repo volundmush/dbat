@@ -1,6 +1,7 @@
 /*
  * DG Scripts: the fields of a room, as in %self.vnum% or %room.north(vnum)%. See fields.hpp.
  */
+#include <array>
 #include <cstdlib>
 
 #include "dbat/utils.hpp"
@@ -40,7 +41,7 @@ result exit_field(const field_query &q, room_data *r)
 }
 
 /* The fields, by name */
-const field<room_data> room_fields[] = {
+const auto room_fields = std::to_array<field<room_data>>({
     {"contents", [](const field_query &q, room_data *r) -> result {
        if (!q.has_arg()) /* the newest thing there */
          return room_get_contents(r) ? uid_text(room_get_contents(r).newest()) : "";
@@ -91,7 +92,7 @@ const field<room_data> room_fields[] = {
     {"southeast", exit_field<SOUTHEAST>},
     {"inside", exit_field<INDIR>},
     {"outside", exit_field<OUTDIR>},
-};
+});
 
 /* A global variable of r, or nothing */
 const variable *global_of(room_data *r, const std::string &name)

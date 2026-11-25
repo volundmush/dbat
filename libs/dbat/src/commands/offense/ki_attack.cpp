@@ -1,4 +1,5 @@
 /* ki_attack.cpp: what every ki attack does; see ki_attack.hpp */
+#include <span>
 #include "ki_attack.hpp"
 
 #include <string>
@@ -83,7 +84,7 @@ void land(ki_shot &s)
   ki_act(s, atk.hits[where - 1]);
   if (atk.strike && atk.strike(s, where))
     return;
-  switch ((atk.spots ? atk.spots : standard)[where - 1]) {
+  switch ((atk.spots.empty() ? std::span<const ki_spot>(standard) : atk.spots)[where - 1]) {
     case ki_spot::body:
       if (atk.soft_crit && char_get_bonuses(s.ch, BONUS_SOFT))
         s.dmg *= calc_critical(g, s.ch, 2);

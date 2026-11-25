@@ -51,8 +51,8 @@ def later_declarators(s, start):
     return out
 
 
-# a parameter: `(T name[]` or `, T name[N]`, followed by `,` or `)`
-PARAM = re.compile(r'[(,]\s*(?:const\s+)?(?:struct\s+)?([A-Za-z_][\w:]*(?:<[^;{}()\n]*>)?)\s*[*&\s]+\s*([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*(?=[,)])')
+# a parameter: `(T name[]` or `, T name[N]`, followed by `,` or `)` (not `(a && b[i])`)
+PARAM = re.compile(r'[(,]\s*(?:const\s+)?(?:struct\s+)?([A-Za-z_][\w:]*(?:<[^;{}()\n]*>)?)(?:\s*\*+\s*|\s*&\s*|\s+)([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*(?=[,)])')
 
 
 def strip(s):
@@ -87,6 +87,8 @@ def find(f, s):
             d = re.match(r'\s*[*&]*\s*([A-Za-z_]\w*)\s*\[', part)
             if d:
                 out.add((f, s[:at + d.start(1)].count('\n') + 1, d.group(1)))
+    for m in re.finditer(r'^[ \t]*(?:typedef\s[^;]*?\b([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*;|using\s+([A-Za-z_]\w*)\s*=[^;]*\[[^\]\n]*\]\s*;)', s, re.M):
+        out.add((f, s[:m.start()].count('\n') + 1, m.group(1) or m.group(2)))  # an array type's name
     for m in PARAM.finditer(s):
         if m.group(1) in NOT_A_TYPE or m.group(2) in NOT_A_NAME:
             continue

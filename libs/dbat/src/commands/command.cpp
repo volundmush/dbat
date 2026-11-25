@@ -1,3 +1,5 @@
+#include <span>
+#include <array>
 #include <cstdlib>
 #include <algorithm>
 #include <cstring>
@@ -52,7 +54,7 @@
  *     directions); it plays no part in matching;
  *   - a minimum level of -1 marks the mob (DG) commands, which check for a mob themselves.
  */
-const struct command_info cmd_info[] = {
+static const auto cmd_info_table = std::to_array<command_info>({
     {"RESERVED",      "",             0,            nullptr,            0,  ADMLVL_NONE,    0                  }, /* this must be first -- for specprocs */
 
     /* directions must come before other commands but after RESERVED */
@@ -623,7 +625,8 @@ const struct command_info cmd_info[] = {
     {"mfollow",       "mfollow",      POS_DEAD,     do_mfollow,         -1, ADMLVL_NONE,    0                  },
 
     {"\n",            "zzzzzzz",      0,            nullptr,            0,  ADMLVL_NONE,    0                  }
-}; /* this must be last */
+}); /* this must be last */
+const std::span<const command_info> cmd_info = cmd_info_table;
 
 /* What a character can still do while held fast (petrified, frozen, paralysed or liquefied). */
 static bool allowed_while_restrained(std::string_view cmd, bool liquefied)
@@ -658,7 +661,7 @@ static bool command_pass(GameWorld *g, std::string_view cmd, struct char_data *c
 }
 
 /* By position, what one too low for a command is told */
-static constexpr std::string_view TOO_LOW[] = {
+static constexpr auto TOO_LOW = std::to_array<std::string_view>({
     "Lie still; you are DEAD!!! :-(\r\n",
     "You are in a pretty bad shape, unable to do anything!\r\n",
     "You are in a pretty bad shape, unable to do anything!\r\n",
@@ -666,7 +669,7 @@ static constexpr std::string_view TOO_LOW[] = {
     "In your dreams, or what?\r\n",
     "Nah... You feel too relaxed to do that..\r\n",
     "Maybe you should get on your feet first?\r\n",
-};
+});
 
 bool special(GameWorld *g, struct char_data *ch, int cmd, std::string_view arg)
 {

@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <cstdlib>
 #include <filesystem>
 #include <optional>
@@ -31,7 +32,7 @@
 #include "dbat/character_utils.hpp"
 #include "dbat/game_world.hpp"
 
-static constexpr std::string_view house_bits_entries[] = {"!GUEST", "FREE", "!IMM", "IMP_ONLY", "RENTFREE", "SAVE_!RENT", "!SAVE"};
+static constexpr auto house_bits_entries = std::to_array<std::string_view>({"!GUEST", "FREE", "!IMM", "IMP_ONLY", "RENTFREE", "SAVE_!RENT", "!SAVE"});
 static_assert(std::size(house_bits_entries) == HOUSE_NUM_FLAGS);
 constinit const name_table house_bits(house_bits_entries);
 

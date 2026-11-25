@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string>
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
@@ -255,7 +256,7 @@ extern const bool free_rent, auto_save;
 
 extern const bool auto_pwipe, selfdelete_fastwipe;
 
-extern const struct pclean_criteria_data pclean_criteria[7];
+extern const std::array<pclean_criteria_data, 7> pclean_criteria;
 
 extern const room_vnum mortal_start_room, immort_start_room, frozen_start_room;
 

@@ -1120,7 +1120,7 @@ static void state_delcnf2(GameWorld *g, struct descriptor_data *d, std::string_v
   desc_set_connected(d, CON_MENU);
 }
 
-static const con_state login_states[] = {
+static const auto login_states = std::to_array<con_state>({
     {CON_GET_NAME,   state_get_name  },
     {CON_NAME_CNFRM, state_name_cnfrm},
     {CON_GET_USER,   state_get_user  },
@@ -1133,10 +1133,10 @@ static const con_state login_states[] = {
     {CON_MENU,       state_menu      },
     {CON_DELCNF1,    state_delcnf1   },
     {CON_DELCNF2,    state_delcnf2   },
-};
+});
 
 /* The editors' states, each answered by context help first */
-static const con_state olc_states[] = {
+static const auto olc_states = std::to_array<con_state>({
     {CON_OEDIT,    olc_parse,       nullptr, true},
     {CON_IEDIT,    olc_parse,       nullptr, true},
     {CON_ZEDIT,    olc_parse,       nullptr, true},
@@ -1151,7 +1151,7 @@ static const con_state olc_states[] = {
     {CON_HEDIT,    olc_parse,       nullptr, true},
     {CON_HSEDIT,   olc_parse,       nullptr, true},
     {CON_POBJ,     pobj_edit_parse, nullptr, true},
-};
+});
 
 /* The state's row: the editors', then the login menus', then character creation's. */
 static const con_state *find_state(int state)

@@ -9,6 +9,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <array>
 #include <algorithm>
 #include <cerrno>
 #include <chrono>
@@ -388,7 +389,7 @@ struct beat {
   bool (*on)(GameWorld *g) = nullptr; /* only when this is true, if there is one */
 };
 
-const beat HEARTBEAT[] = {
+const auto HEARTBEAT = std::to_array<beat>({
     {[](GameWorld *g) { return 1; }, event_process},
     {[](GameWorld *g) { return PULSE_DG_SCRIPT; }, script_trigger_check},
     {[](GameWorld *g) { return PULSE_ZONE; }, zone_update},
@@ -429,7 +430,7 @@ const beat HEARTBEAT[] = {
     {[](GameWorld *g) { return PULSE_TIMESAVE; }, [](GameWorld *g) { save_mud_time(g, &g->time_info); }},
     {[](GameWorld *g) { return 30 * PASSES_PER_SEC; }, [](GameWorld *g) { timed_dt(g, nullptr); }},
     {[](GameWorld *g) { return 1; }, finish_extractions}, /* Every pulse! Don't want them to stink the place up... */
-};
+});
 
 } // namespace
 

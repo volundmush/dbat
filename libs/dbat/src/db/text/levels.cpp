@@ -10,6 +10,7 @@
  * The lines are read as fgets() into a READ_SIZE buffer read them, with their line ends: no line is passed over but
  * a '*' comment (quirk: a blank line in #version is the version).
  */
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <string>
@@ -26,8 +27,8 @@
 
 namespace {
 
-static constexpr std::string_view config_sect[NUM_CONFIG_SECTIONS] = {"version", "experience", "vernum", "fortitude",
-                                                          "reflex",  "will",       "basehit"};
+static constexpr std::array<std::string_view, NUM_CONFIG_SECTIONS> config_sect = {{"version", "experience", "vernum", "fortitude",
+                                                          "reflex",  "will",       "basehit"}};
 
 /* The keywords above, in order. */
 enum {

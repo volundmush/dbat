@@ -1,20 +1,21 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/weapons.hpp"
 
 /* Armor Types */
-static constexpr std::string_view armor_type_entries[] = {
+static constexpr auto armor_type_entries = std::to_array<std::string_view>({
     "Undefined",
     "Light",
     "Medium",
     "Heavy",
-    "Shield"};
+    "Shield"});
 static_assert(std::size(armor_type_entries) == MAX_ARMOR_TYPES);
 constinit const name_table armor_type(armor_type_entries);
 
 /* Weapon Types */
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-static constexpr std::string_view weapon_type_entries[] = {
+static constexpr auto weapon_type_entries = std::to_array<std::string_view>({
     "undefined",
     "unarmed",
     "dagger",
@@ -41,23 +42,23 @@ static constexpr std::string_view weapon_type_entries[] = {
     "monk weapon",
     "double weapon",
     "axe",
-    "whip"};
+    "whip"});
 static_assert(std::size(weapon_type_entries) == MAX_WEAPON_TYPES + 1);
 constinit const name_table weapon_type(weapon_type_entries);
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-static constexpr std::string_view crit_type_entries[] = {
+static constexpr auto crit_type_entries = std::to_array<std::string_view>({
         "x2",
         "x3",
-        "x4"};
+        "x4"});
 static_assert(std::size(crit_type_entries) == NUM_CRIT_TYPES);
 constinit const name_table crit_type(crit_type_entries);
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-static constexpr std::string_view wield_names_entries[] = {
+static constexpr auto wield_names_entries = std::to_array<std::string_view>({
     "if you were bigger",
     "with ease",
     "one-handed",
-    "two-handed"};
+    "two-handed"});
 static_assert(std::size(wield_names_entries) == NUM_WIELD_NAMES);
 constinit const name_table wield_names(wield_names_entries);

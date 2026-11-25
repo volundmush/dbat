@@ -6,6 +6,7 @@
  *  Made for Oasis OLC                                                   *
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <cstring>
@@ -45,7 +46,7 @@ namespace {
     std::string_view prompt{};
   };
 
-  constexpr field FIELDS[] = {
+  constexpr auto FIELDS = std::to_array<field>({
       {'0', mode::trainer,   "Enter vnum of guild master : "                                        },
       {'1', mode::no_skill,  "\r\nEnter new text :\r\n] "                                           },
       {'2', mode::no_cash,   "\r\nEnter new text :\r\n] "                                           },
@@ -53,9 +54,9 @@ namespace {
       {'4', mode::close,     "When does this shop close (a day has 28 hours) ? \r\nEnter new value : "},
       {'5', mode::charge,    "\r\nEnter new value : "                                               },
       {'6', mode::min_level, "Minumum Level will Train: "                                           },
-  };
+  });
 
-  constexpr std::pair<mode, int> CONTEXTS[] = {
+  constexpr auto CONTEXTS = std::to_array<std::pair<mode, int>>({
       {mode::main_menu,    CONTEXT_GEDIT_MAIN_MENU         },
       {mode::confirm_save, CONTEXT_GEDIT_CONFIRM_SAVESTRING},
       {mode::no_cash,      CONTEXT_GEDIT_NO_CASH           },
@@ -69,7 +70,7 @@ namespace {
       {mode::skills,       CONTEXT_GEDIT_SELECT_SKILLS     },
       {mode::languages,    CONTEXT_GEDIT_SELECT_LANGS      },
       /* quirk: the feats list has no context help */
-  };
+  });
 
   /* The guild editor: a copy of one guild, put into the world when saved */
   struct guild_editor final : olc_session {

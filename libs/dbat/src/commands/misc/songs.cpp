@@ -11,6 +11,7 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
+#include <array>
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.misc.hpp"
@@ -70,11 +71,11 @@ namespace {
     std::string_view planet{};
     room_vnum room;
   };
-  constexpr destination DESTINATIONS[] = {
+  constexpr auto DESTINATIONS = std::to_array<destination>({
     {SONG_TELEPORT_EARTH, "Earth", 300},        {SONG_TELEPORT_FRIGID, "Frigid", 4047},   {SONG_TELEPORT_VEGETA, "Vegeta", 2234},
     {SONG_TELEPORT_NAMEK, "Namek", 10182},      {SONG_TELEPORT_ARLIA, "Arlia", 16087},    {SONG_TELEPORT_KANASSA, "Kanassa", 14910},
     {SONG_TELEPORT_KONACK, "Konack", 8003},     {SONG_TELEPORT_AETHER, "Aether", 12025},
-  };
+  });
 
   const destination *destination_of(int song)
   {
@@ -119,12 +120,12 @@ namespace {
     int mended;  /* ...this one mends */
     std::string_view healed{};
   };
-  constexpr limb_mend LIMBS[] = {
+  constexpr auto LIMBS = std::to_array<limb_mend>({
     {0, 0, "Your right arm is no longer broken!@n\r\n"},
     {1, 1, "Your left arm is no longer broken!@n\r\n"},
     {2, 2, "Your right leg is no longer broken!@n\r\n"},
     {0, 3, "Your left leg is no longer broken!@n\r\n"}, /* quirk: the left leg mends while the right arm is hurt */
-  };
+  });
 
   void play_safety(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill)
   {
@@ -266,7 +267,7 @@ namespace {
     std::string_view to_char;
     std::string_view to_room;
   };
-  constexpr tune TUNES[] = {
+  constexpr auto TUNES = std::to_array<tune>({
     {"shielding", 20, 99, SONG_SHIELDING,
      "@CYou begin to play the Song of Shielding! Your fingers lightly glide over the ocarina and as you blow into it a triumphant series of notes issues forth.@n",
      "@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n"},
@@ -279,7 +280,7 @@ namespace {
     {"safety", 3, INT_MIN, SONG_SAFETY,
      "@CYou begin to play the Song of Safety! Your fingers lightly glide over the ocarina and as you blow into it sweet music similar to a lullaby issues forth from the intrument.@n",
      "@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n"},
-  };
+  });
 } // namespace
 
 void handle_songs(GameWorld *g)

@@ -6,6 +6,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <array>
 #include <cstdlib>
 #include "dbat/name_table.hpp"
 #include <optional>
@@ -324,13 +325,13 @@ void script_damage(GameWorld *g, struct char_data *vict, int dam)
 }
 
 /* the fields a script's door command (mdoor, odoor, wdoor) can change, numbered as dg_door_apply() takes them */
-static constexpr std::string_view dg_door_fields_entries[] = {
+static constexpr auto dg_door_fields_entries = std::to_array<std::string_view>({
     "purge",
     "description",
     "flags",
     "key",
     "name",
-    "room"};
+    "room"});
 static_assert(std::size(dg_door_fields_entries) == NUM_DOOR_FIELDS);
 constinit const name_table dg_door_fields(dg_door_fields_entries);
 

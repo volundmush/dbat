@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <optional>
 #include <algorithm>
 #include "dbat/name_table.hpp"
@@ -171,14 +172,14 @@ namespace {
     std::string_view says{};
   };
 
-  constexpr bounty SOIL_BOUNTY[] = {
+  constexpr auto SOIL_BOUNTY = std::to_array<bounty>({
       {8, 10, "@GThe soil seems to have made the plant exteremely bountiful"   },
       {5, 6,  "@GThe soil seems to have made the plant very bountiful"         },
       {3, 4,  "@GThe soil seems to have made the plant bountiful"              },
       {1, 2,  "@GThe soil seems to have made the plant a bit more bountiful"   },
-  };
+  });
 
-  constexpr bounty SKILL_BOUNTY[] = {
+  constexpr auto SKILL_BOUNTY = std::to_array<bounty>({
       {100,     10, " and your outstanding skill has helped the plant be more bountiful yet!@n\r\n"                          },
       {90,      8,  " and your great skill has also helped the plant be more bountiful yet!@n\r\n"                           },
       {80,      5,  " and your good skill has also helped the plant be more bountiful yet!@n\r\n"                            },
@@ -186,7 +187,7 @@ namespace {
       {40,      2,  " and your mastery of the basics of gardening has also helped the plant be more bountiful yet!@n\r\n"    },
       {30,      1,  " and you somehow managed to make the plant slightly more bountiful with what little you know!@n\r\n"   },
       {INT_MIN, 0,  ".@n\r\n"                                                                                              },
-  };
+  });
 
   const bounty *bounty_of(std::span<const bounty> table, int measure)
   {
@@ -278,11 +279,11 @@ namespace {
     int lo, hi; /* its quality */
   };
 
-  constexpr soil_grade SOIL_GRADES[] = {
+  constexpr auto SOIL_GRADES = std::to_array<soil_grade>({
       {room_flag::fertile1, "fertile soil", 8, 8},
       {room_flag::fertile2, "good soil",    5, 7},
       {std::nullopt,  "soil",         0, 4},
-  };
+  });
 
   void collect_soil(GameWorld *g, struct char_data *ch)
   {
@@ -420,7 +421,7 @@ namespace {
   }
 
   /* How much sooner a plant matures, by the soil's quality from 1; any other is as 8. */
-  constexpr int SOIL_HASTE[] = {10, 15, 20, 25, 50, 60, 70};
+  constexpr auto SOIL_HASTE = std::to_array<int>({10, 15, 20, 25, 50, 60, 70});
 
   bool planters_full(GameWorld *g, struct char_data *ch)
   {
@@ -487,13 +488,13 @@ namespace {
     void (*tend)(tending &t);
   };
 
-  constexpr garden_action GARDEN_ACTIONS[] = {
+  constexpr auto GARDEN_ACTIONS = std::to_array<garden_action>({
       {"water",   water  },
       {"harvest", harvest},
       {"dig",     dig    },
       {"plant",   plant  },
       {"pick",    pick   },
-  };
+  });
 } // namespace
 
 ACMD(do_garden)
@@ -568,11 +569,11 @@ namespace {
     int price;
   };
 
-  constexpr house_kind HOUSES[] = {
+  constexpr auto HOUSES = std::to_array<house_kind>({
       {18800, 18899, 65000  },
       {18900, 18999, 150000 },
       {19100, 19199, 1000000},
-  };
+  });
 
   void pack_furniture(GameWorld *g, struct char_data *ch, struct obj_data *obj)
   {
@@ -691,13 +692,13 @@ namespace {
     obj_vnum capsule, furniture;
   };
 
-  constexpr unpacking FURNITURE[] = {
+  constexpr auto FURNITURE = std::to_array<unpacking>({
       {19080, 19090},
       {19081, 19091},
       {19082, 19092},
       {19083, 19093},
       {19085, 11   },
-  };
+  });
 
   /* Where each house capsule's houses stand, and how many rooms apart */
   struct house_site {
@@ -706,11 +707,11 @@ namespace {
     int apart;
   };
 
-  constexpr house_site HOUSE_SITES[] = {
+  constexpr auto HOUSE_SITES = std::to_array<house_site>({
       {4, 18800, 4},
       {5, 18900, 5},
       {6, 19100, 5},
-  };
+  });
 
   bool is_house_capsule(GameWorld *g, struct obj_data *obj)
   {
@@ -831,7 +832,7 @@ ACMD(do_twohand)
 /* The auction, for which there's no command any more */
 
 namespace {
-  static constexpr std::string_view auctioneer[AUC_BID + 1] = {
+  static constexpr std::array<std::string_view, AUC_BID + 1> auctioneer = {{
       "@D[@CAUCTION@c: @C$n@W puts $p@W up for sale at @Y{:d}@W zenni.@D]@n",
       "@D[@CAUCTION@c: @W$p@W at @Y{:d}@W zenni going once!@D]@n",
       "@D[@CAUCTION@c: @W$p@W at @Y{:d}@W zenni going twice!@D]@n",
@@ -842,7 +843,7 @@ namespace {
       "@D[@CAUCTION@c: @WSorry, @C$n@W has left us, the auction can't go on.@D]@n",
       "@D[@CAUCTION@c: @WSorry, $p@W has been confiscated, shame on you $n.@D]@n",
       "@D[@CAUCTION@c: @C$n@W is selling $p@W for @Y{:d}@W zenni.@D]@n",
-      "@D[@CAUCTION@c: @C$n@W bids @Y{:d}@W zenni on $p@W.@D]@n"};
+      "@D[@CAUCTION@c: @C$n@W bids @Y{:d}@W zenni on $p@W.@D]@n"}};
 
   /* auctioneer[i], with the bid where it has {:d}, capitalised if asked */
   std::string auction_message(int i, int bid, bool capitalised = false)
@@ -1127,13 +1128,13 @@ namespace {
     int bonus;
   };
 
-  constexpr weapon_grade WEAPON_GRADES[] = {
+  constexpr auto WEAPON_GRADES = std::to_array<weapon_grade>({
       {extra_flag::weaplvl1, 5 },
       {extra_flag::weaplvl2, 10},
       {extra_flag::weaplvl3, 20},
       {extra_flag::weaplvl4, 30},
       {extra_flag::weaplvl5, 50},
-  };
+  });
 
   void appraisal(GameWorld *g, struct char_data *ch, struct obj_data *lot)
   {
@@ -2713,12 +2714,12 @@ namespace {
     int64_t most, share;
   };
 
-  constexpr candy CANDIES[] = {
+  constexpr auto CANDIES = std::to_array<candy>({
       {53, 0.033, 300000,  1200},
       {93, 0.05,  500000,  1200},
       {94, 0.1,   1200000, 1000},
       {95, 0.1,   1500000, 900 },
-  };
+  });
 
   void majin_gain(GameWorld *g, struct char_data *ch, const candy &c)
   {
@@ -3026,7 +3027,7 @@ ACMD(do_pour)
 
 namespace {
   /* By where it's worn: what's said to the room, and to the wearer */
-  constexpr std::string_view WEAR_MESSAGES[][2] = {
+  constexpr auto WEAR_MESSAGES = std::to_array<std::array<std::string_view, 2>>({
       {"$n lights $p and holds it.",                "You light $p and hold it."                 },
       {"$n slides $p on to $s right ring finger.",  "You slide $p on to your right ring finger."},
       {"$n slides $p on to $s left ring finger.",   "You slide $p on to your left ring finger." },
@@ -3050,21 +3051,21 @@ namespace {
       {"$n puts $p in $s left ear.",                "You put $p in your left ear."              },
       {"$n wears $p as a cape.",                    "You wear $p as a cape."                    },
       {"$n covers $s left eye with $p.",            "You wear $p over your left eye."           },
-  };
+  });
 
   /*
    * By where it's worn, what it takes to be worn there: wear_flag::take is used for objects that do not require
    * special bits to be put into that position (e.g. you can hold any object, not just an object with a HOLD bit.)
    */
-  constexpr wear_flag WEAR_BITVECTORS[] = {
+  constexpr auto WEAR_BITVECTORS = std::to_array<wear_flag>({
       wear_flag::take, wear_flag::finger, wear_flag::finger, wear_flag::neck,
       wear_flag::neck, wear_flag::body, wear_flag::head, wear_flag::legs,
       wear_flag::feet, wear_flag::hands, wear_flag::arms, wear_flag::shield,
       wear_flag::about, wear_flag::waist, wear_flag::wrist, wear_flag::wrist,
       wear_flag::take, wear_flag::take, wear_flag::pack, wear_flag::ear,
-      wear_flag::ear, wear_flag::sh, wear_flag::eye};
+      wear_flag::ear, wear_flag::sh, wear_flag::eye});
 
-  static constexpr std::string_view ALREADY_WEARING[] = {
+  static constexpr auto ALREADY_WEARING = std::to_array<std::string_view>({
       "You're already using a light.\r\n",
       "YOU SHOULD NEVER SEE THIS MESSAGE.  PLEASE REPORT.\r\n",
       "You're already wearing something on both of your ring fingers.\r\n",
@@ -3087,7 +3088,7 @@ namespace {
       "YOU SHOULD NEVER SEE THIS MESSAGE.  PLEASE REPORT.\r\n",
       "You're already wearing something in both ears.\r\n",
       "You're already wearing something on your shoulders.\r\n",
-      "You're already wearing something as a scouter.\r\n"};
+      "You're already wearing something as a scouter.\r\n"});
 
   /* Where a thing goes when no place is named: the first of these its wear flags and the body allow */
   struct wear_place {
@@ -3095,7 +3096,7 @@ namespace {
     int where;
   };
 
-  constexpr wear_place NATURAL_PLACES[] = {
+  constexpr auto NATURAL_PLACES = std::to_array<wear_place>({
       {wear_flag::finger, WEAR_FINGER_R},
       {wear_flag::neck,   WEAR_NECK_1  },
       {wear_flag::body,   WEAR_BODY    },
@@ -3113,7 +3114,7 @@ namespace {
       {wear_flag::ear,    WEAR_EAR_R   },
       {wear_flag::sh,     WEAR_SH      },
       {wear_flag::eye,    WEAR_EYE     },
-  };
+  });
 
   void wear_message(GameWorld *g, struct char_data *ch, struct obj_data *obj, int where)
   {

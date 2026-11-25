@@ -1,9 +1,10 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/directions.hpp"
 
 /* cardinal directions */
-static constexpr std::string_view dirs_entries[] = {
+static constexpr auto dirs_entries = std::to_array<std::string_view>({
         "north",
         "east",
         "south",
@@ -15,10 +16,10 @@ static constexpr std::string_view dirs_entries[] = {
         "southeast",
         "southwest",
         "inside",
-        "outside"};
+        "outside"});
 static_assert(std::size(dirs_entries) == NUM_OF_DIRS);
 constinit const name_table dirs(dirs_entries);
-static constexpr std::string_view abbr_dirs_entries[] = {
+static constexpr auto abbr_dirs_entries = std::to_array<std::string_view>({
         "n",
         "e",
         "s",
@@ -30,12 +31,11 @@ static constexpr std::string_view abbr_dirs_entries[] = {
         "se",
         "sw",
         "in",
-        "out"};
+        "out"});
 static_assert(std::size(abbr_dirs_entries) == NUM_OF_DIRS);
 constinit const name_table abbr_dirs(abbr_dirs_entries);
 
-const int rev_dir[NUM_OF_DIRS] =
-    {
+const std::array<int, NUM_OF_DIRS> rev_dir = {{
         /* North */ SOUTH,
         /* East  */ WEST,
         /* South */ NORTH,
@@ -47,4 +47,4 @@ const int rev_dir[NUM_OF_DIRS] =
         /* SE    */ NORTHWEST,
         /* SW    */ NORTHEAST,
         /* In    */ OUTDIR,
-        /* Out   */ INDIR};
+        /* Out   */ INDIR}};

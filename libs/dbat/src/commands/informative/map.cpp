@@ -1,5 +1,6 @@
 /* map.c: maps, scanning and searching
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 #include <iterator>
 #include <optional>
@@ -149,10 +150,10 @@ namespace {
     int dx, dy;
   };
 
-  constexpr std::optional<map_step> MAP_STEPS[NUM_OF_DIRS] = {
+  constexpr std::array<std::optional<map_step>, NUM_OF_DIRS> MAP_STEPS = {{
       map_step{0, -1}, map_step{1, 0}, map_step{0, 1}, map_step{-1, 0}, std::nullopt, std::nullopt,
       map_step{-1, -1}, map_step{1, -1}, map_step{1, 1}, map_step{-1, 1}, std::nullopt, std::nullopt,
-  };
+  }};
 
   struct sector_glyph {
     int sect;
@@ -161,7 +162,7 @@ namespace {
   };
 
   /* A room's glyph by its sector; lava (any ground effect) marks some as their lava glyph. Failing all, '-'. */
-  constexpr sector_glyph SECTOR_GLYPHS[] = {
+  constexpr auto SECTOR_GLYPHS = std::to_array<sector_glyph>({
       {SECT_INSIDE,       'i', '2'}, /* quirk: lava inside is drawn as lava on a plain */
       {SECT_FIELD,        'p', '2'},
       {SECT_DESERT,       '!', '7'},
@@ -174,7 +175,7 @@ namespace {
       {SECT_WATER_SWIM,   '+', '+'},
       {SECT_SHOP,         '&', '&'},
       {SECT_IMPORTANT,    '*', '*'},
-  };
+  });
 
   char room_glyph(GameWorld *g, room_vnum room)
   {
@@ -214,23 +215,23 @@ ACMD(do_map)
 
 namespace {
   /* The map's glyphs as they are shown, in the order they are replaced. */
-  constexpr std::pair<std::string_view, std::string_view> GLYPH_COLOURS[] = {
+  constexpr auto GLYPH_COLOURS = std::to_array<std::pair<std::string_view, std::string_view>>({
       {"x", "@RX"}, {"&", "@m$"}, {"*", "@m#"}, {"+", "@c~"}, {"s", "@CS"}, {"i", "@wI"}, {"(", "@WC"}, {"^", "@DM"},
       {"h", "@yH"}, {"`", "@BW"}, {"=", "@bU"}, {"p", "@GP"}, {"f", "@gF"}, {"!", "@YD"}, {"-", "@w:"},
       /* lava */
       {"1", "@4@YC@n"}, {"2", "@4@YP@n"}, {"3", "@4@YH@n"}, {"7", "@4@YD@n"}, {"5", "@4@YM@n"}, {"6", "@4@YF@n"},
       /* closed doors */
       {"8", "@1 @n"},
-  };
+  });
 
   /* The key beside each line of the small map */
-  static constexpr std::string_view MAP_KEY[] = {
+  static constexpr auto MAP_KEY = std::to_array<std::string_view>({
       "    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n",
       "    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n",
       "    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n",
       "    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n",
       "    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n",
-  };
+  });
 
   bool exit_visible(GameWorld *g, struct char_data *ch, int dir)
   {

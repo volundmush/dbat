@@ -5,6 +5,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <climits>
@@ -58,14 +59,14 @@ namespace {
     int context;
   };
 
-  constexpr number_field NUMBERS[] = {
+  constexpr auto NUMBERS = std::to_array<number_field>({
       {'8', "Enter weight : ",           [](obj_data *o, int n) { obj_set_weight(o, LIMIT(n, 0, MAX_OBJ_WEIGHT)); },     CONTEXT_OEDIT_WEIGHT     },
       {'9', "Enter cost : ",             [](obj_data *o, int n) { obj_set_cost(o, LIMIT(n, 0, MAX_OBJ_COST)); },         CONTEXT_OEDIT_COST       },
       {'a', "Enter cost per day : ",     [](obj_data *o, int n) { obj_set_cost_per_day(o, LIMIT(n, 0, MAX_OBJ_RENT)); }, CONTEXT_OEDIT_COSTPERDAY },
       {'b', "Enter timer : ",            [](obj_data *o, int n) { obj_set_timer(o, LIMIT(n, obj_get_type_flag(o) == ITEM_PORTAL ? -1 : 0, MAX_OBJ_TIMER)); },
        CONTEXT_OEDIT_TIMER},
       {'m', "Enter new minimum level: ", [](obj_data *o, int n) { obj_set_level(o, MAX(n, 0)); },                         CONTEXT_OEDIT_LEVEL      },
-  };
+  });
 
   /* A text of the main menu's: its key, prompt, and how it's read and kept */
   struct text_field {
@@ -76,11 +77,11 @@ namespace {
     int context;
   };
 
-  constexpr text_field TEXTS[] = {
+  constexpr auto TEXTS = std::to_array<text_field>({
       {'1', "Enter namelist : ",        obj_get_name,              [](obj_data *o, const std::string &t) { obj_set_name(o, t); },              CONTEXT_OEDIT_EDIT_NAMELIST},
       {'2', "Enter short desc : ",      obj_get_short_description, [](obj_data *o, const std::string &t) { obj_set_short_description(o, t); }, CONTEXT_OEDIT_SHORTDESC   },
       {'3', "Enter long desc :-\r\n| ", obj_get_description,       [](obj_data *o, const std::string &t) { obj_set_description(o, t); },       CONTEXT_OEDIT_LONGDESC    },
-  };
+  });
 
   /* A flags menu of the main menu's, shown and toggled from by number */
   struct flag_menu {
@@ -243,14 +244,14 @@ namespace {
     list_menu show;
   };
 
-  constexpr list_choice LISTS[] = {
+  constexpr auto LISTS = std::to_array<list_choice>({
       {'5', object_editor::mode::type,     type_menu    },
       {'6', object_editor::mode::extras,   extras_menu  },
       {'7', object_editor::mode::wear,     wear_menu    },
       {'n', object_editor::mode::material, material_menu},
       {'p', object_editor::mode::perm,     perm_menu    },
       {'y', object_editor::mode::size,     size_menu    },
-  };
+  });
 
   /* ---- the lists the values are chosen from ---- */
 
@@ -343,7 +344,7 @@ namespace {
     int context;
   };
 
-  constexpr value_question VALUE_1[] = {
+  constexpr auto VALUE_1 = std::to_array<value_question>({
       {ITEM_LIGHT,    {},                                         nullptr,          3},
       {ITEM_SCROLL,   "Spell level : "},
       {ITEM_WAND,     "Spell level : "},
@@ -363,13 +364,13 @@ namespace {
       {ITEM_CONTROL,  "Enter vnum of the vehicle these controls belong to : "},
       {ITEM_PORTAL,   "Which room number is the destination? : "},
       {ITEM_BOARD,    "Enter the minimum admin level to read this board (0 for mortals) : "},
-  };
-  constexpr value_range RANGES_1[] = {
+  });
+  constexpr auto RANGES_1 = std::to_array<value_range>({
       {ITEM_WEAPON,    WEAPON_TYPE_UNARMED, MAX_WEAPON_TYPES  },
       {ITEM_CONTAINER, -1,                  MAX_CONTAINER_SIZE},
-  };
+  });
 
-  constexpr value_question VALUE_2[] = {
+  constexpr auto VALUE_2 = std::to_array<value_question>({
       {ITEM_SCROLL,    {},                                              spells_menu},
       {ITEM_POTION,    {},                                              spells_menu},
       {ITEM_WAND,      "Max number of charges : "},
@@ -386,9 +387,9 @@ namespace {
       {ITEM_DRINKCON,  "Initial drink units : "},
       {ITEM_FOUNTAIN,  "Initial drink units : "},
       {ITEM_BOARD,     "Minimum admin level to write (0 for mortals) : "},
-  };
+  });
 
-  constexpr value_question VALUE_3[] = {
+  constexpr auto VALUE_3 = std::to_array<value_question>({
       {ITEM_LIGHT,     "Number of hours (0 = burnt, -1 is infinite) : "},
       {ITEM_WAND,      "Number of charges remaining : "},
       {ITEM_STAFF,     "Number of charges remaining : "},
@@ -402,8 +403,8 @@ namespace {
       {ITEM_WINDOW,    "Vnum of key to unlock window (-1 for no key) : "},
       {ITEM_PORTAL,    "Vnum of the key to unlock portal (-1 for no key) : "},
       {ITEM_BOARD,     "Minimum admin level to remove messages (0 for mortals) : "},
-  };
-  constexpr value_range RANGES_3[] = {
+  });
+  constexpr auto RANGES_3 = std::to_array<value_range>({
       {ITEM_WEAPON,   1, MAX_WEAPON_SDICE },
       {ITEM_ARMOR,    0, 100              },
       {ITEM_WAND,     0, 20               },
@@ -411,9 +412,9 @@ namespace {
       {ITEM_DRINKCON, 0, NUM_LIQ_TYPES - 1},
       {ITEM_FOUNTAIN, 0, NUM_LIQ_TYPES - 1},
       {ITEM_KEY,      0, 60000            },
-  };
+  });
 
-  constexpr value_question VALUE_4[] = {
+  constexpr auto VALUE_4 = std::to_array<value_question>({
       {ITEM_WAND,     {},                                                              spells_menu},
       {ITEM_STAFF,    {},                                                              spells_menu},
       {ITEM_WEAPON,   {},                                                              attack_menu},
@@ -425,34 +426,34 @@ namespace {
       {ITEM_HATCH,    "Enter default vehicle load room : "},
       {ITEM_PORTAL,   "What is the portal's appearance? (-1 for transparent) : "},
       {ITEM_WINDOW,   {},                                                              window_viewport},
-  };
-  constexpr value_range RANGES_4[] = {
+  });
+  constexpr auto RANGES_4 = std::to_array<value_range>({
       {ITEM_HATCH,  1, 60000               },
       {ITEM_WAND,   1, SKILL_TABLE_SIZE - 1},
       {ITEM_STAFF,  1, SKILL_TABLE_SIZE - 1},
       {ITEM_WEAPON, 0, NUM_ATTACK_TYPES - 1},
       {ITEM_ARMOR,  0, 20                  }, /* a penalty, kept positive */
-  };
+  });
 
-  constexpr value_question VALUE_7[] = {
+  constexpr auto VALUE_7 = std::to_array<value_question>({
       {ITEM_WEAPON, {},                         crit_menu},
       {ITEM_ARMOR,  "Arcane spell failure % : "},
-  };
-  constexpr value_range RANGES_7[] = {
+  });
+  constexpr auto RANGES_7 = std::to_array<value_range>({
       {ITEM_WEAPON, 0,    MAX_CRIT_TYPE},
       {ITEM_ARMOR,  -100, 100          }, /* Want to allow weird armor that improves casting */
-  };
+  });
 
-  constexpr value_question VALUE_9[] = {
+  constexpr auto VALUE_9 = std::to_array<value_question>({
       {ITEM_WEAPON, "Default crit is only on natural 20. Extend this range by: "},
-  };
-  constexpr value_range RANGES_9[] = {
+  });
+  constexpr auto RANGES_9 = std::to_array<value_range>({
       {ITEM_WEAPON, 0, 19},
-  };
+  });
 
-  constexpr value_question VALUE_5[] = {
+  constexpr auto VALUE_5 = std::to_array<value_question>({
       {NOTHING, "Enter object default quality percentage (100% MAX): "},
-  };
+  });
 
   /* The values asked for in turn: 1 to 4, the quality (5), 7 and 9. Value 2's answers are read by hand. */
   const value_step *step_of(int n)

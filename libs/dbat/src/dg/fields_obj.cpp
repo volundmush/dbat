@@ -1,6 +1,7 @@
 /*
  * DG Scripts: the fields of an object, as in %self.vnum% or %obj.cost(10)%. See fields.hpp.
  */
+#include <array>
 #include <algorithm>
 #include <cstdlib>
 
@@ -59,7 +60,7 @@ result value_field(const field_query &, obj_data *o)
 }
 
 /* The fields, by name */
-const field<obj_data> obj_fields[] = {
+const auto obj_fields = std::to_array<field<obj_data>>({
     {"affects", [](const field_query &q, obj_data *o) { return has_flag(q, obj_get_bitvector(o)); }},
     {"carried_by", [](const field_query &, obj_data *o) -> result {
        return obj_get_carried_by(o) ? uid_text(char_get_id(obj_get_carried_by(o))) : "";
@@ -165,7 +166,7 @@ const field<obj_data> obj_fields[] = {
     {"worn_by", [](const field_query &, obj_data *o) -> result {
        return obj_get_worn_by(o) ? uid_text(char_get_id(obj_get_worn_by(o))) : "";
      }},
-};
+});
 
 /* A trigger by this name renames objects with name(...), and the warning that gives isn't logged for it */
 constexpr std::string_view rename_trigger = "Rename Object";

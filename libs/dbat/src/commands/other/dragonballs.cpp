@@ -582,7 +582,7 @@ namespace {
   };
 
   /* Tried in order until one is granted. */
-  constexpr wish WISHES[] = {
+  constexpr auto WISHES = std::to_array<wish>({
       {"knowledge",    grant_boon<KNOWLEDGE>   },
       {"speed",        grant_boon<SPEED>       },
       {"tough",        grant_boon<TOUGH>       },
@@ -602,7 +602,7 @@ namespace {
       {" mortal",      mortality               },
       {"senzu",        senzus                  },
       {"roleplay",     roleplay                },
-  };
+  });
 } // namespace
 
 bool shenron_hears(GameWorld *g, struct char_data *ch, std::string_view text)

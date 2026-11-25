@@ -1,9 +1,10 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/appearance.hpp"
 
 /* For Distinguishing Features */
-static constexpr std::string_view eye_types_entries[] = {
+static constexpr auto eye_types_entries = std::to_array<std::string_view>({
     "blue",
     "black",
     "green",
@@ -15,11 +16,11 @@ static constexpr std::string_view eye_types_entries[] = {
     "crimson",
     "gold",
     "amber",
-    "emerald"};
+    "emerald"});
 static_assert(std::size(eye_types_entries) == 12);
 constinit const name_table eye_types(eye_types_entries);
 
-static constexpr std::string_view aura_types_entries[9] = {
+static constexpr std::array<std::string_view, 9> aura_types_entries = {{
     "white",
     "blue",
     "red",
@@ -28,29 +29,29 @@ static constexpr std::string_view aura_types_entries[9] = {
     "purple",
     "yellow",
     "black",
-    "orange"};
+    "orange"}};
 static_assert(std::size(aura_types_entries) == 9);
 constinit const name_table aura_types(aura_types_entries);
 
-static constexpr std::string_view hairl_types_entries[] = {
+static constexpr auto hairl_types_entries = std::to_array<std::string_view>({
     "bald",
     "short",
     "medium",
     "long",
-    "really long"};
+    "really long"});
 static_assert(std::size(hairl_types_entries) == 5);
 constinit const name_table hairl_types(hairl_types_entries);
 
-static constexpr std::string_view FHA_types_entries[] = {
+static constexpr auto FHA_types_entries = std::to_array<std::string_view>({
     "stubby",
     "short",
     "medium",
     "long",
-    "really long"};
+    "really long"});
 static_assert(std::size(FHA_types_entries) == 5);
 constinit const name_table FHA_types(FHA_types_entries);
 
-static constexpr std::string_view hairc_types_entries[] = {
+static constexpr auto hairc_types_entries = std::to_array<std::string_view>({
     "headed",
     "black",
     "brown",
@@ -64,11 +65,11 @@ static constexpr std::string_view hairc_types_entries[] = {
     "purple",
     "silver",
     "crimson",
-    "white"};
+    "white"});
 static_assert(std::size(hairc_types_entries) == 14);
 constinit const name_table hairc_types(hairc_types_entries);
 
-static constexpr std::string_view hairs_types_entries[] = {
+static constexpr auto hairs_types_entries = std::to_array<std::string_view>({
     "",
     "with a plain look",
     "in a mohawk",
@@ -80,11 +81,11 @@ static constexpr std::string_view hairs_types_entries[] = {
     "with a fade look",
     "in a crew cut",
     "with a feathered look",
-    "in dred locks"};
+    "in dred locks"});
 static_assert(std::size(hairs_types_entries) == 12);
 constinit const name_table hairs_types(hairs_types_entries);
 
-static constexpr std::string_view skin_types_entries[] = {
+static constexpr auto skin_types_entries = std::to_array<std::string_view>({
     "white",
     "black",
     "green",
@@ -96,6 +97,6 @@ static constexpr std::string_view skin_types_entries[] = {
     "aqua",
     "pink",
     "purple",
-    "tan"};
+    "tan"});
 static_assert(std::size(skin_types_entries) == 12);
 constinit const name_table skin_types(skin_types_entries);

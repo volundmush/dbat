@@ -1,5 +1,6 @@
 /* help.c: help, commands, toggles, colour, history, time and weather
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 #include "dbat/name_table.hpp"
 #include <cstdlib>
@@ -233,7 +234,7 @@ ACMD(do_gen_ps)
   }
 }
 
-static constexpr std::string_view ctypes_entries[] = {"off", "on"};
+static constexpr auto ctypes_entries = std::to_array<std::string_view>({"off", "on"});
 static constexpr name_table ctypes(ctypes_entries); /* by C_OFF and C_ON */
 
 ACMD(do_color)

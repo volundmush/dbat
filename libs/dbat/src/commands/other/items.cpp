@@ -127,8 +127,8 @@ struct grade {
   std::string_view word;
   int skill;
 };
-constexpr grade GRADES[]        = {{"mid", 50}, {"high", 75}, {"highest", 100}};
-constexpr grade WEAPON_GRADES[] = {{"mid", 30}, {"high", 50}, {"higher", 75}, {"highest", 100}};
+constexpr auto GRADES = std::to_array<grade>({{"mid", 50}, {"high", 75}, {"highest", 100}});
+constexpr auto WEAPON_GRADES = std::to_array<grade>({{"mid", 30}, {"high", 50}, {"higher", 75}, {"highest", 100}});
 
 size_t pick_grade(GameWorld *g, struct char_data *ch, std::string_view word, int skill, std::span<const grade> grades,
                   std::string_view syntax)
@@ -484,11 +484,11 @@ namespace {
   };
   /* The levels each bonus starts at */
   constexpr std::array<int, 7> UPGRADE_TIERS = {90, 80, 70, 60, 50, 25, 0};
-  constexpr upgradable UPGRADABLE[] = {
+  constexpr auto UPGRADABLE = std::to_array<upgradable>({
       {"powerlevel", 75, {5000, 2500, 2000, 1300, 500, 250, 150}, gainBasePL},
       {"ki", 40, {3650, 2450, 1800, 1250, 400, 200, 120}, gainBaseKI},
       {"stamina", 50, {3650, 2450, 1800, 1250, 500, 200, 120}, gainBaseST},
-  };
+  });
 
   const upgradable *upgradable_named(std::string_view name)
   {

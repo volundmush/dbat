@@ -2,6 +2,7 @@
 // Created by basti on 10/22/2021.
 //
 
+#include <array>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
@@ -67,7 +68,7 @@ void print_usage(std::string_view program)
 }
 
 using arity = option::arity;
-const option OPTIONS[] = {
+const auto OPTIONS = std::to_array<option>({
     {'f', arity::value, {}, [](launch &, std::string_view) {}}, /* read before the configuration is loaded */
     {'o', arity::value, "SYSERR: File name to log to expected after option -o.",
      [](launch &l, std::string_view file) {
@@ -118,7 +119,7 @@ const option OPTIONS[] = {
        print_usage(l.program);
        std::exit(0);
      }},
-};
+});
 
 /* The option an argument such as "-d" or "-dlib" is, or nullptr */
 const option *option_for(std::string_view arg)

@@ -1,4 +1,5 @@
 #pragma once
+#include <span>
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
@@ -42,7 +43,7 @@ void race_display_trans_req(GameWorld *g, char_data *ch);
 void race_echo_transform(GameWorld *g, char_data *ch, int tier);
 void race_echo_revert(GameWorld *g, char_data *ch, int tier);
 
-const int64_t *race_soft_cap_table(const char_data *ch);
+std::span<const int64_t> race_soft_cap_table(const char_data *ch);
 softcap_type race_soft_cap_type(const char_data *ch);
 
 int get_size(struct char_data *ch);

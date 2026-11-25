@@ -1,3 +1,4 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/races.hpp"
@@ -5,7 +6,7 @@
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 
-static constexpr std::string_view race_names_entries[] = {
+static constexpr auto race_names_entries = std::to_array<std::string_view>({
     "human",
     "saiyan",
     "icer",
@@ -29,11 +30,11 @@ static constexpr std::string_view race_names_entries[] = {
     "arlian",
     "dragon",
     "mechanical",
-    "spirit"};
+    "spirit"});
 static_assert(std::size(race_names_entries) == NUM_RACES);
 constinit const name_table race_names(race_names_entries);
 
-static constexpr std::string_view race_abbrevs_entries[] = {
+static constexpr auto race_abbrevs_entries = std::to_array<std::string_view>({
     "Hum",
     "Sai",
     "Ice",
@@ -57,11 +58,11 @@ static constexpr std::string_view race_abbrevs_entries[] = {
     "Arl",
     "Mnd",
     "Mec",
-    "Spi"};
+    "Spi"});
 static_assert(std::size(race_abbrevs_entries) == NUM_RACES);
 constinit const name_table race_abbrevs(race_abbrevs_entries);
 
-static constexpr std::string_view pc_race_types_entries[] = {
+static constexpr auto pc_race_types_entries = std::to_array<std::string_view>({
     "Human",
     "Saiyan",
     "Icer",
@@ -85,6 +86,6 @@ static constexpr std::string_view pc_race_types_entries[] = {
     "Arlian",
     "Dragon",
     "mechanical",
-    "Spirit"};
+    "Spirit"});
 static_assert(std::size(pc_race_types_entries) == NUM_RACES);
 constinit const name_table pc_race_types(pc_race_types_entries);

@@ -202,12 +202,12 @@ ACMD(do_carry)
 
 namespace {
   /* By how one is put down: gently, hastily, knocked loose by a hit, or as the one carried leaves the game */
-  constexpr act_msgs CARRY_DROPS[] = {
+  constexpr auto CARRY_DROPS = std::to_array<act_msgs>({
       {"@WYou gently set @C$N@W down on the ground.@n",                  "@C$n @Wgently sets you down on the ground.@n",                  "@C$n @Wgently sets @c$N@W down on the ground.@n",                  true},
       {"@WYou set @C$N@W hastily onto the ground.@n",                    "@C$n @Wsets you hastily onto the ground.@n",                    "@C$n @Wsets @c$N@W hastily onto the ground.@n",                    true},
       {"@WYou have @C$N@W knocked out of your arms and onto the ground!@n", "@WYou are knocked out of @C$n's@W arms and onto the ground!@n", "@C$n @Whas @c$N@W knocked out of $s arms and onto the ground!@n", true},
       {"@WYou stop carrying @C$N@W for some reason.@n",                  "@C$n @Wstops carrying you for some reason.@n",                  "@C$n @Wstops carrying @c$N@W for some reason.@n",                  true},
-  };
+  });
 } // namespace
 
 /* Handles dropping someone you are carrying. */
@@ -237,36 +237,36 @@ namespace {
     std::string_view shown{};
   };
 
-  constexpr landing EARTH[] = {
+  constexpr auto EARTH = std::to_array<landing>({
       {"Nexus City", 300}, {"South Ocean", 800}, {"Nexus Field", 1150}, {"Cherry Blossom Mountain", 1180}, {"Sandy Desert", 1287},
       {"Northern Plains", 1428}, {"Korin's Tower", 1456}, {"Kami's Lookout", 1506}, {"Shadow Forest", 1636}, {"Decrepit Area", 1710},
-      {"West City", 19510}, {"Hercule Beach", 2141}, {"Satan City", 13020}};
-  constexpr landing FRIGID[] = {
+      {"West City", 19510}, {"Hercule Beach", 2141}, {"Satan City", 13020}});
+  constexpr auto FRIGID = std::to_array<landing>({
       {"Ice Crown City", 4264}, {"Ice Highway", 4300}, {"Topica Snowfield", 4351}, {"Glug's Volcano", 4400}, {"Platonic Sea", 4600},
       {"Slave City", 4800}, {"Acturian Woods", 5100}, {"Desolate Demesne", 5150}, {"Chateau Ishran", 5165}, {"Wyrm Spine Mountain", 5200},
-      {"Cloud Ruler Temple", 5500}, {"Koltoan Mine", 4944}};
-  constexpr landing KONACK[] = {
+      {"Cloud Ruler Temple", 5500}, {"Koltoan Mine", 4944}});
+  constexpr auto KONACK = std::to_array<landing>({
       {"Tiranoc City", 8006}, {"Great Oroist Temple", 8300}, {"Elzthuan Forest", 8400}, {"Mazori Farm", 8447}, {"Dres", 8500},
       {"Colvian Farm", 8600}, {"St Alucia", 8700}, {"Meridius Memorial", 8800}, {"Desert of Illusion", 8900}, {"Plains of Confusion", 8954},
       {"Turlon Fair", 9200}, {"Wetlands", 9700}, {"Kerberos", 9855}, {"Shaeras Mansion", 9864}, {"Slavinus Ravine", 9900},
-      {"Furian Citadel", 9949}};
-  constexpr landing VEGETA[] = {
+      {"Furian Citadel", 9949}});
+  constexpr auto VEGETA = std::to_array<landing>({
       {"Vegetos City", 2226}, {"Blood Dunes", 2600}, {"Ancestral Mountains", 2616}, {"Destopa Swamp", 2709}, {"Pride forest", 2800},
-      {"Pride Tower", 2899}, {"Ruby Cave", 2615}};
-  constexpr landing NAMEK[] = {
+      {"Pride Tower", 2899}, {"Ruby Cave", 2615}});
+  constexpr auto NAMEK = std::to_array<landing>({
       {"Senzu Village", 11600}, {"Guru's House", 10182}, {"Crystalline Cave", 10474}, {"Elder Village", 13300}, {"Frieza's Ship", 10203},
-      {"Kakureta Village", 10922}};
-  constexpr landing AETHER[]  = {{"Haven City", 12010}, {"Serenity Lake", 12103}, {"Kaiju Forest", 12300}, {"Ortusian Temple", 12400}, {"Silent Glade", 12480}};
-  constexpr landing YARDRAT[] = {{"Yardra City", 14008}, {"Jade Forest", 14100}, {"Jade Cliffs", 14200}, {"Mount Valaria", 14300}};
-  constexpr landing CERRIA[]  = {{"Cerria Colony", 17531}, {"Crystalline Forest", 7950}, {"Fistarl Volcano", 17420}};
-  constexpr landing ZENNITH[] = {{"Utatlan City", 3412}, {"Zenith Jungle", 3520}, {"Ancient Castle", 19600}};
-  constexpr landing KANASSA[] = {{"Aquis City", 14904}, {"Yunkai Pirate Base", 15655}};
-  constexpr landing ARLIA[]   = {{"Janacre", 16009}, {"Arlian Wasteland", 16544}, {"Arlia Mine", 16600}};
+      {"Kakureta Village", 10922}});
+  constexpr auto AETHER = std::to_array<landing>({{"Haven City", 12010}, {"Serenity Lake", 12103}, {"Kaiju Forest", 12300}, {"Ortusian Temple", 12400}, {"Silent Glade", 12480}});
+  constexpr auto YARDRAT = std::to_array<landing>({{"Yardra City", 14008}, {"Jade Forest", 14100}, {"Jade Cliffs", 14200}, {"Mount Valaria", 14300}});
+  constexpr auto CERRIA = std::to_array<landing>({{"Cerria Colony", 17531}, {"Crystalline Forest", 7950}, {"Fistarl Volcano", 17420}});
+  constexpr auto ZENNITH = std::to_array<landing>({{"Utatlan City", 3412}, {"Zenith Jungle", 3520}, {"Ancient Castle", 19600}});
+  constexpr auto KANASSA = std::to_array<landing>({{"Aquis City", 14904}, {"Yunkai Pirate Base", 15655}});
+  constexpr auto ARLIA = std::to_array<landing>({{"Janacre", 16009}, {"Arlian Wasteland", 16544}, {"Arlia Mine", 16600}});
 
   constexpr std::string_view YOU_GUESS = "You don't know where that made up place is, but decided to land anyway.";
   constexpr std::string_view you_guess = "you don't know where that made up place is, but decided to land anyway.";
 
-  const orbit ORBITS[] = {
+  const auto ORBITS = std::to_array<orbit>({
       {50, EARTH, 300, YOU_GUESS,
        "@D------------------[ @GEarth@D ]------------------@c\n"
        "Nexus City, South Ocean, Nexus field, Cherry Blossom Mountain,\n"
@@ -321,7 +321,7 @@ namespace {
        "@D------------------[ @MArlia@D ]------------------@c\n"
        "Janacre, Arlian Wasteland, Arlia Mine.\n"
        "@D---------------------------------------------@n\n"},
-  };
+  });
 
   const orbit *orbit_at(room_vnum room)
   {
@@ -858,13 +858,13 @@ namespace {
     int concentration;
   };
 
-  constexpr charge_limit CHARGE_LIMITS[] = {
+  constexpr auto CHARGE_LIMITS = std::to_array<charge_limit>({
       {.51, -1,  INT_MAX},
       {.5,  .51, 100    },
       {.4,  .5,  80     },
       {.3,  .4,  70     },
       {.2,  .3,  60     },
-  };
+  });
 
   bool overcharged(GameWorld *g, struct char_data *ch)
   {
@@ -881,7 +881,7 @@ namespace {
     int wait;
   };
 
-  constexpr heavy_gravity HEAVY_GRAVITIES[] = {
+  constexpr auto HEAVY_GRAVITIES = std::to_array<heavy_gravity>({
       {10,    10000,     PULSE_1SEC},
       {20,    30000,     PULSE_2SEC},
       {30,    100000,    PULSE_3SEC},
@@ -895,7 +895,7 @@ namespace {
       {1000,  35000000,  PULSE_5SEC},
       {5000,  100000000, PULSE_5SEC},
       {10000, 200000000, PULSE_5SEC},
-  };
+  });
 
   void slowed_by_gravity(GameWorld *g, struct char_data *ch)
   {
@@ -1161,22 +1161,22 @@ struct door_needs {
   bool open = false, closed = false, unlocked = false, locked = false;
 };
 
-static constexpr std::string_view cmd_door_entries[] = {
+static constexpr auto cmd_door_entries = std::to_array<std::string_view>({
         "open",
         "close",
         "unlock",
         "lock",
-        "pick"};
+        "pick"});
 static_assert(std::size(cmd_door_entries) == NUM_DOOR_CMD);
 constinit const name_table cmd_door(cmd_door_entries);
 
-static constexpr door_needs flags_door[] = {
+static constexpr auto flags_door = std::to_array<door_needs>({
     {.closed = true, .unlocked = true}, /* open */
     {.open = true},                     /* close */
     {.closed = true, .locked = true},   /* unlock */
     {.closed = true, .unlocked = true}, /* lock */
     {.closed = true, .locked = true},   /* pick */
-};
+});
 static_assert(std::size(flags_door) == NUM_DOOR_CMD);
 
 namespace {
@@ -1216,7 +1216,7 @@ namespace {
     std::string_view you, they, inside_heard, outside_heard; /* you: none for a ship's hatch */
   };
 
-  const door_change DOOR_CHANGES[] = {
+  const auto DOOR_CHANGES = std::to_array<door_change>({
       {change::clear, container_flag::closed, exit_flag::closed, false,
        {"@wThe ship hatch opens slowly and settles onto the ground outside.\r\n", "@wThe ship hatch opens slowly and settles onto the ground.\r\n", "@wA great vortex forms as air begins to get sucked out into the void!\r\n"},
        {"@wThe ship hatch opens slowly and settles onto the ground.\r\n", "@wThe ship hatch opens slowly.\r\n", "@wThe air starts getting sucked out into space as the hatch opens!\r\n"},
@@ -1227,7 +1227,7 @@ namespace {
        "@wYou close @c$p@w.", "@C$n@w closes @c$p@w.", "@wThe door to {}@w is closed from the other side.\r\n", "@wThe door to {}@w is closed from the other side.\r\n"},
       {change::clear, container_flag::locked, exit_flag::locked, true, {}, {}, {}, {}, {}, {}},
       {change::set, container_flag::locked, exit_flag::locked, true, {}, {}, {}, {}, {}, {}},
-  };
+  });
 
   void send_to_room_of(GameWorld *g, room_vnum room, std::string_view fmt, struct obj_data *about)
   {
@@ -1934,7 +1934,7 @@ namespace {
     room_vnum space, only_from;
   };
 
-  constexpr launch LAUNCHES[] = {
+  constexpr auto LAUNCHES = std::to_array<launch>({
       {room_flag::earth,   50,  NOWHERE},
       {room_flag::cerria,  198, NOWHERE},
       {room_flag::vegeta,  53,  NOWHERE},
@@ -1945,7 +1945,7 @@ namespace {
       {room_flag::aether,  55,  NOWHERE},
       {room_flag::yardrat, 56,  NOWHERE},
       {room_flag::arlia,   59,  NOWHERE},
-  };
+  });
 
   void fly_space(GameWorld *g, struct char_data *ch)
   {

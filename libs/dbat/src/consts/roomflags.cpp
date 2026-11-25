@@ -1,8 +1,9 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/roomflags.hpp"
 
-static constexpr std::string_view room_bits_entries[] = {
+static constexpr auto room_bits_entries = std::to_array<std::string_view>({
     "DARK",
     "DEATH",
     "NO_MOB",
@@ -68,6 +69,6 @@ static constexpr std::string_view room_bits_entries[] = {
     "FERTILE2",
     "FISHING",
     "FRESHWATFISH",
-    "CANREMODEL"};
+    "CANREMODEL"});
 static_assert(std::size(room_bits_entries) == flag_count<room_flag>);
 constinit const name_table room_bits(room_bits_entries);

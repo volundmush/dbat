@@ -1,10 +1,11 @@
 #pragma once
+#include <array>
 #include "dbat/consts/types.hpp"
 #include "dbat/consts/maximums.hpp"
 #include "dbat/spells.hpp"
 
 // global variables
-extern const struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES];
+extern const std::array<attack_hit_type, NUM_ATTACK_TYPES> attack_hit_text;
 
 // functions
 void death_cry(GameWorld *g, struct char_data *ch);

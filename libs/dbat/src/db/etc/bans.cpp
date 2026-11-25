@@ -2,6 +2,7 @@
  * The banned sites, etc/badsites: "<no|new|select|all> <site> <date> <who banned it>", any number of them, in the
  * order they were banned. And the invalid names, misc/xnames: a name, or part of one, a line.
  */
+#include <array>
 #include <cstring>
 #include <filesystem>
 #include <optional>
@@ -17,7 +18,7 @@
 
 namespace {
 
-static constexpr std::string_view ban_types[] = {"no", "new", "select", "all", "ERROR"};
+static constexpr auto ban_types = std::to_array<std::string_view>({"no", "new", "select", "all", "ERROR"});
 
 void write_bans(io::text_writer &out, const ban_list_element *node)
 {

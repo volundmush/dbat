@@ -1,3 +1,4 @@
+#include <span>
 #include <optional>
 #include <array>
 #include <cstdlib>
@@ -279,7 +280,7 @@ static int calcTier(char_data *ch)
 int64_t calc_soft_cap(char_data *ch)
 {
   int tier               = calcTier(ch);
-  const int64_t *softmap = race_soft_cap_table(ch);
+  std::span<const int64_t> softmap = race_soft_cap_table(ch);
   return ch->level * softmap[tier];
 }
 
@@ -818,12 +819,12 @@ static void cureStatusPoison(GameWorld *g, char_data *ch, bool announce)
   affect_from_char(g, ch, SPELL_POISON);
 }
 
-static constexpr std::string_view limb_names[] = {
+static constexpr auto limb_names = std::to_array<std::string_view>({
     {},
     "right arm",
     "left arm",
     "right leg",
-    "left leg"};
+    "left leg"});
 
 static void restoreLimbs(GameWorld *g, char_data *ch, bool announce)
 {

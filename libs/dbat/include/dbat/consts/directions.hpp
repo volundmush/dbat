@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "dbat/name_table.hpp"
 #include <string_view>
 
@@ -20,5 +21,5 @@ constexpr int NUM_OF_DIRS = 12; /* number of directions in a room (nsewud) */
 
 extern const name_table dirs; /* NUM_OF_DIRS of them */
 extern const name_table abbr_dirs; /* NUM_OF_DIRS of them */
-extern const int rev_dir[NUM_OF_DIRS];
+extern const std::array<int, NUM_OF_DIRS> rev_dir;
 

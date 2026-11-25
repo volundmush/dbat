@@ -13,6 +13,7 @@
    remove levels. A poster can always remove their own messages. Messages
    cannot be removed while someone is still writing them. */
 
+#include <array>
 #include <cstddef>
 #include <cstdlib>
 
@@ -245,7 +246,7 @@ static bool mark_read(GameWorld *g, struct board_info *board, const struct board
 }
 
 /* Reads "Board File" level line: read write remove count version. Missing fields get defaults. */
-static void parse_header(GameWorld *g, std::string_view line, int t[5], obj_vnum vnum, const std::string &path)
+static void parse_header(GameWorld *g, std::string_view line, std::array<int, 5> &t, obj_vnum vnum, const std::string &path)
 {
   io::fields f(line);
   for (int i = 0; i < 5; i++)
@@ -340,7 +341,7 @@ static io::loaded<struct board_info *> load_board(GameWorld *g, obj_vnum board_v
   }
 
   /* oddly enough, most errors in board files can be ignored, setting defaults */
-  int t[5] = {};
+  std::array<int, 5> t = {};
   parse_header(g, file->line().value_or(""), t, board_vnum, path);
   if (t[4] != CURRENT_BOARD_VER) {
     mud_log("SYSERR: Board file '{}' [vnum: {:d}] is format version {:d}; only version {:d} is supported. Not loaded.",

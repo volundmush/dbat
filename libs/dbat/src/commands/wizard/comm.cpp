@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <climits>
 #include "dbat/name_table.hpp"
 #include <cstdlib>
@@ -203,7 +204,7 @@ namespace {
       send_to_char(g, ch, "{}{}{}\r\n", before, text, after);
   }
 
-  static constexpr std::string_view logtypes_entries[] = {"off", "brief", "normal", "complete"};
+  static constexpr auto logtypes_entries = std::to_array<std::string_view>({"off", "brief", "normal", "complete"});
   static constexpr name_table logtypes(logtypes_entries);
 } // namespace
 

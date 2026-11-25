@@ -6,6 +6,7 @@
  * character, as though it were the line end, and gets "\r\n" (quirk: a line in pieces loses one in each piece). A
  * page longer than MAX_STRING_LENGTH isn't read.
  */
+#include <array>
 #include <algorithm>
 #include <optional>
 #include <string>
@@ -36,7 +37,7 @@ struct text_page {
 };
 
 /* in the order they are read at boot */
-constexpr text_page pages[] = {
+constexpr auto pages = std::to_array<text_page>({
     {"news",       NEWS_FILE,       &GameWorld::news,       false, "Cannot read news\r\n",              "Cannot read news\r\n"            },
     {"credits",    CREDITS_FILE,    &GameWorld::credits,    false, "Cannot read credits\r\n",           "Cannot read credits\r\n"         },
     {"motd",       MOTD_FILE,       &GameWorld::motd,       false, "Cannot read motd\r\n",              "Cannot read motd\r\n"            },
@@ -51,12 +52,12 @@ constexpr text_page pages[] = {
     {"ihelp",      IHELP_PAGE_FILE, &GameWorld::ihelp,      false, "Cannot read help front page\r\n",   {}                                },
     {"greetings",  GREETINGS_FILE,  &GameWorld::GREETINGS,  true,  "Cannot read greetings.\r\n",        ""                                },
     {"greetansi",  GREETANSI_FILE,  &GameWorld::GREETANSI,  true,  "Cannot read greetings.\r\n",        ""                                },
-};
+});
 
 /* the order "reload all" reads them in, after the levels */
-static constexpr std::string_view reload_all_order[] = {"greetings", "greetansi", "wizlist", "immlist",  "news",
+static constexpr auto reload_all_order = std::to_array<std::string_view>({"greetings", "greetansi", "wizlist", "immlist",  "news",
                                             "credits",   "motd",      "imotd",   "help",     "info",
-                                            "policy",    "handbook",  "background"};
+                                            "policy",    "handbook",  "background"});
 
 const text_page &page_named(std::string_view keyword)
 {

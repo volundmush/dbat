@@ -5,6 +5,7 @@
 *  This is an original file created by me for Dragonball Advent Truth     *
 *  to house all player level object editing functions -- Iovan 1/6/13     *
 ************************************************************************ */
+#include <array>
 #include <optional>
 #include <string_view>
 
@@ -29,18 +30,18 @@ namespace {
   using step = pobj_order::step;
 
   /* What custom equipment is, by its type */
-  static constexpr std::string_view CUSTOM_TYPES[17] = {"Error",      "Armor Slot", "Gi Slot",   "Wrist Slot", "Ear Slot",  "Finger Slot",
+  static constexpr std::array<std::string_view, 17> CUSTOM_TYPES = {{"Error",      "Armor Slot", "Gi Slot",   "Wrist Slot", "Ear Slot",  "Finger Slot",
                                             "Eye Slot",   "Hands Slot", "Feet Slot", "Belt Slot",  "Legs Slot", "Arms Slot",
-                                            "Head Slot",  "Neck Slot",  "Back Slot", "Shoulder Slot", "Weapon"};
+                                            "Head Slot",  "Neck Slot",  "Back Slot", "Shoulder Slot", "Weapon"}};
 
   /* Where custom equipment of each type (but the weapon) is worn */
-  constexpr std::optional<wear_flag> CUSTOM_WEAR[16] = {std::nullopt,   wear_flag::body, wear_flag::about, wear_flag::wrist, wear_flag::ear,  wear_flag::finger,
+  constexpr std::array<std::optional<wear_flag>, 16> CUSTOM_WEAR = {{std::nullopt,   wear_flag::body, wear_flag::about, wear_flag::wrist, wear_flag::ear,  wear_flag::finger,
                                    wear_flag::eye,  wear_flag::hands, wear_flag::feet, wear_flag::waist, wear_flag::legs, wear_flag::arms,
-                                   wear_flag::head, wear_flag::neck, wear_flag::pack,  wear_flag::sh};
+                                   wear_flag::head, wear_flag::neck, wear_flag::pack,  wear_flag::sh}};
 
   /* A custom weapon's kind, and the damage it does */
-  static constexpr std::string_view CUSTOM_WEAPONS[7] = {"Not A Weapon", "Sword", "Dagger", "Spear", "Club", "Gun", "Brawling"};
-  constexpr int CUSTOM_DAMAGE[7]          = {0, TYPE_SLASH, TYPE_PIERCE, TYPE_STAB, TYPE_CRUSH, TYPE_BLAST, TYPE_POUND};
+  static constexpr std::array<std::string_view, 7> CUSTOM_WEAPONS = {{"Not A Weapon", "Sword", "Dagger", "Spear", "Club", "Gun", "Brawling"}};
+  constexpr std::array<int, 7> CUSTOM_DAMAGE = {{0, TYPE_SLASH, TYPE_PIERCE, TYPE_STAB, TYPE_CRUSH, TYPE_BLAST, TYPE_POUND}};
 
   constexpr obj_vnum CUSTOM_ARMOR  = 20099;
   constexpr obj_vnum CUSTOM_WEAPON = 20098;
@@ -54,11 +55,11 @@ namespace {
     bool no_colour; /* colour codes refused */
   };
 
-  constexpr order_text TEXTS[] = {
+  constexpr auto TEXTS = std::to_array<order_text>({
       {step::name,       &pobj_order::name,       100, "@wToo long. Limit is 100 character.@n\r\n", true },
       {step::short_desc, &pobj_order::short_desc, 150, "@wToo long. Limit is 200 character.@n\r\n", false}, /* quirk: says 200 */
       {step::long_desc,  &pobj_order::long_desc,  200, "@wToo long. Limit is 200 character.@n\r\n", false},
-  };
+  });
 
   void custom_menu(GameWorld *g, struct descriptor_data *d)
   {

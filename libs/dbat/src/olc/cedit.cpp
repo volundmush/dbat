@@ -3,6 +3,7 @@
  * Copyright 2002-2003 Kip Potter   (kip_potter@hotmail.com)            *
  * A graphical in-game game configuration utility for OasisOLC.         *
  ************************************************************************/
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <cerrno>
@@ -89,7 +90,7 @@ struct cedit_option {
 #define RANGE(lo, hi) .range = true, .min = (lo), .max = (hi)
 #define MENU(m, c, l) .menu = (m), .choice = (c), .label = (l)
 
-static const struct cedit_option cedit_options[] = {
+static const auto cedit_options = std::to_array<cedit_option>({
     /* Game play options: menu G, apart from the two creation options (menu N) */
     {.key = "pk_allowed", .comment = "* Is player killing allowed on the mud?\n", BOOL(play.pk_allowed),
      .section = "Game Play Options", MENU('G', 'A', "Player Killing Allowed  ")},
@@ -280,7 +281,7 @@ static const struct cedit_option cedit_options[] = {
      RANGE(0, 30), MENU('T', 'I', "Currents Update Time "), .prompt = "Enter Current update time : "},
     {.key = "method", .comment = "*Character creation method.\n", METHOD(creation.method), RANGE(0, NUM_CREATION_METHODS - 1),
      MENU('N', 'A', "Character Creation Method ")},
-};
+});
 
 namespace {
   /* The option the config file calls tag, or null */

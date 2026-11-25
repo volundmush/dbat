@@ -1,9 +1,10 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/prefflags.hpp"
 
 /* PRF_x */
-static constexpr std::string_view preference_bits_entries[] = {
+static constexpr auto preference_bits_entries = std::to_array<std::string_view>({
     "BRIEF",
     "COMPACT",
     "DEAF",
@@ -63,6 +64,6 @@ static constexpr std::string_view preference_bits_entries[] = {
     "INSTRUCT",
     "GHEALTH",
     "IHEALTH",
-    "ENERGIZE"};
+    "ENERGIZE"});
 static_assert(std::size(preference_bits_entries) == flag_count<pref_flag>);
 constinit const name_table preference_bits(preference_bits_entries);

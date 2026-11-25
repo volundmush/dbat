@@ -1,3 +1,4 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/itemdata.hpp"
@@ -6,7 +7,7 @@
  * WEAR_x - for eq list
  * Not used by type_name() so no \n.
  */
-static constexpr std::string_view wear_where_entries[] = {
+static constexpr auto wear_where_entries = std::to_array<std::string_view>({
     "@c<@CUsed Somewhere     @c>@n ",
     "@c<@CWorn On Finger     @c>@n ",
     "@c<@CWorn On Finger     @c>@n ",
@@ -29,12 +30,12 @@ static constexpr std::string_view wear_where_entries[] = {
     "@c<@CWorn In Ear        @c>@n ",
     "@c<@CWorn In Ear        @c>@n ",
     "@c<@CWorn On Shoulders  @c>@n ",
-    "@c<@CWorn On Eye        @c>@n "};
+    "@c<@CWorn On Eye        @c>@n "});
 static_assert(std::size(wear_where_entries) == NUM_WEARS);
 constinit const name_table wear_where(wear_where_entries);
 
 /* WEAR_x - for stat */
-static constexpr std::string_view equipment_types_entries[] = {
+static constexpr auto equipment_types_entries = std::to_array<std::string_view>({
     "Used as light",
     "Worn on right finger",
     "Worn on left finger",
@@ -57,12 +58,12 @@ static constexpr std::string_view equipment_types_entries[] = {
     "Worn in ear",
     "Worn in ear",
     "Worn on shoulders",
-    "Worn on eye"};
+    "Worn on eye"});
 static_assert(std::size(equipment_types_entries) == NUM_WEARS);
 constinit const name_table equipment_types(equipment_types_entries);
 
 /* ITEM_x (ordinal object types) */
-static constexpr std::string_view item_types_entries[] = {
+static constexpr auto item_types_entries = std::to_array<std::string_view>({
     "UNDEFINED",
     "LIGHT",
     "SCROLL",
@@ -99,12 +100,12 @@ static constexpr std::string_view item_types_entries[] = {
     "YUM",
     "PLANT",
     "FISHINGPOLE",
-    "FISHBAIT"};
+    "FISHBAIT"});
 static_assert(std::size(item_types_entries) == NUM_ITEM_TYPES);
 constinit const name_table item_types(item_types_entries);
 
 /* ITEM_WEAR_ (wear bitvector) */
-static constexpr std::string_view wear_bits_entries[] = {
+static constexpr auto wear_bits_entries = std::to_array<std::string_view>({
     "TAKE",
     "FINGER",
     "NECK",
@@ -123,12 +124,12 @@ static constexpr std::string_view wear_bits_entries[] = {
     "BACK",
     "EAR",
     "SHOULDERS",
-    "SCOUTER"};
+    "SCOUTER"});
 static_assert(std::size(wear_bits_entries) == flag_count<wear_flag>);
 constinit const name_table wear_bits(wear_bits_entries);
 
 /* ITEM_x (extra bits) */
-static constexpr std::string_view extra_bits_entries[] = {
+static constexpr auto extra_bits_entries = std::to_array<std::string_view>({
     "GLOW",
     "HUM",
     "NO_RENT",
@@ -223,22 +224,22 @@ static constexpr std::string_view extra_bits_entries[] = {
     "MATUREPLANT",
     "CARDCASE",
     "MOB_NOPICKUP",
-    "NOSTEAL"};
+    "NOSTEAL"});
 static_assert(std::size(extra_bits_entries) == flag_count<extra_flag>);
 constinit const name_table extra_bits(extra_bits_entries);
 
 /* CONT_x */
-static constexpr std::string_view container_bits_entries[] = {
+static constexpr auto container_bits_entries = std::to_array<std::string_view>({
     "CLOSEABLE",
     "PICKPROOF",
     "CLOSED",
     "LOCKED",
-};
+});
 static_assert(std::size(container_bits_entries) == flag_count<container_flag>);
 constinit const name_table container_bits(container_bits_entries);
 
 /* LIQ_x */
-static constexpr std::string_view drinks_entries[] = {
+static constexpr auto drinks_entries = std::to_array<std::string_view>({
         "water",
         "beer",
         "wine",
@@ -254,12 +255,12 @@ static constexpr std::string_view drinks_entries[] = {
         "coffee",
         "blood",
         "salt water",
-        "clear water"};
+        "clear water"});
 static_assert(std::size(drinks_entries) == NUM_LIQ_TYPES);
 constinit const name_table drinks(drinks_entries);
 
 /* MATERIAL_ */
-static constexpr std::string_view material_names_entries[] = {
+static constexpr auto material_names_entries = std::to_array<std::string_view>({
     "bone",
     "ceramic",
     "copper",
@@ -306,12 +307,12 @@ static constexpr std::string_view material_names_entries[] = {
     "wax",
     "other",
     "food material",
-    "oil"};
+    "oil"});
 static_assert(std::size(material_names_entries) == NUM_MATERIALS);
 constinit const name_table material_names(material_names_entries);
 
 /* one-word alias for each drink */
-static constexpr std::string_view drinknames_entries[] = {
+static constexpr auto drinknames_entries = std::to_array<std::string_view>({
         "water",
         "beer",
         "wine",
@@ -327,13 +328,13 @@ static constexpr std::string_view drinknames_entries[] = {
         "coffee",
         "blood",
         "salt",
-        "water"};
+        "water"});
 static_assert(std::size(drinknames_entries) == NUM_LIQ_TYPES);
 constinit const name_table drinknames(drinknames_entries);
 
 /* effect of drinks on hunger, thirst, and drunkenness -- see values.doc */
 /* (Drunk, Hunger, Thirst) */
-const int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS] = {
+const std::array<std::array<int, NUM_CONDITIONS>, NUM_LIQ_TYPES> drink_aff = {{
     {0, 0, 5},
     {3, 1, 1},
     {3, 1, 1},
@@ -350,10 +351,10 @@ const int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS] = {
     {0, 0, 2},
     {0, 0, 1},
     {0, 0, 8}
-};
+}};
 
 /* color of the various drinks */
-static constexpr std::string_view color_liquid_entries[] = {
+static constexpr auto color_liquid_entries = std::to_array<std::string_view>({
         "clear",
         "brown",
         "clear",
@@ -369,7 +370,7 @@ static constexpr std::string_view color_liquid_entries[] = {
         "black",
         "red",
         "clear",
-        "crystal clear"};
+        "crystal clear"});
 static_assert(std::size(color_liquid_entries) == NUM_LIQ_TYPES);
 constinit const name_table color_liquid(color_liquid_entries);
 

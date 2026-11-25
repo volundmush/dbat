@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string_view>
 
 #include "dbat/extradesc.hpp"
@@ -71,5 +72,5 @@ ACMD(do_intro);
 ACMD(do_scan);
 ACMD(do_toplist);
 ACMD(do_whois);
-extern const std::string_view default_color_choices[NUM_COLOR + 1];
+extern const std::array<std::string_view, NUM_COLOR + 1> default_color_choices;
 

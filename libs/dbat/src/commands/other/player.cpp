@@ -1,5 +1,6 @@
 /* player.c: general player commands (quit, save, group, title, toggles...)
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 #include <cstdlib>
 #include <iterator>
@@ -437,7 +438,7 @@ namespace {
     char letter;
     pref_flag flag;
   };
-  constexpr prompt_part PROMPT_PARTS[] = {{'p', pref_flag::disphp}, {'s', pref_flag::dispmove}, {'k', pref_flag::dispki}, {'t', pref_flag::disptnl}, {'f', pref_flag::fury}, {'h', pref_flag::distime}, {'g', pref_flag::disgold}, {'l', pref_flag::disprac}, {'m', pref_flag::dishuth}, {'c', pref_flag::disperc}};
+  constexpr auto PROMPT_PARTS = std::to_array<prompt_part>({{'p', pref_flag::disphp}, {'s', pref_flag::dispmove}, {'k', pref_flag::dispki}, {'t', pref_flag::disptnl}, {'f', pref_flag::fury}, {'h', pref_flag::distime}, {'g', pref_flag::disgold}, {'l', pref_flag::disprac}, {'m', pref_flag::dishuth}, {'c', pref_flag::disperc}});
 } // namespace
 
 ACMD(do_display)
@@ -615,7 +616,7 @@ namespace {
     return true;
   }
 
-  constexpr gen_toggle GEN_TOGGLES[] = {
+  constexpr auto GEN_TOGGLES = std::to_array<gen_toggle>({
       {SCMD_NOSUMMON, prf<pref_flag::summonable>, "You are now safe from summoning by other players.\r\n", "You may now be summoned by other players.\r\n"},
       {SCMD_NOHASSLE, prf<pref_flag::nohassle>, "Nohassle disabled.\r\n", "Nohassle enabled.\r\n"},
       {SCMD_BRIEF, prf<pref_flag::brief>, "Brief mode off.\r\n", "Brief mode on.\r\n"},
@@ -664,7 +665,7 @@ namespace {
       {SCMD_INSTRUCT, prf<pref_flag::instruct>, "You will no longer instruct those you spar with.\r\n", "You will now instruct those you spar with.\r\n"},
       {SCMD_GHEALTH, prf<pref_flag::ghealth>, "You will no longer view group health.\r\n", "You will now view group health.\r\n"},
       {SCMD_IHEALTH, prf<pref_flag::ihealth>, "You will no longer view item health.\r\n", "You will now view item health.\r\n"},
-  };
+  });
 
   static_assert([] {
     for (int i = 0; i < std::ssize(GEN_TOGGLES); ++i)

@@ -200,7 +200,7 @@ struct pfile_tag {
 constexpr bool ascii_save_poofs = true; /* quirk: ASCII_SAVE_POOFS was "false", but tested with #ifdef */
 
 /* In the order they are written */
-constexpr pfile_tag pfile_tags[] = {
+constexpr auto pfile_tags = std::to_array<pfile_tag>({
     {"Name", [](R &r) { char_set_pc_name(r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text_unless_empty(t, char_get_name(w.ch)); }},
     {"User", [](R &r) { char_set_loguser(r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text(t, char_get_user(w.ch)); }},
     {"Voic", [](R &r) { char_set_voice(r.ch, std::string(r.value)); }, [](W &w, std::string_view t) { w.text_unless_empty(t, char_get_voice(w.ch)); }},
@@ -434,7 +434,7 @@ constexpr pfile_tag pfile_tags[] = {
     {"ThB1", [](R &) {}, nullptr},
     {"ThB2", [](R &) {}, nullptr},
     {"ThB3", [](R &) {}, nullptr},
-};
+});
 
 } // namespace
 

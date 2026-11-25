@@ -14,6 +14,7 @@
  * you should go through this entire file from beginning to end and add
  * the appropriate new special cases for your new class.
  */
+#include <array>
 #include <cerrno>
 #include <cstdlib>
 
@@ -1428,7 +1429,7 @@ int8_t dex_mod_capped(const struct char_data *ch)
   return mod;
 }
 
-static int cabbr_ranktable[NUM_CLASSES];
+static std::array<int, NUM_CLASSES> cabbr_ranktable;
 
 static int comp_rank(const void *a, const void *b)
 {

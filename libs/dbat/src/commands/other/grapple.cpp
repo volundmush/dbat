@@ -1,5 +1,6 @@
 /* grapple.c: grappling and other physical actions
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 
 
@@ -120,12 +121,12 @@ namespace {
     act_msgs msgs;
     bool revealed; /* whether ch comes out of hiding to do it */
   };
-  constexpr grapple_hold GRAPPLE_HOLDS[] = {
+  constexpr auto GRAPPLE_HOLDS = std::to_array<grapple_hold>({
       {"hold", 1, {"@RYou rush at @r$N@R and manage to get $M in a hold from behind!@n", "@r$n@R rushes at YOU and manages to get you in a hold from behind!@n", "@r$n@R rushes at @r$N@R and manages to get $M in a hold from behind!@n", true}, true},
       {"choke", 2, {"@RYou rush at @r$N@R and manage to grab $S throat with both hands!@n", "@r$n@R rushes at YOU and manages to grab your throat with both hands!@n", "@r$n@R rushes at @r$N@R and manages to grab $S throat with both hands!@n", true}, true},
       {"wrap", 4, {"@MMoving quickly you stretch your body out and wrap it around the length of @c$N's@M body! You tighten your body until you begin crushing @c$N@M!", "@C$n@M quickly stretches out $s body and wraps it around @RYOU@M! You feel $s body begin to crush your own!@n", "@C$n@M quickly stretches out $s body and wraps it around @c$N@M! It appears that @c$N's@M body is being crushed slowly!@n", true}, false},
       {"grab", 3, {"@RYou rush at @r$N@R and manage to lock your arm onto $S!@n", "@r$n@R rushes at YOU and manages to lock $s arm onto your's!@n", "@r$n@R rushes at @r$N@R and manages to lock $s arm onto @r$N's@R!@n", true}, true},
-  };
+  });
 
   constexpr act_msgs OVERPOWERED{"@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", "@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", "@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", true};
   constexpr act_msgs AVOIDED{"@RYou try to grapple with @r$N@R, but $E manages to avoid it!@n", "@r$n@R tries to grapple with YOU, but you manage to avoid it!@n", "@r$n@R tries to grapple with @r$N@R, but $E manages to avoid it!@n", true};

@@ -106,7 +106,7 @@ struct trait {
 };
 
 /* Indexed by BONUS_*. Most exclusions go both ways, each written at both ends. */
-static const trait traits[] = {
+static const auto traits = std::to_array<trait>({
     /* the bonuses: they cost points */
     {"Thrifty", "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost             @D[@G-2pts @D]",
      -2, {excludes(BONUS_IMPULSE)}}, /* BONUS_THRIFTY */
@@ -213,7 +213,7 @@ static const trait traits[] = {
      2, {excludes(BONUS_LOYAL)}}, /* BONUS_LONER */
     {"Bad Memory", "Bad Memory  - -5 Skill Slots                                         @D[@G+6pts @D]",
      6, {excludes(BONUS_GMEMORY)}}, /* BONUS_BMEMORY */
-};
+});
 static_assert(std::size(traits) == MAX_BONUSES);
 
 constexpr int FIRST_NEGATIVE = BONUS_SOFT;
@@ -486,21 +486,21 @@ struct size_range {
   int min_height{}, max_height{}, min_weight{}, max_weight{};
 };
 
-static const struct size_range normal_sizes[] = {
+static const auto normal_sizes = std::to_array<size_range>({
     {100, 120, 25, 30 },
     {120, 140, 30, 35 },
     {140, 160, 35, 45 },
     {160, 180, 45, 60 },
     {180, 200, 60, 80 },
     {200, 220, 80, 100},
-};
-static const struct size_range truffle_sizes[] = {
+});
+static const auto truffle_sizes = std::to_array<size_range>({
     {20, 35, 5,  8 },
     {35, 40, 8,  10},
     {40, 50, 10, 12},
     {50, 60, 12, 15},
     {60, 70, 15, 18},
-};
+});
 
 /* The ranges ch may choose from; Icers get the three smallest normal ones. */
 static std::span<const size_range> size_ranges(const struct char_data *ch)
@@ -611,7 +611,7 @@ static void show_genome_menu(GameWorld *g, struct descriptor_data *d, std::strin
   write_to_output(g, d, "@B8@w) @CKonatsu @c- @C40{} higher chance to multihit on physical attacks.\r\n", "%");
 }
 
-static constexpr std::string_view mutation_names[] = {
+static constexpr auto mutation_names = std::to_array<std::string_view>({
     "Unselected",           /* 0 */
     "Extreme Speed",        /* 1 */
     "Increased Cell Regen", /* 2 */
@@ -623,9 +623,9 @@ static constexpr std::string_view mutation_names[] = {
     "Rubbery Body",         /* 8 */
     "Innate Telepathy",     /* 9 */
     "Natural Energy"        /* 10 */
-};
+});
 
-static constexpr std::string_view genome_names[] = {
+static constexpr auto genome_names = std::to_array<std::string_view>({
     "Unselected", /* 0 */
     "Human",      /* 1 */
     "Saiyan",     /* 2 */
@@ -635,7 +635,7 @@ static constexpr std::string_view genome_names[] = {
     "Arlian",     /* 6 */
     "Kai",        /* 7 */
     "Konatsu"     /* 8 */
-};
+});
 
 static void show_chosen_genomes(GameWorld *g, struct descriptor_data *d)
 {
@@ -751,15 +751,15 @@ static void state_qsex(GameWorld *g, struct descriptor_data *d, std::string_view
 
 /* ---- Appearance ------------------------------------------------------- */
 
-static const int hair_lengths[] = {HAIRL_BALD, HAIRL_SHORT, HAIRL_MEDIUM, HAIRL_LONG, HAIRL_RLONG};
-static const int hair_colors[]  = {HAIRC_BLACK, HAIRC_BROWN, HAIRC_BLONDE, HAIRC_GREY, HAIRC_RED, HAIRC_ORANGE, HAIRC_GREEN,
-                                   HAIRC_BLUE, HAIRC_PINK, HAIRC_PURPLE, HAIRC_SILVER, HAIRC_CRIMSON, HAIRC_WHITE};
-static const int hair_styles[]  = {HAIRS_PLAIN, HAIRS_MOHAWK, HAIRS_SPIKY, HAIRS_CURLY, HAIRS_UNEVEN, HAIRS_PONYTAIL,
-                                   HAIRS_AFRO, HAIRS_FADE, HAIRS_CREW, HAIRS_FEATHERED, HAIRS_DRED};
-static const int skins[]        = {SKIN_WHITE, SKIN_BLACK, SKIN_GREEN, SKIN_ORANGE, SKIN_YELLOW, SKIN_RED,
-                                   SKIN_GREY, SKIN_BLUE, SKIN_AQUA, SKIN_PINK, SKIN_PURPLE, SKIN_TAN};
-static const int eyes[]         = {EYE_BLUE, EYE_BLACK, EYE_GREEN, EYE_BROWN, EYE_RED, EYE_AQUA,
-                                   EYE_PINK, EYE_PURPLE, EYE_CRIMSON, EYE_GOLD, EYE_AMBER, EYE_EMERALD};
+static const auto hair_lengths = std::to_array<int>({HAIRL_BALD, HAIRL_SHORT, HAIRL_MEDIUM, HAIRL_LONG, HAIRL_RLONG});
+static const auto hair_colors = std::to_array<int>({HAIRC_BLACK, HAIRC_BROWN, HAIRC_BLONDE, HAIRC_GREY, HAIRC_RED, HAIRC_ORANGE, HAIRC_GREEN,
+                                   HAIRC_BLUE, HAIRC_PINK, HAIRC_PURPLE, HAIRC_SILVER, HAIRC_CRIMSON, HAIRC_WHITE});
+static const auto hair_styles = std::to_array<int>({HAIRS_PLAIN, HAIRS_MOHAWK, HAIRS_SPIKY, HAIRS_CURLY, HAIRS_UNEVEN, HAIRS_PONYTAIL,
+                                   HAIRS_AFRO, HAIRS_FADE, HAIRS_CREW, HAIRS_FEATHERED, HAIRS_DRED});
+static const auto skins = std::to_array<int>({SKIN_WHITE, SKIN_BLACK, SKIN_GREEN, SKIN_ORANGE, SKIN_YELLOW, SKIN_RED,
+                                   SKIN_GREY, SKIN_BLUE, SKIN_AQUA, SKIN_PINK, SKIN_PURPLE, SKIN_TAN});
+static const auto eyes = std::to_array<int>({EYE_BLUE, EYE_BLACK, EYE_GREEN, EYE_BROWN, EYE_RED, EYE_AQUA,
+                                   EYE_PINK, EYE_PURPLE, EYE_CRIMSON, EYE_GOLD, EYE_AMBER, EYE_EMERALD});
 
 /* An appearance question: the keys answering it, and what each sets (or, with no values, the key's position). */
 struct appearance {
@@ -769,7 +769,7 @@ struct appearance {
   void (*set)(struct char_data *ch, int value){};
 };
 
-static const appearance appearances[] = {
+static const auto appearances = std::to_array<appearance>({
     {CON_HAIRL,   "12345",         hair_lengths, [](char_data *ch, int v) { char_set_hairl(ch, v); }  },
     {CON_HAIRC,   "123456789abcd", hair_colors,  [](char_data *ch, int v) { char_set_hairc(ch, v); }  },
     {CON_HAIRS,   "123456789ab",   hair_styles,  [](char_data *ch, int v) { char_set_hairs(ch, v); }  },
@@ -777,7 +777,7 @@ static const appearance appearances[] = {
     {CON_EYE,     "123456789abc",  eyes,         [](char_data *ch, int v) { char_set_eye(ch, v); }    },
     {CON_DISTFEA, "12345",         {},           [](char_data *ch, int v) { char_set_distfea(ch, v); }},
     {CON_AURA,    "123456789",     {},           [](char_data *ch, int v) { char_set_aura(ch, v); }   },
-};
+});
 
 /* CON_HAIRL, CON_HAIRC, CON_HAIRS, CON_SKIN, CON_EYE, CON_DISTFEA, CON_AURA */
 static void state_appearance(GameWorld *g, struct descriptor_data *d, std::string_view arg)
@@ -1023,7 +1023,7 @@ static void show_ages(GameWorld *g, struct descriptor_data *d)
 }
 
 /* The ten questions, in order; question 10 (the age) has its own handler. */
-static const question questions[] = {
+static const auto questions = std::to_array<question>({
     {CON_Q1, false, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n",
      {{{.text = "Ask someone with more experience what to do.", .pl = dice(5, 25), .st = dice(8, 50), .ki = dice(6, 50)},
       {.text = "Jump in with some nice classic pushups!", .pl = dice(5, 55), .st = dice(8, 40), .ki = dice(6, 40)},
@@ -1073,7 +1073,7 @@ static const question questions[] = {
       {.text = "Give him the donut, then return to the baker. You tell him a sob story and convince him to give you a replacement donut.", .alignment = -10, .raise = ability::cha},
       {.text = "It's better just to do as he says and leave it to that. After all its only a donut.", .alignment = -5, .raise = ability::intel}}}},
     {CON_QX, true, "@wWhat do you wish your starting age to be?@n\r\n", {}, show_ages},
-};
+});
 
 static const question &question_for(int state)
 {
@@ -1089,7 +1089,7 @@ static int answer_count(const question &q)
 static void ask_question(GameWorld *g, struct descriptor_data *d)
 {
   const question &q = question_for(desc_get_connected(d));
-  int number        = (int)(&q - questions) + 1;
+  int number        = (int)(&q - questions.data()) + 1;
 
   if (number > 1)
     write_to_output(g, d, "\r\n@WQuestion (@G{:d}@W out of @g10@W)\r\n", number);
@@ -1146,7 +1146,7 @@ static void state_question(GameWorld *g, struct descriptor_data *d, std::string_
     reject_option(g, d);
     return;
   }
-  d->chargen.answers[&q - questions] = c - '1';
+  d->chargen.answers[&q - questions.data()] = c - '1';
   next_step(g, d);
 }
 
@@ -1182,7 +1182,7 @@ static void state_qx(GameWorld *g, struct descriptor_data *d, std::string_view a
 }
 
 /* CON_ALIGN: keep the questionnaire's alignment, or pick one at a cost */
-static const int alignments[] = {1000, 799, 599, 299, 0, -299, -599, -799, -1000}; /* CON_ALIGN's, from 1 */
+static const auto alignments = std::to_array<int>({1000, 799, 599, 299, 0, -299, -599, -799, -1000}); /* CON_ALIGN's, from 1 */
 
 static void state_align(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
@@ -1325,7 +1325,7 @@ struct step {
   void (*enter)(GameWorld *g, struct descriptor_data *d){};
 };
 
-static const step steps[] = {
+static const auto steps = std::to_array<step>({
     {CON_QRACE},
     {CON_RACIAL, asked_racial},
     {CON_QSEX, asked_sex, [](char_data *ch) { char_set_sex(ch, SEX_NEUTRAL); }},
@@ -1344,7 +1344,7 @@ static const step steps[] = {
     {CON_SKILLS},
     {CON_GENOME, asked_genomes, nullptr, ask_genomes},
     {CON_BONUS, nullptr, nullptr, [](GameWorld *g, descriptor_data *d) { ask_bonuses(g, d, "@wChoose: "); }},
-};
+});
 
 /* On from the step d is at to the next it's asked. */
 static void next_step(GameWorld *g, struct descriptor_data *d)
@@ -1501,7 +1501,7 @@ static void state_qstats(GameWorld *g, struct descriptor_data *d, std::string_vi
          char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character), total);
 }
 
-static const con_state chargen_states[] = {
+static const auto chargen_states = std::to_array<con_state>({
     {CON_QRACE,      state_qrace,      display_races        },
     {CON_RACE_HELP,  state_qrace,      display_races_help   },
     {CON_RACIAL,     state_racial,     show_racial_menu     },
@@ -1534,6 +1534,6 @@ static const con_state chargen_states[] = {
     {CON_NEGATIVE,   state_traits                           },
     {CON_QROLLSTATS, state_qrollstats                       },
     {CON_QSTATS,     state_qstats                           },
-};
+});
 
 const std::span<const con_state> CHARGEN_STATES = chargen_states;

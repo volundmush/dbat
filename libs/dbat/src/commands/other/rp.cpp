@@ -1,5 +1,6 @@
 /* rp.c: roleplay points, immortal action logs, hints, poses
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 #include <cstdlib>
 #include <iterator>
@@ -161,13 +162,13 @@ namespace {
     int value;
   };
 
-  constexpr alignment_choice ALIGNMENTS[] = {
+  constexpr auto ALIGNMENTS = std::to_array<alignment_choice>({
       {"evil",       "Evil",       -750},
       {"sorta-evil", "Sorta Evil", -50 },
       {"neutral",    "Neutral",    0   },
       {"sorta-good", "Sorta Good", 51  },
       {"good",       "Good",       300 },
-  };
+  });
 
   int alignment(GameWorld *g, struct char_data *ch, std::string &arg)
   {
@@ -205,14 +206,14 @@ namespace {
     int8_t (*current)(const struct char_data *ch);
   };
 
-  constexpr raised_stat RAISED_STATS[] = {
+  constexpr auto RAISED_STATS = std::to_array<raised_stat>({
       {"str", "strength",     BONUS_WIMP,    char_get_real_abils_str,   char_set_real_abils_str,   char_get_aff_abils_str  },
       {"con", "constitution", BONUS_FRAIL,   char_get_real_abils_con,   char_set_real_abils_con,   char_get_aff_abils_con  },
       {"int", "intelligence", BONUS_DULL,    char_get_real_abils_intel, char_set_real_abils_intel, char_get_aff_abils_intel},
       {"wis", "wisdom",       BONUS_FOOLISH, char_get_real_abils_wis,   char_set_real_abils_wis,   char_get_aff_abils_wis  },
       {"spd", "speed",        BONUS_SLOW,    char_get_real_abils_cha,   char_set_real_abils_cha,   char_get_aff_abils_cha  },
       {"agl", "speed" /* quirk */, BONUS_CLUMSY, char_get_real_abils_dex, char_set_real_abils_dex, char_get_aff_abils_dex  },
-  };
+  });
 
   int raise_stat(GameWorld *g, struct char_data *ch, std::string &arg)
   {
@@ -268,7 +269,7 @@ namespace {
   }
 
   /* An aura's number is its place here. */
-  static constexpr std::string_view AURAS[] = {"white", "blue", "red", "green", "pink", "purple", "yellow", "black", "orange"};
+  static constexpr auto AURAS = std::to_array<std::string_view>({"white", "blue", "red", "green", "pink", "purple", "yellow", "black", "orange"});
 
   int aura(GameWorld *g, struct char_data *ch, std::string &arg)
   {
@@ -360,7 +361,7 @@ namespace {
   }
 
   /* By menu number, from 1. */
-  constexpr reward REWARDS[] = {
+  constexpr auto REWARDS = std::to_array<reward>({
       house_capsule,
       disabled, /* custom skills */
       custom_equipment,
@@ -376,7 +377,7 @@ namespace {
       feature,
       restring,
       skillslot,
-  };
+  });
 } // namespace
 
 /* Let's Reward Those Roleplayers! - Iovan*/
@@ -487,7 +488,7 @@ ACMD(do_pose)
 }
 
 namespace {
-  static constexpr std::string_view HINTS[] = {
+  static constexpr auto HINTS = std::to_array<std::string_view>({
       "Remember to save often.",
       "Remember to eat or drink if you want to stay alive.",
       "It is a good idea to save up PS for learning skills instead of just practicing them.",
@@ -510,7 +511,7 @@ namespace {
       "You will need a scouter in order to use the Scouter Network (SNET).",
       "The DBAT forum is a great resource for finding out information and for conversing\r\nwith fellow players. http://advent-truth.com/forum",
       "Found a bug or have a suggestion? Log into our forums and post in the relevant section.",
-  };
+  });
 } // namespace
 
 /* Hint num, or (for 0) one at random */

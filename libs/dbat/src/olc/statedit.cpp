@@ -8,6 +8,7 @@
  ************************************************************************/
 
 /* --relistan 2/22/99 - 2/24/99: player configurable stats, in character creation */
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
@@ -29,14 +30,14 @@ namespace {
     void (*set)(struct char_data *ch, int8_t value);
   };
 
-  constexpr stat_row STATS[] = {
+  constexpr auto STATS = std::to_array<stat_row>({
       {'s', char_get_real_abils_str,   char_set_real_abils_str  },
       {'i', char_get_real_abils_intel, char_set_real_abils_intel},
       {'w', char_get_real_abils_wis,   char_set_real_abils_wis  },
       {'d', char_get_real_abils_dex,   char_set_real_abils_dex  },
       {'n', char_get_real_abils_con,   char_set_real_abils_con  },
       {'c', char_get_real_abils_cha,   char_set_real_abils_cha  },
-  };
+  });
 
   /* Character creation's stat points: a pool the new character's base stats are bought from */
   struct stat_points final : olc_session {

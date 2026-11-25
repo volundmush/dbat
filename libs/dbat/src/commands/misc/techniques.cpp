@@ -11,6 +11,7 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
+#include <array>
 #include <cstdlib>
 
 #include "dbat/args.hpp"
@@ -226,21 +227,21 @@ namespace {
     int thickness;
     std::string_view aftershock{};
   };
-  constexpr ash_size ASH_SIZES[] = {
+  constexpr auto ASH_SIZES = std::to_array<ash_size>({
     {20, 0.25, 1, 1, {}},
     {10, 0.10, 2, 2, "@WThe ashes ripple with a strong aftershock of power.@n\r\n"},
     {5, 0.05, 4, 3, "@WThe ashes ripple with an intense aftershock of power.@n\r\n"},
-  };
+  });
 
   /* Where shimmer goes by name */
   struct shimmer_place {
     std::string_view name{};
     room_vnum room;
   };
-  constexpr shimmer_place SHIMMER_PLACES[] = {
+  constexpr auto SHIMMER_PLACES = std::to_array<shimmer_place>({
     {"planet-earth", 300},   {"planet-namek", 10222},  {"planet-frigid", 4017}, {"planet-vegeta", 2200},
     {"planet-konack", 8006}, {"planet-aether", 12024}, {"afterlife", 6000},
-  };
+  });
 
   void shimmer_usage(GameWorld *g, struct char_data *ch)
   {
@@ -412,13 +413,13 @@ namespace {
     std::string_view already{};
     room_vnum room;
   };
-  constexpr warp_sea WARP_SEAS[] = {
+  constexpr auto WARP_SEAS = std::to_array<warp_sea>({
     {"earth", room_flag::earth, "You are already on Earth!\r\n", 850},
     {"frigid", room_flag::frigid, "You are already on Frigid!\r\n", 4609},
     {"kanassa", room_flag::kanassa, "You are already on Kanasssa!\r\n", 15100},
     {"namek", room_flag::namek, "You are already on Namek!\r\n", 10904},
     {"aether", room_flag::aether, "You are already on Aether!\r\n", 12252},
-  };
+  });
 
   bool at_sea(GameWorld *g, room_vnum r)
   {
@@ -432,10 +433,10 @@ namespace {
     int dir;
     int opposite;
   };
-  constexpr wall_side WALL_SIDES[] = {
+  constexpr auto WALL_SIDES = std::to_array<wall_side>({
     {"n", 0, 2}, {"e", 1, 3},   {"s", 2, 0},  {"w", 3, 1},  {"u", 4, 5},  {"d", 5, 4},
     {"i", 10, 11}, {"o", 11, 10}, {"nw", 6, 8}, {"ne", 7, 9}, {"se", 8, 6}, {"sw", 9, 7},
-  };
+  });
 } // namespace
 
 ACMD(do_spiritcontrol)

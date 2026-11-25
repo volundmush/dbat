@@ -9,6 +9,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <array>
 #include <cctype>
 #include <cstdlib>
 #include <string>
@@ -46,7 +47,7 @@ struct colour_code {
   char code;
   std::string_view ansi{};
 };
-constexpr colour_code CODES[] = {
+constexpr auto CODES = std::to_array<colour_code>({
     {'@', "@"},
     {'d', AA_NORMAL ANSISEPSTR AF_BLACK},
     {'b', AA_NORMAL ANSISEPSTR AF_BLUE},
@@ -76,7 +77,7 @@ constexpr colour_code CODES[] = {
     {'u', AA_UNDERLINE},
     {'o', AA_BOLD},
     {'e', AA_REVERSE},
-};
+});
 
 /* What @x picks from */
 constexpr std::string_view RANDOM_COLORS = "bgcrmywBGCRMWY";

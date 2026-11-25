@@ -1,9 +1,10 @@
+#include <array>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/constates.hpp"
 
 /* CON_x */
-static constexpr std::string_view connected_types_entries[] = {
+static constexpr auto connected_types_entries = std::to_array<std::string_view>({
     "Playing",
     "Disconnecting",
     "Get name",
@@ -76,6 +77,6 @@ static constexpr std::string_view connected_types_entries[] = {
     "Align Menu",
     "Skills Menu",
     "User Title",
-    "Genome Selection"};
+    "Genome Selection"});
 static_assert(std::size(connected_types_entries) == NUM_CON_TYPES);
 constinit const name_table connected_types(connected_types_entries);

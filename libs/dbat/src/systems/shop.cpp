@@ -11,6 +11,7 @@
 /***
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
+#include <array>
 #include <algorithm>
 #include "dbat/name_table.hpp"
 #include <cstdlib>
@@ -42,7 +43,7 @@
 
 static bool shop_trade_flagged(const struct shop_data *rec, trade_flag flag);
 
-const std::string_view shop_default_msgs[] = {
+const std::array<std::string_view, NUM_SHOP_MSGS> shop_default_msgs = std::to_array<std::string_view>({
     "%s Sorry, I don't stock that item.",  /* SHOP_MSG_NOITEM1 */
     "%s You don't seem to have that.",     /* SHOP_MSG_NOITEM2 */
     "%s I don't trade in such items.",     /* SHOP_MSG_NOBUY */
@@ -50,7 +51,7 @@ const std::string_view shop_default_msgs[] = {
     "%s You are too poor!",                /* SHOP_MSG_NOCASH2 */
     "%s That'll be %d zenni, thanks.",     /* SHOP_MSG_BUY */
     "%s I'll give you %d zenni for that.", /* SHOP_MSG_SELL */
-};
+});
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(GameWorld *g, struct char_data *keeper, struct shop_data *shop);
@@ -91,15 +92,15 @@ static int sell_price(GameWorld *g, struct obj_data *obj, struct shop_data *shop
 static std::string list_object(GameWorld *g, struct obj_data *obj, int cnt, int oindex, struct shop_data *shop, struct char_data *keeper, struct char_data *seller);
 
 /* config arrays */
-static constexpr std::string_view operator_str[] = {
+static constexpr auto operator_str = std::to_array<std::string_view>({
     "[({",
     "])}",
     "|+",
     "&*",
-    "^'"};
+    "^'"});
 
 /* Constant list for printing out who we sell to */
-static constexpr std::string_view trade_letters_entries[] = {
+static constexpr auto trade_letters_entries = std::to_array<std::string_view>({
     "No Good", /* First, the alignment based ones */
     "No Evil",
     "No Neutral",
@@ -176,14 +177,14 @@ static constexpr std::string_view trade_letters_entries[] = {
     "No Loremaster",
     "No Mystic Theurge",
     "No Shadowdancer",
-    "No Thaumaturgist"};
+    "No Thaumaturgist"});
 static_assert(std::size(trade_letters_entries) == NUM_TRADER_NAMES);
 constinit const name_table trade_letters(trade_letters_entries);
 
-static constexpr std::string_view shop_bits_entries[] = {
+static constexpr auto shop_bits_entries = std::to_array<std::string_view>({
     "WILL_FIGHT",
     "USES_BANK",
-    "ALLOW_STEAL"};
+    "ALLOW_STEAL"});
 static_assert(std::size(shop_bits_entries) == NUM_SHOP_FLAGS);
 constinit const name_table shop_bits(shop_bits_entries);
 

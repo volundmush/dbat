@@ -1,10 +1,11 @@
+#include <array>
 #include <string>
 #include <string_view>
 #include "dbat/name_table.hpp"
 #include "dbat/consts/triggers.hpp"
 
 /* mob trigger types */
-static constexpr std::string_view trig_types_entries[] = {
+static constexpr auto trig_types_entries = std::to_array<std::string_view>({
     "Global",
     "Random",
     "Command",
@@ -24,12 +25,12 @@ static constexpr std::string_view trig_types_entries[] = {
     "Leave",
     "Door",
     "UNUSED",
-    "Time"};
+    "Time"});
 static_assert(std::size(trig_types_entries) == flag_count<mob_trig>);
 constinit const name_table trig_types(trig_types_entries);
 
 /* obj trigger types */
-static constexpr std::string_view otrig_types_entries[] = {
+static constexpr auto otrig_types_entries = std::to_array<std::string_view>({
     "Global",
     "Random",
     "Command",
@@ -49,12 +50,12 @@ static constexpr std::string_view otrig_types_entries[] = {
     "Leave",
     "UNUSED",
     "Consume",
-    "Time"};
+    "Time"});
 static_assert(std::size(otrig_types_entries) == flag_count<obj_trig>);
 constinit const name_table otrig_types(otrig_types_entries);
 
 /* wld trigger types */
-static constexpr std::string_view wtrig_types_entries[] = {
+static constexpr auto wtrig_types_entries = std::to_array<std::string_view>({
     "Global",
     "Random",
     "Command",
@@ -74,11 +75,11 @@ static constexpr std::string_view wtrig_types_entries[] = {
     "Leave",
     "Door",
     "UNUSED",
-    "Time"};
+    "Time"});
 static_assert(std::size(wtrig_types_entries) == flag_count<wld_trig>);
 constinit const name_table wtrig_types(wtrig_types_entries);
 
-static constexpr std::string_view ocmd_bits_entries[] = {"EQUIP", "INVEN", "ROOM"};
+static constexpr auto ocmd_bits_entries = std::to_array<std::string_view>({"EQUIP", "INVEN", "ROOM"});
 static_assert(std::size(ocmd_bits_entries) == flag_count<ocmd_where>);
 constinit const name_table ocmd_bits(ocmd_bits_entries);
 

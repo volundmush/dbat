@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <cstdlib>
 #include "dbat/name_table.hpp"
 
@@ -41,7 +42,7 @@
 #include "dbat/game_world.hpp"
 
 namespace {
-  static constexpr std::string_view languages_entries[] = {"common", "elven", "gnomish", "dwarven", "halfling", "orc", "druid", "draconic"};
+  static constexpr auto languages_entries = std::to_array<std::string_view>({"common", "elven", "gnomish", "dwarven", "halfling", "orc", "druid", "draconic"});
   static constexpr name_table languages(languages_entries);
 
   /* How ch is named on the channels and in tells: by name if an immortal, else by account */
@@ -427,25 +428,25 @@ namespace {
     std::string_view sing, plur, others;
   };
 
-  constexpr quiet_talk QUIET_TALKS[] = {
+  constexpr auto QUIET_TALKS = std::to_array<quiet_talk>({
       {SCMD_WHISPER, "whisper to", "whispers to", "$n whispers something to $N."              },
       {SCMD_ASK,     "ask",        "asks",        "$n asks $N a question."                    },
       {-1,           "oops",       "oopses",      "$n is tongue-tied trying to speak with $N."},
-  };
+  });
 
   /* The letters lost from a whisper overheard so well, any of three ways */
-  constexpr std::string_view MUFFLED[3][3] = {
+  constexpr std::array<std::array<std::string_view, 3>, 3> MUFFLED = {{
       {"ahemopyjkdw", "erkmopyjkdw", "srcqluizt"},
       {"bfgvjk",     "dymhst",      "arno"     },
       {"qoig",       "aeio",        "kmb"      },
-  };
+  }};
 
   /* What's overheard, to this level of 0 to 3; quirk: the whisper itself loses the letters, one listener after another */
   std::string_view overhear(GameWorld *g, std::string &buf, int level)
   {
     if (level == 3)
       return until_nul(buf); /* as its c_str() was read */
-    const std::string_view *ways = MUFFLED[level];
+    const std::array<std::string_view, 3> &ways = MUFFLED[level];
     std::string_view lost   = rand_number(g, 1, 10) >= 5 ? ways[0] : rand_number(g, 1, 10) >= 5 ? ways[1] : ways[2];
     for (char c : lost) {
       search_replace(buf, std::string(1, c), "..");
@@ -460,12 +461,12 @@ namespace {
     std::string_view how;
   };
 
-  constexpr hearing HEARINGS[] = {
+  constexpr auto HEARINGS = std::to_array<hearing>({
       {0,  "everything"},
       {10, "a lot of"  },
       {20, "some of"   },
       {30, "little of" },
-  };
+  });
 
   void handle_whisper(GameWorld *g, std::string &buf, struct char_data *ch, struct char_data *vict)
   {
@@ -675,14 +676,14 @@ namespace {
     std::string_view cant, name, not_on, colour;
   };
 
-  constexpr channel CHANNELS[] = {
+  constexpr auto CHANNELS = std::to_array<channel>({
       {pref_flag::nomusic, HIST_HOLLER,  "You cannot music!!\r\n",      "@D[@mMUSIC@D]", "You aren't even on the channel!\r\n",   "@[10]"},
       {pref_flag::deaf,    HIST_SHOUT,   "You cannot shout!!\r\n",      "shout",         "Turn off your noshout flag first!\r\n", "@[9]" },
       {pref_flag::nogoss,  HIST_GOSSIP,  "You cannot ooc!!\r\n",        "@D[@BOOC@D]",   "You aren't even on the channel!\r\n",   "@[10]"},
       {pref_flag::noauct,  HIST_AUCTION, "You cannot newbie!!\r\n",     "newbie",        "You aren't even on the channel!\r\n",   "@[11]"},
       {pref_flag::nogratz, HIST_GRATS,   "You cannot congratulate!\r\n", "congrat",      "You aren't even on the channel!\r\n",   "@[12]"},
       {pref_flag::brief,   -1,           "You cannot gemote!!\r\n",     "gemote",        "You aren't even on the channel!\r\n",   "@[10]"}, /* quirk: reads pref_flag::brief (0), meant as no flag */
-  };
+  });
 
   /* Whether whoever is at i hears ch on the channel */
   bool hears(GameWorld *g, struct char_data *ch, descriptor_data *i, int subcmd)

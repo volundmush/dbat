@@ -1,5 +1,6 @@
 /* status.c: score, status, inventory, equipment, consider
  * Split from act.informative.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 #include "dbat/name_table.hpp"
 #include <cstdlib>
@@ -65,11 +66,11 @@ namespace {
     std::string_view felt, label;
   };
 
-  constexpr evolution EVOLUTIONS[] = {
+  constexpr auto EVOLUTIONS = std::to_array<evolution>({
       {"powerlevel", "pl", "powerlevel", 0.65, 0.15, getBasePL, gainBasePL, "your body has strengthened.", "@RPL"},
       {"ki", {}, "ki", 0.50, 0.22, getBaseKI, gainBaseKI, "your spirit has strengthened.", "@CKi"},
       {"stamina", "st", "stamina", 0.50, 0.15, getBaseST, gainBaseST, "your body has more stamina.", "@GST"},
-  };
+  });
 
   int64_t evolution_cost(struct char_data *ch, const evolution &e)
   {
@@ -133,11 +134,11 @@ namespace {
   }
 
   /* what perfecting a skill each way does, from type 1 */
-  static constexpr std::string_view PERFECTIONS[] = {
+  static constexpr auto PERFECTIONS = std::to_array<std::string_view>({
       "so that you can over charge it!",
       "so that you have supreme accuracy with it!",
       "so that you require a lower minimum charge for it!",
-  };
+  });
 } // namespace
 
 ACMD(do_perf)
@@ -210,9 +211,9 @@ namespace {
   };
 
   /* An android's model and version, the first flag it has; failing them all, the last. */
-  constexpr by_flag ANDROID_MODELS[]   = {{player_flag::absorb, "@CAbsorption"}, {player_flag::repair, "@GSelf Repairing"}, {player_flag::sensem, "@RSensor Equiped"}, {std::nullopt, "@WNone"}};
-  constexpr by_flag ANDROID_VERSIONS[] = {{player_flag::trans1, "Beta 1.0"}, {player_flag::trans2, "ANS 2.0"}, {player_flag::trans3, "ANS 3.0"}, {player_flag::trans4, "ANS 4.0"},
-                                          {player_flag::trans5, "ANS 5.0"},  {player_flag::trans6, "ANS 6.0"}, {std::nullopt, "Alpha 0.5"}};
+  constexpr auto ANDROID_MODELS = std::to_array<by_flag>({{player_flag::absorb, "@CAbsorption"}, {player_flag::repair, "@GSelf Repairing"}, {player_flag::sensem, "@RSensor Equiped"}, {std::nullopt, "@WNone"}});
+  constexpr auto ANDROID_VERSIONS = std::to_array<by_flag>({{player_flag::trans1, "Beta 1.0"}, {player_flag::trans2, "ANS 2.0"}, {player_flag::trans3, "ANS 3.0"}, {player_flag::trans4, "ANS 4.0"},
+                                          {player_flag::trans5, "ANS 5.0"},  {player_flag::trans6, "ANS 6.0"}, {std::nullopt, "Alpha 0.5"}});
 
   std::string_view first_flagged(struct char_data *ch, std::span<const by_flag> rows)
   {
@@ -306,22 +307,22 @@ namespace {
   };
 
   /* Rillao: transloc, add new transes here */
-  constexpr transformation HUMAN_FORMS[]     = {{player_flag::trans1, std::nullopt, "@CSuper Human First"}, {player_flag::trans2, std::nullopt, "@CSuper Human Second"}, {player_flag::trans3, std::nullopt, "@CSuper Human Third"}, {player_flag::trans4, std::nullopt, "@CSuper Human Fourth"}};
-  constexpr transformation SAIYAN_FORMS[]    = {{player_flag::trans1, player_flag::fpssj, "@YFull Powered @CSuper Saiyan"}, {player_flag::trans1, std::nullopt, "@CSuper Saiyan First"},
+  constexpr auto HUMAN_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CSuper Human First"}, {player_flag::trans2, std::nullopt, "@CSuper Human Second"}, {player_flag::trans3, std::nullopt, "@CSuper Human Third"}, {player_flag::trans4, std::nullopt, "@CSuper Human Fourth"}});
+  constexpr auto SAIYAN_FORMS = std::to_array<transformation>({{player_flag::trans1, player_flag::fpssj, "@YFull Powered @CSuper Saiyan"}, {player_flag::trans1, std::nullopt, "@CSuper Saiyan First"},
                                                 {player_flag::trans2, std::nullopt, "@CSuper Saiyan Second"}, {player_flag::trans3, std::nullopt, "@CSuper Saiyan Third"},
-                                                {player_flag::trans4, std::nullopt, "@CSuper Saiyan Fourth"}, {player_flag::oozaru, std::nullopt, "@COozaru"}};
-  constexpr transformation LEGENDARY_FORMS[] = {{player_flag::trans1, player_flag::fpssj, "@YFull Powered @CSuper Saiyan"}, {player_flag::trans1, std::nullopt, "@CSuper Saiyan First"},
-                                                {player_flag::trans2, std::nullopt, "@YLegendary @CSuper Saiyan"}, {player_flag::oozaru, std::nullopt, "@COozaru"}};
-  constexpr transformation NAMEK_FORMS[]     = {{player_flag::trans1, std::nullopt, "@CSuper Namek First"}, {player_flag::trans2, std::nullopt, "@CSuper Namek Second"}, {player_flag::trans3, std::nullopt, "@CSuper Namek Third"}, {player_flag::trans4, std::nullopt, "@CSuper Namek Fourth"}};
-  constexpr transformation ICER_FORMS[]      = {{player_flag::trans1, std::nullopt, "@CTransform First"}, {player_flag::trans2, std::nullopt, "@CTransform Second"}, {player_flag::trans3, std::nullopt, "@CTransform Third"}, {player_flag::trans4, std::nullopt, "@CTransform Fourth"}};
-  constexpr transformation KONATSU_FORMS[]   = {{player_flag::trans1, std::nullopt, "@CShadow First"}, {player_flag::trans2, std::nullopt, "@CShadow Second"}, {player_flag::trans3, std::nullopt, "@CShadow Third"}, {player_flag::trans4, std::nullopt, "@CShadow Fourth"}};
-  constexpr transformation MUTANT_FORMS[]    = {{player_flag::trans1, std::nullopt, "@CMutate First"}, {player_flag::trans2, std::nullopt, "@CMutate Second"}, {player_flag::trans3, std::nullopt, "@CMutate Third"}};
-  constexpr transformation BIO_FORMS[]       = {{player_flag::trans1, std::nullopt, "@CMature"}, {player_flag::trans2, std::nullopt, "@CSemi-perfect"}, {player_flag::trans3, std::nullopt, "@CPerfect"}, {player_flag::trans4, std::nullopt, "@CSuper Perfect"}};
-  constexpr transformation ANDROID_FORMS[]   = {{player_flag::trans1, std::nullopt, "@CSeries 1.0"}, {player_flag::trans2, std::nullopt, "@CSeries 2.0"}, {player_flag::trans3, std::nullopt, "@CSeries 3.0"},
-                                                {player_flag::trans4, std::nullopt, "@CSeries 4.0"}, {player_flag::trans5, std::nullopt, "@CSeries 5.0"}, {player_flag::trans6, std::nullopt, "@CSeries 6.0"}};
-  constexpr transformation MAJIN_FORMS[]     = {{player_flag::trans1, std::nullopt, "@CAffinity"}, {player_flag::trans2, std::nullopt, "@CSuper"}, {player_flag::trans3, std::nullopt, "@CTrue"}};
-  constexpr transformation TRUFFLE_FORMS[]   = {{player_flag::trans1, std::nullopt, "@CAscend First"}, {player_flag::trans2, std::nullopt, "@CAscend Second"}, {player_flag::trans3, std::nullopt, "@CAscend Third"}};
-  constexpr transformation KAI_FORMS[]       = {{player_flag::trans1, std::nullopt, "@CMystic First"}, {player_flag::trans2, std::nullopt, "@CMystic Second"}, {player_flag::trans3, std::nullopt, "@CMystic Third"}};
+                                                {player_flag::trans4, std::nullopt, "@CSuper Saiyan Fourth"}, {player_flag::oozaru, std::nullopt, "@COozaru"}});
+  constexpr auto LEGENDARY_FORMS = std::to_array<transformation>({{player_flag::trans1, player_flag::fpssj, "@YFull Powered @CSuper Saiyan"}, {player_flag::trans1, std::nullopt, "@CSuper Saiyan First"},
+                                                {player_flag::trans2, std::nullopt, "@YLegendary @CSuper Saiyan"}, {player_flag::oozaru, std::nullopt, "@COozaru"}});
+  constexpr auto NAMEK_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CSuper Namek First"}, {player_flag::trans2, std::nullopt, "@CSuper Namek Second"}, {player_flag::trans3, std::nullopt, "@CSuper Namek Third"}, {player_flag::trans4, std::nullopt, "@CSuper Namek Fourth"}});
+  constexpr auto ICER_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CTransform First"}, {player_flag::trans2, std::nullopt, "@CTransform Second"}, {player_flag::trans3, std::nullopt, "@CTransform Third"}, {player_flag::trans4, std::nullopt, "@CTransform Fourth"}});
+  constexpr auto KONATSU_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CShadow First"}, {player_flag::trans2, std::nullopt, "@CShadow Second"}, {player_flag::trans3, std::nullopt, "@CShadow Third"}, {player_flag::trans4, std::nullopt, "@CShadow Fourth"}});
+  constexpr auto MUTANT_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CMutate First"}, {player_flag::trans2, std::nullopt, "@CMutate Second"}, {player_flag::trans3, std::nullopt, "@CMutate Third"}});
+  constexpr auto BIO_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CMature"}, {player_flag::trans2, std::nullopt, "@CSemi-perfect"}, {player_flag::trans3, std::nullopt, "@CPerfect"}, {player_flag::trans4, std::nullopt, "@CSuper Perfect"}});
+  constexpr auto ANDROID_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CSeries 1.0"}, {player_flag::trans2, std::nullopt, "@CSeries 2.0"}, {player_flag::trans3, std::nullopt, "@CSeries 3.0"},
+                                                {player_flag::trans4, std::nullopt, "@CSeries 4.0"}, {player_flag::trans5, std::nullopt, "@CSeries 5.0"}, {player_flag::trans6, std::nullopt, "@CSeries 6.0"}});
+  constexpr auto MAJIN_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CAffinity"}, {player_flag::trans2, std::nullopt, "@CSuper"}, {player_flag::trans3, std::nullopt, "@CTrue"}});
+  constexpr auto TRUFFLE_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CAscend First"}, {player_flag::trans2, std::nullopt, "@CAscend Second"}, {player_flag::trans3, std::nullopt, "@CAscend Third"}});
+  constexpr auto KAI_FORMS = std::to_array<transformation>({{player_flag::trans1, std::nullopt, "@CMystic First"}, {player_flag::trans2, std::nullopt, "@CMystic Second"}, {player_flag::trans3, std::nullopt, "@CMystic Third"}});
 
   struct race_forms {
     bool (*is)(const struct char_data *ch);
@@ -332,7 +333,7 @@ namespace {
   bool legendary(const struct char_data *ch) { return char_is_saiyan(ch) && char_plr_flagged(ch, player_flag::lssj); }
 
   /* In this order; a hoshijin's forms are its star phases, and are told apart below. */
-  const race_forms RACE_FORMS[] = {
+  const auto RACE_FORMS = std::to_array<race_forms>({
       {char_is_human,     HUMAN_FORMS    },
       {full_saiyan,       SAIYAN_FORMS   },
       {legendary,         LEGENDARY_FORMS},
@@ -345,7 +346,7 @@ namespace {
       {char_is_majin,     MAJIN_FORMS    },
       {char_is_truffle,   TRUFFLE_FORMS  },
       {char_is_kai,       KAI_FORMS      },
-  };
+  });
 
   /* The form's name, with its colour; "@wNone" for none. Races are told apart in this order, a hoshijin's star
      phases first. */
@@ -379,12 +380,12 @@ struct limb_row {
   player_flag healthy_flag; /* a sound limb isn't cybernetic by this */
   player_flag cyber_flag;
 };
-constexpr limb_row LIMBS[] = {
+constexpr auto LIMBS = std::to_array<limb_row>({
     {"Right Arm   ", 0, player_flag::crarm, player_flag::crarm},
     {"Left Arm    ", 1, player_flag::clarm, player_flag::clarm},
     {"Right Leg   ", 2, player_flag::clarm, player_flag::crleg}, /* quirk: a sound right leg is the left arm's */
     {"Left Leg    ", 3, player_flag::clleg, player_flag::clleg},
-};
+});
 
 void appendages_status(GameWorld *g, struct char_data *ch)
 {
@@ -433,7 +434,7 @@ void climb(GameWorld *g, struct char_data *ch, int value, std::span<const rung> 
     send_to_char(g, ch, "{}", says);
 }
 
-constexpr rung HUNGER_RUNGS[] = {
+constexpr auto HUNGER_RUNGS = std::to_array<rung>({
     {48, "         You are full.\r\n"},
     {40, "         You are nearly full.\r\n"},
     {30, "         You are not hungry.\r\n"},
@@ -443,8 +444,8 @@ constexpr rung HUNGER_RUNGS[] = {
     {5, "         You are really hungry.\r\n"},
     {2, "         You are extremely hungry.\r\n"},
     {0, "         You are starving!\r\n"},
-};
-constexpr rung THIRST_RUNGS[] = {
+});
+constexpr auto THIRST_RUNGS = std::to_array<rung>({
     {48, "         You are not thirsty.\r\n"},
     {40, "         You are nearly quenched.\r\n"},
     {30, "         You are not thirsty.\r\n"},
@@ -454,18 +455,18 @@ constexpr rung THIRST_RUNGS[] = {
     {5, "         You are really thirsty.\r\n"},
     {2, "         You are extremely thirsty.\r\n"},
     {0, "         You are dehydrated!\r\n"},
-};
-constexpr rung RELAX_RUNGS[] = {
+});
+constexpr auto RELAX_RUNGS = std::to_array<rung>({
     {465, "You are far too at ease to train hard like you should. Get out of the house more often.\r\n"},
     {233, "You are too at ease to train hard like you should. Get out of the house more often.\r\n"},
     {117, "You are a bit at ease and your training suffers. Get out of the house more often.\r\n"},
-};
-constexpr rung DRUNK_RUNGS[] = {
+});
+constexpr auto DRUNK_RUNGS = std::to_array<rung>({
     {16, "You are extremely drunk.\r\n"},
     {11, "You are pretty drunk.\r\n"},
     {5, "You are drunk.\r\n"},
     {1, "You have an alcoholic buzz.\r\n"},
-};
+});
 
 /* A line said when a flag is set */
 enum class flag_kind { plr, aff, prf, affected, spell };
@@ -521,13 +522,13 @@ struct preference_line {
   int preference;
   std::string_view says{};
 };
-constexpr preference_line PREFERENCES[] = {
+constexpr auto PREFERENCES = std::to_array<preference_line>({
     {0, "         You preferred a balanced form of fighting.\r\n"},
     {PREFERENCE_KI, "         You preferred a ki dominate form of fighting.\r\n"},
     {PREFERENCE_WEAPON, "         You preferred a weapon dominate form of fighting.\r\n"},
     {PREFERENCE_H2H, "         You preferred a body dominate form of fighting.\r\n"},
     {PREFERENCE_THROWING, "         You preferred a throwing dominate form of fighting.\r\n"},
-};
+});
 
 /* What one's "hair" is, by race */
 std::string_view hair_word(struct char_data *ch)
@@ -541,9 +542,9 @@ std::string_view hair_word(struct char_data *ch)
   return "hair is";
 }
 
-static constexpr std::string_view FORGET_LEVELS_entries[] = {
+static constexpr auto FORGET_LEVELS_entries = std::to_array<std::string_view>({
     "@GRemembered Well@n", "@GRemembered Well Enough@n", "@RGetting Foggy@n", "@RHalf Forgotten@n", "@rAlmost Forgotten@n", "@rForgotten@n",
-};
+});
 static constexpr name_table FORGET_LEVELS(FORGET_LEVELS_entries);
 
 void info_status(GameWorld *g, struct char_data *ch)
@@ -627,11 +628,11 @@ void info_status(GameWorld *g, struct char_data *ch)
 }
 
 /* A mutant's mutations and a bio-android's genes, by genome (1 up) */
-static constexpr std::string_view MUTATIONS[] = {
+static constexpr auto MUTATIONS = std::to_array<std::string_view>({
     "Extreme Speed",  "Increased Cell Regeneration", "Extreme Reflexes", "Infravision",       "Natural Camo",
     "Limb Regen",     "Poisonous (you can use the bite attack)", "Rubbery Body", "Innate Telepathy", "Natural Energy",
-};
-static constexpr std::string_view GENES[] = {"Human", "Saiyan", "Namek", "Icer", "Truffle", "Arlian", "Kai", "Konatsu"};
+});
+static constexpr auto GENES = std::to_array<std::string_view>({"Human", "Saiyan", "Namek", "Icer", "Truffle", "Arlian", "Kai", "Konatsu"});
 
 void genome_status(GameWorld *g, struct char_data *ch, std::string_view heading, std::span<const std::string_view> names, std::string_view suffix)
 {
@@ -643,15 +644,15 @@ void genome_status(GameWorld *g, struct char_data *ch, std::string_view heading,
   }
 }
 
-constexpr flag_line STEALTH_LINES[] = {
+constexpr auto STEALTH_LINES = std::to_array<flag_line>({
     {flag_kind::plr, player_flag::eyec, "Your eyes are closed.\r\n"},
     {flag_kind::aff, aff_flag::sneak, "You are prepared to sneak where ever you go.\r\n"},
     {flag_kind::plr, player_flag::disguised, "You have disguised your facial features.\r\n"},
     {flag_kind::aff, aff_flag::flying, "You are flying.\r\n"},
     {flag_kind::plr, player_flag::piloting, "You are busy piloting a ship.\r\n"},
-};
+});
 static_assert(kinds_match(STEALTH_LINES));
-constexpr flag_line READY_LINES[] = {
+constexpr auto READY_LINES = std::to_array<flag_line>({
     {flag_kind::aff, aff_flag::zanzoken, "You are prepared to zanzoken.\r\n"},
     {flag_kind::aff, aff_flag::hass, "Your arms are moving fast.\r\n"},
     {flag_kind::aff, aff_flag::infuse, "Your ki will be infused in your next physical attack.\r\n"},
@@ -659,9 +660,9 @@ constexpr flag_line READY_LINES[] = {
     {flag_kind::plr, player_flag::nogrow, "Your tail is no longer regrowing!\r\n"},
     {flag_kind::affected, aff_flag::special_pose, "You are feeling confident from your pose earlier.\r\n"},
     {flag_kind::affected, aff_flag::hydrozap, "You are effected by Kanso Suru.\r\n"},
-};
+});
 static_assert(kinds_match(READY_LINES));
-constexpr flag_line AFFLICTION_LINES[] = {
+constexpr auto AFFLICTION_LINES = std::to_array<flag_line>({
     {flag_kind::aff, aff_flag::knocked, "You have been knocked unconcious!\r\n"},
     {flag_kind::aff, aff_flag::invisible, "You are invisible.\r\n"},
     {flag_kind::aff, aff_flag::detect_invis, "You are sensitive to the presence of invisible things.\r\n"},
@@ -677,7 +678,7 @@ constexpr flag_line AFFLICTION_LINES[] = {
     {flag_kind::aff, aff_flag::spirit, "You have died and are part of the SPIRIT world!\r\n"},
     {flag_kind::prf, pref_flag::nogive, "You are not accepting items being handed to you right now.\r\n"},
     {flag_kind::aff, aff_flag::ethereal, "You are ethereal and cannot interact with normal space!\r\n"},
-};
+});
 static_assert(kinds_match(AFFLICTION_LINES));
 
 /* What lasting effects are told, by their skill's name */
@@ -820,7 +821,7 @@ void condition_status(GameWorld *g, struct char_data *ch)
 }
 
 /* The traits, bonuses then negatives, by number */
-static constexpr std::string_view TRAITS[] = {
+static constexpr auto TRAITS = std::to_array<std::string_view>({
     "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost          ",
     "Prodigy     - +25% Experience Gained Until Level 80               ",
     "Quick Study - Character auto-trains skills faster                 ",
@@ -874,7 +875,7 @@ static constexpr std::string_view TRAITS[] = {
     "Sadistic    - Half Experience Gained For Quick Kills              ",
     "Loner       - Can't Group with anyone, +5% train and +10% Phys    ",
     "Bad Memory  - -5 Skill Slots                                      ",
-};
+});
 constexpr int FIRST_NEGATIVE = 26;
 
 void bonus_status(GameWorld *g, struct char_data *ch)
@@ -995,7 +996,7 @@ namespace {
     std::string_view says{};
   };
 
-  constexpr odds CONSIDERED[] = {
+  constexpr auto CONSIDERED = std::to_array<odds>({
       {-10, "Now where did that chicken go?\r\n"},
       {-5,  "You could do it with a needle!\r\n"},
       {-2,  "Easy.\r\n"},
@@ -1007,7 +1008,7 @@ namespace {
       {5,   "Do you feel lucky? You better.\r\n"},
       {10,  "Better bring some tough backup!\r\n"},
       {25,  "Maybe if they are allergic to you, otherwise your last words will be 'Oh shit.'\r\n"},
-  };
+  });
 
   std::string_view pronoun(struct char_data *ch) { return char_get_sex(ch) == SEX_MALE ? "He " : (char_get_sex(ch) == SEX_FEMALE ? "She " : "It "); }
 } // namespace

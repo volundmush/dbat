@@ -5,6 +5,7 @@
  * all read first, so that the count of records, logged with how much memory they take, comes before anything they
  * hold is loaded; then each is loaded by its kind's reader.
  */
+#include <array>
 #include <algorithm>
 #include <optional>
 #include <vector>
@@ -82,7 +83,7 @@ struct world_kind {
   void (*finish)(GameWorld *); /* after every file has loaded; may be null */
 };
 
-constexpr world_kind kinds[] = {
+constexpr auto kinds = std::to_array<world_kind>({
     {DB_BOOT_ZON, ZON_PREFIX, count_one,           report_zones,   false, read_zone_file,               nullptr  },
     {DB_BOOT_TRG, TRG_PREFIX, count_hash_records,  nullptr,        false, read_trigger_file,            nullptr  },
     {DB_BOOT_WLD, WLD_PREFIX, count_hash_records,  report_rooms,   false, read_room_file,               nullptr  },
@@ -91,7 +92,7 @@ constexpr world_kind kinds[] = {
     {DB_BOOT_SHP, SHP_PREFIX, count_hash_records,  nullptr,        true,  read_shop_file,               nullptr  },
     {DB_BOOT_GLD, GLD_PREFIX, count_hash_records,  nullptr,        true,  read_guild_file,              nullptr  },
     {DB_BOOT_HLP, HLP_PREFIX, count_help_keywords, report_help,    false, read_help_file,               sort_help},
-};
+});
 
 } // namespace
 

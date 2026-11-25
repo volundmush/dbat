@@ -1,5 +1,6 @@
 /* kiblasts.c: ki blast attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include "dbat/args.hpp"
 #include "dbat/iterate.hpp"
 #include "dbat/act.offensive.hpp"
@@ -33,10 +34,10 @@
 namespace {
 
 /* Where an eraser cannon's or a big bang's hits land: their second and third places are both the head */
-constexpr ki_spot HEAD_TWICE[6]     = {ki_spot::body, ki_spot::head, ki_spot::head,
-                                       ki_spot::arm, ki_spot::leg, ki_spot::body};
-constexpr ki_spot BIG_BANG_SPOTS[6] = {ki_spot::body, ki_spot::head, ki_spot::head,
-                                       ki_spot::body, ki_spot::arm, ki_spot::leg};
+constexpr std::array<ki_spot, 6> HEAD_TWICE = {{ki_spot::body, ki_spot::head, ki_spot::head,
+                                       ki_spot::arm, ki_spot::leg, ki_spot::body}};
+constexpr std::array<ki_spot, 6> BIG_BANG_SPOTS = {{ki_spot::body, ki_spot::head, ki_spot::head,
+                                       ki_spot::body, ki_spot::arm, ki_spot::leg}};
 
 /* An eraser cannon takes more ki the better its user knows it */
 void eraser_drain(ki_shot &s, ki_outcome)

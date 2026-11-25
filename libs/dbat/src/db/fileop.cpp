@@ -31,13 +31,13 @@ namespace {
     int64_t (*value)(GameWorld *g, char_data *ch);
     bool by_account; /* listed by the account's name, not the character's */
   };
-  const toplist_section toplist_sections[] = {
+  const auto toplist_sections = std::to_array<toplist_section>({
     {"powerlevel", [](GameWorld *g, char_data *ch) -> int64_t { return getEffMaxPL(g, ch); }, false},
     {"ki", [](GameWorld *g, char_data *ch) -> int64_t { return getMaxKI(g, ch); }, false},
     {"stamina", [](GameWorld *g, char_data *ch) -> int64_t { return getMaxST(g, ch); }, false},
     {"zenni", [](GameWorld *, char_data *ch) -> int64_t { return char_get_bank_gold(ch) + char_get_gold(ch); }, false},
     {"RPP", [](GameWorld *, char_data *ch) -> int64_t { return char_get_trp(ch); }, true},
-  };
+  });
   constexpr int TOPLIST_PLACES = 5 * static_cast<int>(std::size(toplist_sections));
 
   void set_place(GameWorld *g, int x, int64_t points, std::string_view name)

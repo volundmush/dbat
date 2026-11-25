@@ -3,6 +3,7 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <span>
@@ -130,17 +131,17 @@ namespace {
     bool names_global; /* then the global's name and value (V) */
   };
 
-  constexpr arg_step LOAD_MOB[]   = {{1, &MOB_VNUM}, {2, &MAX_LOADED}, {4, &ROOM_MAX}, {5, &CHANCE}};
-  constexpr arg_step LOAD_OBJ[]   = {{1, &OBJ_VNUM}, {2, &MAX_LOADED}, {4, &ROOM_MAX}, {5, &CHANCE}};
-  constexpr arg_step GIVE[]       = {{1, &OBJ_VNUM}, {2, &MAX_LOADED}, {5, &CHANCE}};
-  constexpr arg_step EQUIP[]      = {{1, &OBJ_VNUM}, {2, &MAX_LOADED}, {3, &WEAR_POSITION}, {5, &CHANCE}};
-  constexpr arg_step PUT[]        = {{1, &OBJ_VNUM}, {2, &MAX_LOADED}, {3, &CONTAINER}, {5, &CHANCE}};
-  constexpr arg_step SET_DOOR[]   = {{2, &DOOR}, {3, &DOOR_STATE}};
-  constexpr arg_step REMOVE[]     = {{2, &REMOVED_VNUM}};
-  constexpr arg_step TRIGGER[]    = {{1, &TRIGGER_TYPE}, {2, &TRIGGER_VNUM}};
-  constexpr arg_step VARIABLE[]   = {{1, &TRIGGER_TYPE}, {2, &CONTEXT}};
+  constexpr auto LOAD_MOB = std::to_array<arg_step>({{1, &MOB_VNUM}, {2, &MAX_LOADED}, {4, &ROOM_MAX}, {5, &CHANCE}});
+  constexpr auto LOAD_OBJ = std::to_array<arg_step>({{1, &OBJ_VNUM}, {2, &MAX_LOADED}, {4, &ROOM_MAX}, {5, &CHANCE}});
+  constexpr auto GIVE = std::to_array<arg_step>({{1, &OBJ_VNUM}, {2, &MAX_LOADED}, {5, &CHANCE}});
+  constexpr auto EQUIP = std::to_array<arg_step>({{1, &OBJ_VNUM}, {2, &MAX_LOADED}, {3, &WEAR_POSITION}, {5, &CHANCE}});
+  constexpr auto PUT = std::to_array<arg_step>({{1, &OBJ_VNUM}, {2, &MAX_LOADED}, {3, &CONTAINER}, {5, &CHANCE}});
+  constexpr auto SET_DOOR = std::to_array<arg_step>({{2, &DOOR}, {3, &DOOR_STATE}});
+  constexpr auto REMOVE = std::to_array<arg_step>({{2, &REMOVED_VNUM}});
+  constexpr auto TRIGGER = std::to_array<arg_step>({{1, &TRIGGER_TYPE}, {2, &TRIGGER_VNUM}});
+  constexpr auto VARIABLE = std::to_array<arg_step>({{1, &TRIGGER_TYPE}, {2, &CONTEXT}});
 
-  constexpr command_kind COMMANDS[] = {
+  constexpr auto COMMANDS = std::to_array<command_kind>({
       {'M', LOAD_MOB, false, true,  false},
       {'O', LOAD_OBJ, false, true,  false},
       {'P', PUT,      false, false, false},
@@ -150,7 +151,7 @@ namespace {
       {'R', REMOVE,   true,  false, false},
       {'T', TRIGGER,  false, true,  false},
       {'V', VARIABLE, false, true,  true },
-  };
+  });
 
   int reset_com::*const ARGS[] = {nullptr, &reset_com::arg1, &reset_com::arg2, &reset_com::arg3, &reset_com::arg4, &reset_com::arg5};
 

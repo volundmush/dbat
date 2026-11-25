@@ -5,6 +5,8 @@
  * besides (a slash cuts limbs, a dagger backstabs, a club tires). attack is a blow with the main hand, or the off hand
  * if that's all there is; a second weapon then may follow up with a blow of its own, off_hand_attack(), which has its
  * own costs and wording. */
+#include <span>
+#include <array>
 #include <algorithm>
 #include <climits>
 
@@ -57,8 +59,8 @@ struct weapon_shot {
 struct weapon_style {
   int skill{}; /* SKILL_ */
   bool gun{};  /* it costs zenni, not stamina, and can't be disarmed by a parry */
-  const act_msgs *main_hits{}; /* to_char, to_vict and to_room, by hit spot */
-  const act_msgs *off_hits{};  /* quirk: the follow-up's own wording */
+  std::span<const act_msgs> main_hits{}; /* to_char, to_vict and to_room, by hit spot */
+  std::span<const act_msgs> off_hits{};  /* quirk: the follow-up's own wording */
   /* each may be null */
   bool (*face_mastery)(const weapon_shot &s){}; /* a hit to the face is a critical one better */
   bool (*before_hit)(weapon_shot &s){};         /* true if that was the blow */
@@ -66,83 +68,83 @@ struct weapon_style {
 };
 
 /* What each says of a hit (generated from the old code, typos and all) */
-constexpr act_msgs SLASHING[] = {
+constexpr auto SLASHING = std::to_array<act_msgs>({
     {"@WYou slash @C$N@W across the stomach!@n", "@c$n@W slashes you across the stomach!@n", "@c$n@W slashes @C$N@W across the stomach!@n", true},
     {"@WYou slash @C$N@W across the arm!@n", "@c$n@W slashes you across the arm!@n", "@c$n@W slashes @C$N@W across the arm!@n", true},
     {"@WYou slash @C$N@W across the leg!@n", "@c$n@W slashes you across the leg!@n", "@c$n@W slashes @C$N@W across the leg!@n", true},
     {"@WYou slash @C$N@W across the face!@n", "@c$n@W slashes you across the face!@n", "@c$n@W slashes @C$N@W across the face!@n", true},
     {"@WYou slash @C$N@W across the chest!@n", "@c$n@W slashes you across the chest!@n", "@c$n@W slashes @C$N@W across the chest!@n", true},
-};
-constexpr act_msgs PIERCING_MAIN[] = {
+});
+constexpr auto PIERCING_MAIN = std::to_array<act_msgs>({
     {"@WYou pierce @C$N's@W stomach!@n", "@c$n@W pierces your stomach!@n", "@c$n@W pierces @C$N's@W stomach!@n", true},
     {"@WYou pierce @C$N's@W arm!@n", "@c$n@W pierces your arm!@n", "@c$n@W pierces @C$N's@W arm!@n", true},
     {"@WYou pierce @C$N's@W leg!@n", "@c$n@W pierces your leg!@n", "@c$n@W pierces @C$N's@W leg!@n", true},
     {"@WYou pierce @C$N's@W face!@n", "@c$n@W pierces your face!@n", "@c$n@W pierces @C$N's@W face!@n", true},
     {"@WYou pierce @C$N's@W chest!@n", "@c$n@W pierces your chest!@n", "@c$n@W pierces @C$N's@W chest!@n", true},
-};
-constexpr act_msgs PIERCING_OFF[] = {
+});
+constexpr auto PIERCING_OFF = std::to_array<act_msgs>({
     {"@WYou pierce @C$N's@W stomach!@n", "@c$n@W pierces your stomach!@n", "@c$n@W pierces @C$N's@W stomach!@n", true},
     {"@WYou pierce @C$N's@W arm!@n", "@c$n@W pierces your arm!@n", "@c$n@W pierces @C$N'@W arm!@n", true},
     {"@WYou pierce @C$N's@W leg!@n", "@c$n@W pierces your leg!@n", "@c$n@W pierces @C$N's@W leg!@n", true},
     {"@WYou pierce @C$N's@W face!@n", "@c$n@W pierces your face!@n", "@c$n@W pierces @C$N's@W face!@n", true},
     {"@WYou pierce @C$N's@W chest!@n", "@c$n@W pierces your chest!@n", "@c$n@W pierces @C$N's@W chest!@n", true},
-};
-constexpr act_msgs CRUSHING_MAIN[] = {
+});
+constexpr auto CRUSHING_MAIN = std::to_array<act_msgs>({
     {"@WYou crush @C$N's@W chest!@n", "@c$n@W crushes your chest!@n", "@c$n@W crushes @C$N's@W chest@n", true},
     {"@WYou crush @C$N's@W arm!@n", "@c$n@W crushes your arm!@n", "@c$n@W crushes @C$N's@W arm!@n", true},
     {"@WYou crush @C$N's@W leg!@n", "@c$n@W crushes your leg!@n", "@c$n@W crushes @C$N's@W leg!@n", true},
     {"@WYou crush @C$N@W in the face!@n", "@c$n@W crushes you in the face!@n", "@c$n@W crushes @C$N@W in the face!@n", true},
     {"@WYou crush @C$N's@W stomach!@n", "@c$n@W crushes your stomach!@n", "@c$n@W crushes @C$N's@W stomach@n", true},
-};
-constexpr act_msgs CRUSHING_OFF[] = {
+});
+constexpr auto CRUSHING_OFF = std::to_array<act_msgs>({
     {"@WYou crush @C$N's@W stomach!@n", "@c$n@W crushes your stomach!@n", "@c$n@W crushes @C$N's@W stomach!@n", true},
     {"@WYou crush @C$N's@W arm!@n", "@c$n@W crushes your arm!@n", "@c$n@W crushes @C$N's@W arm!@n", true},
     {"@WYou crush @C$N's@W leg!@n", "@c$n@W crushes your leg!@n", "@c$n@W crushes @C$N's@W leg!@n", true},
     {"@WYou crush @C$N's@W face!@n", "@c$n@W crushes your face!@n", "@c$n@W crushes @C$N'@W face!@n", true},
     {"@WYou crush @C$N's@W chest!@n", "@c$n@W crushes your chest!@n", "@c$n@W crushes @C$N's@W chest!@n", true},
-};
-constexpr act_msgs STABBING_MAIN[] = {
+});
+constexpr auto STABBING_MAIN = std::to_array<act_msgs>({
     {"@WYou stab @C$N's@W chest!@n", "@c$n@W stabs your chest!@n", "@c$n@W stabs @C$N's@W chest!@n", true},
     {"@WYou stab @C$N's@W arm!@n", "@c$n@W stabs your arm!@n", "@c$n@W stabs @C$N's@W arm!@n", true},
     {"@WYou stab @C$N's@W leg!@n", "@c$n@W stabs your leg!@n", "@c$n@W stabs @C$N's@W leg!@n", true},
     {"@WYou stab @C$N@W in the face!@n", "@c$n@W stabs you in the face!@n", "@c$n@W stabs @C$N@W in the face!@n", true},
     {"@WYou stab @C$N's@W stomach!@n", "@c$n@W stabs your stomach!@n", "@c$n@W stabs @C$N's@W stomach@n", true},
-};
-constexpr act_msgs STABBING_OFF[] = {
+});
+constexpr auto STABBING_OFF = std::to_array<act_msgs>({
     {"@WYou stab @C$N's@W stomach!@n", "@c$n@W stabs your stomach!@n", "@c$n@W stabs @C$N's@W stomach!@n", true},
     {"@WYou stab @C$N's@W arm!@n", "@c$n@W stabs your arm!@n", "@c$n@W stabs @C$N's@W arm!@n", true},
     {"@WYou stab @C$N's@W leg!@n", "@c$n@W stabs your leg!@n", "@c$n@W stabs @C$N's@W leg!@n", true},
     {"@WYou stab @C$N's@W face!@n", "@c$n@W stabs your face!@n", "@c$n@W stabs @C$N'@W face!@n", true},
     {"@WYou stab @C$N's@W chest!@n", "@c$n@W stabs your chest!@n", "@c$n@W stabs @C$N's@W chest!@n", true},
-};
-constexpr act_msgs SHOOTING_MAIN[] = {
+});
+constexpr auto SHOOTING_MAIN = std::to_array<act_msgs>({
     {"@WYou blast @C$N's@W chest!@n", "@c$n@W blasts your chest!@n", "@c$n@W blasts @C$N's@W chest!@n", true},
     {"@WYou blast @C$N's@W arm!@n", "@c$n@W blasts your arm!@n", "@c$n@W blasts @C$N's@W arm!@n", true},
     {"@WYou blast @C$N's@W leg!@n", "@c$n@W blasts your leg!@n", "@c$n@W blasts @C$N's@W leg!@n", true},
     {"@WYou blast @C$N@W in the face!@n", "@c$n@W blasts you in the face!@n", "@c$n@W blasts @C$N@W in the face!@n", true},
     {"@WYou blast @C$N's@W stomach!@n", "@c$n@W blasts your stomach!@n", "@c$n@W blasts @C$N's@W stomach@n", true},
-};
-constexpr act_msgs SHOOTING_OFF[] = {
+});
+constexpr auto SHOOTING_OFF = std::to_array<act_msgs>({
     {"@WYou blast @C$N's@W stomach!@n", "@c$n@W blasts your stomach!@n", "@c$n@W blasts @C$N's@W stomach!@n", true},
     {"@WYou blast @C$N's@W arm!@n", "@c$n@W blasts your arm!@n", "@c$n@W blasts @C$N's@W arm!@n", true},
     {"@WYou blast @C$N's@W leg!@n", "@c$n@W blasts your leg!@n", "@c$n@W blasts @C$N's@W leg!@n", true},
     {"@WYou blast @C$N's@W face!@n", "@c$n@W blasts your face!@n", "@c$n@W blasts @C$N'@W face!@n", true},
     {"@WYou blast @C$N's@W chest!@n", "@c$n@W blasts your chest!@n", "@c$n@W blasts @C$N's@W chest!@n", true},
-};
-constexpr act_msgs BRAWLING_MAIN[] = {
+});
+constexpr auto BRAWLING_MAIN = std::to_array<act_msgs>({
     {"@WYou whack @C$N's@W chest!@n", "@c$n@W whacks your chest!@n", "@c$n@W whacks @C$N's@W chest!@n", true},
     {"@WYou whack @C$N's@W arm!@n", "@c$n@W whacks your arm!@n", "@c$n@W whacks @C$N's@W arm!@n", true},
     {"@WYou whack @C$N's@W leg!@n", "@c$n@W whacks your leg!@n", "@c$n@W whacks @C$N's@W leg!@n", true},
     {"@WYou whack @C$N@W in the face!@n", "@c$n@W whacks you in the face!@n", "@c$n@W whacks @C$N@W in the face!@n", true},
     {"@WYou whack @C$N's@W stomach!@n", "@c$n@W whacks your stomach!@n", "@c$n@W whacks @C$N's@W stomach@n", true},
-};
-constexpr act_msgs BRAWLING_OFF[] = {
+});
+constexpr auto BRAWLING_OFF = std::to_array<act_msgs>({
     {"@WYou whack @C$N's@W stomach!@n", "@c$n@W whacks your stomach!@n", "@c$n@W whacks @C$N's@W stomach!@n", true},
     {"@WYou whack @C$N's@W arm!@n", "@c$n@W whacks your arm!@n", "@c$n@W whacks @C$N's@W arm!@n", true},
     {"@WYou whack @C$N's@W leg!@n", "@c$n@W whacks your leg!@n", "@c$n@W whacks @C$N's@W leg!@n", true},
     {"@WYou whack @C$N's@W face!@n", "@c$n@W whacks your face!@n", "@c$n@W whacks @C$N'@W face!@n", true},
     {"@WYou whack @C$N's@W chest!@n", "@c$n@W whacks your chest!@n", "@c$n@W whacks @C$N's@W chest!@n", true},
-};
+});
 
 void off_hand_attack(GameWorld *g, struct char_data *ch);
 
@@ -190,15 +192,15 @@ void club_tires(weapon_shot &s)
 
 /* By damage type, as in STYLE_DAMTYPES, and then anything else */
 enum { SLASH_STYLE, PIERCE_STYLE, CRUSH_STYLE, STAB_STYLE, GUN_STYLE, BRAWL_STYLE };
-constexpr int STYLE_DAMTYPES[]       = {TYPE_SLASH, TYPE_PIERCE, TYPE_CRUSH, TYPE_STAB, TYPE_BLAST};
-constexpr weapon_style WEAPON_STYLES[] = {
+constexpr auto STYLE_DAMTYPES = std::to_array<int>({TYPE_SLASH, TYPE_PIERCE, TYPE_CRUSH, TYPE_STAB, TYPE_BLAST});
+constexpr auto WEAPON_STYLES = std::to_array<weapon_style>({
     {SKILL_SWORD,  false, SLASHING, SLASHING, slash_face_mastery, nullptr, slash_cuts},
     {SKILL_DAGGER, false, PIERCING_MAIN, PIERCING_OFF, nullptr, pierce_first, nullptr},
     {SKILL_CLUB,   false, CRUSHING_MAIN, CRUSHING_OFF, nullptr, nullptr, club_tires},
     {SKILL_SPEAR,  false, STABBING_MAIN, STABBING_OFF},
     {SKILL_GUN,    true,  SHOOTING_MAIN, SHOOTING_OFF},
     {SKILL_BRAWL,  false, BRAWLING_MAIN, BRAWLING_OFF, brawl_face_mastery},
-};
+});
 
 const weapon_style &style_of(struct obj_data *weapon)
 {
@@ -219,10 +221,10 @@ int take_up(GameWorld *g, struct char_data *ch, const weapon_style &style)
   return skill;
 }
 
-constexpr extra_flag LEVEL_FLAGS[] = {extra_flag::weaplvl1, extra_flag::weaplvl2, extra_flag::weaplvl3, extra_flag::weaplvl4, extra_flag::weaplvl5};
-constexpr double LEVEL_SHARE[] = {0.05, 0.1, 0.2, 0.3, 0.5}; /* the damage a weapon's level adds */
-constexpr int GUN_COSTS[]      = {0, 0, 2, 4, 6, 12};         /* zenni a shot, by the gun's level */
-constexpr double SPEAR_REACH[] = {0.04, 0.08, 0.12, 0.2, 0.25}; /* a spear's level adds this, two-handed */
+constexpr auto LEVEL_FLAGS = std::to_array<extra_flag>({extra_flag::weaplvl1, extra_flag::weaplvl2, extra_flag::weaplvl3, extra_flag::weaplvl4, extra_flag::weaplvl5});
+constexpr auto LEVEL_SHARE = std::to_array<double>({0.05, 0.1, 0.2, 0.3, 0.5}); /* the damage a weapon's level adds */
+constexpr auto GUN_COSTS = std::to_array<int>({0, 0, 2, 4, 6, 12});         /* zenni a shot, by the gun's level */
+constexpr auto SPEAR_REACH = std::to_array<double>({0.04, 0.08, 0.12, 0.2, 0.25}); /* a spear's level adds this, two-handed */
 
 int weapon_level(struct obj_data *weapon)
 {
@@ -324,8 +326,8 @@ void spear_skill(weapon_shot &s)
 
 /* Where roll_hitloc()'s 1 (the stomach) to 5 (a leg) lands, as a hit spot: quirk: the off hand's arm and leg hits
    land on the chest, and a soft fist's critical on the body is only the main blow's */
-constexpr int MAIN_SPOTS[] = {1, 4, 5, 2, 3};
-constexpr int OFF_SPOTS[]  = {1, 4, 5, 5, 5};
+constexpr auto MAIN_SPOTS = std::to_array<int>({1, 4, 5, 2, 3});
+constexpr auto OFF_SPOTS = std::to_array<int>({1, 4, 5, 5, 5});
 
 void aim(weapon_shot &s, int roll)
 {
@@ -334,7 +336,7 @@ void aim(weapon_shot &s, int roll)
   s.hitspot = (s.main ? MAIN_SPOTS : OFF_SPOTS)[roll - 1];
 }
 
-constexpr int EQ_BY_SPOT[] = {4, 1, 2, 3, 4}; /* dam_eq_loc()'s 1 arms, 2 legs, 3 head and 4 body */
+constexpr auto EQ_BY_SPOT = std::to_array<int>({4, 1, 2, 3, 4}); /* dam_eq_loc()'s 1 arms, 2 legs, 3 head and 4 body */
 
 /* It lands where aimed: false if it was something else (a backstab) */
 bool weapon_lands(weapon_shot &s)

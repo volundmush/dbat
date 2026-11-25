@@ -5,6 +5,7 @@
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <array>
 #include <optional>
 #include <algorithm>
 #include <cctype>
@@ -51,7 +52,7 @@ namespace {
   };
 
   /* In the menu's two columns: the first six on the left, the others beside them */
-  constexpr exit_choice EXITS[] = {
+  constexpr auto EXITS = std::to_array<exit_choice>({
       {'5', NORTH,     "north"    },
       {'6', EAST,      "east"     },
       {'7', SOUTH,     "south"    },
@@ -64,7 +65,7 @@ namespace {
       {'e', SOUTHWEST, "southwest"},
       {'f', INDIR,     "in"       },
       {'g', OUTDIR,    "out"      },
-  };
+  });
 
   /* A number of the exit menu's, any negative one meaning none (-1) */
   struct exit_field {
@@ -74,7 +75,7 @@ namespace {
     int context;
   };
 
-  constexpr exit_field EXIT_FIELDS[] = {
+  constexpr auto EXIT_FIELDS = std::to_array<exit_field>({
       {'4', "Enter key number : ",                                         &room_direction_data::key,           CONTEXT_REDIT_EXIT_KEY},
       {'7', "Enter lock DC number : ",                                     &room_direction_data::dclock,        NOTHING               },
       {'8', "Enter door search DC number : ",                              &room_direction_data::dchide,        NOTHING               },
@@ -83,7 +84,7 @@ namespace {
       {'c', "Enter the DC to beat for SAVE from failed skill checks : ",   &room_direction_data::dcfailsave,    NOTHING               },
       {'d', "Enter the room to send play to for minor save failure : ",    &room_direction_data::failroom,      NOTHING               },
       {'e', "Enter the room to send play to for major save failure : ",    &room_direction_data::totalfailroom, NOTHING               },
-  };
+  });
 
   /* The main menu's choices only builders have: a mortal remodeling with a droid has the others */
   constexpr std::string_view BUILDERS_ONLY = "3456789abcdefgwxsz";
