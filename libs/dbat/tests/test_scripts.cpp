@@ -371,11 +371,11 @@ namespace {
         act_mtrigger(g, mob, line, s.actor, s.witness, s.prop, nullptr, "");
         return "ran";
       }
-      case bit_of<mob_trig::death>: return str_format("{:d}", death_mtrigger(g, mob, s.actor));
+      case bit_of<mob_trig::death>: return str_format("{:d}", int(death_mtrigger(g, mob, s.actor) != 0));
       case bit_of<mob_trig::greet>:
       case bit_of<mob_trig::greet_all>: return str_format("{:d}", (int)greet_mtrigger(g, s.actor, 0));
-      case bit_of<mob_trig::entry>: return str_format("{:d}", entry_mtrigger(g, mob));
-      case bit_of<mob_trig::receive>: return s.prop ? str_format("{:d}", receive_mtrigger(g, mob, s.actor, s.prop)) : "no prop";
+      case bit_of<mob_trig::entry>: return str_format("{:d}", int(entry_mtrigger(g, mob) != 0));
+      case bit_of<mob_trig::receive>: return s.prop ? str_format("{:d}", int(receive_mtrigger(g, mob, s.actor, s.prop) != 0)) : "no prop";
       case bit_of<mob_trig::fight>: set_fighting(g, mob, s.actor); fight_mtrigger(g, mob); return "ran";
       case bit_of<mob_trig::hitprcnt>: set_fighting(g, mob, s.actor); hitprcnt_mtrigger(g, mob); return "ran";
       case bit_of<mob_trig::bribe>: bribe_mtrigger(g, mob, s.actor, std::max(s.t.narg, 1)); return "ran";
@@ -385,9 +385,9 @@ namespace {
         if (owner_here(g, s))
           entry_memory_mtrigger(g, owner_mob(g, s));
         return "ran";
-      case bit_of<mob_trig::cast>: return str_format("{:d}", cast_mtrigger(g, s.actor, mob, CAST_SPELL));
-      case bit_of<mob_trig::leave>: return str_format("{:d}", leave_mtrigger(g, s.actor, 0));
-      case bit_of<mob_trig::door>: return str_format("{:d}", door_mtrigger(g, s.actor, 0, 0));
+      case bit_of<mob_trig::cast>: return str_format("{:d}", int(cast_mtrigger(g, s.actor, mob, CAST_SPELL) != 0));
+      case bit_of<mob_trig::leave>: return str_format("{:d}", int(leave_mtrigger(g, s.actor, 0) != 0));
+      case bit_of<mob_trig::door>: return str_format("{:d}", int(door_mtrigger(g, s.actor, 0, 0) != 0));
       case bit_of<mob_trig::time>: time_mtrigger(g, mob); return "ran";
       default: return "";
     }
@@ -404,15 +404,15 @@ namespace {
       case bit_of<obj_trig::random>: random_otrigger(g, obj); return "ran";
       case bit_of<obj_trig::command>: return str_format("{:d}", (int)command_otrigger(g, s.actor, cmd, arg));
       case bit_of<obj_trig::timer>: timer_otrigger(g, obj); return "ran";
-      case bit_of<obj_trig::get>: return str_format("{:d}", get_otrigger(g, obj, s.actor));
-      case bit_of<obj_trig::drop>: return str_format("{:d}", drop_otrigger(g, obj, s.actor));
-      case bit_of<obj_trig::give>: return str_format("{:d}", give_otrigger(g, obj, s.actor, s.witness));
-      case bit_of<obj_trig::wear>: return str_format("{:d}", wear_otrigger(g, obj, s.actor, 0));
-      case bit_of<obj_trig::remove>: return str_format("{:d}", remove_otrigger(g, obj, s.actor));
+      case bit_of<obj_trig::get>: return str_format("{:d}", int(get_otrigger(g, obj, s.actor) != 0));
+      case bit_of<obj_trig::drop>: return str_format("{:d}", int(drop_otrigger(g, obj, s.actor) != 0));
+      case bit_of<obj_trig::give>: return str_format("{:d}", int(give_otrigger(g, obj, s.actor, s.witness) != 0));
+      case bit_of<obj_trig::wear>: return str_format("{:d}", int(wear_otrigger(g, obj, s.actor, 0) != 0));
+      case bit_of<obj_trig::remove>: return str_format("{:d}", int(remove_otrigger(g, obj, s.actor) != 0));
       case bit_of<obj_trig::load>: return str_format("{:d}", (int)load_otrigger(g, obj));
-      case bit_of<obj_trig::cast>: return str_format("{:d}", cast_otrigger(g, s.actor, obj, CAST_SPELL));
+      case bit_of<obj_trig::cast>: return str_format("{:d}", int(cast_otrigger(g, s.actor, obj, CAST_SPELL) != 0));
       case bit_of<obj_trig::leave>: return str_format("{:d}", (int)leave_otrigger(g, room_of(g, s.room), s.actor, 0));
-      case bit_of<obj_trig::consume>: return str_format("{:d}", consume_otrigger(g, obj, s.actor, consume_cmd::eat));
+      case bit_of<obj_trig::consume>: return str_format("{:d}", int(consume_otrigger(g, obj, s.actor, consume_cmd::eat) != 0));
       case bit_of<obj_trig::time>: time_otrigger(g, obj); return "ran";
       default: return "";
     }
@@ -428,14 +428,14 @@ namespace {
 
     switch (type) {
       case bit_of<wld_trig::random>: random_wtrigger(g, room); return "ran";
-      case bit_of<wld_trig::command>: return str_format("{:d}", command_wtrigger(g, s.actor, cmd, arg));
+      case bit_of<wld_trig::command>: return str_format("{:d}", int(command_wtrigger(g, s.actor, cmd, arg) != 0));
       case bit_of<wld_trig::speech>: speech_wtrigger(g, s.actor, text); return "ran";
       case bit_of<wld_trig::reset>: reset_wtrigger(g, room); return "ran";
-      case bit_of<wld_trig::enter>: return str_format("{:d}", enter_wtrigger(g, room, s.actor, 0));
-      case bit_of<wld_trig::drop>: return s.prop ? str_format("{:d}", drop_wtrigger(g, s.prop, s.actor)) : "no prop";
-      case bit_of<wld_trig::cast>: return str_format("{:d}", cast_wtrigger(g, s.actor, s.witness, nullptr, CAST_SPELL));
-      case bit_of<wld_trig::leave>: return str_format("{:d}", leave_wtrigger(g, room, s.actor, 0));
-      case bit_of<wld_trig::door>: return str_format("{:d}", door_wtrigger(g, s.actor, 0, 0));
+      case bit_of<wld_trig::enter>: return str_format("{:d}", int(enter_wtrigger(g, room, s.actor, 0) != 0));
+      case bit_of<wld_trig::drop>: return s.prop ? str_format("{:d}", int(drop_wtrigger(g, s.prop, s.actor) != 0)) : "no prop";
+      case bit_of<wld_trig::cast>: return str_format("{:d}", int(cast_wtrigger(g, s.actor, s.witness, nullptr, CAST_SPELL) != 0));
+      case bit_of<wld_trig::leave>: return str_format("{:d}", int(leave_wtrigger(g, room, s.actor, 0) != 0));
+      case bit_of<wld_trig::door>: return str_format("{:d}", int(door_wtrigger(g, s.actor, 0, 0) != 0));
       case bit_of<wld_trig::time>: time_wtrigger(g, room); return "ran";
       default: return "";
     }

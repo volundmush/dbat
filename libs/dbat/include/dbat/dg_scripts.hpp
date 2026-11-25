@@ -127,27 +127,27 @@ void speech_mtrigger(GameWorld *g, char_data *actor, std::string_view str);
 void speech_wtrigger(GameWorld *g, char_data *actor, std::string_view str);
 void greet_memory_mtrigger(GameWorld *g, char_data *ch);
 bool greet_mtrigger(GameWorld *g, char_data *actor, int dir);
-int entry_mtrigger(GameWorld *g, char_data *ch);
+bool entry_mtrigger(GameWorld *g, char_data *ch);
 void entry_memory_mtrigger(GameWorld *g, char_data *ch);
-int enter_wtrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
-int drop_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
+bool enter_wtrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
+bool drop_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
 void timer_otrigger(GameWorld *g, obj_data *obj);
-int get_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
-int drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor);
-int give_otrigger(GameWorld *g, obj_data *obj, char_data *actor,
+bool get_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
+bool drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor);
+bool give_otrigger(GameWorld *g, obj_data *obj, char_data *actor,
                   char_data *victim);
-int receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor,
+bool receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor,
                      obj_data *obj);
 void bribe_mtrigger(GameWorld *g, char_data *ch, char_data *actor,
                     int amount);
-int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int where);
-int remove_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
+bool wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int where);
+bool remove_otrigger(GameWorld *g, obj_data *obj, char_data *actor);
 
 bool command_mtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument);
 bool command_otrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument);
-int command_wtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument);
+bool command_wtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument);
 
-int death_mtrigger(GameWorld *g, char_data *ch, char_data *actor);
+bool death_mtrigger(GameWorld *g, char_data *ch, char_data *actor);
 void fight_mtrigger(GameWorld *g, char_data *ch);
 void hitprcnt_mtrigger(GameWorld *g, char_data *ch);
 
@@ -159,18 +159,18 @@ void reset_wtrigger(GameWorld *g, room_data *ch);
 void load_mtrigger(GameWorld *g, char_data *ch);
 bool load_otrigger(GameWorld *g, obj_data *obj); /* false if its script purged it */
 
-int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum);
-int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum);
-int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj, int spellnum);
+bool cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum);
+bool cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum);
+bool cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj, int spellnum);
 
-int leave_mtrigger(GameWorld *g, char_data *actor, int dir);
-int leave_wtrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
+bool leave_mtrigger(GameWorld *g, char_data *actor, int dir);
+bool leave_wtrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
 bool leave_otrigger(GameWorld *g, room_data *room, char_data *actor, int dir);
 
-int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir);
-int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir);
+bool door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir);
+bool door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir);
 
-int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, consume_cmd cmd);
+bool consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, consume_cmd cmd);
 
 void time_mtrigger(GameWorld *g, char_data *ch);
 void time_otrigger(GameWorld *g, obj_data *obj);

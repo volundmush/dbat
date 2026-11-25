@@ -360,12 +360,12 @@ void entry_memory_mtrigger(GameWorld *g, char_data *ch)
   }
 }
 
-int entry_mtrigger(GameWorld *g, char_data *ch)
+bool entry_mtrigger(GameWorld *g, char_data *ch)
 {
   if (char_aff_flagged(ch, aff_flag::charm))
-    return 1;
+    return true;
   auto r = fire(g, ch, mob_trig::entry, ready_and_chance(g), no_vars, stop_at_first);
-  return r ? r->value : 1;
+  return !r || r->value != 0;
 }
 
 bool command_mtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument)
@@ -454,12 +454,12 @@ void hitprcnt_mtrigger(GameWorld *g, char_data *ch)
        [&](trig_data *t) { add_char_uid_var(t, "actor", char_get_fighting(g, ch), 0); }, stop_at_first);
 }
 
-int receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor, obj_data *obj)
+bool receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor, obj_data *obj)
 {
   long id = obj_get_id(obj);
 
   if (char_aff_flagged(ch, aff_flag::charm))
-    return 1;
+    return true;
   auto r = fire(g, ch, mob_trig::receive, ready_and_chance(g),
                 [&](trig_data *t) {
                   add_char_uid_var(t, "actor", actor, 0);
@@ -467,24 +467,24 @@ int receive_mtrigger(GameWorld *g, char_data *ch, char_data *actor, obj_data *ob
                 },
                 stop_at_first);
   if (!r)
-    return 1;
+    return true;
   /* by id, because plenty of scripts purge what they're given */
   if (char_is_dead(actor) || char_is_dead(ch) || !(obj = find_obj(g, id)) || obj_get_carried_by(obj) != actor)
-    return 0;
-  return r->value;
+    return false;
+  return r->value != 0;
 }
 
-int death_mtrigger(GameWorld *g, char_data *ch, char_data *actor)
+bool death_mtrigger(GameWorld *g, char_data *ch, char_data *actor)
 {
   if (char_aff_flagged(ch, aff_flag::charm))
-    return 1;
+    return true;
   auto r = fire(g, ch, mob_trig::death, ready_and_chance(g),
                 [&](trig_data *t) {
                   if (actor)
                     add_char_uid_var(t, "actor", actor, 0);
                 },
                 stop_at_first);
-  return r ? r->value : 1;
+  return !r || r->value != 0;
 }
 
 void load_mtrigger(GameWorld *g, char_data *ch)
@@ -495,23 +495,23 @@ void load_mtrigger(GameWorld *g, char_data *ch)
     char_proto_script(mob_proto_of(g, char_get_nr(ch))).clear();
 }
 
-int cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum)
+bool cast_mtrigger(GameWorld *g, char_data *actor, char_data *ch, int spellnum)
 {
   if (ch == nullptr || char_aff_flagged(ch, aff_flag::charm))
-    return 1;
+    return true;
   auto r = fire(g, ch, mob_trig::cast, ready_and_chance(g),
                 [&](trig_data *t) {
                   add_char_uid_var(t, "actor", actor, 0);
                   set_spell(g, t, spellnum);
                 },
                 stop_at_first);
-  return r ? r->value : 1;
+  return !r || r->value != 0;
 }
 
-int leave_mtrigger(GameWorld *g, char_data *actor, int dir)
+bool leave_mtrigger(GameWorld *g, char_data *actor, int dir)
 {
   if (!valid_dg_target(g, actor, dg_gods::allow))
-    return 1;
+    return true;
 
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (inattentive(g, ch, actor))
@@ -523,12 +523,12 @@ int leave_mtrigger(GameWorld *g, char_data *actor, int dir)
                   },
                   stop_at_first);
     if (r)
-      return r->value;
+      return r->value != 0;
   }
-  return 1;
+  return true;
 }
 
-int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
+bool door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 {
   for (char_data *ch : room_people(g, char_get_in_room(actor))) {
     if (inattentive(g, ch, actor))
@@ -541,9 +541,9 @@ int door_mtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
                   },
                   stop_at_first);
     if (r)
-      return r->value;
+      return r->value != 0;
   }
-  return 1;
+  return true;
 }
 
 /* A time trigger fires when the hour is the one in its number, and gets %time% */
@@ -579,15 +579,15 @@ void timer_otrigger(GameWorld *g, struct obj_data *obj)
   fire(g, obj, obj_trig::timer, ready_only(g), no_vars, [](const run_result &) { return then::go_on; });
 }
 
-int get_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
+bool get_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
   auto r = fire(g, obj, obj_trig::get, ready_and_chance(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first);
   if (!r)
-    return 1;
+    return true;
   /* no get if the actor was killed (the mud would choke on obj_to_char) or the object purged */
   if (char_is_dead(actor) || r->owner_gone)
-    return 0;
-  return r->value;
+    return false;
+  return r->value != 0;
 }
 
 /* Runs obj's command triggers for where the actor has it (type), until one takes the command or purges obj */
@@ -637,33 +637,34 @@ bool command_otrigger(GameWorld *g, char_data *actor, std::string_view cmd, std:
          cmd_otrig_list(g, room_get_contents(g, char_get_in_room(actor)), actor, cmd, argument, ocmd_where::room);
 }
 
-/* The result of the first trigger, of wear, remove or consume, that runs; 0 if it purged the object */
-static int run_unless_purged(const std::optional<run_result> &r)
+/* Whether the first trigger, of wear, remove or consume, that runs lets the action go on (its script's return value
+   not 0); no if it purged the object */
+static bool run_unless_purged(const std::optional<run_result> &r)
 {
   if (!r)
-    return 1;
-  return r->owner_gone ? 0 : r->value;
+    return true;
+  return !r->owner_gone && r->value != 0;
 }
 
-int wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int /* where */)
+bool wear_otrigger(GameWorld *g, obj_data *obj, char_data *actor, int /* where */)
 {
   return run_unless_purged(fire(g, obj, obj_trig::wear, ready_only(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first));
 }
 
-int remove_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
+bool remove_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
   if (!valid_dg_target(g, actor, dg_gods::refuse))
-    return 1;
+    return true;
   return run_unless_purged(fire(g, obj, obj_trig::remove, ready_only(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first));
 }
 
-int drop_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
+bool drop_otrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
   /* a purged object leaves nothing to drop */
   return run_unless_purged(fire(g, obj, obj_trig::drop, ready_and_chance(g), [&](trig_data *t) { add_char_uid_var(t, "actor", actor, 0); }, stop_at_first));
 }
 
-int give_otrigger(GameWorld *g, obj_data *obj, char_data *actor, char_data *victim)
+bool give_otrigger(GameWorld *g, obj_data *obj, char_data *actor, char_data *victim)
 {
   auto r = fire(g, obj, obj_trig::give, ready_and_chance(g),
                 [&](trig_data *t) {
@@ -672,11 +673,11 @@ int give_otrigger(GameWorld *g, obj_data *obj, char_data *actor, char_data *vict
                 },
                 stop_at_first);
   if (!r)
-    return 1;
+    return true;
   /* no give if the object was purged, or the giver no longer has it */
   if (r->owner_gone || obj_get_carried_by(obj) != actor)
-    return 0;
-  return r->value;
+    return false;
+  return r->value != 0;
 }
 
 bool load_otrigger(GameWorld *g, obj_data *obj)
@@ -692,10 +693,10 @@ bool load_otrigger(GameWorld *g, obj_data *obj)
   return true;
 }
 
-int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
+bool cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
 {
   if (obj == nullptr)
-    return 1;
+    return true;
   auto r = fire(g, obj, obj_trig::cast, ready_and_chance(g),
                 [&](trig_data *t) {
                   add_char_uid_var(t, "actor", actor, 0);
@@ -703,11 +704,11 @@ int cast_otrigger(GameWorld *g, char_data *actor, obj_data *obj, int spellnum)
                 },
                 stop_at_first);
   if (!r)
-    return 1;
+    return true;
   /* the spell has nothing left to work on, or nobody left to cast it */
   if (r->owner_gone || char_is_dead(actor))
-    return 0;
-  return r->value;
+    return false;
+  return r->value != 0;
 }
 
 /* every leave trigger on every object in the room runs, and any one of them can stop the actor */
@@ -732,7 +733,7 @@ bool leave_otrigger(GameWorld *g, room_data *room, char_data *actor, int dir)
   return final;
 }
 
-int consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, consume_cmd cmd)
+bool consume_otrigger(GameWorld *g, obj_data *obj, char_data *actor, consume_cmd cmd)
 {
   return run_unless_purged(fire(g, obj, obj_trig::consume, ready_only(g),
                                 [&](trig_data *t) {
@@ -765,7 +766,7 @@ void random_wtrigger(GameWorld *g, struct room_data *room)
   fire(g, room, wld_trig::random, ready_and_chance(g), no_vars, stop_at_first);
 }
 
-int enter_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int dir)
+bool enter_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int dir)
 {
   auto r = fire(g, room, wld_trig::enter, ready_and_chance(g),
                 [&](trig_data *t) {
@@ -773,7 +774,7 @@ int enter_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int d
                   add_char_uid_var(t, "actor", actor, 0);
                 },
                 stop_at_first);
-  return r ? r->value : 1;
+  return !r || r->value != 0;
 }
 
 /* The room the actor is in, if it has triggers of type and there is an actor */
@@ -784,15 +785,15 @@ static room_data *actor_room_with(GameWorld *g, char_data *actor, wld_trig type)
   return room_of(g, char_get_in_room(actor));
 }
 
-int command_wtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument)
+bool command_wtrigger(GameWorld *g, char_data *actor, std::string_view cmd, std::string_view argument)
 {
   room_data *room = actor_room_with(g, actor, wld_trig::command);
   /* prevent people we like from becoming trapped :P */
   if (!room || !valid_dg_target(g, actor, dg_gods::refuse))
-    return 0;
+    return false;
   auto r = fire(g, room, wld_trig::command, [&](trig_data *t) { return ready(g, t) && has_text(g, t, "W-Command") && command_matches(t, cmd); },
                 [&](trig_data *t) { set_command_vars(t, actor, cmd, argument); }, stop_at_first);
-  return r ? r->value : 0;
+  return r && r->value != 0;
 }
 
 void speech_wtrigger(GameWorld *g, char_data *actor, std::string_view str)
@@ -809,11 +810,11 @@ void speech_wtrigger(GameWorld *g, char_data *actor, std::string_view str)
        stop_at_first);
 }
 
-int drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor)
+bool drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor)
 {
   room_data *room = actor_room_with(g, actor, wld_trig::drop);
   if (!room)
-    return 1;
+    return true;
   auto r = fire(g, room, wld_trig::drop, ready_and_chance(g),
                 [&](trig_data *t) {
                   add_char_uid_var(t, "actor", actor, 0);
@@ -821,15 +822,15 @@ int drop_wtrigger(GameWorld *g, obj_data *obj, char_data *actor)
                 },
                 stop_at_first);
   if (!r)
-    return 1;
-  return obj_get_carried_by(obj) != actor ? 0 : r->value;
+    return true;
+  return obj_get_carried_by(obj) == actor && r->value != 0;
 }
 
-int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj, int spellnum)
+bool cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj, int spellnum)
 {
   room_data *room = actor_room_with(g, actor, wld_trig::cast);
   if (!room)
-    return 1;
+    return true;
   auto r = fire(g, room, wld_trig::cast, ready_and_chance(g),
                 [&](trig_data *t) {
                   add_char_uid_var(t, "actor", actor, 0);
@@ -840,27 +841,27 @@ int cast_wtrigger(GameWorld *g, char_data *actor, char_data *vict, obj_data *obj
                   set_spell(g, t, spellnum);
                 },
                 stop_at_first);
-  return r ? r->value : 1;
+  return !r || r->value != 0;
 }
 
-int leave_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int dir)
+bool leave_wtrigger(GameWorld *g, struct room_data *room, char_data *actor, int dir)
 {
   if (!valid_dg_target(g, actor, dg_gods::allow))
-    return 1;
+    return true;
   auto r = fire(g, room, wld_trig::leave, ready_and_chance(g),
                 [&](trig_data *t) {
                   set_direction(t, dir, false);
                   add_char_uid_var(t, "actor", actor, 0);
                 },
                 stop_at_first);
-  return r ? r->value : 1;
+  return !r || r->value != 0;
 }
 
-int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
+bool door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
 {
   room_data *room = actor_room_with(g, actor, wld_trig::door);
   if (!room)
-    return 1;
+    return true;
   auto r = fire(g, room, wld_trig::door, ready_and_chance(g),
                 [&](trig_data *t) {
                   add_var(t->var_list, "cmd", cmd_door[subcmd], 0);
@@ -868,7 +869,7 @@ int door_wtrigger(GameWorld *g, char_data *actor, int subcmd, int dir)
                   add_char_uid_var(t, "actor", actor, 0);
                 },
                 stop_at_first);
-  return r ? r->value : 1;
+  return !r || r->value != 0;
 }
 
 void time_wtrigger(GameWorld *g, struct room_data *room)

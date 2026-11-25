@@ -796,7 +796,7 @@ static void check_cast_trigger_purges_its_target(GameWorld *g, struct char_data 
 {
   struct obj_data *obj = object_with_trigger(g, ch, 386);
 
-  CHECK(cast_otrigger(g, ch, obj, 1) == 0);
+  CHECK(!cast_otrigger(g, ch, obj, 1));
   CHECK_AUDIT(g);
 }
 
@@ -835,7 +835,7 @@ static void check_receive_trigger_purges_the_gift(GameWorld *g, struct char_data
   char_to_room(g, mob, char_get_in_room(ch));
   attach_trigger(g, char_script_slot(mob), 389);
   obj_to_char(g, obj, ch);
-  CHECK(receive_mtrigger(g, mob, ch, obj) == 0);
+  CHECK(!receive_mtrigger(g, mob, ch, obj));
   CHECK(find_obj(g, id) == nullptr);
   extract_char(g, mob);
   finish_extractions(g);

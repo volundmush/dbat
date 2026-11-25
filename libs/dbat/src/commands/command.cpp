@@ -756,7 +756,7 @@ void command_interpreter(GameWorld *g, struct char_data *ch, std::string_view ar
    */
   /* otherwise, find the command */
   {
-    int cont;                                                                                 /* continue the command checks */
+    bool cont;                                                                                /* continue the command checks */
     cont = command_wtrigger(g, ch, arg, line);                                 /* any world triggers ? */
     if (!cont && !char_is_dead(ch)) cont = command_mtrigger(g, ch, arg, line); /* any mobile triggers ? */
     if (!cont && !char_is_dead(ch)) cont = command_otrigger(g, ch, arg, line); /* any object triggers ? */
