@@ -97,7 +97,7 @@ struct alias_line {
   {
     text.append(more.substr(0, std::min(more.size(), (size_t)MAX_RAW_INPUT_LENGTH - 1 - text.size())));
   }
-  void queue(struct txt_q *q) const { write_to_q(std::string_view(text).substr(0, MAX_INPUT_LENGTH - 1), q, 1); }
+  void queue(struct txt_q *q) const { write_to_q(std::string_view(text).substr(0, MAX_INPUT_LENGTH - 1), q, true); }
 };
 
 static void perform_complex_alias(struct txt_q *input_q, std::string_view orig, struct alias_data *a)

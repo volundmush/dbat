@@ -53,7 +53,7 @@
 
 static void look_in_direction(GameWorld *g, struct char_data *ch, int dir);
 static void look_in_obj(GameWorld *g, struct char_data *ch, const std::string &arg);
-static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg, int read);
+static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg, bool read);
 static void do_auto_exits(GameWorld *g, room_vnum target_room, struct char_data *ch, int exit_mode);
 static void do_auto_exits2(GameWorld *g, room_vnum target_room, struct char_data *ch);
 
@@ -767,7 +767,7 @@ namespace {
   }
 
   /* Reading: the board ch carries or sees, its message number, or else what's named looked at */
-  void read_board(GameWorld *g, struct char_data *ch, std::string &arg, void (*look_at)(GameWorld *, struct char_data *, std::string &, int))
+  void read_board(GameWorld *g, struct char_data *ch, std::string &arg, void (*look_at)(GameWorld *, struct char_data *, std::string &, bool))
   {
     auto is_board        = [&](obj_data *o) { return obj_get_type_flag(o) == ITEM_BOARD; };
     struct obj_data *obj = find_first(char_inventory(g, ch), is_board);
@@ -788,7 +788,7 @@ namespace {
       show_board(g, obj_get_vnum(g, obj), ch);
     } else if ((!isdigit(number[0]) || (!(msg = parse_int(number)))) || number.find('.') != std::string::npos) {
       std::string target = number + " " + std::string(rest);
-      look_at(g, ch, target, 0);
+      look_at(g, ch, target, false);
     } else {
       board_display_msg(g, obj_get_vnum(g, obj), ch, msg);
     }
@@ -803,7 +803,7 @@ namespace {
  * Thanks to Angus Mezick <angus@EDGIL.CCMAIL.COMPUSERVE.COM> for the
  * suggested fix to this problem.
  */
-static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg, int cmread)
+static void look_at_target(GameWorld *g, struct char_data *ch, std::string &arg, bool cmread)
 {
   if (!char_get_desc(ch))
     return;
@@ -988,7 +988,7 @@ ACMD(do_look)
     if (arg.empty())
       send_to_char(g, ch, "Read what?\r\n");
     else
-      look_at_target(g, ch, arg, 1);
+      look_at_target(g, ch, arg, true);
     return;
   }
   std::string arg  = take_word(rest);
@@ -1023,7 +1023,7 @@ ACMD(do_look)
     if (search)
       send_to_char(g, ch, "That is not a direction!\r\n");
     else
-      look_at_target(g, ch, arg2, 0);
+      look_at_target(g, ch, arg2, false);
   } else if (is_abbrev(arg, "around")) {
     bool found = false;
     for (const extra_descr_data &i : room_get_ex_description(g, char_get_in_room(ch))) {
@@ -1035,7 +1035,7 @@ ACMD(do_look)
     if (!found)
       send_to_char(g, ch, "You couldn't find anything noticeable.\r\n");
   } else if (find_exdesc(arg, room_get_ex_description(g, char_get_in_room(ch))) != nullptr || !search) {
-    look_at_target(g, ch, arg, 0);
+    look_at_target(g, ch, arg, false);
   } else {
     send_to_char(g, ch, "That is not a direction!\r\n");
   }
@@ -1053,7 +1053,7 @@ ACMD(do_examine)
 
   /* look_at_target() eats the number. */
   std::string tempsave = arg;
-  look_at_target(g, ch, tempsave, 0);
+  look_at_target(g, ch, tempsave, false);
 
   struct char_data *tmp_char;
   struct obj_data *tmp_object;

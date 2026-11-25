@@ -61,19 +61,19 @@ static void sort_keeper_objs(GameWorld *g, struct char_data *keeper, struct shop
 static void shopping_list(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
 static void shopping_value(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
 static void shopping_sell(GameWorld *g, std::string &arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
-static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, std::string &name, struct char_data *keeper, struct shop_data *shop, int msg);
+static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, std::string &name, struct char_data *keeper, struct shop_data *shop, bool msg);
 static struct obj_data *slide_obj(GameWorld *g, struct obj_data *obj, struct char_data *keeper, struct shop_data *shop);
 static void shopping_buy(GameWorld *g, std::string &arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
 static void shopping_app(GameWorld *g, std::string_view arg, struct char_data *ch, struct char_data *keeper, struct shop_data *shop);
-static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, std::string_view arg, struct char_data *keeper, struct shop_data *shop, int msg);
+static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, std::string_view arg, struct char_data *keeper, struct shop_data *shop, bool msg);
 static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, std::string_view name, const id_list &list);
 static struct obj_data *get_slide_obj_vis(GameWorld *g, struct char_data *ch, std::string_view name, const id_list &list);
-static std::string customer_string(GameWorld *g, struct shop_data *shop, int detailed);
+static std::string customer_string(GameWorld *g, struct shop_data *shop, bool detailed);
 static void list_all_shops(GameWorld *g, struct char_data *ch);
 static void list_detailed_shop(GameWorld *g, struct char_data *ch, struct shop_data *shop);
 static bool is_ok_char(GameWorld *g, struct char_data *keeper, struct char_data *ch, struct shop_data *shop);
 static bool is_ok_obj(GameWorld *g, struct char_data *keeper, struct char_data *ch, struct obj_data *obj, struct shop_data *shop);
-static bool is_open(GameWorld *g, struct char_data *keeper, struct shop_data *shop, int msg);
+static bool is_open(GameWorld *g, struct char_data *keeper, struct shop_data *shop, bool msg);
 static bool is_ok(GameWorld *g, struct char_data *keeper, struct char_data *ch, struct shop_data *shop);
 static void push(struct stack_data *stack, int pushval);
 static int top(struct stack_data *stack);
@@ -270,7 +270,7 @@ static bool is_ok_obj(GameWorld *g, struct char_data *keeper, struct char_data *
   return (true);
 }
 
-static bool is_open(GameWorld *g, struct char_data *keeper, struct shop_data *shop, int msg)
+static bool is_open(GameWorld *g, struct char_data *keeper, struct shop_data *shop, bool msg)
 {
   std::string buf;
   if (shop_get_open1(shop) > g->time_info.hours)
@@ -539,7 +539,7 @@ static struct obj_data *get_hash_obj_vis(GameWorld *g, struct char_data *ch, std
 }
 
 static struct obj_data *get_purchase_obj(GameWorld *g, struct char_data *ch, std::string_view arg,
-                                         struct char_data *keeper, struct shop_data *shop, int msg)
+                                         struct char_data *keeper, struct shop_data *shop, bool msg)
 {
   struct obj_data *obj;
   std::string name = take_arg(arg);
@@ -885,7 +885,7 @@ static void shopping_buy(GameWorld *g, std::string &arg, struct char_data *ch, s
     }
 }
 
-static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, std::string &name, struct char_data *keeper, struct shop_data *shop, int msg)
+static struct obj_data *get_selling_obj(GameWorld *g, struct char_data *ch, std::string &name, struct char_data *keeper, struct shop_data *shop, bool msg)
 {
   std::string buf;
   struct obj_data *obj;
@@ -1255,7 +1255,7 @@ void assign_the_shopkeepers(GameWorld *g)
   }
 }
 
-static std::string customer_string(GameWorld *g, struct shop_data *shop, int detailed)
+static std::string customer_string(GameWorld *g, struct shop_data *shop, bool detailed)
 {
   std::string buf;
 

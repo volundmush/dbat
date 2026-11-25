@@ -38,7 +38,7 @@ const std::string_view guild_default_no_gold  = "%s Sorry, but I'm gonna need mo
 
 /* Local variables */
 
-static std::string guild_customer_string(GameWorld *g, struct guild_data *guild_nr, int detailed);
+static std::string guild_customer_string(GameWorld *g, struct guild_data *guild_nr, bool detailed);
 static int calculate_skill_cost(GameWorld *g, struct char_data *ch, int skill);
 
 static int calculate_skill_cost(GameWorld *g, struct char_data *ch, int skill)
@@ -391,7 +391,7 @@ void list_skills(GameWorld *g, struct char_data *ch, std::string_view arg)
   send_to_char(g, ch, buf2);
 }
 
-static bool is_guild_open(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, int msg)
+static bool is_guild_open(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, bool msg)
 {
   std::string buf;
 
@@ -1163,7 +1163,7 @@ void assign_the_guilds(GameWorld *g)
   }
 }
 
-static std::string guild_customer_string(GameWorld *g, struct guild_data *guild_nr, int detailed)
+static std::string guild_customer_string(GameWorld *g, struct guild_data *guild_nr, bool detailed)
 {
   std::string buf;
 

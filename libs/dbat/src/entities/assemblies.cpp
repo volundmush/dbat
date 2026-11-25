@@ -196,7 +196,7 @@ bool assemblyAddComponent(GameWorld *g, obj_vnum lVnum, obj_vnum lComponentVnum,
   return (true);
 }
 
-bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCharacter, int extract_yes)
+bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCharacter, bool extract_yes)
 {
   bool bOk                             = true;
   long i                               = 0;
@@ -246,7 +246,7 @@ bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCh
     if (ppComponentObjects[i] == nullptr)
       continue;
 
-    if (pAssembly->pComponents[i].bExtract && bOk && extract_yes == true)
+    if (pAssembly->pComponents[i].bExtract && bOk && extract_yes)
       extract_obj(g, ppComponentObjects[i]);
     else if (pAssembly->pComponents[i].bInRoom)
       obj_to_room(g, ppComponentObjects[i], char_get_in_room(pCharacter));

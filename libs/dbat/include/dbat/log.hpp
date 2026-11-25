@@ -35,11 +35,11 @@ void mud_log(std::format_string<Args...> fmt, Args &&...args)
 }
 
 /* mudlog(): the text as it is */
-void mudlog(GameWorld *g, int type, int level, int file, std::string_view text);
+void mudlog(GameWorld *g, int type, int level, bool file, std::string_view text);
 /* mudlog(): the text formatted as std::format does */
 template <class... Args>
   requires(sizeof...(Args) > 0)
-void mudlog(GameWorld *g, int type, int level, int file, std::format_string<Args...> fmt, Args &&...args)
+void mudlog(GameWorld *g, int type, int level, bool file, std::format_string<Args...> fmt, Args &&...args)
 {
   mudlog(g, type, level, file, str_format(fmt, std::forward<Args>(args)...));
 }

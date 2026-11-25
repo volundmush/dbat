@@ -12,7 +12,7 @@ void display_spells(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 void display_scroll(GameWorld *g, struct char_data *ch, struct obj_data *obj);
 void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, int mode);
 bool show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch);
-void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, int mode, int show);
+void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, int mode, bool show);
 void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch);
 void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch);
 void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch);

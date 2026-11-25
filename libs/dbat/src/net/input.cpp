@@ -22,7 +22,7 @@
 
 #include "comm_internal.hpp"
 
-void write_to_q(std::string_view txt, struct txt_q *queue, int aliased)
+void write_to_q(std::string_view txt, struct txt_q *queue, bool aliased)
 {
   queue->lines.push_back({std::string(txt), aliased});
   if (!aliased)
@@ -224,7 +224,7 @@ bool handle_typed(GameWorld *g, struct descriptor_data *t, std::string tmp, bool
       mudlog(g, LOG_CMP, ADMLVL_GOD, true, "Input flood from [{}]: more than {:d} commands queued; disconnecting.", t->host, MAX_QUEUED_INPUT);
       return false;
     }
-    write_to_q(tmp, &t->input, 0);
+    write_to_q(tmp, &t->input, false);
   }
   return true;
 }

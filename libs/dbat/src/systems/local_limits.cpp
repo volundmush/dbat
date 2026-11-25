@@ -776,7 +776,7 @@ void set_title(GameWorld *g, struct char_data *ch, std::string_view title)
   }
   /*
    if (title == NULL) {
-     title = class_desc_str(ch, 2, TRUE);
+     title = class_desc_str(ch, 2, true);
    }
 
    if (strlen(title) > MAX_TITLE_LENGTH)

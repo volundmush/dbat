@@ -70,7 +70,7 @@
 static void do_stat_room(GameWorld *g, struct char_data *ch);
 static void do_stat_object(GameWorld *g, struct char_data *ch, struct obj_data *j);
 static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_data *k);
-static std::string zone_summary(GameWorld *g, struct zone_data *zone, int listall);
+static std::string zone_summary(GameWorld *g, struct zone_data *zone, bool listall);
 static void mob_checkload(GameWorld *g, struct char_data *ch, mob_vnum mvnum);
 static void obj_checkload(GameWorld *g, struct char_data *ch, obj_vnum ovnum);
 static void trg_checkload(GameWorld *g, struct char_data *ch, trig_vnum tvnum);
@@ -579,7 +579,7 @@ static void do_stat_character(GameWorld *g, struct char_data *ch, struct char_da
 
   send_to_char(g, ch, "L-Des: {}@n", or_if_empty(char_get_ldesc(k), "<None>\r\n"));
   if (CONFIG_ALLOW_MULTICLASS) {
-    buf = class_desc_str(k, 1, 0);
+    buf = class_desc_str(k, 1, false);
   } else {
     buf = str_format("{}", char_sensei_name(k));
   }
@@ -1017,7 +1017,7 @@ ACMD(do_last)
    code 3 times ... -je, 4/6/93 */
 
 /* FIXME: overflow possible */
-static std::string zone_summary(GameWorld *g, struct zone_data *zone, int listall)
+static std::string zone_summary(GameWorld *g, struct zone_data *zone, bool listall)
 {
   if (listall) {
     int j, k, l, m, n, o;
@@ -1051,17 +1051,17 @@ namespace {
   {
     std::string buf;
     if (value == ".")
-      buf = zone_summary(g, room_get_zone(g, char_get_in_room(ch)), 1);
+      buf = zone_summary(g, room_get_zone(g, char_get_in_room(ch)), true);
     else if (!value.empty() && is_number(value)) {
       struct zone_data *zone = find_zone(g, parse_int(value));
       if (!zone) {
         send_to_char(g, ch, "That is not a valid zone.\r\n");
         return;
       }
-      buf = zone_summary(g, zone, 1);
+      buf = zone_summary(g, zone, true);
     } else {
       for (struct zone_data *zone : g->zones.all())
-        buf += zone_summary(g, zone, 0);
+        buf += zone_summary(g, zone, false);
     }
     send_to_char(g, ch, buf);
   }
@@ -1085,7 +1085,7 @@ namespace {
     send_to_char(g, ch, "Au: {:<8d}  Bal: {:<8d}  Exp: {:d}  Align: {:<5d}\r\n",
                  char_get_gold(vict), char_get_bank_gold(vict), char_get_exp(vict), char_get_alignment(vict));
     if (CONFIG_ALLOW_MULTICLASS)
-      send_to_char(g, ch, "Class ranks: {}\r\n", class_desc_str(vict, 1, 0));
+      send_to_char(g, ch, "Class ranks: {}\r\n", class_desc_str(vict, 1, false));
 
     send_to_char(g, ch, "Started: {:<20.16}  ", asctime_text(char_get_time_created(vict)));
     send_to_char(g, ch, "Last: {:<20.16}  Played: {:>3d}h {:>2d}m\r\n", asctime_text(char_get_time_logon(vict)),

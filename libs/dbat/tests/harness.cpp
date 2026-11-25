@@ -317,7 +317,7 @@ void th_type_at(GameWorld *g, struct descriptor_data *d, const char *line)
 
   /* process_input() never lets a longer line through */
   snprintf(limited, sizeof(limited), "%s", line);
-  write_to_q(limited, &d->input, 0);
+  write_to_q(limited, &d->input, false);
   if (d->character)
     char_set_wait(d->character, 0);
   game_process_commands(g);

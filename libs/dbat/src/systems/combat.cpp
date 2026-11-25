@@ -5361,13 +5361,13 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
   return 0;
 }
 
-void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill, int first)
+void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill, bool first)
 {
   int prob, perc, avo, index, pry = 2, dge = 2, blk = 2;
   int64_t dmg;
   double amount = 0.0;
 
-  if (first == false) {
+  if (!first) {
     amount = 0.05;
   } else {
     amount = 0.5;
@@ -5458,7 +5458,7 @@ void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, i
       hurt(g, 0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
-    if (first == true) {
+    if (first) {
       dmg = damtype(g, ch, 44, skill, .5);
     } else {
       dmg = damtype(g, ch, 45, skill, .01);

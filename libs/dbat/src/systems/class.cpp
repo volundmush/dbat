@@ -1439,7 +1439,7 @@ static int comp_rank(const void *a, const void *b)
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-std::string class_desc_str(struct char_data *ch, int howlong, int wantthe)
+std::string class_desc_str(struct char_data *ch, int howlong, bool wantthe)
 {
   std::string str;
   int i, rank, j;

@@ -51,7 +51,7 @@
 
 #include "informative_internal.hpp"
 
-static void print_object_location(GameWorld *g, int num, struct obj_data *obj, struct char_data *ch, int recur);
+static void print_object_location(GameWorld *g, int num, struct obj_data *obj, struct char_data *ch, bool recur);
 static void perform_mortal_where(GameWorld *g, struct char_data *ch, const std::string &arg);
 static void perform_immort_where(GameWorld *g, struct char_data *ch, const std::string &arg);
 
@@ -361,7 +361,7 @@ static void perform_mortal_where(GameWorld *g, struct char_data *ch, const std::
   send_to_char(g, ch, "{:<25} - {}\r\n", char_get_name(tch), room_get_name(g, char_get_in_room(tch)));
 }
 
-static void print_object_location(GameWorld *g, int num, struct obj_data *obj, struct char_data *ch, int recur)
+static void print_object_location(GameWorld *g, int num, struct obj_data *obj, struct char_data *ch, bool recur)
 {
   if (num > 0)
     send_to_char(g, ch, "O{:>3d}. {:<25} - ", num, obj_get_short_description(obj));

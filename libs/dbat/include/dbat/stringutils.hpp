@@ -51,7 +51,7 @@ int parse_int(std::string_view s);
 void delete_doubledollar(std::string &s);
 /* The place of arg in list, ignoring case: the whole entry if exact, else the first that starts with arg (an empty arg
    matches only an empty entry). -1 if there is none, or if arg starts with '!'. */
-int search_block(std::string_view arg, std::span<const std::string_view> list, int exact);
+int search_block(std::string_view arg, std::span<const std::string_view> list, bool exact);
 bool is_number(std::string_view str);
 /* The first keyword of a name list: its leading letters */
 std::string_view fname(std::string_view namelist);

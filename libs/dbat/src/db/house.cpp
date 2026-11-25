@@ -35,7 +35,7 @@ static constexpr std::string_view house_bits_entries[] = {"!GUEST", "FREE", "!IM
 static_assert(std::size(house_bits_entries) == HOUSE_NUM_FLAGS);
 constinit const name_table house_bits(house_bits_entries);
 
-static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int quiet);
+static void House_list_guests(GameWorld *g, struct char_data *ch, int i, bool quiet);
 
 /* local globals */
 
@@ -466,7 +466,7 @@ bool House_can_enter(GameWorld *g, struct char_data *ch, room_vnum house)
   return false;
 }
 
-static void House_list_guests(GameWorld *g, struct char_data *ch, int i, int quiet)
+static void House_list_guests(GameWorld *g, struct char_data *ch, int i, bool quiet)
 {
   int j, num_printed;
   const std::string *temp;

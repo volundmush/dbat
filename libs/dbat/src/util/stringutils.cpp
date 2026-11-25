@@ -199,7 +199,7 @@ bool is_abbrev(std::string_view arg1, std::string_view arg2)
 
 int parse_int(std::string_view s) { return static_cast<int>(io::c_atol(s)); }
 
-int search_block(std::string_view arg, std::span<const std::string_view> list, int exact)
+int search_block(std::string_view arg, std::span<const std::string_view> list, bool exact)
 {
   if (!arg.empty() && arg[0] == '!')
     return -1;

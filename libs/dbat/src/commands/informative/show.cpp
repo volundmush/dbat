@@ -623,7 +623,7 @@ bool show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch
   return found;
 }
 
-void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, int mode, int show)
+void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, int mode, bool show)
 {
   struct obj_data *d;
   bool found = false;

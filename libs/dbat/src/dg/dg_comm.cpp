@@ -133,7 +133,7 @@ void sub_write(GameWorld *g, std::string_view arg, struct char_data *ch, act_to 
 {
   std::vector<sub_piece> pieces(1);
   room_data *room = room_of(g, char_get_in_room(ch));
-  int to_sleeping = 1; /* mainly for windows compiles */
+  bool to_sleeping = true; /* mainly for windows compiles */
 
   for (size_t p = 0; p < arg.size();) {
     switch (arg[p]) {

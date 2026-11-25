@@ -6,7 +6,7 @@ void homing_update(GameWorld *g);
 void damage_weapon(GameWorld *g, struct char_data *ch, struct obj_data *obj, struct char_data *vict);
 int roll_accuracy(GameWorld *g, struct char_data *ch, int skill, bool kiatt);
 int handle_parry(GameWorld *g, struct char_data *ch);
-void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill, int first);
+void handle_spiral(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill, bool first);
 void handle_cooldown(GameWorld *g, struct char_data *ch, int cooldown);
 void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_data *vict, std::string_view sname, int prob, int perc, int skill, int type);
 void dodge_ki(GameWorld *g, struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2);

@@ -412,7 +412,7 @@ const beat HEARTBEAT[] = {
      }},
     {[](GameWorld *g) { return 1 * PASSES_PER_SEC; }, copyover_check}, /* EVERY second */
     {[](GameWorld *g) { return SECS_PER_MUD_HOUR * PASSES_PER_SEC; }, [](GameWorld *g) {
-       weather_and_time(g, 1);
+       weather_and_time(g, true);
        check_time_triggers(g);
        affect_update(g);
      }},

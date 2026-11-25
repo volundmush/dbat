@@ -42,7 +42,7 @@ void mud_log(std::string_view text)
 
 /* mudlog -- log mud messages to a file & to online imm's syslogs
  * based on syslog by Fen Jul 3, 1992 */
-void mudlog(GameWorld *g, int type, int level, int file, std::string_view text)
+void mudlog(GameWorld *g, int type, int level, bool file, std::string_view text)
 {
   if (file)
     mud_log(text);

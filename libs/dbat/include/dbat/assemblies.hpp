@@ -31,7 +31,7 @@ void assemblyListToChar(GameWorld *g, struct char_data *pCharacter);
 
 bool assemblyAddComponent(GameWorld *g, obj_vnum lVnum, obj_vnum lComponentVnum,
                           bool bExtract, bool bInRoom);
-bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCharacter, int extract_yes);
+bool assemblyCheckComponents(GameWorld *g, obj_vnum lVnum, struct char_data *pCharacter, bool extract_yes);
 bool assemblyCreate(GameWorld *g, obj_vnum lVnum, int iAssembledType);
 bool assemblyDestroy(GameWorld *g, obj_vnum lVnum);
 

@@ -119,7 +119,7 @@ void mobile_activity(GameWorld *g)
         (!char_mob_flagged(ch, mob_flag::stay_zone) ||
          (room_get_zone(g, char_get_exit(g, ch, door)->to_room) == room_get_zone(g, char_get_in_room(ch))))) {
       if (rand_number(g, 1, 2) == 2 && !char_is_affected(ch, aff_flag::paralyze) && block_calc(g, ch)) {
-        perform_move(g, ch, door, 1);
+        perform_move(g, ch, door, true);
       }
     }
 

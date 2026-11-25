@@ -271,7 +271,7 @@ static void perform_act(GameWorld *g, std::string_view orig, struct char_data *c
 }
 
 /* act()/sub_write(): should ch receive this message? (to_sleeping: deliver even to sleeping characters) */
-bool sendok(struct char_data *ch, int to_sleeping)
+bool sendok(struct char_data *ch, bool to_sleeping)
 {
   return (char_get_desc(ch) || script_has_type(char_get_script(ch), mob_trig::act)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, player_flag::writing);
 }

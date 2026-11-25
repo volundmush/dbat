@@ -22,7 +22,7 @@ static bool copy_object_preserve(struct obj_data *to, struct obj_data *from);
 static obj_vnum index_object(GameWorld *g, struct obj_data *obj, obj_vnum ovnum, obj_vnum ornum);
 static int update_objects(GameWorld *g, struct obj_data *refobj);
 
-static bool copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
+static bool copy_object_main(struct obj_data *to, struct obj_data *from, bool free_object);
 
 obj_vnum add_object(GameWorld *g, struct obj_data *newobj, obj_vnum ovnum)
 {
@@ -133,7 +133,7 @@ static bool copy_object_preserve(struct obj_data *to, struct obj_data *from)
   return copy_object_main(to, from, false);
 }
 
-static bool copy_object_main(struct obj_data *to, struct obj_data *from, int free_object)
+static bool copy_object_main(struct obj_data *to, struct obj_data *from, bool free_object)
 {
   *to = *from; /* strings and extra descriptions included */
   return true;

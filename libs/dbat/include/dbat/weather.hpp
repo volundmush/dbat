@@ -22,5 +22,5 @@ struct time_info_data {
 void star_phase(GameWorld *g, struct char_data *ch, int type);
 void oozaru_transform(GameWorld *g, struct char_data *ch);
 void oozaru_revert(GameWorld *g, struct char_data *ch);
-void weather_and_time(GameWorld *g, int mode);
+void weather_and_time(GameWorld *g, bool mode);
 

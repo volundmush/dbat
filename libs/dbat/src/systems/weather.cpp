@@ -25,7 +25,7 @@
 static void oozaru_add(GameWorld *g);
 static void oozaru_drop(GameWorld *g);
 
-static void another_hour(GameWorld *g, int mode);
+static void another_hour(GameWorld *g, bool mode);
 static void weather_change(GameWorld *g);
 static void phase_powerup(GameWorld *g, struct char_data *ch, int phase);
 static void grow_plants(GameWorld *g);
@@ -65,7 +65,7 @@ static void grow_plants(GameWorld *g)
   }
 }
 
-void weather_and_time(GameWorld *g, int mode)
+void weather_and_time(GameWorld *g, bool mode)
 {
   another_hour(g, mode);
   grow_plants(g);
@@ -73,7 +73,7 @@ void weather_and_time(GameWorld *g, int mode)
     weather_change(g);
 }
 
-static void another_hour(GameWorld *g, int mode)
+static void another_hour(GameWorld *g, bool mode)
 {
   g->time_info.hours++;
 

@@ -430,7 +430,7 @@ bool has_o2(struct char_data *ch)
  *   1 : If succes.
  *   0 : If fail
  */
-bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specials_check)
+bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, bool need_specials_check)
 {
   std::string buf2;
   std::string buf3;
@@ -772,7 +772,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, int need_specia
   return true;
 }
 
-bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials_check)
+bool perform_move(GameWorld *g, struct char_data *ch, int dir, bool need_specials_check)
 {
   room_vnum was_in;
 
@@ -825,7 +825,7 @@ bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials
           (!char_aff_flagged(ch, aff_flag::zanzoken) ||
            (char_aff_flagged(ch, aff_flag::group) && char_aff_flagged(fol, aff_flag::group)))) {
         act(g, "You follow $N.\r\n", false, fol, nullptr, ch, act_to::actor);
-        perform_move(g, fol, dir, 1);
+        perform_move(g, fol, dir, true);
       } else if ((char_get_in_room(fol) == was_in) &&
                  (char_get_position(fol) >= POS_STANDING) &&
                  (char_aff_flagged(ch, aff_flag::zanzoken) && char_aff_flagged(fol, aff_flag::zanzoken)) &&
@@ -835,7 +835,7 @@ bool perform_move(GameWorld *g, struct char_data *ch, int dir, int need_specials
         act(g, "You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, fol, nullptr, ch, act_to::vict);
         char_aff_set(ch, aff_flag::zanzoken, false);
         char_aff_set(fol, aff_flag::zanzoken, false);
-        perform_move(g, fol, dir, 1);
+        perform_move(g, fol, dir, true);
       } else if ((char_get_in_room(fol) == was_in) &&
                  (char_get_position(fol) >= POS_STANDING) &&
                  (char_aff_flagged(ch, aff_flag::zanzoken) && !char_aff_flagged(fol, aff_flag::zanzoken))) {
@@ -929,7 +929,7 @@ namespace {
 ACMD(do_move)
 {
   if (char_is_npc(ch)) {
-    perform_move(g, ch, subcmd - 1, 0);
+    perform_move(g, ch, subcmd - 1, false);
     return;
   }
   if (char_plr_flagged(ch, player_flag::selfd)) {
@@ -1087,7 +1087,7 @@ ACMD(do_move)
       return;
     }
   }
-  perform_move(g, ch, subcmd - 1, 0);
+  perform_move(g, ch, subcmd - 1, false);
   if (!char_get_rdisplay(ch).empty()) {
     if (char_get_rdisplay(ch) != "Empty") {
       char_set_rdisplay(ch, "Empty");
@@ -1444,7 +1444,7 @@ ACMD(do_gen_door)
  * The checks entering and leaving an object share. Returns the movement points it costs, or -1
  * (after telling ch why) when ch can't go.
  */
-static int portal_move_cost(GameWorld *g, struct char_data *ch, room_vnum dest_room, int need_specials_check)
+static int portal_move_cost(GameWorld *g, struct char_data *ch, room_vnum dest_room, bool need_specials_check)
 {
   int need_movement;
 
@@ -1483,7 +1483,7 @@ static int portal_move_cost(GameWorld *g, struct char_data *ch, room_vnum dest_r
   return need_movement;
 }
 
-static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data *obj, bool need_specials_check)
 {
   room_vnum dest_room = obj_get_value(obj, VAL_PORTAL_DEST);
   room_vnum was_in    = char_get_in_room(ch);
@@ -1570,7 +1570,7 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
   return true;
 }
 
-static bool perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static bool perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, bool need_specials_check)
 {
   room_vnum was_in = char_get_in_room(ch);
   bool could_move  = false;
@@ -1603,7 +1603,7 @@ static bool perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_dat
           if ((char_get_in_room(fol) == was_in) &&
               (char_get_position(fol) >= POS_STANDING)) {
             act(g, "You follow $N.\r\n", false, fol, nullptr, ch, act_to::actor);
-            perform_enter_obj(g, fol, obj, 1);
+            perform_enter_obj(g, fol, obj, true);
           }
     } else {
       send_to_char(g, ch,
@@ -1635,7 +1635,7 @@ ACMD(do_enter)
       obj = get_obj_in_equip_vis(g, ch, buf, nullptr, char_get_equipment_array(ch));
     /* We have an object to enter */
     if (obj)
-      perform_enter_obj(g, ch, obj, 0);
+      perform_enter_obj(g, ch, obj, false);
     /* Is there a door to enter? */
     else {
       for (door = 0; door < NUM_OF_DIRS; door++)
@@ -1645,7 +1645,7 @@ ACMD(do_enter)
               move_dir = door;
       /* Did we find what they wanted to enter. */
       if (move_dir > -1)
-        perform_move(g, ch, move_dir, 1);
+        perform_move(g, ch, move_dir, true);
       else
         send_to_char(g, ch, "There is no {} here.\r\n", buf);
     }
@@ -1660,13 +1660,13 @@ ACMD(do_enter)
               room_flagged(g, char_get_exit(g, ch, door)->to_room, room_flag::indoors))
             move_dir = door;
     if (move_dir > -1)
-      perform_move(g, ch, move_dir, 1);
+      perform_move(g, ch, move_dir, true);
     else
       send_to_char(g, ch, "You can't seem to find anything to enter.\r\n");
   }
 }
 
-static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data *obj, bool need_specials_check)
 
 {
   room_vnum was_in = char_get_in_room(ch), dest_room = NOWHERE;
@@ -1783,7 +1783,7 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
   return true;
 }
 
-static bool perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static bool perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, bool need_specials_check)
 {
   room_vnum was_in = char_get_in_room(ch);
   bool could_move  = false;
@@ -1802,7 +1802,7 @@ static bool perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_dat
           if ((char_get_in_room(fol) == was_in) &&
               (char_get_position(fol) >= POS_STANDING)) {
             act(g, "You follow $N.\r\n", false, fol, nullptr, ch, act_to::actor);
-            perform_leave_obj(g, fol, obj, 1);
+            perform_leave_obj(g, fol, obj, true);
           }
   }
   return could_move;
@@ -1820,7 +1820,7 @@ ACMD(do_leave)
   for (obj_data *obj : room_contents(g, char_get_in_room(ch)))
     if (char_can_see_obj(g, ch, obj))
       if (obj_get_type_flag(obj) == ITEM_HATCH || obj_get_type_flag(obj) == ITEM_PORTAL) {
-        perform_leave_obj(g, ch, obj, 0);
+        perform_leave_obj(g, ch, obj, false);
         return;
       }
 
@@ -1832,7 +1832,7 @@ ACMD(do_leave)
         if (char_get_exit(g, ch, door)->to_room != NOWHERE)
           if (!room_exit_flagged(char_get_exit(g, ch, door), exit_flag::closed) &&
               !room_flagged(g, char_get_exit(g, ch, door)->to_room, room_flag::indoors)) {
-            perform_move(g, ch, door, 1);
+            perform_move(g, ch, door, true);
             return;
           }
     send_to_char(g, ch, "I see no obvious exits to the outside.\r\n");

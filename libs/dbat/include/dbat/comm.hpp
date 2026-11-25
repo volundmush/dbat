@@ -128,7 +128,7 @@ void close_socket(GameWorld *g, struct descriptor_data *d);
 void close_all_sockets(GameWorld *g);
 
 /* I/O functions */
-void write_to_q(std::string_view txt, struct txt_q *queue, int aliased);
+void write_to_q(std::string_view txt, struct txt_q *queue, bool aliased);
 int write_to_descriptor(net::native_handle desc, std::string_view txt);
 /* Queues text for d as it is */
 size_t write_to_output(GameWorld *g, struct descriptor_data *d, std::string_view text);
@@ -165,4 +165,4 @@ void game_heartbeat(GameWorld *g, int heart_pulse);
 /* Sends the log to filename (stderr reopened on it; appended to if keep_old_log, as after a copyover), or a default
    file if that can't be opened, or stderr if filename is empty: exits if none of the files can be opened */
 void setup_log(std::string_view filename, bool keep_old_log);
-bool sendok(struct char_data *ch, int to_sleeping);
+bool sendok(struct char_data *ch, bool to_sleeping);
