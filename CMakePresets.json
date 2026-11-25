@@ -12,7 +12,7 @@
       "name": "release",
       "displayName": "Release (GCC, -O2 -g)",
       "binaryDir": "${sourceDir}/build-release",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo", "CMAKE_CXX_COMPILER": "g++", "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-O2 -g" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo", "CMAKE_CXX_COMPILER": "g++", "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-O2 -g", "CMAKE_CXX_FLAGS": "-D_GLIBCXX_ASSERTIONS" }
     },
     {
       "name": "asan",
@@ -34,7 +34,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_CXX_FLAGS": "--coverage -DDBAT_COVERAGE",
+        "CMAKE_CXX_FLAGS": "--coverage -DDBAT_COVERAGE -D_GLIBCXX_ASSERTIONS",
         "CMAKE_EXE_LINKER_FLAGS": "--coverage"
       }
     },
