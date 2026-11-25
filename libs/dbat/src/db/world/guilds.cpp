@@ -16,6 +16,7 @@
  *   ...
  *   $~
  */
+#include <array>
 #include <memory>
 #include <optional>
 
@@ -60,7 +61,7 @@ io::loaded<std::string> read_message(io::text_reader &in, guild_vnum vnum, std::
 /* What it teaches: "<skill> 1" or "<feat> 2", or a bare "<skill>" as the oldest guilds have it */
 io::loaded<void> read_teachings(io::text_reader &in, guild_data *guild, guild_vnum vnum)
 {
-  int t[2] = {};
+  std::array<int, 2> t = {{}};
   for (;;) {
     std::optional<std::string_view> line = in.line();
     if (!line)

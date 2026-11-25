@@ -1,4 +1,5 @@
 /* ki_attack.cpp: what every ki attack does; see ki_attack.hpp */
+#include <array>
 #include <span>
 #include "ki_attack.hpp"
 
@@ -62,8 +63,8 @@ void pay(ki_shot &s, ki_outcome how)
 /* The victim couldn't avoid it: where it hit, and what that did. */
 void land(ki_shot &s)
 {
-  static constexpr ki_spot standard[6] = {ki_spot::body, ki_spot::head, ki_spot::body,
-                                          ki_spot::arm, ki_spot::leg, ki_spot::body};
+  static constexpr std::array<ki_spot, 6> standard = {{ki_spot::body, ki_spot::head, ki_spot::body,
+                                          ki_spot::arm, ki_spot::leg, ki_spot::body}};
   GameWorld *g                         = s.g;
   const ki_attack &atk                 = *s.attack;
   auto damage_eq                       = [&](int loc) {

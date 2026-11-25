@@ -967,7 +967,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
 {
   struct obj_data *chair  = nullptr;
   bool count = false;
-  static constexpr std::string_view positions[] = {
+  static constexpr auto positions = std::to_array<std::string_view>({
       " is dead",
       " is mortally wounded",
       " is lying here, incapacitated",
@@ -976,7 +976,7 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
       " is resting here",
       " is sitting here",
       "!FIGHTING!",
-      " is standing here"};
+      " is standing here"});
 
   if (!char_is_npc(ch) && char_prf_flagged(g, ch, pref_flag::roomflags) && char_is_npc(i))
     send_to_char(g, ch, "@D[@G{:d}@D]@w {}", char_get_mob_vnum(g, i), char_get_script(i) ? "[TRIG] " : "");

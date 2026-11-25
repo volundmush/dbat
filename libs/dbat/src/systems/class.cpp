@@ -1444,7 +1444,7 @@ std::string class_desc_str(struct char_data *ch, int howlong, bool wantthe)
 {
   std::string str;
   int i, rank, j;
-  int rankorder[NUM_CLASSES];
+  std::array<int, NUM_CLASSES> rankorder;
   std::string_view buf, buf2, buf3;
 
   if (char_is_npc(ch)) {
@@ -1467,7 +1467,7 @@ std::string class_desc_str(struct char_data *ch, int howlong, bool wantthe)
     }
     rankorder[0]                  = char_get_class(ch); /* we always want primary class first */
     rankorder[char_get_class(ch)] = 0;
-    qsort((void *)rankorder, NUM_CLASSES, sizeof(int), comp_rank);
+    qsort(rankorder.data(), rankorder.size(), sizeof(int), comp_rank);
     for (int sen = 0; sen < NUM_CLASSES; sen++) {
       if (!sensei_exists(sen))
         continue;

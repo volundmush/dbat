@@ -83,7 +83,7 @@ ACMD(do_time)
 
 ACMD(do_weather)
 {
-  static constexpr std::string_view sky_look[] = {"cloudless", "cloudy", "rainy", "lit by flashes of lightning"};
+  static constexpr auto sky_look = std::to_array<std::string_view>({"cloudless", "cloudy", "rainy", "lit by flashes of lightning"});
 
   if (char_is_outside(g, ch)) {
     send_to_char(g, ch, "The sky is {} and {}.\r\n", sky_look[g->weather_info.sky],

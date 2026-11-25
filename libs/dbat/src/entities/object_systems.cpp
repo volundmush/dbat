@@ -1,3 +1,4 @@
+#include <array>
 #include "dbat/iterate.hpp"
 #include "dbat/object_systems.hpp"
 #include "dbat/utils.hpp"
@@ -12,7 +13,7 @@ void broken_update(GameWorld *g)
 {
   struct obj_data *money;
 
-  int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
+  std::array<int, 14> rand_gravity = {{0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000}};
   int dice = rand_number(g, 2, 12), grav_roll = 0, grav_change = false, health = 0;
 
   for (obj_data *k : each_obj(g)) {

@@ -2,6 +2,7 @@
  * The networking's system calls on POSIX systems: see dbat/net/platform.hpp. platform_win32.cpp is the Windows one.
  */
 #ifndef _WIN32
+#include <array>
 #include <cerrno>
 #include <csignal>
 #include <cstdio>
@@ -176,10 +177,10 @@ std::optional<accepted> accept_from(const socket &listener)
 
   /* The site is the numeric address. No reverse DNS: the lookup blocks the whole game, and the name it
      returns is chosen by whoever controls the address, so it is no basis for bans. */
-  char host[INET_ADDRSTRLEN];
-  if (!inet_ntop(AF_INET, &peer.sin_addr, host, sizeof(host)))
+  std::array<char, INET_ADDRSTRLEN> host;
+  if (!inet_ntop(AF_INET, &peer.sin_addr, host.data(), host.size()))
     return accepted{std::move(s), "unknown"};
-  return accepted{std::move(s), host};
+  return accepted{std::move(s), host.data()};
 }
 
 io_result send_some(native_handle h, std::string_view text)
@@ -290,8 +291,8 @@ void install_signals(signal_flags &to, void (*crash)(int sig))
   signal(SIGALRM, SIG_IGN);
 
   /* crashes: say so, then die (and dump core) as before */
-  void *warm[1];
-  backtrace(warm, 1); /* load the unwinder now, so the handler doesn't have to allocate */
+  std::array<void *, 1> warm;
+  backtrace(warm.data(), warm.size()); /* load the unwinder now, so the handler doesn't have to allocate */
   for (int sig : {SIGSEGV, SIGBUS, SIGFPE, SIGILL, SIGABRT})
     signal(sig, fatal_signal);
 
@@ -328,10 +329,10 @@ void write_raw(int fd, std::string_view text)
 
 void write_backtrace(int fd)
 {
-  void *frames[64];
-  int n = backtrace(frames, 64);
+  std::array<void *, 64> frames;
+  int n = backtrace(frames.data(), frames.size());
 
-  backtrace_symbols_fd(frames, n, fd);
+  backtrace_symbols_fd(frames.data(), n, fd);
 }
 
 std::expected<std::string, std::string> executable_path()

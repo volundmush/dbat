@@ -1,3 +1,4 @@
+#include <array>
 #include <algorithm>
 #include <ctime>
 #include <format>
@@ -221,8 +222,8 @@ bool is_number(std::string_view str)
 
 std::string asctime_text(time_t when)
 {
-  static constexpr std::string_view DAYS[]   = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-  static constexpr std::string_view MONTHS[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+  static constexpr auto DAYS = std::to_array<std::string_view>({"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"});
+  static constexpr auto MONTHS = std::to_array<std::string_view>({"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"});
   const std::tm *t                           = std::localtime(&when);
   return std::format("{} {}{:3d} {:02d}:{:02d}:{:02d} {:d}", DAYS[t->tm_wday], MONTHS[t->tm_mon], t->tm_mday, t->tm_hour, t->tm_min,
                      t->tm_sec, 1900 + t->tm_year);

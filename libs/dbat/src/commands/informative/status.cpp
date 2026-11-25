@@ -121,7 +121,7 @@ ACMD(do_evolve)
 
 bool perf_skill(int skill)
 {
-  static constexpr int PERFECTABLE[] = {464, 441, 444, 475, 474, 476, 488, 472, 485, 442, 510, 533};
+  static constexpr auto PERFECTABLE = std::to_array<int>({464, 441, 444, 475, 474, 476, 488, 472, 485, 442, 510, 533});
   return std::ranges::contains(PERFECTABLE, skill);
 }
 

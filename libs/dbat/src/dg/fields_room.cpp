@@ -75,7 +75,7 @@ const auto room_fields = std::to_array<field<room_data>>({
        return number(room_get_number(r));
      }},
     {"weather", [](const field_query &q, room_data *r) -> result {
-       static constexpr std::string_view sky_look[] = {"sunny", "cloudy", "rainy", "lightning"};
+       static constexpr auto sky_look = std::to_array<std::string_view>({"sunny", "cloudy", "rainy", "lightning"});
        return room_flagged(r, room_flag::indoors) ? "" : str_format("{}", sky_look[q.g->weather_info.sky]);
      }},
     {"zonename", [](const field_query &, room_data *r) -> result { return str_format("{}", room_get_zone(r)->name); }},

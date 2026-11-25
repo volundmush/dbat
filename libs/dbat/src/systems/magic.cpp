@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include "dbat/iterate.hpp"
 #include "dbat/consts/aligns.hpp"
 #include "dbat/config.hpp"
@@ -94,7 +95,7 @@ constexpr int MAX_SPELL_AFFECTS = 5; /* change if more needed */
 void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                  int spellnum)
 {
-  struct affected_type af[MAX_SPELL_AFFECTS] = {};
+  std::array<affected_type, MAX_SPELL_AFFECTS> af = {{}};
   bool accum_affect = false, accum_duration = false;
   std::string_view to_vict, to_room;
   int i;
@@ -363,7 +364,7 @@ void mag_affects(GameWorld *g, int level, struct char_data *ch, struct char_data
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++)
     if (af[i].bitvector != aff_flag::dontuse || (af[i].location != APPLY_NONE))
-      affect_join(g, victim, af + i, accum_duration, false, accum_affect, false);
+      affect_join(g, victim, &af[i], accum_duration, false, accum_affect, false);
 
   if (!to_vict.empty())
     act(g, to_vict, false, victim, nullptr, ch, act_to::actor);
@@ -695,7 +696,7 @@ void mag_creations(GameWorld *g, int level, struct char_data *ch, int spellnum)
 void mag_affectsv(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                   int spellnum)
 {
-  struct affected_type af[MAX_SPELL_AFFECTS] = {};
+  std::array<affected_type, MAX_SPELL_AFFECTS> af = {{}};
   bool accum_affect = false, accum_duration = false;
   std::string_view to_vict, to_room;
   int i;

@@ -340,7 +340,7 @@ namespace {
 
 ACMD(do_scan)
 {
-  static constexpr std::string_view dirnames[] = {"North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"};
+  static constexpr auto dirnames = std::to_array<std::string_view>({"North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"});
 
   if (char_get_position(ch) < POS_SLEEPING) {
     send_to_char(g, ch, "You can't see anything but stars!\n\r");

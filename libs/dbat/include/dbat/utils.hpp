@@ -28,7 +28,6 @@
 constexpr std::string_view AN(std::string_view s) { return s.empty() || s.front() == '\0' || std::string_view("aeiouAEIOU").contains(s.front()) ? "an" : "a"; }
 
 #define MIN(a, b)  ((a) < (b) ? (a) : (b))
-#define countof(a) (sizeof(a) / sizeof((a)[0])) /* elements in an array (C2y has it as countof) */
 #define MAX(a, b)  ((a) > (b) ? (a) : (b))
 
 static inline double safeDiv(double numer, double denom)

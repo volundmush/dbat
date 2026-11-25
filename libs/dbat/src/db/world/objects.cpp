@@ -22,6 +22,7 @@
  *   Z                                                its size
  *   <size>
  */
+#include <array>
 #include <optional>
 
 #include "dbat/world_files.hpp"
@@ -146,7 +147,7 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
   obj_set_item_number(obj, vnum);
 
   std::string what = str_format("object #{:d}", vnum);
-  std::string text[4]; /* aliases, short, long and action descriptions */
+  std::array<std::string, 4> text; /* aliases, short, long and action descriptions */
   for (std::string &s : text) {
     io::loaded<std::string> read = in.tilde_string(what);
     if (!read)
@@ -166,7 +167,7 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
   /* its type and flags */
   std::optional<std::string_view> line = in.line();
   int type = 0;
-  std::string flags[12];
+  std::array<std::string, 12> flags;
   int read = 0;
   if (line) {
     io::fields f(*line);
@@ -190,7 +191,7 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
   /* its values: as many as the line has, which may be none (quirk) */
   if (!(line = in.line()))
     return std::unexpected(in.fail(str_format("object #{:d}: the file ends before its values", vnum)));
-  int values[NUM_OBJ_VAL_POSITIONS] = {};
+  std::array<int, NUM_OBJ_VAL_POSITIONS> values = {{}};
   io::scan_ints(*line, values);
   for (int i = 0; i < NUM_OBJ_VAL_POSITIONS; i++)
     obj_set_value(obj, i, values[i]);
@@ -198,7 +199,7 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
   rules::suntzu_weapon_types(obj);
 
   /* its weight, cost, rent and level, which may be left out */
-  int t[4] = {};
+  std::array<int, 4> t = {{}};
   if (!(line = in.line()) || io::scan_ints(*line, t) < 3)
     return std::unexpected(in.fail(str_format("object #{:d}: expected its weight, cost, rent and level", vnum)));
   obj_set_weight(obj, t[0]);
@@ -237,7 +238,7 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
       case 'A': {
         if (slot >= MAX_OBJ_AFFECT)
           return std::unexpected(in.fail(str_format("object #{:d} has more than {:d} affects", vnum, MAX_OBJ_AFFECT)));
-        int a[3] = {0, 0, specific};
+        std::array<int, 3> a = {{0, 0, specific}};
         if (io::loaded<void> after = read_after(in, vnum, 'A', a, 2, "its location, modifier and specific"); !after)
           return after;
         specific = a[2];
@@ -252,7 +253,7 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
         if (slot >= SPELLBOOK_SIZE)
           return std::unexpected(
               in.fail(str_format("object #{:d} has more than {:d} spells and affects", vnum, SPELLBOOK_SIZE)));
-        int s[2] = {};
+        std::array<int, 2> s = {{}};
         if (io::loaded<void> after = read_after(in, vnum, 'S', s, 2, "its spell and pages"); !after)
           return after;
         obj_spellbook_spell &spell = obj_make_sbinfo(obj)[slot];
@@ -265,7 +266,7 @@ io::loaded<void> read_object(GameWorld *g, io::text_reader &in, obj_vnum vnum)
         dg_attach_proto_trigger(g, *line, obj);
         break;
       case 'Z': {
-        int z[1] = {};
+        std::array<int, 1> z = {{}};
         if (io::loaded<void> after = read_after(in, vnum, 'Z', z, 1, "its size"); !after)
           return after;
         obj_set_size(obj, z[0]);
@@ -291,7 +292,7 @@ void write_object(GameWorld *g, io::text_writer &out, obj_data *obj)
   out.print("#{:d}\n{}~\n{}~\n{}~\n{}~\n", obj_get_vnum(g, obj), or_if_empty(obj_get_name(obj), "undefined"),
             or_if_empty(obj_get_short_description(obj), "undefined"), or_if_empty(obj_get_description(obj), "undefined"), action);
 
-  std::string flags[12];
+  std::array<std::string, 12> flags;
   for (int i = 0; i < 4; i++) {
     flags[i]     = flag_letters(obj_get_extra_flags(obj).word(static_cast<std::size_t>(i)));
     flags[i + 4] = flag_letters(obj_get_wear_flags(obj).word(static_cast<std::size_t>(i)));

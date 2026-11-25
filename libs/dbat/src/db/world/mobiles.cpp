@@ -92,7 +92,7 @@ const auto especs = std::to_array<espec_field>({
      nullptr},
     {"Affect",
      [](GameWorld *g, char_data *mob, std::string_view value, int) {
-       int n[6] = {};
+       std::array<int, 6> n = {{}};
        io::scan_ints(value, n);
        if (n[0] <= 0)
          return;
@@ -153,7 +153,7 @@ io::loaded<void> read_mob_numbers(GameWorld *g, io::text_reader &in, char_data *
   char_set_real_abils_cha(mob, 0);
 
   std::optional<std::string_view> line = in.line();
-  int t[9]{};
+  std::array<int, 9> t = {{}};
   int read = 0;
   if (line) {
     io::fields f(*line);
@@ -178,7 +178,7 @@ io::loaded<void> read_mob_numbers(GameWorld *g, io::text_reader &in, char_data *
   char_set_mob_specials_damnodice(mob, t[6]);
   char_set_mob_specials_damsizedice(mob, t[7]); /* t[8], the damage bonus, is unused */
 
-  if (!(line = in.line()) || io::scan_ints(*line, std::span(t, 4)) != 4)
+  if (!(line = in.line()) || io::scan_ints(*line, std::span(t).first(4)) != 4)
     return std::unexpected(
         in.fail(str_format("mob #{:d}: expected its gold, experience, race and class, as '# # # #'", vnum)));
   char_set_gold(mob, t[0]);
@@ -189,7 +189,7 @@ io::loaded<void> read_mob_numbers(GameWorld *g, io::text_reader &in, char_data *
   rules::infravision_unless_human(mob);
   char_set_speaking(mob, SKILL_LANG_COMMON);
 
-  if (!(line = in.line()) || io::scan_ints(*line, std::span(t, 3)) != 3)
+  if (!(line = in.line()) || io::scan_ints(*line, std::span(t).first(3)) != 3)
     return std::unexpected(
         in.fail(str_format("mob #{:d}: expected its position, default position and sex, as '# # #'", vnum)));
   char_set_position(mob, t[0]);
@@ -232,7 +232,7 @@ io::loaded<void> read_mob(GameWorld *g, io::text_reader &in, mob_vnum vnum)
   char_drop_player_specials(mob); /* no player_specials is what makes a character an NPC */
 
   std::string what = str_format("mob vnum {:d}", vnum);
-  std::string text[4]; /* aliases, short, long and detailed descriptions */
+  std::array<std::string, 4> text; /* aliases, short, long and detailed descriptions */
   for (std::string &s : text) {
     io::loaded<std::string> read = in.tilde_string(what);
     if (!read)
@@ -246,7 +246,8 @@ io::loaded<void> read_mob(GameWorld *g, io::text_reader &in, mob_vnum vnum)
   char_set_ddesc(mob, text[3]);
 
   std::optional<std::string_view> line = in.line();
-  std::string flags[8], kind;
+  std::array<std::string, 8> flags;
+  std::string kind;
   int alignment = 0;
   int read      = 0;
   if (line) {
@@ -304,7 +305,7 @@ void write_mob(GameWorld *g, io::text_writer &out, mob_vnum vnum, char_data *mob
   strip_cr(ddesc);
   out.print("#{:d}\n{}~\n{}~\n{}~\n{}~\n", vnum, char_get_alias(mob), char_get_sdesc(mob), ldesc, ddesc);
 
-  std::string flags[8];
+  std::array<std::string, 8> flags;
   for (int i = 0; i < 4; i++) {
     flags[i]     = flag_letters(char_get_mob_flags(mob).word(static_cast<std::size_t>(i)));
     flags[i + 4] = flag_letters(char_get_affected_by(mob).word(static_cast<std::size_t>(i)));

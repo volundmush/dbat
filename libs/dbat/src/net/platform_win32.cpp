@@ -3,6 +3,7 @@
  * The messages are those of the POSIX file, so the logs read the same.
  */
 #ifdef _WIN32
+#include <array>
 #include <cerrno>
 #include <charconv>
 #include <csignal>
@@ -57,9 +58,9 @@ in_addr bind_address(std::string_view ip)
   if (addr.s_addr == htonl(INADDR_ANY)) {
     mud_log("Binding to all IP interfaces on this host.");
   } else {
-    char text[INET_ADDRSTRLEN] = "";
-    inet_ntop(AF_INET, &addr, text, sizeof(text));
-    mud_log("Binding only to IP address {}", text);
+    std::array<char, INET_ADDRSTRLEN> text = {};
+    inet_ntop(AF_INET, &addr, text.data(), text.size());
+    mud_log("Binding only to IP address {}", text.data());
   }
   return addr;
 }
@@ -161,10 +162,10 @@ std::optional<accepted> accept_from(const socket &listener)
   if (setsockopt(h, SOL_SOCKET, SO_KEEPALIVE, reinterpret_cast<const char *>(&keepalive), sizeof(keepalive)) == SOCKET_ERROR)
     report_error("SYSERR: setsockopt SO_KEEPALIVE");
 
-  char host[INET_ADDRSTRLEN];
-  if (!inet_ntop(AF_INET, &peer.sin_addr, host, sizeof(host)))
+  std::array<char, INET_ADDRSTRLEN> host;
+  if (!inet_ntop(AF_INET, &peer.sin_addr, host.data(), host.size()))
     return accepted{std::move(s), "unknown"};
-  return accepted{std::move(s), host};
+  return accepted{std::move(s), host.data()};
 }
 
 io_result send_some(native_handle h, std::string_view text)
@@ -260,14 +261,14 @@ void write_raw(int fd, std::string_view text) { _write(fd, text.data(), static_c
 /* The frames' addresses, which tools/symbolize.sh can't resolve, but a debugger can */
 void write_backtrace(int fd)
 {
-  void *frames[62];
-  USHORT n = CaptureStackBackTrace(0, 62, frames, nullptr);
+  std::array<void *, 62> frames;
+  USHORT n = CaptureStackBackTrace(0, frames.size(), frames.data(), nullptr);
 
   for (USHORT i = 0; i < n; i++) {
-    char line[24] = "0x";
-    char *end     = std::to_chars(line + 2, line + sizeof(line) - 1, reinterpret_cast<std::uintptr_t>(frames[i]), 16).ptr;
-    *end++        = '\n';
-    write_raw(fd, std::string_view(line, end));
+    std::array<char, 24> line = {'0', 'x'};
+    char *end = std::to_chars(line.data() + 2, line.data() + line.size() - 1, reinterpret_cast<std::uintptr_t>(frames[i]), 16).ptr;
+    *end++    = '\n';
+    write_raw(fd, std::string_view(line.data(), end));
   }
 }
 

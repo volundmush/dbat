@@ -147,7 +147,7 @@ bool sunder_strike(ki_shot &s, int where)
 /* Where a malice breaker lands: a third of the time, the head */
 int malice_locate(ki_shot &s)
 {
-  static constexpr int spots[6] = {1, 2, 2, 3, 4, 5};
+  static constexpr std::array<int, 6> spots = {{1, 2, 2, 3, 4, 5}};
   return spots[rand_number(s.g, 1, 6) - 1];
 }
 
@@ -182,7 +182,7 @@ void seishou_molted(ki_shot &s)
 
 int seishou_locate(ki_shot &s)
 {
-  static constexpr int spots[7] = {1, 2, 2, 2, 3, 4, 5};
+  static constexpr std::array<int, 7> spots = {{1, 2, 2, 2, 3, 4, 5}};
   return spots[rand_number(s.g, 1, 7) - 1];
 }
 
@@ -617,7 +617,7 @@ void beast_at_victim(GameWorld *g, char_data *ch, char_data *vict, const beast_a
 {
   /* dam_eq_loc() for where it lands: 1 arms, 2 legs, 3 head, 4 body; quirk: a hit on the body's first place damages
      the head's equipment, and one on the face the body's */
-  static constexpr int equipment[5] = {3, 4, 4, 1, 2};
+  static constexpr std::array<int, 5> equipment = {{3, 4, 4, 1, 2}};
   int pry = 2, dge = 2, blk = 2;
 
   if (!can_kill(g, ch, vict, nullptr, atk.kill_mode))

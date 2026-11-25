@@ -8,6 +8,7 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 
+#include <array>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -319,7 +320,8 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, std::string_view name)
 
   /* quirk: the last line is looked at twice, as while (!feof()) read it */
   std::string buf;
-  int nr = 0, t[5] = {};
+  int nr = 0;
+  std::array<int, 5> t = {};
   while (!in.eof()) {
     in.next();
     if (!in.line().starts_with('#'))
@@ -338,7 +340,7 @@ void Crash_listrent(GameWorld *g, struct char_data *ch, std::string_view name)
        descriptions, then the line whose fifth number is shown as its cost (quirk: it is a wear flags word) */
     in.next();
     in.next();
-    io::loaded<std::string> strings[4];
+    std::array<io::loaded<std::string>, 4> strings;
     bool cut_short = false;
     for (io::loaded<std::string> &text : strings)
       if (!(text = in.string("a listed rent file's object"))) {

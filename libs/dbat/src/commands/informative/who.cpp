@@ -509,9 +509,9 @@ ACMD(do_toplist)
 
 ACMD(do_whois)
 {
-  static constexpr std::string_view immlevels[ADMLVL_IMPL + 1] = {
+  static constexpr std::array<std::string_view, ADMLVL_IMPL + 1> immlevels = {{
       "[Mortal]", "[Enforcer]", "[First Class Enforcer]", "[High Enforcer]", "[Vice Admin]", "[Administrator]", "[Implementor]",
-  };
+  }};
 
   argument = skip_spaces(argument);
   if (argument.empty()) {

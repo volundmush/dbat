@@ -1006,7 +1006,7 @@ ACMD(do_bury)
 /* This determines of an object is a suitable bundle of silk or not */
 bool valid_silk(GameWorld *g, struct obj_data *obj)
 {
-  constexpr obj_vnum BUNDLES[] = {16700, 16701, 16702, 16703, 16704, 16708};
+  constexpr auto BUNDLES = std::to_array<obj_vnum>({16700, 16701, 16702, 16703, 16704, 16708});
   return std::ranges::find(BUNDLES, obj_get_vnum(g, obj)) != std::end(BUNDLES);
 }
 

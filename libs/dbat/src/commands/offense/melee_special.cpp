@@ -1,5 +1,6 @@
 /* melee_special.c: special melee attacks
  * Split from act.offensive.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include "dbat/args.hpp"
 #include "dbat/act.offensive.hpp"
 #include "dbat/consts/affflags.hpp"
@@ -94,26 +95,26 @@ void show(const strike_shot &s, const scenery &sc)
 /* A slam to the head throws the victim down, which can knock them out, and into the ground, which craters it */
 void slam_crater(strike_shot &s, int where)
 {
-  static constexpr scenery outdoors[8]   = {{"Debris is thrown into the air and showers down thunderously!"},
+  static constexpr std::array<scenery, 8> outdoors = {{{"Debris is thrown into the air and showers down thunderously!"},
                                             {"Lava leaks up through cracks in the crater!"},
                                             {"A cloud of dust envelopes the entire area!"},
                                             {"The surrounding area roars and shudders from the impact!"},
-                                            {"The ground shatters apart from the stress of the impact!"}};
-  static constexpr scenery underwater[3] = {
+                                            {"The ground shatters apart from the stress of the impact!"}}};
+  static constexpr std::array<scenery, 3> underwater = {{
       {"The water churns violently!"},
       {"Large bubbles rise from the movement!"},
       {"The water collapses in on the hole created!", "The water collapses in on the hole create!"}
-  };
-  static constexpr scenery water[3] = {
+  }};
+  static constexpr std::array<scenery, 3> water = {{
       {"A huge column of water erupts from the impact!"},
       {"The impact briefly causes a swirling vortex of water!"},
-      {"A huge depression forms in the water and erupts into a wave from the impact!"}};
-  static constexpr scenery inside[8] = {{"Debris is thrown into the air and showers down thunderously!"},
+      {"A huge depression forms in the water and erupts into a wave from the impact!"}}};
+  static constexpr std::array<scenery, 8> inside = {{{"Debris is thrown into the air and showers down thunderously!"},
                                         {"The structure of the surrounding room cracks and quakes from the impact!"},
                                         {"Parts of the ceiling collapse, crushing into the floor!"},
                                         {"The surrounding area roars and shudders from the impact!"},
                                         {"The ground shatters apart from the stress of the impact!"},
-                                        {"The walls of the surrounding room crack in the same instant!"}};
+                                        {"The walls of the surrounding room crack in the same instant!"}}};
   GameWorld *g                       = s.g;
   struct char_data *vict             = s.vict;
   auto here                          = [&] { return char_get_in_room(vict); };

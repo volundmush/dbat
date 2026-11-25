@@ -1,6 +1,7 @@
 /*
  * Reading the old binary hcontrol and plrmail files: see legacy_binary.hpp.
  */
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <string>
@@ -63,7 +64,7 @@ std::vector<house_control_rec> houses(std::string_view bytes)
       h.guests[i] = le(bytes, at + 48 + 8 * static_cast<size_t>(i), 8);
     h.last_payment = le(bytes, at + 128, 8);
     h.bitvector    = house_flags_from_number(le(bytes, at + 136, 8));
-    long *rest[]   = {&h.builtby, &h.spare2, &h.spare3, &h.spare4, &h.spare5, &h.spare6, &h.spare7};
+    auto rest = std::to_array<long *>({&h.builtby, &h.spare2, &h.spare3, &h.spare4, &h.spare5, &h.spare6, &h.spare7});
     for (size_t i = 0; i < std::size(rest); i++)
       *rest[i] = le(bytes, at + 144 + 8 * i, 8);
     out.push_back(h);

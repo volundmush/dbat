@@ -15,6 +15,7 @@
  * blank, the line after it is the first), and a message is the rest of its line, as fgets() into a
  * MAX_STRING_LENGTH buffer reads it, losing its last character as though it were the line end.
  */
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <optional>
@@ -157,13 +158,13 @@ io::loaded<void> read_socials(GameWorld *g)
     std::string sort_as;
     int hide = 0, min_char_pos = POS_RESTING, min_pos = 0, min_lvl = 0;
     if (new_form) {
-      int *numbers[] = {&hide, &min_char_pos, &min_pos, &min_lvl};
+      auto numbers = std::to_array<int *>({&hide, &min_char_pos, &min_pos, &min_lvl});
       if (in.fields(&sort_as, numbers) != 5)
         return std::unexpected(in.fail(str_format("format error in the social near '{}'", word)));
       social.command = std::string_view(word).substr(word.empty() ? 0 : 1); /* quirk: whatever its first character is */
       social.sort_as = sort_as;
     } else {
-      int *numbers[] = {&hide, &min_pos};
+      auto numbers = std::to_array<int *>({&hide, &min_pos});
       if (in.fields(nullptr, numbers) != 2)
         return std::unexpected(in.fail(str_format("format error in the social near '{}'", word)));
       social.command = word;

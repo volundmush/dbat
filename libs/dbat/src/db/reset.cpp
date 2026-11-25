@@ -9,6 +9,7 @@
 *  To see this in action, check out AderonMUD                            * 
 ************************************************************************ */
 
+#include <array>
 #include "dbat/utils.hpp"
 #include "dbat/reset.hpp"
 #include "dbat/spec_procs.hpp"
@@ -50,7 +51,7 @@ static bool prereset_gauntlet_zone(GameWorld *g)
   int i, gauntlet_players = 0;
   struct char_data *mob;
   /* The mobs in the gauntlet are ALL reset here... */
-  struct gauntlet_mob gauntlet_mobs[NUM_GAUNTLET_ROOMS] = {
+  std::array<gauntlet_mob, NUM_GAUNTLET_ROOMS> gauntlet_mobs = {{
       /* room vnum   mob vnum */
       {2403, 2400},
       {2405, 2401},
@@ -72,7 +73,7 @@ static bool prereset_gauntlet_zone(GameWorld *g)
       {2437, 2417},
       {2439, 2418},
       {2441, 2419}
-  };
+  }};
 
   mud_log("Special Reset: zone {:d}: Resetting Gauntlet", RESET_GAUNTLET);
 

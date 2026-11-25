@@ -1,6 +1,7 @@
 /*
  * The loaders' fix-ups: see load_rules.hpp.
  */
+#include <array>
 #include "load_rules.hpp"
 #include "dbat/room_utils.hpp"
 #include "dbat/consts/roomflags.hpp"
@@ -98,11 +99,11 @@ void portal_and_hatch_dcs(obj_data *obj)
 
 void suntzu_weapon_types(obj_data *obj)
 {
-  static constexpr int suntzu[] = {
+  static constexpr auto suntzu = std::to_array<int>({
       WEAPON_TYPE_DAGGER, WEAPON_TYPE_SHORTSWORD, WEAPON_TYPE_LONGSWORD, WEAPON_TYPE_GREATSWORD, WEAPON_TYPE_MACE,
       WEAPON_TYPE_AXE,    WEAPON_TYPE_WHIP,       WEAPON_TYPE_SPEAR,     WEAPON_TYPE_POLEARM,    WEAPON_TYPE_UNARMED,
       WEAPON_TYPE_FLAIL,  WEAPON_TYPE_STAFF,      WEAPON_TYPE_HAMMER,
-  }; /* 170 to 182 */
+  }); /* 170 to 182 */
   int old = obj_get_value(obj, 0);
   if (obj_get_type_flag(obj) != ITEM_WEAPON || old <= 169)
     return;

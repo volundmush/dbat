@@ -17,6 +17,7 @@
  *   ...
  *   $~
  */
+#include <array>
 #include "dbat/world_files.hpp"
 #include "dbat/consts/roomflags.hpp"
 #include "dbat/db.hpp"
@@ -82,7 +83,7 @@ io::loaded<void> read_exit(GameWorld *g, io::text_reader &in, room_vnum room, in
   exit->keyword             = std::move(*keyword);
 
   std::optional<std::string_view> line = in.line();
-  int n[11];
+  std::array<int, 11> n;
   if (!line || io::scan_ints(*line, n) != 11)
     return std::unexpected(in.fail(str_format(
         "room #{:d}, exit D{:d}: expected 11 numbers (door, key, to room, lock DC, hide DC, skill, move DC, save type, save DC, fail room, total fail room)",
@@ -128,7 +129,7 @@ io::loaded<void> read_room(GameWorld *g, io::text_reader &in, room_vnum vnum)
   if (!line)
     return std::unexpected(in.fail(str_format("room #{:d}: the file ends before its flags and sector", vnum)));
   int zone_number = 0, sector = 0;
-  std::string flags[4];
+  std::array<std::string, 4> flags;
   io::fields f(*line);
   f.number(zone_number) && f.word(flags[0], 127) && f.word(flags[1], 127) && f.word(flags[2], 127) &&
       f.word(flags[3], 127) && f.number(sector);

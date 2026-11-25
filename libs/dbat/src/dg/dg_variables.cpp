@@ -8,6 +8,7 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
+#include <array>
 #include <cstdlib>
 
 #include "dbat/io/reader.hpp"
@@ -154,7 +155,7 @@ const struct {
 /* The names %send%, %echo% and the rest stand for: the command of that name for each kind of owner */
 const struct {
   std::string_view name;
-  std::string_view per_kind[3]; /* for a mob, an object, a room */
+  std::array<std::string_view, 3> per_kind; /* for a mob, an object, a room */
 } command_names[] = {
     {"door",       {"mdoor ", "odoor ", "wdoor "}                     },
     {"force",      {"mforce ", "oforce ", "wforce "}                  },

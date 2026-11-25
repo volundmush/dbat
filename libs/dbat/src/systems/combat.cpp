@@ -9,6 +9,7 @@
 *  contains code written by Iovan for use with the Real Dragonball Battle *
 *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
 ************************************************************************ */
+#include <array>
 #include "dbat/iterate.hpp"
 #include "dbat/consts/deathtype.hpp"
 #include "dbat/consts/attacks.hpp"
@@ -3336,8 +3337,8 @@ static void saiyan_gain(GameWorld *g, struct char_data *ch, struct char_data *vi
     if (weak) {
       send_to_char(g, ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
     } else {
-      int stats[3] = {0, 1, 2};
-      int available[3];
+      std::array<int, 3> stats = {{0, 1, 2}};
+      std::array<int, 3> available;
       int avail_count = 0;
 
       for (int i = 0; i < 3; i++) {

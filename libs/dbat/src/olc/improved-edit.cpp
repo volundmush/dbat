@@ -306,8 +306,8 @@ namespace {
         pieces.push_back(args.substr(at, end - at));
       at = end + 1;
     }
-    static constexpr std::string_view MISSING[] = {"Invalid format.\r\n", "Target string must be enclosed in single quotes.\r\n",
-                                              "No replacement string.\r\n", "Replacement string must be enclosed in single quotes.\r\n"};
+    static constexpr auto MISSING = std::to_array<std::string_view>({"Invalid format.\r\n", "Target string must be enclosed in single quotes.\r\n",
+                                              "No replacement string.\r\n", "Replacement string must be enclosed in single quotes.\r\n"});
     if (pieces.size() < 4) {
       write_to_output(g, d, MISSING[pieces.size()]);
       return;

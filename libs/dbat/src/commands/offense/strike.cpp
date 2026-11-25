@@ -1,4 +1,5 @@
 /* strike.cpp: what every strike does; see strike.hpp */
+#include <array>
 #include <span>
 #include "strike.hpp"
 
@@ -52,8 +53,8 @@ void pay(strike_shot &s, int64_t stamina)
 /* The victim couldn't avoid it: where it hit, and what that did. */
 void land(strike_shot &s)
 {
-  static constexpr strike_spot standard[5] = {strike_spot::body, strike_spot::head, strike_spot::body,
-                                              strike_spot::arm, strike_spot::leg};
+  static constexpr std::array<strike_spot, 5> standard = {{strike_spot::body, strike_spot::head, strike_spot::body,
+                                              strike_spot::arm, strike_spot::leg}};
   GameWorld *g                             = s.g;
   const strike_attack &atk                 = *s.attack;
 

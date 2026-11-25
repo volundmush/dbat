@@ -60,7 +60,7 @@ static const struct special_board {
 
 static const struct special_board *find_special_board(obj_vnum vnum)
 {
-  for (size_t i = 0; i < countof(special_boards); i++)
+  for (size_t i = 0; i < std::size(special_boards); i++)
     if (special_boards[i].vnum == vnum)
       return &special_boards[i];
   return nullptr;

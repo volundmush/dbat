@@ -58,7 +58,7 @@ template <class T> void write_number(io::text_writer &out, std::string_view tag,
 
 long *spares(house_control_rec &h, int i)
 {
-  long *s[] = {&h.spare2, &h.spare3, &h.spare4, &h.spare5, &h.spare6, &h.spare7};
+  auto s = std::to_array<long *>({&h.spare2, &h.spare3, &h.spare4, &h.spare5, &h.spare6, &h.spare7});
   return s[i];
 }
 

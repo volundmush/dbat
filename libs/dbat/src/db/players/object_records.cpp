@@ -14,6 +14,7 @@
  * The lines are read by get_line()'s rules, a line left as it was at the end of the file, and a few of the readers'
  * numbers last from one record to the next (quirk): a values line cut short keeps the rest of the record before's.
  */
+#include <array>
 #include <cstdlib>
 #include <string>
 
@@ -33,8 +34,8 @@ io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_k
                                      const std::function<void(obj_data *, int)> &loaded)
 {
   std::string_view file_kind = kind == record_kind::rent ? "rent" : "house";
-  int t[30]             = {}; /* a damaged line leaves some of these unread */
-  std::string f[4];
+  std::array<int, 30> t = {{}}; /* a damaged line leaves some of these unread */
+  std::array<std::string, 4> f;
 
   while (!in.eof()) {
     if (!in.line().starts_with('#')) {
@@ -80,7 +81,7 @@ io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_k
 
     in.next();
     if (in.line() == "XAP") { /* then this is a Xap Obj, requires special care */
-      io::loaded<std::string> text[4];
+      std::array<io::loaded<std::string>, 4> text;
       for (int i = 0; i < 4; i++)
         if (!(text[i] = in.string(str_format("{} object #{:d}", file_kind, nr))))
           return std::unexpected(text[i].error());
@@ -202,7 +203,7 @@ io::loaded<void> read_object_records(GameWorld *g, io::line_cursor &in, record_k
 
 void write_object_record(GameWorld *g, io::text_writer &out, obj_data *obj, int locate)
 {
-  std::string flags[4];
+  std::array<std::string, 4> flags;
   for (int i = 0; i < 4; i++)
     flags[i] = flag_letters(obj_get_extra_flags(obj).word(static_cast<std::size_t>(i)));
   out.print("#{:d}\n{:d}", obj_get_vnum(g, obj), locate);

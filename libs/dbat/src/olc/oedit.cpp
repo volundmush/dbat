@@ -458,7 +458,7 @@ namespace {
   /* The values asked for in turn: 1 to 4, the quality (5), 7 and 9. Value 2's answers are read by hand. */
   const value_step *step_of(int n)
   {
-    static const value_step STEPS[] = {
+    static const auto STEPS = std::to_array<value_step>({
         {},
         {VALUE_1, RANGES_1, {NOTHING, INT_MIN, INT_MAX}, 5, 2, CONTEXT_OEDIT_VALUE_1},
         {VALUE_2, {},       {},                          5, 3, CONTEXT_OEDIT_VALUE_2},
@@ -469,7 +469,7 @@ namespace {
         {VALUE_7, RANGES_7, {NOTHING, -32000, 32000},    9, 9, NOTHING              },
         {},
         {VALUE_9, RANGES_9, {NOTHING, -32000, 32000},    0, 0, NOTHING              },
-    };
+    });
     return &STEPS[n];
   }
 

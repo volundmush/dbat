@@ -2,6 +2,7 @@
 // Created by volund on 11/4/21.
 //
 
+#include <array>
 #include <cstdlib>
 
 #include "dbat/techniques.hpp"
@@ -122,26 +123,26 @@ void tech_impact_scenery(GameWorld *g, char_data *ch, char_data *vict, room_vnum
     std::string_view to_room{}; /* if not to_char */
   };
   /* a null is nothing; outdoors' second is lava, if the ground is quiet */
-  static constexpr scenery outdoors[8]   = {{"Debris is thrown into the air and showers down thunderously!"},
+  static constexpr std::array<scenery, 8> outdoors = {{{"Debris is thrown into the air and showers down thunderously!"},
                                             {"Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!"},
                                             {"A cloud of dust envelopes the entire area!"},
                                             {"The surrounding area roars and shudders from the impact!"},
                                             {"The ground shatters apart from the stress of the impact!"},
-                                            {"The explosion continues to burn spreading out and devouring some more of the ground before dying out."}};
-  static constexpr scenery underwater[3] = {
+                                            {"The explosion continues to burn spreading out and devouring some more of the ground before dying out."}}};
+  static constexpr std::array<scenery, 3> underwater = {{
       {"The water churns violently!"},
       {"Large bubbles rise from the movement!"},
       {"The water collapses in on the hole created!", "The water collapses in on the hole create!"}
-  };
-  static constexpr scenery water[3]  = {{"A huge column of water erupts from the impact!"},
+  }};
+  static constexpr std::array<scenery, 3> water = {{{"A huge column of water erupts from the impact!"},
                                         {"The impact briefly causes a swirling vortex of water!"},
-                                        {"A huge depression forms in the water and erupts into a wave from the impact!"}};
-  static constexpr scenery inside[8] = {{"Debris is thrown into the air and showers down thunderously!"},
+                                        {"A huge depression forms in the water and erupts into a wave from the impact!"}}};
+  static constexpr std::array<scenery, 8> inside = {{{"Debris is thrown into the air and showers down thunderously!"},
                                         {"The structure of the surrounding room cracks and quakes from the blast!"},
                                         {"Parts of the ceiling collapse, crushing into the floor!"},
                                         {"The surrounding area roars and shudders from the impact!"},
                                         {"The ground shatters apart from the stress of the impact!"},
-                                        {"The walls of the surrounding room crack in the same instant!"}};
+                                        {"The walls of the surrounding room crack in the same instant!"}}};
   auto show = [&](const scenery &sc) {
     if (sc.to_char.empty())
       return;

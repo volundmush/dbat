@@ -34,6 +34,7 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <array>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -851,7 +852,7 @@ ACMD(do_mtransform)
 {
   std::string arg;
   char_data *m, tmpmob;
-  obj_data *obj[NUM_WEARS];
+  std::array<obj_data *, NUM_WEARS> obj;
   mob_vnum this_rnum = char_get_nr(ch);
   int pos;
 

@@ -738,7 +738,7 @@ static void state_racial(GameWorld *g, struct descriptor_data *d, std::string_vi
 /* CON_QSEX: query sex of new user (Nameks aren't asked) */
 static void state_qsex(GameWorld *g, struct descriptor_data *d, std::string_view arg)
 {
-  static const int sexes[] = {SEX_MALE, SEX_FEMALE, SEX_NEUTRAL};
+  static const auto sexes = std::to_array<int>({SEX_MALE, SEX_FEMALE, SEX_NEUTRAL});
   int choice               = menu_choice(arg, "mfn");
 
   if (choice < 0) {
@@ -873,7 +873,7 @@ static void state_android(GameWorld *g, struct descriptor_data *d, std::string_v
 /* Starting ability ranges by race, in the order they are rolled. */
 static const struct {
   bool (*is_race)(const struct char_data *ch){};
-  int str[2]{}, con[2]{}, wis[2]{}, intel[2]{}, cha[2]{}, dex[2]{};
+  std::array<int, 2> str{}, con{}, wis{}, intel{}, cha{}, dex{};
 } starting_abilities[] = {
     {char_is_saiyan,    {12, 18}, {12, 18}, {8, 16},  {8, 14},  {8, 18},  {8, 16} },
     {char_is_halfbreed, {10, 18}, {10, 18}, {8, 18},  {8, 18},  {8, 18},  {8, 18} },
@@ -895,7 +895,7 @@ static const struct {
 
 static void roll_starting_abilities(GameWorld *g, struct char_data *ch)
 {
-  for (size_t i = 0; i < countof(starting_abilities); i++) {
+  for (size_t i = 0; i < std::size(starting_abilities); i++) {
     if (!starting_abilities[i].is_race(ch))
       continue;
     char_set_real_abils_str(ch, rand_number(g, starting_abilities[i].str[0], starting_abilities[i].str[1]));
@@ -1154,14 +1154,14 @@ static void state_question(GameWorld *g, struct descriptor_data *d, std::string_
 static int age_chosen(const struct char_data *ch, int choice)
 {
   /* the last two depend on the race: long-lived, Namek, everyone else */
-  static const int ages[]         = {8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 40, 50, 60, 65};
-  static const int old_ages[3][2] = {
+  static const auto ages = std::to_array<int>({8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 40, 50, 60, 65});
+  static const std::array<std::array<int, 2>, 3> old_ages = {{
       {500, 800},
       {250, 400},
       {70,  75 }
-  };
+  }};
 
-  if (choice < (int)(countof(ages)))
+  if (choice < (int)(std::size(ages)))
     return ages[choice];
   return old_ages[long_lived(ch) ? 0 : char_is_namek(ch) ? 1
                                                          : 2][choice - 16];

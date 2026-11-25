@@ -1,3 +1,4 @@
+#include <array>
 #include <algorithm>
 #include <cctype>
 
@@ -25,14 +26,14 @@ std::string_view skip_spaces(std::string_view args)
 
 bool is_fill_word(std::string_view word)
 {
-  static constexpr std::string_view fill[] = {"in", "into", "from", "with", "the", "on", "at", "to"};
+  static constexpr auto fill = std::to_array<std::string_view>({"in", "into", "from", "with", "the", "on", "at", "to"});
 
   return std::ranges::any_of(fill, [word](std::string_view f) { return str_eq_nocase(word, f); });
 }
 
 bool is_reserved_word(std::string_view word)
 {
-  static constexpr std::string_view reserved[] = {"a", "an", "self", "me", "all", "room", "someone", "something"};
+  static constexpr auto reserved = std::to_array<std::string_view>({"a", "an", "self", "me", "all", "room", "someone", "something"});
 
   return std::ranges::any_of(reserved, [word](std::string_view r) { return str_eq_nocase(word, r); });
 }

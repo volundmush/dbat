@@ -165,7 +165,7 @@ void read_affects(pfile_reader &r)
     std::optional<std::string_view> line = r.list_line();
     if (!line)
       break;
-    int n[6] = {};
+    std::array<int, 6> n = {{}};
     io::fields f(*line);
     for (int &x : n)
       if (!f.number(x))
@@ -363,7 +363,7 @@ constexpr auto pfile_tags = std::to_array<pfile_tag>({
     {"Skil", [](R &r) { read_skills(r, false); }, [](W &w, std::string_view t) { write_skills(w, t, false); }},
     {"Bonu",
      [](R &r) {
-       int num[52] = {};
+       std::array<int, 52> num = {{}};
        if (std::optional<std::string_view> line = r.list_line()) {
          io::fields f(*line);
          for (int &n : num)
@@ -676,8 +676,8 @@ int load_char(GameWorld *g, std::string_view name, struct char_data *ch)
 void save_char(GameWorld *g, struct char_data *ch)
 {
   int i, id; bool save_index = false;
-  struct affected_type tmp_aff[MAX_AFFECT];
-  struct obj_data *char_eq[NUM_WEARS];
+  std::array<affected_type, MAX_AFFECT> tmp_aff;
+  std::array<obj_data *, NUM_WEARS> char_eq;
 
   if (char_is_npc(ch) || char_get_pfilepos(ch) < 0)
     return;

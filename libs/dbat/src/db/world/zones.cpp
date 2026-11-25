@@ -11,6 +11,7 @@
  *   S
  *   $
  */
+#include <array>
 #include <cstring>
 #include <memory>
 
@@ -91,7 +92,7 @@ io::loaded<void> read_zone_file(GameWorld *g, io::text_reader &in)
   std::optional<std::string_view> first_command;
   int line_offset = 0;
   if (version >= 2) {
-    std::string flags[4];
+    std::array<std::string, 4> flags;
     io::fields f(*line);
     f.number(zone.bot) && f.number(zone.top) && f.number(zone.lifespan) && f.number(zone.reset_mode) &&
         f.word(flags[0]) && f.word(flags[1]) && f.word(flags[2]) && f.word(flags[3]) && f.number(zone.min_level) &&
@@ -103,7 +104,7 @@ io::loaded<void> read_zone_file(GameWorld *g, io::text_reader &in)
     for (int i = 0; i < 4; i++)
       zone.zone_flags.set_word(static_cast<std::size_t>(i), io::ascii_flags(flags[i], 0, "asciiflag_conv"));
   } else {
-    int numbers[4];
+    std::array<int, 4> numbers;
     if (io::scan_ints(*line, numbers) != 4) {
       mud_log("SYSERR: Format error in numeric constant line of {}, attempting to fix.", in.name());
       if (io::scan_ints(zone.name, numbers) != 4)

@@ -251,7 +251,7 @@ static const struct {
  * unknown gravities return 0 like std::map::operator[] did. */
 static uint16_t grav_threshold_for(int grav)
 {
-  for (size_t i = 0; i < countof(grav_threshold); i++)
+  for (size_t i = 0; i < std::size(grav_threshold); i++)
     if (grav_threshold[i].grav == grav)
       return (uint16_t)grav_threshold[i].threshold;
   return 0;
@@ -1039,13 +1039,13 @@ std::string_view report_party_health(GameWorld *g, struct char_data *ch)
   std::string result4;
   std::string result5;
 
-  static constexpr std::string_view plcol[5] = {"@r",
+  static constexpr std::array<std::string_view, 5> plcol = {{"@r",
                           "@y",
                           "@Y",
                           "@G",
-                          ""};
+                          ""}};
 
-  static constexpr std::string_view exhaust[9] = {"Exhausted",   /* 0/7 */
+  static constexpr std::array<std::string_view, 9> exhaust = {{"Exhausted",   /* 0/7 */
                             "Strained",    /* 1/7 */
                             "Very Tired",  /* 2/7 */
                             "Tired",       /* 3/7 */
@@ -1053,9 +1053,9 @@ std::string_view report_party_health(GameWorld *g, struct char_data *ch)
                             "Very Winded", /* 5/7 */
                             "Winded",      /* 6/7 */
                             "Energetic",   /* 7/7 */
-                            "?????????"};
+                            "?????????"}};
 
-  static constexpr std::string_view excol[9] = {"@r", /* 0/7 */
+  static constexpr std::array<std::string_view, 9> excol = {{"@r", /* 0/7 */
                           "@R", /* 1/7 */
                           "@R", /* 2/7 */
                           "@M", /* 3/7 */
@@ -1063,7 +1063,7 @@ std::string_view report_party_health(GameWorld *g, struct char_data *ch)
                           "@M", /* 5/7 */
                           "@G", /* 6/7 */
                           "@g", /* 7/7 */
-                          "@w"};
+                          "@w"}};
 
   if (ch->followers) {
     for (char_data *fol : char_followers(g, ch)) {
@@ -1402,7 +1402,7 @@ void remove_affect(GameWorld *g, struct char_data *ch, aff_flag flag)
 
 void assign_affect(GameWorld *g, struct char_data *ch, aff_flag flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd)
 {
-  struct affected_type af[6] = {};
+  std::array<affected_type, 6> af = {{}};
   int num = 0;
 
   if (str == 0 && con == 0 && wis == 0 && intel == 0 && agl == 0 && spd == 0) {

@@ -3251,7 +3251,7 @@ void perform_wear(GameWorld *g, struct char_data *ch, struct obj_data *obj, int 
 
 int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::string_view arg)
 {
-  static constexpr std::string_view keywords_entries[] = {
+  static constexpr auto keywords_entries = std::to_array<std::string_view>({
       "!RESERVED!",
       "finger",
       "!RESERVED!",
@@ -3274,7 +3274,7 @@ int find_eq_pos(GameWorld *g, struct char_data *ch, struct obj_data *obj, std::s
       "ear",
       "\r!RESERVED!",
       "shoulders",
-      "scouter"};
+      "scouter"});
   static constexpr name_table keywords(keywords_entries);
 
   if (arg.empty()) {

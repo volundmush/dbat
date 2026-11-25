@@ -440,11 +440,11 @@ static room_vnum room_or_void(GameWorld *g, room_vnum vnum)
    for tying it, 3 for a new one. A payout lasts a day, unless a better one comes. */
 static void payout(GameWorld *g, int num)
 {
-  static constexpr std::string_view why[] = {
+  static constexpr auto why = std::to_array<std::string_view>({
       "@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n",
       "@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n",
       "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n",
-  };
+  });
 
   if (g->LASTPAYOUT == 0 || num > g->LASTPAYTYPE || g->LASTPAYOUT <= game_now(g)) {
     g->LASTPAYOUT  = game_now(g) + 86400;

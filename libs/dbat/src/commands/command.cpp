@@ -631,8 +631,8 @@ const std::span<const command_info> cmd_info = cmd_info_table;
 /* What a character can still do while held fast (petrified, frozen, paralysed or liquefied). */
 static bool allowed_while_restrained(std::string_view cmd, bool liquefied)
 {
-  static constexpr std::string_view always[]        = {"look", "score", "ooc", "osay", "emote", "smote", "status"};
-  static constexpr std::string_view liquefied_too[] = {"liquefy", "ingest"};
+  static constexpr auto always = std::to_array<std::string_view>({"look", "score", "ooc", "osay", "emote", "smote", "status"});
+  static constexpr auto liquefied_too = std::to_array<std::string_view>({"liquefy", "ingest"});
   auto is_cmd                                       = [&](std::string_view c) { return str_eq_nocase(cmd, c); };
 
   return std::ranges::any_of(always, is_cmd) || (liquefied && std::ranges::any_of(liquefied_too, is_cmd));

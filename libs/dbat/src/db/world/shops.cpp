@@ -21,6 +21,7 @@
  *   ...
  *   $~
  */
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -188,8 +189,8 @@ io::loaded<void> read_shop(GameWorld *g, io::text_reader &in, shop_vnum vnum)
     return r;
   shop->type = read_buy_types(g, in, vnum);
 
-  std::string *messages[] = {&shop->no_such_item1, &shop->no_such_item2, &shop->do_not_buy, &shop->missing_cash1,
-                             &shop->missing_cash2, &shop->message_buy,   &shop->message_sell};
+  auto messages = std::to_array<std::string *>({&shop->no_such_item1, &shop->no_such_item2, &shop->do_not_buy, &shop->missing_cash1,
+                             &shop->missing_cash2, &shop->message_buy,   &shop->message_sell});
   for (int i = 0; i < NUM_SHOP_MSGS; i++) {
     io::loaded<std::string> message = read_message(in, vnum, static_cast<shop_message>(i));
     if (!message)

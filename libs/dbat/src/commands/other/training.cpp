@@ -180,7 +180,7 @@ constexpr struct {
 int training_difficulty(GameWorld *g, struct char_data *ch, int64_t total)
 {
   int64_t pl                 = getEffMaxPL(g, ch);
-  const int64_t thresholds[] = {pl / 8, pl / 4, pl / 2, pl, pl * 2};
+  const auto thresholds = std::to_array<int64_t>({pl / 8, pl / 4, pl / 2, pl, pl * 2});
   int bonus                  = 0;
   for (int64_t t : thresholds)
     if (total > t)

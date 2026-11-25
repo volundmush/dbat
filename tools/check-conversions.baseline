@@ -114,7 +114,7 @@
 1 libs/dbat/src/olc/tedit.cpp
 9 libs/dbat/src/olc/zedit.cpp
 8 libs/dbat/src/systems/broadcast.cpp
-85 libs/dbat/src/systems/class.cpp
+84 libs/dbat/src/systems/class.cpp
 527 libs/dbat/src/systems/combat.cpp
 2 libs/dbat/src/systems/feats.cpp
 199 libs/dbat/src/systems/fight.cpp

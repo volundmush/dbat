@@ -17,9 +17,9 @@
 
 /* Converted into metric units: cm and kg; SRD has english units. */
 static const struct {
-  int height[NUM_SEX]{}; /* cm */
+  std::array<int, NUM_SEX> height = {{}}; /* cm */
   int heightdie{};       /* 2d(heightdie) added to height */
-  int weight[NUM_SEX]{}; /* kg */
+  std::array<int, NUM_SEX> weight = {{}}; /* kg */
   int weightfac{};       /* added height * weightfac/100 added to weight */
 } hw_info[NUM_RACES] = {
     /* RACE_HUMAN      */ {{141, 147, 135}, 26, {46, 54, 39}, 89 },
@@ -645,7 +645,7 @@ int race_flag_to_tier(std::optional<player_flag> flag)
 
 int race_current_trans_tier(const char_data *ch)
 {
-  static constexpr player_flag flags[] = {player_flag::trans1, player_flag::trans2, player_flag::trans3, player_flag::trans4, player_flag::trans5, player_flag::trans6};
+  static constexpr auto flags = std::to_array<player_flag>({player_flag::trans1, player_flag::trans2, player_flag::trans3, player_flag::trans4, player_flag::trans5, player_flag::trans6});
   for (int i = 0; i < 6; i++) {
     if (char_plr_flagged(ch, flags[i]))
       return i + 1;

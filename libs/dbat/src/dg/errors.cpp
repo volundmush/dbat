@@ -3,6 +3,7 @@
  *   [trig #vnum 'name' instance #id, line N: text; on mob 'name' #vnum uid U in room R; actor 'name' uid A]
  * where the line is the one running, numbered as the script is written.
  */
+#include <array>
 #include "dbat/iterate.hpp"
 #include "dbat/utils.hpp"
 #include "dbat/comm.hpp"
@@ -82,7 +83,7 @@ void dg_ctx_set_line(GameWorld *g, const dg::line &l)
 /* " [trig ... ]" describing the running trigger, or "" when none is. */
 std::string dg_context(GameWorld *g)
 {
-  static constexpr std::string_view owner_types[] = {"mob", "obj", "room"};
+  static constexpr auto owner_types = std::to_array<std::string_view>({"mob", "obj", "room"});
   const struct dg_run_ctx &ctx     = g->dg_ctx;
 
   if (!ctx.active)

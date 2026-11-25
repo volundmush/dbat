@@ -4,6 +4,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <array>
 #include "dbat/arrays.hpp"
 #include "dbat/genzon.hpp"
 #include "dbat/utils.hpp"
@@ -65,7 +66,7 @@ std::expected<zone_data *, std::string_view> create_new_zone(GameWorld *g, zone_
     std::string path, text;
     std::string_view log, error;
   };
-  const new_file files[] = {
+  const auto files = std::to_array<new_file>({
     {str_format("{}{:d}.zon", ZON_PREFIX, vzone_num), str_format("#{:d}\nNew Zone~\n{:d} 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99),
      "SYSERR: OLC: Can't write new zone file.", "Could not write zone file.\r\n"},
     {str_format("{}{:d}.wld", WLD_PREFIX, vzone_num), str_format("#{:d}\nThe Beginning~\nNot much here.\n~\n{:d} 0 0\nS\n$\n", bottom, vzone_num),
@@ -76,7 +77,7 @@ std::expected<zone_data *, std::string_view> create_new_zone(GameWorld *g, zone_
     {str_format("{}{:d}.trg", TRG_PREFIX, vzone_num), "$~\n", "SYSERR: OLC: Can't write new trigger file", "Could not write trigger file.\r\n"},
     /* quirk: a '/' more than the others */
     {str_format("{}/{:d}.gld", GLD_PREFIX, vzone_num), "$~\n", "SYSERR: OLC: Can't write new guild file", "Could not write guild file.\r\n"},
-  };
+  });
   for (const new_file &file : files)
     if (!io::replace_file(file.path, file.text, false)) {
       mudlog(g, LOG_BRF, ADMLVL_IMPL, true, "{}", file.log);
@@ -124,7 +125,7 @@ std::expected<zone_data *, std::string_view> create_new_zone(GameWorld *g, zone_
 
 void create_world_index(GameWorld *g, zone_vnum znum, std::string_view type)
 {
-  static constexpr std::pair<char, std::string_view> PREFIXES[] = {
+  static constexpr auto PREFIXES = std::to_array<std::pair<char, std::string_view>>({
       {'z', ZON_PREFIX},
       {'w', WLD_PREFIX},
       {'o', OBJ_PREFIX},
@@ -132,7 +133,7 @@ void create_world_index(GameWorld *g, zone_vnum znum, std::string_view type)
       {'s', SHP_PREFIX},
       {'t', TRG_PREFIX},
       {'g', GLD_PREFIX},
-  };
+  });
   auto prefix = std::ranges::find(PREFIXES, type.empty() ? '\0' : type.front(), &std::pair<char, std::string_view>::first);
   if (prefix == std::end(PREFIXES))
     return; /* Caller messed up */
