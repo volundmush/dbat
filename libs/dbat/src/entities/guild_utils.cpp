@@ -103,22 +103,22 @@ void guild_set_not_enough_gold(struct guild_data *guild, std::string_view v)
   guild->not_enough_gold = v;
 }
 
-int guild_get_skill(const struct guild_data *guild, int n)
+bool guild_get_skill(const struct guild_data *guild, int n)
 {
   return guild->skills[n];
 }
 
-void guild_set_skill(struct guild_data *guild, int n, int v)
+void guild_set_skill(struct guild_data *guild, int n, bool v)
 {
   guild->skills[n] = v;
 }
 
-int guild_get_feat(const struct guild_data *guild, int n)
+bool guild_get_feat(const struct guild_data *guild, int n)
 {
   return guild->feats[n];
 }
 
-void guild_set_feat(struct guild_data *guild, int n, int v)
+void guild_set_feat(struct guild_data *guild, int n, bool v)
 {
   guild->feats[n] = v;
 }

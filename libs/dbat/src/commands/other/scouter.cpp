@@ -114,7 +114,7 @@ namespace {
       act_triple(g, {"@CYou remove the link your mind had with @w$N.@n", "@w$n@C removes the link $s mind had with yours.@n", {}, true}, ch, nullptr, linked);
       char_set_mindlink(linked, nullptr);
       char_set_mindlink(ch, nullptr);
-      char_set_linker(ch, 0);
+      char_set_linker(ch, false);
       return;
     }
     auto found = find_char(g, ch, target, find_flag::char_world, "Link with the mind of who?\r\n");
@@ -145,7 +145,7 @@ namespace {
     send_to_char(g, vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
     char_set_mindlink(vict, ch);
     char_set_mindlink(ch, vict);
-    char_set_linker(ch, 1);
+    char_set_linker(ch, true);
   }
 
   /* The word for an alignment: the first whose bound it is above */

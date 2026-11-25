@@ -18,7 +18,7 @@
 /* A line of input waiting to be run */
 struct txt_line {
   std::string text;
-  int aliased{}; /* it came from an alias, not from the player */
+  bool aliased{};/* it came from an alias, not from the player */
 };
 
 struct txt_q {
@@ -52,7 +52,7 @@ struct descriptor_data {
   std::string backstr;                 /* what was there when writing began, put back if an OLC edit is aborted */
   size_t max_str{};                    /* maximum size of string in modify-str	*/
   int32_t mail_to{};                   /* name for mail system			*/
-  int has_prompt{};                    /* is the user at a prompt?             */
+  bool has_prompt{};                   /* is the user at a prompt?             */
   net::readiness ready;                /* how the socket stood at this pulse's poll (game_loop) */
   std::string raw_input;               /* what has come since the last newline (MAX_RAW_INPUT_LENGTH - 1 at most) */
   std::string last_input;              /* the last command, for ! and ^old^new */

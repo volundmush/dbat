@@ -861,7 +861,7 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
       }
     }
     if (char_get_level(ch) < 100) {
-      if (char_get_mindlink(g, ch) && gain > 0 && char_get_linker(ch) == 0) {
+      if (char_get_mindlink(g, ch) && gain > 0 && !char_get_linker(ch)) {
         if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(g, ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(g, ch))) {
           send_to_char(g, char_get_mindlink(g, ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
         } else {
@@ -893,7 +893,7 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
       if (char_is_android(ch)) {
         diff = diff * 1.2;
       }
-      if (char_get_mindlink(g, ch) && gain > 0 && char_get_linker(ch) == 0) {
+      if (char_get_mindlink(g, ch) && gain > 0 && !char_get_linker(ch)) {
         if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(g, ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(g, ch))) {
           send_to_char(g, char_get_mindlink(g, ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
         } else {

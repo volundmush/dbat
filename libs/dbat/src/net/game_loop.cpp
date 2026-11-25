@@ -164,7 +164,7 @@ void game_process_commands(GameWorld *g)
     if (!next)
       continue;
     std::string comm = std::move(next->text);
-    int aliased      = next->aliased;
+    bool aliased     = next->aliased;
 
     if (d->character) {
       /* Reset the idle timer & pull char back from void if necessary */
@@ -332,7 +332,7 @@ static void game_loop(GameWorld *g)
           //close_socket(d);
           mud_log("ERROR: Tried to send output to dead socket!");
         } else
-          d->has_prompt = 1;
+          d->has_prompt = true;
       }
     }
 

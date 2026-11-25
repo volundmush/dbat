@@ -50,7 +50,7 @@ static bool VALID_EDGE(GameWorld *g, room_vnum x, int y)
 {
   if (room_get_dir_option(g, x, y) == nullptr || room_get_exit_to_room(g, x, y) == NOWHERE)
     return false;
-  if (CONFIG_TRACK_T_DOORS == false && IS_CLOSED(g, x, y))
+  if (!CONFIG_TRACK_T_DOORS && IS_CLOSED(g, x, y))
     return false;
   if (room_flagged(g, room_get_exit_to_room(g, x, y), room_flag::notrack) || IS_MARKED(g, room_get_exit_to_room(g, x, y)))
     return false;

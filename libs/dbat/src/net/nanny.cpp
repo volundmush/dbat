@@ -410,7 +410,7 @@ int enter_player_game(GameWorld *g, struct descriptor_data *d)
     char_set_invis_level(g, ch, char_get_level(ch));
 
   int load_result = place_player(g, d);
-  if (d->acct.customfile != 1) {
+  if (!d->acct.customfile) {
     customCreate(d);
     save_account(d);
   }
@@ -998,7 +998,7 @@ static void enter_game(GameWorld *g, struct descriptor_data *d)
   if (load_result == 2) { /* rented items lost */
     send_to_char(g, d->character, "\r\n\007You could not afford your rent!\r\nYour possesions have been donated to the Salvation Army!\r\n");
   }
-  d->has_prompt = 0;
+  d->has_prompt = false;
   /* We've updated to 3.1 - some bits might be set wrongly: */
   char_prf_set(g, d->character, pref_flag::buildwalk, false);
   if (!char_get_equipment(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, player_flag::thandw))

@@ -71,12 +71,12 @@ io::loaded<void> read_teachings(io::text_reader &in, guild_data *guild, guild_vn
       return {};
     if (count == 1 || (count == 2 && t[1] == 1)) {
       if (t[0] < SKILL_TABLE_SIZE)
-        guild->skills[t[0]] = 1;
+        guild->skills[t[0]] = true;
       else
         mud_log("SYSERR: Guild #{:d} teaches impossible skill {:d}", vnum, t[0]);
     } else if (count == 2 && t[1] == 2) {
       if (t[0] < NUM_FEATS_DEFINED)
-        guild->feats[t[0]] = 1;
+        guild->feats[t[0]] = true;
       else
         mud_log("SYSERR: Guild #{:d} teaches impossible feat {:d}", vnum, t[0]);
     } else if (count == 2)

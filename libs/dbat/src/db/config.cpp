@@ -53,10 +53,10 @@
  * However, if you decide you want to have an all-out knock-down drag-out
  * PK Mud, just set pk_allowed to YES - and anything goes.
  */
-const int pk_allowed = false;
+const bool pk_allowed = false;
 
 /* is playerthieving allowed? */
-const int pt_allowed = false;
+const bool pt_allowed = false;
 
 /* minimum level a player must be to shout/holler/gossip/auction */
 const int level_can_shout = 1;
@@ -97,7 +97,7 @@ const int idle_rent_time = 48;
 const int idle_max_level = ADMLVL_IMMORT;
 
 /* should items in death traps automatically be junked? */
-const int dts_are_dumps = true;
+const bool dts_are_dumps = true;
 
 /* What the new PULSE_VIOLENCE will be */
 
@@ -120,7 +120,7 @@ const int pulse_current  = 10;
  * able to carry around things like boards.  That's not necessarily a bad
  * thing, but this will be left at a default of 'NO' for historic reasons.
  */
-const int load_into_inventory = false;
+const bool load_into_inventory = false;
 
 /* "okay" etc. */
 const std::string_view OK       = "Okay.\r\n";
@@ -133,7 +133,7 @@ const std::string_view NOEFFECT = "Nothing seems to happen.\r\n";
  * hidden doors. A setting of 'NO' means to not go through the doors
  * while 'YES' will pass through doors to find the target.
  */
-const int track_through_doors = true;
+const bool track_through_doors = true;
 
 /*
  * This defines the cap for player character levels. It is impossible for
@@ -151,7 +151,7 @@ const int level_cap = 101;
  * count of the number there are is given.  A value of 0 means standard
  * behaviour.
  */
-const int show_obj_stacking = true;
+const bool show_obj_stacking = true;
 
 /*
  *  This enables mob stacking - that is, if a room contains more that
@@ -159,13 +159,13 @@ const int show_obj_stacking = true;
  *  number indicating how many there are.  A value of 0 means standard
  *  behaviour.
  */
-const int show_mob_stacking = true;
+const bool show_mob_stacking = true;
 
 /*
  *  This allows aggressive mobs to initiate a fight with other mobs. A
  *  value of 0 means standard behaviour.
  */
-const int mob_fighting = false;
+const bool mob_fighting = false;
 
 /****************************************************************************/
 /****************************************************************************/
@@ -176,7 +176,7 @@ const int mob_fighting = false;
  * Should the MUD allow you to 'rent' for free?  (i.e. if you just quit,
  * your objects are saved at no cost, as in Merc-type MUDs.)
  */
-const int free_rent = true;
+const bool free_rent = true;
 
 /* maximum number of items players are allowed to rent */
 const int max_obj_save = 30;
@@ -191,7 +191,7 @@ const int min_rent_cost = 100;
  * the 'save' command will be disabled to prevent item duplication via
  * game crashes.
  */
-const int auto_save = true;
+const bool auto_save = true;
 
 /*
  * if auto_save (above) is yes, how often (in minutes) should the MUD
@@ -207,7 +207,7 @@ const int crash_file_timeout = 10;
 const int rent_file_timeout = 30;
 
 /* Do you want to automatically wipe players who've been gone too long? */
-const int auto_pwipe = true;
+const bool auto_pwipe = true;
 
 /* Autowipe deletion criteria
    This struct holds information used to determine which players to wipe
@@ -247,7 +247,7 @@ const struct pclean_criteria_data pclean_criteria[7] = {
 /* Do you want players who self-delete to be wiped immediately with no
    backup?
 */
-const int selfdelete_fastwipe = true;
+const bool selfdelete_fastwipe = true;
 
 /****************************************************************************/
 /****************************************************************************/
@@ -331,7 +331,7 @@ const int max_bad_pws = 3;
  * to just have to remove the SITEOK flags from those people I want to ban
  * rather than what is currently done?
  */
-const int siteok_everyone = true;
+const bool siteok_everyone = true;
 
 /*
  * Some nameservers are very slow and cause the game to lag terribly every 
@@ -352,19 +352,19 @@ const int siteok_everyone = true;
  * net::accept_from() in net/platform_posix.cpp), so logging in never waits on a nameserver.
  */
 
-const int nameserver_is_slow = false;
+const bool nameserver_is_slow = false;
 
 /*
  * Will changes save automaticaly in OLC ?
  */
-const int auto_save_olc = 1;
+const bool auto_save_olc = true;
 
 /*
  * if you wish to enable Aedit, set this to 1 
  * This will make the mud look for a file called socials.new,
  * which is in a different format than the stock socials file.
  */
-const int use_new_socials = 1;
+const bool use_new_socials = true;
 
 const std::string_view MENU =
     "\r\n"
@@ -398,7 +398,7 @@ const std::string_view START_MESSG =
  * someone immorts, or is promoted to a higher (or lower) god level?
  * NOTE: this only works under UNIX systems.
  */
-const int use_autowiz = true;
+const bool use_autowiz = true;
 
 /* If yes, what is the lowest level which should be on the wizlist?  (All
    immort levels below the level you specify will go on the immlist instead.) */
@@ -422,14 +422,14 @@ const int initial_points = 20;
  * Set to NO to mimic historic behaviour - a player has to explicitly
  * look in a certain direction to see a door there.
  */
-const int disp_closed_doors = true;
+const bool disp_closed_doors = true;
 
 /*
  * Do you want players to be able to reroll their status at creation?
  * Set to NO to mimic historic behaviour - a player gets the stats rolled
  * and cannot see the values at creation time.
  */
-const int reroll_status = false;
+const bool reroll_status = false;
 
 /*
  * Advancement options
@@ -441,8 +441,8 @@ const int reroll_status = false;
  *   only level your primary class!
  */
 
-const int allow_multiclass = false;
-const int allow_prestige   = false;
+const bool allow_multiclass = false;
+const bool allow_prestige   = false;
 
 /*
  * Do you want to enable MCCP2 stream compression? It is safe to enable
@@ -452,20 +452,20 @@ const int allow_prestige   = false;
  * Enabling compression will save a great deal of bandwidth for data
  * being transmitted to users with MCCP2-compliant MUD clients.
  */
-const int enable_compression = true;
+const bool enable_compression = true;
 
 /*
  * Do you want to enable different spoken languages? Set to YES and
  * you will have different races speaking in different languages.
  */
-const int enable_languages = true;
+const bool enable_languages = true;
 
 /*
  * Do you want to treat all objects as unique? Set to YES and
  * every object created in the game will be flagged as UNIQUE. This
  * will help prevent object duping.
  */
-const int all_items_unique = true;
+const bool all_items_unique = true;
 
 /*
  * Multiplier that is applied to gaining experience.

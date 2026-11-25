@@ -110,7 +110,7 @@ const option OPTIONS[] = {
     /* before there's a log, so this says only that it can't be logged (quirk) */
     {'x', arity::nothing, {},
      [](launch &l, std::string_view) {
-       l.g->xap_objs = 1;
+       l.g->xap_objs = true;
        mud_log("Loading player objects from secondary (ascii) files.");
      }},
     {'h', arity::nothing, {},
@@ -242,7 +242,7 @@ int main(int argc, char **argv)
      * in the log if stderr is redirected to a file.
      */
   mud_log("Using {} for configuration.", CONFIG_CONFFILE);
-  g->xap_objs = 1;
+  g->xap_objs = true;
   std::filesystem::current_path(l.dir, error);
   if (error) {
     file_print(stderr, "SYSERR: Fatal error changing to data directory: {}\n", error.message());

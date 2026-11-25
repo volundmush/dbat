@@ -15,7 +15,7 @@
 1 libs/dbat/src/db/players/pfile.cpp
 3 libs/dbat/src/db/reset.cpp
 1 libs/dbat/src/dg/dg_misc.cpp
-17 libs/dbat/src/entities/character_utils.cpp
+15 libs/dbat/src/entities/character_utils.cpp
 7 libs/dbat/src/entities/object_utils.cpp
 1 libs/dbat/src/net/messages.cpp
 1 libs/dbat/src/net/prompt.cpp
@@ -25,7 +25,6 @@
 2 libs/dbat/src/systems/broadcast.cpp
 2 libs/dbat/src/systems/class.cpp
 15 libs/dbat/src/systems/combat.cpp
-3 libs/dbat/src/systems/feats.cpp
 4 libs/dbat/src/systems/fight.cpp
 3 libs/dbat/src/systems/graph.cpp
 11 libs/dbat/src/systems/guild.cpp
@@ -36,6 +35,5 @@
 1 libs/dbat/src/systems/search.cpp
 1 libs/dbat/src/systems/shop.cpp
 5 libs/dbat/src/systems/spec_procs.cpp
-1 libs/dbat/src/systems/spell_parser.cpp
 1 libs/dbat/src/systems/spells.cpp
 2 libs/dbat/src/systems/vehicles.cpp

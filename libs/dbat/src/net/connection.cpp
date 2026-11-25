@@ -59,7 +59,7 @@ void init_descriptor(GameWorld *g, struct descriptor_data *newd, net::socket soc
 
   newd->sock       = std::move(sock);
   newd->login_time = game_now(g);
-  newd->has_prompt = 1; /* prompt is part of greetings */
+  newd->has_prompt = true; /* prompt is part of greetings */
   desc_set_connected(newd, CON_GET_USER);
   /* Numbers run from 1 to 999 and wrap, skipping any still in use. */
   do {

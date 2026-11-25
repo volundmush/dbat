@@ -537,18 +537,18 @@ static bool is_guild_ok(GameWorld *g, struct char_data *keeper, struct char_data
   return (false);
 }
 
-static int does_guild_know(GameWorld *g, struct guild_data *guild_nr, int i)
+static bool does_guild_know(GameWorld *g, struct guild_data *guild_nr, int i)
 {
   if (i < 0 || i >= SKILL_TABLE_SIZE)
     return (false);
-  return ((int)guild_nr->skills[i]);
+  return guild_nr->skills[i];
 }
 
-static int does_guild_know_feat(GameWorld *g, struct guild_data *guild_nr, int i)
+static bool does_guild_know_feat(GameWorld *g, struct guild_data *guild_nr, int i)
 {
   if (i < 0 || i >= NUM_FEATS_DEFINED)
     return (false);
-  return ((int)guild_nr->feats[i]);
+  return guild_nr->feats[i];
 }
 
 void sort_spells(GameWorld *g)

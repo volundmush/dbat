@@ -110,7 +110,7 @@ ACMD(do_quit)
     send_to_char(g, ch, why);
     return;
   }
-  if (char_get_mindlink(g, ch) && char_get_linker(ch) == 0) {
+  if (char_get_mindlink(g, ch) && !char_get_linker(ch)) {
     send_to_char(g, ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
     if (char_get_in_room(char_get_mindlink(g, ch)) != NOWHERE) {
       look_at_room(g, char_get_in_room(char_get_mindlink(g, ch)), ch, 0);

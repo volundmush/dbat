@@ -5755,12 +5755,12 @@ void char_set_droom(struct char_data *ch, room_vnum v)
   ch->droom = v;
 }
 
-int char_get_overf(const struct char_data *ch)
+bool char_get_overf(const struct char_data *ch)
 {
   return ch->overf;
 }
 
-void char_set_overf(struct char_data *ch, int v)
+void char_set_overf(struct char_data *ch, bool v)
 {
   ch->overf = v;
 }
@@ -6395,12 +6395,12 @@ void char_set_mindlink(struct char_data *ch, struct char_data *v)
   ch->mindlink_uid = v ? char_get_id(v) : 0;
 }
 
-int char_get_linker(const struct char_data *ch)
+bool char_get_linker(const struct char_data *ch)
 {
   return ch->linker;
 }
 
-void char_set_linker(struct char_data *ch, int v)
+void char_set_linker(struct char_data *ch, bool v)
 {
   ch->linker = v;
 }

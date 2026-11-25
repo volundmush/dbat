@@ -14,7 +14,7 @@ struct account {
   int rpp{};                                        /* its RPP                                 */
   std::array<std::string, MAX_ACCOUNT_SLOTS> slots; /* each slot's character, or "Empty"      */
   int level{};                                      /* above 0 gets past the lockout list     */
-  int customfile{};                                 /* whether its customs file has been made */
+  bool customfile{};                                /* whether its customs file has been made */
   int rbank{};                                      /* the RPP bank (unused)                   */
 };
 

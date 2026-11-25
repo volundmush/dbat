@@ -38,7 +38,7 @@
  * (config_load_option()) and save_config()'s output.
  */
 enum cedit_type {
-  CT_BOOL,   /* int, toggled from the menu */
+  CT_BOOL,   /* bool, toggled from the menu */
   CT_INT,    /* int */
   CT_ROOM,   /* room_vnum that must exist */
   CT_METHOD, /* int, an index into creation_methods[] */
@@ -51,7 +51,7 @@ enum cedit_type {
 
 /* Where an option is in a config_data, as the type it has there */
 template <class T> using config_field = T &(*)(struct config_data &);
-using any_config_field                = std::variant<config_field<int>, config_field<uint16_t>, config_field<float>, config_field<std::string>>;
+using any_config_field                = std::variant<config_field<bool>, config_field<int>, config_field<uint16_t>, config_field<float>, config_field<std::string>>;
 
 struct cedit_option {
   std::string_view key{};     /* config file key */
@@ -77,7 +77,7 @@ struct cedit_option {
 /* Finds the field in a config_data; it won't compile unless the field has type T */
 #define FIELD(f, T) static_cast<config_field<T>>([](struct config_data &c) -> T & { return c.f; })
 
-#define BOOL(f)       .type = CT_BOOL, .field = FIELD(f, int)
+#define BOOL(f)       .type = CT_BOOL, .field = FIELD(f, bool)
 #define INT(f)        .type = CT_INT, .field = FIELD(f, int)
 #define ROOM(f)       .type = CT_ROOM, .field = FIELD(f, room_vnum)
 #define METHOD(f)     .type = CT_METHOD, .field = FIELD(f, int)
@@ -321,7 +321,7 @@ io::loaded<void> config_load_option(GameWorld *g, std::string_view tag, std::str
 
   struct config_data &c = g->config_info;
   switch (o->type) {
-    case CT_BOOL:
+    case CT_BOOL: o->in<bool>(c) = io::c_atol(value) != 0; break; /* as atoi(), and the game only asked whether it was 0 */
     case CT_INT:
     case CT_ROOM:
     case CT_METHOD: {
@@ -372,7 +372,7 @@ bool save_config(GameWorld *g, struct zone_data *)
       out.write(o.comment);
 
     switch (o.type) {
-      case CT_BOOL:
+      case CT_BOOL: out.print("{} = {:d}\n", o.key, int(o.in<bool>(c))); break;
       case CT_INT:
       case CT_ROOM:
       case CT_METHOD: out.print("{} = {:d}\n", o.key, o.in<int>(c)); break;
@@ -459,9 +459,9 @@ namespace {
     switch (o.type) {
       case CT_BOOL:
         if (o.menu == 'O') /* the operation options always showed YES/NO */
-          value = YESNO(o.in<int>(config));
+          value = YESNO(o.in<bool>(config));
         else
-          value = o.in<int>(config) == 1 ? "Yes" : "No";
+          value = o.in<bool>(config) ? "Yes" : "No";
         break;
       case CT_INT:
       case CT_ROOM: value = str_format("{:d}", o.in<int>(config)); break;
@@ -629,8 +629,8 @@ namespace {
       ask(g, d, *found);
       return;
     }
-    int &flag = found->in<int>(config);
-    flag      = flag == 1 ? 0 : 1;
+    bool &flag = found->in<bool>(config);
+    flag       = !flag;
     if (!found->note.empty())
       send_to_char(g, d->character, "{}", found->note);
     show_submenu(g, d, submenu);

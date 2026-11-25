@@ -17,7 +17,7 @@
 
 /* Local Functions */
 
-static void feato(GameWorld *g, int featnum, std::string_view name, int in_game, int can_learn, int can_stack);
+static void feato(GameWorld *g, int featnum, std::string_view name, bool in_game, bool can_learn, bool can_stack);
 static int compare_feats(const void *x, const void *y, void *world);
 
 /* Global Variables and Structures */
@@ -26,7 +26,7 @@ static int compare_feats(const void *x, const void *y, void *world);
 
 /* External functions*/
 
-static void feato(GameWorld *g, int featnum, std::string_view name, int in_game, int can_learn, int can_stack)
+static void feato(GameWorld *g, int featnum, std::string_view name, bool in_game, bool can_learn, bool can_stack)
 {
   g->feat_list[featnum].name      = name;
   g->feat_list[featnum].in_game   = in_game;

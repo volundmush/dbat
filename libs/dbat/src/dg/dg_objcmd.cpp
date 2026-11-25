@@ -361,7 +361,7 @@ static OCMD(do_opurge)
     o = get_obj_by_obj(g, obj, arg);
     if (o) {
       if (o == obj)
-        g->dg_owner_purged = 1;
+        g->dg_owner_purged = true;
       extract_obj(g, o);
     } else
       obj_log(g, obj, "opurge: bad argument");

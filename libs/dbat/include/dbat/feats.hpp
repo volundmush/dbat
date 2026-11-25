@@ -204,9 +204,9 @@ constexpr int ARMOR_TYPE_SHIELD    = 4;
 struct feat_info {
 
   std::string_view name{}; /* The name of the feat to be displayed to players */
-  int in_game{};      /* TRUE or FALSE, is the feat in the game yet? */
-  int can_learn{};    /* TRUE or FALSE, can the feat be learned or is it an automatic feat? */
-  int can_stack{};    /* TRUE or FALSE, can the feat be learned more than once? */
+  bool in_game{};      /* is the feat in the game yet? */
+  bool can_learn{};    /* can the feat be learned or is it an automatic feat? */
+  bool can_stack{};    /* can the feat be learned more than once? */
 };
 
 

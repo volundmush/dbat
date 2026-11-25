@@ -126,7 +126,7 @@ namespace {
     clear_screen(g, d);
     write_to_output(g, d, which == mode::feats ? "Feats known:\r\n" : "Skills known:\r\n");
     int shown = 0;
-    auto show = [&](int i, int taught, std::string_view name) {
+    auto show = [&](int i, bool taught, std::string_view name) {
       write_to_output(g, d, "@n[@c{:<3}@n] {:<3d} {:<20.20}  ", YESNO(taught), i, name);
       if (++shown % 3 == 0)
         write_to_output(g, d, "\r\n");
@@ -255,7 +255,7 @@ namespace {
         if (n == 0)
           break;
         /* quirk: any number is taken, listed or not, a negative one as the first */
-        int *taught = asking == mode::feats ? &guild.feats[std::clamp(n, 0, NUM_FEATS_DEFINED - 1)]
+        bool *taught = asking == mode::feats ? &guild.feats[std::clamp(n, 0, NUM_FEATS_DEFINED - 1)]
                                             : &guild.skills[std::clamp(n, 0, SKILL_TABLE_SIZE - 1)];
         *taught     = !*taught;
         teaching_menu(g, d, asking);

@@ -302,7 +302,7 @@ struct char_data {
   // food, drink, sleep
   int sleeptime{};
   int foodr{};
-  int overf{};
+  bool overf{};
 
   // Saiyan and halfy stuff
   int tail_growth{};
@@ -396,7 +396,7 @@ struct char_data {
 
   int personality{};
   int combine{};
-  int linker{};
+  bool linker{};
 
   int throws{};
 

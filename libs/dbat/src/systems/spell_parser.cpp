@@ -375,7 +375,7 @@ flag_set<skill_kind> skill_type(GameWorld *g, int snum)
 }
 
 /* Assign the spells on boot up */
-static void spello(GameWorld *g, int spl, std::string_view name, int max_mana, int min_mana, int mana_change, int minpos, flag_set<spell_target> targets, int violent, flag_set<mag_routine> routines, flag_set<mag_save> save_flags, flag_set<mag_component> comp_flags, std::string_view wearoff, int cmspell_level, int school, int domain)
+static void spello(GameWorld *g, int spl, std::string_view name, int max_mana, int min_mana, int mana_change, int minpos, flag_set<spell_target> targets, bool violent, flag_set<mag_routine> routines, flag_set<mag_save> save_flags, flag_set<mag_component> comp_flags, std::string_view wearoff, int cmspell_level, int school, int domain)
 {
   int i;
 
@@ -422,7 +422,7 @@ static void unused_spell(GameWorld *g, int spl)
   g->spell_info[spl].ki_change    = 0;
   g->spell_info[spl].min_position = 0;
   g->spell_info[spl].targets      = {};
-  g->spell_info[spl].violent      = 0;
+  g->spell_info[spl].violent      = false;
   g->spell_info[spl].routines     = {};
   g->spell_info[spl].name         = unused_spellname;
   g->spell_info[spl].skilltype    = {};
@@ -436,7 +436,7 @@ static void unused_spell(GameWorld *g, int spl)
 
 static void skillo(GameWorld *g, int skill, std::string_view name, flag_set<skill_flag> flags)
 {
-  spello(g, skill, name, 0, 0, 0, 0, {}, 0, {}, {}, {}, {}, 0, 0, 0);
+  spello(g, skill, name, 0, 0, 0, 0, {}, false, {}, {}, {}, {}, 0, 0, 0);
   g->spell_info[skill].skilltype = skill_kind::skill;
   g->spell_info[skill].flags     = flags;
 }

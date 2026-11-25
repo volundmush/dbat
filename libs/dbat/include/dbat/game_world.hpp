@@ -51,7 +51,7 @@ struct GameWorld {
   struct obj_unique_hash_elem **obj_unique_hash_pools{};
   int mob_specials_used{};
   int number_of_assassins{};
-  int xap_objs{};
+  bool xap_objs{};
 
   /* Zones */
   vnum_table<zone_data, zone_vnum> zones; /* in vnum order */
@@ -68,7 +68,7 @@ struct GameWorld {
   long max_trig_id{};                           /* the last id given to a trigger */
   std::vector<struct trig_data *> extracted_triggers; /* waiting for free_extracted_triggers() */
   struct dg_run_ctx dg_ctx{};
-  int dg_owner_purged{};
+  bool dg_owner_purged{};
   int dg_eval_depth{}; /* how deeply nested the expression being evaluated is */
   int dg_act_check{};
   int script_depth{}; /* How many scripts are running inside each other */

@@ -9,8 +9,8 @@
  * variables.
  */
 struct game_data {
-  int pk_allowed{};          /* Is player killing allowed? 	  */
-  int pt_allowed{};          /* Is player thieving allowed?	  */
+  bool pk_allowed{};         /* Is player killing allowed? 	  */
+  bool pt_allowed{};         /* Is player thieving allowed?	  */
   int level_can_shout{};     /* Level player must be to shout.	  */
   int holler_move_cost{};    /* Cost to holler in move points.	  */
   int tunnel_size{};         /* Number of people allowed in a tunnel.*/
@@ -21,22 +21,22 @@ struct game_data {
   int idle_void{};           /* Num tics before PC sent to void(idle)*/
   int idle_rent_time{};      /* Num tics before PC is autorented.	  */
   int idle_max_level{};      /* Level of players immune to idle.     */
-  int dts_are_dumps{};       /* Should items in dt's be junked?	  */
-  int load_into_inventory{}; /* Objects load in immortals inventory. */
-  int track_through_doors{}; /* Track through doors while closed?    */
+  bool dts_are_dumps{};      /* Should items in dt's be junked?	  */
+  bool load_into_inventory{}; /* Objects load in immortals inventory. */
+  bool track_through_doors{}; /* Track through doors while closed?    */
   int level_cap{};           /* You cannot level to this level       */
-  int stack_mobs{};          /* Turn mob stacking on                 */
-  int stack_objs{};          /* Turn obj stacking on                 */
-  int mob_fighting{};        /* Allow mobs to attack other mobs.     */
+  bool stack_mobs{};         /* Turn mob stacking on                 */
+  bool stack_objs{};         /* Turn obj stacking on                 */
+  bool mob_fighting{};       /* Allow mobs to attack other mobs.     */
   std::string OK{};          /* When player receives 'Okay.' text.	  */
   std::string NOPERSON{};    /* 'No-one by that name here.'	  */
   std::string NOEFFECT{};    /* 'Nothing seems to happen.'	          */
-  int disp_closed_doors{};   /* Display closed doors in autoexit?	  */
-  int reroll_player{};       /* Players can reroll stats on creation */
+  bool disp_closed_doors{};  /* Display closed doors in autoexit?	  */
+  bool reroll_player{};      /* Players can reroll stats on creation */
   int initial_points{};      /* Initial points pool size		  */
-  int enable_compression{};  /* Enable MCCP2 stream compression      */
-  int enable_languages{};    /* Enable spoken languages              */
-  int all_items_unique{};    /* Treat all items as unique 		  */
+  bool enable_compression{}; /* Enable MCCP2 stream compression      */
+  bool enable_languages{};   /* Enable spoken languages              */
+  bool all_items_unique{};   /* Treat all items as unique 		  */
   float exp_multiplier{};    /* Experience gain  multiplier	  */
 };
 
@@ -44,10 +44,10 @@ struct game_data {
  * The rent and crashsave options.
  */
 struct crash_save_data {
-  int free_rent{};          /* Should the MUD allow rent for free?  */
+  bool free_rent{};         /* Should the MUD allow rent for free?  */
   int max_obj_save{};       /* Max items players can rent.          */
   int min_rent_cost{};      /* surcharge on top of item costs.	  */
-  int auto_save{};          /* Does the game automatically save ppl?*/
+  bool auto_save{};         /* Does the game automatically save ppl?*/
   int autosave_time{};      /* if auto_save=TRUE, how often?        */
   int crash_file_timeout{}; /* Life of crashfiles and idlesaves.    */
   int rent_file_timeout{};  /* Lifetime of normal rent files in days*/
@@ -76,10 +76,10 @@ struct game_operation {
   int max_playing{};        /* Maximum number of players allowed. */
   int max_filesize{};       /* Maximum size of misc files.	  */
   int max_bad_pws{};        /* Maximum number of pword attempts.  */
-  int siteok_everyone{};    /* Everyone from all sites are SITEOK.*/
-  int nameserver_is_slow{}; /* Is the nameserver slow or fast?	  */
-  int use_new_socials{};    /* Use new or old socials file ?      */
-  int auto_save_olc{};      /* Does OLC save to disk right away ? */
+  bool siteok_everyone{};   /* Everyone from all sites are SITEOK.*/
+  bool nameserver_is_slow{}; /* Is the nameserver slow or fast?	  */
+  bool use_new_socials{};   /* Use new or old socials file ?      */
+  bool auto_save_olc{};     /* Does OLC save to disk right away ? */
   std::string MENU{};       /* The MAIN MENU.			  */
   std::string WELC_MESSG{}; /* The welcome message.		  */
   std::string START_MESSG{}; /* The start msg for new characters.  */
@@ -90,7 +90,7 @@ struct game_operation {
  * The Autowizard options.
  */
 struct autowiz_data {
-  int use_autowiz{};     /* Use the autowiz feature?		*/
+  bool use_autowiz{};    /* Use the autowiz feature?		*/
   int min_wizlist_lev{}; /* Minimun level to show on wizlist.	*/
 };
 
@@ -114,8 +114,8 @@ struct tick_data {
  * The character advancement (leveling) options.
  */
 struct advance_data {
-  int allow_multiclass{}; /* Allow advancement in multiple classes     */
-  int allow_prestige{};   /* Allow advancement in prestige classes     */
+  bool allow_multiclass{}; /* Allow advancement in multiple classes     */
+  bool allow_prestige{};  /* Allow advancement in prestige classes     */
 };
 
 /*
@@ -233,22 +233,27 @@ struct config_data {
 /* GAME PLAY OPTIONS */
 
 // global variables
-extern const int pk_allowed, pt_allowed, level_can_shout, holler_move_cost, CURRENT_ERA;
+extern const int level_can_shout, holler_move_cost, CURRENT_ERA;
+extern const bool pk_allowed, pt_allowed;
 
 extern const int tunnel_size, max_exp_gain, max_exp_loss, max_npc_corpse_time, max_pc_corpse_time;
 
-extern const int idle_void, idle_rent_time, idle_max_level, dts_are_dumps, pulse_violence;
+extern const int idle_void, idle_rent_time, idle_max_level, pulse_violence;
+extern const bool dts_are_dumps;
 
 extern const int pulse_zone, pulse_mobile, pulse_autosave, pulse_idlepwd, pulse_sanity, pulse_usage;
-extern const int pulse_timesave, pulse_current, load_into_inventory;
+extern const int pulse_timesave, pulse_current;
+extern const bool load_into_inventory;
 
 extern const std::string_view OK, NOPERSON, NOEFFECT;
 
-extern const int track_through_doors, level_cap, show_obj_stacking, show_mob_stacking, mob_fighting;
+extern const int level_cap;
+extern const bool track_through_doors, show_obj_stacking, show_mob_stacking, mob_fighting;
 
-extern const int free_rent, max_obj_save, min_rent_cost, auto_save, autosave_time;
+extern const int max_obj_save, min_rent_cost, autosave_time;
+extern const bool free_rent, auto_save;
 
-extern const int auto_pwipe, selfdelete_fastwipe;
+extern const bool auto_pwipe, selfdelete_fastwipe;
 
 extern const struct pclean_criteria_data pclean_criteria[7];
 
@@ -260,15 +265,18 @@ extern const uint16_t DFLT_PORT;
 
 extern const std::string_view DFLT_IP, DFLT_DIR, LOGNAME, MENU, WELC_MESSG, START_MESSG; /* DFLT_IP and LOGNAME: empty for none */
 
-extern const int max_playing, max_filesize, max_bad_pws, siteok_everyone, nameserver_is_slow;
+extern const int max_playing, max_filesize, max_bad_pws;
+extern const bool siteok_everyone, nameserver_is_slow;
 
-extern const int auto_save_olc, use_new_socials, use_autowiz, min_wizlist_lev, initial_points;
+extern const int min_wizlist_lev, initial_points;
+extern const bool auto_save_olc, use_new_socials, use_autowiz;
 
 extern const obj_vnum portal_object;
 
-extern const int disp_closed_doors, reroll_status, allow_multiclass, allow_prestige;
+extern const bool disp_closed_doors, reroll_status, allow_multiclass, allow_prestige;
 
-extern const int enable_compression, enable_languages, all_items_unique, method;
+extern const int method;
+extern const bool enable_compression, enable_languages, all_items_unique;
 
 extern const int crash_file_timeout, rent_file_timeout;
 

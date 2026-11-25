@@ -289,7 +289,7 @@ struct spell_info_type {
 
   int min_level[NUM_CLASSES]{};
   flag_set<mag_routine> routines;
-  int8_t violent{};
+  bool violent{};
   flag_set<spell_target> targets; /* See below for use with TAR_XXX  */
   std::string_view name{};         /* a string constant */
   std::string_view wear_off_msg{}; /* a string constant, or empty for none */

@@ -338,7 +338,7 @@ namespace {
 
 ACMD(do_oasis_aedit)
 {
-  if (CONFIG_NEW_SOCIALS == 0) {
+  if (!CONFIG_NEW_SOCIALS) {
     send_to_char(g, ch, "Socials cannot be edited at the moment.\r\n");
     return;
   }

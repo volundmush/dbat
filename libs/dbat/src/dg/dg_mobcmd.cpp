@@ -534,7 +534,7 @@ ACMD(do_mpurge)
     return;
   }
 
-  if (victim == ch) g->dg_owner_purged = 1;
+  if (victim == ch) g->dg_owner_purged = true;
 
   extract_char(g, victim);
 }

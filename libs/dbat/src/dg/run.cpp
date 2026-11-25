@@ -229,7 +229,7 @@ int run_trigger(GameWorld *g, owner_ptr go, trig_data *trig, int mode, bool &own
     sc->context       = 0;
   }
 
-  g->dg_owner_purged = 0;
+  g->dg_owner_purged = false;
 
   runner r(g, go, trig, owner_gone);
   /* Once extracted, what the trigger belonged to may be gone, and free_trigger() has the rest. */

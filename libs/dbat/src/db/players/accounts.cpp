@@ -13,6 +13,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 #include "dbat/account.hpp"
 #include "dbat/character_utils.hpp"
@@ -81,6 +82,13 @@ void read_field(const std::string &line, int &number)
   io::fields(line).number(number); /* a line that isn't a number leaves it as it was */
 }
 
+void read_field(const std::string &line, bool &yes)
+{
+  int number = yes;
+  io::fields(line).number(number);
+  yes = number == 1; /* only a 1 ever said yes */
+}
+
 } // namespace
 
 bool read_account_file(const std::string &path, account &a)
@@ -105,7 +113,12 @@ bool write_account(std::string_view name, const account &a)
   if (!path)
     return false;
   io::text_writer out(*path, true);
-  each_account_field(a, [&](const auto &field) { out.print("{}\n", field); });
+  each_account_field(a, [&](const auto &field) {
+    if constexpr (std::is_same_v<std::remove_cvref_t<decltype(field)>, bool>)
+      out.print("{:d}\n", int(field));
+    else
+      out.print("{}\n", field);
+  });
   if (!out.commit()) {
     mud_log("ERROR: could not save user, {}, to filename, {}.", name, *path);
     return false;
@@ -220,14 +233,14 @@ void customRead(GameWorld *g, struct descriptor_data *d, int type, std::string_v
 /* Makes the customs file of d's account, if it hasn't one */
 void customCreate(struct descriptor_data *d)
 {
-  if (!d || d->acct.customfile == 1)
+  if (!d || d->acct.customfile)
     return;
   std::optional<std::string> path = player_path(CUSTOME_FILE, d->acct.user.c_str());
   if (!path)
     return;
   io::text_writer out(*path, true);
   out.write("@D--@RUser @GC@gustom@Gs@D--@n\n");
-  d->acct.customfile = 1;
+  d->acct.customfile = true;
   if (!out.commit())
     mud_log("ERROR: could not create custom file.");
 }

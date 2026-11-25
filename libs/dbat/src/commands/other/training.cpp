@@ -705,7 +705,7 @@ void break_mind_link(GameWorld *g, struct char_data *ch)
     send_to_char(g, ch, "You are not mind linked with anyone.\r\n");
     return;
   }
-  if (char_get_linker(ch) == 1) {
+  if (char_get_linker(ch)) {
     send_to_char(g, ch, "This is not how you break YOUR mind link.\r\n");
     return;
   }
@@ -721,7 +721,7 @@ void break_mind_link(GameWorld *g, struct char_data *ch)
       send_to_char(g, linked, "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
       char_aff_set(linked, aff_flag::shocked, false); /* quirk: they aren't, though */
     }
-    char_set_linker(linked, 0);
+    char_set_linker(linked, false);
     char_set_mindlink(linked, nullptr);
     char_set_mindlink(ch, nullptr);
     return;
@@ -1240,7 +1240,7 @@ void base_update(GameWorld *g)
         char_set_blocks(d->character, nullptr);
       }
     }
-    if (char_get_overf(d->character) == true) {
+    if (char_get_overf(d->character)) {
       mudlog(g, LOG_NRM, ADMLVL_GOD, true, "OVERFLOW: {} has caused an overflow, check for illegal activity.", char_get_name(d->character));
       char_set_overf(d->character, false);
     }

@@ -62,7 +62,7 @@ void userCreate(struct descriptor_data *d)
                .rpp        = 0,
                .slots      = {"Empty", "Empty", "Empty", "Empty", "Empty"},
                .level      = 0,
-               .customfile = 1,
+               .customfile = true,
                .rbank      = 0};
 
   CAP(made.user);
