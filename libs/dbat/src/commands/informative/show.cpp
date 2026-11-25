@@ -538,33 +538,33 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
     send_to_char(g, ch, "\r\n");
 }
 
-int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
+bool show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 {
-  int found = false;
+  bool found = false;
 
   if (obj_extra_flagged(obj, extra_flag::invisible)) {
     send_to_char(g, ch, " (invisible)");
-    found++;
+    found = true;
   }
   if (obj_extra_flagged(obj, extra_flag::bless) && char_aff_flagged(ch, aff_flag::detect_align)) {
     send_to_char(g, ch, " ..It glows blue!");
-    found++;
+    found = true;
   }
   if (obj_extra_flagged(obj, extra_flag::magic) && char_aff_flagged(ch, aff_flag::detect_magic)) {
     send_to_char(g, ch, " ..It glows yellow!");
-    found++;
+    found = true;
   }
   if (obj_extra_flagged(obj, extra_flag::glow)) {
     send_to_char(g, ch, " @D(@GGlowing@D)@n");
-    found++;
+    found = true;
   }
   if (obj_extra_flagged(obj, extra_flag::hot)) {
     send_to_char(g, ch, " @D(@RHOT@D)@n");
-    found++;
+    found = true;
   }
   if (obj_extra_flagged(obj, extra_flag::hum)) {
     send_to_char(g, ch, " @D(@RHumming@D)@n");
-    found++;
+    found = true;
   }
   if (obj_extra_flagged(obj, extra_flag::slot2)) {
     if (obj_extra_flagged(obj, extra_flag::slot_one) && !obj_extra_flagged(obj, extra_flag::slots_filled))
@@ -573,19 +573,19 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
       send_to_char(g, ch, " @D[@m2/2 Tokens@D]@n");
     else
       send_to_char(g, ch, " @D[@m0/2 Tokens@D]@n");
-    found++;
+    found = true;
   }
   if (obj_extra_flagged(obj, extra_flag::slot1)) {
     if (obj_extra_flagged(obj, extra_flag::slots_filled))
       send_to_char(g, ch, " @D[@m1/1 Tokens@D]@n");
     else
       send_to_char(g, ch, " @D[@m0/1 Tokens@D]@n");
-    found++;
+    found = true;
   }
   if (obj_get_kicharge(obj) > 0) {
     int num = (obj_get_distance(obj) * 20) + rand_number(g, 1, 5);
     send_to_char(g, ch, " {:d} meters away", num);
-    found++;
+    found = true;
   }
   if (obj_extra_flagged(obj, extra_flag::custom)) {
     send_to_char(g, ch, " @D(@YCUSTOM@D)@n");
@@ -605,7 +605,7 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
     } else {
       send_to_char(g, ch, ", and is broken.");
     }
-    found++;
+    found = true;
   } else {
     if (obj_get_type_flag(obj) != ITEM_BOARD) {
       if (obj_get_type_flag(obj) != ITEM_CONTAINER) {
@@ -618,9 +618,9 @@ int show_obj_modifiers(GameWorld *g, struct obj_data *obj, struct char_data *ch)
         send_to_char(g, ch, "\n...{}{} has been posted to it.", char_prf_flagged(g, ch, pref_flag::roomflags) ? dvnum.c_str() : "", obj_get_short_description(obj2));
       }
     }
-    found++;
+    found = true;
   }
-  return (found);
+  return found;
 }
 
 void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, int mode, int show)

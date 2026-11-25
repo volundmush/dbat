@@ -80,7 +80,7 @@ static int top(struct stack_data *stack);
 static int pop(struct stack_data *stack);
 static void evaluate_operation(struct stack_data *ops, struct stack_data *vals);
 static int find_oper_num(char token);
-static int evaluate_expression(struct obj_data *obj, std::string_view expr);
+static bool evaluate_expression(struct obj_data *obj, std::string_view expr);
 static int trade_with(GameWorld *g, struct obj_data *item, struct shop_data *shop);
 static bool same_obj(struct obj_data *obj1, struct obj_data *obj2);
 
@@ -347,7 +347,7 @@ static int find_oper_num(char token)
   return (NOTHING);
 }
 
-static int evaluate_expression(struct obj_data *obj, std::string_view expr)
+static bool evaluate_expression(struct obj_data *obj, std::string_view expr)
 {
   struct stack_data ops, vals;
   int temp, eindex;
@@ -397,7 +397,7 @@ static int evaluate_expression(struct obj_data *obj, std::string_view expr)
     mud_log("SYSERR: Extra operands left on shop keyword expression stack.");
     return (false);
   }
-  return (temp);
+  return temp != 0;
 }
 
 static int trade_with(GameWorld *g, struct obj_data *item, struct shop_data *shop)
@@ -1179,22 +1179,22 @@ SPECIAL(shop_keeper)
 
   shop = find_first(g->shops.all(), [&](shop_data *s) { return shop_get_keeper(s) == char_get_nr(keeper); });
   if (!shop)
-    return (false);
+    return false;
 
   if (shop_get_func(shop)) /* Check secondary function */
     if ((shop_get_func(shop))(g, ch, me, cmd, argument))
-      return (true);
+      return true;
 
   if (keeper == ch) {
     if (cmd)
       shop_set_lastsort(shop, 0); /* Safety in case "drop all" */
-    return (false);
+    return false;
   }
   if (!ok_shop_room(g, shop, char_get_in_room(ch)))
-    return (0);
+    return false;
 
   if (!char_is_awake(keeper))
-    return (false);
+    return false;
 
   if (CMD_IS(g, "steal")) {
     std::string argm;
@@ -1205,33 +1205,33 @@ SPECIAL(shop_keeper)
       act(g, argm, false, ch, nullptr, keeper, act_to::room);
       do_action(g, keeper, char_get_name(ch), g->cmd_slap, 0);
 
-      return (true);
+      return true;
     }
-    return (false);
+    return false;
   }
 
   std::string line(argument); /* buying and selling take the amount off its front */
   if (CMD_IS(g, "buy")) {
     shopping_buy(g, line, ch, keeper, shop);
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "sell")) {
     shopping_sell(g, line, ch, keeper, shop);
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "value")) {
     shopping_value(g, line, ch, keeper, shop);
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "list")) {
     shopping_list(g, line, ch, keeper, shop);
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "appraise")) {
     shopping_app(g, line, ch, keeper, shop);
-    return (true);
+    return true;
   }
-  return (false);
+  return false;
 }
 
 void assign_the_shopkeepers(GameWorld *g)

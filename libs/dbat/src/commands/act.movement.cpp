@@ -47,7 +47,7 @@
 
 /* local functions */
 static void handle_fall(GameWorld *g, struct char_data *ch);
-static int check_swim(GameWorld *g, struct char_data *ch);
+static bool check_swim(GameWorld *g, struct char_data *ch);
 
 namespace {
   /* A message to ch and one to the rest of the room */
@@ -1570,10 +1570,10 @@ static bool do_simple_enter(GameWorld *g, struct char_data *ch, struct obj_data 
   return true;
 }
 
-static int perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static bool perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
   room_vnum was_in = char_get_in_room(ch);
-  int could_move   = false;
+  bool could_move  = false;
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
@@ -1783,10 +1783,10 @@ static bool do_simple_leave(GameWorld *g, struct char_data *ch, struct obj_data 
   return true;
 }
 
-static int perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static bool perform_leave_obj(GameWorld *g, struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
   room_vnum was_in = char_get_in_room(ch);
-  int could_move   = false;
+  bool could_move  = false;
 
   if (char_get_grappling(g, ch) || char_get_grappled(g, ch)) {
     send_to_char(g, ch, "You are grappling with someone!\r\n");
@@ -1879,7 +1879,7 @@ static void handle_fall(GameWorld *g, struct char_data *ch)
   }
 }
 
-static int check_swim(GameWorld *g, struct char_data *ch)
+static bool check_swim(GameWorld *g, struct char_data *ch)
 {
   bool can = false;
 

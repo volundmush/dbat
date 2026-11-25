@@ -52,7 +52,7 @@ SPECIAL(dump)
   }
 
   if (!CMD_IS(g, "drop"))
-    return (false);
+    return false;
 
   do_drop(g, ch, argument, cmd, SCMD_DROP);
 
@@ -71,7 +71,7 @@ SPECIAL(dump)
     else
       char_set_gold(ch, char_get_gold(ch) + (value));
   }
-  return (true);
+  return true;
 }
 
 /* ********************************************************************
@@ -168,7 +168,7 @@ SPECIAL(pet_shops)
         continue;
       send_to_char(g, ch, "{:>8d} - {}\r\n", PET_PRICE(tch), char_get_name(tch));
     }
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "buy")) {
 
@@ -178,11 +178,11 @@ SPECIAL(pet_shops)
 
     if (!(pet = get_char_room(g, which, nullptr, pet_room)) || !char_is_npc(pet)) {
       send_to_char(g, ch, "There is no such pet!\r\n");
-      return (true);
+      return true;
     }
     if (char_get_gold(ch) < PET_PRICE(pet)) {
       send_to_char(g, ch, "You don't have enough zenni!\r\n");
-      return (true);
+      return true;
     }
     char_set_gold(ch, char_get_gold(ch) - (PET_PRICE(pet)));
 
@@ -209,11 +209,11 @@ SPECIAL(pet_shops)
     send_to_char(g, ch, "May you enjoy your pet.\r\n");
     act(g, "$n buys $N as a pet.", false, ch, nullptr, pet, act_to::room);
 
-    return (true);
+    return true;
   }
 
   /* All commands except list and buy */
-  return (false);
+  return false;
 }
 
 SPECIAL(auction)
@@ -264,7 +264,7 @@ SPECIAL(auction)
       send_to_char(g, ch, "There are no items being auctioned by you.\r\n");
     }
 
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "pickup")) {
     int founded = false;
@@ -340,7 +340,7 @@ SPECIAL(auction)
     if (found == false) {
       send_to_char(g, ch, "There are no items that you have bid on.\r\n");
     }
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "auction")) {
     std::string arg, arg2;
@@ -352,28 +352,28 @@ SPECIAL(auction)
 
     if (arg.empty() || arg2.empty()) {
       send_to_char(g, ch, "Auction what item and for how much?\r\n");
-      return (true);
+      return true;
     }
 
     value = parse_int(arg2);
 
     if (!(obj2 = get_obj_in_list_vis(g, ch, arg, nullptr, char_get_inventory(ch)))) {
       send_to_char(g, ch, "You don't have that item to auction.\r\n");
-      return (true);
+      return true;
     }
     if (value <= 999) {
       send_to_char(g, ch, "Do not auction anything for less than 1,000 zenni.\r\n");
-      return (true);
+      return true;
     }
 
     if (obj_extra_flagged(obj2, extra_flag::broken)) {
       act(g, "$P is broken and we will not accept it.", false, ch, nullptr, obj2, act_to::actor);
-      return (true);
+      return true;
     }
 
     if (obj_extra_flagged(obj2, extra_flag::nodonate)) {
       act(g, "$P is junk and we will not accept it.", false, ch, nullptr, obj2, act_to::actor);
-      return (true);
+      return true;
     }
 
     obj_set_bid(obj2, value);
@@ -402,11 +402,11 @@ SPECIAL(auction)
         send_to_char(g, d->character, "@RScouter Auction News@D: @GThe item, @w{}@G, has been placed on auction for @Y{}@G zenni.@n\r\n", obj_get_short_description(obj2), add_commas(obj_get_bid(obj2)));
       }
     }
-    return (true);
+    return true;
   }
 
   /* All commands except list and buy */
-  return (false);
+  return false;
 }
 
 /* ********************************************************************
@@ -430,42 +430,42 @@ SPECIAL(healtank)
 
   if (CMD_IS(g, "htank")) {
     if (!htank) {
-      return (false);
+      return false;
     }
 
     if (arg.empty()) {
       send_to_char(g, ch, "@WHealing Tank Commands:\r\nhtank [ enter | exit | check ]@n");
-      return (true);
+      return true;
     }
 
     if (str_eq_nocase("enter", arg)) {
       if (char_plr_flagged(ch, player_flag::healt)) {
         send_to_char(g, ch, "You are already inside a healing tank!\r\n");
-        return (true);
+        return true;
       }
       if (char_get_master(g, ch) && char_get_master(g, ch) != ch) {
         send_to_char(g, ch, "You can't enter it while following someone!\r\n");
-        return (true);
+        return true;
       }
       if (char_is_android(ch)) {
         send_to_char(g, ch, "A healing tank will have no effect on you.\r\n");
-        return (true);
+        return true;
       }
       if (obj_get_healcharge(htank) <= 0) {
         send_to_char(g, ch, "That healing tank needs to recharge, wait a while.\r\n");
-        return (true);
+        return true;
       }
       if (obj_extra_flagged(htank, extra_flag::broken)) {
         send_to_char(g, ch, "It is broken! You will need to fix it yourself or wait for someone else to fix it.\r\n");
-        return (true);
+        return true;
       }
       if (char_get_sits(g, ch)) {
         send_to_char(g, ch, "You are already on something.\r\n");
-        return (true);
+        return true;
       }
       if (obj_get_sitting(g, htank)) {
         send_to_char(g, ch, "Someone else is already inside that healing tank!\r\n");
-        return (true);
+        return true;
       }
       char_set_charge(ch, 0);
       char_plr_set(ch, player_flag::charge, false);
@@ -476,21 +476,21 @@ SPECIAL(healtank)
       char_plr_set(ch, player_flag::healt, true);
       char_set_sits(ch, htank);
       obj_set_sitting(htank, ch);
-      return (true);
+      return true;
 
     } // End of Enter argument
 
     else if (str_eq_nocase("exit", arg)) {
       if (!char_plr_flagged(ch, player_flag::healt)) {
         send_to_char(g, ch, "You are not inside a healing tank.\r\n");
-        return (true);
+        return true;
       }
       act(g, "@wThe healing tank drains and you exit it shortly after.", true, ch, nullptr, nullptr, act_to::actor);
       act(g, "@C$n@w exits the healing tank after letting it drain.@n", true, ch, nullptr, nullptr, act_to::room);
       char_plr_set(ch, player_flag::healt, false);
       obj_set_sitting(htank, nullptr);
       char_set_sits(ch, nullptr);
-      return (true);
+      return true;
     } // End of Exit argument
 
     else if (str_eq_nocase("check", arg)) {
@@ -501,17 +501,17 @@ SPECIAL(healtank)
       } else {
         send_to_char(g, ch, "The healing tank has full energy shown on its meter.\r\n");
       }
-      return (true);
+      return true;
     }
 
     else {
       send_to_char(g, ch, "@WHealing Tank Commands:\r\nhtank [ enter | exit | check ]@n");
-      return (true);
+      return true;
     }
 
   } // End of htank command
   else {
-    return (false);
+    return false;
   }
 }
 
@@ -547,7 +547,7 @@ SPECIAL(augmenter)
       send_to_char(g, ch, "@mAgility     @y: @WCurrently measured at @w{:d}@W, cost to augment @Y{}@W.@n\r\n", agility, add_commas(agicost));
       send_to_char(g, ch, "@YSpeed       @y: @WCurrently measured at @w{:d}@W, cost to augment @Y{}@W.@n\r\n", speed, add_commas(specost));
       send_to_char(g, ch, "\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("strength", arg) || str_eq_nocase("str", arg)) {
       if (strength >= 100)
@@ -624,9 +624,9 @@ SPECIAL(augmenter)
     } else {
       send_to_char(g, ch, "Syntax: augment [str | con | int | wis | agi | spe]\r\n");
     }
-    return (true);
+    return true;
   } else { /* They are not using the right command, ignore them. */
-    return (false);
+    return false;
   }
 }
 
@@ -650,15 +650,15 @@ SPECIAL(gravity)
     if (arg.empty()) {
       send_to_char(g, ch, "@WGravity Commands:@n\r\n");
       send_to_char(g, ch, "@Wgravity [ 0 | N | 10 | 20 | 30 | 40 | 50 | 100 | 200 ]\r\n          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
-      return (true);
+      return true;
     }
     if (obj_extra_flagged(obj, extra_flag::broken)) {
       send_to_char(g, ch, "It's broken!\r\n");
-      return (true);
+      return true;
     }
     if ((str_eq_nocase("N", arg) || str_eq_nocase("n", arg) || str_eq_nocase("0", arg)) && obj_get_weight(obj) == 0) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("N", arg) || str_eq_nocase("n", arg) || str_eq_nocase("0", arg)) {
       send_to_char(g, ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -674,11 +674,11 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("10", arg) && obj_get_weight(obj) == 10) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("10", arg) && room_get_gravity(g, char_get_in_room(ch)) == 10 && (room_flagged(g, char_get_in_room(ch), room_flag::vegeta) || room_flagged(g, char_get_in_room(ch), room_flag::gravityx10))) {
       send_to_char(g, ch, "The gravity around you is already at that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("10", arg) && room_get_gravity(g, char_get_in_room(ch)) != 10 && (room_flagged(g, char_get_in_room(ch), room_flag::vegeta) || room_flagged(g, char_get_in_room(ch), room_flag::gravityx10))) {
       send_to_char(g, ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -699,7 +699,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("20", arg) && obj_get_weight(obj) == 20) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("20", arg)) {
       send_to_char(g, ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -714,7 +714,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("30", arg) && obj_get_weight(obj) == 30) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("30", arg)) {
       send_to_char(g, ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -729,7 +729,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("40", arg) && obj_get_weight(obj) == 40) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("40", arg)) {
       send_to_char(g, ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -744,7 +744,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("50", arg) && obj_get_weight(obj) == 50) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("50", arg)) {
       send_to_char(g, ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -759,7 +759,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("100", arg) && obj_get_weight(obj) == 100) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("100", arg)) {
       send_to_char(g, ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -774,7 +774,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("200", arg) && obj_get_weight(obj) == 200) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("200", arg)) {
       send_to_char(g, ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -789,7 +789,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("300", arg) && obj_get_weight(obj) == 300) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("300", arg)) {
       send_to_char(g, ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -804,7 +804,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("400", arg) && obj_get_weight(obj) == 400) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("400", arg)) {
       send_to_char(g, ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -819,7 +819,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("500", arg) && obj_get_weight(obj) == 500) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("500", arg)) {
       send_to_char(g, ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -834,7 +834,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("1000", arg) && obj_get_weight(obj) == 1000) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("1000", arg)) {
       send_to_char(g, ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -849,7 +849,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("5000", arg) && obj_get_weight(obj) == 5000) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("5000", arg)) {
       send_to_char(g, ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -864,7 +864,7 @@ SPECIAL(gravity)
     }
     if (str_eq_nocase("10000", arg) && obj_get_weight(obj) == 10000) {
       send_to_char(g, ch, "The gravity generator is already set to that.\r\n");
-      return (true);
+      return true;
     }
     if (str_eq_nocase("10000", arg)) {
       send_to_char(g, ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
@@ -880,11 +880,11 @@ SPECIAL(gravity)
       send_to_char(g, ch, "That is not a proper command for this device.\r\n");
       send_to_char(g, ch, "@WGravity Commands:@n\r\n");
       send_to_char(g, ch, "@Wgravity [ 0 | N | 10 | 20 | 30 | 40 | 50 | 100 | 200 ]\r\n          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
-      return (true);
+      return true;
     }
-    return (true);
+    return true;
   }
-  return (false);
+  return false;
 }
 
 SPECIAL(bank)
@@ -904,14 +904,14 @@ SPECIAL(bank)
   if (CMD_IS(g, "balance")) {
     if ((obj && obj_extra_flagged(obj, extra_flag::broken))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
-      return (true);
+      return true;
     }
 
     if (char_get_bank_gold(ch) > 0)
       send_to_char(g, ch, "Your current balance is {:d} zenni.\r\n", char_get_bank_gold(ch));
     else
       send_to_char(g, ch, "You currently have no money deposited.\r\n");
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "wire")) {
     std::string arg, arg2;
@@ -923,20 +923,20 @@ SPECIAL(bank)
 
     if ((obj && obj_extra_flagged(obj, extra_flag::broken))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
-      return (true);
+      return true;
     }
 
     if ((amount = parse_int(arg)) <= 0) {
       send_to_char(g, ch, "How much do you want to transfer?\r\n");
-      return (true);
+      return true;
     }
     if (char_get_bank_gold(ch) < amount + (amount / 100)) {
       send_to_char(g, ch, "You don't have that much zenni in the bank (plus 1{} charge)!\r\n", "%");
-      return (true);
+      return true;
     }
     if (arg2.empty()) {
       send_to_char(g, ch, "You want to transfer it to who?!\r\n");
-      return (true);
+      return true;
     }
     if (!(vict = get_player_vis(g, ch, arg2, nullptr, find_flag::char_world))) {
       int is_file = false, player_i = 0;
@@ -953,17 +953,17 @@ SPECIAL(bank)
       } else {
         free_char(g, vict);
         send_to_char(g, ch, "That person doesn't exist.\r\n");
-        return (true);
+        return true;
       }
       if (char_get_desc(ch)->acct.user.empty()) {
         send_to_char(g, ch, "There is an error. Report to Iovan.");
-        return (true);
+        return true;
       }
       if (std::ranges::any_of(char_get_desc(ch)->acct.slots, [&](const std::string &slot) { return str_eq_nocase(char_get_name(vict), slot); })) {
         send_to_char(g, ch, "You can not transfer money to your own offline characters...");
         if (is_file == true)
           free_char(g, vict);
-        return (true);
+        return true;
       }
       char_set_bank_gold(vict, char_get_bank_gold(vict) + (amount));
       char_set_bank_gold(ch, char_get_bank_gold(ch) - (amount + (amount / 100)));
@@ -979,43 +979,43 @@ SPECIAL(bank)
     }
     send_to_char(g, ch, "You transfer {} zenni to them.\r\n", add_commas(amount));
     act(g, "$n makes a bank transaction.", true, ch, nullptr, nullptr, act_to::room);
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "deposit")) {
 
     if ((obj && obj_extra_flagged(obj, extra_flag::broken))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
-      return (true);
+      return true;
     }
 
     if ((amount = parse_int(argument)) <= 0) {
       send_to_char(g, ch, "How much do you want to deposit?\r\n");
-      return (true);
+      return true;
     }
     if (char_get_gold(ch) < amount) {
       send_to_char(g, ch, "You don't have that much zenni!\r\n");
-      return (true);
+      return true;
     }
     char_set_gold(ch, char_get_gold(ch) - (amount));
     char_set_bank_gold(ch, char_get_bank_gold(ch) + (amount));
     send_to_char(g, ch, "You deposit {:d} zenni.\r\n", amount);
     act(g, "$n makes a bank transaction.", true, ch, nullptr, nullptr, act_to::room);
-    return (true);
+    return true;
   }
   if (CMD_IS(g, "withdraw")) {
 
     if ((obj && obj_extra_flagged(obj, extra_flag::broken))) {
       send_to_char(g, ch, "The ATM is broken!\r\n");
-      return (true);
+      return true;
     }
 
     if ((amount = parse_int(argument)) <= 0) {
       send_to_char(g, ch, "How much do you want to withdraw?\r\n");
-      return (true);
+      return true;
     }
     if (char_get_bank_gold(ch) < amount) {
       send_to_char(g, ch, "You don't have that much zenni!\r\n");
-      return (true);
+      return true;
     }
     if (char_get_bank_gold(ch) - (amount + (1 + amount / 100)) < 0) {
       if (amount >= 100) {
@@ -1024,7 +1024,7 @@ SPECIAL(bank)
         amount = amount + 1;
       }
       send_to_char(g, ch, "You need at least {} in the bank with the 1 percent withdraw fee.\r\n", add_commas(amount));
-      return (true);
+      return true;
     }
     if (char_get_gold(ch) + amount > char_gold_carry(ch)) {
       send_to_char(g, ch, "You can only carry {} zenni, you left the rest.\r\n", add_commas(char_gold_carry(ch)));
@@ -1039,7 +1039,7 @@ SPECIAL(bank)
       }
       send_to_char(g, ch, "You withdraw {} zenni,  and pay {} in withdraw fees.\r\n.\r\n", add_commas(amount), add_commas(num));
       act(g, "$n makes a bank transaction.", true, ch, nullptr, nullptr, act_to::room);
-      return (true);
+      return true;
     }
     char_set_gold(ch, char_get_gold(ch) + (amount));
     if (amount >= 100) {
@@ -1050,7 +1050,7 @@ SPECIAL(bank)
     }
     send_to_char(g, ch, "You withdraw {} zenni, and pay {} in withdraw fees.\r\n", add_commas(amount), add_commas(num));
     act(g, "$n makes a bank transaction.", true, ch, nullptr, nullptr, act_to::room);
-    return (true);
+    return true;
   } else
-    return (false);
+    return false;
 }

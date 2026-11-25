@@ -1121,29 +1121,29 @@ SPECIAL(guild)
 
   guild_nr = find_first(g->guilds.all(), [&](guild_data *gd) { return guild_get_gm(gd) == char_get_nr(keeper); });
   if (!guild_nr)
-    return (false);
+    return false;
 
   if (guild_get_func(guild_nr))
     if ((guild_get_func(guild_nr))(g, ch, me, cmd, argument)) /* the mob's own special: it was given a buffer never filled */
-      return (true);
+      return true;
 
   /*** Is the GM able to train?    ****/
   if (!char_is_awake(keeper))
-    return (false);
+    return false;
 
   for (i = 0; !guild_cmd_tab[i].cmd.empty(); i++)
     if (CMD_IS(g, guild_cmd_tab[i].cmd))
       break;
 
   if (guild_cmd_tab[i].cmd.empty())
-    return (false);
+    return false;
 
   if (!(is_guild_ok(g, keeper, ch, guild_nr)))
-    return (true);
+    return true;
 
   (guild_cmd_tab[i].func)(g, keeper, guild_nr, ch, argument);
 
-  return (true);
+  return true;
 }
 
 void assign_the_guilds(GameWorld *g)

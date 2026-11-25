@@ -135,29 +135,29 @@ static std::string read_delete(GameWorld *g, long recipient)
 SPECIAL(postmaster)
 {
   if (!char_get_desc(ch) || char_is_npc(ch))
-    return (0); /* so mobs don't get caught here */
+    return false; /* so mobs don't get caught here */
 
   if (!(CMD_IS(g, "mail") || CMD_IS(g, "check") || CMD_IS(g, "receive")))
-    return (0);
+    return false;
 
   if (g->no_mail) {
     send_to_char(g, ch, "Sorry, the mail system is having technical difficulties.\r\n");
-    return (0);
+    return false;
   }
 
   if (CMD_IS(g, "mail")) {
     postmaster_send_mail(g, ch, (struct char_data *)me, cmd, argument);
-    return (1);
+    return true;
   }
   if (CMD_IS(g, "check")) {
     postmaster_check_mail(g, ch, (struct char_data *)me, cmd, argument);
-    return (1);
+    return true;
   }
   if (CMD_IS(g, "receive")) {
     postmaster_receive_mail(g, ch, (struct char_data *)me, cmd, argument);
-    return (1);
+    return true;
   } else
-    return (0);
+    return false;
 }
 
 static void postmaster_send_mail(GameWorld *g, struct char_data *ch, struct char_data *mailman,

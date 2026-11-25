@@ -48,13 +48,13 @@ static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)
   }
 }
 
-static int checkship(GameWorld *g, room_vnum rnum, obj_vnum vnum)
+static bool checkship(GameWorld *g, room_vnum rnum, obj_vnum vnum)
 {
-  int there = false;
+  bool there = false;
 
   for (obj_data *item : room_contents(g, rnum)) {
     if (!room_flagged(g, rnum, room_flag::nebula)) {
-      if (obj_get_type_flag(item) == ITEM_VEHICLE && there != true) {
+      if (obj_get_type_flag(item) == ITEM_VEHICLE && !there) {
         there = true;
         ping_ship(g, obj_get_vnum(g, item), vnum);
       }

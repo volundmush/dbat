@@ -1,6 +1,6 @@
 # check-bools.py's counts: <ints that only hold 0 or 1> <file>. Lower it with tools/check-bools.py --update.
 1 libs/dbat/src/commands/act.item.cpp
-10 libs/dbat/src/commands/act.movement.cpp
+7 libs/dbat/src/commands/act.movement.cpp
 1 libs/dbat/src/commands/informative/map.cpp
 1 libs/dbat/src/commands/informative/rp.cpp
 5 libs/dbat/src/commands/informative/show.cpp
@@ -34,7 +34,7 @@
 12 libs/dbat/src/systems/guild.cpp
 3 libs/dbat/src/systems/local_limits.cpp
 1 libs/dbat/src/systems/magic.cpp
-6 libs/dbat/src/systems/maputils.cpp
+4 libs/dbat/src/systems/maputils.cpp
 4 libs/dbat/src/systems/mobact.cpp
 1 libs/dbat/src/systems/search.cpp
 2 libs/dbat/src/systems/shop.cpp

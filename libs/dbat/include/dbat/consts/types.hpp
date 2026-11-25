@@ -90,6 +90,6 @@ typedef struct pclean_criteria_data pclean_criteria_data;
 typedef struct GameWorld GameWorld;
 
 #define ACMD(name)    void(name)(GameWorld * g, struct char_data * ch, std::string_view argument, int cmd, int subcmd)
-#define SPECIAL(name) int(name)(GameWorld * g, struct char_data * ch, void *me, int cmd, std::string_view argument)
+#define SPECIAL(name) bool(name)(GameWorld * g, struct char_data * ch, void *me, int cmd, std::string_view argument)
 typedef SPECIAL((*spec_proc_func));
 
