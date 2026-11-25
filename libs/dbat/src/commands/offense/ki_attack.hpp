@@ -3,6 +3,7 @@
  * Ki attacks (galik gun, kamehameha and the rest) as data: what every one of them does is perform_ki_attack(), and
  * what each does differently is its ki_attack. A hook covers what only a few do.
  */
+#include <array>
 #include <cstdint>
 #include <string_view>
 
@@ -113,7 +114,7 @@ struct ki_attack {
   act_msgs dodge;
   act_msgs miss;          /* when the victim could have avoided it */
   act_msgs miss_spent;    /* when the victim had no stamina left to avoid it */
-  act_msgs hits[6];       /* by where it landed, 1-5 from roll_hitloc() (or 1-6 from locate) */
+  std::array<act_msgs, 6> hits;       /* by where it landed, 1-5 from roll_hitloc() (or 1-6 from locate) */
   const ki_spot *spots{}; /* what each of those is; null for roll_hitloc()'s body, head, body, arm, leg */
   std::string_view obj_to_char{};
   std::string_view obj_to_room{};

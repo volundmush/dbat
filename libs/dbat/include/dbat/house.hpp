@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -57,7 +58,7 @@ struct house_control_rec {
   int mode{};                /* mode of ownership		*/
   long owner{};              /* idnum of house's owner	*/
   int num_of_guests{};       /* how many guests for house	*/
-  long guests[MAX_GUESTS]{}; /* idnums of house's guests	*/
+  std::array<long, MAX_GUESTS> guests{}; /* idnums of house's guests	*/
   time_t last_payment{};     /* date of last house payment   */
   flag_set<house_flag> bitvector;
   long builtby{};

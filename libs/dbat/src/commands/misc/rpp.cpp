@@ -217,7 +217,7 @@ ACMD(do_instill)
     return;
   }
 
-  std::span<obj_affected_type> affects{obj_get_affected(obj), MAX_OBJ_AFFECT};
+  std::span<obj_affected_type> affects = obj_get_affected(obj);
   int stat     = obj_get_affected(token)[0].location;
   auto same    = std::ranges::find(affects, stat, &obj_affected_type::location);
   auto empty   = std::ranges::find(affects, 0, &obj_affected_type::location);

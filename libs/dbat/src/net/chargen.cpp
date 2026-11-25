@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <algorithm>
 #include <cstdlib>
 
@@ -101,7 +102,7 @@ struct trait {
   std::string_view name{}; /* as the status commands show it */
   std::string_view line{}; /* its line in the menu, the cost included */
   int cost{};          /* negative for a bonus (points spent), positive for a negative (points gained) */
-  trait_bar bars[2]{}; /* checked in order */
+  std::array<trait_bar, 2> bars{}; /* checked in order */
 };
 
 /* Indexed by BONUS_*. Most exclusions go both ways, each written at both ends. */
@@ -992,7 +993,7 @@ struct question {
   int state{};
   bool gap{};          /* a blank line before "Answer the following question" */
   std::string_view ask{};
-  answer answers[5]{}; /* or none, and choices shows them */
+  std::array<answer, 5> answers{}; /* or none, and choices shows them */
   void (*choices)(GameWorld *g, struct descriptor_data *d){};
 };
 
@@ -1024,53 +1025,53 @@ static void show_ages(GameWorld *g, struct descriptor_data *d)
 /* The ten questions, in order; question 10 (the age) has its own handler. */
 static const question questions[] = {
     {CON_Q1, false, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n",
-     {{.text = "Ask someone with more experience what to do.", .pl = dice(5, 25), .st = dice(8, 50), .ki = dice(6, 50)},
+     {{{.text = "Ask someone with more experience what to do.", .pl = dice(5, 25), .st = dice(8, 50), .ki = dice(6, 50)},
       {.text = "Jump in with some nice classic pushups!", .pl = dice(5, 55), .st = dice(8, 40), .ki = dice(6, 40)},
       {.text = "Search for something magical to increase my strength.", .pl = dice(5, 125), .st = dice(8, 50), .ki = dice(6, 40)},
       {.text = "Practice my favorite skills instead of working just on my body.", .pl = dice(5, 65), .st = dice(8, 65), .ki = dice(6, 65), .flag = player_flag::skillp},
-      {.text = "Spar with a friend so we can both improve our abilities.", .pl = dice(5, 75), .st = dice(8, 100), .ki = dice(6, 75)}}},
+      {.text = "Spar with a friend so we can both improve our abilities.", .pl = dice(5, 75), .st = dice(8, 100), .ki = dice(6, 75)}}}},
     {CON_Q2, false, "@wYou are faced with the strongest opponent you have ever\r\nfaced in your life. You both have beat each other to the\r\nlimits of both your strengths. A situation has presented \r\nan opportunity to win the fight, what do you do?\r\n",
-     {{.text = "Kill my opponent in a very brutal fashion!", .alignment = -200},
+     {{{.text = "Kill my opponent in a very brutal fashion!", .alignment = -200},
       {.text = "Disable my opponent, but spare their life.", .alignment = 100},
       {.text = "Kill my opponent, I have no other choice.", .alignment = 10},
       {.text = "Try to evade my opponent till I can get away.", .alignment = 0},
-      {.text = "Take their head clean off and bathe in their blood!", .alignment = -400}}},
+      {.text = "Take their head clean off and bathe in their blood!", .alignment = -400}}}},
     {CON_Q3, false, "@wYou are one day offered a means to gain incredible strength\r\nby some extraordinary means. The only problem is it requires\r\nthe lives of innocents to obtain. What do you do?\r\n",
-     {{.text = "Hell yeah I take the opportunity to get stronger!", .alignment = -100, .pl = plus(100), .st = plus(80), .ki = plus(10)},
+     {{{.text = "Hell yeah I take the opportunity to get stronger!", .alignment = -100, .pl = plus(100), .st = plus(80), .ki = plus(10)},
       {.text = "I refuse to gain unnatural strength.", .alignment = 10, .pl = plus(25), .st = plus(25), .ki = plus(25)},
       {.text = "I refuse to gain strength at the cost of the innocent.", .alignment = 50, .pl = plus(20), .st = plus(20), .ki = plus(20)},
-      {.text = "I kill that many innocents before breakfast anyway...", .alignment = -200, .pl = plus(100), .st = plus(100), .ki = plus(100)}}},
+      {.text = "I kill that many innocents before breakfast anyway...", .alignment = -200, .pl = plus(100), .st = plus(100), .ki = plus(100)}}}},
     {CON_Q4, false, "@wOne day you are offered a way to make a lot of money, but in order\r\nto do so you will need to stop training for a whole month to\r\nhandle business. What do you do?\r\n",
-     {{.text = "I take the opportunity, with more money I can train better later.", .gold_add = 1000, .pl = take(10, 30), .st = take(10, 30), .ki = take(10, 30)},
+     {{{.text = "I take the opportunity, with more money I can train better later.", .gold_add = 1000, .pl = take(10, 30), .st = take(10, 30), .ki = take(10, 30)},
       {.text = "I refuse to waste my time. What I need is some nice hard training.", .gold_set = 0, .pl = add(50, 165), .st = add(50, 165), .ki = add(50, 165)},
       {.text = "Hmm. With more money I can live better, certainly that is worth the time.", .gold_set = 2500, .pl = take(15, 25), .st = take(15, 25), .ki = take(15, 25)},
-      {.text = "I choose to earn a little money while still training instead.", .gold_set = 150, .pl = add(25, 80), .st = add(25, 80), .ki = add(25, 80)}}},
+      {.text = "I choose to earn a little money while still training instead.", .gold_set = 150, .pl = add(25, 80), .st = add(25, 80), .ki = add(25, 80)}}}},
     {CON_Q5, false, "@wYou are introduced to a new way of training one day, what do you do?\r\n",
-     {{.text = "I prefer my way, it has worked so far.", .pl = add(0, 40)},
+     {{{.text = "I prefer my way, it has worked so far.", .pl = add(0, 40)},
       {.text = "I am open to new possibilites, sure.", .pl = add(-30, 80)},
       {.text = "I will at least try it, for a little while.", .pl = add(-25, 60)},
-      {.text = "No way is superior to eating spinach everyday...", .pl = add(0, 50)}}},
+      {.text = "No way is superior to eating spinach everyday...", .pl = add(0, 50)}}}},
     {CON_Q6, true, "@wYou have an enemy before you, what is your prefered method to attack him?@n\r\n",
-     {{.text = "I prefer to defend rather than attack.", .pl = add(0, 15), .st = add(0, 15), .choice = 1},
+     {{{.text = "I prefer to defend rather than attack.", .pl = add(0, 15), .st = add(0, 15), .choice = 1},
       {.text = "I prefer to throw a strong punch at the enemy's throat.", .pl = add(0, 30), .choice = 2},
       {.text = "I prefer to send a devestating kick at the enemy's neck.", .pl = add(0, 30), .choice = 3},
       {.text = "I prefer to smash them with a two-handed slam!", .pl = add(0, 30), .choice = 4},
-      {.text = "I prefer to throw one of my many energy attacks!", .ki = add(0, 50), .choice = 5}}},
+      {.text = "I prefer to throw one of my many energy attacks!", .ki = add(0, 50), .choice = 5}}}},
     {CON_Q7, true, "@wYou are camped out one night in a field, the sky is clear and the\r\nstars visible. Looking at them, what thought crosses your mind?@n\r\n",
-     {{.text = "One day, I am going to conquer every one of those.", .alignment = -10, .raise = ability::str},
+     {{{.text = "One day, I am going to conquer every one of those.", .alignment = -10, .raise = ability::str},
       {.text = "I really wish I had brought that special someone along as this is a great night for romance", .alignment = 10, .raise = ability::cha},
       {.text = "Those stars hold greater meaning to you than just planets, they dictate\r\nyour life or guide you and those arround you in one form or another.", .raise = ability::wis},
-      {.text = "You'd very much like to travel into space to get to one of these stars to study all that it holds.", .raise = ability::intel}}},
+      {.text = "You'd very much like to travel into space to get to one of these stars to study all that it holds.", .raise = ability::intel}}}},
     {CON_Q8, true, "@wOne day, you are on the way home. You happen to walk past two\r\nof your best friends about to lock horns. Do you@n\r\n",
-     {{.text = "You try to talk them out of it. With a silver tongue, you can stop the fight before it has began.", .alignment = 10, .raise = ability::cha},
+     {{{.text = "You try to talk them out of it. With a silver tongue, you can stop the fight before it has began.", .alignment = 10, .raise = ability::cha},
       {.text = "It's clear that they are quite chuffed about something, you could stop the fight now but they may just try again later. It's best to investigate and find out the source of the problem.", .alignment = 20, .raise = ability::wis},
       {.text = "Pick the one you like the most and help them to win.", .alignment = -10, .raise = ability::str},
-      {.text = "You try to sneak past them, reckoning no matter what you do there its a no win situation, so long as they don't see you.", .alignment = -20, .raise = ability::dex}}},
+      {.text = "You try to sneak past them, reckoning no matter what you do there its a no win situation, so long as they don't see you.", .alignment = -20, .raise = ability::dex}}}},
     {CON_Q9, true, "@wAs a kid you were confronted with this. On the way from the bakery,\r\na group of kids corner you in an alley and the leader demands that\r\nyou surrender your jam donut to him. Do you...@n\r\n",
-     {{.text = "Throw the donut up in the air, hoping that the leader will pay enough attention to it so that you can get at least one good shot in.", .raise = ability::str},
+     {{{.text = "Throw the donut up in the air, hoping that the leader will pay enough attention to it so that you can get at least one good shot in.", .raise = ability::str},
       {.text = "Surrender the donut for now but come back later with your friends and gain your revenge.", .alignment = -30, .raise = ability::wis},
       {.text = "Give him the donut, then return to the baker. You tell him a sob story and convince him to give you a replacement donut.", .alignment = -10, .raise = ability::cha},
-      {.text = "It's better just to do as he says and leave it to that. After all its only a donut.", .alignment = -5, .raise = ability::intel}}},
+      {.text = "It's better just to do as he says and leave it to that. After all its only a donut.", .alignment = -5, .raise = ability::intel}}}},
     {CON_QX, true, "@wWhat do you wish your starting age to be?@n\r\n", {}, show_ages},
 };
 

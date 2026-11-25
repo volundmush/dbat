@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -58,7 +59,7 @@ struct colourized {
   std::string text;
   size_t wanted;
 };
-colourized colourize(GameWorld *g, std::string_view text, bool parse, const std::string *choices, size_t maxlen);
+colourized colourize(GameWorld *g, std::string_view text, bool parse, std::span<const std::string> choices, size_t maxlen);
 
 /* prompt.cpp */
 std::string make_prompt(GameWorld *g, struct descriptor_data *d);

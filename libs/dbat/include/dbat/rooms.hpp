@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <vector>
 #include <string>
 #include "dbat/registry.hpp"
@@ -34,7 +35,7 @@ struct room_data {
   std::string name;                                      /* Rooms name 'You are ...'; empty for none */
   std::string description;                               /* Shown when entered; empty for none */
   ex_desc_list ex_description;                           /* for examine/look */
-  owned<room_direction_data> dir_option[NUM_OF_DIRS];    /* Directions: the room owns its exits */
+  std::array<owned<room_direction_data>, NUM_OF_DIRS> dir_option;    /* Directions: the room owns its exits */
   flag_set<room_flag> room_flags;                         /* DEATH,DARK ... etc */
 
   std::vector<trig_vnum> proto_script{}; /* the triggers it starts with */

@@ -368,13 +368,13 @@ struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, std::string &na
   return (nullptr);
 }
 
-struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, struct obj_data *equipment[])
+struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, std::span<obj_data *const> equipment)
 {
   int pos = get_obj_pos_in_equip_vis(g, ch, name, number, equipment);
   return pos < 0 ? nullptr : equipment[pos];
 }
 
-int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, struct obj_data *equipment[])
+int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, std::span<obj_data *const> equipment)
 {
   int j, num;
 

@@ -115,16 +115,16 @@ struct GameWorld {
   room_vnum r_mortal_start_room{}, r_immort_start_room{}, r_frozen_start_room{};
   std::string level_version; /* up to READ_SIZE - 1 */
   int level_vernum{};
-  int save_classes[SAVING_WILL + 1][NUM_CLASSES]{};
-  int basehit_classes[NUM_CLASSES]{};
+  std::array<std::array<int, NUM_CLASSES>, SAVING_WILL + 1> save_classes{};
+  std::array<int, NUM_CLASSES> basehit_classes{};
 
   /* Commands, skills and feats */
   struct command_info *complete_cmd_info{};
   int *cmd_sort_info{};
-  struct spell_info_type spell_info[SKILL_TABLE_SIZE]{};
-  int spell_sort_info[SKILL_TABLE_SIZE]{};
-  struct feat_info feat_list[NUM_FEATS_DEFINED]{};
-  int feat_sort_info[MAX_FEATS]{};
+  std::array<spell_info_type, SKILL_TABLE_SIZE> spell_info{};
+  std::array<int, SKILL_TABLE_SIZE> spell_sort_info{};
+  std::array<feat_info, NUM_FEATS_DEFINED> feat_list{};
+  std::array<int, MAX_FEATS> feat_sort_info{};
   struct disabled_data *disabled_first{};
   struct social_messg *soc_mess_list{};
   int top_of_socialt{};
@@ -140,7 +140,7 @@ struct GameWorld {
   struct board_info *bboards{};
   time_t BOARDNEWBUI{}, BOARDNEWCOD{}, BOARDNEWDUO{}, BOARDNEWIMM{}, BOARDNEWMORT{};
   std::vector<mail_letter> mail; /* the letters waiting, in the order they were sent */
-  struct house_control_rec house_control[MAX_HOUSES]{};
+  std::array<house_control_rec, MAX_HOUSES> house_control{};
   int num_of_houses{};
   struct ban_list_element *ban_list{};
   std::vector<std::string> invalid_list; /* at most MAX_INVALID_NAMES - 1 */
@@ -149,7 +149,7 @@ struct GameWorld {
 
   /* Dragon balls and wishes */
   int SHENRON{}, DRAGONC{}, DRAGONR{}, DRAGONZ{}, dballtime{}, WISHTIME{};
-  int WISH[2]{};
+  std::array<int, 2> WISH{};
   int32_t EDRAGON_uid{}; /* the summoned Shenron, by id */
   int SHADOW_DRAGON1{}, SHADOW_DRAGON2{}, SHADOW_DRAGON3{}, SHADOW_DRAGON4{}, SHADOW_DRAGON5{}, SHADOW_DRAGON6{}, SHADOW_DRAGON7{};
 
@@ -158,7 +158,7 @@ struct GameWorld {
   int SAIYAN_ALLOWED{}, SELFISHMETER{}, TOPCOUNTDOWN{}, TOPLOADED{}, TOP_OF_NEWS{};
   time_t INTERESTTIME{}, LASTINTEREST{}, LASTPAYOUT{}, NEWSUPDATE{}, PCOUNTDATE{}, PCOUNTDAY{};
   std::array<std::string, 25> topname;
-  int64_t toppoint[25]{};
+  std::array<int64_t, 25> toppoint{};
 
   /* Auctions */
   int32_t ch_selling_uid{}, ch_buying_uid{}; /* by id, as entities refer to each other */
@@ -167,7 +167,7 @@ struct GameWorld {
 
   /* Pathfinding and map display */
   struct bfs_queue_struct *bfs_queue_head{}, *bfs_queue_tail{};
-  room_vnum mapnums[MAP_ROWS + 1][MAP_COLS + 1]{};
+  std::array<std::array<room_vnum, MAP_COLS + 1>, MAP_ROWS + 1> mapnums{};
 
   /* OLC and bookkeeping */
   std::vector<save_list_data> save_list; /* what OLC changed and hasn't saved, oldest first */

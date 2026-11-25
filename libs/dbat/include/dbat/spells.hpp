@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
@@ -287,18 +288,18 @@ struct spell_info_type {
   int ki_max{};          /* Max amount of mana used by a spell (lowest lev) */
   int ki_change{};       /* Change in mana used by spell from lev to lev */
 
-  int min_level[NUM_CLASSES]{};
+  std::array<int, NUM_CLASSES> min_level{};
   flag_set<mag_routine> routines;
   bool violent{};
   flag_set<spell_target> targets; /* See below for use with TAR_XXX  */
   std::string_view name{};         /* a string constant */
   std::string_view wear_off_msg{}; /* a string constant, or empty for none */
-  int race_can_learn[NUM_RACES]{};
+  std::array<int, NUM_RACES> race_can_learn{};
   flag_set<skill_kind> skilltype; /* none for an unused entry */
   flag_set<skill_flag> flags;
   flag_set<mag_save> save_flags;
   flag_set<mag_component> comp_flags;
-  int8_t can_learn_skill[NUM_CLASSES]{};
+  std::array<int8_t, NUM_CLASSES> can_learn_skill{};
   int spell_level{};
   int school{};
   int domain{};

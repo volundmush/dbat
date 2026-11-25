@@ -1328,7 +1328,7 @@ namespace {
   /* A truffle's knack: one of the made thing's bonuses grows, or, if none does by the 11th try, one more is added */
   void truffle_touch(GameWorld *g, struct char_data *ch, struct obj_data *made)
   {
-    auto *aff   = obj_get_affected(made);
+    auto aff    = obj_get_affected(made);
     int hasstat = 0;
     for (int tries = 1; tries <= 11; tries++) {
       int i = (tries - 1) % 6;

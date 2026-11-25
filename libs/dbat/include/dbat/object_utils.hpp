@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <span>
 #include <string_view>
 #include <cstdint>
 #include <ctime>
@@ -135,7 +136,7 @@ struct obj_spellbook_spell *obj_make_sbinfo(struct obj_data *obj);
 /* Field accessors */
 std::string_view obj_get_action_description(const struct obj_data *obj);
 void obj_set_action_description(struct obj_data *obj, std::string_view v);
-struct obj_affected_type *obj_get_affected(struct obj_data *obj);
+std::span<obj_affected_type> obj_get_affected(struct obj_data *obj);
 struct char_data *obj_get_carried_by(const struct obj_data *obj);
 void obj_set_carried_by(struct obj_data *obj, struct char_data *v);
 const id_list &obj_get_contains(const struct obj_data *obj);

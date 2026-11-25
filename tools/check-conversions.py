@@ -5,7 +5,9 @@ The game builds with -Wconversion, -Wsign-conversion and -Wold-style-cast as war
 already there are fixed. This counts each file's warning sites (a header's once, however many files include it), by
 compiling every file in build/compile_commands.json (the debug build's) with -fsyntax-only, and fails if a file has
 more than check-conversions.baseline says, or has any and isn't listed. --update lowers the baseline after a change
-that removes some; --show FILE lists one file's sites. When every count is zero, the baseline goes and the warnings
+that removes some; --show FILE lists one file's sites. An index into a std::array or std::span (a signed int converted to
+its size_type) doesn't count: with _GLIBCXX_ASSERTIONS, which every preset defines, [] checks it, so a negative index
+stops the game instead of reading out of bounds. When every count is zero, the baseline goes and the warnings
 become errors.
 
 JOBS sets how many compilers run at once (default: one per core).
@@ -16,6 +18,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 BASELINE = os.path.join(ROOT, 'tools', 'check-conversions.baseline')
 DATABASE = os.path.join(ROOT, 'build', 'compile_commands.json')
 FLAGS = ['-Wconversion', '-Wsign-conversion', '-Wold-style-cast']
+CHECKED_INDEX = re.compile(r'conversion to .std::(?:array|span)<.*>::size_type. .*may change the sign of the result \[-Wsign-conversion\]$')
 WARNING = re.compile(r'^(?P<file>[^:\s]+):(?P<line>\d+):(?P<col>\d+): warning: .*\[(?P<flag>-W(?:conversion|float-conversion|sign-conversion|old-style-cast))\]$')
 
 
@@ -35,7 +38,7 @@ def sites(entry):
     found = set()
     for line in result.stderr.splitlines():
         m = WARNING.match(line)
-        if m:
+        if m and not CHECKED_INDEX.search(line):
             path = os.path.relpath(os.path.realpath(os.path.join(entry['directory'], m['file'])), ROOT)
             found.add((path, int(m['line']), int(m['col']), m['flag']))
     return found

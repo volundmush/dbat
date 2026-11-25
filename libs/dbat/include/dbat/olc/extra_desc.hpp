@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
@@ -18,7 +19,7 @@ struct extra_desc_editor {
     std::string_view description_prompt;
     bool says_unfinished; /* going on from an unfinished description says why it can't, rather than nothing */
     bool others_leave;    /* a number not on the menu leaves it, as 0 does, rather than showing it again */
-    int contexts[3];      /* the context help while asking for each mode */
+    std::array<int, 3> contexts;      /* the context help while asking for each mode */
   };
 
   const style *how{};

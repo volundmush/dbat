@@ -4,6 +4,7 @@
  * does is perform_strike(), and what each does differently is its strike_attack. They cost stamina rather than
  * charged ki, a parry of one is a counterblow, and a hit can be burned by a fire shield and lead to a multihit.
  */
+#include <array>
 #include <cstdint>
 #include <optional>
 #include <string_view>
@@ -66,7 +67,7 @@ struct strike_attack {
   act_msgs dodge;
   act_msgs miss;              /* when the victim could have avoided it */
   act_msgs miss_spent;        /* when the victim had no stamina left to avoid it */
-  act_msgs hits[5];           /* by where roll_hitloc() says it landed */
+  std::array<act_msgs, 5> hits;           /* by where roll_hitloc() says it landed */
   const strike_spot *spots{}; /* what each of those is; null for body, head, body, arm, leg */
   std::string_view obj_to_char{};
   std::string_view obj_to_room{};

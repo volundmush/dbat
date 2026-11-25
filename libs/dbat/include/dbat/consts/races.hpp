@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "dbat/name_table.hpp"
 #include <string_view>
 
@@ -33,11 +34,11 @@ constexpr int NUM_RACES = 24;
 
 struct aging_data {
   int adult{};           /* Adulthood */
-  int classdice[3][2]{}; /* Dice info for starting age based on class age type */
+  std::array<std::array<int, 2>, 3> classdice{}; /* Dice info for starting age based on class age type */
   int middle{};          /* Middle age */
   int old{};             /* Old age */
   int venerable{};       /* Venerable age */
-  int maxdice[2]{};      /* For roll to determine natural death beyond venerable */
+  std::array<int, 2> maxdice{};      /* For roll to determine natural death beyond venerable */
 };
 
 extern const name_table race_names; /* NUM_RACES of them */

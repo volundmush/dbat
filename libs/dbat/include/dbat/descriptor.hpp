@@ -74,7 +74,7 @@ struct descriptor_data {
   /*---------------Ship Construction Editing Variables---------------------*/
   int shipmenu{};
   int shipsize{};
-  int shipextra[4]{};
+  std::array<int, 4> shipextra{};
   int shields{};
   int armor{};
   int drive{};

@@ -25,7 +25,7 @@ struct obj_data {
   room_vnum in_room{};     /* In what room -1 when conta/carr	*/
   room_vnum room_loaded{}; /* Room loaded in, for room_max checks	*/
 
-  int value[NUM_OBJ_VAL_POSITIONS]{};      /* Values of the item (see list)    */
+  std::array<int, NUM_OBJ_VAL_POSITIONS> value{};      /* Values of the item (see list)    */
   int8_t type_flag{};                      /* Type of item                        */
   int level{};                             /* Minimum level of object.            */
   flag_set<wear_flag> wear_flags;          /* Where you can wear it     */
@@ -36,7 +36,7 @@ struct obj_data {
   flag_set<aff_flag> bitvector;            /* To set chars bits          */
   int size{};                              /* Size class of object                */
 
-  struct obj_affected_type affected[MAX_OBJ_AFFECT]{}; /* affects */
+  std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{}; /* affects */
 
   std::string name;                          /* Title of object :get etc.; empty for none */
   std::string description;                   /* When in room; empty for none */

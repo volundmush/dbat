@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <deque>
+#include <span>
 #include <string>
 #include <string_view>
 #include <cstdint>
@@ -825,7 +826,7 @@ void char_set_health(struct char_data *ch, double v);
 void char_set_life(struct char_data *ch, double v);
 int char_get_raw_lifebonus(const struct char_data *ch);
 void char_set_raw_lifebonus(struct char_data *ch, int v);
-int *char_get_limbs(struct char_data *ch);
+std::span<int> char_get_limbs(struct char_data *ch);
 struct char_data *char_get_master(GameWorld *g, const struct char_data *ch);
 void char_set_master(struct char_data *ch, struct char_data *v);
 int32_t char_get_master_id(const struct char_data *ch);
@@ -901,7 +902,7 @@ int8_t *char_real_abils_con_slot(struct char_data *ch);
 int8_t *char_real_abils_cha_slot(struct char_data *ch);
 
 /* The equipment slots as an array. */
-struct obj_data **char_get_equipment_array(struct char_data *ch);
+std::span<obj_data *> char_get_equipment_array(struct char_data *ch);
 
 /* Unlinking a character from the lists that run through it */
 void char_unlink_from_affect_list(GameWorld *g, struct char_data *ch);

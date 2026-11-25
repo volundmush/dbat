@@ -988,7 +988,7 @@ namespace {
 
   void object_editor::apply_answer(GameWorld *g, struct descriptor_data *d, int n)
   {
-    obj_affected_type *applies = obj_get_affected(&obj);
+    std::span<obj_affected_type> applies = obj_get_affected(&obj);
     if (n == 0) {
       applies[slot].location = 0;
       applies[slot].modifier = 0;
@@ -998,7 +998,7 @@ namespace {
     else {
       /* deny builders another of an apply already there */
       if (char_get_admlevel(d->character) < ADMLVL_GRGOD &&
-          std::ranges::any_of(std::span(applies, MAX_OBJ_AFFECT), [n](const obj_affected_type &a) { return a.location == n; })) {
+          std::ranges::any_of(applies, [n](const obj_affected_type &a) { return a.location == n; })) {
         write_to_output(g, d, "Object already has that apply.");
         return;
       }

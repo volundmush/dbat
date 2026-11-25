@@ -81,10 +81,10 @@ constexpr colour_code CODES[] = {
 /* What @x picks from */
 constexpr std::string_view RANDOM_COLORS = "bgcrmywBGCRMWY";
 
-/* A user's colour choice i (@n is choice COLOR_NORMAL), or the default */
-std::string_view choice(const std::string *choices, int i)
+/* A user's colour choice i (@n is choice COLOR_NORMAL), or the default (always, when choices is empty) */
+std::string_view choice(std::span<const std::string> choices, int i)
 {
-  return choices && !choices[i].empty() ? until_nul(choices[i]) : std::string_view(default_color_choices[i]);
+  return !choices.empty() && !choices[i].empty() ? until_nul(choices[i]) : std::string_view(default_color_choices[i]);
 }
 
 /* The number atoi() reads at txt[at]: leading spaces, a sign, then digits (atoi() is strtol() cut to an int) */
@@ -92,7 +92,7 @@ int number_at(std::string_view txt, size_t at) { return static_cast<int>(io::c_a
 
 } // namespace
 
-colourized colourize(GameWorld *g, std::string_view txt, bool parse, const std::string *choices, size_t maxlen)
+colourized colourize(GameWorld *g, std::string_view txt, bool parse, std::span<const std::string> choices, size_t maxlen)
 {
   if (txt.find('@') == std::string_view::npos) /* skip out if no color codes */
     return {std::string(txt), txt.size()};

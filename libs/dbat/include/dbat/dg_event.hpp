@@ -13,6 +13,7 @@
 *  $Revision: 1.0.14 $                                                    *
 ************************************************************************ */
 #pragma once
+#include <array>
 #include "dbat/consts/types.hpp"
 
 /********** Event related section *********/
@@ -37,7 +38,7 @@ struct event {
 constexpr int NUM_EVENT_QUEUES = 10;
 
 struct queue {
-  struct q_element *head[NUM_EVENT_QUEUES]{}, *tail[NUM_EVENT_QUEUES]{};
+  std::array<q_element *, NUM_EVENT_QUEUES> head{}, tail{};
 };
 
 struct q_element {

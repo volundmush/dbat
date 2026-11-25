@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <vector>
 #include <deque>
 #include <list>
@@ -85,15 +86,15 @@ struct player_special_data {
   flag_set<pref_flag> pref;                /* preference flags for PC's.		*/
   flag_set<player_flag> player_flags;      /* PLR_ flags: only players have them */
   uint8_t bad_pws{};                       /* number of bad password attemps	*/
-  int8_t conditions[NUM_CONDITIONS]{};     /* Drunk, full, thirsty			*/
+  std::array<int8_t, NUM_CONDITIONS> conditions{};     /* Drunk, full, thirsty			*/
 
   // Only the character's own class in this array is used, to store PS/Practices.
   int practice_points{};                   /* Practice points available to the character */
-  std::deque<std::string> comm_hist[NUM_HIST]; /* each channel's history, oldest first */
+  std::array<std::deque<std::string>, NUM_HIST> comm_hist; /* each channel's history, oldest first */
   zone_vnum olc_zone{};                    /* Zone where OLC is permitted		*/
   int speaking{};                          /* Language currently speaking		*/
 
-  std::string color_choices[NUM_COLOR]; /* Choices for custom colors		*/
+  std::array<std::string, NUM_COLOR> color_choices; /* Choices for custom colors		*/
   int murder{};                     /* Murder of PC's count                 */
 
   // Attribute training
@@ -185,7 +186,7 @@ struct char_data {
   std::list<affected_type> affected; /* affected by what spells, newest first */
 
   // inventory and equipment
-  struct obj_data *equipment[NUM_WEARS]{};
+  std::array<obj_data *, NUM_WEARS> equipment{};
   id_list carrying;     /* the objects it carries, newest first */
   int carry_weight{};   // carried weight
   int carry_items{}; // number of carried items
@@ -293,7 +294,7 @@ struct char_data {
   int spam{}; // channel spam
 
   time_t lastpl{};
-  time_t lboard[5]{};
+  std::array<time_t, 5> lboard{};
 
   // absorbtion data for bio/majin
   int absorbs{};
@@ -322,13 +323,13 @@ struct char_data {
   int lasthit{};
 
   // limb information... why do we have three of them?
-  int limbs[4]{}; /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
-  int limb_condition[4]{};
+  std::array<int, 4> limbs{}; /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
+  std::array<int, 4> limb_condition{};
   flag_set<body_part> bodyparts;          /* current bodyparts, by equipment position */
 
   time_t rewtime{};
 
-  int genome[2]{}; /* Bio racial bonus, Genome */
+  std::array<int, 2> genome{}; /* Bio racial bonus, Genome */
 
   // roleplay points stuff
   int rp{};
@@ -353,7 +354,7 @@ struct char_data {
   // Chargen bonus/flaw points
   int ccpoints{};
   int negcount{};
-  int bonuses[MAX_BONUSES]{};
+  std::array<int, MAX_BONUSES> bonuses{};
   int choice{};
 
   // cooldowns here
@@ -385,7 +386,7 @@ struct char_data {
 
   // transformation data
   int transclass{};
-  int transcost[6]{};
+  std::array<int, 6> transcost{};
   int kaioken{}; // current level of kaioken 0-20
 
   // Fishing stuff - accuracy_mod is fish_pole_bonus

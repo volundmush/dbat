@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <span>
 #include <string_view>
 
 #include "dbat/consts/types.hpp"
@@ -48,8 +49,8 @@ struct char_data *get_char_room_vis(GameWorld *g, struct char_data *ch, std::str
 struct char_data *get_char_world_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number);
 struct obj_data *get_obj_in_list_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, const id_list &list);
 struct obj_data *get_obj_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number);
-struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, struct obj_data *equipment[]);
-int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, struct obj_data *equipment[]);
+struct obj_data *get_obj_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, std::span<obj_data *const> equipment);
+int get_obj_pos_in_equip_vis(GameWorld *g, struct char_data *ch, std::string &name, int *number, std::span<obj_data *const> equipment);
 
 struct obj_data *get_obj_in_list_num(GameWorld *g, obj_vnum num, const id_list &list);
 struct obj_data *get_obj_num(GameWorld *g, obj_vnum nr);

@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string>
 #include <string_view>
 #include "dbat/consts/types.hpp"
@@ -36,7 +37,7 @@ struct board_info {
   struct board_info *next{};
   struct board_msg *messages{};
   int version{};
-  struct board_memory *memory[BOARD_MEMORY_SLOTS]{};
+  std::array<board_memory *, BOARD_MEMORY_SLOTS> memory{};
 };
 
 

@@ -45,7 +45,7 @@ struct pfile_reader {
   io::text_reader &in;
   std::string_view value{}; /* the line after its tag */
   std::optional<io::load_error> error{};
-  std::string flag_words[4]{};
+  std::array<std::string, 4> flag_words{};
   int num = 0, num2 = 0, num3 = 0;
 
   int as_int() const { return static_cast<int>(io::c_atol(value)); }

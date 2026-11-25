@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <array>
 #include <climits>
 #include <span>
 
@@ -1211,7 +1212,7 @@ namespace {
     container_flag cont_bit;
     exit_flag ex_bit;
     bool always_say_obj;
-    std::string_view inside_ship[3], outside_ship[3];
+    std::array<std::string_view, 3> inside_ship, outside_ship;
     std::string_view you, they, inside_heard, outside_heard; /* you: none for a ship's hatch */
   };
 

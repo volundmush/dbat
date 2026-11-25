@@ -215,7 +215,7 @@ namespace {
       room_set_flag(g, room, room_flag::bfs_mark, false); /* quirk: clears room_flag::bfs_mark, meant room_flag::house and room_flag::house_crash:
                                                          their numbers or-ed as bits, 11 | 12 is 15 */
     House_delete_file(g->house_control[i].vnum);
-    std::copy(g->house_control + i + 1, g->house_control + g->num_of_houses, g->house_control + i);
+    std::copy(g->house_control.begin() + i + 1, g->house_control.begin() + g->num_of_houses, g->house_control.begin() + i);
     g->num_of_houses--;
     send_to_char(g, d->character, "House deleted.\r\n");
     House_save_control(g);
@@ -266,8 +266,8 @@ namespace {
       case mode::guest_add:
       case mode::guest_delete: {
         long id = get_id_by_name(g, line);
-        long *end = house.guests + house.num_of_guests;
-        long *at  = std::find(house.guests, end, id);
+        auto end = house.guests.begin() + house.num_of_guests;
+        auto at  = std::find(house.guests.begin(), end, id);
         if (id < 0)
           send_to_char(g, d->character, "No such player.\r\n");
         else if (id == char_get_idnum(d->character))
@@ -281,7 +281,7 @@ namespace {
           send_to_char(g, d->character, "That player isn't in the guest list!\r\n");
         else {
           std::copy(at + 1, end, at);
-          end[-1] = end == house.guests + MAX_GUESTS ? 0 : *end; /* what was after the list moves up, as it always did */
+          end[-1] = end == house.guests.end() ? 0 : *end; /* what was after the list moves up, as it always did */
           house.num_of_guests--;
           send_to_char(g, d->character, "Guest deleted.\r\n");
           changed = true;

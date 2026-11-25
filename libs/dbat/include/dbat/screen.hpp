@@ -1,4 +1,6 @@
 #pragma once
+#include <span>
+#include <string>
 #include "dbat/consts/types.hpp"
 
 #define KNRM "\x1B[0m"
@@ -18,8 +20,9 @@ constexpr int C_BRI = C_ON; /* Compatibility hack */
 constexpr int C_NRM = C_ON; /* Compatibility hack */
 constexpr int C_CMP = C_ON; /* Compatibility hack */
 
-#define COLOR_CHOICES(ch) (char_is_npc(ch) ? nullptr : char_get_player_specials(ch) ? char_get_player_specials(ch)->color_choices \
-                                                                           : nullptr)
+/* a character's colour choices, or none (an empty span) for an NPC */
+#define COLOR_CHOICES(ch) (char_is_npc(ch) || !char_get_player_specials(ch) ? std::span<const std::string>{} \
+                                                                           : std::span<const std::string>(char_get_player_specials(ch)->color_choices))
 #define _clrlevel(g, ch)  (!char_is_npc(ch) ? (char_prf_flagged(g, (ch), pref_flag::color) ? 1 : 0) : 0)
 #define clr(g, ch, lvl)   (_clrlevel(g, ch) >= (lvl))
 #define CCNRM(g, ch, lvl) (clr(g, (ch), (lvl)) ? KNRM : KNUL)

@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <cstdio>
 #include <string>
 #include <string_view>
@@ -18,7 +19,7 @@ extern const std::string_view guild_default_no_gold;
 
 struct guild_data {
   room_vnum vnum{};                     /* number of the guild */
-  bool skills[SKILL_TABLE_SIZE]{};      /* array to keep track of which feats things we'll train */
+  std::array<bool, SKILL_TABLE_SIZE> skills{};      /* array to keep track of which feats things we'll train */
   float charge{};                       /* charge * skill level = how much we'll charge */
   std::string no_such_skill{};          /* message when we don't teach that skill */
   std::string not_enough_gold{};        /* message when the student doesn't have enough gold */
@@ -27,7 +28,7 @@ struct guild_data {
   flag_set<trade_flag> with_who;        /* whom we dislike */
   int open{}, close{};                    /* when we will train */
   SPECIAL(*func){};                     /* secondary spec_proc for the GM */
-  bool feats[NUM_FEATS_DEFINED]{};      /* array to keep track of which feats things we'll train */
+  std::array<bool, NUM_FEATS_DEFINED> feats{};      /* array to keep track of which feats things we'll train */
 };
 
 

@@ -3,6 +3,7 @@
  * Objects as rent files and house files hold them (see db/players/object_records.cpp): a record for each object,
  * with where it was, and the containers refilled as they load.
  */
+#include <array>
 #include <functional>
 #include <string>
 #include <string_view>
@@ -47,5 +48,5 @@ private:
   GameWorld *g_;
   char_data *ch_;
   room_vnum room_;
-  std::vector<obj_data *> rows_[MAX_BAG_ROWS]; /* each list in file order */
+  std::array<std::vector<obj_data *>, MAX_BAG_ROWS> rows_; /* each list in file order */
 };

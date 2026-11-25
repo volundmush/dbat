@@ -25,6 +25,32 @@ NOT_A_NAME = {'auto', 'operator', 'const', 'new', 'delete'}
 # a declaration that starts a line: qualifiers, a type (with a template's arguments), pointers, a name, its bounds
 LINE = re.compile(r'^[ \t]*(?:(?:static|const|constexpr|extern|inline|thread_local|mutable|volatile|struct|unsigned|signed|long|short)\s+)*'
                   r'([A-Za-z_][\w:]*(?:<[^;{}()\n]*>)?)(?:\s+const)?((?:\s*[*&]+\s*|\s+))([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*(?:\[[^\]\n]*\]\s*)*[;=,{)]', re.M)
+# a declaration's start, for its later declarators: `act_msgs parry, block, hits[5];`, `int nr = 0, t[5] = {};`
+STMT = re.compile(r'^[ \t]*(?:(?:static|const|constexpr|inline|mutable|struct)\s+)*([A-Za-z_][\w:]*(?:<[^;{}()\n]*>)?)\s+[*&]*\s*[A-Za-z_]\w*\s*[=,{\[]', re.M)
+
+
+def later_declarators(s, start):
+    """the declarators after a declaration's first, as (offset, text): split at its top-level commas, up to its ';'"""
+    out, depth, cur, at, first = [], 0, '', start, True
+    for k in range(start, len(s)):
+        c = s[k]
+        if c in '([{':
+            depth += 1
+        elif c in ')]}':
+            depth -= 1
+            if depth < 0:
+                break
+        if depth == 0 and c in ',;':
+            if not first:
+                out.append((at, cur))
+            first, cur, at = False, '', k + 1
+            if c == ';':
+                break
+        else:
+            cur += c
+    return out
+
+
 # a parameter: `(T name[]` or `, T name[N]`, followed by `,` or `)`
 PARAM = re.compile(r'[(,]\s*(?:const\s+)?(?:struct\s+)?([A-Za-z_][\w:]*(?:<[^;{}()\n]*>)?)\s*[*&\s]+\s*([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*(?=[,)])')
 
@@ -54,6 +80,13 @@ def find(f, s):
         if kind in NOT_A_TYPE or name in NOT_A_NAME or kind.startswith('std::array'):
             continue
         out.add((f, s[:m.start(3)].count('\n') + 1, name))
+    for m in STMT.finditer(s):
+        if m.group(1) in NOT_A_TYPE:
+            continue
+        for at, part in later_declarators(s, m.start()):
+            d = re.match(r'\s*[*&]*\s*([A-Za-z_]\w*)\s*\[', part)
+            if d:
+                out.add((f, s[:at + d.start(1)].count('\n') + 1, d.group(1)))
     for m in PARAM.finditer(s):
         if m.group(1) in NOT_A_TYPE or m.group(2) in NOT_A_NAME:
             continue

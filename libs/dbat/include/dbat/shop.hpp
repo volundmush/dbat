@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <cstdint>
 #include <cstdio>
 #include <string>
@@ -75,7 +76,7 @@ constexpr int LIST_ROOM    = 2;
 
 
 struct stack_data {
-  int data[100]{};
+  std::array<int, 100> data{};
   int len{};
 };
 

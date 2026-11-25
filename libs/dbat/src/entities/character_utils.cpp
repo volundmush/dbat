@@ -7424,7 +7424,7 @@ void char_set_raw_lifebonus(struct char_data *ch, int v)
   ch->lifebonus = v;
 }
 
-int *char_get_limbs(struct char_data *ch)
+std::span<int> char_get_limbs(struct char_data *ch)
 {
   return ch->limbs;
 }
@@ -7781,7 +7781,7 @@ int8_t *char_real_abils_cha_slot(struct char_data *ch)
   return &ch->real_abils.cha;
 }
 
-struct obj_data **char_get_equipment_array(struct char_data *ch)
+std::span<obj_data *> char_get_equipment_array(struct char_data *ch)
 {
   return ch->equipment;
 }

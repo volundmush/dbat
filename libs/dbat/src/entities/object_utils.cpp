@@ -914,7 +914,7 @@ void obj_set_action_description(struct obj_data *obj, std::string_view v)
   obj->action_description = v;
 }
 
-struct obj_affected_type *obj_get_affected(struct obj_data *obj)
+std::span<obj_affected_type> obj_get_affected(struct obj_data *obj)
 {
   return obj->affected;
 }
