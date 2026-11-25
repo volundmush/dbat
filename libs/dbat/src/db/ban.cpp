@@ -137,7 +137,7 @@ ACMD(do_unban)
 {
   std::string site;
   struct ban_list_element *ban_node, *temp;
-  int found = 0;
+  bool found = false;
 
   std::string_view rest = argument;
   site                  = take_arg(rest);
@@ -148,7 +148,7 @@ ACMD(do_unban)
   ban_node = g->ban_list;
   while (ban_node && !found) {
     if (str_eq_nocase(ban_node->site, until_nul(site)))
-      found = 1;
+      found = true;
     else
       ban_node = ban_node->next;
   }

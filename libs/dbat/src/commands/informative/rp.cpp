@@ -473,7 +473,7 @@ void introCreate(struct char_data *ch)
 
 int readIntro(struct char_data *ch, struct char_data *vict)
 {
-  int known = false;
+  bool known = false;
 
   /* Read Introduction File */
   if (vict == nullptr) {
@@ -502,7 +502,7 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     }
   }
 
-  if (known == true)
+  if (known)
     return 1;
   else
     return 0;

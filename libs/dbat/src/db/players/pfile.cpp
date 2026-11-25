@@ -675,7 +675,7 @@ int load_char(GameWorld *g, std::string_view name, struct char_data *ch)
 /* Write the vital data of a player to the player file */
 void save_char(GameWorld *g, struct char_data *ch)
 {
-  int i, id, save_index = false;
+  int i, id; bool save_index = false;
   struct affected_type tmp_aff[MAX_AFFECT];
   struct obj_data *char_eq[NUM_WEARS];
 

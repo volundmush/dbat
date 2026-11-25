@@ -113,7 +113,7 @@ namespace {
       at += newline + 1;
     }
 
-    int line_chars = 0, color_chars = 0, pass_line = 0;
+    int line_chars = 0, color_chars = 0; bool pass_line = false;
     bool cap_next = true, cap_next_next = false;
     size_t start = 0;
     if (indent) {
@@ -125,7 +125,7 @@ namespace {
       while (one_of("\n\r\f\t\v ", copy[at])) {
         if (copy[at] == '\n' && !pass_line)
           if (i++ >= high) {
-            pass_line = 1;
+            pass_line = true;
             break;
           }
         at++;
@@ -164,12 +164,12 @@ namespace {
           copy[at] = '\0'; /* ends the word, and is left there */
           at++;
           if (copy[at] == '\n' && i++ >= high)
-            pass_line = 1;
+            pass_line = true;
 
           while (one_of("\n\r", copy[at]) && !pass_line) {
             at++;
             if (copy[at] == '\n' && i++ >= high)
-              pass_line = 1;
+              pass_line = true;
           }
           temp = copy[at];
         } else {

@@ -143,7 +143,7 @@ int find_first_step(GameWorld *g, room_vnum src, room_vnum target)
 ACMD(do_sradar)
 {
   struct obj_data *vehicle = nullptr, *controls = nullptr;
-  int dir = 0, noship = false;
+  int dir = 0; bool noship = false;
   std::string arg;
   std::string planet;
 
@@ -167,17 +167,17 @@ ACMD(do_sradar)
     return;
   }
 
-  if (noship == false && room_sect(g, obj_get_in_room(vehicle)) != SECT_SPACE) {
+  if (!noship && room_sect(g, obj_get_in_room(vehicle)) != SECT_SPACE) {
     send_to_char(g, ch, "@wYour ship is not in space!\r\n");
     return;
   }
-  if (noship == true && room_sect(g, char_get_in_room(ch)) != SECT_SPACE) {
+  if (noship && room_sect(g, char_get_in_room(ch)) != SECT_SPACE) {
     send_to_char(g, ch, "@wYou are not even in space!\r\n");
     return;
   }
 
   if (arg.empty()) {
-    if (char_get_admlevel(ch) >= 1 && noship == true) {
+    if (char_get_admlevel(ch) >= 1 && noship) {
       printmap(g, char_get_in_room(ch), ch, 0, -1);
     } else {
       printmap(g, obj_get_in_room(vehicle), ch, 0, obj_get_vnum(g, vehicle));
@@ -198,7 +198,7 @@ ACMD(do_sradar)
     return;
   }
 
-  if (noship == false) {
+  if (!noship) {
     if (str_eq_nocase(arg, "earth") || str_eq_nocase(arg, "Earth")) {
       dir = find_first_step(g, obj_get_in_room(vehicle), 40979);
       planet = "Earth";
@@ -244,7 +244,7 @@ ACMD(do_sradar)
     }
   }
 
-  if (noship == true) {
+  if (noship) {
     if (str_eq_nocase(arg, "earth") || str_eq_nocase(arg, "Earth")) {
       dir = find_first_step(g, char_get_in_room(ch), 40979);
       planet = "Earth";
@@ -310,14 +310,14 @@ ACMD(do_sradar)
 ACMD(do_radar)
 {
   room_vnum room = 0;
-  int dir, num = 0, found = false, found2 = false, fcount = 0;
+  int dir, num = 0, fcount = 0; bool found = false, found2 = false;
 
   for (obj_data *obj2 : char_inventory(g, ch)) {
     if (obj_get_vnum(g, obj2) == 12 && (!obj_extra_flagged(obj2, extra_flag::broken)) && (!obj_extra_flagged(obj2, extra_flag::forged))) {
       found2 = true;
     }
   }
-  if (found2 == false) {
+  if (!found2) {
     send_to_char(g, ch, "You do not even have a dragon radar!\r\n");
     return;
   }
@@ -389,7 +389,7 @@ ACMD(do_radar)
       num += 1;
       room += 1;
     }
-    if (found == false) {
+    if (!found) {
       send_to_char(g, ch, "The radar didn't detect any dragonballs on the planet.\r\n");
       return;
     }

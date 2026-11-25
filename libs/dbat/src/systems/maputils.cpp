@@ -25,14 +25,14 @@ static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)
 {
 
   struct obj_data *controls = nullptr, *obj = nullptr;
-  int found = false;
+  bool found = false;
 
   if (vnum2 == -1) {
     return;
   }
 
   for (char_data *tch : each_char(g)) {
-    if (found == false) {
+    if (!found) {
       if (!(obj = find_control(g, tch))) {
         continue;
       }
@@ -43,7 +43,7 @@ static void ping_ship(GameWorld *g, obj_vnum vnum, obj_vnum vnum2)
     }
   }
 
-  if (found == true) {
+  if (found) {
     send_to_room(g, obj_get_in_room(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
   }
 }
@@ -67,7 +67,7 @@ static bool checkship(GameWorld *g, room_vnum rnum, obj_vnum vnum)
 static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch, room_vnum start, obj_vnum vnum)
 {
   std::string mapchar;
-  int there = false, enemy = false;
+  bool there = false, enemy = false;
 
   if (rnum == start) {
     there = true;
@@ -79,7 +79,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   if (rnum == char_get_radar1(ch) || rnum == char_get_radar2(ch) || rnum == char_get_radar3(ch)) {
     if (there) {
       mapchar = "@WB@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@WB@r#";
     } else {
       mapchar = "@WBB";
@@ -88,7 +88,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::eorbit)) {
     if (there) {
       mapchar = "@GE@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@GE@r#";
     } else {
       mapchar = "@GEE";
@@ -97,7 +97,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::corbit)) {
     if (there) {
       mapchar = "@MC@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@MC@r#";
     } else {
       mapchar = "@MCC";
@@ -106,7 +106,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::forbit)) {
     if (there) {
       mapchar = "@CF@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@CF@r#";
     } else {
       mapchar = "@CFF";
@@ -115,7 +115,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::korbit)) {
     if (there) {
       mapchar = "@mK@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@mK@r#";
     } else {
       mapchar = "@mKK";
@@ -124,7 +124,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::norbit)) {
     if (there) {
       mapchar = "@gN@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@gN@r#";
     } else {
       mapchar = "@gNN";
@@ -133,7 +133,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (rnum == 50772) {
     if (there) {
       mapchar = "@cZ@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@cZ@r#";
     } else {
       mapchar = "@cZZ";
@@ -142,7 +142,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::vorbit)) {
     if (there) {
       mapchar = "@YV@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@YV@r#";
     } else {
       mapchar = "@YVV";
@@ -151,7 +151,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::aorbit)) {
     if (there) {
       mapchar = "@BA@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@BA@r#";
     } else {
       mapchar = "@BAA";
@@ -160,7 +160,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::yorbit)) {
     if (there) {
       mapchar = "@MY@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@MY@r#";
     } else {
       mapchar = "@MYY";
@@ -169,7 +169,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::kanorb)) {
     if (there) {
       mapchar = "@CK@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@CK@r#";
     } else {
       mapchar = "@CKK";
@@ -178,7 +178,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::arlorb)) {
     if (there) {
       mapchar = "@mA@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@mA@r#";
     } else {
       mapchar = "@mAA";
@@ -187,7 +187,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::nebula)) {
     if (there) {
       mapchar = "@m&@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@m&@r#";
     } else {
       mapchar = "@m&&";
@@ -196,7 +196,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (rnum == 38028) {
     if (there) {
       mapchar = "@yQ@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@yQ@r#";
     } else {
       mapchar = "@yQQ";
@@ -205,7 +205,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::astero)) {
     if (there) {
       mapchar = "@y:@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@y:@r#";
     } else {
       mapchar = "@y::";
@@ -214,7 +214,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::wormho)) {
     if (there) {
       mapchar = "@b@1*@RX@n";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@b@1*@r#@n";
     } else {
       mapchar = "@b@1**@n";
@@ -223,7 +223,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::station)) {
     if (there) {
       mapchar = "@DS@RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@DS@r#";
     } else {
       mapchar = "@DSS";
@@ -232,7 +232,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else if (room_flagged(g, rnum, room_flag::star)) {
     if (there) {
       mapchar = "@6 @RX@n";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@6 @r#@n";
     } else {
       mapchar = "@6  @n";
@@ -241,7 +241,7 @@ static std::string getmapchar(GameWorld *g, room_vnum rnum, struct char_data *ch
   else {
     if (there) {
       mapchar = "@w @RX";
-    } else if (enemy == true) {
+    } else if (enemy) {
       mapchar = "@w @r#";
     } else {
       int color = rand_number(g, 1, 30);

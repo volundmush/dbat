@@ -839,8 +839,8 @@ ACMD(do_meditate)
 /* This handles many player specific routines. It may be a bit too bloated though. */
 void base_update(GameWorld *g)
 {
-  int cash = false, inc = 0;
-  int countch = false, pcoun = 0;
+  int inc = 0; bool cash = false;
+  int pcoun = 0; bool countch = false;
 
   if (g->INTERESTTIME != 0 && g->INTERESTTIME <= game_now(g) && game_now(g) != 0) {
     g->INTERESTTIME = game_now(g) + 86400;
@@ -882,7 +882,7 @@ void base_update(GameWorld *g)
       }
       continue;
     }
-    if (countch == true) {
+    if (countch) {
       pcoun += 1;
     }
     if (!char_is_npc(d->character) && rand_number(g, 1, 15) >= 14) {
@@ -1038,7 +1038,7 @@ void base_update(GameWorld *g)
     if (char_moon_ok(g, d->character)) {
       oozaru_transform(g, d->character);
     }
-    if (cash == true && char_get_bank_gold(d->character) > 0) {
+    if (cash && char_get_bank_gold(d->character) > 0) {
       inc = char_get_bank_interest(d->character);
       char_set_lastint(d->character, g->LASTINTEREST);
       char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (inc));
@@ -1250,7 +1250,7 @@ void base_update(GameWorld *g)
       continue;
   }
 
-  if (countch == true) {
+  if (countch) {
     g->PCOUNT    = pcoun;
     g->PCOUNTDAY = game_now(g);
   }

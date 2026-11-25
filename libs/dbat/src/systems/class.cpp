@@ -806,7 +806,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
     send_to_char(g, ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
   }
 
-  int gain_stat = false;
+  bool gain_stat = false;
 
   switch (char_get_level(ch)) {
     case 10:
@@ -823,10 +823,10 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
       break;
   }
 
-  if (gain_stat == true) {
-    int raise = false, stat_fail = 0;
+  if (gain_stat) {
+    int stat_fail = 0; bool raise = false;
     if (char_is_konatsu(ch)) {
-      while (raise == false) {
+      while (!raise) {
         if (char_get_real_abils_dex(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_dex(ch) < 45 || char_get_bonuses(ch, BONUS_CLUMSY) <= 0) {
             char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
@@ -835,7 +835,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
           } else {
             stat_fail += 1;
           }
-        } else if (char_get_real_abils_cha(ch) < 100 && raise == false && stat_fail < 2) {
+        } else if (char_get_real_abils_cha(ch) < 100 && !raise && stat_fail < 2) {
           if (char_get_real_abils_cha(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
             send_to_char(g, ch, "@GYou feel your speed increase!@n\r\n");
@@ -851,7 +851,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
     } // End Konatsu
 
     else if (char_is_mutant(ch)) {
-      while (raise == false) {
+      while (!raise) {
         if (char_get_real_abils_con(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_con(ch) < 45 || char_get_bonuses(ch, BONUS_FRAIL) <= 0) {
             char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 1);
@@ -860,7 +860,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
           } else {
             stat_fail += 1;
           }
-        } else if (char_get_real_abils_cha(ch) < 100 && raise == false && stat_fail < 2) {
+        } else if (char_get_real_abils_cha(ch) < 100 && !raise && stat_fail < 2) {
           if (char_get_real_abils_cha(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
             send_to_char(g, ch, "@GYou feel your speed increase!@n\r\n");
@@ -876,7 +876,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
     } // End Mutant
 
     else if (char_is_hoshijin(ch)) {
-      while (raise == false) {
+      while (!raise) {
         if (char_get_real_abils_str(ch) < 100 && rand_number(g, 1, 2) == 2 && stat_fail != 1) {
           if (char_get_real_abils_str(ch) < 45 || char_get_bonuses(ch, BONUS_WIMP) <= 0) {
             char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 1);
@@ -885,7 +885,7 @@ void advance_level(GameWorld *g, struct char_data *ch, int whichclass)
           } else {
             stat_fail += 1;
           }
-        } else if (char_get_real_abils_dex(ch) < 100 && raise == false && stat_fail < 2) {
+        } else if (char_get_real_abils_dex(ch) < 100 && !raise && stat_fail < 2) {
           if (char_get_real_abils_dex(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
             char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
             send_to_char(g, ch, "@GYou feel your agility increase!@n\r\n");

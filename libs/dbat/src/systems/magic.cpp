@@ -553,7 +553,7 @@ void mag_points(GameWorld *g, int level, struct char_data *ch, struct char_data 
 void mag_unaffects(GameWorld *g, int level, struct char_data *ch, struct char_data *victim,
                    int spellnum)
 {
-  int spell = 0, msg_not_affected = true;
+  int spell = 0; bool msg_not_affected = true;
   std::string_view to_vict, to_room;
 
   if (victim == nullptr)

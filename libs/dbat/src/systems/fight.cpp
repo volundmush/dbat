@@ -250,7 +250,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, std::string_view buf)
   if (char_get_class(ch) == CLASS_NPC_COMMONER)
     special = 0;
 
-  int dragonpass = true;
+  bool dragonpass = true;
 
   if (char_is_dragon(ch)) {
     if (char_get_mob_vnum(g, ch) == 81 || char_get_mob_vnum(g, ch) == 82 || char_get_mob_vnum(g, ch) == 83 || char_get_mob_vnum(g, ch) == 84 || char_get_mob_vnum(g, ch) == 85 || char_get_mob_vnum(g, ch) == 86 || char_get_mob_vnum(g, ch) == 87) {
@@ -267,7 +267,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, std::string_view buf)
     return;
   }
 
-  if ((getCurKI(g, ch)) >= getMaxKI(g, ch) * 0.05 && char_is_humanoid(ch) && (!char_is_dragon(ch) || dragonpass == true)) {
+  if ((getCurKI(g, ch)) >= getMaxKI(g, ch) * 0.05 && char_is_humanoid(ch) && (!char_is_dragon(ch) || dragonpass)) {
     if (char_get_mobcharge(ch) <= 0 && rand_number(g, 1, 10) >= 8) {
       act(g, "@wAn aura flares up around @R$n@w!@n", true, ch, nullptr, nullptr, act_to::room);
       char_set_mobcharge(ch, char_get_mobcharge(ch) + 1);
@@ -287,7 +287,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, std::string_view buf)
     }
   }
 
-  if (char_is_humanoid(ch) && dragonpass == true) { /* Is a humanoid mob */
+  if (char_is_humanoid(ch) && dragonpass) { /* Is a humanoid mob */
     if (char_aff_flagged(ch, aff_flag::paralyze)) {
       return;
     }
@@ -639,7 +639,7 @@ static void mob_attack(GameWorld *g, struct char_data *ch, std::string_view buf)
           break;
       } /* End power switch */
     } /* End special attacks */
-  } else if (!char_is_humanoid(ch) || dragonpass == false) { /* Is not a humanoid mob */
+  } else if (!char_is_humanoid(ch) || !dragonpass) { /* Is not a humanoid mob */
     if (char_is_serpent(ch) && rand_number(g, 1, 5) == 5) {
       do_strike(g, ch, buf, 0, 0);
     } else if (char_is_dragon(ch) && rand_number(g, 1, 12) >= 10 && char_get_mob_vnum(g, ch) != 17917) {
@@ -676,12 +676,12 @@ static void cleanup_arena_watch(GameWorld *g, struct char_data *ch)
 
 static void shadow_dragons_live(GameWorld *g)
 {
-  int value = 0;
+  bool value = false;
   if (g->SHADOW_DRAGON1 != -1 || g->SHADOW_DRAGON2 != -1 || g->SHADOW_DRAGON3 != -1 || g->SHADOW_DRAGON4 != -1 || g->SHADOW_DRAGON5 != -1 || g->SHADOW_DRAGON6 != -1 || g->SHADOW_DRAGON7 != -1) {
-    value = 1;
+    value = true;
   }
 
-  if (value == 0) {
+  if (!value) {
     g->SELFISHMETER = 0;
     save_mud_time(g, &g->time_info);
   }
@@ -1954,7 +1954,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
   update_pos(g, ch);
 
   if (char_is_npc(ch) && !char_mob_flagged(ch, mob_flag::dummy)) {
-    int shadowed = false;
+    bool shadowed = false;
     decCurHealthPercent(g, ch, 1, 0);
     if (char_is_shadow_dragon1(g, ch)) {
       struct obj_data *obj = nullptr;
@@ -2016,7 +2016,7 @@ void raw_kill(GameWorld *g, struct char_data *ch, struct char_data *killer)
     make_corpse(g, ch, killer);
     purge_homing(g, ch);
     extract_char(g, ch);
-    if (shadowed == true) {
+    if (shadowed) {
       shadow_dragons_live(g);
     }
   } else if (char_is_npc(ch) && char_mob_flagged(ch, mob_flag::dummy)) {
@@ -2244,16 +2244,16 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
     }
   }
   if (char_get_lasthit(victim) != 0 && char_get_lasthit(victim) != char_get_idnum(ch)) {
-    int checkit = false;
+    bool checkit = false;
     for (char_data *fol : char_followers(g, ch)) {
       if (char_aff_flagged(fol, aff_flag::group) && char_get_lasthit(victim) == char_get_idnum(fol)) {
         checkit = true;
       }
     }
-    if (checkit == false && char_get_master(g, ch) != nullptr && char_get_idnum(char_get_master(g, ch)) == char_get_lasthit(victim)) {
+    if (!checkit && char_get_master(g, ch) != nullptr && char_get_idnum(char_get_master(g, ch)) == char_get_lasthit(victim)) {
       checkit = true;
     }
-    if (checkit == false && char_get_master(g, ch) != nullptr) {
+    if (!checkit && char_get_master(g, ch) != nullptr) {
       struct char_data *master = char_get_master(g, ch);
       for (char_data *foll : char_followers(g, master)) {
         if (foll != ch) {
@@ -2263,7 +2263,7 @@ static void perform_group_gain(GameWorld *g, struct char_data *ch, int base, str
         }
       }
     }
-    if (checkit == false) {
+    if (!checkit) {
       send_to_char(g, ch, "@RYou didn't do most of the work for this kill.@n\r\n");
       share = 1;
     }

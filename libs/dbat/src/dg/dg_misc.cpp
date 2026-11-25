@@ -69,7 +69,7 @@ void do_dg_cast(GameWorld *g, owner_ptr go, struct script_data *sc, trig_data *t
   struct char_data *tch         = nullptr;
   struct obj_data *tobj         = nullptr;
   struct room_data *caster_room = nullptr;
-  int spellnum, target = 0;
+  int spellnum; bool target = false;
   std::optional<std::string> victim; /* the target's name, if anything follows the spell */
 
   /* need to get the caster or the room of the temporary caster */

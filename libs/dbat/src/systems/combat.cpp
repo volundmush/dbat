@@ -329,7 +329,7 @@ void handle_multihit(GameWorld *g, struct char_data *ch, struct char_data *vict)
 bool handle_defender(GameWorld *g, struct char_data *vict, struct char_data *ch)
 {
 
-  int result = false;
+  bool result = false;
 
   if (char_get_defender(g, vict)) {
     struct char_data *def = char_get_defender(g, vict);
@@ -423,7 +423,7 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
   double maxki  = 0.0;
   int totalmem  = 1;
   int attspd = 0, blockable = true, same = true, attsk = 0, attavg = char_get_skill(ch, attack_skills[char_get_combine(ch)]);
-  int burn = false, shocked = false;
+  bool burn = false, shocked = false;
 
   switch (char_get_combine(ch)) {
     case 0: /* Kamehameha */
@@ -591,9 +591,9 @@ void combine_attacks(GameWorld *g, struct char_data *ch, struct char_data *vict)
       return;
     }
   }
-  if (burn == true)
+  if (burn)
     tech_handle_burn(g, ch, vict, 3);
-  if (shocked == true) {
+  if (shocked) {
     if (!char_aff_flagged(vict, aff_flag::shocked) && rand_number(g, 1, 4) == 4 && !char_aff_flagged(vict, aff_flag::sanctuary)) {
       act(g, "@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, act_to::actor);
       act(g, "@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, act_to::room);
@@ -613,18 +613,18 @@ bool check_ruby(GameWorld *g, struct char_data *ch)
 {
 
   struct obj_data *ruby = nullptr;
-  int found = 0;
+  bool found = false;
 
   for (obj_data *obj : char_inventory(g, ch)) {
-    if (found == 0 && obj_get_vnum(g, obj) == 6600) {
+    if (!found && obj_get_vnum(g, obj) == 6600) {
       if (obj_extra_flagged(obj, extra_flag::hot)) {
-        found = 1;
+        found = true;
         ruby  = obj;
       }
     }
   }
 
-  if (found > 0) {
+  if (found) {
     act(g, "@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", true, ch, ruby, nullptr, act_to::actor);
     act(g, "@R$n's@R $p@R flares up and disappears!@n", true, ch, ruby, nullptr, act_to::room);
     extract_obj(g, ruby);
@@ -873,7 +873,7 @@ bool backstab(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
 void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wlvl, int hitspot)
 {
 
-  int chance = 0, decap = 0, decapitate = false;
+  int chance = 0, decap = 0; bool decapitate = false;
   int roll_to_beat = rand_number(g, 1, 10000);
 
   if (wlvl == 1) {
@@ -907,7 +907,7 @@ void cut_limb(GameWorld *g, struct char_data *ch, struct char_data *vict, int wl
     return;
   }
 
-  if (decapitate == true) {
+  if (decapitate) {
     act(g, "@R$N's@r head is cut off in the attack!@n", true, ch, nullptr, vict, act_to::actor);
     act(g, "@RYOUR head is cut off in the attack!@n", true, ch, nullptr, vict, act_to::vict);
     act(g, "@R$N's@rhead is cut off in the attack!@n", true, ch, nullptr, vict, act_to::notvict);
@@ -2389,7 +2389,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
   std::string buf;
   std::string buf2;
   std::string buf3;
-  int foundv = false, foundo = false;
+  bool foundv = false, foundo = false;
   int64_t dmg = 0;
 
   for (char_data *tch : room_people(g, char_get_in_room(ch))) {
@@ -2401,7 +2401,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
     if (!can_kill(g, ch, tch, nullptr, 1))
       continue;
 
-    if (rand_number(g, 1, 101) >= 90 && foundv == false) {
+    if (rand_number(g, 1, 101) >= 90 && !foundv) {
       if (handle_parry(g, tch) > rand_number(g, 1, 140)) {
         buf  = str_format("@C$N@W deflects your {}, sending it flying away!@n", sname);
         buf2 = str_format("@WYou deflect @C$n's@W {} sending it flying away!@n", sname);
@@ -2428,7 +2428,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
   for (obj_data *tob : room_contents(g, char_get_in_room(ch))) {
     if (obj_extra_flagged(tob, extra_flag::unbreakable))
       continue;
-    if (foundo == true)
+    if (foundo)
       continue;
     if (rand_number(g, 1, 101) >= 80) {
       foundo = true;
@@ -2441,7 +2441,7 @@ void parry_ki(GameWorld *g, double attperc, struct char_data *ch, struct char_da
     }
   }
 
-  if ((foundo == false || foundv == false) && !room_flagged(g, char_get_in_room(vict), room_flag::space)) {
+  if ((!foundo || !foundv) && !room_flagged(g, char_get_in_room(vict), room_flag::space)) {
     buf  = str_format("@WYou watch as the deflected {} slams into the ground, exploding with a roar of blinding light!@n", sname);
     buf2 = str_format("@WThe deflected {} slams into the ground, exploding with a roar of blinding light!@n", sname);
     act(g, buf, true, vict, nullptr, nullptr, act_to::actor);
@@ -3302,7 +3302,7 @@ int64_t damtype(GameWorld *g, struct char_data *ch, int type, int skill, double 
 static void saiyan_gain(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
   int gain = rand_number(g, char_get_level(ch) * 6, char_get_level(ch) * 8);
-  int weak = false;
+  bool weak = false;
 
   if (!vict)
     return;
@@ -3647,7 +3647,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
 {
   int64_t index   = 0;
   int64_t maindmg = dmg, beforered = dmg;
-  int dead = false;
+  bool dead = false;
 
   /* If a character is trageted */
 
@@ -4079,7 +4079,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     if (char_get_position(vict) == POS_SITTING && char_is_npc(vict) && getCurHealth(g, vict) >= ((getEffMaxPL(g, vict))) * .98) {
       do_stand(g, vict, "", 0, 0);
     }
-    int suppresso = false;
+    bool suppresso = false;
     if (is_sparring(ch) && is_sparring(vict) && (char_get_suppressed(vict) + getCurHealth(g, vict)) - dmg <= 0) {
       if (!char_is_npc(vict)) {
         act(g, "@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict, act_to::actor);
@@ -4104,15 +4104,15 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         act(g, "@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", true, ch, nullptr, vict, act_to::actor);
         act(g, "@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", true, ch, nullptr, vict, act_to::notvict);
         solo_gain(g, ch, vict);
-        int founded = 0;
+        bool founded = false;
         for (obj_data *rew : char_inventory(g, vict)) {
           if (rew) {
             obj_from_char(g, rew);
             obj_to_room(g, rew, char_get_in_room(vict));
-            founded = 1;
+            founded = true;
           }
         }
-        if (founded == 1) {
+        if (founded) {
           act(g, "@c$N@w leaves a reward behind out of respect.@n", true, ch, nullptr, vict, act_to::actor);
         }
         setCurHealth(vict, 0);
@@ -4204,7 +4204,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
     }
     if (!is_sparring(ch) && !char_plr_flagged(vict, player_flag::immortal) && getCurPL(g, vict) - dmg <= 0) {
 
-      if (getCurPL(g, vict) - dmg <= 0 && suppresso == false) {
+      if (getCurPL(g, vict) - dmg <= 0 && !suppresso) {
         decCurHealthPercent(g, vict, 1, 0);
         if (!char_is_npc(vict) && char_get_lifeperc(vict) > 0 && (getCurLF(g, vict)) - (dmg - getCurPL(g, vict)) >= 0) {
           act(g, "@c$N@w barely clings to life!@n", true, ch, nullptr, vict, act_to::actor);
@@ -4287,15 +4287,15 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         die(g, vict, ch);
         dead = true;
       }
-    } else if (getCurPL(g, vict) - dmg > 0 || suppresso == true) {
-      if (suppresso == false) {
+    } else if (getCurPL(g, vict) - dmg > 0 || suppresso) {
+      if (!suppresso) {
         decCurHealth(g, vict, dmg, 0);
       }
       if (char_get_fighting(g, ch) == nullptr)
         set_fighting(g, ch, vict);
       if (char_get_fighting(g, vict) == nullptr)
         set_fighting(g, vict, ch);
-      if (dmg > 1 && suppresso == false) {
+      if (dmg > 1 && !suppresso) {
         if (type == 0 && getCurPL(g, ch) >= getEffMaxPL(g, ch) * 0.5) {
           int64_t raise = (getMaxKI(g, ch) * 0.005) + 1;
           incCurKI(g, ch, raise, true);
@@ -4322,7 +4322,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           send_to_char(g, ch, "\r\n");
         }
       } else if (!char_is_npc(ch)) {
-        if (dmg <= 1 && suppresso == false && !char_prf_flagged(g, ch, pref_flag::nodec)) {
+        if (dmg <= 1 && !suppresso && !char_prf_flagged(g, ch, pref_flag::nodec)) {
           send_to_char(g, ch, "@D[@GDamage@W: @BPitiful...@D]@n");
           send_to_char(g, vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
           if (char_get_equipment(ch, WEAR_EYE) && vict && !char_prf_flagged(g, ch, pref_flag::nodec)) {
@@ -4340,7 +4340,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           } else {
             send_to_char(g, ch, "\r\n");
           }
-        } else if (dmg > 1 && suppresso == true && !char_prf_flagged(g, ch, pref_flag::nodec)) {
+        } else if (dmg > 1 && suppresso && !char_prf_flagged(g, ch, pref_flag::nodec)) {
           send_to_char(g, ch, "@D[@GDamage@W: @R{}@D]@n", add_commas(dmg));
           send_to_char(g, vict, "@D[@rDamage@W: @R{} @c-Suppression-@D]@n\r\n", add_commas(dmg));
           send_to_char(g, vict, "@D[Suppression@W: @G{}@D]@n\r\n", add_commas(char_get_suppressed(vict)));
@@ -4360,7 +4360,7 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
           } else {
             send_to_char(g, ch, "\r\n");
           }
-        } else if (dmg <= 1 && suppresso == true && !char_prf_flagged(g, ch, pref_flag::nodec)) {
+        } else if (dmg <= 1 && suppresso && !char_prf_flagged(g, ch, pref_flag::nodec)) {
           send_to_char(g, ch, "@D[@GDamage@W: @BPitiful...@D]@n");
           send_to_char(g, vict, "@D[@rDamage@W: @BPitiful... @c-Suppression-@D]@n\r\n");
           send_to_char(g, vict, "@D[Suppression@W: @G{}@D]@n\r\n", add_commas(char_get_suppressed(vict)));
@@ -4403,10 +4403,10 @@ void hurt(GameWorld *g, int limb, int chance, struct char_data *ch, struct char_
         saiyan_gain(g, ch, vict);
       }
     }
-    if (char_is_arlian(vict) && dead != true && !is_sparring(vict) && !is_sparring(ch)) {
+    if (char_is_arlian(vict) && !dead && !is_sparring(vict) && !is_sparring(ch)) {
       handle_evolution(g, vict, dmg);
     }
-    if (dead == true) {
+    if (dead) {
       std::string corp;
       if (!char_plr_flagged(ch, player_flag::selfd2)) {
         if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(g, ch, pref_flag::autogold)) {
@@ -4689,7 +4689,7 @@ int handle_parry(GameWorld *g, struct char_data *ch)
 /* This handles whether a step of the combo was preformed. */
 static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  int success = false, pass = false;
+  bool success = false, pass = false;
 
   if (char_is_npc(ch))
     return 0;
@@ -4718,7 +4718,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
       break;
   }
 
-  if (pass == false)
+  if (!pass)
     return 0;
 
   if (count_physical(ch) < 3)
@@ -4748,7 +4748,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
   }
 
   if (char_get_combo(ch) <= -1 && rand_number(g, 1, 100) > chance) {
-    while (success == false) {
+    while (!success) {
       switch (rand_number(g, 1, 24)) {
         case 1:
         case 2:
@@ -4827,7 +4827,7 @@ static int handle_combo(GameWorld *g, struct char_data *ch, struct char_data *vi
   }
   if (char_get_lastattack(ch) == char_get_combo(ch) && char_get_combhits(ch) < physical_mastery(ch)) {
     char_set_combhits(ch, char_get_combhits(ch) + (1));
-    while (success == false) {
+    while (!success) {
       if (char_get_combhits(ch) >= 20) { /* We're kicking ass! */
         switch (rand_number(g, 1, 34)) {
           case 1:

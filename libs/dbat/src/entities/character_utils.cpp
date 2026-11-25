@@ -1355,14 +1355,14 @@ std::string_view report_party_health(GameWorld *g, struct char_data *ch)
 bool know_skill(GameWorld *g, struct char_data *ch, int skill)
 {
 
-  int know = 0;
+  bool know = false;
 
   if (char_get_skill(ch, skill) > 0)
-    know = 1;
+    know = true;
 
-  if (know == 0) {
+  if (!know) {
     send_to_char(g, ch, "You do not know how to perform {}.\r\n", g->spell_info[skill].name);
-    know = 0;
+    know = false;
   }
 
   return (know);
@@ -1472,14 +1472,14 @@ void assign_affect(GameWorld *g, struct char_data *ch, aff_flag flag, int skill,
 bool sec_roll_check(GameWorld *g, struct char_data *ch)
 {
 
-  int figure = 0, chance = 0, outcome = 0;
+  int figure = 0, chance = 0; bool outcome = false;
 
   figure = 10 + (char_get_level(ch) * 1.6);
 
   chance = axion_dice(g, 0) + axion_dice(g, 0) + rand_number(g, 0, 20);
 
   if (figure >= chance)
-    outcome = 1;
+    outcome = true;
 
   return (outcome);
 }
@@ -2117,7 +2117,7 @@ void senseCreate(struct char_data *ch)
 
 int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict)
 {
-  int known       = false;
+  bool known = false;
   mob_vnum idnums = -1337;
 
   /* Read Sense File */
@@ -2152,7 +2152,7 @@ int read_sense_memory(GameWorld *g, struct char_data *ch, struct char_data *vict
     }
   }
 
-  if (known == true)
+  if (known)
     return 1;
   else
     return 0;
@@ -3357,36 +3357,36 @@ bool planet_check(GameWorld *g, struct char_data *ch, struct char_data *vict)
     mud_log("ERROR: planet_check called without vict!");
     return false;
   }
-  int success = 0;
+  bool success = false;
   if (char_get_admlevel(vict) <= 0) {
     if (room_flagged(g, char_get_in_room(ch), room_flag::earth) && room_flagged(g, char_get_in_room(vict), room_flag::earth)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::frigid) && room_flagged(g, char_get_in_room(vict), room_flag::frigid)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::namek) && room_flagged(g, char_get_in_room(vict), room_flag::namek)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::vegeta) && room_flagged(g, char_get_in_room(vict), room_flag::vegeta)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::aether) && room_flagged(g, char_get_in_room(vict), room_flag::aether)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::konack) && room_flagged(g, char_get_in_room(vict), room_flag::konack)) {
-      success = 1;
+      success = true;
     } else if (room_planet_zenith(g, char_get_in_room(ch)) && room_planet_zenith(g, char_get_in_room(vict))) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::kanassa) && room_flagged(g, char_get_in_room(vict), room_flag::kanassa)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::yardrat) && room_flagged(g, char_get_in_room(vict), room_flag::yardrat)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::al) && room_flagged(g, char_get_in_room(vict), room_flag::al)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::hell) && room_flagged(g, char_get_in_room(vict), room_flag::hell)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::arlia) && room_flagged(g, char_get_in_room(vict), room_flag::arlia)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::neo) && room_flagged(g, char_get_in_room(vict), room_flag::neo)) {
-      success = 1;
+      success = true;
     } else if (room_flagged(g, char_get_in_room(ch), room_flag::cerria) && room_flagged(g, char_get_in_room(vict), room_flag::cerria)) {
-      success = 1;
+      success = true;
     }
   }
   return (success);
@@ -3972,7 +3972,7 @@ bool check_points(GameWorld *g, struct char_data *ch, int64_t ki, int64_t st)
     st -= st * 0.5;
   }
 
-  int fail = false;
+  bool fail = false;
   if (char_is_npc(ch)) {
     if ((getCurKI(g, ch)) < ki) {
       send_to_char(g, ch, "You do not have enough ki!\r\n");
@@ -4031,7 +4031,7 @@ bool check_points(GameWorld *g, struct char_data *ch, int64_t ki, int64_t st)
       fail = true;
     }
   }
-  if (fail == true) {
+  if (fail) {
     return false;
   }
   return true;

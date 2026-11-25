@@ -19,7 +19,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
 {
   std::string prompt;
   struct obj_data *chair = nullptr;
-  int flagged            = false;
+  bool flagged = false;
 
   /* Note, prompt is truncated at MAX_PROMPT_LENGTH - 1 chars, at the end. */
 
@@ -163,7 +163,7 @@ std::string make_prompt(GameWorld *g, struct descriptor_data *d)
         prompt += "FISHING -";
         flagged = true;
       }
-      if (flagged == true) {
+      if (flagged) {
         prompt += "@n\n";
       }
       if ((char_get_sits(g, d->character) && char_plr_flagged(d->character, player_flag::healt)) && !char_prf_flagged(g, d->character, pref_flag::nodec)) {

@@ -288,8 +288,8 @@ std::string print_skills_by_type(GameWorld *g, struct char_data *ch, flag_set<sk
 
 int slot_count(struct char_data *ch)
 {
-  int i, skills = -1, fail = false;
-  int punch = false, kick = false, knee = false, elbow = false, kiball = false, kiblast = false, beam = false, renzo = false, shogekiha = false;
+  int i, skills = -1; bool fail = false;
+  bool punch = false, kick = false, knee = false, elbow = false, kiball = false, kiblast = false, beam = false, renzo = false, shogekiha = false;
 
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (char_get_skill(ch, i) > 0) {
@@ -356,17 +356,17 @@ int slot_count(struct char_data *ch)
           }
           break;
       }
-      if (fail == false) {
+      if (!fail) {
         skills += 1;
       }
       fail = false;
     }
   }
 
-  if (punch == true && kick == true && elbow == true && knee == true) {
+  if (punch && kick && elbow && knee) {
     skills += 1;
   }
-  if (kiball == true && kiblast == true && beam == true && shogekiha == true && renzo == true) {
+  if (kiball && kiblast && beam && shogekiha && renzo) {
     skills += 1;
   }
 
@@ -1046,7 +1046,7 @@ int rpp_to_level(struct char_data *ch)
 static void handle_study(GameWorld *g, struct char_data *keeper, struct guild_data *guild_nr, struct char_data *ch, std::string_view argument)
 {
 
-  int expcost = 25000, goldcost = 750, fail = false, reward = 25, goldadjust = 0, expadjust = 0;
+  int expcost = 25000, goldcost = 750, reward = 25, goldadjust = 0, expadjust = 0; bool fail = false;
 
   if (char_get_level(ch) >= 100) {
     goldadjust = 500;
@@ -1090,7 +1090,7 @@ static void handle_study(GameWorld *g, struct char_data *keeper, struct guild_da
     fail = true;
   }
 
-  if (fail == true)
+  if (fail)
     return;
 
   char_set_exp(ch, char_get_exp(ch) - (expcost));

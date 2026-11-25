@@ -172,15 +172,15 @@ void log_zone_error(GameWorld *g, struct zone_data *zone, int cmd_no, std::strin
 /* execute the reset command table of a given zone */
 void reset_zone(GameWorld *g, struct zone_data *zone)
 {
-  int cmd_no, last_cmd = 0;
+  int cmd_no; bool last_cmd = false;
   struct char_data *mob = nullptr;
   struct obj_data *obj, *obj_to;
   room_vnum rvnum;
   room_vnum rrnum;
   struct char_data *tmob = nullptr; /* for trigger assignment */
   struct obj_data *tobj  = nullptr; /* for trigger assignment */
-  int mob_load           = false;   /* ### */
-  int obj_load           = false;   /* ### */
+  bool mob_load = false;   /* ### */
+  bool obj_load = false;   /* ### */
 
   if (pre_reset(g, zone->number) == false) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
@@ -200,7 +200,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
      */
       switch (ZCMD2.command) {
         case '*': /* ignore command */
-          last_cmd = 0;
+          last_cmd = false;
           break;
 
         case 'M': /* read a mobile */
@@ -236,10 +236,10 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
             load_mtrigger(g, mob);
             tmob     = mob;
-            last_cmd = 1;
+            last_cmd = true;
             mob_load = true;
           } else
-            last_cmd = 0;
+            last_cmd = false;
           tobj = nullptr;
           break;
 
@@ -281,19 +281,19 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
 
               obj_set_room_loaded(obj, ZCMD2.arg3);
 
-              last_cmd = 1;
+              last_cmd = true;
               tobj     = load_otrigger(g, obj) ? obj : nullptr;
               obj_load = true;
             } else {
               obj = read_object(g, ZCMD2.arg1);
               add_unique_id(g, obj);
               obj_set_in_room(obj, NOWHERE);
-              last_cmd = 1;
+              last_cmd = true;
               tobj     = obj;
               obj_load = true;
             }
           } else
-            last_cmd = 0;
+            last_cmd = false;
           tmob = nullptr;
           break;
 
@@ -308,10 +308,10 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             }
             add_unique_id(g, obj);
             obj_to_obj(g, obj, obj_to);
-            last_cmd = 1;
+            last_cmd = true;
             tobj     = load_otrigger(g, obj) ? obj : nullptr;
           } else
-            last_cmd = 0;
+            last_cmd = false;
           tmob = nullptr;
           break;
 
@@ -329,10 +329,10 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             if (char_get_mob_spec(g, mob) != shop_keeper) {
               randomize_eq(g, obj);
             }
-            last_cmd = 1;
+            last_cmd = true;
             tobj     = load_otrigger(g, obj) ? obj : nullptr;
           } else
-            last_cmd = 0;
+            last_cmd = false;
           tmob = nullptr;
           break;
 
@@ -363,17 +363,17 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
                   tobj = obj;
                 }
               }
-              last_cmd = 1;
+              last_cmd = true;
             }
           } else
-            last_cmd = 0;
+            last_cmd = false;
           tmob = nullptr;
           break;
 
         case 'R': /* rem obj from room */
           if ((obj = get_obj_in_list_num(g, ZCMD2.arg2, room_get_contents(g, ZCMD2.arg1))) != nullptr)
             extract_obj(g, obj);
-          last_cmd = 1;
+          last_cmd = true;
           tmob     = nullptr;
           tobj     = nullptr;
           break;
@@ -398,7 +398,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
                 room_get_dir_option(g, ZCMD2.arg1, ZCMD2.arg2)->exit_info.set(exit_flag::closed);
                 break;
             }
-          last_cmd = 1;
+          last_cmd = true;
           tmob     = nullptr;
           tobj     = nullptr;
           break;
@@ -406,10 +406,10 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
         case 'T': /* trigger command */
           if (ZCMD2.arg1 == MOB_TRIGGER && tmob) {
             add_trigger(g, dg_ensure_script(char_script_slot(tmob)), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
-            last_cmd = 1;
+            last_cmd = true;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER && tobj) {
             add_trigger(g, dg_ensure_script(obj_script_slot(tobj)), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
-            last_cmd = 1;
+            last_cmd = true;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
             if (!room_of(g, ZCMD2.arg3)) {
               ZONE_ERROR(g, "Invalid room number in trigger assignment");
@@ -417,7 +417,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             if (!room_get_script(g, ZCMD2.arg3))
               dg_ensure_script(room_script_slot(g, ZCMD2.arg3));
             add_trigger(g, room_get_script(g, ZCMD2.arg3), read_trigger(g, find_trigger(g, ZCMD2.arg2)), -1);
-            last_cmd = 1;
+            last_cmd = true;
           }
 
           break;
@@ -429,14 +429,14 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
             } else
               add_var(char_get_script(tmob)->global_vars, ZCMD2.sarg1, ZCMD2.sarg2,
                       ZCMD2.arg3);
-            last_cmd = 1;
+            last_cmd = true;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER && tobj) {
             if (!obj_get_script(tobj)) {
               ZONE_ERROR(g, "Attempt to give variable to scriptless object");
             } else
               add_var(obj_get_script(tobj)->global_vars, ZCMD2.sarg1, ZCMD2.sarg2,
                       ZCMD2.arg3);
-            last_cmd = 1;
+            last_cmd = true;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
             if (!room_of(g, ZCMD2.arg3)) {
               ZONE_ERROR(g, "Invalid room number in variable assignment");
@@ -446,7 +446,7 @@ void reset_zone(GameWorld *g, struct zone_data *zone)
               } else
                 add_var(room_get_script(g, ZCMD2.arg3)->global_vars,
                         ZCMD2.sarg1, ZCMD2.sarg2, ZCMD2.arg2);
-              last_cmd = 1;
+              last_cmd = true;
             }
           }
           break;

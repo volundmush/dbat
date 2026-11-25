@@ -153,11 +153,11 @@ void wishSYS(GameWorld *g)
     } else {
       send_to_room(g, g->DRAGONR, "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
       room_vnum num = rand_number(g, 200, 20000);
-      int done = false, place = 1;
+      int place = 1; bool done = false;
       g->DRAGONC = 0;
       g->WISH[0] = 0;
       g->WISH[1] = 0;
-      while (done == false) {
+      while (!done) {
         switch (place) {
           case 1:
             if (room_of(g, num)) {

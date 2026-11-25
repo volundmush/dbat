@@ -938,7 +938,7 @@ void gain_exp(GameWorld *g, struct char_data *ch, int64_t gain)
 
 void gain_exp_regardless(GameWorld *g, struct char_data *ch, int64_t gain)
 {
-  int is_altered = false;
+  bool is_altered = false;
   int num_levels = 0;
 
   gain = (gain * (double)CONFIG_EXP_MULTIPLIER);
@@ -1169,7 +1169,7 @@ static void check_idling(GameWorld *g, struct char_data *ch)
 
 static void heal_limb(GameWorld *g, struct char_data *ch)
 {
-  int healrate = 0, recovered = false;
+  int healrate = 0; bool recovered = false;
 
   if (char_plr_flagged(ch, player_flag::bandaged)) {
     healrate += 10;
@@ -1256,7 +1256,7 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
       send_to_char(g, ch, "Your left leg as fully recovered.\r\n");
     }
 
-    if (!char_plr_flagged(ch, player_flag::bandaged) && recovered == true) {
+    if (!char_plr_flagged(ch, player_flag::bandaged) && recovered) {
       if (axion_dice(g, -10) > char_get_aff_abils_con(ch)) {
         char_set_real_abils_str(ch, char_get_real_abils_str(ch) - 1);
         char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) - 1);
@@ -1279,7 +1279,7 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
     }
   }
 
-  if (char_plr_flagged(ch, player_flag::bandaged) && recovered == true) {
+  if (char_plr_flagged(ch, player_flag::bandaged) && recovered) {
     char_plr_set(ch, player_flag::bandaged, false);
     send_to_char(g, ch, "You remove your bandages.\r\n");
     return;
@@ -1288,7 +1288,7 @@ static void heal_limb(GameWorld *g, struct char_data *ch)
 
 static void point_update_characters(GameWorld *g)
 {
-  int change = false;
+  bool change = false;
   for (char_data *i : each_char(g)) {
 
     if (!char_is_npc(i) && char_get_in_room(i) != NOWHERE) {

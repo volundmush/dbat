@@ -254,7 +254,7 @@ ASPELL(spell_charm)
 
 ASPELL(spell_identify)
 {
-  int i, found;
+  int i; bool found;
 
   if (obj) {
     std::string bitbuf;

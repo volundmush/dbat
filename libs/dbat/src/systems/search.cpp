@@ -426,7 +426,7 @@ find_dots find_all_dots(std::string &arg)
 std::optional<find_flag> generic_find(GameWorld *g, std::string_view arg, flag_set<find_flag> where, struct char_data *ch,
                                       struct char_data **tar_ch, struct obj_data **tar_obj)
 {
-  int i, found, number;
+  int i, number; bool found;
 
   *tar_ch  = nullptr;
   *tar_obj = nullptr;

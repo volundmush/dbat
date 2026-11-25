@@ -1123,7 +1123,7 @@ static void shopping_list(GameWorld *g, std::string_view arg, struct char_data *
 {
   std::string buf;
   struct obj_data *last_obj = nullptr;
-  int cnt = 0, lindex = 0, found = false;
+  int cnt = 0, lindex = 0; bool found = false;
   /* cnt is the number of that particular object available */
 
   if (!is_ok(g, keeper, ch, shop))

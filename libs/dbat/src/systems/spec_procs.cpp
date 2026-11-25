@@ -220,7 +220,7 @@ SPECIAL(auction)
 {
   room_vnum auct_room;
   struct obj_data *obj2 = nullptr;
-  int found = false;
+  bool found = false;
 
   /* Gross. */
   auct_room = 80;
@@ -260,14 +260,14 @@ SPECIAL(auction)
       }
     }
 
-    if (found == false) {
+    if (!found) {
       send_to_char(g, ch, "There are no items being auctioned by you.\r\n");
     }
 
     return true;
   }
   if (CMD_IS(g, "pickup")) {
-    int founded = false;
+    bool founded = false;
 
     for (obj_data *obj : room_contents(g, auct_room)) {
       if (obj && obj_get_curBidder(obj) == char_get_id(ch)) {
@@ -313,9 +313,9 @@ SPECIAL(auction)
           }
         }
 
-        if (founded == false) {
+        if (!founded) {
           struct char_data *vict = nullptr;
-          int is_file = false, player_i = 0;
+          int player_i = 0; bool is_file = false;
 
           vict = new char_data();
           clear_char(vict);
@@ -331,13 +331,13 @@ SPECIAL(auction)
 
           char_set_pfilepos(vict, player_i);
           save_char(g, vict);
-          if (is_file == true)
+          if (is_file)
             free_char(g, vict);
         }
       }
     }
 
-    if (found == false) {
+    if (!found) {
       send_to_char(g, ch, "There are no items that you have bid on.\r\n");
     }
     return true;
@@ -635,7 +635,7 @@ SPECIAL(gravity)
 {
   struct obj_data *obj = nullptr;
   std::string arg;
-  int match = false;
+  bool match = false;
 
   std::string_view rest = argument;
   arg                   = take_arg(rest);
@@ -876,7 +876,7 @@ SPECIAL(gravity)
       room_set_gravity(g, char_get_in_room(ch), 10000);
       obj_set_weight(obj, 10000);
       match = true;
-    } else if (match == false) {
+    } else if (!match) {
       send_to_char(g, ch, "That is not a proper command for this device.\r\n");
       send_to_char(g, ch, "@WGravity Commands:@n\r\n");
       send_to_char(g, ch, "@Wgravity [ 0 | N | 10 | 20 | 30 | 40 | 50 | 100 | 200 ]\r\n          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
@@ -939,7 +939,7 @@ SPECIAL(bank)
       return true;
     }
     if (!(vict = get_player_vis(g, ch, arg2, nullptr, find_flag::char_world))) {
-      int is_file = false, player_i = 0;
+      int player_i = 0; bool is_file = false;
       std::string name;
 
       vict = new char_data();
@@ -961,7 +961,7 @@ SPECIAL(bank)
       }
       if (std::ranges::any_of(char_get_desc(ch)->acct.slots, [&](const std::string &slot) { return str_eq_nocase(char_get_name(vict), slot); })) {
         send_to_char(g, ch, "You can not transfer money to your own offline characters...");
-        if (is_file == true)
+        if (is_file)
           free_char(g, vict);
         return true;
       }
@@ -970,7 +970,7 @@ SPECIAL(bank)
       char_set_pfilepos(vict, player_i);
       mudlog(g, LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(g, ch)), true, "EXCHANGE: {} gave {} zenni to user {}", char_get_name(ch), add_commas(amount), char_get_name(vict));
       save_char(g, vict);
-      if (is_file == true)
+      if (is_file)
         free_char(g, vict);
     } else {
       char_set_bank_gold(vict, char_get_bank_gold(vict) + (amount));

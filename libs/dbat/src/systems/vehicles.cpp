@@ -729,7 +729,7 @@ ACMD(do_warp)
 
 ACMD(do_drive)
 {
-  int dir, confirmed = false, count = 0;
+  int dir; bool confirmed = false, count = false;
   struct obj_data *vehicle, *controls;
   std::string arg3;
 
@@ -780,15 +780,15 @@ ACMD(do_drive)
       }
       if (char_plr_flagged(d->character, player_flag::piloting) && char_get_in_room(d->character) == char_get_in_room(ch)) {
         send_to_char(g, ch, "@w{} is already piloting the ship!\r\n", char_get_name(d->character));
-        count = 1;
+        count = true;
         return;
       }
     }
-    if (count == 0) {
+    if (!count) {
       confirmed = true;
     }
   }
-  if (confirmed == true) {
+  if (confirmed) {
     char_plr_set(ch, player_flag::piloting, true);
     act(g, "@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, act_to::room);
     char_set_position(ch, POS_SITTING);

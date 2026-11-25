@@ -38,7 +38,7 @@ static bool player_present(GameWorld *g, struct char_data *ch);
 static bool player_present(GameWorld *g, struct char_data *ch)
 {
 
-  int found = false;
+  bool found = false;
 
   if (char_get_in_room(ch) == NOWHERE)
     return false;
@@ -55,7 +55,7 @@ static bool player_present(GameWorld *g, struct char_data *ch)
 void mobile_activity(GameWorld *g)
 {
   struct obj_data *best_obj;
-  int door, found, max;
+  int door, max; bool found;
 
   for (char_data *ch : each_char(g)) {
 
@@ -240,11 +240,11 @@ void mobile_activity(GameWorld *g)
 
     /* Be helpful */ /* - temporarily disabled by the first false check */
     if (false && char_is_humanoid(ch) && !char_mob_flagged(ch, mob_flag::nokill)) {
-      int done = false;
+      bool done = false;
       for (char_data *ally : room_people(g, char_get_in_room(ch))) {
         if (ally == ch)
           continue;
-        if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && done == false) {
+        if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && !done) {
           if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(g, ally) < getCurPL(g, ch) * 0.6 && axion_dice(g, 0) >= 90) {
             act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, act_to::room);
             std::string buf = str_format("{}", char_get_name(ally));
@@ -270,11 +270,11 @@ void mobile_activity(GameWorld *g)
 
     /* Help those under attack! */ /* - temporarily disabled by the first false check */
     if (false && !char_get_fighting(g, ch) && rand_number(g, 1, 20) >= 14 && char_is_humanoid(ch) && !char_mob_flagged(ch, mob_flag::nokill)) {
-      int done = false;
+      bool done = false;
       for (char_data *ally : room_people(g, char_get_in_room(ch))) {
         if (ally == ch)
           continue;
-        if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && done == false) {
+        if (char_is_npc(ally) && race_is_people(char_get_race(ally)) && char_get_fighting(g, ally) && !done) {
           if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(g, ally) < getCurPL(g, ch) * 0.6 && axion_dice(g, 0) >= 70) {
             act(g, "@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, ally, act_to::room);
             std::string buf = str_format("{}", char_get_name(ally));

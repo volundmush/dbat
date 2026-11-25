@@ -416,13 +416,13 @@ ACMD(do_flee)
   }
 
   if (!char_is_npc(ch)) {
-    int fail = false;
+    bool fail = false;
     for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
       if (obj_get_kicharge(obj) > 0 && obj_get_user(g, obj) == ch) {
         fail = true;
       }
     }
-    if (fail == true) {
+    if (fail) {
       send_to_char(g, ch, "You are too busy controlling your attack!\r\n");
       return;
     }

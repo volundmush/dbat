@@ -140,7 +140,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
     return;
   }
 
-  int spotted = false;
+  bool spotted = false;
 
   if (char_get_skill(ch, SKILL_SPOT) > rand_number(g, 20, 110)) {
     spotted = true;
@@ -182,11 +182,11 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
         } else {
           bury = "recent grave covered by";
         }
-        if (spotted == true && room_sect(g, obj_get_in_room(obj)) != SECT_DESERT) {
+        if (spotted && room_sect(g, obj_get_in_room(obj)) != SECT_DESERT) {
           send_to_char(g, ch, "@yA {} soft dirt is here.@n\r\n", bury);
           return;
         }
-        if (spotted == true && room_sect(g, obj_get_in_room(obj)) == SECT_DESERT) {
+        if (spotted && room_sect(g, obj_get_in_room(obj)) == SECT_DESERT) {
           send_to_char(g, ch, "@YA {} soft sand is here.@n\r\n", bury);
           return;
         }
@@ -449,7 +449,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
           if (!obj_is_corpse(obj)) {
             send_to_char(g, ch, "You see nothing special..\r\n");
           } else {
-            int mention = false;
+            bool mention = false;
             send_to_char(g, ch, "This corpse has ");
 
             if (obj_get_value(obj, VAL_CORPSE_HEAD) == 0) {
@@ -489,7 +489,7 @@ void show_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch, 
               mention = true;
             }
 
-            if (mention == false) {
+            if (!mention) {
               send_to_char(g, ch, "nothing missing from it but life.");
             } else {
               send_to_char(g, ch, "and is dead.");
@@ -731,7 +731,7 @@ void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 
 void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 {
-  int j, found;
+  int j; bool found;
 
   if (!char_get_desc(ch)) {
     return;
@@ -965,7 +965,7 @@ void look_at_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 {
   struct obj_data *chair  = nullptr;
-  int count               = false;
+  bool count = false;
   static constexpr std::string_view positions[] = {
       " is dead",
       " is mortally wounded",
@@ -1261,16 +1261,16 @@ static void list_one_char(GameWorld *g, struct char_data *i, struct char_data *c
     chair = char_get_sits(g, i);
     if (char_plr_flagged(i, player_flag::healt)) {
       send_to_char(g, ch, "@w is floating inside a healing tank.");
-    } else if (count == true) {
+    } else if (count) {
       send_to_char(g, ch, ",@w and{} on {}.", positions[(int)char_get_position(i)], obj_get_short_description(chair));
-    } else if (count == false) {
+    } else if (!count) {
       send_to_char(g, ch, "@w{} on {}.", positions[(int)char_get_position(i)], obj_get_short_description(chair));
     }
   } else if (!char_plr_flagged(i, player_flag::piloting) && !char_get_sits(g, i) && (!char_is_npc(i) || !char_get_fighting(g, i))) {
-    if (count == true) {
+    if (count) {
       send_to_char(g, ch, "@w, and{}.", positions[(int)char_get_position(i)]);
     }
-    if (count == false) {
+    if (!count) {
       send_to_char(g, ch, "@w{}.", positions[(int)char_get_position(i)]);
     }
   } else if (char_plr_flagged(i, player_flag::piloting)) {

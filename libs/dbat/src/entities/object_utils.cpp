@@ -14,7 +14,7 @@
 
 bool wearable_obj(struct obj_data *obj)
 {
-  int pass = false;
+  bool pass = false;
 
   if (obj_wear_flagged(obj, wear_flag::finger))
     pass = true;
@@ -51,7 +51,7 @@ bool wearable_obj(struct obj_data *obj)
   if (obj_wear_flagged(obj, wear_flag::ear))
     pass = true;
 
-  if (pass == true)
+  if (pass)
     return true;
   else
     return false;
@@ -62,7 +62,7 @@ void randomize_eq(GameWorld *g, struct obj_data *obj)
   if (wearable_obj(obj) && !obj_extra_flagged(obj, extra_flag::norandom)) {
     int value = 0, slot = 0, roll = rand_number(g, 2, 12), slot1 = 1, slot2 = 1;
     int stat     = 0;
-    int strength = false, wisdom = false, intelligence = false, dexterity = false, speed = false, constitution = false;
+    bool strength = false, wisdom = false, intelligence = false, dexterity = false, speed = false, constitution = false;
     // Setting the strength stats
     int i;
     for (i = 0; i < 6; i++) {
@@ -259,49 +259,49 @@ void randomize_eq(GameWorld *g, struct obj_data *obj)
     }
 
     if (slot1 == 0) {
-      if (strength == false && rand_number(g, 1, 6) == 1) {
+      if (!strength && rand_number(g, 1, 6) == 1) {
         strength                  = true;
         obj->affected[0].location = 1;
         obj->affected[0].modifier = 1;
-      } else if (dexterity == false && rand_number(g, 1, 6) == 1) {
+      } else if (!dexterity && rand_number(g, 1, 6) == 1) {
         dexterity                 = true;
         obj->affected[0].location = 2;
         obj->affected[0].modifier = 1;
-      } else if (intelligence == false && rand_number(g, 1, 6) == 1) {
+      } else if (!intelligence && rand_number(g, 1, 6) == 1) {
         intelligence              = true;
         obj->affected[0].location = 3;
         obj->affected[0].modifier = 1;
-      } else if (wisdom == false && rand_number(g, 1, 6) == 1) {
+      } else if (!wisdom && rand_number(g, 1, 6) == 1) {
         wisdom                    = true;
         obj->affected[0].location = 4;
         obj->affected[0].modifier = 1;
-      } else if (constitution == false && rand_number(g, 1, 6) == 1) {
+      } else if (!constitution && rand_number(g, 1, 6) == 1) {
         constitution              = true;
         obj->affected[0].location = 5;
         obj->affected[0].modifier = 1;
-      } else if (speed == false && rand_number(g, 1, 6) == 1) {
+      } else if (!speed && rand_number(g, 1, 6) == 1) {
         speed                     = true;
         obj->affected[0].location = 6;
         obj->affected[0].modifier = 1;
       }
     }
     if (slot2 == 0 && roll >= 10) {
-      if (strength == false && rand_number(g, 1, 6) == 1) {
+      if (!strength && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 1;
         obj->affected[1].modifier = 1;
-      } else if (dexterity == false && rand_number(g, 1, 6) == 1) {
+      } else if (!dexterity && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 2;
         obj->affected[1].modifier = 1;
-      } else if (intelligence == false && rand_number(g, 1, 6) == 1) {
+      } else if (!intelligence && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 3;
         obj->affected[1].modifier = 1;
-      } else if (wisdom == false && rand_number(g, 1, 6) == 1) {
+      } else if (!wisdom && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 4;
         obj->affected[1].modifier = 1;
-      } else if (constitution == false && rand_number(g, 1, 6) == 1) {
+      } else if (!constitution && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 5;
         obj->affected[1].modifier = 1;
-      } else if (speed == false && rand_number(g, 1, 6) == 1) {
+      } else if (!speed && rand_number(g, 1, 6) == 1) {
         obj->affected[1].location = 6;
         obj->affected[1].modifier = 1;
       }

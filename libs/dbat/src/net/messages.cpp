@@ -25,7 +25,7 @@
 int arena_watch(GameWorld *g, struct char_data *ch)
 {
 
-  int found      = false;
+  bool found = false;
   room_vnum room = NOWHERE;
 
   for (descriptor_data *d : each_desc(g)) {
@@ -40,7 +40,7 @@ int arena_watch(GameWorld *g, struct char_data *ch)
     }
   }
 
-  if (found == false) {
+  if (!found) {
     char_prf_set(g, ch, pref_flag::arenawatch, false);
     char_set_arenawatch(ch, -1);
     return (NOWHERE);

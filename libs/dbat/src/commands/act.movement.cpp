@@ -459,7 +459,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, bool need_speci
     return false;
   }
 
-  int willfall = false;
+  bool willfall = false;
   /* if this room or the one we're going to needs flight, check for it */
   if ((room_sect(g, char_get_in_room(ch)) == SECT_FLYING) || (room_sect(g, char_get_exit(g, ch, dir)->to_room) == SECT_FLYING)) {
     if (!has_flight(g, ch)) {
@@ -763,7 +763,7 @@ bool do_simple_move(GameWorld *g, struct char_data *ch, int dir, bool need_speci
     char_to_room(g, ch, was_in);
     look_at_room(g, char_get_in_room(ch), ch, 0);
   } else greet_memory_mtrigger(g, ch);
-  if (willfall == true) {
+  if (willfall) {
     handle_fall(g, ch);
     if (char_get_drag(g, ch)) {
       handle_fall(g, char_get_drag(g, ch));
@@ -965,13 +965,13 @@ ACMD(do_move)
    */
   if (char_plr_flagged(ch, player_flag::piloting)) {
     struct obj_data *vehicle = nullptr, *controls = nullptr;
-    int noship = false;
+    bool noship = false;
     if (!(controls = find_control(g, ch)) && char_get_admlevel(ch) < 1) {
       noship = true;
     } else if (!(vehicle = find_vehicle_by_vnum(g, obj_get_value(controls, 0)))) {
       noship = true;
     }
-    if (noship == true) {
+    if (noship) {
       send_to_char(g, ch, "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
       return;
     }
@@ -997,13 +997,13 @@ ACMD(do_move)
     return;
   }
   if (!char_is_npc(ch)) {
-    int fail = false;
+    bool fail = false;
     for (obj_data *obj : room_contents(g, char_get_in_room(ch))) {
       if (obj_get_kicharge(obj) > 0 && obj_get_user(g, obj) == ch) {
         fail = true;
       }
     }
-    if (fail == true) {
+    if (fail) {
       send_to_char(g, ch, "You are too busy controlling your attack!\r\n");
       return;
     }
@@ -1587,13 +1587,13 @@ static bool perform_enter_obj(GameWorld *g, struct char_data *ch, struct obj_dat
     } else if ((obj_get_value(obj, VAL_PORTAL_DEST) != NOWHERE) &&
                (room_of(g, obj_get_value(obj, VAL_PORTAL_DEST)))) {
       if (obj_get_value(obj, VAL_PORTAL_DEST) >= 45000 && obj_get_value(obj, VAL_PORTAL_DEST) <= 45099) {
-        int filled = false;
+        bool filled = false;
         for (char_data *tch : room_people(g, obj_get_value(obj, VAL_PORTAL_DEST))) {
           if (tch) {
             filled = true;
           }
         }
-        if (filled == true) {
+        if (filled) {
           send_to_char(g, ch, "Only one person can fit in there at a time.\r\n");
           return (0);
         }
