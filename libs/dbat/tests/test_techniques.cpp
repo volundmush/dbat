@@ -8,6 +8,7 @@
  *   --full writes the players' saved files out whole, where otherwise each is a hash;
  *   --shard runs every Nth attack from the Kth (the scenes count after the attacks).
  */
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -52,12 +53,15 @@
 constexpr time_t TRANSCRIPT_TIME = 1800000000;
 constexpr int CASE_SECONDS       = 10;
 
-static const struct {
+namespace {
+struct attacks_entry {
   const char *command;
   int skill;  /* 0 for none */
   void (*beast)(GameWorld *, struct char_data *, std::string_view, int, int); /* only mobs make it, when they fight, by this: a critter makes it in the attacker's place */
   bool area;  /* it catches everyone, and takes no target: just the charge */
-} attacks[] = {
+};
+}
+static const auto attacks = std::to_array<attacks_entry>({
     {"barrage",       SKILL_PBARRAGE     },
     {"scatter",       SKILL_SCATTER      },
     {"kakusanha",     SKILL_KAKUSANHA, nullptr, true},
@@ -124,28 +128,31 @@ static const struct {
     {"breath",        0,                  do_breath},
     {"ram",           0,                  do_ram},
     {"strike",        0,                  do_strike},
-};
+});
 
 /* who attacks: race and sensei decide what some attacks can do */
-static const struct {
+namespace {
+struct attackers_entry {
   const char *name;
   int race, sensei;
   bool armed; /* wields the fixture's sword, for the slashes */
-} attackers[] = {
+};
+}
+static const auto attackers = std::to_array<attackers_entry>({
     {"Hugo",  RACE_HUMAN,  CLASS_ROSHI,   false},
     {"Sayla", RACE_SAIYAN, CLASS_BARDOCK, false},
     {"Icor",  RACE_ICER,   CLASS_FRIEZA,  false},
     {"Blade", RACE_HUMAN,  CLASS_TAPION,  true },
-};
+});
 
 /* the target, typed after the command; empty means none, while fighting the dummy */
-static const char *const targets[] = {"namek", "dummy", "chest", ""}; /* players know each other by race */
+static const auto targets = std::to_array<const char *const>({"namek", "dummy", "chest", ""}); /* players know each other by race */
 
 /* the share of the charge to use, after the target: all of it kills, a little often doesn't */
-static const char *const charges[] = {"", "5"};
+static const auto charges = std::to_array<const char *const>({"", "5"});
 
-static const int skill_levels[] = {35, 75, 100};
-static const int defences[]     = {0, 100}; /* the victim's block, dodge and parry */
+static const auto skill_levels = std::to_array<int>({35, 75, 100});
+static const auto defences = std::to_array<int>({0, 100}); /* the victim's block, dodge and parry */
 constexpr int PERFECTIONS       = 4;
 constexpr int SEEDS             = 2;
 
@@ -157,12 +164,13 @@ constexpr int SEEDS             = 2;
  * Situations the grid never sets up, each tried with every attack, attacker and perfection: the checks before an
  * attack, and the ways out of one (a defender, zanzoken, an android's absorbing, a clean miss).
  */
-static const struct situation {
+struct situation {
   const char *name;
   const char *target; /* "" for none */
   bool fighting;      /* fighting the dummy when it starts */
   void (*setup)(GameWorld *g, struct char_data *att, struct char_data *victim, int skill);
-} situations[] = {
+};
+static const auto situations = std::to_array<situation>({
     {"unskilled",         "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int skill) { if (skill) char_set_skills_base(att, skill, 0); }                                           },
     {"no target",         "",        false, [](GameWorld *,  char_data *,    char_data *,       int) {}                                                  },
     {"low charge",        "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int) { char_set_charge(att, 1); }                        },
@@ -229,7 +237,7 @@ static const struct situation {
     {"newbie victim",     "namek",   false, [](GameWorld *,  char_data *,    char_data *victim, int) { char_set_class_level(victim, 5); }                 },
     {"dead victim",       "namek",   false, [](GameWorld *,  char_data *,    char_data *victim, int) { char_aff_set(victim, aff_flag::spirit, true); }          },
     {"hiding",            "namek",   false, [](GameWorld *,  char_data *att, char_data *,       int) { char_aff_set(att, aff_flag::hide, true); }              },
-};
+});
 constexpr int SITUATION_SEEDS = 3;
 
 /* All the scenes, in order */
@@ -272,7 +280,7 @@ static void play(GameWorld *g, struct char_data *att, struct char_data *victim, 
     beast = att = read_mobile(g, 310);
     char_to_room(g, att, ARENA);
   }
-  struct char_data *chars[] = {beast ? victim : att, victim};
+  auto chars = std::to_array<char_data *>({beast ? victim : att, victim});
   size_t n_chars            = beast ? 1 : 2;
 
   circle_srandom(g, seed);
@@ -309,18 +317,18 @@ static void play(GameWorld *g, struct char_data *att, struct char_data *victim, 
   if (world_audit(g, audit_problem, nullptr))
     th_exit(3);
   if (transcript)
-    th_write_case_record(g, chars, n_chars, full_saves);
+    th_write_case_record(g, chars.data(), n_chars, full_saves);
   fflush(stdout);
 }
 
 /* Runs play() in a child, with its output to a file, and records what it said under what */
 template <class Play> static void fork_case(const std::string &what, Play play)
 {
-  char report[64];
+  std::array<char, 64> report;
   int status;
   pid_t pid;
 
-  snprintf(report, sizeof(report), "case-%ld.txt", (long)getpid());
+  snprintf(report.data(), sizeof(report), "case-%ld.txt", (long)getpid());
   cases++;
   fflush(nullptr);
   if ((pid = fork()) < 0) {
@@ -328,7 +336,7 @@ template <class Play> static void fork_case(const std::string &what, Play play)
     exit(2);
   }
   if (pid == 0) {
-    int fd = open(report, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int fd = open(report.data(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
     dup2(fd, STDOUT_FILENO);
     dup2(fd, STDERR_FILENO);
@@ -339,12 +347,12 @@ template <class Play> static void fork_case(const std::string &what, Play play)
   waitpid(pid, &status, 0);
   int outcome = WIFEXITED(status) ? WEXITSTATUS(status) : -WTERMSIG(status);
   if (transcript) {
-    file_print(transcript, "######## {} | {:d}\n{}", what, outcome, th_file_text(report));
+    file_print(transcript, "######## {} | {:d}\n{}", what, outcome, th_file_text(report.data()));
     fflush(transcript);
   }
   if (outcome) {
     failures++;
-    file_print(stdout, "FAIL ({:d}): {}\n{}", outcome, what, th_file_text(report));
+    file_print(stdout, "FAIL ({:d}): {}\n{}", outcome, what, th_file_text(report.data()));
   }
 }
 
@@ -363,7 +371,7 @@ static void play_scene(GameWorld *g, struct char_data *att, struct char_data *vi
 {
   std::string name          = "dummy";
   struct char_data *dummy   = get_char_room_vis(g, att, name, nullptr);
-  struct char_data *chars[] = {att, victim, cast.helper};
+  auto chars = std::to_array<char_data *>({att, victim, cast.helper});
 
   if (sc.by_mob) { /* with no descriptor, it sees nothing and saves nothing: the rooms' record has it */
     att = read_mobile(g, 310);
@@ -391,7 +399,7 @@ static void play_scene(GameWorld *g, struct char_data *att, struct char_data *vi
   if (world_audit(g, audit_problem, nullptr))
     th_exit(3);
   if (transcript)
-    th_write_case_record(g, chars, sc.by_mob ? 2 : 3, full_saves);
+    th_write_case_record(g, chars.data(), sc.by_mob ? 2 : 3, full_saves);
   fflush(stdout);
 }
 
@@ -434,8 +442,8 @@ int main(int argc, char **argv)
 
   GameWorld *g                 = th_boot_at(TRANSCRIPT_TIME);
   struct char_data *victim     = th_player_as(g, "Victim", ADMLVL_NONE, RACE_NAMEK, CLASS_PICCOLO);
-  constexpr size_t n_attackers = sizeof(attackers) / sizeof(*attackers);
-  struct char_data *att[n_attackers];
+  constexpr size_t n_attackers = attackers.size();
+  std::array<char_data *, n_attackers> att;
 
   char_set_class_level(victim, 20); /* past the newbie shield */
   place(g, victim, ARENA);
@@ -455,7 +463,7 @@ int main(int argc, char **argv)
   place(g, cast.android, 300);
   th_take_output(g, cast.android);
 
-  for (int a = 0; a < (int)(sizeof(attacks) / sizeof(*attacks)); a++) {
+  for (int a = 0; a < (int)(attacks.size()); a++) {
     if (a % shards != shard || (only && strcmp(only, attacks[a].command)))
       continue;
     for (size_t who = 0; who < n_attackers; who++)
@@ -474,7 +482,7 @@ int main(int argc, char **argv)
             run_case(g, att[who], victim, a, 75, perf, 0, sit.target, "", &sit, seed);
           }
   }
-  constexpr int n_attacks = sizeof(attacks) / sizeof(*attacks);
+  constexpr int n_attacks = attacks.size();
   for (int i = 0; i < (int)scenes.size(); i++) {
     std::string_view command = scenes[i].by_mob ? "attack" : std::string_view(scenes[i].line).substr(0, std::string_view(scenes[i].line).find(' '));
     if ((n_attacks + i) % shards != shard || (only && command != only))

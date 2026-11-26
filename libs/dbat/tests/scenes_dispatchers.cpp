@@ -1,8 +1,9 @@
 /* Scenes for test_techniques: see scene_kit.hpp */
+#include <array>
 #include "scene_kit.hpp"
 
 namespace {
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* focus: each buff on the user and on another, and the rest */
     {"nothing", "focus", false, SETUP(focuses(att, 70);)},
     {"something unknown", "focus nothing", false, SETUP(focuses(att, 70);)},
@@ -1183,7 +1184,7 @@ namespace {
     {"implementor, with a death trap", "game death", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); room_set_flag(g, 5, room_flag::death, true);), false, 1},
     {"implementor, with a godroom", "game godrooms", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); room_set_flag(g, 5, room_flag::godroom, true); room_set_flag(g, 6, room_flag::godroom, true);), false, 1},
     {"implementor, multiclassing", "game player Sayla", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); g->config_info.advance.allow_multiclass = 1;), false, 1},
-  };
+  });
 } // namespace
 
 extern const std::span<const scene> SCENES_DISPATCHERS = list;

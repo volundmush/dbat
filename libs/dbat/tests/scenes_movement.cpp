@@ -1,4 +1,5 @@
 /* Scenes for test_techniques: see scene_kit.hpp. These are act.movement.cpp's. */
+#include <array>
 #include "scene_kit.hpp"
 
 #include "dbat/act.movement.hpp"
@@ -125,7 +126,7 @@ namespace {
     char_set_limb_condition(ch, 3, ll);
   }
 
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* carry */
     {"dragging someone", "carry namek", false, SETUP(dragging(att, victim);), false, 1},
     {"piloting", "carry namek", false, SETUP(char_plr_set(att, player_flag::piloting, true);), false, 1},
@@ -617,7 +618,7 @@ namespace {
     {"following", "follow self", false, SETUP(add_follower(g, att, victim);), false, 1},
     {"followed", "follow namek", false, SETUP(add_follower(g, victim, att);), false, 1},
     {"following another", "follow namek", false, SETUP(add_follower(g, att, cast.helper);), false, 1},
-  };
+  });
 } // namespace
 
 const std::span<const scene> SCENES_MOVEMENT = list;

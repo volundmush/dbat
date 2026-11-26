@@ -153,7 +153,7 @@ namespace {
       {'V', VARIABLE, false, true,  true },
   });
 
-  int reset_com::*const ARGS[] = {nullptr, &reset_com::arg1, &reset_com::arg2, &reset_com::arg3, &reset_com::arg4, &reset_com::arg5};
+  const auto ARGS = std::to_array<int reset_com::*>({nullptr, &reset_com::arg1, &reset_com::arg2, &reset_com::arg3, &reset_com::arg4, &reset_com::arg5});
 
   /* What a reset command's arg1 says the thing is: a mobile, object or room */
   std::string_view attached_to(int type)

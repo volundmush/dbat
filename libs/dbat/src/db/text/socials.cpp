@@ -36,13 +36,13 @@
 namespace {
 
 /* A social's messages in the order the file has them; the old form has the first 8 */
-constexpr social_message social_messg::*messages[] = {
+constexpr auto messages = std::to_array<social_message social_messg::*>({
     &social_messg::char_no_arg,     &social_messg::others_no_arg,     &social_messg::char_found,
     &social_messg::others_found,    &social_messg::vict_found,        &social_messg::not_found,
     &social_messg::char_auto,       &social_messg::others_auto,       &social_messg::char_body_found,
     &social_messg::others_body_found, &social_messg::vict_body_found, &social_messg::char_obj_found,
     &social_messg::others_obj_found,
-};
+});
 constexpr int old_form_messages = 8;
 
 /* fgets(buf, MAX_STRING_LENGTH), as the socials were read */

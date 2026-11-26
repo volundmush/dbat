@@ -434,14 +434,17 @@ ACMD(do_commune)
 
 namespace {
   /* The poses struck, as the user and the room see them */
-  constexpr struct {
+  namespace {
+struct poses_entry {
     std::string_view to_char, to_room;
-  } POSES[] = {
+  };
+}
+  constexpr auto POSES = std::to_array<poses_entry>({
       {"@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", "@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n"},
       {"@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", "@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n"},
       {"@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", "@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n"},
       {"@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", "@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n"},
-  };
+  });
 } // namespace
 
 ACMD(do_pose)

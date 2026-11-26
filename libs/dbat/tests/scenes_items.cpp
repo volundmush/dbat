@@ -1,4 +1,5 @@
 /* Scenes for test_techniques: see scene_kit.hpp. These are act.item.cpp's: refuel to remove. */
+#include <array>
 #include "scene_kit.hpp"
 
 #include "dbat/act.item.hpp"
@@ -359,7 +360,7 @@ namespace {
       wearable(g, att, "garment", wear);
   }
 
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* garden: what harvest_plant yields */
     {"a master in rich soil, by ripe herbs", "garden seedling harvest", false, SETUP(ripe(g, att, 100, 250, 8);), false, 1},
     {"a great gardener in good soil, by ripe herbs", "garden seedling harvest", false, SETUP(ripe(g, att, 90, 250, 5);), false, 2},
@@ -976,7 +977,7 @@ namespace {
     {"wearing a ring of strength", "remove ring", false, SETUP({ obj_data *r = make(g, {.name = "ring", .wear = {wear_flag::finger}}); obj_get_affected(r)[0].location = APPLY_STR; obj_get_affected(r)[0].modifier = 20; equip_char(g, att, r, WEAR_FINGER_R); restoreVitals(att, false); }), false, 1},
     {"wearing a ring of might", "remove ring", false, SETUP({ obj_data *r = make(g, {.name = "ring", .wear = {wear_flag::finger}}); obj_get_affected(r)[0].location = APPLY_HIT; obj_get_affected(r)[0].modifier = 50000; equip_char(g, att, r, WEAR_FINGER_R); restoreVitals(att, false); }), false, 1},
     {"two-handing", "remove sword", false, SETUP(wield(g, att, TYPE_SLASH - TYPE_HIT); two_handed(att, 50);), false, 1},
-  };
+  });
 } // namespace
 
 const std::span<const scene> SCENES_ITEMS = list;

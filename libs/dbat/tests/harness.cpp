@@ -1,3 +1,4 @@
+#include <array>
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
@@ -35,16 +36,16 @@ extern "C" void __gcov_dump(void);
 
 constexpr room_vnum MAP_ROOM = 300;
 
-static char temp_dir[PATH_MAX];
+static std::array<char, PATH_MAX> temp_dir;
 static const char *world_source = nullptr;
 
 static void run(const char *format, const char *a, const char *b)
 {
-  char cmd[PATH_MAX * 2 + 64];
+  std::array<char, PATH_MAX * 2 + 64> cmd;
 
-  snprintf(cmd, sizeof(cmd), format, a, b);
-  if (system(cmd) != 0) {
-    file_print(stderr, "harness: '{}' failed\n", cmd);
+  snprintf(cmd.data(), sizeof(cmd), format, a, b);
+  if (system(cmd.data()) != 0) {
+    file_print(stderr, "harness: '{}' failed\n", cmd.data());
     exit(2);
   }
 }
@@ -95,25 +96,25 @@ GameWorld *th_boot(void)
 GameWorld *th_boot_at(time_t when)
 {
   const char *tmp = getenv("TMPDIR");
-  char data_dir[PATH_MAX + 8];
+  std::array<char, PATH_MAX + 8> data_dir;
 
-  snprintf(temp_dir, sizeof(temp_dir), "%s/dbat-test.XXXXXX", tmp ? tmp : "/tmp");
-  if (!mkdtemp(temp_dir)) {
+  snprintf(temp_dir.data(), sizeof(temp_dir), "%s/dbat-test.XXXXXX", tmp ? tmp : "/tmp");
+  if (!mkdtemp(temp_dir.data())) {
     perror("harness: mkdtemp");
     exit(2);
   }
   /* in a directory called data, because the game opens ../data/surface.map */
-  snprintf(data_dir, sizeof(data_dir), "%s/data", temp_dir);
-  if (mkdir(data_dir, 0755) < 0) {
+  snprintf(data_dir.data(), sizeof(data_dir), "%s/data", temp_dir.data());
+  if (mkdir(data_dir.data(), 0755) < 0) {
     perror("harness: mkdir");
     exit(2);
   }
   if (world_source)
     /* these two are large, and the game doesn't read them */
-    run("tar -C '%s' --exclude=./assets.sqlite3 --exclude=./state -cf - . | tar -C '%s' -xf -", world_source, data_dir);
+    run("tar -C '%s' --exclude=./assets.sqlite3 --exclude=./state -cf - . | tar -C '%s' -xf -", world_source, data_dir.data());
   else
-    run("cp -r '%s/.' '%s'", DBAT_TEST_FIXTURE, data_dir);
-  if (chdir(data_dir) < 0) {
+    run("cp -r '%s/.' '%s'", DBAT_TEST_FIXTURE, data_dir.data());
+  if (chdir(data_dir.data()) < 0) {
     perror("harness: chdir");
     exit(2);
   }
@@ -168,11 +169,11 @@ void th_shutdown(GameWorld *g)
 {
   free_game(g);
   if (getenv("TH_KEEP")) { /* for looking at what a run left behind */
-    file_print(stdout, "kept {}\n", temp_dir);
+    file_print(stdout, "kept {}\n", temp_dir.data());
     return;
   }
   if (chdir("/") == 0)
-    run("rm -rf '%s'%s", temp_dir, "");
+    run("rm -rf '%s'%s", temp_dir.data(), "");
 }
 
 void th_before_boot(void (*hook)(void))
@@ -193,7 +194,7 @@ void th_abandon(void)
     logfile = nullptr;
   }
   if (chdir("/") == 0)
-    run("rm -rf '%s'%s", temp_dir, "");
+    run("rm -rf '%s'%s", temp_dir.data(), "");
 }
 
 void th_stop(GameWorld *g)
@@ -275,9 +276,9 @@ struct char_data *th_player_as(GameWorld *g, const char *name, int admlevel, int
 
 struct descriptor_data *th_connect(GameWorld *g, int *peer)
 {
-  int ends[2];
+  std::array<int, 2> ends;
 
-  if (socketpair(AF_UNIX, SOCK_STREAM, 0, ends) < 0) {
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, ends.data()) < 0) {
     perror("harness: socketpair");
     exit(2);
   }
@@ -313,11 +314,11 @@ void th_type(GameWorld *g, struct char_data *ch, const char *line)
 
 void th_type_at(GameWorld *g, struct descriptor_data *d, const char *line)
 {
-  char limited[MAX_INPUT_LENGTH];
+  std::array<char, MAX_INPUT_LENGTH> limited;
 
   /* process_input() never lets a longer line through */
-  snprintf(limited, sizeof(limited), "%s", line);
-  write_to_q(limited, &d->input, false);
+  snprintf(limited.data(), sizeof(limited), "%s", line);
+  write_to_q(limited.data(), &d->input, false);
   if (d->character)
     char_set_wait(d->character, 0);
   game_process_commands(g);
@@ -396,12 +397,12 @@ void th_pulses(GameWorld *g, int n)
 std::string th_file_text(const char *path)
 {
   std::string text;
-  char chunk[4096];
+  std::array<char, 4096> chunk;
   size_t n;
 
   if (FILE *fl = fopen(path, "r")) {
-    while ((n = fread(chunk, 1, sizeof(chunk), fl)) > 0)
-      text.append(chunk, n);
+    while ((n = fread(chunk.data(), 1, sizeof(chunk), fl)) > 0)
+      text.append(chunk.data(), n);
     fclose(fl);
   }
   return text;

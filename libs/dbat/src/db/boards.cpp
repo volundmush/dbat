@@ -45,18 +45,19 @@
 
 
 /* Boards whose new posts are announced, and whose last visit is kept in the player's lboard[]. */
-static const struct special_board {
+struct special_board {
   obj_vnum vnum;
   int lboard;                /* index into char lboard[] */
   time_t GameWorld::*newest; /* where in GameWorld the time of the newest post is kept */
   bool admin_only;           /* announce to admins only */
   std::string_view label{};
-} special_boards[] = {
+};
+static const auto special_boards = std::to_array<special_board>({
     {3092, 0, &GameWorld::BOARDNEWMORT, false, "Mortal"    },
     {3098, 1, &GameWorld::BOARDNEWIMM,  true,  "Immortal"  },
     {3099, 3, &GameWorld::BOARDNEWDUO,  true,  "Punishment"},
     {3090, 4, &GameWorld::BOARDNEWBUI,  true,  "Builder"   },
-};
+});
 
 static const struct special_board *find_special_board(obj_vnum vnum)
 {

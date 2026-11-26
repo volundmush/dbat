@@ -17,6 +17,7 @@
  * The test reaches the engine only through the dispatchers, the attach and detach commands and the event queue,
  * so that the same source builds against the old engine and the new.
  */
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -120,10 +121,10 @@ namespace {
           j++;
         if (++j >= lines.size())
           break;
-        char flags[128] = "";
-        if (sscanf(lines[j].c_str(), "%d %127s %d", &t.attach, flags, &t.narg) < 2)
+        std::array<char, 128> flags = {};
+        if (sscanf(lines[j].c_str(), "%d %127s %d", &t.attach, flags.data(), &t.narg) < 2)
           continue;
-        t.types = io::ascii_flags(flags, 0, "asciiflag_conv");
+        t.types = io::ascii_flags(flags.data(), 0, "asciiflag_conv");
         std::string args;
         for (j++; j < lines.size(); j++) { /* the argument list */
           size_t tilde = lines[j].find('~');
@@ -357,18 +358,20 @@ namespace {
   {
     struct char_data *mob = owner_mob(g, s);
     std::string words     = words_for(s.t);
-    char text[MAX_INPUT_LENGTH], cmd[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH] = "";
-    snprintf(text, sizeof(text), "%s", words.c_str());
-    snprintf(cmd, sizeof(cmd), "%s", first_word(words).c_str());
+    std::array<char, MAX_INPUT_LENGTH> text;
+    std::array<char, MAX_INPUT_LENGTH> cmd;
+    std::array<char, MAX_INPUT_LENGTH> arg = {};
+    snprintf(text.data(), sizeof(text), "%s", words.c_str());
+    snprintf(cmd.data(), sizeof(cmd), "%s", first_word(words).c_str());
 
     switch (type) {
       case bit_of<mob_trig::random>: random_mtrigger(g, mob); return "ran";
-      case bit_of<mob_trig::command>: return str_format("{:d}", (int)command_mtrigger(g, s.actor, cmd, arg));
-      case bit_of<mob_trig::speech>: speech_mtrigger(g, s.actor, text); return "ran";
+      case bit_of<mob_trig::command>: return str_format("{:d}", (int)command_mtrigger(g, s.actor, cmd.data(), arg.data()));
+      case bit_of<mob_trig::speech>: speech_mtrigger(g, s.actor, text.data()); return "ran";
       case bit_of<mob_trig::act>: { /* as act() sends it, ending in a line break */
-        char line[MAX_INPUT_LENGTH + 2];
-        snprintf(line, sizeof(line), "%s\r\n", words.c_str());
-        act_mtrigger(g, mob, line, s.actor, s.witness, s.prop, nullptr, "");
+        std::array<char, MAX_INPUT_LENGTH + 2> line;
+        snprintf(line.data(), sizeof(line), "%s\r\n", words.c_str());
+        act_mtrigger(g, mob, line.data(), s.actor, s.witness, s.prop, nullptr, "");
         return "ran";
       }
       case bit_of<mob_trig::death>: return str_format("{:d}", int(death_mtrigger(g, mob, s.actor) != 0));
@@ -397,12 +400,13 @@ namespace {
   {
     struct obj_data *obj = owner_obj(g, s);
     std::string words    = words_for(s.t);
-    char cmd[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH] = "";
-    snprintf(cmd, sizeof(cmd), "%s", first_word(words).c_str());
+    std::array<char, MAX_INPUT_LENGTH> cmd;
+    std::array<char, MAX_INPUT_LENGTH> arg = {};
+    snprintf(cmd.data(), sizeof(cmd), "%s", first_word(words).c_str());
 
     switch (type) {
       case bit_of<obj_trig::random>: random_otrigger(g, obj); return "ran";
-      case bit_of<obj_trig::command>: return str_format("{:d}", (int)command_otrigger(g, s.actor, cmd, arg));
+      case bit_of<obj_trig::command>: return str_format("{:d}", (int)command_otrigger(g, s.actor, cmd.data(), arg.data()));
       case bit_of<obj_trig::timer>: timer_otrigger(g, obj); return "ran";
       case bit_of<obj_trig::get>: return str_format("{:d}", int(get_otrigger(g, obj, s.actor) != 0));
       case bit_of<obj_trig::drop>: return str_format("{:d}", int(drop_otrigger(g, obj, s.actor) != 0));
@@ -422,14 +426,16 @@ namespace {
   {
     struct room_data *room = room_of(g, s.room);
     std::string words      = words_for(s.t);
-    char text[MAX_INPUT_LENGTH], cmd[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH] = "";
-    snprintf(text, sizeof(text), "%s", words.c_str());
-    snprintf(cmd, sizeof(cmd), "%s", first_word(words).c_str());
+    std::array<char, MAX_INPUT_LENGTH> text;
+    std::array<char, MAX_INPUT_LENGTH> cmd;
+    std::array<char, MAX_INPUT_LENGTH> arg = {};
+    snprintf(text.data(), sizeof(text), "%s", words.c_str());
+    snprintf(cmd.data(), sizeof(cmd), "%s", first_word(words).c_str());
 
     switch (type) {
       case bit_of<wld_trig::random>: random_wtrigger(g, room); return "ran";
-      case bit_of<wld_trig::command>: return str_format("{:d}", int(command_wtrigger(g, s.actor, cmd, arg) != 0));
-      case bit_of<wld_trig::speech>: speech_wtrigger(g, s.actor, text); return "ran";
+      case bit_of<wld_trig::command>: return str_format("{:d}", int(command_wtrigger(g, s.actor, cmd.data(), arg.data()) != 0));
+      case bit_of<wld_trig::speech>: speech_wtrigger(g, s.actor, text.data()); return "ran";
       case bit_of<wld_trig::reset>: reset_wtrigger(g, room); return "ran";
       case bit_of<wld_trig::enter>: return str_format("{:d}", int(enter_wtrigger(g, room, s.actor, 0) != 0));
       case bit_of<wld_trig::drop>: return s.prop ? str_format("{:d}", int(drop_wtrigger(g, s.prop, s.actor) != 0)) : "no prop";
@@ -546,8 +552,8 @@ namespace {
       run_queue(g);
     }
 
-    struct char_data *people[] = {s.actor, s.witness};
-    th_write_case_record(g, people, 2, false);
+    auto people = std::to_array<char_data *>({s.actor, s.witness});
+    th_write_case_record(g, people.data(), 2, false);
     save_char_vars(g, s.actor);
     if (std::optional<std::string> path = player_path(SCRIPT_VARS_FILE, "Actor"))
       file_print(stdout, "== Actor's variables:\n{}", th_file_text(path->c_str()));
@@ -583,9 +589,9 @@ namespace {
 
   void run(GameWorld *g, const trigger &t)
   {
-    char report[64];
+    std::array<char, 64> report;
     int status;
-    snprintf(report, sizeof(report), "case-%ld.txt", (long)getpid());
+    snprintf(report.data(), sizeof(report), "case-%ld.txt", (long)getpid());
     cases++;
     fflush(nullptr);
     pid_t pid = fork();
@@ -594,15 +600,15 @@ namespace {
       exit(2);
     }
     if (pid == 0) {
-      int fd = open(report, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      int fd = open(report.data(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
       dup2(fd, STDOUT_FILENO);
       alarm(CASE_SECONDS);
       play(g, t);
       th_exit(0);
     }
     waitpid(pid, &status, 0);
-    std::string text = th_file_text(report);
-    unlink(report);
+    std::string text = th_file_text(report.data());
+    unlink(report.data());
     int outcome = WIFEXITED(status) ? WEXITSTATUS(status) : -WTERMSIG(status);
     if (transcript) {
       file_print(transcript, "######## trigger {:d} | {:d}\n{}", t.vnum, outcome, text);

@@ -5,6 +5,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
+#include <array>
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -27,11 +28,14 @@
 #include "dbat/olc/commands.hpp"
 
 /* Structure defining all known save types.  */
-static struct {
+namespace {
+struct save_types_entry {
   int save_type;
   bool (*func)(GameWorld *g, struct zone_data *zone);
   std::string_view message{};
-} save_types[] = {
+};
+}
+static auto save_types = std::to_array<save_types_entry>({
     {SL_MOB, save_mobiles, "mobile"},
     {SL_OBJ, save_objects, "object"},
     {SL_SHP, save_shops,   "shop"  },
@@ -42,7 +46,7 @@ static struct {
     {SL_ACT, nullptr,      "social"},
     {SL_HLP, nullptr,      "help"  },
     {-1,     nullptr,      {}      },
-};
+});
 
 std::optional<std::string> npc_msg_format_problem(std::string_view msg, bool allow_int)
 {

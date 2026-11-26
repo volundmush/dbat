@@ -123,15 +123,18 @@ constexpr auto STATS = std::to_array<trained_stat>({
 constexpr size_t N_STATS = std::size(STATS);
 
 /* Some races need more (or less) training for some stats: shares of the usual, in STATS' order */
-constexpr struct {
+namespace {
+struct race_shares_entry {
   bool (*is)(const struct char_data *);
   std::array<double, N_STATS> share;
-} RACE_SHARES[] = {
+};
+}
+constexpr auto RACE_SHARES = std::to_array<race_shares_entry>({
     {char_is_human, {1, 1, 1, 0.75, 0.75, 1}},
     {char_is_kanassan, {1, 1, 1, 0.4, 0.4, 0.4}},
     {char_is_halfbreed, {0.75, 1, 1, 0.75, 1, 1}},
     {char_is_truffle, {1.5, 1, 1.5, 1, 1, 1}},
-};
+});
 
 /* The training a stat takes to go up by one */
 int training_needed(struct char_data *ch, size_t stat)
@@ -158,23 +161,29 @@ void training_status(GameWorld *g, struct char_data *ch, int64_t weight)
 }
 
 /* How much more a sensei makes of training, by the student's level: the first row they reach */
-constexpr struct {
+namespace {
+struct sensei_mults_entry {
   int level;
   int64_t mult;
-} SENSEI_MULTS[] = {{100, 15000}, {80, 1500}, {40, 600}, {20, 300}, {10, 150}};
+};
+}
+constexpr auto SENSEI_MULTS = std::to_array<sensei_mults_entry>({{100, 15000}, {80, 1500}, {40, 600}, {20, 300}, {10, 150}});
 
 /* How hard the training is (its weight against the trainee's power level), from the easiest that counts */
-constexpr struct {
+namespace {
+struct gains_entry {
   int gain;
   std::string_view feel{};
   int wait;
-} GAINS[] = {
+};
+}
+constexpr auto GAINS = std::to_array<gains_entry>({
     {5, "slight improvement.", PULSE_3SEC},
     {10, "some improvement.", PULSE_3SEC},
     {25, "good improvement.", PULSE_3SEC},
     {50, "great improvement!", PULSE_5SEC},
     {100, "awesome improvement!", PULSE_5SEC},
-};
+});
 
 /* 0 for too easy to count, or 1 + the row of GAINS */
 int training_difficulty(GameWorld *g, struct char_data *ch, int64_t total)
@@ -477,13 +486,16 @@ int body_workout(GameWorld *g, struct char_data *ch, int gravity, std::string_vi
 }
 
 /* How the cost measures up against the exerciser's most: the first row it fits, or else just right */
-constexpr struct {
+namespace {
+struct challenges_entry {
   int64_t share; /* of the most */
   bool at_least; /* or less than */
   int mult;      /* or, if negative, divide */
   std::string_view how;
   bool ellipsis;
-} CHALLENGES[] = {
+};
+}
+constexpr auto CHALLENGES = std::to_array<challenges_entry>({
     {2, true, 10, "a great challenge for you!", false},
     {4, true, 8, "an awesome challenge for you!", false},
     {10, true, 6, "a good challenge for you!", false},
@@ -492,7 +504,7 @@ constexpr struct {
     {50, false, -4, "definitely not a challenge for you", true},
     {30, false, -3, "barely a challenge for you", true},
     {20, false, -2, "hardly a challenge for you", true},
-};
+});
 
 /* what is "This gravity is" or the like; ellipsis ends the easy ones and the just right */
 template <class T>
@@ -539,9 +551,12 @@ template <class T> void place_bonus(GameWorld *g, struct char_data *ch, T &bonus
 }
 
 /* How long one exercise takes, by the gravity: the first row it's within, or none past them */
-constexpr struct {
+namespace {
+struct exercise_waits_entry {
   int gravity, wait;
-} EXERCISE_WAITS[] = {{50, PULSE_2SEC}, {200, PULSE_3SEC}, {500, PULSE_4SEC}, {1000, PULSE_5SEC}, {5000, PULSE_6SEC}, {10000, PULSE_7SEC}};
+};
+}
+constexpr auto EXERCISE_WAITS = std::to_array<exercise_waits_entry>({{50, PULSE_2SEC}, {200, PULSE_3SEC}, {500, PULSE_4SEC}, {1000, PULSE_5SEC}, {5000, PULSE_6SEC}, {10000, PULSE_7SEC}});
 
 void exercise_wait(struct char_data *ch, int gravity)
 {

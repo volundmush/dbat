@@ -1,4 +1,5 @@
 /* Scenes for test_techniques: see scene_kit.hpp */
+#include <array>
 #include "scene_kit.hpp"
 
 #include "dbat/act.misc.hpp"
@@ -167,7 +168,7 @@ namespace {
     holding_as(g, att, "ash", 1305);
   }
 
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* misc/songs.cpp: song, and the verses the pulse plays */
     {"unskilled", "song", false, SETUP(), false, 1},
     {"a musician without an instrument", "song", false, SETUP(musician(g, att, 100, 0);), false, 1},
@@ -797,7 +798,7 @@ namespace {
     {"decapitating with a club", "decapitate corpse", false, SETUP(wield(g, att, TYPE_BLUDGEON - TYPE_HIT); thing_here(g, "corpse Bob", ITEM_CONTAINER, {{VAL_CORPSE_HEAD, 1}});), false, 1},
     {"decapitating with a dagger in the other hand", "decapitate corpse", false, SETUP(off_hand(g, att, TYPE_STAB - TYPE_HIT); thing_here(g, "corpse Bob", ITEM_CONTAINER, {{VAL_CORPSE_HEAD, 1}});), false, 1},
     {"decapitating with a club in the other hand", "decapitate corpse", false, SETUP(off_hand(g, att, TYPE_BLUDGEON - TYPE_HIT); thing_here(g, "corpse Bob", ITEM_CONTAINER, {{VAL_CORPSE_HEAD, 1}});), false, 1},
-  };
+  });
 } // namespace
 
 extern const std::span<const scene> SCENES_MISC = list;

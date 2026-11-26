@@ -2,6 +2,7 @@
  * Reads a damaged save file for one player, in one game that keeps running: the first byte picks the
  * kind of file, and the rest is its contents. Everything the player loaded goes before the next.
  */
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 
@@ -57,7 +58,7 @@ static void read_player_file(const uint8_t *data, size_t size)
 
 static void read_file_in_game(int kind, const uint8_t *data, size_t size)
 {
-  static const char *const paths[] = {"plrobjs/F-J/fuzzy.new", "plralias/F-J/fuzzy.alias", "plrvars/F-J/fuzzy.mem"};
+  static constexpr auto paths = std::to_array<const char *>({"plrobjs/F-J/fuzzy.new", "plralias/F-J/fuzzy.alias", "plrvars/F-J/fuzzy.mem"});
   struct char_data *ch             = g->descriptors.newest() ? g->descriptors.newest()->character : nullptr;
 
   if (!ch)

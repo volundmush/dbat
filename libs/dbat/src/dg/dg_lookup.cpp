@@ -2,6 +2,7 @@
  * DG Scripts: finding characters, objects and rooms for scripts, by name or UID, and the UID lookup table.
  * Split out of dg_scripts.c.
  */
+#include <array>
 #include <cstdlib>
 
 #include "dbat/iterate.hpp"
@@ -116,7 +117,8 @@ int find_eq_pos_script(std::string_view arg)
   struct eq_pos_list {
     std::string_view pos{};
     int where{};
-  } eq_pos[] = {
+  };
+  auto eq_pos = std::to_array<eq_pos_list>({
       {"hold",      WEAR_WIELD2  },
       {"held",      WEAR_WIELD2  },
       {"light",     WEAR_WIELD2  },
@@ -142,7 +144,7 @@ int find_eq_pos_script(std::string_view arg)
       {"shoulders", WEAR_SH      },
       {"scouter",   WEAR_EYE     },
       {"none",      -1           }
-  };
+  });
 
   if (is_number(arg) && (i = parse_int(arg)) >= 0 && i < NUM_WEARS)
     return i;

@@ -1416,11 +1416,12 @@ constexpr int MAX_AFFECTS_ALLOWED = 3;
 
 /* Armor class limits*/
 constexpr int TOTAL_WEAR_CHECKS = (flag_count<wear_flag> - 2); /*minus Wield and Take*/
-static const struct zcheck_armor {
+struct zcheck_armor {
   wear_flag bitvector{};   /* from Structs.h                       */
   int ac_allowed{};        /* Max. AC allowed for this body part  */
   std::string_view message{};   /* phrase for error message            */
-} zarmor[] = {
+};
+static const auto zarmor = std::to_array<zcheck_armor>({
     {wear_flag::finger, 10, "Ring"         },
     {wear_flag::neck,   10, "Necklace"     },
     {wear_flag::body,   10, "Body armor"   },
@@ -1438,7 +1439,7 @@ static const struct zcheck_armor {
     {wear_flag::ear,    10, "Earring item" },
     {wear_flag::sh,     10, "Shoulder item"},
     {wear_flag::eye,    10, "Eye item"     }
-};
+});
 
 /*
   Applies limits
@@ -1446,12 +1447,13 @@ static const struct zcheck_armor {
   To ignore an apply, set max_aff to -99.
   These will be ignored if MAX_APPLIES_LIMIT = 0
 */
-static const struct zcheck_affs {
+struct zcheck_affs {
   int aff_type{};        /*from Structs.h*/
   int min_aff{};         /*min. allowed value*/
   int max_aff{};         /*max. allowed value*/
   std::string_view message{}; /*phrase for error message*/
-} zaffs[] = {
+};
+static const auto zaffs = std::to_array<zcheck_affs>({
     {APPLY_NONE,        0,   -99, "unused0"         },
     {APPLY_STR,         -6,  6,   "strength"        },
     {APPLY_DEX,         -6,  6,   "dexterity"       },
@@ -1498,7 +1500,7 @@ static const struct zcheck_affs {
     {APPLY_ALLSAVES,    -4,  4,   "all 3 save types"},
     {APPLY_RESISTANCE,  -4,  4,   "resistance"      },
     {APPLY_ALL_STATS,   -6,  6,   "all stats"       }
-};
+});
 
 /* These are ABS() values. */
 constexpr int MAX_APPLY_ACCURCY_MOD_TOTAL = 5;

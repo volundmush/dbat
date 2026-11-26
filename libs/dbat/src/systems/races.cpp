@@ -16,12 +16,15 @@
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
 
 /* Converted into metric units: cm and kg; SRD has english units. */
-static const struct {
+namespace {
+struct hw_info_entry {
   std::array<int, NUM_SEX> height = {{}}; /* cm */
   int heightdie{};       /* 2d(heightdie) added to height */
   std::array<int, NUM_SEX> weight = {{}}; /* kg */
   int weightfac{};       /* added height * weightfac/100 added to weight */
-} hw_info[NUM_RACES] = {
+};
+}
+static const std::array<hw_info_entry, NUM_RACES> hw_info = {{
     /* RACE_HUMAN      */ {{141, 147, 135}, 26, {46, 54, 39}, 89 },
     /* RACE_SAIYAN     */
     {{140, 147, 135}, 26, {46, 54, 39}, 89 },
@@ -69,7 +72,7 @@ static const struct {
     {{141, 147, 135}, 26, {46, 54, 39}, 89 },
     /* RACE_FAERIE     */
     {{141, 147, 135}, 26, {46, 54, 39}, 89 }
-};
+}};
 
 void set_height_and_weight_by_race(GameWorld *g, struct char_data *ch)
 {

@@ -1,3 +1,4 @@
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -21,14 +22,14 @@ void __wrap_exit(int status)
 
 void fuzz_write_file(const char *path, const uint8_t *data, size_t size)
 {
-  char directory[512];
+  std::array<char, 512> directory;
   char *slash;
   FILE *fl;
 
-  snprintf(directory, sizeof(directory), "%s", path);
-  for (slash = strchr(directory, '/'); slash; slash = strchr(slash + 1, '/')) {
+  snprintf(directory.data(), sizeof(directory), "%s", path);
+  for (slash = strchr(directory.data(), '/'); slash; slash = strchr(slash + 1, '/')) {
     *slash = '\0';
-    mkdir(directory, 0755);
+    mkdir(directory.data(), 0755);
     *slash = '/';
   }
   if (!(fl = fopen(path, "w")))

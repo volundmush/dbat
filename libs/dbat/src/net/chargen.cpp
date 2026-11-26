@@ -871,10 +871,13 @@ static void state_android(GameWorld *g, struct descriptor_data *d, std::string_v
 /* ---- Questionnaire ---------------------------------------------------- */
 
 /* Starting ability ranges by race, in the order they are rolled. */
-static const struct {
+namespace {
+struct starting_abilities_entry {
   bool (*is_race)(const struct char_data *ch){};
   std::array<int, 2> str{}, con{}, wis{}, intel{}, cha{}, dex{};
-} starting_abilities[] = {
+};
+}
+static const auto starting_abilities = std::to_array<starting_abilities_entry>({
     {char_is_saiyan,    {12, 18}, {12, 18}, {8, 16},  {8, 14},  {8, 18},  {8, 16} },
     {char_is_halfbreed, {10, 18}, {10, 18}, {8, 18},  {8, 18},  {8, 18},  {8, 18} },
     {char_is_human,     {8, 18},  {8, 18},  {10, 18}, {12, 18}, {8, 18},  {8, 18} },
@@ -891,7 +894,7 @@ static const struct {
     {char_is_kanassan,  {8, 16},  {8, 16},  {12, 18}, {12, 18}, {8, 18},  {8, 18} },
     {char_is_demon,     {11, 18}, {8, 18},  {10, 18}, {10, 18}, {8, 18},  {8, 18} },
     {char_is_konatsu,   {10, 14}, {10, 14}, {10, 16}, {10, 14}, {12, 18}, {14, 18}},
-};
+});
 
 static void roll_starting_abilities(GameWorld *g, struct char_data *ch)
 {

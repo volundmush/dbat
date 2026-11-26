@@ -11,6 +11,7 @@
  * every line the transcript has what the client was sent and the state its connection is in; at the end, the
  * account and player files the journey left, and who and what is in the fixture's rooms.
  */
+#include <array>
 #include <type_traits>
 #include <algorithm>
 #include <cstdio>
@@ -160,7 +161,7 @@ namespace {
   const std::string LONG_SAY    = "say " + std::string(300, 'x');
   const std::string DOLLARS_SAY = "say " + std::string(248, 'y') + "$$$$$$";
 
-  const journey JOURNEYS[] = {
+  const auto JOURNEYS = std::to_array<journey>({
       made("chargen, stats by points, rerolling first", with_stats({{CON_QROLLSTATS, "n"}, {CON_QROLLSTATS, "y"}}), {}, points_method_2),
       made("chargen, stats by points, no rerolling", with_stats({{CON_QROLLSTATS, ""}}), {}, points_method_2_no_reroll),
       made("chargen, stats from a pool", with_stats({{CON_QROLLSTATS, ""}}), {}, points_method_3),
@@ -387,7 +388,7 @@ namespace {
          went before the buffer, lost); where the socket fills depends on the kernel, so several sizes */
       made("network, the rest of a prompt", {}, {"@sndbuf 2048", "@output 1 8600", "@stall 1", "say hi", "@show", "@output 1 8650", "@stall 1", "say hi", "@show", "@output 1 8700", "@stall 1", "say hi", "@show", "@output 1 8750", "@stall 1", "say hi", "@show", "@output 1 8800", "@stall 1", "say hi", "@show", "@output 1 8850", "@stall 1", "say hi", "@show", "@output 1 8900", "@stall 1", "say hi", "@show", "@output 1 8950", "@stall 1", "say hi", "@show", "@output 1 9000", "@stall 1", "say hi", "@show"}),
       {"network, idle at the password", {"Tester", "@pulse 150", "@show", "@pulse 150", "@show", "@pulse 150", "@show"}, rich_account},
-  };
+  });
 
   unsigned long seed_for(const std::string &what)
   {
@@ -407,14 +408,14 @@ namespace {
   std::string received(GameWorld *g, client &c)
   {
     std::string got;
-    char buffer[32768];
+    std::array<char, 32768> buffer;
     ssize_t length;
     if (!c.d || c.peer < 0)
       return got;
     if (!desc_output(c.d).empty() && game_send_output(g, c.d) < 0)
       return got;
-    while ((length = read(c.peer, buffer, sizeof(buffer))) > 0)
-      got.append(buffer, length);
+    while ((length = read(c.peer, buffer.data(), sizeof(buffer))) > 0)
+      got.append(buffer.data(), length);
     return got;
   }
 
@@ -666,9 +667,9 @@ namespace {
 
   void run(GameWorld *g, const journey &j)
   {
-    char report[64];
+    std::array<char, 64> report;
     int status;
-    snprintf(report, sizeof(report), "case-%ld.txt", (long)getpid());
+    snprintf(report.data(), sizeof(report), "case-%ld.txt", (long)getpid());
     cases++;
     fflush(nullptr);
     std::string own = str_format("{}/dbat-login-{:d}-{:d}", getenv("TMPDIR") ? getenv("TMPDIR") : "/tmp", getpid(), cases);
@@ -682,7 +683,7 @@ namespace {
       std::string copy = str_format("mkdir -p '{}/data' && cp -r . '{}/data'", own, own);
       if (system(copy.c_str()) != 0 || chdir((own + "/data").c_str()) < 0)
         th_exit(2);
-      int fd = open(report, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      int fd = open(report.data(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
       dup2(fd, STDOUT_FILENO);
       dup2(fd, STDERR_FILENO);
       alarm(CASE_SECONDS);
@@ -690,7 +691,7 @@ namespace {
       th_exit(0);
     }
     waitpid(pid, &status, 0);
-    std::string report_path = own + "/data/" + report;
+    std::string report_path = own + "/data/" + report.data();
     std::string text        = th_file_text(report_path.c_str());
     std::string cleanup     = str_format("rm -rf '{}'", own);
     if (system(cleanup.c_str()) != 0)

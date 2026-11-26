@@ -390,13 +390,14 @@ void learn_or_practise(GameWorld *g, struct char_data *ch, int skill, bool may, 
 /* Using an arm broken (above 0 and below 50) when the other is gone hurts it more */
 void strain_broken_arm(GameWorld *g, struct char_data *ch)
 {
-  static constexpr struct {
+  struct arms_entry {
     int arm, other;
     std::string_view strained, to_char, to_room;
-  } ARMS[] = {
+  };
+  static constexpr auto ARMS = std::to_array<arms_entry>({
       {0, 1, "Using your broken right arm has damaged it more!@n\r\n", "@RYour right arm has fallen apart!@n", "@r$n@R's right arm has fallen apart!@n"},
       {1, 0, "Using your broken left arm has damaged it more!@n\r\n", "@RYour left arm has fallen apart!@n", "@r$n@R's left arm has fallen apart!@n"},
-  };
+  });
 
   for (const auto &a : ARMS) {
     if (char_get_limb_condition(ch, a.arm) > 0 && char_get_limb_condition(ch, a.arm) < 50 && char_get_limb_condition(ch, a.other) < 0) {
@@ -413,11 +414,14 @@ void strain_broken_arm(GameWorld *g, struct char_data *ch)
 
 /* A mob's skill with its off hand, by its level (quirk: never used, as mobs keep no dual wield skill to follow up
    with) */
-constexpr struct {
+namespace {
+struct mob_off_hand_skill_entry {
   int level, low, high;
-} MOB_OFF_HAND_SKILL[] = {
-    {10, 30, 50}, {20, 30, 60}, {30, 30, 70}, {50, 40, 80}, {70, 50, 90}, {80, 60, 100}, {90, 70, 100}, {100, 80, 100}, {INT_MAX, 95, 100},
 };
+}
+constexpr auto MOB_OFF_HAND_SKILL = std::to_array<mob_off_hand_skill_entry>({
+    {10, 30, 50}, {20, 30, 60}, {30, 30, 70}, {50, 40, 80}, {70, 50, 90}, {80, 60, 100}, {90, 70, 100}, {100, 80, 100}, {INT_MAX, 95, 100},
+});
 
 /* The off hand's follow-up, at whoever ch is fighting here */
 void off_hand_attack(GameWorld *g, struct char_data *ch)

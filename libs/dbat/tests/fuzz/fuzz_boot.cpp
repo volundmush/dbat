@@ -2,6 +2,7 @@
  * Boots a game with one of its files damaged: the first byte picks which, and the rest is its contents.
  * The game may refuse to boot, but if it does boot then its world has to make sense.
  */
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 
@@ -11,15 +12,15 @@
 #include "../harness.hpp"
 #include "fuzz.hpp"
 
-static const char *const files[] = {
+static constexpr auto files = std::to_array<const char *>({
     "world/wld/3.wld", "world/mob/3.mob", "world/obj/3.obj", "world/zon/3.zon", "world/trg/3.trg",
     "world/shp/3.shp", "world/gld/3.gld", "world/wld/index", "world/mob/index", "world/obj/index",
     "world/zon/index", "world/trg/index", "world/shp/index", "world/gld/index", "etc/config",
     "etc/assemblies", "etc/badsites", "etc/hcontrol", "etc/levels", "etc/time",
     "etc/auction", "etc/boards", "etc/plrmail", "plrfiles/index", "misc/socials",
     "misc/socials.new", "misc/messages", "text/help/help.hlp", "text/help/index", "disabled.cmds",
-};
-constexpr size_t NUM_FILES = sizeof(files) / sizeof(*files);
+});
+constexpr size_t NUM_FILES = files.size();
 
 static const uint8_t *file_data;
 static size_t file_size;

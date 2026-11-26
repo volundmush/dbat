@@ -1,5 +1,6 @@
 #pragma once
 /* What the scenes of test_techniques share: the helpers that set them up, and the scene itself. */
+#include <array>
 #include <type_traits>
 #include <cstdio>
 #include <optional>
@@ -392,7 +393,7 @@ template <std::same_as<container_flag>... F> int cont_value(F... flags)
 /* ... with a room in every direction from the arena, of this sector and ground effect, through exits like so */
 inline void surrounded(GameWorld *g, int sect, int geffect = 0, flag_set<exit_flag> exit_info = {}, const char *keyword = "door")
 {
-  static constexpr room_vnum around[NUM_OF_DIRS] = {51, 52, 53, 54, 55, 56, 81, 82, 83, 84, 85, 86};
+  static constexpr std::array<room_vnum, NUM_OF_DIRS> around = {{51, 52, 53, 54, 55, 56, 81, 82, 83, 84, 85, 86}};
   for (int dir = 0; dir < NUM_OF_DIRS; dir++) {
     exit_to(g, dir, around[dir]);
     struct room_direction_data *exit = room_get_dir_option(g, ARENA, dir);
@@ -507,7 +508,7 @@ inline struct obj_data *wearing(GameWorld *g, struct char_data *att, const char 
 /* ... and enchanted, with affects of every kind appraise names differently */
 inline void enchanted(struct obj_data *obj)
 {
-  constexpr std::pair<int, int> affects[] = {{APPLY_STR, 2}, {APPLY_REGEN, 5}, {APPLY_SKILL, 3}, {APPLY_FEAT, 1}, {APPLY_TRAIN, -2}, {APPLY_LIFEMAX, 4}};
+  constexpr auto affects = std::to_array<std::pair<int, int>>({{APPLY_STR, 2}, {APPLY_REGEN, 5}, {APPLY_SKILL, 3}, {APPLY_FEAT, 1}, {APPLY_TRAIN, -2}, {APPLY_LIFEMAX, 4}});
   for (int i = 0; i < 6; i++) {
     obj_get_affected(obj)[i].location = affects[i].first;
     obj_get_affected(obj)[i].modifier = affects[i].second;

@@ -5,6 +5,7 @@
  * test_bad_data         all of them
  * test_bad_data NAME    one of them, here
  */
+#include <array>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
@@ -223,24 +224,25 @@ static void check_long_chain_of_operators(void)
 
 static void check_chain_as_long_as_real_scripts_have(void)
 {
-  char script[4096] = "if 1 == 2";
+  std::array<char, 4096> script = {"if 1 == 2"};
   struct char_data *ch;
   GameWorld *g;
 
   /* the longest in the game's real triggers has 19 of these */
   for (int i = 0; i < 60; i++)
-    strcat(script, " || 1 == 2");
-  strcat(script, " || 1 == 1\n  %echo% matched\nend");
-  g = run_script(script, &ch);
+    strcat(script.data(), " || 1 == 2");
+  strcat(script.data(), " || 1 == 1\n  %echo% matched\nend");
+  g = run_script(script.data(), &ch);
   CHECK(saw(ch, "Matched"));
   th_shutdown(g);
 }
 
 static void check_expression_values(void)
 {
-  static const struct {
+  struct cases_entry {
     const char *expression, *value;
-  } cases[] = {
+  };
+  static const auto cases = std::to_array<cases_entry>({
       {"1 + 2", "3"},
       {"2 * 3 + 1", "7"},
       {"(1 + 2) * 3", "9"},
@@ -251,10 +253,10 @@ static void check_expression_values(void)
       {"\"a + b\" == \"a + b\"", "1"},
       {"!0", "1"},
       {"((((5))))", "5"},
-  };
+  });
   GameWorld *g = th_boot();
 
-  for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++) {
+  for (size_t i = 0; i < cases.size(); i++) {
     std::string result = eval_expr(g, cases[i].expression, owner_ptr{static_cast<room_data *>(nullptr)}, nullptr, nullptr);
 
     if (result != cases[i].value) {
@@ -271,19 +273,20 @@ static void check_expression_values(void)
 /* Arithmetic at the ends of the range wraps around, and never takes the game down. */
 static void check_arithmetic_at_the_limits(void)
 {
-  static const struct {
+  struct cases_entry {
     const char *expression, *value;
-  } cases[] = {
+  };
+  static const auto cases = std::to_array<cases_entry>({
       {"9223372036854775807 + 1",                   "-9223372036854775808"},
       {"9223372036854775807 * 2",                   "-2"                  },
       {"99999999999999999999 + 6",                  "-9223372036854775803"}, /* atoll() makes a number too large the largest one */
       {"(0 - 9223372036854775807) - 2",             "9223372036854775807" }, /* subtraction groups from the right */
       {"7 / 0",                                     "0"                   },
       {"((0 - 9223372036854775807) - 1) / (0 - 1)", "-9223372036854775808"}, /* the processor traps on this */
-  };
+  });
   GameWorld *g = th_boot();
 
-  for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++) {
+  for (size_t i = 0; i < cases.size(); i++) {
     std::string result = eval_expr(g, cases[i].expression, owner_ptr{static_cast<room_data *>(nullptr)}, nullptr, nullptr);
 
     if (result != cases[i].value) {
@@ -417,12 +420,12 @@ static void check_saved_affects_are_cleaned_up(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE), *copy;
-  char path[256];
+  std::array<char, 256> path;
 
   save_char(g, ch);
-  save_path("plrfiles", "plr", "tester", path, sizeof(path));
+  save_path("plrfiles", "plr", "tester", path.data(), sizeof(path));
   /* the same list, later in the file, adds to it */
-  append_file(path, "Affs:\n"
+  append_file(path.data(), "Affs:\n"
                     "10 5 1 1 0 77777\n"            /* garbage in specific, as older saves have */
                     "10 5 1 41 0 999999\n"          /* a skill that doesn't exist */
                     "10 5 1 1 2000000 0\n"          /* a flag that doesn't exist */
@@ -447,11 +450,11 @@ static void check_player_file_cut_short_in_its_description(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE), *copy;
-  char path[256];
+  std::array<char, 256> path;
 
   save_char(g, ch);
-  save_path("plrfiles", "plr", "tester", path, sizeof(path));
-  append_file(path, "Desc:\nA tall fighter,\nwith no end to");
+  save_path("plrfiles", "plr", "tester", path.data(), sizeof(path));
+  append_file(path.data(), "Desc:\nA tall fighter,\nwith no end to");
 
   copy = new char_data();
   clear_char(copy);
@@ -469,13 +472,13 @@ static std::string read_whole(const char *path)
 {
   FILE *fl = fopen(path, "rb");
   std::string text;
-  char buf[4096];
+  std::array<char, 4096> buf;
   size_t n;
 
   if (!fl)
     return text;
-  while ((n = fread(buf, 1, sizeof(buf), fl)) > 0)
-    text.append(buf, n);
+  while ((n = fread(buf.data(), 1, sizeof(buf), fl)) > 0)
+    text.append(buf.data(), n);
   fclose(fl);
   return text;
 }
@@ -527,11 +530,11 @@ static void check_old_binary_mail_is_converted(void)
   CHECK(read_whole(MAIL_FILE) == text);
 
   /* a letter with "~" and line ends in it comes back as it was */
-  char message[] = "first line~\r\nsecond ~ line\r\n";
-  store_mail(g, 9, 7, message);
+  auto message = std::to_array("first line~\r\nsecond ~ line\r\n");
+  store_mail(g, 9, 7, message.data());
   g->mail.clear();
   CHECK(scan_file(g));
-  CHECK(g->mail.size() == 2 && g->mail[1].text == message);
+  CHECK(g->mail.size() == 2 && g->mail[1].text == message.data());
   th_shutdown(g);
 }
 
@@ -620,15 +623,16 @@ static void write_house_file(void)
 
 static void check_hcontrol_that_cant_be_read_refuses_the_boot(void)
 {
-  static const struct {
+  struct cases_entry {
     const char *text, *reason;
-  } cases[] = {
+  };
+  static const auto cases = std::to_array<cases_entry>({
       {"not a house file at all",  "SYSERR: etc/hcontrol:1: expected '# dbat hcontrol 2' to begin the file"},
       {"# dbat hcontrol 1\n",      "SYSERR: etc/hcontrol:1: expected '# dbat hcontrol 2' to begin the file"},
       {"# dbat hcontrol 2\n#300\nColour: red\n", "SYSERR: etc/hcontrol:3: house #300: 'Colour: red' isn't one of its fields"},
       {"# dbat hcontrol 2\nOwner: 1\n", "SYSERR: etc/hcontrol:2: expected '#<vnum>' to begin a house, got 'Owner: 1'"},
       {"# dbat hcontrol 2\n#300\nGuests: 1 2 3 4 5 6 7 8 9 10 11\n", "SYSERR: etc/hcontrol:3: house #300: can't read its Guests"},
-  };
+  });
   for (const auto &c : cases) {
     house_file_text = c.text;
     if (!boot_is_refused(write_house_file, c.reason)) {
@@ -677,10 +681,10 @@ static void check_rent_file_cut_short_in_a_string(void)
 {
   GameWorld *g         = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  char path[256];
+  std::array<char, 256> path;
 
-  save_path("plrobjs", "new", "tester", path, sizeof(path));
-  write_file(path, "1\n#350\n0\nXAP\nkeywords~\na short descr");
+  save_path("plrobjs", "new", "tester", path.data(), sizeof(path));
+  write_file(path.data(), "1\n#350\n0\nXAP\nkeywords~\na short descr");
   CHECK(Crash_load(g, ch) == 0); /* the file is refused, and the game goes on */
   th_shutdown(g);
 }
@@ -711,7 +715,7 @@ static void check_toplist_name_listed_twice_at_the_bottom(void)
   GameWorld *g         = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
   std::string user(char_get_user(ch));
-  const char *rpp[5]   = {"Aaa", user.c_str(), "Ccc", "Bbb", user.c_str()}; /* the last section, places 20 to 24 */
+  const std::array<const char *, 5> rpp = {{"Aaa", user.c_str(), "Ccc", "Bbb", user.c_str()}}; /* the last section, places 20 to 24 */
 
   CHECK(!user.empty() && char_get_desc(ch) != nullptr);
   for (int x = 0; x < 25; x++) {
@@ -746,11 +750,11 @@ static void check_cut_off_skill_list(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE), *copy;
-  char path[256];
+  std::array<char, 256> path;
 
   save_char(g, ch);
-  save_path("plrfiles", "plr", "tester", path, sizeof(path));
-  append_file(path, "Skil:\n5 1 0\n"); /* and no 0 to end it */
+  save_path("plrfiles", "plr", "tester", path.data(), sizeof(path));
+  append_file(path.data(), "Skil:\n5 1 0\n"); /* and no 0 to end it */
   copy = load_again(g, "tester");
   free_char(g, copy);
   th_shutdown(g);
@@ -760,11 +764,11 @@ static void check_impossible_indexes_in_a_save(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE), *copy;
-  char path[256];
+  std::array<char, 256> path;
 
   save_char(g, ch);
-  save_path("plrfiles", "plr", "tester", path, sizeof(path));
-  append_file(path, "Colr: 999999 x\nColr: -5 x\nTcos: 9999 1\nTcos: -1 1\n");
+  save_path("plrfiles", "plr", "tester", path.data(), sizeof(path));
+  append_file(path.data(), "Colr: 999999 x\nColr: -5 x\nTcos: 9999 1\nTcos: -1 1\n");
   copy = load_again(g, "tester");
   free_char(g, copy);
   th_shutdown(g);
@@ -774,11 +778,11 @@ static void check_birth_at_the_end_of_time(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE), *copy;
-  char path[256];
+  std::array<char, 256> path;
 
   save_char(g, ch);
-  save_path("plrfiles", "plr", "tester", path, sizeof(path));
-  append_file(path, "Brth: 9223372036854775807\nMxAg: 0\n");
+  save_path("plrfiles", "plr", "tester", path.data(), sizeof(path));
+  append_file(path.data(), "Brth: 9223372036854775807\nMxAg: 0\n");
   copy = load_again(g, "tester");
   free_char(g, copy);
   th_shutdown(g);
@@ -813,14 +817,14 @@ static void check_too_many_applies_on_a_saved_object(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  char path[256];
-  char text[4096] = "1\n#350\n0\nXAP\n~\n~\n.~\n~\n2 0 0 0 0 0 0 0\n";
+  std::array<char, 256> path;
+  std::array<char, 4096> text = {"1\n#350\n0\nXAP\n~\n~\n.~\n~\n2 0 0 0 0 0 0 0\n"};
 
   for (int i = 0; i < 40; i++)
-    strcat(text, "A\n1 1 77777\n");
-  strcat(text, "$~\n");
-  save_path("plrobjs", "new", "tester", path, sizeof(path));
-  write_file(path, text);
+    strcat(text.data(), "A\n1 1 77777\n");
+  strcat(text.data(), "$~\n");
+  save_path("plrobjs", "new", "tester", path.data(), sizeof(path));
+  write_file(path.data(), text.data());
   Crash_load(g, ch);
   CHECK(!char_get_inventory(ch).empty());
   while (char_get_inventory(ch))
@@ -833,11 +837,11 @@ static void check_saved_object_with_a_negative_unique_id(void)
 {
   GameWorld *g         = th_boot();
   struct char_data *ch = th_player(g, "Tester", ADMLVL_NONE);
-  char path[256];
+  std::array<char, 256> path;
 
   /* -1 means none yet, but no real unique id is negative, and a pool can't be found from one that is */
-  save_path("plrobjs", "new", "tester", path, sizeof(path));
-  write_file(path, "1\n#350\n0\nXAP\n~\n~\n.~\n~\n2 0 0 0 0 0 0 0\nU\n-38995189\n$~\n");
+  save_path("plrobjs", "new", "tester", path.data(), sizeof(path));
+  write_file(path.data(), "1\n#350\n0\nXAP\n~\n~\n.~\n~\n2 0 0 0 0 0 0 0\nU\n-38995189\n$~\n");
   Crash_load(g, ch);
   struct obj_data *obj = first_obj(g, char_get_inventory(ch));
   CHECK(obj && obj_get_unique_id(obj) >= 0);
@@ -858,7 +862,7 @@ static void old_skip_spaces(char **string)
 /* one of the fill words, which one_argument() passed over; a word starting with '!' never was one */
 static bool old_fill_word(const char *word)
 {
-  static const char *const fill[] = {"in", "into", "from", "with", "the", "on", "at", "to"};
+  static const auto fill = std::to_array<const char *const>({"in", "into", "from", "with", "the", "on", "at", "to"});
 
   if (*word == '!')
     return false;
@@ -1163,7 +1167,7 @@ static void check_add_commas(void)
 /* The words args.hpp takes off a line are the ones the old char * functions did, and so is what is left. */
 static void check_args_match_the_old_parsers(void)
 {
-  static const char *const edges[] = {
+  static const auto edges = std::to_array<const char *const>({
       "",
       " ",
       "\t",
@@ -1186,48 +1190,50 @@ static void check_args_match_the_old_parsers(void)
       "2.sword",
       "all.coin from bag",
       "x \"y z\" w",
-  };
-  static const char *const tokens[] = {" ", "  ", "\t", "\"", "the", "In", "at", "x", "Sword", "\xc8", "\n", "2.", "on", "a"};
-  std::vector<std::string> inputs(edges, edges + sizeof(edges) / sizeof(*edges));
+  });
+  static const auto tokens = std::to_array<const char *const>({" ", "  ", "\t", "\"", "the", "In", "at", "x", "Sword", "\xc8", "\n", "2.", "on", "a"});
+  std::vector<std::string> inputs(edges.begin(), edges.end());
   unsigned seed  = 12345;
   int mismatches = 0;
 
   for (int i = 0; i < 3000; i++) {
     std::string text;
     for (int n = (seed = seed * 1103515245 + 12345) % 9; n > 0; n--)
-      text += tokens[(seed = seed * 1103515245 + 12345) / 65536 % (sizeof(tokens) / sizeof(*tokens))];
+      text += tokens[(seed = seed * 1103515245 + 12345) / 65536 % (tokens.size())];
     inputs.push_back(text);
   }
 
   for (const std::string &input : inputs) {
-    char buf[MAX_INPUT_LENGTH], w1[MAX_INPUT_LENGTH], w2[MAX_INPUT_LENGTH];
+    std::array<char, MAX_INPUT_LENGTH> buf;
+    std::array<char, MAX_INPUT_LENGTH> w1;
+    std::array<char, MAX_INPUT_LENGTH> w2;
     std::string_view args;
     const char *rest;
 
-    snprintf(buf, sizeof(buf), "%s", input.c_str());
-    rest = old_one_argument(buf, w1);
+    snprintf(buf.data(), sizeof(buf), "%s", input.c_str());
+    rest = old_one_argument(buf.data(), w1.data());
     args = input;
-    mismatches += take_arg(args) != w1 || args != rest;
+    mismatches += take_arg(args) != w1.data() || args != rest;
 
-    snprintf(buf, sizeof(buf), "%s", input.c_str());
-    rest = old_any_one_arg(buf, w1);
+    snprintf(buf.data(), sizeof(buf), "%s", input.c_str());
+    rest = old_any_one_arg(buf.data(), w1.data());
     args = input;
-    mismatches += take_word(args) != w1 || args != rest;
+    mismatches += take_word(args) != w1.data() || args != rest;
 
-    snprintf(buf, sizeof(buf), "%s", input.c_str());
-    rest = old_one_word(buf, w1);
+    snprintf(buf.data(), sizeof(buf), "%s", input.c_str());
+    rest = old_one_word(buf.data(), w1.data());
     args = input;
-    mismatches += take_quoted(args) != w1 || args != rest;
+    mismatches += take_quoted(args) != w1.data() || args != rest;
 
-    snprintf(buf, sizeof(buf), "%s", input.c_str());
-    rest = old_two_arguments(buf, w1, w2);
+    snprintf(buf.data(), sizeof(buf), "%s", input.c_str());
+    rest = old_two_arguments(buf.data(), w1.data(), w2.data());
     args = input;
-    mismatches += take_arg(args) != w1 || take_arg(args) != w2 || args != rest;
+    mismatches += take_arg(args) != w1.data() || take_arg(args) != w2.data() || args != rest;
 
-    snprintf(buf, sizeof(buf), "%s", input.c_str());
-    old_half_chop(buf, w1, w2);
+    snprintf(buf.data(), sizeof(buf), "%s", input.c_str());
+    old_half_chop(buf.data(), w1.data(), w2.data());
     args = input;
-    mismatches += take_word(args) != w1 || skip_spaces(args) != w2;
+    mismatches += take_word(args) != w1.data() || skip_spaces(args) != w2.data();
   }
   CHECK(mismatches == 0);
 }
@@ -1273,15 +1279,15 @@ static bool old_is_name(const char *str, const char *namelist)
 static bool old_isname(const char *str, const char *namelist)
 {
   char *newlist, *curtok;
-  static char newlistbuf[MAX_STRING_LENGTH];
+  static std::array<char, MAX_STRING_LENGTH> newlistbuf;
 
   if (!str || !*str || !namelist || !*namelist)
     return false;
   if (!strcasecmp(str, namelist))
     return true;
 
-  strlcpy(newlistbuf, namelist, sizeof(newlistbuf));
-  newlist = newlistbuf;
+  strlcpy(newlistbuf.data(), namelist, sizeof(newlistbuf));
+  newlist = newlistbuf.data();
   for (curtok = strsep(&newlist, " \t"); curtok; curtok = strsep(&newlist, " \t")) {
     if (curtok && is_abbrev(str, curtok)) {
       if (isdigit(*str) && (atoi(str) != atoi(curtok)))
@@ -1337,17 +1343,17 @@ static int old_get_number(char **name)
 {
   int i;
   char *ppos;
-  char number[MAX_INPUT_LENGTH];
+  std::array<char, MAX_INPUT_LENGTH> number;
 
-  *number = '\0';
+  number[0] = '\0';
   if ((ppos = strchr(*name, '.')) != nullptr) {
     *ppos++ = '\0';
-    strlcpy(number, *name, sizeof(number));
+    strlcpy(number.data(), *name, sizeof(number));
     memmove(*name, ppos, strlen(ppos) + 1);
-    for (i = 0; *(number + i); i++)
-      if (!isdigit(*(number + i)))
+    for (i = 0; *(number.data() + i); i++)
+      if (!isdigit(*(number.data() + i)))
         return (0);
-    return (atoi(number));
+    return (atoi(number.data()));
   }
   return (1);
 }
@@ -1367,24 +1373,24 @@ static find_dots old_find_all_dots(char *arg)
  * caller's name as they did. */
 static void check_name_matching_matches_the_old_code(void)
 {
-  static const char *const tokens[] = {"sword", "Sword", "sw", "2.", "0.", "10", "100", "1000", " ", "\t", "@r",
+  static const auto tokens = std::to_array<const char *const>({"sword", "Sword", "sw", "2.", "0.", "10", "100", "1000", " ", "\t", "@r",
                                        "@", "\xc8", "a", "-", "+", "0", "99999999999999999999", ".", "all", "all.",
-                                       "!", "\n", "x.y", "ME", "-12"};
-  static const char *const words[]  = {"finger", "neck", "body", "head", "\n"};
-  static constexpr std::string_view word_views[] = {"finger", "neck", "body", "head"}; /* the same, without the "\n" */
+                                       "!", "\n", "x.y", "ME", "-12"});
+  static const auto words = std::to_array<const char *const>({"finger", "neck", "body", "head", "\n"});
+  static constexpr auto word_views = std::to_array<std::string_view>({"finger", "neck", "body", "head"}); /* the same, without the "\n" */
   unsigned seed                     = 4242;
   int mismatches                    = 0;
   auto next                         = [&] { return (seed = seed * 1103515245 + 12345) / 65536; };
   auto text                         = [&] {
     std::string t;
     for (int n = next() % 5; n > 0; n--)
-      t += tokens[next() % (sizeof(tokens) / sizeof(*tokens))];
+      t += tokens[next() % (tokens.size())];
     return t;
   };
 
   for (int i = 0; i < 20000; i++) {
     std::string a = text(), b = text();
-    char old_buf[MAX_INPUT_LENGTH];
+    std::array<char, MAX_INPUT_LENGTH> old_buf;
 
     mismatches += isname(a, b) != old_isname(a.c_str(), b.c_str());
     mismatches += is_name(a, b) != old_is_name(a.c_str(), b.c_str());
@@ -1395,22 +1401,22 @@ static void check_name_matching_matches_the_old_code(void)
     mismatches += is_number(a) != old_is_number(a.c_str());
 
     std::string name = a;
-    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    char *old_p = old_buf;
-    mismatches += get_number(name) != old_get_number(&old_p) || name != old_buf;
+    snprintf(old_buf.data(), sizeof(old_buf), "%s", a.c_str());
+    char *old_p = old_buf.data();
+    mismatches += get_number(name) != old_get_number(&old_p) || name != old_buf.data();
 
     name = a;
-    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += find_all_dots(name) != old_find_all_dots(old_buf) || name != old_buf;
+    snprintf(old_buf.data(), sizeof(old_buf), "%s", a.c_str());
+    mismatches += find_all_dots(name) != old_find_all_dots(old_buf.data()) || name != old_buf.data();
 
     name = a;
-    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += CAP(name) != old_CAP(old_buf);
+    snprintf(old_buf.data(), sizeof(old_buf), "%s", a.c_str());
+    mismatches += CAP(name) != old_CAP(old_buf.data());
 
-    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += search_block(a, word_views, false) != old_search_block(old_buf, words, false);
-    snprintf(old_buf, sizeof(old_buf), "%s", a.c_str());
-    mismatches += search_block(a, word_views, true) != old_search_block(old_buf, words, true);
+    snprintf(old_buf.data(), sizeof(old_buf), "%s", a.c_str());
+    mismatches += search_block(a, word_views, false) != old_search_block(old_buf.data(), words.data(), false);
+    snprintf(old_buf.data(), sizeof(old_buf), "%s", a.c_str());
+    mismatches += search_block(a, word_views, true) != old_search_block(old_buf.data(), words.data(), true);
   }
   CHECK(mismatches == 0);
 }
@@ -1448,20 +1454,21 @@ static void check_index_without_an_end(void)
 static void guild_with_impossible_numbers(void)
 {
   FILE *in = fopen("world/gld/3.gld", "r");
-  char line[512], text[65536] = "";
+  std::array<char, 512> line;
+  std::array<char, 65536> text = {};
   bool first = true;
 
   if (!in)
     abort();
-  while (fgets(line, sizeof(line), in)) {
-    strcat(text, line);
-    if (*line == '#' && first) {
-      strcat(text, "999999 1\n999999 2\n999999\n");
+  while (fgets(line.data(), sizeof(line), in)) {
+    strcat(text.data(), line.data());
+    if (line[0] == '#' && first) {
+      strcat(text.data(), "999999 1\n999999 2\n999999\n");
       first = false;
     }
   }
   fclose(in);
-  write_file("world/gld/3.gld", text);
+  write_file("world/gld/3.gld", text.data());
 }
 
 static void check_guild_with_impossible_numbers(void)
@@ -1646,7 +1653,7 @@ static void check_news_entry_leaves_the_immortal_list_alone(void)
 {
   GameWorld *g         = th_boot();
   struct char_data *ch = th_player(g, "Writer", ADMLVL_IMPL);
-  char news[4096]      = "";
+  std::array<char, 4096> news = {};
 
   th_type(g, ch, "newsedit A title");
   th_type(g, ch, "The entry itself.");
@@ -1654,11 +1661,11 @@ static void check_news_entry_leaves_the_immortal_list_alone(void)
   FILE *fl = fopen(NEWS_FILE, "r");
   CHECK(fl);
   if (fl) {
-    news[fread(news, 1, sizeof(news) - 1, fl)] = '\0';
+    news[fread(news.data(), 1, sizeof(news) - 1, fl)] = '\0';
     fclose(fl);
   }
   /* the editor used to start out holding the immlist file, which it borrowed to write in */
-  CHECK(strstr(news, "The entry itself.") && !strstr(news, "Fixture immlist"));
+  CHECK(strstr(news.data(), "The entry itself.") && !strstr(news.data(), "Fixture immlist"));
   th_shutdown(g);
 }
 
@@ -1758,12 +1765,12 @@ static void check_help_keyword_with_an_unfinished_quote(void)
    its buffer. */
 static void help_line_starting_with_a_nul(void)
 {
-  static const char text[] = "nul\nbefore\n\0after\nend\n#0\n$\n";
+  static const auto text = std::to_array("nul\nbefore\n\0after\nend\n#0\n$\n");
   FILE *fl                 = fopen("text/help/help.hlp", "w");
 
   if (!fl)
     abort();
-  fwrite(text, 1, sizeof(text) - 1, fl);
+  fwrite(text.data(), 1, text.size() - 1, fl);
   fclose(fl);
 }
 
@@ -1891,7 +1898,7 @@ static void check_mjunk_by_name(void)
   GameWorld *g          = th_boot();
   struct char_data *ch  = th_player(g, "Tester", ADMLVL_NONE);
   struct char_data *mob = read_mobile(g, 300);
-  const char *names[]   = {"sword", "dagger", "pebble", "pebble"};
+  const auto names = std::to_array<const char *>({"sword", "dagger", "pebble", "pebble"});
 
   CHECK(mob != nullptr);
   char_to_room(g, mob, char_get_in_room(ch));
@@ -2132,10 +2139,10 @@ static void check_rent_listing_keeps_no_copies(void)
 {
   GameWorld *g         = th_boot();
   struct char_data *ch = th_player(g, "Wizard", ADMLVL_IMPL);
-  char path[256];
+  std::array<char, 256> path;
 
-  save_path("plrobjs", "new", "tester", path, sizeof(path));
-  write_file(path, "1 0 0 0 0 1\n#-1\n0\nXAP\nthing~\na unique thing~\nA thing lies here.~\nIt does things.~\n0 0 0 0 7\n$~\n");
+  save_path("plrobjs", "new", "tester", path.data(), sizeof(path));
+  write_file(path.data(), "1 0 0 0 0 1\n#-1\n0\nXAP\nthing~\na unique thing~\nA thing lies here.~\nIt does things.~\n0 0 0 0 7\n$~\n");
   std::string tester = "tester";
   Crash_listrent(g, ch, tester.data());
   CHECK(saw(ch, "a unique thing"));
@@ -2188,9 +2195,9 @@ static void check_imm_action_reaches_the_log(void)
   log_imm_action(g, "IMM: plain text, 100% of it");
   std::string text;
   if (FILE *fl = fopen(REQUEST_FILE, "r")) {
-    char line[512];
-    while (fgets(line, sizeof(line), fl))
-      text += line;
+    std::array<char, 512> line;
+    while (fgets(line.data(), sizeof(line), fl))
+      text += line.data();
     fclose(fl);
   }
   CHECK(text.find(":: IMM: Giver gave 42 zenni\n") != std::string::npos);
@@ -2436,11 +2443,12 @@ static void check_board_post_saves_and_aborts(void)
 /* The lexer reads keywords as whole words, ending at a space or '(', and numbers lines as written. */
 static void check_lexer_reads_keywords_strictly(void)
 {
-  static const struct {
+  struct lines_entry {
     const char *text;
     dg::keyword kw;
     const char *argument;
-  } lines[] = {
+  };
+  static const auto lines = std::to_array<lines_entry>({
       {"if %x% == 1", dg::keyword::if_, "%x% == 1"},
       {"  IF(%x%)", dg::keyword::if_, "(%x%)"},
       {"elseif %y%", dg::keyword::elseif_, "%y%"},
@@ -2459,7 +2467,7 @@ static void check_lexer_reads_keywords_strictly(void)
       {"   ", dg::keyword::blank, ""},
       {"if%x%", dg::keyword::command, ""},
       {"%echo% if", dg::keyword::command, ""},
-  };
+  });
   for (const auto &want : lines) {
     auto prog = dg::lex(want.text, "* none");
     CHECK(prog->lines.size() == 1 && prog->lines[0].kw == want.kw);
@@ -2515,9 +2523,10 @@ static std::string describe(const dg::expression &e)
 /* Templates and expressions compile to what the old engine's scan of the text found, quirks and all */
 static void check_scripts_compile_as_the_old_scan_read_them(void)
 {
-  static const struct {
+  struct templates_entry {
     const char *text, *want;
-  } templates[] = {
+  };
+  static const auto templates = std::to_array<templates_entry>({
       {"say %%hi%% %actor.name%!", "say %hi% {actor|name}!"},
       {"%x.y.z%", "{x|y|>z}"},
       {"%a.b(1).c(2)%", "{a|b|>c:1|(12)}"},         /* the subfields run together */
@@ -2526,13 +2535,14 @@ static void check_scripts_compile_as_the_old_scan_read_them(void)
       {"100%", "100"},                                /* a lone % at the end is dropped */
       {"%x", "{x}"},                                  /* a variable left open runs to the end */
       {"%a.b.%c%", "{a|b|>%c}"},                      /* the character after a '.' is never looked at */
-  };
+  });
   for (const auto &t : templates)
     CHECK(describe(dg::compile_template(t.text)) == t.want);
 
-  static const struct {
+  struct expressions_entry {
     const char *text, *want;
-  } expressions[] = {
+  };
+  static const auto expressions = std::to_array<expressions_entry>({
       {"1 + 2 * 3", "(1 +(2 *3))"},
       {"(a == b) && c", "([(a ==b)]&&c)"},
       {"\"a-b\" - 1", "(\"a-b\" -1)"},
@@ -2542,7 +2552,7 @@ static void check_scripts_compile_as_the_old_scan_read_them(void)
       {"(1) junk", "[1]"},           /* and after one, the rest is ignored */
       {"!%x%", "(!{x})"},
       {"\"ab\\", "\"ab\\"},          /* a quote ending in a backslash stops at the end of the text */
-  };
+  });
   for (const auto &e : expressions)
     CHECK(describe(dg::compile_expression(e.text, dg::max_expression_depth)) == e.want);
 
@@ -2620,11 +2630,12 @@ static void check_parser_refuses_misplaced_keywords(void)
   const auto &sw = std::get<dg::switch_node>(good->body[2].what);
   CHECK(sw.labels.size() == 2 && sw.labels[0].at == 1 && sw.labels[1].is_default && sw.labels[1].at == 1);
 
-  static const struct {
+  struct bad_entry {
     const char *script;
     int line;
     const char *message;
-  } bad[] = {
+  };
+  static const auto bad = std::to_array<bad_entry>({
       {"say a\nend", 2, "'end' closes nothing"},
       {"if 1\n  done\nend", 2, "'done' closes nothing (the open block is the 'if' at line 1)"},
       {"if 1\nsay a", 1, "'if' never closed"},
@@ -2636,7 +2647,7 @@ static void check_parser_refuses_misplaced_keywords(void)
       {"say a\n\nelse", 3, "'else' with no 'if' open"},
       {"wait until x", 1, "'wait' needs a time it can read, such as 'wait 5 s' or 'wait until 14:30'"},
       {"wait   ", 1, "'wait' needs a time it can read, such as 'wait 5 s' or 'wait until 14:30'"},
-  };
+  });
   for (const auto &want : bad) {
     auto prog = dg::lex(want.script, "* none");
     CHECK(!prog->runs() && prog->body.empty());
@@ -2854,20 +2865,20 @@ static void check_shop_with_impossible_item_types(void)
 static void empty_record_before_the_shops(void)
 {
   FILE *fl = fopen("world/shp/3.shp", "r");
-  char text[65536];
+  std::array<char, 65536> text;
   size_t len;
 
   if (!fl)
     abort();
-  len       = fread(text, 1, sizeof(text) - 1, fl);
+  len       = fread(text.data(), 1, sizeof(text) - 1, fl);
   text[len] = '\0';
   fclose(fl);
   /* the version line, then an empty record, then the shops as they were */
-  char *rest = strchr(text, '\n');
+  char *rest = strchr(text.data(), '\n');
   if (!rest)
     abort();
   fl = fopen("world/shp/3.shp", "w");
-  fwrite(text, 1, rest + 1 - text, fl);
+  fwrite(text.data(), 1, rest + 1 - text.data(), fl);
   fputs("~\n", fl);
   fputs(rest + 1, fl);
   fclose(fl);
@@ -2955,12 +2966,13 @@ static void check_long_name_in_auction_file(void)
 {
   GameWorld *g = th_boot();
   struct obj_data *obj = read_object(g, 350);
-  char text[400], name[201];
+  std::array<char, 400> text;
+  std::array<char, 201> name;
 
-  memset(name, 'x', 200);
+  memset(name.data(), 'x', 200);
   name[200] = '\0';
-  snprintf(text, sizeof(text), "1 %s 1 1 1 1 1\n", name);
-  write_file(AUCTION_FILE, text);
+  snprintf(text.data(), sizeof(text), "1 %s 1 1 1 1 1\n", name.data());
+  write_file(AUCTION_FILE, text.data());
   auc_load(obj);
   CHECK_AUDIT(g);
   th_shutdown(g);
@@ -2971,13 +2983,13 @@ static void replace_in_file(const char *path, const char *from, const char *to)
 {
   FILE *fl = fopen(path, "r");
   std::string text;
-  char chunk[4096];
+  std::array<char, 4096> chunk;
   size_t n;
 
   if (!fl)
     abort();
-  while ((n = fread(chunk, 1, sizeof(chunk), fl)) > 0)
-    text.append(chunk, n);
+  while ((n = fread(chunk.data(), 1, sizeof(chunk), fl)) > 0)
+    text.append(chunk.data(), n);
   fclose(fl);
   size_t at = text.find(from);
   if (at == std::string::npos)
@@ -2999,15 +3011,16 @@ static void prepare_and_log_to_stderr(void)
 
 static bool boot_is_refused(void (*prepare)(void), const char *reason)
 {
-  int status = 0, out[2];
+  int status = 0;
+  std::array<int, 2> out;
   pid_t child;
   std::string said;
-  char chunk[4096];
+  std::array<char, 4096> chunk;
   ssize_t n;
 
   fflush(stdout);
   fflush(stderr);
-  if (pipe(out))
+  if (pipe(out.data()))
     abort();
   if (!(child = fork())) {
     close(out[0]);
@@ -3019,8 +3032,8 @@ static bool boot_is_refused(void (*prepare)(void), const char *reason)
     th_exit(0);
   }
   close(out[1]);
-  while ((n = read(out[0], chunk, sizeof(chunk))) > 0)
-    said.append(chunk, (size_t)n);
+  while ((n = read(out[0], chunk.data(), sizeof(chunk))) > 0)
+    said.append(chunk.data(), (size_t)n);
   close(out[0]);
   waitpid(child, &status, 0);
   if (said.find("runtime error") != std::string::npos || said.find("ERROR: AddressSanitizer") != std::string::npos ||
@@ -3056,10 +3069,11 @@ static void check_zone_command_with_a_space_before_it(void)
 
 /* Damaged files of each kind the boot reads, each with what the game says when it refuses to start. These fix
  * today's messages, so that a change to them shows; the loaders are being rewritten (see the file I/O plan). */
-static const struct damaged_file {
+struct damaged_file {
   const char *path, *from, *to;
   const char *reason;
-} damaged_files[] = {
+};
+static const auto damaged_files = std::to_array<damaged_file>({
     {"world/obj/3.obj", "15 0 0 0 0 a 0 0 0 0 0 0 0\n", "15 0 0 0 0\n",
      "SYSERR: world/obj/3.obj:6: object #300: expected its type, 4 extra flags, 4 wear flags and 4 affect flags, got '15 0 0 0 0'"},
     {"world/obj/3.obj", "#301\nsword blade~", "#300\nsword blade~", "SYSERR: world/obj/3.obj:11: object #300 is defined twice"},
@@ -3097,7 +3111,7 @@ static const struct damaged_file {
     /* quirk: a string missing its ~ takes in the next one, and the error is found on a later line */
     {"world/obj/3.obj", "A wooden chest sits here.~\n", "A wooden chest sits here.\n",
      "SYSERR: world/obj/3.obj:13: object #300: expected its type, 4 extra flags, 4 wear flags and 4 affect flags, got 'a plain sword~'"},
-};
+});
 static const damaged_file *damaging;
 
 static void damage_a_file(void)
@@ -3116,10 +3130,13 @@ static void check_damaged_files_refuse_the_boot(void)
   }
 }
 
-static const struct {
+namespace {
+struct checks_entry {
   const char *name;
   void (*check)(void);
-} checks[] = {
+};
+}
+static const auto checks = std::to_array<checks_entry>({
     {"while_without_done",                          check_while_without_done                         },
     {"break_without_done",                          check_break_without_done                         },
     {"switch_around_an_unfinished_while",           check_switch_around_an_unfinished_while          },
@@ -3229,13 +3246,13 @@ static const struct {
     {"long_sense_memory",                           check_long_sense_memory                          },
     {"toplist_name_listed_twice_at_the_bottom",     check_toplist_name_listed_twice_at_the_bottom    },
     {"damaged_files_refuse_the_boot",               check_damaged_files_refuse_the_boot              },
-};
+});
 
 int main(int argc, char **argv)
 {
   int failed = 0;
 
-  for (size_t i = 0; i < sizeof(checks) / sizeof(*checks); i++) {
+  for (size_t i = 0; i < checks.size(); i++) {
     int status = 0;
     pid_t child;
 

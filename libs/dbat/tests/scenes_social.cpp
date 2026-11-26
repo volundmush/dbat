@@ -1,5 +1,6 @@
 /* Scenes for test_techniques: see scene_kit.hpp. These are act.social.cpp's: the socials (the fixture has only nod),
    gemote, and insult, which no command reaches. */
+#include <array>
 #include "scene_kit.hpp"
 
 #include "dbat/act.comm.hpp"
@@ -30,7 +31,7 @@ namespace {
     char_set_sex(victim, v);
   }
 
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* nod */
     {"", "nod", false, SETUP(), false, 1},
     {"", "nod namek", false, SETUP(), false, 1},
@@ -86,7 +87,7 @@ namespace {
     {"resting", "carry namek", false, SETUP(char_set_position(att, POS_RESTING);), false, 1},
     {"sitting", "carry namek", false, SETUP(char_set_position(att, POS_SITTING);), false, 1},
     {"stunned", "carry namek", false, SETUP(char_set_position(att, POS_STUNNED);), false, 1},
-  };
+  });
 } // namespace
 
 const std::span<const scene> SCENES_SOCIAL = list;

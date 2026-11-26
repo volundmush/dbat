@@ -115,10 +115,13 @@ namespace {
 using dg::field_query;
 
 /* The fields of any variable's text, as in %arg.car%, which work on the text and not on what it names */
-const struct {
+namespace {
+struct text_fields_entry {
   std::string_view name;
   std::string (*get)(const std::string &text, const std::string &arg);
-} text_fields[] = {
+};
+}
+const auto text_fields = std::to_array<text_fields_entry>({
     {"strlen", [](const std::string &text, const std::string &) { return str_format("{:d}", until_nul(text).size()); }},
     {"trim", [](const std::string &text, const std::string &) { /* without whitespace at either end */
        constexpr std::string_view space = " \t\n\v\f\r"; /* what isspace() finds */
@@ -150,13 +153,16 @@ const struct {
            return std::string(cmd_info[cmd].command);
        return std::string();
      }},
-};
+});
 
 /* The names %send%, %echo% and the rest stand for: the command of that name for each kind of owner */
-const struct {
+namespace {
+struct command_names_entry {
   std::string_view name;
   std::array<std::string_view, 3> per_kind; /* for a mob, an object, a room */
-} command_names[] = {
+};
+}
+const auto command_names = std::to_array<command_names_entry>({
     {"door",       {"mdoor ", "odoor ", "wdoor "}                     },
     {"force",      {"mforce ", "oforce ", "wforce "}                  },
     {"load",       {"mload ", "oload ", "wload "}                     },
@@ -171,7 +177,7 @@ const struct {
     {"at",         {"mat ", "oat ", "wat "}                           },
     {"transform",  {"mtransform ", "otransform ", "wecho "}           }, /* there is no wtransform */
     {"recho",      {"mrecho ", "orecho ", "wrecho "}                  },
-};
+});
 
 /* The variable var: the trigger's own, or else the script's global seen from its context */
 const dg::variable *find_variable(struct script_data *sc, trig_data *trig, const std::string &var)
@@ -262,10 +268,13 @@ std::string random_dir(GameWorld *g, const owner_ptr &go)
  *
  * findmob and findobj are additions inspired by Jamie Nelson - mordecai@xtra.co.nz
  */
-const struct {
+namespace {
+struct special_variables_entry {
   std::string_view name;
   std::string (*get)(const field_query &);
-} special_variables[] = {
+};
+}
+const auto special_variables = std::to_array<special_variables_entry>({
     {"global", [](const field_query &q) {
        struct script_data *thescript = room_get_script(q.g, 0);
        if (!thescript) {
@@ -328,7 +337,7 @@ const struct {
        int num = parse_int(q.field);
        return number(num > 0 ? rand_number(q.g, 1, num) : 0);
      }},
-};
+});
 
 /* What a script owned by go finds by name: as a mob would, as an object would, or as a room would */
 using found = std::variant<std::monostate, char_data *, obj_data *, room_data *>;

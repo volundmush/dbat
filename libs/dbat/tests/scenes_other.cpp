@@ -1,8 +1,9 @@
 /* Scenes for test_techniques: see scene_kit.hpp */
+#include <array>
 #include "scene_kit.hpp"
 
 namespace {
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* other/scouter.cpp: telepathy, eavesdrop, snet, scouter */
     {"unskilled", "telepathy namek hi", false, SETUP(char_set_skills_base(att, SKILL_TELEPATHY, 0);), false, 1},
     {"a telepath", "telepathy", false, SETUP(telepath(g, att, victim);), false, 1},
@@ -1160,7 +1161,7 @@ namespace {
     {"a mighty icer with RPP", "transform first", false, SETUP(empowered(att, 100000000000); char_set_rp(att, 50); char_set_race(att, RACE_ICER);), false, 1},
     {"an immortal", "file todo", false, SETUP(char_set_admlevel(att, 1);), false, 1},
     {"an immortal", "file none", false, SETUP(char_set_admlevel(att, 1);), false, 1},
-  };
+  });
 } // namespace
 
 extern const std::span<const scene> SCENES_OTHER = list;

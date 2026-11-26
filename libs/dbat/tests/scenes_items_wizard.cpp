@@ -1,8 +1,9 @@
 /* Scenes for test_techniques: see scene_kit.hpp */
+#include <array>
 #include "scene_kit.hpp"
 
 namespace {
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     {"unskilled", "garden", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 0); char_set_skill_slots(att, 200);), false, 2},
     {"unskilled, no slots", "garden", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 0); char_set_skill_slots(att, 0);), false, 1},
     {"skilled", "garden", false, SETUP(char_set_skills_base(att, SKILL_GARDENING, 50); ), false, 1},
@@ -355,7 +356,7 @@ namespace {
     {"implementor, unleveled", "set me practices 50", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); char_set_class_level(att, 0);), false, 1},
     {"implementor without an id", "set Sayla idnum 5", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); char_set_idnum(att, 0);), false, 1},
     {"implementor number 1", "set Sayla passwd secret", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); char_set_idnum(att, 1);), false, 1},
-  };
+  });
 } // namespace
 
 extern const std::span<const scene> SCENES_ITEMS_WIZARD = list;

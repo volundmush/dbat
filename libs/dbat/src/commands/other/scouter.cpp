@@ -1,5 +1,6 @@
 /* scouter.c: scouters, SNET and eavesdropping
  * Split from act.other.c (CircleMUD/DBAT; see license.doc). */
+#include <array>
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
@@ -149,14 +150,17 @@ namespace {
   }
 
   /* The word for an alignment: the first whose bound it is above */
-  constexpr struct {
+  namespace {
+struct alignments_entry {
     int above;
     std::string_view word{};
-  } ALIGNMENTS[] = {
+  };
+}
+  constexpr auto ALIGNMENTS = std::to_array<alignments_entry>({
       {999, "Saint         "}, {750, "Extremely Good"}, {500, "Really Good   "}, {250, "Good          "},
       {100, "Pretty Good   "}, {50, "Sorta Good    "}, {-50, "Neutral       "}, {-100, "Sorta Evil    "},
       {-500, "Pretty Evil   "}, {-751, "Evil          "}, {INT_MIN, "Extremely Evil"},
-  };
+  });
 
   /* telepathy read: what vict, in the room, is */
   void telepathy_read(GameWorld *g, struct char_data *ch, std::string &target)
@@ -476,10 +480,13 @@ ACMD(do_snet)
 
 namespace {
   /* What each kind of scouter can't read without overloading */
-  constexpr struct {
+  namespace {
+struct scouter_limits_entry {
     extra_flag flag;
     int64_t limit;
-  } SCOUTER_LIMITS[] = {{extra_flag::bscouter, 150000}, {extra_flag::mscouter, 5000000}, {extra_flag::ascouter, 15000000}};
+  };
+}
+  constexpr auto SCOUTER_LIMITS = std::to_array<scouter_limits_entry>({{extra_flag::bscouter, 150000}, {extra_flag::mscouter, 5000000}, {extra_flag::ascouter, 15000000}});
 
   bool beyond_scouter(GameWorld *g, struct obj_data *scouter, struct char_data *vict)
   {
@@ -512,16 +519,22 @@ namespace {
   }
 
   /* How tired a stamina, in percent, looks: the first it's below */
-  constexpr struct {
+  namespace {
+struct staminas_entry {
     long double below;
     std::string_view word{};
-  } STAMINAS[] = {{10, "Exhausted"}, {25, "Extremely Tired"}, {50, "Very Tired"}, {75, "Tired"}, {90, "Winded"}, {100, "Untired"}};
+  };
+}
+  constexpr auto STAMINAS = std::to_array<staminas_entry>({{10, "Exhausted"}, {25, "Extremely Tired"}, {50, "Very Tired"}, {75, "Tired"}, {90, "Winded"}, {100, "Untired"}});
 
   /* What a scouter notices about someone beyond their numbers */
-  constexpr struct {
+  namespace {
+struct noticed_entry {
     std::optional<aff_flag> aff; /* or none for the player_flag::selfd flag */
     std::string_view what{};
-  } NOTICED[] = {{aff_flag::zanzoken, "Zanzoken Prepared"}, {aff_flag::hass, "Accelerated Arms"}, {aff_flag::healglow, "Healing Glow Prepared"}, {aff_flag::poison, "Poisoned"}, {std::nullopt, "Explosive Energy"}};
+  };
+}
+  constexpr auto NOTICED = std::to_array<noticed_entry>({{aff_flag::zanzoken, "Zanzoken Prepared"}, {aff_flag::hass, "Accelerated Arms"}, {aff_flag::healglow, "Healing Glow Prepared"}, {aff_flag::poison, "Poisoned"}, {std::nullopt, "Explosive Energy"}});
 
   /* scouter scan: everyone on ch's planet, and the way to them or where they are */
   void scouter_scan(GameWorld *g, struct char_data *ch, struct obj_data *obj)

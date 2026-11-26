@@ -682,10 +682,13 @@ constexpr auto AFFLICTION_LINES = std::to_array<flag_line>({
 static_assert(kinds_match(AFFLICTION_LINES));
 
 /* What lasting effects are told, by their skill's name */
-constexpr struct {
+namespace {
+struct affect_lines_entry {
   std::string_view skill{};
   std::string_view says{}; /* before " (n Mud Hours)" */
-} AFFECT_LINES[] = {
+};
+}
+constexpr auto AFFECT_LINES = std::to_array<affect_lines_entry>({
     {"runic", "Your Kenaz rune is still in effect!"},
     {"punch", "Your Algiz rune is still in effect!"},
     {"knee", "Your Oagaz rune is still in effect!"},
@@ -708,7 +711,7 @@ constexpr struct {
     {"warp pool", "Weakened State!"},
     {"dark metamorphosis", "Your Dark Metamorphosis is still in effect."},
     {"hayasa", "Your body has been infused to move faster!"},
-};
+});
 
 /* Each effect is told once for a run of affects of its skill */
 void affects_status(GameWorld *g, struct char_data *ch)

@@ -696,11 +696,14 @@ ACMD(do_gen_tog)
 
 namespace {
   /* What file can show, to immortals of at least the level */
-  constexpr struct {
+  namespace {
+struct files_entry {
     std::string_view cmd{};
     int level;
     std::string_view file{};
-  } FILES[] = {
+  };
+}
+  constexpr auto FILES = std::to_array<files_entry>({
       {"none", 6, "Does Nothing"},
       {"bug", ADMLVL_IMMORT, "../data/misc/bugs"},
       {"typo", ADMLVL_IMMORT, "../data/misc/typos"},
@@ -717,7 +720,7 @@ namespace {
       {"immlog", ADMLVL_IMMORT, "../data/misc/request"},
       {"customs", ADMLVL_IMMORT, "../data/misc/customs"},
       {"todo", 5, "../todo"},
-  };
+  });
 } // namespace
 
 ACMD(do_file)

@@ -6,6 +6,7 @@
  * Based on shop.c.  As such, the CircleMud License applies                *
  * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
  ************************************************************************ */
+#include <array>
 #include <cstdlib>
 #include <memory>
 
@@ -1107,17 +1108,18 @@ SPECIAL(guild)
   struct guild_data *guild_nr;
   int i;
   struct char_data *keeper = (struct char_data *)me;
-  struct {
+  struct guild_cmd_tab_entry {
     std::string_view cmd{};
     void (*func)(GameWorld *, struct char_data *, struct guild_data *, struct char_data *, std::string_view){};
-  } guild_cmd_tab[] = {
+  };
+  auto guild_cmd_tab = std::to_array<guild_cmd_tab_entry>({
       {"practice", handle_practice},
       {"gain",     handle_gain    },
       {"forget",   handle_forget  },
       {"study",    handle_study   },
       {"grand",    handle_grand   },
       {{},         nullptr        }
-  };
+  });
 
   guild_nr = find_first(g->guilds.all(), [&](guild_data *gd) { return guild_get_gm(gd) == char_get_nr(keeper); });
   if (!guild_nr)

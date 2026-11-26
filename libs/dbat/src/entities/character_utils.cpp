@@ -228,10 +228,13 @@ bool in_northran(GameWorld *g, char_data *ch)
   return in_room_range(g, ch, 17900, 17999);
 }
 
-static const struct {
+namespace {
+struct grav_threshold_entry {
   int grav;
   int64_t threshold;
-} grav_threshold[] = {
+};
+}
+static const auto grav_threshold = std::to_array<grav_threshold_entry>({
     {10,    5000     },
     {20,    20000    },
     {30,    50000    },
@@ -245,7 +248,7 @@ static const struct {
     {1000,  25000000 },
     {5000,  100000000},
     {10000, 200000000}
-};
+});
 
 /* NOTE: truncated to uint16_t to match the original std::map<int, uint16_t>;
  * unknown gravities return 0 like std::map::operator[] did. */

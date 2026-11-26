@@ -211,10 +211,11 @@ void kai_learns_from_another(GameWorld *g, struct char_data *ch, struct char_dat
 /* A jinto's enlightenment, for 15 practices, may give whoever is enlightened a share of their next level */
 void jinto_enlightens(GameWorld *g, struct char_data *ch, struct char_data *target, bool self)
 {
-  static constexpr struct {
+  struct shares_entry {
     int skill;
     double share;
-  } SHARES[] = {{100, 0.15}, {60, 0.10}, {40, 0.05}};
+  };
+  static constexpr auto SHARES = std::to_array<shares_entry>({{100, 0.15}, {60, 0.10}, {40, 0.05}});
 
   if (char_is_jinto(ch) && level_exp(target, char_get_level(target) + 1) - char_get_exp(target) > 0 && char_get_practice_points(g, ch) >= 15 && rand_number(g, 1, 4) >= 3) {
     char_set_practice_points(g, ch, char_get_practice_points(g, ch) - (15));

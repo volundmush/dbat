@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """check-arrays.py [--update] [--list]: an array is a std::array (or a std::span when a function takes one). This
-counts, per file of the game and its tests (libs/dbat/src, libs/dbat/include, libs/dbat/tests, apps, tools/*.cpp),
-the C arrays still declared: struct members, tables, locals (`int value[N];`, `static const T NAME[] = {...};`) and
-array parameters (`T arr[]`), which decay to pointers.
+finds, in the game and its tests (libs/dbat/src, libs/dbat/include, libs/dbat/tests, apps, tools/*.cpp), any C
+array declared: struct members, tables (`static const T NAME[] = {...};`, a struct's `static const struct {...} NAME[]`,
+one of pointers to members `int T::*NAME[]`), locals (`int value[N];`) and array parameters (`T arr[]`), which decay to
+pointers.
 
 With _GLIBCXX_ASSERTIONS (every preset defines it) std::array's and std::span's [] check the index, so an index out of
 bounds stops with a message instead of reading or writing past the end; a C array doesn't.
 
-It reads the text, not the syntax tree. The counts are a ratchet while the arrays convert: check-arrays.baseline holds
-each file's, and this fails if a file has more than its baseline (or any, if it isn't listed). After a change that
-converts some, run it with --update to lower the baseline. --list prints each one found, as file:line: name.
+It reads the text, not the syntax tree. None is left: check-arrays.baseline is empty, and this fails on any C array (it
+held each file's count, a ratchet, while they converted; a file over its baseline fails). --update rewrites the baseline
+from what it finds. --list prints each one found, as file:line: name.
 """
 import collections
 import glob
@@ -24,7 +25,7 @@ NOT_A_NAME = {'auto', 'operator', 'const', 'new', 'delete'}
 
 # a declaration that starts a line: qualifiers, a type (with a template's arguments), pointers, a name, its bounds
 LINE = re.compile(r'^[ \t]*(?:(?:static|const|constexpr|extern|inline|thread_local|mutable|volatile|struct|unsigned|signed|long|short)\s+)*'
-                  r'([A-Za-z_][\w:]*(?:<[^;{}()\n]*>)?)(?:\s+const)?((?:\s*[*&]+\s*|\s+))([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*(?:\[[^\]\n]*\]\s*)*[;=,{)]', re.M)
+                  r'([A-Za-z_][\w:]*(?:<[^;{}()\n]*>)?)(?:\s+const)?((?:\s*[*&]+\s*(?:const\s+)?|\s+))([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*(?:\[[^\]\n]*\]\s*)*[;=,{)]', re.M)
 # a declaration's start, for its later declarators: `act_msgs parry, block, hits[5];`, `int nr = 0, t[5] = {};`
 STMT = re.compile(r'^[ \t]*(?:(?:static|const|constexpr|inline|mutable|struct)\s+)*([A-Za-z_][\w:]*(?:<[^;{}()\n]*>)?)\s+[*&]*\s*[A-Za-z_]\w*\s*[=,{\[]', re.M)
 
@@ -89,6 +90,10 @@ def find(f, s):
                 out.add((f, s[:at + d.start(1)].count('\n') + 1, d.group(1)))
     for m in re.finditer(r'^[ \t]*(?:typedef\s[^;]*?\b([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*;|using\s+([A-Za-z_]\w*)\s*=[^;]*\[[^\]\n]*\]\s*;)', s, re.M):
         out.add((f, s[:m.start()].count('\n') + 1, m.group(1) or m.group(2)))  # an array type's name
+    for m in re.finditer(r'^[ \t]*\}[ \t]*([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*[;={]', s, re.M):
+        out.add((f, s[:m.start(1)].count('\n') + 1, m.group(1)))  # a struct's table: `static const struct {...} NAME[] = {`
+    for m in re.finditer(r'::\*\s*(?:const\s+)?([A-Za-z_]\w*)\s*\[[^\]\n]*\]\s*[;={]', s):
+        out.add((f, s[:m.start(1)].count('\n') + 1, m.group(1)))  # a table of pointers to members: `int T::*NAME[] = {`
     for m in PARAM.finditer(s):
         if m.group(1) in NOT_A_TYPE or m.group(2) in NOT_A_NAME:
             continue

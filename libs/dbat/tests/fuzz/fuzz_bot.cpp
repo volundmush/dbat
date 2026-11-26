@@ -2,6 +2,7 @@
  * Plays a journal, in the bot's own format: who connects, what they type, how time passes. It's the
  * bot with a fuzzer steering it, which can find its way down a path a random player wouldn't.
  */
+#include <array>
 #include <unistd.h>
 
 #include "fuzz.hpp"
@@ -22,7 +23,7 @@ constexpr long MAX_CLOCK_JUMP = 10L * 365 * 24 * 3600;
  */
 static bool possible(const char *line)
 {
-  char label[16];
+  std::array<char, 16> label;
   int level, race, sensei;
   unsigned long kit;
 
@@ -37,7 +38,7 @@ static bool possible(const char *line)
   if (!strncmp(line, "clock ", 6))
     return labs(strtol(line + 6, nullptr, 10)) <= MAX_CLOCK_JUMP;
   if (!strncmp(line, "spawn ", 6))
-    return sscanf(line + 6, "%15s %d %lu %d %d", label, &level, &kit, &race, &sensei) == 5 && level >= 0 && level <= ADMLVL_IMPL &&
+    return sscanf(line + 6, "%15s %d %lu %d %d", label.data(), &level, &kit, &race, &sensei) == 5 && level >= 0 && level <= ADMLVL_IMPL &&
            race >= 0 && race < NUM_RACES && sensei >= 0 && sensei < NUM_CLASSES;
   return true;
 }
@@ -69,8 +70,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     used++;
     line[length] = '\0';
-    if (*line && *line != '#' && strcmp(line, "restart") && possible(line)) {
-      do_action(g, line);
+    if (line[0] && line[0] != '#' && strcmp(line.data(), "restart") && possible(line.data())) {
+      do_action(g, line.data());
       actions++;
     }
   }

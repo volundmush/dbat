@@ -672,10 +672,11 @@ void list_obj_to_char(GameWorld *g, const id_list &list, struct char_data *ch, i
 
 void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 {
-  struct {
+  struct diagnosis_entry {
     int percent{};
     std::string_view text{};
-  } diagnosis[] = {
+  };
+  auto diagnosis = std::to_array<diagnosis_entry>({
       {100, "is in excellent condition."               },
       {90,  "has a few scuffs."                        },
       {75,  "has some small scuffs and scratches."     },
@@ -684,7 +685,7 @@ void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch)
       {15,  "looks pretty damaged."                    },
       {0,   "is in awful condition."                   },
       {-1,  "is in need of repair."                    },
-  };
+  });
   int percent, ar_index;
   std::string_view objs = obj_shortdesc_for(g, obj, ch);
 
@@ -702,10 +703,11 @@ void diag_obj_to_char(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 
 void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch)
 {
-  struct {
+  struct diagnosis_entry {
     int percent{};
     std::string_view text{};
-  } diagnosis[] = {
+  };
+  auto diagnosis = std::to_array<diagnosis_entry>({
       {100, "@wis in @Gexcellent@w condition."                  },
       {90,  "@whas a few @Rscratches@w."                        },
       {80,  "@whas some small @Rwounds@w and @Rbruises@w."      },
@@ -718,7 +720,7 @@ void diag_char_to_char(GameWorld *g, struct char_data *i, struct char_data *ch)
       {10,  "@wis in @mawful condition@w."                      },
       {0,   "@Ris barely alive.@w"                              },
       {-1,  "@ris nearly dead.@w"                               },
-  };
+  });
   int percent, ar_index;
 
   percent = (int)(clampHealth(char_get_health(i)) * 100.0);

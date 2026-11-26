@@ -76,10 +76,13 @@ void boost_obj(GameWorld *g, struct obj_data *obj, struct char_data *ch)
 }
 
 /* What concentration takes off the ki a creation costs: the first row the skill reaches. */
-constexpr struct {
+namespace {
+struct discounts_entry {
   int skill;
   double discount;
-} DISCOUNTS[] = {{100, 0.5}, {90, 0.6}, {80, 0.65}, {70, 0.7}, {60, 0.75}, {50, 0.8}, {40, 0.85}, {30, 0.9}, {20, 0.95}};
+};
+}
+constexpr auto DISCOUNTS = std::to_array<discounts_entry>({{100, 0.5}, {90, 0.6}, {80, 0.65}, {70, 0.7}, {60, 0.75}, {50, 0.8}, {40, 0.85}, {30, 0.9}, {20, 0.95}});
 
 double concentration_discount(struct char_data *ch)
 {
@@ -196,16 +199,19 @@ constexpr creation BOOTS    = {.cost = fifth, .vnums = {1532}, .boosted = true, 
 constexpr creation SHURIKEN = {.cost = [](int64_t max_ki, int) { return max_ki / 4; }, .vnums = {19053}, .no_rent = true, .sized = true};
 constexpr creation KACHIN   = {.cost = nearly_all, .vnums = {87}, .on_floor = true, .sized = true};
 
-constexpr struct {
+namespace {
+struct weapons_entry {
   std::string_view name;
   std::array<obj_vnum, 5> vnums; /* by grade */
-} WEAPONS[] = {
+};
+}
+constexpr auto WEAPONS = std::to_array<weapons_entry>({
     {"sword", {90, 1516, 1517, 1518, 1519}},
     {"dagger", {1536, 1537, 1538, 1539, 1540}},
     {"club", {1541, 1542, 1543, 1544, 1545}},
     {"spear", {1546, 1547, 1548, 1549, 1550}},
     {"gun", {1551, 1552, 1553, 1554, 1555}},
-};
+});
 
 void weapon(GameWorld *g, struct char_data *ch, form_request &req)
 {
@@ -322,12 +328,13 @@ void senzu(GameWorld *g, struct char_data *ch, form_request &req)
 }
 
 /* In the menu's order. Names match exactly. */
-constexpr struct form_kind {
+struct form_kind {
   std::string_view name;
   int skill; /* the creation skill it takes */
   std::string_view menu;
   void (*make)(GameWorld *, struct char_data *, form_request &);
-} FORMS[] = {
+};
+constexpr auto FORMS = std::to_array<form_kind>({
     {"food", 0, "create food\r\n", make<FOOD>},
     {"water", 0, "create water\r\n", make<WATER>},
     {"light", 20, "create light\r\n", make<LIGHT>},
@@ -343,7 +350,7 @@ constexpr struct form_kind {
     {"senzu", 80, "create senzu\r\n", senzu},
     {"kachin", 90, "create kachin\r\n", make<KACHIN>},
     {"elixir", 100, "create elixir\r\n", elixir},
-};
+});
 
 } // namespace
 
@@ -838,14 +845,17 @@ ACMD(do_forgery)
 }
 
 namespace {
-  constexpr struct {
+  namespace {
+struct weapon_levels_entry {
     extra_flag flag;
     std::string_view line{};
-  } WEAPON_LEVELS[] = {
+  };
+}
+  constexpr auto WEAPON_LEVELS = std::to_array<weapon_levels_entry>({
       {extra_flag::weaplvl1, "Weapon Level: 1\nDamage Bonus: 5%\r\n"},  {extra_flag::weaplvl2, "Weapon Level: 2\nDamage Bonus: 10%\r\n"},
       {extra_flag::weaplvl3, "Weapon Level: 3\nDamage Bonus: 20%\r\n"}, {extra_flag::weaplvl4, "Weapon Level: 4\nDamage Bonus: 30%\r\n"},
       {extra_flag::weaplvl5, "Weapon Level: 5\nDamage Bonus: 50%\r\n"},
-  };
+  });
 
   /* How full obj's token slots are, if it has any; quirk: two filled slots show nothing */
   std::string_view token_slots(struct obj_data *obj)

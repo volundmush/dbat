@@ -1,4 +1,5 @@
 /* Scenes for test_techniques: see scene_kit.hpp */
+#include <array>
 #include "scene_kit.hpp"
 
 #include "dbat/act.wizard.hpp"
@@ -108,7 +109,7 @@ namespace {
     room_get_dir_option(g, ARENA, NORTH)->keyword = "door";
   }
 
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* wizard/comm.cpp */
     {"a mob, reading", "news", false, SETUP(), true, 1},
     {"reading", "news", false, SETUP(news_file(NEWS);), false, 1},
@@ -545,7 +546,7 @@ namespace {
     {"an immortal", "findkey n", false, SETUP(imm(g, att); key_exit(g, 70);), false, 1},
     {"an immortal", "spells", false, SETUP(imm(g, att);), false, 1},
     {"an immortal", "audit", false, SETUP(imm(g, att);), false, 1},
-  };
+  });
 } // namespace
 
 extern const std::span<const scene> SCENES_WIZARD = list;

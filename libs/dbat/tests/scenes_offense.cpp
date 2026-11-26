@@ -1,8 +1,9 @@
 /* Scenes for test_techniques: see scene_kit.hpp */
+#include <array>
 #include "scene_kit.hpp"
 
 namespace {
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* attack: each kind of weapon (by damage type), in each hand */
     {"a sword",              "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_SLASH - TYPE_HIT); }},
     {"a dagger",             "attack namek",                 false, [](GameWorld *g, char_data *att, char_data *) { wield(g, att, TYPE_PIERCE - TYPE_HIT); }},
@@ -184,7 +185,7 @@ namespace {
     {"focused",              "energize",                     false, [](GameWorld *, char_data *att, char_data *) { char_set_preference(att, PREFERENCE_THROWING); char_set_skills_base(att, SKILL_FOCUS, 30); }},
     {"on",                   "energize",                     false, [](GameWorld *, char_data *att, char_data *) { char_set_preference(att, PREFERENCE_THROWING); char_set_skills_base(att, SKILL_ENERGIZE, 30); }},
     {"off",                  "energize",                     false, [](GameWorld *g, char_data *att, char_data *) { char_set_preference(att, PREFERENCE_THROWING); char_set_skills_base(att, SKILL_ENERGIZE, 30); char_prf_set(g, att, pref_flag::energize, true); }},
-  };
+  });
 } // namespace
 
 extern const std::span<const scene> SCENES_OFFENSE = list;

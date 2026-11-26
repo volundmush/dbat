@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <array>
 #include <algorithm>
 #include <cstdlib>
 
@@ -127,14 +128,15 @@ void string_add(GameWorld *g, struct descriptor_data *d, std::string_view typed)
 
   if (action == STRINGADD_SAVE || action == STRINGADD_ABORT) {
     /* the editor that opened the text editor goes on from it; so does whatever opened it outside an editor */
-    static constexpr struct {
+    struct not_editors_entry {
       int state{};
       void (*done)(GameWorld *g, struct descriptor_data *dsc, int todo){};
-    } NOT_EDITORS[] = {
+    };
+    static constexpr auto NOT_EDITORS = std::to_array<not_editors_entry>({
         {CON_EXDESC,   exdesc_string_cleanup },
         {CON_PLAYING,  playing_string_cleanup},
         {CON_NEWSEDIT, news_string_cleanup   },
-    };
+    });
 
     if (d->olc)
       d->olc->text_done(g, d, action);

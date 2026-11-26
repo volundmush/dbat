@@ -23,13 +23,14 @@ bool legs_ok(GameWorld *g, struct char_data *ch)
 {
   if (!limb_ok(g, ch, 1))
     return false;
-  static constexpr struct {
+  struct legs_entry {
     int limb, other;
     std::string_view worse, gone_char, gone_room;
-  } legs[] = {
+  };
+  static constexpr auto legs = std::to_array<legs_entry>({
       {2, 3, "Using your broken right leg has damaged it more!@n\r\n", "@RYour right leg has fallen apart!@n", "@r$n@R's right leg has fallen apart!@n"},
       {3, 2, "Using your broken left leg has damaged it more!@n\r\n",  "@RYour left leg has fallen apart!@n",  "@r$n@R's left leg has fallen apart!@n" },
-  };
+  });
   for (const auto &leg : legs) {
     if (char_get_limb_condition(ch, leg.limb) > 0 && char_get_limb_condition(ch, leg.limb) < 50 &&
         char_get_limb_condition(ch, leg.other) < 0) {

@@ -329,15 +329,16 @@ static int place_player(GameWorld *g, struct descriptor_data *d)
 /* What doesn't last from one session to the next: healed limbs, combat and transient states. */
 static void reset_session_state(GameWorld *g, struct char_data *ch)
 {
-  static const struct {
+  struct regrown_entry {
     player_flag flag;
     int limb;
-  } regrown[] = {
+  };
+  static const auto regrown = std::to_array<regrown_entry>({
       {player_flag::rarm, 0},
       {player_flag::larm, 1},
       {player_flag::lleg, 3},
       {player_flag::rleg, 2},
-  };
+  });
 
   for (const auto &r : regrown)
     if (char_plr_flagged(ch, r.flag)) {
@@ -900,10 +901,13 @@ static void choose_slot(GameWorld *g, struct descriptor_data *d, int n)
 }
 
 /* The account menu's options other than the slots, each a letter in either case. */
-static const struct {
+namespace {
+struct account_options_entry {
   std::string_view key;
   void (*choose)(GameWorld *g, struct descriptor_data *d);
-} account_options[] = {
+};
+}
+static const auto account_options = std::to_array<account_options_entry>({
     {"Q", [](GameWorld *g, descriptor_data *d) {
        write_to_output(g, d, "Thanks for visiting!\n");
        desc_set_connected(d, CON_CLOSE);
@@ -926,7 +930,7 @@ static const struct {
        desc_set_connected(d, CON_DELCNF1);
      }},
     {"B", buy_slot},
-};
+});
 
 /* CON_UMENU */
 static void state_umenu(GameWorld *g, struct descriptor_data *d, std::string_view arg)

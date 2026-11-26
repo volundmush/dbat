@@ -34,9 +34,10 @@ int heeldrop_cooldown(strike_shot &s)
 void heeldrop_defense(strike_shot &s, int &pry, int &blk, int &dge)
 {
   /* the least and most a mob rolls, by the attacker's level. quirk: there was a second, unreachable, entry for 40 */
-  static constexpr struct {
+  struct mobs_entry {
     int level, lo, hi;
-  } mobs[] = {
+  };
+  static constexpr auto mobs = std::to_array<mobs_entry>({
       {10,  20, 40 },
       {20,  20, 60 },
       {30,  20, 70 },
@@ -46,7 +47,7 @@ void heeldrop_defense(strike_shot &s, int &pry, int &blk, int &dge)
       {80,  50, 90 },
       {90,  60, 90 },
       {100, 70, 100}
-  };
+  });
 
   pry = blk = dge = 0;
   if (!char_is_npc(s.vict)) {
@@ -286,11 +287,14 @@ const ki_attack ROGAFUFUKEN = {
 };
 
 /* A bite's hits, by where roll_hitloc() says it landed */
-constexpr struct {
+namespace {
+struct bites_entry {
   act_msgs msgs;
   int crit; /* calc_critical()'s argument; 2 only with BONUS_SOFT */
   int eq;   /* dam_eq_loc(): 1 arms, 2 legs, 3 head, 4 body */
-} BITES[5] = {
+};
+}
+constexpr std::array<bites_entry, 5> BITES = {{
     {{"@WYou bite @C$N's@W face!@n", "@C$n@W bites your face!@n", "@c$n@W bites into $N's face!@n", true},        2, 3},
     {{"@WYou bite @C$N@W!@n", "@C$n@W bites you!@n", "@C$n@W bites @c$N@W!@n", true},                             0, 4},
     {{"@WYou bite @C$N's@W body!@n", "@C$n@W bites you on the body, sending blood flying!@n",
@@ -299,7 +303,7 @@ constexpr struct {
      4                                                                                                                },
     {{"@WYou bite @C$N's@W arm!@n", "@C$n@W bites you on the arm!@n", "@C$n@W bites @c$N@W on the arm!@n", true}, 1, 1},
     {{"@WYou bite @C$N's@W leg!@n", "@C$n@W bites into your leg!@n", "@c$n@W bites into @c$N's@W leg!@n", true},  1, 2},
-};
+}};
 
 /* A bite at someone. stcost: what it costs the biter if it lands; anything else, half */
 void bite_victim(GameWorld *g, struct char_data *ch, struct char_data *vict, int skill, int64_t stcost)

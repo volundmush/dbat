@@ -5,6 +5,7 @@
  * test_gameplay         all of them
  * test_gameplay NAME    one of them, here
  */
+#include <array>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -72,24 +73,25 @@ static struct char_data *fighter(GameWorld *g, const char *name, int admlevel, i
 
 static void check_commands_wait_for_the_song_to_stop(void)
 {
-  static const struct {
+  struct commands_entry {
     const char *name;
     void (*command)(GameWorld *, struct char_data *, std::string_view, int, int);
-  } commands[] = {
+  };
+  static const auto commands = std::to_array<commands_entry>({
       {"throw", do_throw}, {"tslash", do_tslash}, {"pslash", do_pslash}, {"ddslash", do_ddslash},
       {"kousengan", do_kousengan}, {"heeldrop", do_heeldrop}, {"attack", do_attack}, {"grapple", do_grapple},
       {"zen", do_zen}, {"malice", do_malice}, {"head", do_head}, {"bash", do_bash},
       {"seishou", do_seishou}, {"eraser", do_eraser}, {"tailwhip", do_tailwhip}, {"steal", do_steal},
-  };
+  });
   GameWorld *g = th_boot();
   struct char_data *ch = fighter(g, "Singer", ADMLVL_NONE, RACE_HUMAN, CLASS_ROSHI);
 
   char_set_powerattack(ch, SONG_SHIELDING);
-  for (size_t i = 0; i < sizeof(commands) / sizeof(*commands); i++) {
-    char argument[] = "nobody";
+  for (size_t i = 0; i < commands.size(); i++) {
+    auto argument = std::to_array("nobody");
 
     th_take_output(g, ch);
-    commands[i].command(g, ch, argument, 0, 0);
+    commands[i].command(g, ch, argument.data(), 0, 0);
     if (!saw(ch, "currently playing a song")) {
       file_print(stdout, "FAIL: {} works during a song: {}\n", commands[i].name, th_output(ch));
       failures++;
@@ -134,10 +136,10 @@ static void check_healing_glow_goes_on_the_target(void)
   GameWorld *g = th_boot();
   struct char_data *ch = fighter(g, "Healer", ADMLVL_IMPL, RACE_HUMAN, CLASS_ROSHI);
   struct char_data *vict = fighter(g, "Patient", ADMLVL_IMPL, RACE_HUMAN, CLASS_ROSHI);
-  char argument[] = "patient";
+  auto argument = std::to_array("patient");
 
   char_set_skills_base(ch, SKILL_HEALGLOW, 100);
-  do_healglow(g, ch, argument, 0, 0);
+  do_healglow(g, ch, argument.data(), 0, 0);
   CHECK(saw(ch, "blue glow"));
   CHECK(is_affected(vict, aff_flag::healglow));
   CHECK(!is_affected(ch, aff_flag::healglow));
@@ -155,11 +157,11 @@ static void hurt_all_over(GameWorld *g, struct char_data *ch)
 static void heal_until_it_works(GameWorld *g, struct char_data *ch, const char *target)
 {
   for (int i = 0; i < 200 && !saw(ch, "orange glow"); i++) {
-    char argument[64];
+    std::array<char, 64> argument;
 
-    snprintf(argument, sizeof(argument), "%s", target);
+    snprintf(argument.data(), sizeof(argument), "%s", target);
     restoreKI(ch, true);
-    do_heal(g, ch, argument, 0, 0);
+    do_heal(g, ch, argument.data(), 0, 0);
   }
   if (!saw(ch, "orange glow"))
     file_print(stdout, "{}\n", th_output(ch));
@@ -206,12 +208,12 @@ static void check_sacred_vial_stops_at_a_full_stomach(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = fighter(g, "Drinker", ADMLVL_IMPL, RACE_HUMAN, CLASS_ROSHI);
-  char argument[] = "item86";
+  auto argument = std::to_array("item86");
 
   obj_to_char(g, read_object(g, 86), ch);
   char_set_conditions(g, ch, HUNGER, 40);
   char_set_conditions(g, ch, THIRST, 46);
-  do_drink(g, ch, argument, 0, 0);
+  do_drink(g, ch, argument.data(), 0, 0);
   CHECK(saw(ch, "uncork"));
   CHECK(char_get_conditions(g, ch, THIRST) <= 48);
   th_shutdown(g);
@@ -221,15 +223,16 @@ static void check_trait_limits_training_at_70(void)
 {
   GameWorld *g = th_boot();
   struct char_data *ch = fighter(g, "Trainee", ADMLVL_NONE, RACE_HUMAN, CLASS_ROSHI);
-  char first[] = "str", second[] = "str";
+  auto first = std::to_array("str");
+  auto second = std::to_array("str");
 
   char_set_bonuses(ch, BONUS_WIMP, 1);
   char_set_real_abils_str(ch, 50);
-  do_train(g, ch, first, 0, 0);
+  do_train(g, ch, first.data(), 0, 0);
   CHECK(!saw(ch, "not able to withstand"));
   th_take_output(g, ch);
   char_set_real_abils_str(ch, 70);
-  do_train(g, ch, second, 0, 0);
+  do_train(g, ch, second.data(), 0, 0);
   CHECK(saw(ch, "beyond 70"));
   th_shutdown(g);
 }
@@ -301,7 +304,9 @@ static void check_staff_log_all_of_snet(void)
   struct char_data *far = fighter(g, "Faraway", ADMLVL_IMPL, RACE_HUMAN, CLASS_ROSHI);
   struct char_data *mortal = fighter(g, "Mortal", ADMLVL_NONE, RACE_HUMAN, CLASS_ROSHI);
   struct obj_data *scouter = read_object(g, 350);
-  char ordinary[] = "hello everyone", broadcast[] = "* big news", call[] = "#12345 just you";
+  auto ordinary = std::to_array("hello everyone");
+  auto broadcast = std::to_array("* big news");
+  auto call = std::to_array("#12345 just you");
 
   obj_wear_set(scouter, wear_flag::eye, true);
   equip_char(g, ch, scouter, WEAR_EYE);
@@ -309,11 +314,11 @@ static void check_staff_log_all_of_snet(void)
   char_to_room(g, far, 301);
   char_from_room(g, mortal);
   char_to_room(g, mortal, 301);
-  do_snet(g, ch, ordinary, 0, 0);
-  do_snet(g, ch, broadcast, 0, 0);
-  do_snet(g, ch, call, 0, 0);
+  do_snet(g, ch, ordinary.data(), 0, 0);
+  do_snet(g, ch, broadcast.data(), 0, 0);
+  do_snet(g, ch, call.data(), 0, 0);
   for (struct char_data *staff = nearby; staff; staff = staff == nearby ? far : nullptr) {
-    bool logged[3] = {};
+    std::array<bool, 3> logged = {{}};
 
     for (const std::string &line : *char_comm_hist(g, staff, HIST_SNET)) {
       logged[0] |= line.find("ello everyone") != std::string::npos;
@@ -464,18 +469,18 @@ static const char *mob_level;
 
 static void change_mob_levels(void)
 {
-  char command[128];
+  std::array<char, 128> command;
 
-  snprintf(command, sizeof(command), "sed -i 's/^1 0 10 0d0+0/%s 0 10 0d0+0/' world/mob/3.mob", mob_level);
-  if (system(command) != 0)
+  snprintf(command.data(), sizeof(command), "sed -i 's/^1 0 10 0d0+0/%s 0 10 0d0+0/' world/mob/3.mob", mob_level);
+  if (system(command.data()) != 0)
     abort();
 }
 
 static void check_mob_experience_at_impossible_levels(void)
 {
-  static const char *const levels[] = {"20000", "-5"};
+  static const auto levels = std::to_array<const char *const>({"20000", "-5"});
 
-  for (size_t i = 0; i < sizeof(levels) / sizeof(*levels); i++) {
+  for (size_t i = 0; i < levels.size(); i++) {
     GameWorld *g;
     struct char_data *mob;
 
@@ -508,10 +513,13 @@ static void check_experience_past_32_bits_survives_a_save(void)
   th_shutdown(g);
 }
 
-static const struct {
+namespace {
+struct checks_entry {
   const char *name;
   void (*check)(void);
-} checks[] = {
+};
+}
+static const auto checks = std::to_array<checks_entry>({
     {"commands_wait_for_the_song_to_stop", check_commands_wait_for_the_song_to_stop},
     {"song_of_shielding_costs_ki", check_song_of_shielding_costs_ki},
     {"healing_glow_goes_on_the_target", check_healing_glow_goes_on_the_target},
@@ -530,13 +538,13 @@ static const struct {
     {"mob_experience_stops_at_zero", check_mob_experience_stops_at_zero},
     {"mob_experience_at_impossible_levels", check_mob_experience_at_impossible_levels},
     {"experience_past_32_bits_survives_a_save", check_experience_past_32_bits_survives_a_save},
-};
+});
 
 int main(int argc, char **argv)
 {
   int failed = 0;
 
-  for (size_t i = 0; i < sizeof(checks) / sizeof(*checks); i++) {
+  for (size_t i = 0; i < checks.size(); i++) {
     int status = 0;
     pid_t child;
 

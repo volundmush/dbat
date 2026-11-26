@@ -1,4 +1,5 @@
 /* Scenes for test_techniques: see scene_kit.hpp */
+#include <array>
 #include <type_traits>
 #include "scene_kit.hpp"
 
@@ -14,7 +15,7 @@ static void clear_host(Descriptor *d)
 }
 
 namespace {
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     {"with only a restricted entry", "help qqq", false, SETUP(restricted_help_table(g);), false, 1},
     {"implementor, with modifiers", "game affect Hugo", false, SETUP(char_set_admlevel(att, ADMLVL_IMPL); affected_type af{}; af.type = 1; af.duration = 3; af.modifier = 2; af.location = APPLY_STR; affect_to_char(g, att, &af); af.bitvector = aff_flag::flying; affect_to_char(g, att, &af); af.modifier = 0; affect_to_char(g, att, &af);), false, 1},
     {"mimicking a namek", "mimic", false, SETUP(char_set_skills_base(att, SKILL_MIMIC, 100); char_set_mimic(att, RACE_NAMEK);), false, 1},
@@ -1054,7 +1055,7 @@ namespace {
     {"with 7 places", "toplist", false, SETUP(toplist_of(7);), false, 1},
     {"with 30 places", "toplist", false, SETUP(toplist_of(30);), false, 1},
     {"without the file", "toplist", false, SETUP(toplist_of(-1);), false, 1},
-  };
+  });
 } // namespace
 
 extern const std::span<const scene> SCENES_INFORMATIVE = list;

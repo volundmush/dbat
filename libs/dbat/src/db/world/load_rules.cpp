@@ -25,10 +25,11 @@ void gravity_by_flags(GameWorld *g, room_vnum room)
 
 void gravity_by_vnum(GameWorld *g, room_vnum room)
 {
-  static constexpr struct {
+  struct ranges_entry {
     room_vnum low, high;
     int gravity;
-  } ranges[] = {
+  };
+  static constexpr auto ranges = std::to_array<ranges_entry>({
       {19800, 19899, 1000 },
       {64000, 64006, 100  },
       {64007, 64016, 300  },
@@ -37,7 +38,7 @@ void gravity_by_vnum(GameWorld *g, room_vnum room)
       {64049, 64070, 5000 },
       {64071, 64096, 10000},
       {64097, 64097, 1000 },
-  };
+  });
   for (const auto &r : ranges)
     if (room >= r.low && room <= r.high)
       room_set_gravity(g, room, r.gravity);

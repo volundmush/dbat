@@ -3,6 +3,7 @@
  * Each case forks from one booted game, so one crash can't hide another or spoil later cases.
  * test_commands [command]   runs one command only, and shows the sanitizer's whole report.
  */
+#include <array>
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
@@ -27,20 +28,20 @@
 
 #include "harness.hpp"
 
-static const char *const skipped[] = {
+static const auto skipped = std::to_array<const char *const>({
     "copyover", /* replaces the process */
     "shutdown", /* ends the game on purpose */
-};
+});
 
 /*
  * Commands with a failure nobody has fixed yet. They still run and still get reported, but don't
  * fail the test, so a new failure stands out. Remove a command from here when it's fixed.
  */
-static const char *const known_failures[] = {
+static const auto known_failures = std::to_array<const char *const>({
     "", /* none at the moment */
-};
+});
 
-static const char *const arguments[] = {
+static const auto arguments = std::to_array<const char *const>({
     "",
     "xyzzy",
     "dummy",
@@ -60,20 +61,20 @@ static const char *const arguments[] = {
     "sword chest",
     "%s%s%n$n$N@x",
     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-};
+});
 
 enum state { STANDING, SLEEPING, FIGHTING, DEAD, NUM_STATES };
-static const char *const state_names[NUM_STATES] = {"standing", "sleeping", "fighting", "dead"};
+static const std::array<const char *const, NUM_STATES> state_names = {{"standing", "sleeping", "fighting", "dead"}};
 
-static const int levels[] = {ADMLVL_NONE, ADMLVL_GOD, ADMLVL_IMPL};
+static constexpr auto levels = std::to_array<int>({ADMLVL_NONE, ADMLVL_GOD, ADMLVL_IMPL});
 
 constexpr int CASE_SECONDS   = 10;
 constexpr int MAX_SIGNATURES = 500;
 constexpr int AUDIT_FAILED   = 3;
 
 struct signature {
-  char text[300]{};
-  char example[300]{};
+  std::array<char, 300> text = {{}};
+  std::array<char, 300> example = {{}};
   int count{};
   bool known{};
 };
@@ -83,17 +84,17 @@ constexpr time_t TRANSCRIPT_TIME = 1800000000;
 static FILE *transcript          = nullptr;
 static bool full_saves           = false; /* --full: saved files as they are, rather than a hash of each */
 static unsigned long case_seed   = 0;
-static struct char_data *transcript_chars[8];
+static std::array<char_data *, 8> transcript_chars;
 static size_t num_transcript_chars = 0;
 
-static struct signature signatures[MAX_SIGNATURES];
+static std::array<signature, MAX_SIGNATURES> signatures;
 static int num_signatures = 0;
 static int cases          = 0;
 static bool verbose       = false;
 
 static bool is_known_failure(const char *command)
 {
-  for (size_t i = 0; i < sizeof(known_failures) / sizeof(*known_failures); i++)
+  for (size_t i = 0; i < known_failures.size(); i++)
     if (!strcmp(command, known_failures[i]))
       return true;
   return false;
@@ -102,14 +103,14 @@ static bool is_known_failure(const char *command)
 static void record(const char *text, const char *example, bool known)
 {
   for (int i = 0; i < num_signatures; i++)
-    if (!strcmp(signatures[i].text, text)) {
+    if (!strcmp(signatures[i].text.data(), text)) {
       signatures[i].count++;
       return;
     }
   if (num_signatures == MAX_SIGNATURES)
     return;
-  snprintf(signatures[num_signatures].text, sizeof(signatures[num_signatures].text), "%s", text);
-  snprintf(signatures[num_signatures].example, sizeof(signatures[num_signatures].example), "%s", example);
+  snprintf(signatures[num_signatures].text.data(), sizeof(signatures[num_signatures].text), "%s", text);
+  snprintf(signatures[num_signatures].example.data(), sizeof(signatures[num_signatures].example), "%s", example);
   signatures[num_signatures].known = known;
   signatures[num_signatures++].count = 1;
 }
@@ -117,36 +118,38 @@ static void record(const char *text, const char *example, bool known)
 /* The sanitizer's summary, followed by the first frame of the game's own code. */
 static void describe_report(const char *report_path, char *out, size_t size)
 {
-  char line[1024], summary[200] = "", frame[120] = "";
+  std::array<char, 1024> line;
+  std::array<char, 200> summary = {};
+  std::array<char, 120> frame = {};
   FILE *fl = fopen(report_path, "r");
 
   if (!fl) {
     snprintf(out, size, "no report");
     return;
   }
-  while (fgets(line, sizeof(line), fl)) {
+  while (fgets(line.data(), sizeof(line), fl)) {
     char *at;
 
     if (verbose)
-      fputs(line, stdout);
-    line[strcspn(line, "\n")] = '\0';
-    if (!*summary && !strncmp(line, "AUDIT: ", 7))
-      snprintf(summary, sizeof(summary), "%s", line);
-    if (!*summary && (at = strstr(line, "runtime error:")))
-      snprintf(summary, sizeof(summary), "%s", at);
-    if ((at = strstr(line, "SUMMARY: ")) && !*summary)
-      snprintf(summary, sizeof(summary), "%s", at + 9);
-    if (!*frame && (at = strstr(line, "/libs/dbat/src/")) && strstr(line, " in ")) {
-      char *in = strstr(line, " in ");
+      fputs(line.data(), stdout);
+    line[strcspn(line.data(), "\n")] = '\0';
+    if (!summary[0] && !strncmp(line.data(), "AUDIT: ", 7))
+      snprintf(summary.data(), sizeof(summary), "%s", line.data());
+    if (!summary[0] && (at = strstr(line.data(), "runtime error:")))
+      snprintf(summary.data(), sizeof(summary), "%s", at);
+    if ((at = strstr(line.data(), "SUMMARY: ")) && !summary[0])
+      snprintf(summary.data(), sizeof(summary), "%s", at + 9);
+    if (!frame[0] && (at = strstr(line.data(), "/libs/dbat/src/")) && strstr(line.data(), " in ")) {
+      char *in = strstr(line.data(), " in ");
       char *end = strchr(in + 4, ' ');
 
       if (end)
         *end = '\0';
-      snprintf(frame, sizeof(frame), "%s", in + 4);
+      snprintf(frame.data(), sizeof(frame), "%s", in + 4);
     }
   }
   fclose(fl);
-  snprintf(out, size, "%s [%s]", *summary ? summary : "exited with no sanitizer report", frame);
+  snprintf(out, size, "%s [%s]", summary[0] ? summary.data() : "exited with no sanitizer report", frame.data());
 }
 
 static void audit_problem(void *, const char *problem)
@@ -198,13 +201,15 @@ static unsigned long seed_for(const char *command, size_t player, int state, siz
 static void run_case(GameWorld *g, struct char_data *ch, struct char_data *victim, enum state state,
                      const char *command, const char *argument)
 {
-  char line[512], example[512], report[64];
+  std::array<char, 512> line;
+  std::array<char, 512> example;
+  std::array<char, 64> report;
   int status;
   pid_t pid;
 
-  snprintf(line, sizeof(line), "%s %s", command, argument);
-  snprintf(example, sizeof(example), "'%s' level %d %s", line, char_get_admlevel(ch), state_names[state]);
-  snprintf(report, sizeof(report), "case-%ld.txt", (long)getpid());
+  snprintf(line.data(), sizeof(line), "%s %s", command, argument);
+  snprintf(example.data(), sizeof(example), "'%s' level %d %s", line.data(), char_get_admlevel(ch), state_names[state]);
+  snprintf(report.data(), sizeof(report), "case-%ld.txt", (long)getpid());
   cases++;
   fflush(nullptr);
 
@@ -214,47 +219,47 @@ static void run_case(GameWorld *g, struct char_data *ch, struct char_data *victi
     exit(2);
   }
   if (pid == 0) {
-    int fd = open(report, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int fd = open(report.data(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
     dup2(fd, STDOUT_FILENO);
     dup2(fd, STDERR_FILENO);
     alarm(CASE_SECONDS);
     if (transcript)
       circle_srandom(g, case_seed);
-    play_case(g, ch, victim, state, line);
+    play_case(g, ch, victim, state, line.data());
     if (transcript)
-      th_write_case_record(g, transcript_chars, num_transcript_chars, full_saves);
+      th_write_case_record(g, transcript_chars.data(), num_transcript_chars, full_saves);
     fflush(stdout);
     th_exit(0);
   }
 
   waitpid(pid, &status, 0);
   if (transcript) {
-    file_print(transcript, "######## {} | {}\n{}", example, WIFEXITED(status) ? WEXITSTATUS(status) : -WTERMSIG(status),
-               th_file_text(report));
+    file_print(transcript, "######## {} | {}\n{}", example.data(), WIFEXITED(status) ? WEXITSTATUS(status) : -WTERMSIG(status),
+               th_file_text(report.data()));
     fflush(transcript);
   }
   if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
     return;
 
   if (WIFSIGNALED(status) && WTERMSIG(status) == SIGALRM) {
-    char text[64];
+    std::array<char, 64> text;
 
-    snprintf(text, sizeof(text), "hang: still running after %d seconds", CASE_SECONDS);
-    record(text, example, is_known_failure(command));
+    snprintf(text.data(), sizeof(text), "hang: still running after %d seconds", CASE_SECONDS);
+    record(text.data(), example.data(), is_known_failure(command));
   } else {
-    char text[300];
+    std::array<char, 300> text;
 
-    describe_report(report, text, sizeof(text));
-    if (WIFSIGNALED(status) && strstr(text, "no sanitizer report"))
-      snprintf(text, sizeof(text), "killed by signal %d", WTERMSIG(status));
-    record(text, example, is_known_failure(command));
+    describe_report(report.data(), text.data(), sizeof(text));
+    if (WIFSIGNALED(status) && strstr(text.data(), "no sanitizer report"))
+      snprintf(text.data(), sizeof(text), "killed by signal %d", WTERMSIG(status));
+    record(text.data(), example.data(), is_known_failure(command));
   }
 }
 
 static bool is_skipped(const char *command)
 {
-  for (size_t i = 0; i < sizeof(skipped) / sizeof(*skipped); i++)
+  for (size_t i = 0; i < skipped.size(); i++)
     if (!strcmp(command, skipped[i]))
       return true;
   return false;
@@ -301,18 +306,18 @@ int main(int argc, char **argv)
 
   GameWorld *g             = transcript ? th_boot_at(TRANSCRIPT_TIME) : th_boot();
   struct char_data *victim = th_player(g, "Victim", ADMLVL_NONE);
-  struct char_data *players[sizeof(levels) / sizeof(*levels)];
+  std::array<char_data *, levels.size()> players;
   const char *only         = argc > arg ? argv[arg] : nullptr;
-  const size_t num_players = sizeof(players) / sizeof(*players);
+  const size_t num_players = players.size();
   int new_failures = 0;
 
   verbose = only != nullptr;
   place(g, victim, 301);
   for (size_t i = 0; i < num_players; i++) {
-    char name[32];
+    std::array<char, 32> name;
 
-    snprintf(name, sizeof(name), "Tester%c", (char)('A' + i));
-    players[i] = th_player(g, name, levels[i]);
+    snprintf(name.data(), sizeof(name), "Tester%c", (char)('A' + i));
+    players[i] = th_player(g, name.data(), levels[i]);
     place(g, players[i], 301);
     obj_to_char(g, read_object(g, 301), players[i]);
     obj_to_char(g, read_object(g, 302), players[i]);
@@ -334,7 +339,7 @@ int main(int argc, char **argv)
       continue;
     for (size_t p = 0; p < num_players; p++)
       for (int s = 0; s < NUM_STATES; s++)
-        for (size_t a = 0; a < sizeof(arguments) / sizeof(*arguments); a++) {
+        for (size_t a = 0; a < arguments.size(); a++) {
           case_seed = seed_for(command, p, s, a);
           run_case(g, players[p], victim, (enum state)s, command, arguments[a]);
         }
@@ -342,7 +347,7 @@ int main(int argc, char **argv)
   if (transcript)
     fclose(transcript);
 
-  qsort(signatures, num_signatures, sizeof(*signatures), by_count);
+  qsort(signatures.data(), num_signatures, sizeof(signatures[0]), by_count);
   for (int i = 0; i < num_signatures; i++) {
     file_print(stdout, "{:>5d} {} {}\n       e.g. {}\n", signatures[i].count, signatures[i].known ? "known" : "NEW  ",
                signatures[i].text, signatures[i].example);

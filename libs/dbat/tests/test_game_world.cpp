@@ -1,4 +1,5 @@
 /* Two GameWorlds built by hand must not affect each other. Needs no data/ files. */
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -206,8 +207,8 @@ static void check_read_entities(GameWorld *a, GameWorld *b)
 /* A loop sees the members of a list as they were when it began, skipping any destroyed or moved before their turn */
 static void check_iteration(GameWorld *g)
 {
-  struct char_data *mob[6];
-  struct obj_data *obj[4];
+  std::array<char_data *, 6> mob;
+  std::array<obj_data *, 4> obj;
   std::vector<struct char_data *> seen;
 
   for (auto &m : mob)
@@ -566,8 +567,8 @@ static void check_toplist_load(void)
 {
   const char *tmp = getenv("TMPDIR");
   std::string dir = std::string(tmp && *tmp ? tmp : "/tmp") + "/dbat-toplist.XXXXXX";
-  char cwd[4096];
-  CHECK(mkdtemp(dir.data()) != nullptr && getcwd(cwd, sizeof(cwd)) != nullptr);
+  std::array<char, 4096> cwd;
+  CHECK(mkdtemp(dir.data()) != nullptr && getcwd(cwd.data(), sizeof(cwd)) != nullptr);
   CHECK(chdir(dir.c_str()) == 0 && mkdir("intro", 0755) == 0 && mkdir("intro/P-T", 0755) == 0);
   FILE *fl = fopen("intro/P-T/toplist.itr", "w");
   CHECK(fl != nullptr);
@@ -584,7 +585,7 @@ static void check_toplist_load(void)
   free_world(g);
 
   CHECK(remove("intro/P-T/toplist.itr") == 0 && rmdir("intro/P-T") == 0 && rmdir("intro") == 0);
-  CHECK(chdir(cwd) == 0 && rmdir(dir.c_str()) == 0);
+  CHECK(chdir(cwd.data()) == 0 && rmdir(dir.c_str()) == 0);
 }
 
 int main(void)

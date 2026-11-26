@@ -135,11 +135,12 @@ ACMD(do_refuel)
 /* garden */
 
 /* The plants that can be harvested: what they yield, and how the yield is adjusted. */
-static const struct harvest {
+struct harvest {
   obj_vnum plant, fruit;
   int bonus;  /* added to the yield */
   bool kills; /* harvesting kills the plant */
-} harvests[] = {
+};
+static const auto harvests = std::to_array<harvest>({
     {250,   1,     0,  false}, /* at most 2 */
     {1129,  1131,  0,  true },
     {17210, 17212, 2,  true },
@@ -152,7 +153,7 @@ static const struct harvest {
     {17224, 17225, 10, true },
     {17226, 17227, -8, true },
     {3702,  3703,  -2, true },
-};
+});
 
 static const struct harvest *find_harvest(GameWorld *g, struct obj_data *plant)
 {

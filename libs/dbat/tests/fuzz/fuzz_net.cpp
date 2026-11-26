@@ -3,6 +3,7 @@
  * to the socket, and each 0xfe lets ten pulses pass. Between writes the client reads what the game sent, as a real one
  * would. Whatever arrives, and however it is split, the game must stay consistent and keep going.
  */
+#include <array>
 #include <unistd.h>
 
 #include "dbat/comm.hpp"
@@ -35,10 +36,10 @@ static bool connected(GameWorld *g, struct descriptor_data *d)
 /* What the game sent the client, read and thrown away */
 static void read_output(GameWorld *g, struct descriptor_data *d, int peer)
 {
-  char buffer[65536];
+  std::array<char, 65536> buffer;
   if (connected(g, d) && !desc_output(d).empty())
     game_send_output(g, d);
-  while (read(peer, buffer, sizeof(buffer)) > 0) {
+  while (read(peer, buffer.data(), sizeof(buffer)) > 0) {
   }
 }
 

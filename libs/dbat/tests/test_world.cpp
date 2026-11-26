@@ -1,4 +1,5 @@
 /* Plays through whole game systems in the fixture world, checking the world audit after each. */
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -499,27 +500,27 @@ static void check_lookups_past_the_end(GameWorld *g)
 /* Inserting used to free uninitialized memory, or strings that a neighbouring guild was still using. */
 static void check_new_guilds(GameWorld *g)
 {
-  guild_vnum vnums[] = {320, 310, 330}; /* the fixture already has 300 */
+  auto vnums = std::to_array<guild_vnum>({320, 310, 330}); /* the fixture already has 300 */
 
-  for (size_t i = 0; i < sizeof(vnums) / sizeof(*vnums); i++) {
-    char message[32];
+  for (size_t i = 0; i < vnums.size(); i++) {
+    std::array<char, 32> message;
     struct guild_data guild{};
 
-    snprintf(message, sizeof(message), "guild %d", vnums[i]);
+    snprintf(message.data(), sizeof(message), "guild %d", vnums[i]);
     guild_set_vnum(&guild, vnums[i]);
-    guild_set_no_such_skill(&guild, message);
-    guild_set_not_enough_gold(&guild, message);
+    guild_set_no_such_skill(&guild, message.data());
+    guild_set_not_enough_gold(&guild, message.data());
     add_guild(g, &guild);
   }
   CHECK(g->guilds.size() == 4);
   for (guild_vnum v = 310; v <= 330; v += 10) {
-    char message[32];
+    std::array<char, 32> message;
 
-    snprintf(message, sizeof(message), "guild %d", v);
+    snprintf(message.data(), sizeof(message), "guild %d", v);
     CHECK(find_guild(g, v));
     if (find_guild(g, v)) {
       std::string_view no_such_skill = guild_get_no_such_skill(find_guild(g, v));
-      CHECK(no_such_skill == message);
+      CHECK(no_such_skill == message.data());
     }
   }
   CHECK(guild_get_vnum(*g->guilds.all().begin()) == 300);
@@ -758,7 +759,7 @@ static struct obj_data *object_with_trigger(GameWorld *g, struct char_data *ch, 
 /* The loop over objects used to read the next one from an object whose trigger had just purged it. */
 static void check_time_trigger_purges_itself(GameWorld *g, struct char_data *ch)
 {
-  long ids[3];
+  std::array<long, 3> ids;
   int hours = g->time_info.hours;
 
   for (int i = 0; i < 3; i++)

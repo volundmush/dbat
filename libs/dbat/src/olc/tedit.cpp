@@ -5,6 +5,7 @@
  * XXX: This needs Oasis-ifying.
  */
 
+#include <array>
 #include <cstdlib>
 
 #include "dbat/args.hpp"
@@ -146,13 +147,14 @@ ACMD(do_tedit)
   int l, i = 0;
   std::string field;
 
-  struct {
+  struct fields_entry {
     std::string_view cmd{};
     char level{};
     std::string *buffer{};
     int size{};
     std::string_view filename{};
-  } fields[] = {
+  };
+  auto fields = std::to_array<fields_entry>({
       /* edit the lvls to your own needs */
       {"credits",    ADMLVL_IMPL,  &g->credits,    24000, CREDITS_FILE   },
       {"donottouch", 6,            &g->news,       24000, NEWS_FILE      },
@@ -164,7 +166,7 @@ ACMD(do_tedit)
       {"handbook",   ADMLVL_IMPL,  &g->handbook,   24000, HANDBOOK_FILE  },
       {"update",     ADMLVL_IMPL,  &g->policies,   24000, POLICIES_FILE  },
       {"ihelp",      ADMLVL_GRGOD, &g->ihelp,      24000, IHELP_PAGE_FILE},
-  };
+  });
 
   if (char_get_desc(ch) == nullptr)
     return;

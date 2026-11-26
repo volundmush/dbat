@@ -24,6 +24,7 @@
  * to every line, so that removing a line doesn't change the rolls of all the lines after it, which is
  * what lets a journal shrink.
  */
+#include <array>
 #include <cctype>
 #include <csignal>
 #include <cstdio>
@@ -101,49 +102,49 @@ static obj_vnum nth_obj_vnum(GameWorld *g, size_t n)
   return NOTHING;
 }
 
-static const char *const known_failures[] = {
+static const auto known_failures = std::to_array<const char *const>({
     "(none at the moment)",
-};
+});
 
-static const char *const never_typed[] = {
+static const auto never_typed = std::to_array<const char *const>({
     "copyover", /* replaces the process */
     "shutdown", /* ends the game on purpose */
-};
+});
 
 /* What players mostly do, so that the bots get somewhere instead of only trying the odd commands. */
-static const char *const everyday[] = {
+static const auto everyday = std::to_array<const char *const>({
     "north", "east", "south", "west", "look", "get", "drop", "give", "put", "wear", "remove", "wield",
     "kill", "punch", "flee", "follow", "sit", "stand", "sleep", "wake", "rest", "say", "tell", "open",
     "close", "eat", "buy", "sell", "list", "inventory", "equipment", "score", "deposit", "withdraw",
     "balance", "group", "steal", "sacrifice", "junk", "save", "quit",
-};
+});
 
-static const char *const words[] = {
+static const auto words = std::to_array<const char *const>({
     "dummy", "keeper", "stranger", "chest", "sword", "bread", "atm", "bot0", "bot1", "bot2", "bot3", "self",
     "all", "all.sword", "2.dummy", "north", "east", "south", "west", "1", "2", "100", "300", "301", "302",
     "303", "3034", "-1", "0", "on", "off", "xyzzy", "%s%n", "$n", "thing", "thing5", "thing9", "thing15", "thing17", "thing24",
     "thing27", "thing28", "thing30", "thing31", "thing32", "critter1", "critter5", "critter10", "vanisher", "guildmaster",
     "hello", "dance", "up", "down", "here", "me", "@x", "$N",
-};
+});
 
 /* Editors are entered with these, by Implementors, and bots stay in them for a while. */
-static const char *const builder_commands[] = {
+static const auto builder_commands = std::to_array<const char *const>({
     "redit 300", "redit 310", "redit 399", "oedit 300", "oedit 311", "oedit 398", "medit 300", "medit 310",
     "medit 398", "zedit 3", "zedit new 5", "sedit 300", "sedit 398", "gedit 300", "gedit 398", "trigedit 300",
     "trigedit 340", "trigedit 398", "aedit nod", "aedit newsocial", "hedit fixture", "hedit newhelp", "cedit",
     "tedit news", "tedit motd", "assedit 300", "hsedit 300", "iedit sword", "iedit chest", "rlist", "olist",
     "mlist", "slist", "glist", "tlist", "zlist",
-};
+});
 
-static const char *const editor_exits[] = {"q", "y", "n", "/s", "/q", "/c", "/h", "x"};
+static const auto editor_exits = std::to_array<const char *const>({"q", "y", "n", "/s", "/q", "/c", "/h", "x"});
 
 /* For the login menus. Some of these match each other often enough to get all the way in. */
-static const char *const login_answers[] = {
+static const auto login_answers = std::to_array<const char *const>({
     "Botuser", "Botuser", "Otheruser", "y", "y", "n", "Pa55word1", "Pa55word1", "Pa55word1", "bot@example.com", "1", "1", "2", "3", "4", "5",
     "Zarbot", "Qorbot", "Yes", "No", "", "", "m", "b", "x", "new", "delete", "cancel",
-};
+});
 
-#define PICK(list) ((list)[bot_dice(sizeof(list) / sizeof(*(list)))])
+#define PICK(list) ((list)[bot_dice((list).size())])
 
 /*
  * The bots' own dice, so that choosing what to do takes nothing from the game's generator. Only
@@ -164,7 +165,7 @@ static unsigned long bot_dice(unsigned long sides)
 
 static bool is_never_typed(const char *command)
 {
-  for (size_t i = 0; i < sizeof(never_typed) / sizeof(*never_typed); i++)
+  for (size_t i = 0; i < never_typed.size(); i++)
     if (!strcmp(command, never_typed[i]))
       return true;
   return false;
@@ -172,12 +173,12 @@ static bool is_never_typed(const char *command)
 
 /* Who is connected, by the label the journal knows them by. */
 struct connection {
-  char label[16]{};
+  std::array<char, 16> label = {{}};
   struct descriptor_data *d{};
   int peer{}; /* the client's end of its socket, or -1 for a player made by spawn */
 };
 
-static struct connection connections[MAX_CONNECTIONS];
+static std::array<connection, MAX_CONNECTIONS> connections;
 static int num_connections = 0;
 
 /* Forgets connections the game has closed, which it can do at any moment. */
@@ -200,7 +201,7 @@ static void forget_closed_connections(const GameWorld *g)
 static struct connection *find_connection(const char *label)
 {
   for (int i = 0; i < num_connections; i++)
-    if (!strcmp(connections[i].label, label))
+    if (!strcmp(connections[i].label.data(), label))
       return &connections[i];
   return nullptr;
 }
@@ -248,12 +249,12 @@ static void fingerprint_bytes(const char *bytes, size_t length)
 /* A connection's output goes through the game's real output code, and the client reads it. */
 static void send_real_output(GameWorld *g, struct connection *c)
 {
-  static char received[32768];
+  static std::array<char, 32768> received;
   ssize_t length;
 
   if (!desc_output(c->d).empty() && game_send_output(g, c->d) >= 0)
-    while ((length = read(c->peer, received, sizeof(received))) > 0)
-      fingerprint_bytes(received, length);
+    while ((length = read(c->peer, received.data(), sizeof(received))) > 0)
+      fingerprint_bytes(received.data(), length);
 }
 
 static void take_all_output(GameWorld *g)
@@ -305,10 +306,10 @@ static void simplify_message(char *text)
 static void check_log(void)
 {
   static FILE *log_reader;
-  static char seen[1024][160];
+  static std::array<std::array<char, 160>, 1024> seen;
   static int num_seen;
   const char *fatal = getenv("DBAT_SYSERR");
-  char text[1024];
+  std::array<char, 1024> text;
 
   /*
    * What goes wrong during the first boot is mostly what a tiny world lacks, so it only counts as seen.
@@ -318,8 +319,8 @@ static void check_log(void)
 
   if (!log_reader && !(log_reader = fopen("test.log", "r")))
     return;
-  while (fgets(text, sizeof(text), log_reader)) {
-    char *message = strstr(text, "SYSERR");
+  while (fgets(text.data(), sizeof(text), log_reader)) {
+    char *message = strstr(text.data(), "SYSERR");
     bool is_new = true;
 
     if (!message)
@@ -330,9 +331,9 @@ static void check_log(void)
     simplify_message(message);
     message[159] = '\0';
     for (int i = 0; i < num_seen && is_new; i++)
-      is_new = strcmp(seen[i], message) != 0;
+      is_new = strcmp(seen[i].data(), message) != 0;
     if (is_new && num_seen < 1024)
-      snprintf(seen[num_seen++], sizeof(seen[0]), "%s", message);
+      snprintf(seen[num_seen++].data(), sizeof(seen[0]), "%s", message);
     if (first_boot)
       continue;
     if (is_new)
@@ -358,7 +359,7 @@ static bool player_in_game(GameWorld *g, const char *name)
 
 static void add_connection(const char *label, struct descriptor_data *d, int peer)
 {
-  snprintf(connections[num_connections].label, sizeof(connections[num_connections].label), "%s", label);
+  snprintf(connections[num_connections].label.data(), sizeof(connections[num_connections].label), "%s", label);
   connections[num_connections].d      = d;
   connections[num_connections++].peer = peer;
 }
@@ -379,24 +380,25 @@ static void do_action(GameWorld *g, char *line)
   if (!strncmp(line, "seed ", 5)) {
     circle_srandom(g, strtoul(line + 5, nullptr, 10));
   } else if (!strncmp(line, "spawn ", 6)) {
-    char label[16];
+    std::array<char, 16> label;
     int level, race, sensei;
     unsigned long kit;
 
-    if (sscanf(line + 6, "%15s %d %lu %d %d", label, &level, &kit, &race, &sensei) == 5 && num_connections < MAX_CONNECTIONS) {
-      struct char_data *ch = th_player_as(g, label, level, race, sensei);
+    if (sscanf(line + 6, "%15s %d %lu %d %d", label.data(), &level, &kit, &race, &sensei) == 5 && num_connections < MAX_CONNECTIONS) {
+      struct char_data *ch = th_player_as(g, label.data(), level, race, sensei);
 
       equip_bot(g, ch, kit);
-      add_connection(label, char_get_desc(ch), -1);
+      add_connection(label.data(), char_get_desc(ch), -1);
     }
   } else if (!strncmp(line, "login ", 6)) {
-    char label[16], name[64];
+    std::array<char, 16> label;
+    std::array<char, 64> name;
     struct char_data *ch;
 
     /* the game itself won't load a player who's already in it */
-    if (sscanf(line + 6, "%15s %63s", label, name) == 2 && num_connections < MAX_CONNECTIONS && !player_in_game(g, name) &&
-        (ch = th_existing_player(g, name)))
-      add_connection(label, char_get_desc(ch), -1);
+    if (sscanf(line + 6, "%15s %63s", label.data(), name.data()) == 2 && num_connections < MAX_CONNECTIONS && !player_in_game(g, name.data()) &&
+        (ch = th_existing_player(g, name.data())))
+      add_connection(label.data(), char_get_desc(ch), -1);
   } else if (!strncmp(line, "connect ", 8)) {
     int peer;
     struct descriptor_data *d;
@@ -444,14 +446,14 @@ static void do_action(GameWorld *g, char *line)
 /* The first word of keywords, or "something" for none: empty, or null from a getter that still gives null */
 static const char *first_keyword(std::string_view keywords)
 {
-  static char word[64];
+  static std::array<char, 64> word;
 
   if (keywords.empty())
     keywords = "something";
   keywords = keywords.substr(0, std::min(keywords.find(' '), sizeof(word) - 1));
-  keywords.copy(word, keywords.size());
+  keywords.copy(word.data(), keywords.size());
   word[keywords.size()] = '\0';
-  return word;
+  return word.data();
 }
 
 [[maybe_unused]] static const char *first_keyword(const char *keywords) /* for the getters that still give one */
@@ -462,7 +464,7 @@ static const char *first_keyword(std::string_view keywords)
 /* Something this bot could sensibly mean: what's around it, what it holds, or a number from the world. */
 static const char *pick_word(GameWorld *g, const struct char_data *ch)
 {
-  static char number[16];
+  static std::array<char, 16> number;
 
   switch (ch ? bot_dice(6) : 2 + bot_dice(4)) {
     case 0: {
@@ -489,14 +491,14 @@ static const char *pick_word(GameWorld *g, const struct char_data *ch)
       break;
     }
     case 2:
-      snprintf(number, sizeof(number), "%d", g->rooms.nth(bot_dice(g->rooms.size())));
-      return number;
+      snprintf(number.data(), sizeof(number), "%d", g->rooms.nth(bot_dice(g->rooms.size())));
+      return number.data();
     case 3:
-      snprintf(number, sizeof(number), "%d", nth_obj_vnum(g, bot_dice(g->obj_proto.size())));
-      return number;
+      snprintf(number.data(), sizeof(number), "%d", nth_obj_vnum(g, bot_dice(g->obj_proto.size())));
+      return number.data();
     case 4:
-      snprintf(number, sizeof(number), "%d", nth_mob_vnum(g, bot_dice(g->mob_proto.size())));
-      return number;
+      snprintf(number.data(), sizeof(number), "%d", nth_mob_vnum(g, bot_dice(g->mob_proto.size())));
+      return number.data();
     default:
       break;
   }
@@ -506,11 +508,11 @@ static const char *pick_word(GameWorld *g, const struct char_data *ch)
 /* Mostly short, sometimes as long as the game allows: buffers only overflow on long input. */
 static size_t append_word(GameWorld *g, const struct char_data *ch, char *text, size_t used, size_t size)
 {
-  static const size_t lengths[] = {256, 1024, 4096, MAX_INPUT_LENGTH - 8};
+  static const auto lengths = std::to_array<size_t>({256, 1024, 4096, MAX_INPUT_LENGTH - 8});
 
   used += snprintf(text + used, size - used, " ");
   if (used < size && !bot_dice(40)) {
-    size_t length = lengths[bot_dice(sizeof(lengths) / sizeof(*lengths))];
+    size_t length = lengths[bot_dice(lengths.size())];
     char fill = bot_dice(2) ? 'a' : '%';
 
     while (length-- > 0 && used + 1 < size)
@@ -549,9 +551,9 @@ static void compose_for_login(char *text, size_t size)
 /* Opens an editor on something that exists, or something new. Only Implementors will get anywhere. */
 static void compose_builder_command(GameWorld *g, char *text, size_t size)
 {
-  static const char *const with_room[] = {"redit", "goto", "rstat"};
-  static const char *const with_object[] = {"oedit", "ostat", "load obj", "vnum obj"};
-  static const char *const with_mob[] = {"medit", "mstat", "load mob", "vnum mob"};
+  static const auto with_room = std::to_array<const char *const>({"redit", "goto", "rstat"});
+  static const auto with_object = std::to_array<const char *const>({"oedit", "ostat", "load obj", "vnum obj"});
+  static const auto with_mob = std::to_array<const char *const>({"medit", "mstat", "load mob", "vnum mob"});
 
   switch (bot_dice(7)) {
     case 0:
@@ -636,16 +638,16 @@ static bool at_login_menu(const struct descriptor_data *d)
 /* Only a real world has players worth logging in as: the fixture's are other bots. */
 static bool use_real_players = false;
 static FILE *journal;
-static char line[MAX_LINE + 2];
+static std::array<char, MAX_LINE + 2> line;
 
 static void journal_and_do(GameWorld *g)
 {
-  static char with_dice[MAX_LINE + 34];
+  static std::array<char, MAX_LINE + 34> with_dice;
 
-  snprintf(with_dice, MAX_LINE, "@%lu %s", bot_dice(1000000000), line);
-  file_print(journal, "{}\n", with_dice);
+  snprintf(with_dice.data(), MAX_LINE, "@%lu %s", bot_dice(1000000000), line.data());
+  file_print(journal, "{}\n", with_dice.data());
   fflush(journal);
-  do_action(g, with_dice);
+  do_action(g, with_dice.data());
 }
 
 /* Chooses what happens next. */
@@ -662,7 +664,7 @@ static void bot_step(GameWorld *g, int *next_name)
       const struct player_index_element *player = &g->player_table[bot_dice(g->top_of_p_table + 1)];
 
       if (!player->name.empty()) {
-        snprintf(line, sizeof(line), "login Real%d %s", number, player->name.c_str());
+        snprintf(line.data(), sizeof(line), "login Real%d %s", number, player->name.c_str());
         journal_and_do(g);
         forget_closed_connections(g);
         continue;
@@ -670,13 +672,13 @@ static void bot_step(GameWorld *g, int *next_name)
     }
 
     /* the first of each batch is an Implementor: they reach far more of the game */
-    snprintf(line, sizeof(line), "spawn Bot%d %d %lu %lu %lu", number, number % NUM_BOTS == 0 ? ADMLVL_IMPL : ADMLVL_NONE,
+    snprintf(line.data(), sizeof(line), "spawn Bot%d %d %lu %lu %lu", number, number % NUM_BOTS == 0 ? ADMLVL_IMPL : ADMLVL_NONE,
              bot_dice(1000000), bot_dice(NUM_RACES), bot_dice(NUM_SENSEIS));
     journal_and_do(g);
     forget_closed_connections(g);
   }
   if (!bot_dice(60) && num_connections < NUM_BOTS * 3) {
-    snprintf(line, sizeof(line), "connect Client%d", (*next_name)++);
+    snprintf(line.data(), sizeof(line), "connect Client%d", (*next_name)++);
     journal_and_do(g);
     forget_closed_connections(g);
   }
@@ -684,25 +686,25 @@ static void bot_step(GameWorld *g, int *next_name)
   c = &connections[bot_dice(num_connections)];
   if (at_login_menu(c->d) && (c->peer < 0 || !bot_dice(50))) {
     /* someone gives up at the menus; a spawned bot only gets here after quitting */
-    snprintf(line, sizeof(line), "leave %s", c->label);
+    snprintf(line.data(), sizeof(line), "leave %s", c->label.data());
   } else if (!bot_dice(200)) {
-    snprintf(line, sizeof(line), "leave %s", c->label); /* a connection drops, at any moment at all */
+    snprintf(line.data(), sizeof(line), "leave %s", c->label.data()); /* a connection drops, at any moment at all */
   } else {
-    static char text[MAX_LINE - 32];
+    static std::array<char, MAX_LINE - 32> text;
 
-    compose_typing(g, c->d, text, sizeof(text));
-    snprintf(line, sizeof(line), "type %s %s", c->label, text);
+    compose_typing(g, c->d, text.data(), sizeof(text));
+    snprintf(line.data(), sizeof(line), "type %s %s", c->label.data(), text.data());
   }
   journal_and_do(g);
 
   if (!bot_dice(100)) {
-    static const int jumps[] = {3600, 3600 * 6, 86400, 86400 * 7, 86400 * 30};
+    static const auto jumps = std::to_array<int>({3600, 3600 * 6, 86400, 86400 * 7, 86400 * 30});
 
-    snprintf(line, sizeof(line), "clock %d", jumps[bot_dice(sizeof(jumps) / sizeof(*jumps))]);
+    snprintf(line.data(), sizeof(line), "clock %d", jumps[bot_dice(jumps.size())]);
     journal_and_do(g);
   }
 
-  snprintf(line, sizeof(line), "pulse %lu", bot_dice(10) + 1);
+  snprintf(line.data(), sizeof(line), "pulse %lu", bot_dice(10) + 1);
   journal_and_do(g);
 }
 
@@ -734,25 +736,25 @@ static void save_everything(GameWorld *g)
 
 /* One changed line of a file, and whether the other side of the comparison has the same line. */
 struct changed_line {
-  char text[240]{};
+  std::array<char, 240> text = {{}};
   bool moved{};
 };
 
-static char changed_file[96];
+static std::array<char, 96> changed_file;
 
 static void report_kind(const char *key)
 {
-  static char reported[256][136];
+  static std::array<std::array<char, 136>, 256> reported;
   static int num_reported;
-  char kind[136];
+  std::array<char, 136> kind;
   bool is_new = true;
 
-  snprintf(kind, sizeof(kind), "%s %s", changed_file, key);
+  snprintf(kind.data(), sizeof(kind), "%s %s", changed_file.data(), key);
   for (int i = 0; i < num_reported && is_new; i++)
-    is_new = strcmp(reported[i], kind) != 0;
+    is_new = strcmp(reported[i].data(), kind.data()) != 0;
   if (is_new && num_reported < 256) {
-    snprintf(reported[num_reported++], sizeof(reported[0]), "%s", kind);
-    file_print(stdout, "LOGGED: SAVE CHANGED: {}\n", kind);
+    snprintf(reported[num_reported++].data(), sizeof(reported[0]), "%s", kind.data());
+    file_print(stdout, "LOGGED: SAVE CHANGED: {}\n", kind.data());
   }
 }
 
@@ -769,63 +771,64 @@ static void report_changed_lines(struct changed_line *lines, int count)
 {
   for (int i = 0; i < count; i++)
     for (int j = i + 1; j < count && !lines[i].moved; j++)
-      if (!lines[j].moved && lines[i].text[0] != lines[j].text[0] && same_text(lines[i].text + 1, lines[j].text + 1))
+      if (!lines[j].moved && lines[i].text[0] != lines[j].text[0] && same_text(lines[i].text.data() + 1, lines[j].text.data() + 1))
         lines[i].moved = lines[j].moved = true;
   for (int i = 0; i < count; i++)
     if (!lines[i].moved) {
-      char key[32] = "";
+      std::array<char, 32> key = {};
 
       file_print(stdout, "  {}\n", lines[i].text);
-      sscanf(lines[i].text + 2, "%31[A-Za-z_]", key);
-      report_kind(*key ? key : "(numbers)");
+      sscanf(lines[i].text.data() + 2, "%31[A-Za-z_]", key.data());
+      report_kind(key[0] ? key.data() : "(numbers)");
     }
 }
 
 /* Reports each kind of line that differs, rather than every line, as one mistake can change thousands. */
 static void report_changes(const char *what)
 {
-  static struct changed_line lines[512];
+  static std::array<changed_line, 512> lines;
   int count = 0;
-  char command[256], text[2048];
+  std::array<char, 256> command;
+  std::array<char, 2048> text;
   FILE *diff;
 
   /* User comes from the connection, and the saves restart_and_compare() makes have none. */
   /* An object file's first line starts with when it was saved. */
-  snprintf(command, sizeof(command), "diff -r -x '*.bak' -x test.log -x time -I '^User: ' -I '^[0-9] 1[0-9]\\{9\\} ' %s",
+  snprintf(command.data(), sizeof(command), "diff -r -x '*.bak' -x test.log -x time -I '^User: ' -I '^[0-9] 1[0-9]\\{9\\} ' %s",
            what);
-  if (!(diff = popen(command, "r")))
+  if (!(diff = popen(command.data(), "r")))
     return;
-  while (fgets(text, sizeof(text), diff)) {
-    text[strcspn(text, "\n")] = '\0';
-    if (!strncmp(text, "diff ", 5) || !strncmp(text, "Only in", 7) || !strncmp(text, "Binary", 6)) {
+  while (fgets(text.data(), sizeof(text), diff)) {
+    text[strcspn(text.data(), "\n")] = '\0';
+    if (!strncmp(text.data(), "diff ", 5) || !strncmp(text.data(), "Only in", 7) || !strncmp(text.data(), "Binary", 6)) {
       /* the file's directory says what it holds: world/wld, plrfiles and so on */
-      char *at = strstr(text, "first/");
+      char *at = strstr(text.data(), "first/");
 
-      report_changed_lines(lines, count);
+      report_changed_lines(lines.data(), count);
       count = 0;
       if (at) {
         char *end;
 
-        snprintf(changed_file, sizeof(changed_file), "%s", at + 6);
-        changed_file[strcspn(changed_file, " :")] = '\0';
-        if ((end = strchr(changed_file, '/')) && !strncmp(changed_file, "world/", 6))
+        snprintf(changed_file.data(), sizeof(changed_file), "%s", at + 6);
+        changed_file[strcspn(changed_file.data(), " :")] = '\0';
+        if ((end = strchr(changed_file.data(), '/')) && !strncmp(changed_file.data(), "world/", 6))
           end = strchr(end + 1, '/');
         if (end)
           *end = '\0';
       }
-      file_print(stdout, "  {:.200}\n", text);
-      if (*text != 'd') {
-        char key[8];
+      file_print(stdout, "  {:.200}\n", text.data());
+      if (text[0] != 'd') {
+        std::array<char, 8> key;
 
-        snprintf(key, sizeof(key), "(%.4s)", text);
-        report_kind(key);
+        snprintf(key.data(), sizeof(key), "(%.4s)", text.data());
+        report_kind(key.data());
       }
-    } else if ((*text == '<' || *text == '>') && count < 512) {
-      snprintf(lines[count].text, sizeof(lines[count].text), "%s", text);
+    } else if ((text[0] == '<' || text[0] == '>') && count < 512) {
+      snprintf(lines[count].text.data(), sizeof(lines[count].text), "%s", text.data());
       lines[count++].moved = false;
     }
   }
-  report_changed_lines(lines, count);
+  report_changed_lines(lines.data(), count);
   pclose(diff);
 }
 
@@ -856,7 +859,7 @@ static GameWorld *restart_and_compare(GameWorld *g)
   int players = 0, returned;
   time_t when = g->pinned_time;
   FILE *lost;
-  char text[256];
+  std::array<char, 256> text;
 
   alarm(STEP_SECONDS * 20);
   /*
@@ -906,9 +909,9 @@ static GameWorld *restart_and_compare(GameWorld *g)
                     "grep -h '^#[0-9]' \"$f\" | sort > \"$TMPDIR/.x$$\"; "
                     "[ -e \"$OLDPWD/plrobjs/$f\" ] && grep -h '^#[0-9]' \"$OLDPWD/plrobjs/$f\" | sort | comm -23 \"$TMPDIR/.x$$\" - ; "
                     "done; rm -f \"$TMPDIR/.x$$\"", "r"))) {
-    while (fgets(text, sizeof(text), lost)) {
-      snprintf(changed_file, sizeof(changed_file), "plrobjs");
-      file_print(stdout, "  object lost: {}", text);
+    while (fgets(text.data(), sizeof(text), lost)) {
+      snprintf(changed_file.data(), sizeof(changed_file), "plrobjs");
+      file_print(stdout, "  object lost: {}", text.data());
       report_kind("object lost on loading");
     }
     pclose(lost);
@@ -940,7 +943,7 @@ static void play_seed(unsigned long seed, int steps, FILE *journal_file)
 
   journal   = journal_file;
   dice_state = seed;
-  snprintf(line, sizeof(line), "seed %lu", seed);
+  snprintf(line.data(), sizeof(line), "seed %lu", seed);
   journal_and_do(g);
   for (int step = 0; step < steps; step++)
     bot_step(g, &next_name);
@@ -960,38 +963,38 @@ static void play_journal(const char *path)
     exit(2);
   }
   g = th_boot_at(START_TIME);
-  while (fgets(line, MAX_LINE, fl)) {
-    line[strcspn(line, "\r\n")] = '\0';
-    if (!strcmp(line, "restart"))
+  while (fgets(line.data(), MAX_LINE, fl)) {
+    line[strcspn(line.data(), "\r\n")] = '\0';
+    if (!strcmp(line.data(), "restart"))
       g = restart_and_compare(g);
-    else if (*line && *line != '#')
-      do_action(g, line);
+    else if (line[0] && line[0] != '#')
+      do_action(g, line.data());
   }
   fclose(fl);
   finish(g);
 }
 
 struct signature {
-  char text[300]{};
-  char example[600]{};
+  std::array<char, 300> text = {{}};
+  std::array<char, 600> example = {{}};
   int count{};
   bool known{};
 };
 
-static struct signature signatures[MAX_SIGNATURES];
+static std::array<signature, MAX_SIGNATURES> signatures;
 static int num_signatures = 0;
 
 static void record(const char *text, const char *example, bool known)
 {
   for (int i = 0; i < num_signatures; i++)
-    if (!strcmp(signatures[i].text, text)) {
+    if (!strcmp(signatures[i].text.data(), text)) {
       signatures[i].count++;
       return;
     }
   if (num_signatures == MAX_SIGNATURES)
     return;
-  snprintf(signatures[num_signatures].text, sizeof(signatures[num_signatures].text), "%s", text);
-  snprintf(signatures[num_signatures].example, sizeof(signatures[num_signatures].example), "%s", example);
+  snprintf(signatures[num_signatures].text.data(), sizeof(signatures[num_signatures].text), "%s", text);
+  snprintf(signatures[num_signatures].example.data(), sizeof(signatures[num_signatures].example), "%s", example);
   signatures[num_signatures].known   = known;
   signatures[num_signatures++].count = 1;
 }
@@ -999,36 +1002,38 @@ static void record(const char *text, const char *example, bool known)
 /* What the report says went wrong: the sanitizer's or audit's own words, and the game's first frame. */
 static void read_report(const char *path, char *text, size_t size, unsigned long *fingerprint_found, bool *known)
 {
-  char report_line[1024], summary[220] = "", frame[60] = "";
+  std::array<char, 1024> report_line;
+  std::array<char, 220> summary = {};
+  std::array<char, 60> frame = {};
   FILE *fl = fopen(path, "r");
 
   *known = false;
-  while (fl && fgets(report_line, sizeof(report_line), fl)) {
+  while (fl && fgets(report_line.data(), sizeof(report_line), fl)) {
     char *at;
 
-    report_line[strcspn(report_line, "\n")] = '\0';
-    for (size_t i = 0; i < sizeof(known_failures) / sizeof(*known_failures); i++)
-      if (strstr(report_line, known_failures[i]))
+    report_line[strcspn(report_line.data(), "\n")] = '\0';
+    for (size_t i = 0; i < known_failures.size(); i++)
+      if (strstr(report_line.data(), known_failures[i]))
         *known = true;
-    sscanf(report_line, "fingerprint %lx", fingerprint_found);
-    if (!*summary && !strncmp(report_line, "AUDIT: ", 7))
-      snprintf(summary, sizeof(summary), "%s", report_line);
-    if (!*summary && (at = strstr(report_line, "runtime error:")))
-      snprintf(summary, sizeof(summary), "%s", at);
-    if (!*summary && (at = strstr(report_line, "SUMMARY: ")))
-      snprintf(summary, sizeof(summary), "%s", at + 9);
+    sscanf(report_line.data(), "fingerprint %lx", fingerprint_found);
+    if (!summary[0] && !strncmp(report_line.data(), "AUDIT: ", 7))
+      snprintf(summary.data(), sizeof(summary), "%s", report_line.data());
+    if (!summary[0] && (at = strstr(report_line.data(), "runtime error:")))
+      snprintf(summary.data(), sizeof(summary), "%s", at);
+    if (!summary[0] && (at = strstr(report_line.data(), "SUMMARY: ")))
+      snprintf(summary.data(), sizeof(summary), "%s", at + 9);
     /* the accessors tell us nothing: they're only where a bad pointer happened to get used */
-    if (!*frame && strstr(report_line, "/libs/dbat/src/") && !strstr(report_line, "_utils.c") && (at = strstr(report_line, " in "))) {
+    if (!frame[0] && strstr(report_line.data(), "/libs/dbat/src/") && !strstr(report_line.data(), "_utils.c") && (at = strstr(report_line.data(), " in "))) {
       char *end = strchr(at + 4, ' ');
 
       if (end)
         *end = '\0';
-      snprintf(frame, sizeof(frame), "%s", at + 4);
+      snprintf(frame.data(), sizeof(frame), "%s", at + 4);
     }
   }
   if (fl)
     fclose(fl);
-  snprintf(text, size, "%s [%s]", *summary ? summary : "no report", frame);
+  snprintf(text, size, "%s [%s]", summary[0] ? summary.data() : "no report", frame.data());
 }
 
 /*
@@ -1037,19 +1042,22 @@ static void read_report(const char *path, char *text, size_t size, unsigned long
  */
 static unsigned long run_child(const char *dir, unsigned long seed, int steps, const char *path)
 {
-  char report[600], journal_path[600], text[300], example[600];
+  std::array<char, 600> report;
+  std::array<char, 600> journal_path;
+  std::array<char, 300> text;
+  std::array<char, 600> example;
   unsigned long found = 0;
   int status;
   bool known;
   pid_t pid;
 
   mkdir(dir, 0755);
-  snprintf(report, sizeof(report), "%s/report.txt", dir);
-  snprintf(journal_path, sizeof(journal_path), "%s/journal.txt", dir);
+  snprintf(report.data(), sizeof(report), "%s/report.txt", dir);
+  snprintf(journal_path.data(), sizeof(journal_path), "%s/journal.txt", dir);
   if (path)
-    snprintf(example, sizeof(example), "test_bot --replay %s", path);
+    snprintf(example.data(), sizeof(example), "test_bot --replay %s", path);
   else
-    snprintf(example, sizeof(example), "test_bot --seed %lu %d", seed, steps);
+    snprintf(example.data(), sizeof(example), "test_bot --seed %lu %d", seed, steps);
   fflush(nullptr);
 
   pid = fork();
@@ -1058,10 +1066,10 @@ static unsigned long run_child(const char *dir, unsigned long seed, int steps, c
     exit(2);
   }
   if (pid == 0) {
-    FILE *journal_file = path ? nullptr : fopen(journal_path, "w");
+    FILE *journal_file = path ? nullptr : fopen(journal_path.data(), "w");
 
     setenv("TMPDIR", dir, 1);
-    if ((!path && !journal_file) || !freopen(report, "w", stdout) || dup2(STDOUT_FILENO, STDERR_FILENO) < 0)
+    if ((!path && !journal_file) || !freopen(report.data(), "w", stdout) || dup2(STDOUT_FILENO, STDERR_FILENO) < 0)
       _exit(2);
     setvbuf(stdout, nullptr, _IOLBF, 0); /* whole lines, so they don't split around what stderr writes to the same file */
     if (path)
@@ -1072,15 +1080,15 @@ static unsigned long run_child(const char *dir, unsigned long seed, int steps, c
   }
 
   waitpid(pid, &status, 0);
-  read_report(report, text, sizeof(text), &found, &known);
+  read_report(report.data(), text.data(), sizeof(text), &found, &known);
   if (WIFEXITED(status) && WEXITSTATUS(status) == 0 && found)
     return found;
 
   if (WIFSIGNALED(status) && WTERMSIG(status) == SIGALRM)
-    snprintf(text, sizeof(text), "hang: one action ran for over %d seconds", STEP_SECONDS);
-  else if (WIFSIGNALED(status) && !strncmp(text, "no report", 9))
-    snprintf(text, sizeof(text), "killed by signal %d", WTERMSIG(status));
-  record(text, example, known);
+    snprintf(text.data(), sizeof(text), "hang: one action ran for over %d seconds", STEP_SECONDS);
+  else if (WIFSIGNALED(status) && !strncmp(text.data(), "no report", 9))
+    snprintf(text.data(), sizeof(text), "killed by signal %d", WTERMSIG(status));
+  record(text.data(), example.data(), known);
   return 0;
 }
 
@@ -1098,7 +1106,7 @@ static int print_failures(void)
   for (int i = 0; i < num_signatures; i++) {
     file_print(stdout, "{:>4d} {} {}\n      first seen with: {}\n", signatures[i].count, signatures[i].known ? "known" : "NEW  ",
                signatures[i].text, signatures[i].example);
-    if (!signatures[i].known && (HAS_SANITIZER || strncmp(signatures[i].text, "killed by signal", 16)))
+    if (!signatures[i].known && (HAS_SANITIZER || strncmp(signatures[i].text.data(), "killed by signal", 16)))
       new_failures++;
   }
   return new_failures;
@@ -1107,26 +1115,27 @@ static int print_failures(void)
 static int run_seeds(const char *base, unsigned long first, int seeds, int steps)
 {
   unsigned long repeat_fingerprint = 0;
-  char repeat_journal[600] = "", repeat_dir[600];
+  std::array<char, 600> repeat_journal = {};
+  std::array<char, 600> repeat_dir;
   int finished = 0, failures = 0;
 
   for (int i = 0; i < seeds; i++) {
-    char dir[512];
+    std::array<char, 512> dir;
     unsigned long result;
 
-    snprintf(dir, sizeof(dir), "%s/seed-%lu", base, first + i);
-    result = run_child(dir, first + i, steps, nullptr);
+    snprintf(dir.data(), sizeof(dir), "%s/seed-%lu", base, first + i);
+    result = run_child(dir.data(), first + i, steps, nullptr);
     if (result)
       finished++;
     if (result && !repeat_fingerprint) {
       repeat_fingerprint = result;
-      snprintf(repeat_journal, sizeof(repeat_journal), "%s/journal.txt", dir);
+      snprintf(repeat_journal.data(), sizeof(repeat_journal), "%s/journal.txt", dir.data());
     }
   }
   /* a run that failed proves nothing here, so this uses the first that finished */
-  snprintf(repeat_dir, sizeof(repeat_dir), "%s/replay", base);
-  if (repeat_fingerprint && run_child(repeat_dir, 0, 0, repeat_journal) != repeat_fingerprint) {
-    file_print(stdout, "FAIL: replaying {} didn't repeat the run exactly\n", repeat_journal);
+  snprintf(repeat_dir.data(), sizeof(repeat_dir), "%s/replay", base);
+  if (repeat_fingerprint && run_child(repeat_dir.data(), 0, 0, repeat_journal.data()) != repeat_fingerprint) {
+    file_print(stdout, "FAIL: replaying {} didn't repeat the run exactly\n", repeat_journal.data());
     failures++;
   }
   failures += print_failures();
@@ -1145,13 +1154,14 @@ static int run_corpus(const char *base, const char *corpus)
     return 1;
   }
   while ((entry = readdir(dir))) {
-    char path[1024], child[1024];
+    std::array<char, 1024> path;
+    std::array<char, 1024> child;
 
     if (!strstr(entry->d_name, ".txt"))
       continue;
-    snprintf(path, sizeof(path), "%s/%s", corpus, entry->d_name);
-    snprintf(child, sizeof(child), "%s/corpus-%d", base, files++);
-    run_child(child, 0, 0, path);
+    snprintf(path.data(), sizeof(path), "%s/%s", corpus, entry->d_name);
+    snprintf(child.data(), sizeof(child), "%s/corpus-%d", base, files++);
+    run_child(child.data(), 0, 0, path.data());
   }
   closedir(dir);
   failures = print_failures();
@@ -1162,7 +1172,8 @@ static int run_corpus(const char *base, const char *corpus)
 int main(int argc, char **argv)
 {
   const char *tmp = getenv("TMPDIR");
-  char base[512], cleanup[600];
+  std::array<char, 512> base;
+  std::array<char, 600> cleanup;
   int failures;
 
   /* The sanitizer only reads this at startup, and a stack trace is what says which code failed. */
@@ -1195,19 +1206,19 @@ int main(int argc, char **argv)
     return 0;
   }
 
-  snprintf(base, sizeof(base), "%s/dbat-bot.XXXXXX", tmp ? tmp : "/tmp");
-  if (!mkdtemp(base)) {
+  snprintf(base.data(), sizeof(base), "%s/dbat-bot.XXXXXX", tmp ? tmp : "/tmp");
+  if (!mkdtemp(base.data())) {
     perror("mkdtemp");
     return 2;
   }
 
   if (argc > 2 && !strcmp(argv[1], "--corpus"))
-    failures = run_corpus(base, argv[2]);
+    failures = run_corpus(base.data(), argv[2]);
   else
-    failures = run_seeds(base, argc > 1 ? strtoul(argv[1], nullptr, 10) : 1, argc > 2 ? atoi(argv[2]) : 20, argc > 3 ? atoi(argv[3]) : 2000);
+    failures = run_seeds(base.data(), argc > 1 ? strtoul(argv[1], nullptr, 10) : 1, argc > 2 ? atoi(argv[2]) : 20, argc > 3 ? atoi(argv[3]) : 2000);
 
-  snprintf(cleanup, sizeof(cleanup), "rm -rf '%s'", base);
-  if (system(cleanup) != 0)
-    file_print(stdout, "couldn't remove {}\n", base);
+  snprintf(cleanup.data(), sizeof(cleanup), "rm -rf '%s'", base.data());
+  if (system(cleanup.data()) != 0)
+    file_print(stdout, "couldn't remove {}\n", base.data());
   return failures != 0;
 }

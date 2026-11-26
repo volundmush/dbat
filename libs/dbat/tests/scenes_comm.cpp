@@ -1,4 +1,5 @@
 /* Scenes for test_techniques: see scene_kit.hpp. These are act.comm.cpp's. */
+#include <array>
 #include "scene_kit.hpp"
 
 #include "dbat/config.hpp"
@@ -75,7 +76,7 @@ namespace {
     obj_to_room(g, obj, ARENA);
   }
 
-  const scene list[] = {
+  const auto list = std::to_array<scene>({
     /* voice */
     {"mute", "voice gravelly", false, SETUP(char_set_bonuses(att, BONUS_MUTE, 1);), false, 1},
     {"", "voice", false, SETUP(), false, 1},
@@ -246,7 +247,7 @@ namespace {
     {"by a board", "respond 0", false, SETUP(board_here(g);), false, 1},
     {"by a board", "respond 1", false, SETUP(board_here(g);), false, 1},
     {"watching the dummy respond", "respond", false, SETUP(for (char_data *c : room_people(g, ARENA)) if (char_is_npc(c) && isname("dummy", char_get_alias(c))) { do_respond(g, c, "1", 0, 0); break; }), false, 1},
-  };
+  });
 } // namespace
 
 const std::span<const scene> SCENES_COMM = list;

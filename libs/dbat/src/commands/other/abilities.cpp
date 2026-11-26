@@ -410,12 +410,15 @@ ACMD(do_hass)
 
 namespace {
   /* The limbs implant replaces: its word, the limb's index, the flag it gets, and what it's called */
-  constexpr struct {
+  namespace {
+struct implants_entry {
     std::string_view word{};
     int limb;
     player_flag flag;
     std::string_view name{};
-  } IMPLANTS[] = {{"rarm", 0, player_flag::crarm, "right arm"}, {"larm", 1, player_flag::clarm, "left arm"}, {"rleg", 2, player_flag::crleg, "right leg"}, {"lleg", 3, player_flag::clleg, "left leg"}};
+  };
+}
+  constexpr auto IMPLANTS = std::to_array<implants_entry>({{"rarm", 0, player_flag::crarm, "right arm"}, {"larm", 1, player_flag::clarm, "left arm"}, {"rleg", 2, player_flag::crleg, "right leg"}, {"lleg", 3, player_flag::clleg, "left leg"}});
 } // namespace
 
 ACMD(do_implant)
@@ -835,21 +838,27 @@ ACMD(do_absorb)
 
 namespace {
   /* How regeneration's healing looks, by how much it was: the first it's less than (in tenths of full) */
-  constexpr struct {
+  namespace {
+struct regenerations_entry {
     int64_t divisor;
     std::string_view to_char, to_room;
-  } REGENERATIONS[] = {
+  };
+}
+  constexpr auto REGENERATIONS = std::to_array<regenerations_entry>({
       {10, "You concentrate your ki and regenerate your body a little.", "$n concentrates and regenerates $s body a little."},
       {5, "You concentrate your ki and regenerate your body some.", "$n concentrates and regenerates $s body some."},
       {2, "You concentrate your ki and regenerate your body a great deal.", "$n concentrates and regenerates $s body a great deal."},
-  };
+  });
 
   /* The limbs regeneration regrows or mends, in its order; quirk: some are set before they're told of, some after */
-  constexpr struct {
+  namespace {
+struct regrown_entry {
     int limb;
     std::string_view name{};
     bool regrown_first, mended_first; /* whether the limb is set before the messages */
-  } REGROWN[] = {{0, "right arm", false, false}, {1, "left arm", true, false}, {3, "left leg", true, false}, {2, "right leg", true, true}};
+  };
+}
+  constexpr auto REGROWN = std::to_array<regrown_entry>({{0, "right arm", false, false}, {1, "left arm", true, false}, {3, "left leg", true, false}, {2, "right leg", true, true}});
 
   void regrow_limbs(GameWorld *g, struct char_data *ch)
   {
@@ -1103,9 +1112,12 @@ ACMD(do_solar)
 
 namespace {
   /* What healing costs, of the healer's max ki, and heals, of the patient's max powerlevel: the first row skill reaches */
-  constexpr struct {
+  namespace {
+struct healing_entry {
     int skill, cost_divisor, heal_divisor;
-  } HEALING[] = {{100, 20, 5}, {90, 16, 10}, {75, 14, 12}, {50, 12, 15}, {25, 10, 20}, {INT_MIN, 6, 20}};
+  };
+}
+  constexpr auto HEALING = std::to_array<healing_entry>({{100, 20, 5}, {90, 16, 10}, {75, 14, 12}, {50, 12, 15}, {25, 10, 20}, {INT_MIN, 6, 20}});
 
   /* A healing's mending beyond powerlevel, by ch of vict */
   void mend(GameWorld *g, struct char_data *ch, struct char_data *vict, int64_t heal)
@@ -1289,10 +1301,13 @@ ACMD(do_barrier)
 
 namespace {
   /* Where instant transmission can take you without a target */
-  constexpr struct {
+  namespace {
+struct planets_by_ki_entry {
     std::string_view name{};
     room_vnum room;
-  } PLANETS_BY_KI[] = {{"planet-earth", 300}, {"planet-namek", 10222}, {"planet-frigid", 4017}, {"planet-vegeta", 2200}, {"planet-konack", 8006}, {"planet-aether", 12024}};
+  };
+}
+  constexpr auto PLANETS_BY_KI = std::to_array<planets_by_ki_entry>({{"planet-earth", 300}, {"planet-namek", 10222}, {"planet-frigid", 4017}, {"planet-vegeta", 2200}, {"planet-konack", 8006}, {"planet-aether", 12024}});
 
   constexpr std::string_view SELF_TRANSMISSION = "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n";
 

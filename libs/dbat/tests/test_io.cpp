@@ -3,6 +3,7 @@
  * asciiflag_conv() and get_filename(), kept here as they were (on POSIX's getline() and open_memstream()) to compare
  * with, and sscanf() itself, on awkward input and on random input.
  */
+#include <array>
 #include <cctype>
 #include <climits>
 #include <cstdio>
@@ -126,7 +127,7 @@ static FILE *file_of(const std::string &text)
 
 static std::string random_text(std::mt19937 &rng, size_t length)
 {
-  static const char alphabet[] = "ab~ *#\r\n\n\n~0123-+\t\0x";
+  static const auto alphabet = std::to_array("ab~ *#\r\n\n\n~0123-+\t\0x");
   std::string s;
   for (size_t i = 0; i < length; i++)
     s += alphabet[rng() % (sizeof(alphabet) - 1)];
@@ -164,15 +165,15 @@ static void check_lines(const std::string &text)
 {
   FILE *fl = file_of(text);
   io::text_reader r("test", text);
-  char buf[READ_SIZE];
+  std::array<char, READ_SIZE> buf;
   for (;;) {
-    int advanced = old_get_line(fl, buf);
+    int advanced = old_get_line(fl, buf.data());
     int before   = r.line_number();
     std::optional<std::string_view> line = r.line();
     CHECK((advanced > 0) == line.has_value());
     if (!advanced || !line)
       break;
-    CHECK(*line == std::string_view(buf));
+    CHECK(*line == std::string_view(buf.data()));
     CHECK(r.line_number() - before == advanced);
   }
   fclose(fl);
@@ -181,12 +182,12 @@ static void check_lines(const std::string &text)
   FILE *old = file_of(text);
   io::text_reader again("test", text);
   io::line_cursor cursor(again);
-  char b[READ_SIZE] = "";
+  std::array<char, READ_SIZE> b = {};
   for (;;) {
-    int y  = old_get_line(old, b);
+    int y  = old_get_line(old, b.data());
     bool x = cursor.next();
     CHECK(x == (y > 0));
-    CHECK(cursor.line() == b);
+    CHECK(cursor.line() == b.data());
     CHECK(cursor.eof() == (feof(old) != 0));
     if (!x || !y)
       break;
@@ -221,13 +222,13 @@ static void check_letters(const std::string &text)
   for (int i = 0; i < 50; i++) {
     int want = old_fread_letter(fl);
     CHECK(r.peek_letter() == want);
-    char buf[READ_SIZE];
-    int advanced = old_get_line(fl, buf);
+    std::array<char, READ_SIZE> buf;
+    int advanced = old_get_line(fl, buf.data());
     std::optional<std::string_view> line = r.line();
     CHECK((advanced > 0) == line.has_value());
     if (!advanced || !line)
       break;
-    CHECK(*line == std::string_view(buf));
+    CHECK(*line == std::string_view(buf.data()));
   }
   fclose(fl);
 }
@@ -267,10 +268,11 @@ static void check_line_numbers()
 
 static void compare_scan(const std::string &text)
 {
-  int want[6] = {7, 7, 7, 7, 7, 7}, got[6] = {7, 7, 7, 7, 7, 7};
-  int n = sscanf(text.c_str(), "%d %d %d %d %d %d", want, want + 1, want + 2, want + 3, want + 4, want + 5);
+  std::array<int, 6> want = {{7, 7, 7, 7, 7, 7}};
+  std::array<int, 6> got = {{7, 7, 7, 7, 7, 7}};
+  int n = sscanf(text.c_str(), "%d %d %d %d %d %d", &want[0], &want[1], &want[2], &want[3], &want[4], &want[5]);
   int m = io::scan_ints(text, got);
-  if (n != m || memcmp(want, got, sizeof(want))) {
+  if (n != m || memcmp(want.data(), got.data(), sizeof(want))) {
     file_print(stdout, "scan_ints('{}'): {:d} [{:d} {:d} {:d}], sscanf {:d} [{:d} {:d} {:d}]\n", text, m, got[0], got[1],
                got[2], n, want[0], want[1], want[2]);
     failures++;
@@ -284,7 +286,7 @@ static void check_numbers_read_as_sscanf_reads_them()
                            "2147483647 -2147483648", "\t1\n2", "1,2", "0x10", "007 -0"})
     compare_scan(text);
   std::mt19937 rng(54321);
-  static const char alphabet[] = "0123456789 -+x\t";
+  static const auto alphabet = std::to_array("0123456789 -+x\t");
   for (int i = 0; i < 20000; i++) {
     std::string s;
     for (size_t n = rng() % 30; n; n--)
@@ -298,41 +300,44 @@ static void check_numbers_read_as_sscanf_reads_them()
 static void compare_fields(const std::string &text)
 {
   int a = 0, b = 0, c = 0, d = 0, e = 0, f6 = 0, g = 0, h = 0;
-  char w1[1024], w2[1024], w3[1024], w4[1024];
+  std::array<char, 1024> w1;
+  std::array<char, 1024> w2;
+  std::array<char, 1024> w3;
+  std::array<char, 1024> w4;
 
-  int want = sscanf(text.c_str(), "%d %255s %d", &a, w1, &b);
+  int want = sscanf(text.c_str(), "%d %255s %d", &a, w1.data(), &b);
   io::fields f(text);
   int x = 0, y = 0;
   std::string s1, s2, s3, s4;
   f.number(x) && f.word(s1, 255) && f.number(y);
-  if (f.count() != std::max(want, 0) || (want >= 1 && x != a) || (want >= 2 && s1 != w1) || (want >= 3 && y != b)) {
+  if (f.count() != std::max(want, 0) || (want >= 1 && x != a) || (want >= 2 && s1 != w1.data()) || (want >= 3 && y != b)) {
     file_print(stdout, "fields (trigger) differ for '{}'\n", text);
     CHECK(false);
   }
 
-  int n[6];
-  want = sscanf(text.c_str(), " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &a, &b, &c, &d, &e, &f6, w1, w2);
+  std::array<int, 6> n;
+  want = sscanf(text.c_str(), " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &a, &b, &c, &d, &e, &f6, w1.data(), w2.data());
   io::fields v(text);
   for (int &i : n)
     v.number(i);
   v.word(s1, 79) && v.until(s2, "\f\n\r\t\v", 79);
-  int got[6] = {a, b, c, d, e, f6};
+  std::array<int, 6> got = {{a, b, c, d, e, f6}};
   bool same  = v.count() == std::max(want, 0);
   for (int i = 0; i < std::min(want, 6); i++)
     same = same && n[i] == got[i];
-  if (!same || (want >= 7 && s1 != w1) || (want >= 8 && s2 != w2)) {
+  if (!same || (want >= 7 && s1 != w1.data()) || (want >= 8 && s2 != w2.data())) {
     file_print(stdout, "fields (V command) differ for '{}'\n", text);
     CHECK(false);
   }
 
-  want = sscanf(text.c_str(), " %d %d %d %d %s %s %s %s %d %d", &a, &b, &c, &d, w1, w2, w3, w4, &g, &h);
+  want = sscanf(text.c_str(), " %d %d %d %d %s %s %s %s %d %d", &a, &b, &c, &d, w1.data(), w2.data(), w3.data(), w4.data(), &g, &h);
   io::fields z(text);
-  int m[6];
+  std::array<int, 6> m;
   z.number(m[0]) && z.number(m[1]) && z.number(m[2]) && z.number(m[3]) && z.word(s1) && z.word(s2) && z.word(s3) &&
       z.word(s4) && z.number(m[4]) && z.number(m[5]);
-  int zgot[10]    = {a, b, c, d, 0, 0, 0, 0, g, h};
-  const char *ws[] = {w1, w2, w3, w4};
-  std::string *ss[] = {&s1, &s2, &s3, &s4};
+  std::array<int, 10> zgot = {{a, b, c, d, 0, 0, 0, 0, g, h}};
+  const auto ws = std::to_array<const char *>({w1.data(), w2.data(), w3.data(), w4.data()});
+  auto ss = std::to_array<std::string *>({&s1, &s2, &s3, &s4});
   same              = z.count() == std::max(want, 0);
   for (int i = 0; i < want; i++)
     if (i < 4)
@@ -346,9 +351,10 @@ static void compare_fields(const std::string &text)
     CHECK(false);
   }
   /* a mob's points: the 'd' and '+' are matched as they stand, with no spaces passed over before them */
-  int mob[9], want_mob[9];
-  want = sscanf(text.c_str(), " %d %d %d %dd%d+%d %dd%d+%d ", want_mob, want_mob + 1, want_mob + 2, want_mob + 3,
-                want_mob + 4, want_mob + 5, want_mob + 6, want_mob + 7, want_mob + 8);
+  std::array<int, 9> mob;
+  std::array<int, 9> want_mob;
+  want = sscanf(text.c_str(), " %d %d %d %dd%d+%d %dd%d+%d ", &want_mob[0], &want_mob[1], &want_mob[2], &want_mob[3],
+                &want_mob[4], &want_mob[5], &want_mob[6], &want_mob[7], &want_mob[8]);
   io::fields p(text);
   p.number(mob[0]) && p.number(mob[1]) && p.number(mob[2]) && p.number(mob[3]) && p.literal('d') &&
       p.number(mob[4]) && p.literal('+') && p.number(mob[5]) && p.number(mob[6]) && p.literal('d') &&
@@ -369,7 +375,7 @@ static void check_fields_read_as_sscanf_reads_them()
                            "1 0 10 0d0+0 0d0+0", "1 0 10 5d6+-7 1 d2+3", "1 0 10 5 d6+7 1d2+3", "1 2 3 4d+5"})
     compare_fields(text);
   std::mt19937 rng(98765);
-  static const char alphabet[] = "0123456789 -+abdZ~\t\v";
+  static const auto alphabet = std::to_array("0123456789 -+abdZ~\t\v");
   for (int i = 0; i < 20000; i++) {
     std::string s;
     for (size_t n = rng() % 200; n; n--)
@@ -382,7 +388,7 @@ static void check_fields_read_as_sscanf_reads_them()
 static void check_floats_read_as_sscanf_reads_them()
 {
   std::mt19937 rng(4242);
-  static const char alphabet[] = "0123456789 -+.eExinfa\t";
+  static const auto alphabet = std::to_array("0123456789 -+.eExinfa\t");
   std::vector<std::string> texts = {"", " ", "1.00", "0.75", " -2.5", "1e3", "1e", "1e+", ".", "-.5", "inf", "nan",
                                     "0x1p3", "x", "3.25 junk"};
   for (int i = 0; i < 20000; i++) {

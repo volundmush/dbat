@@ -11,6 +11,7 @@
  * the clock stopped. After every line the transcript has what the builder was sent and the state its connection is
  * in, and what a watcher sees: an implementor standing by, who sees the game's log at its fullest; at the end, every file the journey changed, in full, and who and what is in the fixture's rooms.
  */
+#include <array>
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -378,7 +379,7 @@ namespace {
     return h;
   }
 
-  const char *const MADE_BY_LOGIN[] = {"plrfiles/", "intro/", "sense/", "user/", "test.log"};
+  const auto MADE_BY_LOGIN = std::to_array<const char *const>({"plrfiles/", "intro/", "sense/", "user/", "test.log"});
 
   /* Every file under here that differs from the same file under original, or that it lacks, in name order; then
      every file the original has that is gone */
@@ -489,9 +490,9 @@ namespace {
 
   void run(GameWorld *g, const journey &j)
   {
-    char report[64];
+    std::array<char, 64> report;
     int status;
-    snprintf(report, sizeof(report), "case-%ld.txt", (long)getpid());
+    snprintf(report.data(), sizeof(report), "case-%ld.txt", (long)getpid());
     cases++;
     fflush(nullptr);
     std::filesystem::path original = std::filesystem::current_path();
@@ -506,7 +507,7 @@ namespace {
       std::string copy = str_format("mkdir -p '{}/data' && cp -r . '{}/data'", own, own);
       if (system(copy.c_str()) != 0 || chdir((own + "/data").c_str()) < 0)
         th_exit(2);
-      int fd = open(report, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      int fd = open(report.data(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
       dup2(fd, STDOUT_FILENO);
       dup2(fd, STDERR_FILENO);
       alarm(CASE_SECONDS);
@@ -516,7 +517,7 @@ namespace {
       th_exit(0);
     }
     waitpid(pid, &status, 0);
-    std::string report_path = own + "/data/" + report;
+    std::string report_path = own + "/data/" + report.data();
     std::string text        = th_file_text(report_path.c_str());
     std::string cleanup     = str_format("rm -rf '{}'", own);
     if (system(cleanup.c_str()) != 0)
